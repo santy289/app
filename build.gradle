@@ -26,9 +26,9 @@ task clean(type: Delete) {
 }
 
 ext {
-    supportLibVersion = "26.0.1"
+    supportLibVersion = "26.1.0"
     constraintLayoutVersion = "1.0.2"
-    archLifecycleVersion = "1.0.0-alpha9"
+    archLifecycleVersion = "1.0.0-beta1"
     retrofit = "2.3.0"
     butterknife = "8.8.1"
 }

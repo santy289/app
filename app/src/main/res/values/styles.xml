@@ -10,4 +10,8 @@
 
     <style name="Toolbar" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
+    <style name="AppTheme.Launcer">
+        <item name="android:windowBackground">@drawable/launch_screen</item>
+    </style>
+
 </resources>

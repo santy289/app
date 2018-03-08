@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.main;
+package com.rootnetapp.rootnetintranet.ui.main;
 
 import android.arch.lifecycle.ViewModel;
 

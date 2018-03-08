@@ -14,10 +14,10 @@ buildscript {
 
 allprojects {
     repositories {
+        mavenCentral()
+        google()
         jcenter()
-        maven {
-            url "https://maven.google.com"
-        }
+        maven { url 'https://maven.google.com' }
     }
 }
 
@@ -31,4 +31,7 @@ ext {
     archLifecycleVersion = "1.0.0-beta1"
     retrofit = "2.3.0"
     butterknife = "8.8.1"
+    daggerLibraryVersion = '2.13'
+    rxandroidLibraryVersion         = '2.0.1'
+    rxjavaLibraryVersion            = '2.1.7'
 }

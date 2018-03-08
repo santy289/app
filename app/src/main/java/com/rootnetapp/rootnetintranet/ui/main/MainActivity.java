@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.main;
+package com.rootnetapp.rootnetintranet.ui.main;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
@@ -12,7 +12,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.lifecycle.LifecycleAppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 

@@ -11,12 +11,19 @@ android {
         versionName "1.0"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        jackOptions {
+            enabled true
+        }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
     }
 }
 
@@ -40,6 +47,12 @@ dependencies {
     //3rd party
     compile 'com.squareup.retrofit2:retrofit:' + rootProject.retrofit;
     compile 'com.squareup.retrofit2:converter-moshi:' + rootProject.retrofit;
+
+    annotationProcessor "com.google.dagger:dagger-compiler:${daggerLibraryVersion}"
+    compile "com.google.dagger:dagger:${daggerLibraryVersion}"
+
+    compile     "io.reactivex.rxjava2:rxandroid:${rxandroidLibraryVersion}"
+    compile     "io.reactivex.rxjava2:rxjava:${rxjavaLibraryVersion}"
 
     testCompile 'junit:junit:4.12'
 }

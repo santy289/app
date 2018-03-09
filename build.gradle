@@ -34,4 +34,5 @@ ext {
     daggerLibraryVersion = '2.13'
     rxandroidLibraryVersion         = '2.0.1'
     rxjavaLibraryVersion            = '2.1.7'
+    rx2JavaLibraryVersion           = '1.0.0'
 }

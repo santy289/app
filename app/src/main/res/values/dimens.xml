@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="marginVertical_domain">5dp</dimen>
+    <dimen name="marginHorizontal_domain">15dp</dimen>
+</resources>

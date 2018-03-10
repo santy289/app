@@ -6,7 +6,7 @@ import android.arch.lifecycle.ViewModel;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.models.responses.ClientResponse;
+import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 
 /**
  * Created by Propietario on 09/03/2018.
@@ -31,7 +31,6 @@ public class DomainViewModel extends ViewModel {
     }
 
     private void onCheckDomainFailure(Throwable throwable) {
-        Log.d("test", "onCheckDomainFailure: " + throwable.getMessage());
         mErrorLiveData.setValue(R.string.failure_connect);
     }
 

@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.models.responses;
+package com.rootnetapp.rootnetintranet.models.responses.domain;
 
 import com.squareup.moshi.Json;
 

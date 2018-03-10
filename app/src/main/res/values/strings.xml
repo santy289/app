@@ -7,4 +7,11 @@
     <string name="get_plan">Get a plan</string>
     <string name="failure_connect">Ha ocurrido un error de conexión, por favor vuelva a intentarlo</string>
     <string name="loading_message">Loading</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="change_domain">Change Company</string>
+    <string name="login">Log In</string>
+    <string name="empty_domain">The domain name cannot be empty</string>
+    <string name="empty_user">Please provide a username to continue</string>
+    <string name="empty_password">Please enter your password to continue</string>
 </resources>

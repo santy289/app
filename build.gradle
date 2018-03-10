@@ -26,13 +26,14 @@ task clean(type: Delete) {
 }
 
 ext {
-    supportLibVersion = "26.1.0"
-    constraintLayoutVersion = "1.0.2"
-    archLifecycleVersion = "1.0.0-beta1"
-    retrofit = "2.3.0"
-    butterknife = "8.8.1"
-    daggerLibraryVersion = '2.13'
+    supportLibVersion               = "26.1.0"
+    constraintLayoutVersion         = "1.0.2"
+    archLifecycleVersion            = "1.0.0-beta1"
+    retrofit                        = "2.3.0"
+    butterknife                     = "8.8.1"
+    daggerLibraryVersion            = '2.13'
     rxandroidLibraryVersion         = '2.0.1'
     rxjavaLibraryVersion            = '2.1.7'
     rx2JavaLibraryVersion           = '1.0.0'
+    retrofitUrlInterceptorVersion   = '1.2.0'
 }

@@ -10,6 +10,7 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -21,20 +22,11 @@ public class NetModule {
     @Provides
     @Singleton
     Retrofit provideRetrofit() {
-        /*Cache cache = null;
-        try {
-            cache = new Cache(cacheFile, 10 * 1024 * 1024);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .cache(cache)
-                .build();*/
-
+        OkHttpClient client = RetrofitUrlManager.getInstance().with(new OkHttpClient.Builder())
+                .build();
         return new Retrofit.Builder()
                 .baseUrl(Utils.URL)
-                //.client(okHttpClient)
+                .client(client)
                 .addConverterFactory(MoshiConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();

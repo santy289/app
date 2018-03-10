@@ -2,7 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.domain;
 
 import io.reactivex.Observable;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
-import com.rootnetapp.rootnetintranet.models.responses.ClientResponse;
+import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;

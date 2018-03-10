@@ -56,6 +56,7 @@
                     android:weightSum="10">
 
                     <android.support.design.widget.TextInputLayout
+                        android:id="@+id/til_domain"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="6"
@@ -65,6 +66,7 @@
                             android:id="@+id/input_domain"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:maxLines="1"
                             android:hint="@string/subdomain"
                             android:textColor="@color/white" />
 
@@ -81,7 +83,7 @@
                 </LinearLayout>
 
                 <Button
-                    android:id="@+id/check_domain"
+                    android:id="@+id/btn_check_domain"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/marginVertical_domain"
@@ -94,11 +96,13 @@
                     android:textColor="@color/white" />
 
                 <TextView
+                    android:id="@+id/btn_get_plan"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/marginVertical_domain"
                     android:text="@string/get_plan"
-                    android:textColor="@color/colorAccent" />
+                    android:textColor="@color/colorAccent"
+                    android:onClick="onClick" />
 
             </LinearLayout>
 

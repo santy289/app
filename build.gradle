@@ -36,4 +36,5 @@ ext {
     rxjavaLibraryVersion            = '2.1.7'
     rx2JavaLibraryVersion           = '1.0.0'
     retrofitUrlInterceptorVersion   = '1.2.0'
+    jsonWebTokenVersion             = '1.1.1'
 }

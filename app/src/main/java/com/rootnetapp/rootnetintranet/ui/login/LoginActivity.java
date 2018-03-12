@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.auth0.android.jwt.JWT;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ActivityLoginBinding;
@@ -21,6 +22,7 @@ import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
+import com.rootnetapp.rootnetintranet.ui.resetPass.resetpassdialog.ResetPasswordDialog;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
@@ -71,6 +73,11 @@ public class LoginActivity extends AppCompatActivity {
             if (null != data) {
                 //Todo Pedir data del user aqui o en mainActivity? (PREGUNTAR)
                 //Todo Guardar TOKEN en las preferences para las demas consultas.
+
+                JWT jwt = new JWT(data.getToken());
+
+                //Log.d("test", "subscribe: "+jwt.toString());
+
                 startActivity(new Intent(this, MainActivity.class));
                 finishAffinity();
             }
@@ -115,6 +122,9 @@ public class LoginActivity extends AppCompatActivity {
             case R.id.btn_change:
                 startActivity(new Intent(this, DomainActivity.class));
                 finishAffinity();
+                break;
+            case R.id.btn_forgot_pass:
+                ResetPasswordDialog.newInstance().show(getSupportFragmentManager(),"password_recover");
                 break;
             default:
                 break;

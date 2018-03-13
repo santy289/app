@@ -1,10 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <item
-        android:id="@+id/nav_menu_list"
-        android:title="Title List" />
-    <item
-        android:id="@+id/nav_menu_stat"
-        android:title="Title Stat" />
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_timeline"
+            android:title="@string/timeline" />
+        <item
+            android:id="@+id/nav_community"
+            android:title="@string/community" />
+        <item
+            android:id="@+id/nav_workflows"
+            android:title="@string/workflows" />
+        <item
+            android:id="@+id/nav_projects"
+            android:title="@string/projects" />
+        <item
+            android:id="@+id/nav_resourcing"
+            android:title="@string/resourcing" />
+        <item
+            android:id="@+id/nav_reports"
+            android:title="@string/reports" />
+    </group>
 </menu>

@@ -5,7 +5,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.models.responses.resetPass.RequestTokenResponse;
+import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordResponse;
 
 /**
  * Created by Propietario on 12/03/2018.
@@ -13,7 +13,7 @@ import com.rootnetapp.rootnetintranet.models.responses.resetPass.RequestTokenRes
 
 public class RequestTokenViewModel extends ViewModel {
 
-    private MutableLiveData<RequestTokenResponse> mTokenLiveData;
+    private MutableLiveData<ResetPasswordResponse> mTokenLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
     private RequestTokenRepository requestTokenRepository;
 
@@ -25,15 +25,15 @@ public class RequestTokenViewModel extends ViewModel {
         requestTokenRepository.requestToken(username, "1").subscribe(this::onRequestSuccess, this::onRequestFailure);
     }
 
-    private void onRequestSuccess(RequestTokenResponse requestTokenResponse) {
-        mTokenLiveData.setValue(requestTokenResponse);
+    private void onRequestSuccess(ResetPasswordResponse resetPasswordResponse) {
+        mTokenLiveData.setValue(resetPasswordResponse);
     }
 
     private void onRequestFailure(Throwable throwable) {
         mErrorLiveData.setValue(R.string.failure_connect);
     }
 
-    protected LiveData<RequestTokenResponse> getObservableToken() {
+    protected LiveData<ResetPasswordResponse> getObservableToken() {
         if (mTokenLiveData == null) {
             mTokenLiveData = new MutableLiveData<>();
         }

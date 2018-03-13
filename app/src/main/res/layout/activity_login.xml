@@ -75,6 +75,7 @@
                     android:layout_marginStart="@dimen/marginHorizontal_domain"
                     android:layout_marginTop="@dimen/marginVertical_domain"
                     android:textColorHint="@color/colorAccent"
+                    app:passwordToggleTint="@color/colorAccent"
                     app:passwordToggleEnabled="true">
 
                     <android.support.v7.widget.AppCompatEditText

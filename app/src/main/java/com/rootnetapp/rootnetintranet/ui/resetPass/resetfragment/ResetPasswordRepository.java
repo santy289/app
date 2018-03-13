@@ -19,8 +19,13 @@ public class ResetPasswordRepository {
         this.services = apiService;
     }
 
-    public Observable<ResetPasswordResponse> resetPassword() {
-        return services.resetPassword().subscribeOn(Schedulers.newThread())
+    public Observable<ResetPasswordResponse> validateToken(String token) {
+        return services.validateToken(token).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<ResetPasswordResponse> resetPassword(String token, String username, String password, String repeatNewPassword) {
+        return services.resetPassword(token, username, password, repeatNewPassword).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 

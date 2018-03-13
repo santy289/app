@@ -14,6 +14,7 @@ import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordRe
 public class ResetPasswordViewModel extends ViewModel {
 
     private MutableLiveData<ResetPasswordResponse> mResetLiveData;
+    private MutableLiveData<ResetPasswordResponse> mTokenLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
     private ResetPasswordRepository resetPasswordRepository;
 
@@ -21,8 +22,16 @@ public class ResetPasswordViewModel extends ViewModel {
         this.resetPasswordRepository = resetPasswordRepository;
     }
 
-    protected void resetPassword() {
-        resetPasswordRepository.resetPassword().subscribe(this::onResetSuccess, this::onResetFailure);
+    protected void validateToken(String token) {
+        resetPasswordRepository.validateToken(token).subscribe(this::onValidateSuccess, this::onResetFailure);
+    }
+
+    protected void resetPassword(String token, String username, String password, String repeatNewPassword) {
+        resetPasswordRepository.resetPassword(token, username, password, repeatNewPassword).subscribe(this::onResetSuccess, this::onResetFailure);
+    }
+
+    private void onValidateSuccess(ResetPasswordResponse resetPasswordResponse) {
+        mTokenLiveData.setValue(resetPasswordResponse);
     }
 
     private void onResetSuccess(ResetPasswordResponse resetPasswordResponse) {
@@ -33,7 +42,14 @@ public class ResetPasswordViewModel extends ViewModel {
         mErrorLiveData.setValue(R.string.failure_connect);
     }
 
-    protected LiveData<ResetPasswordResponse> getObservableLogin() {
+    protected LiveData<ResetPasswordResponse> getObservableValidate() {
+        if (mTokenLiveData == null) {
+            mTokenLiveData = new MutableLiveData<>();
+        }
+        return mTokenLiveData;
+    }
+
+    protected LiveData<ResetPasswordResponse> getObservableReset() {
         if (mResetLiveData == null) {
             mResetLiveData = new MutableLiveData<>();
         }

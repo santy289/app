@@ -3,7 +3,7 @@
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerInParent="true"
+        android:gravity="center"
         android:orientation="vertical">
 
         <android.support.design.widget.TextInputLayout
@@ -23,7 +23,7 @@
                 android:hint="@string/username_email"
                 android:inputType="text"
                 android:maxLines="1"
-                android:textColor="@color/white" />
+                android:textColor="@color/colorAccent" />
 
         </android.support.design.widget.TextInputLayout>
 
@@ -35,7 +35,7 @@
             android:layout_marginStart="@dimen/marginHorizontal_domain"
             android:layout_marginTop="@dimen/marginVertical_domain"
             android:text="@string/link_will_be_sent"
-            android:textColor="@color/white"/>
+            android:textColor="@color/colorPrimaryDark"/>
 
         <LinearLayout
             android:layout_width="match_parent"

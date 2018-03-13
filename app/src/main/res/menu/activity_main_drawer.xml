@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_timeline"
+            android:title="@string/timeline" />
+        <item
+            android:id="@+id/nav_community"
+            android:title="@string/community">
+            <menu>
+                <item
+                    android:id="@+id/nav_share"
+                    android:icon="@drawable/ic_menu_share"
+                    android:title="Share" />
+                <item
+                    android:id="@+id/nav_send"
+                    android:icon="@drawable/ic_menu_send"
+                    android:title="Send" />
+            </menu>
+        </item>
+        <item
+            android:id="@+id/nav_workflows"
+            android:title="@string/workflows" />
+        <item
+            android:id="@+id/nav_projects"
+            android:title="@string/projects" />
+        <item
+            android:id="@+id/nav_resourcing"
+            android:title="@string/resourcing" />
+        <item
+            android:id="@+id/nav_reports"
+            android:title="@string/reports" />
+        <item
+            android:id="@+id/nav_profile"
+            android:title="@string/profile" />
+        <item
+            android:id="@+id/nav_exit"
+            android:title="@string/exit" />
+    </group>
+</menu>

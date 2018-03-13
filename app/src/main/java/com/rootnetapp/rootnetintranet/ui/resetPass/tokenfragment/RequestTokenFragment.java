@@ -10,9 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.FragmentRequestTokenBinding;
-import com.rootnetapp.rootnetintranet.models.responses.resetPass.RequestTokenResponse;
+import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordResponse;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetpassdialog.ResetPasswordDialog;
 
@@ -77,7 +76,7 @@ public class RequestTokenFragment extends Fragment {
     }
 
     private void subscribe() {
-        final Observer<RequestTokenResponse> tokenObserver = ((RequestTokenResponse data) -> {
+        final Observer<ResetPasswordResponse> tokenObserver = ((ResetPasswordResponse data) -> {
             dialog.hideLoading();
             if (null != data) {
                 if (data.getCode() == 200){

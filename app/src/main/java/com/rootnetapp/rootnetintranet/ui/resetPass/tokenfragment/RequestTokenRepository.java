@@ -1,7 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.resetPass.tokenfragment;
 
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
-import com.rootnetapp.rootnetintranet.models.responses.resetPass.RequestTokenResponse;
+import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordResponse;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -19,7 +19,7 @@ public class RequestTokenRepository {
         this.services = apiService;
     }
 
-    public Observable<RequestTokenResponse> requestToken(String username, String client_id) {
+    public Observable<ResetPasswordResponse> requestToken(String username, String client_id) {
         return services.requestToken(username, client_id).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }

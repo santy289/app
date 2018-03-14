@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.auth0.android.jwt.Claim;
 import com.auth0.android.jwt.JWT;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -20,6 +21,7 @@ import com.rootnetapp.rootnetintranet.databinding.ActivityLoginBinding;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.SyncActivity;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetpassdialog.ResetPasswordDialog;
@@ -38,6 +40,7 @@ public class LoginActivity extends AppCompatActivity {
     LoginViewModelFactory loginViewModelFactory;
     LoginViewModel loginViewModel;
     private ActivityLoginBinding loginBinding;
+    private SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +54,7 @@ public class LoginActivity extends AppCompatActivity {
         Moshi moshi = new Moshi.Builder().build();
         JsonAdapter<ClientResponse> jsonAdapter = moshi.adapter(ClientResponse.class);
         //todo Preguntar como implementar SharesPreferencesModule en los Viewmodels para cada tipo de clase guardada
-        SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String json = sharedPref.getString("domain", "");
         //todo cambiar por consulta al viewmodel
         if (json.isEmpty()) {
@@ -73,12 +76,22 @@ public class LoginActivity extends AppCompatActivity {
             if (null != data) {
                 //Todo Pedir data del user aqui o en mainActivity? (PREGUNTAR)
                 //Todo Guardar TOKEN en las preferences para las demas consultas.
+                SharedPreferences.Editor editor = sharedPref.edit();
 
-                JWT jwt = new JWT(data.getToken());
+                editor.putString("token",data.getToken()).apply();
 
-                //Log.d("test", "subscribe: "+jwt.toString());
+                //todo manejo de JWT
+                /*JWT jwt = new JWT(data.getToken());
+                String username = jwt.getClaim("username").asString();
+                String userType = jwt.getClaim("user_type").asString();
+                String locale = jwt.getClaim("locale").asString();
+                String name = jwt.getClaim("full_name").asString();
+                //String department = jwt.getClaim("department").asString();
+                //claim.asString();
+                Log.d("test", "username: "+username+
+                " Type: "+userType+" locale: "+locale+" Name: "+name);*/
 
-                startActivity(new Intent(this, MainActivity.class));
+                startActivity(new Intent(this, SyncActivity.class));
                 finishAffinity();
             }
         });

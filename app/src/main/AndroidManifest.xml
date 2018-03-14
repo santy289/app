@@ -29,7 +29,11 @@
         </activity>
         <activity
             android:name=".ui.login.LoginActivity"
-            android:theme="@style/LoginStyle"></activity>
+            android:theme="@style/LoginStyle" />
+        <activity
+            android:name=".ui.SyncActivity"
+            android:label="@string/title_activity_sync"
+            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>

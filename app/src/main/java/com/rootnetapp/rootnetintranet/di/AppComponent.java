@@ -1,5 +1,6 @@
 package com.rootnetapp.rootnetintranet.di;
 
+import com.rootnetapp.rootnetintranet.ui.SyncActivity;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainModule;
 import com.rootnetapp.rootnetintranet.ui.login.LoginActivity;
@@ -36,5 +37,6 @@ public interface AppComponent {
     void inject(LoginActivity loginActivity);
     void inject(ResetPasswordFragment resetPasswordFragment);
     void inject(RequestTokenFragment requestTokenFragment);
+    void inject(SyncActivity syncActivity);
 
 }

@@ -4,10 +4,13 @@ package com.rootnetapp.rootnetintranet.data.remote;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
 import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordResponse;
+import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 
@@ -46,5 +49,9 @@ public interface ApiInterface {
                                                     @Field("username") String username,
                                                     @Field("password")String password,
                                                     @Field("repeat_new_password")String repeatNewPassword);
+
+    @Headers({"Domain-Name: api"})
+    @GET("v1/profiles?enabled=all")
+    Observable<UserResponse> getUsers(@Header("Authorization") String authorization);
 
 }

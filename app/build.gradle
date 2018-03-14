@@ -48,6 +48,8 @@ dependencies {
     compile 'android.arch.lifecycle:runtime:' + rootProject.archLifecycleVersion;
     compile 'android.arch.lifecycle:extensions:' + rootProject.archLifecycleVersion;
     annotationProcessor 'android.arch.lifecycle:compiler:' + rootProject.archLifecycleVersion;
+    compile "android.arch.persistence.room:runtime:${roomVersion}"
+    annotationProcessor "android.arch.persistence.room:compiler:${roomVersion}"
 
     //3rd party
     compile 'com.squareup.retrofit2:retrofit:' + rootProject.retrofit;
@@ -62,9 +64,6 @@ dependencies {
     compile "com.jakewharton.retrofit:retrofit2-rxjava2-adapter:${rx2JavaLibraryVersion}"
     compile "io.reactivex.rxjava2:rxandroid:${rxandroidLibraryVersion}"
     compile "io.reactivex.rxjava2:rxjava:${rxjavaLibraryVersion}"
-
-
-
 
     testCompile 'junit:junit:4.12'
 }

@@ -81,8 +81,8 @@ public class LoginActivity extends AppCompatActivity {
                 editor.putString("token",data.getToken()).apply();
 
                 //todo manejo de JWT
-                /*JWT jwt = new JWT(data.getToken());
-                String username = jwt.getClaim("username").asString();
+                JWT jwt = new JWT(data.getToken());
+                /*String username = jwt.getClaim("username").asString();
                 String userType = jwt.getClaim("user_type").asString();
                 String locale = jwt.getClaim("locale").asString();
                 String name = jwt.getClaim("full_name").asString();

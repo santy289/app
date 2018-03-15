@@ -49,4 +49,11 @@
     <string name="password_mismatch">Both passwords must match</string>
     <string name="password_changed">Your password was succesfully changed, please log in</string>
     <string name="title_activity_sync">SyncActivity</string>
+    <string name="action_edit_profile">Edit Profile</string>
+    <string name="title_activity_edit_profile">EditProfileActivity</string>
+    <string name="name">Name</string>
+    <string name="phone">Phone number</string>
+    <string name="email">Email</string>
+    <string name="change_password">Change your password</string>
+    <string name="edit_profile">Edit Profile</string>
 </resources>

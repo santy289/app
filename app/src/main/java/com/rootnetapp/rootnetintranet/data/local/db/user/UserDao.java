@@ -20,9 +20,18 @@ public interface UserDao {
     @Query("SELECT * FROM user WHERE userId = :userId")
     User getUserById(int userId);
 
+//todo maybe remove
+    @Query("UPDATE user SET fullName = :userFullname, email = :userEmail," +
+            " phoneNumber = :userPhone  WHERE userId = :userId")
+    int editUser(int userId, String userFullname, String userEmail, String userPhone);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<User> users);
 
     @Delete
     void delete(User user);
+
+    @Query("DELETE FROM user")
+    int deleteAll();
+
 }

@@ -15,6 +15,7 @@ import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 
 /**
  * Created by Propietario on 09/03/2018.
@@ -56,9 +57,11 @@ public interface ApiInterface {
     Observable<UserResponse> getUsers(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
-    @PATCH("v1/profiles/1")
+    @PATCH("v1/profiles/{id}")
     @FormUrlEncoded
-    Observable<EditUserResponse> editUser(@Field("full_name") String fullName,
+    Observable<EditUserResponse> editUser(@Header("Authorization") String authorization,
+                                          @Path("id")int id,
+                                          @Field("full_name") String fullName,
                                           @Field("email") String email,
                                           @Field("phone_number")String phoneNumber);
 

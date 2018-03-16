@@ -56,4 +56,6 @@
     <string name="email">Email</string>
     <string name="change_password">Change your password</string>
     <string name="edit_profile">Edit Profile</string>
+    <string name="empty_name">The name cannot be empty</string>
+    <string name="empty_email">The email cannot be empty</string>
 </resources>

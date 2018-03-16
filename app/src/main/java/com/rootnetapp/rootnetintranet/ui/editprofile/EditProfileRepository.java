@@ -26,8 +26,8 @@ public class EditProfileRepository {
         this.services = services;
     }
 
-    public Observable<EditUserResponse> editUserService(String fullName, String email, String phoneNumber) {
-        return services.editUser(fullName, email, phoneNumber).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
+    public Observable<EditUserResponse> editUserService(String token, int id, String fullName, String email, String phoneNumber) {
+        return services.editUser(token, id, fullName, email, phoneNumber).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
     }
 
     public Observable<Boolean> editUserLocal(User user) {
@@ -39,4 +39,9 @@ public class EditProfileRepository {
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
     }
 
+    public Observable<User> getUser(int id) {
+        return Observable.fromCallable(()-> database.userDao().getUserById(id))
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
 }

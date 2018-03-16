@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse;
 
 /**
@@ -12,7 +13,8 @@ import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse
  */
 
 public class EditProfileViewModel extends ViewModel {
-    private MutableLiveData<Boolean> mUserLiveData;
+    private MutableLiveData<User> mUserLiveData;
+    private MutableLiveData<Boolean> mStatusLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
     private EditProfileRepository editProfileRepository;
 
@@ -20,8 +22,17 @@ public class EditProfileViewModel extends ViewModel {
         this.editProfileRepository = editProfileRepository;
     }
 
-    protected void editUser(String fullName, String email, String phoneNumber) {
-        editProfileRepository.editUserService(fullName, email, phoneNumber).subscribe(this::onEditRemoteSuccess, this::onUserFailure);
+    protected void getUser(int id) {
+        editProfileRepository.getUser(id).subscribe(this::onGetUserSuccess, this::onUserFailure);
+    }
+
+    private void onGetUserSuccess(User user) {
+        mUserLiveData.setValue(user);
+    }
+
+    protected void editUser(String token, int id,
+                            String fullName, String email, String phoneNumber) {
+        editProfileRepository.editUserService(token, id, fullName, email, phoneNumber).subscribe(this::onEditRemoteSuccess, this::onUserFailure);
     }
 
     private void onEditRemoteSuccess(EditUserResponse editUserResponse) {
@@ -29,7 +40,7 @@ public class EditProfileViewModel extends ViewModel {
     }
 
     private void onEditLocalSuccess(Boolean aBoolean) {
-        mUserLiveData.setValue(true);
+        mStatusLiveData.setValue(true);
     }
 
     private void onUserFailure(Throwable throwable) {
@@ -37,10 +48,10 @@ public class EditProfileViewModel extends ViewModel {
     }
 
     protected LiveData<Boolean> getObservableStatus() {
-        if (mUserLiveData == null) {
-            mUserLiveData = new MutableLiveData<>();
+        if (mStatusLiveData == null) {
+            mStatusLiveData = new MutableLiveData<>();
         }
-        return mUserLiveData;
+        return mStatusLiveData;
     }
 
     protected LiveData<Integer> getObservableError() {
@@ -48,5 +59,12 @@ public class EditProfileViewModel extends ViewModel {
             mErrorLiveData = new MutableLiveData<>();
         }
         return mErrorLiveData;
+    }
+
+    public LiveData<User> getObservableUser() {
+        if (mUserLiveData == null) {
+            mUserLiveData = new MutableLiveData<>();
+        }
+        return mUserLiveData;
     }
 }

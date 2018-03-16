@@ -17,12 +17,12 @@ public interface UserDao {
     @Query("SELECT * FROM user")
     List<User> getAll();
 
-    @Query("SELECT * FROM user WHERE userId = :userId")
+    @Query("SELECT * FROM user WHERE id = :userId")
     User getUserById(int userId);
 
 //todo maybe remove
     @Query("UPDATE user SET fullName = :userFullname, email = :userEmail," +
-            " phoneNumber = :userPhone  WHERE userId = :userId")
+            " phoneNumber = :userPhone  WHERE id = :userId")
     int editUser(int userId, String userFullname, String userEmail, String userPhone);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

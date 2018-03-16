@@ -33,6 +33,7 @@ public class ProfileFragment extends Fragment {
     ProfileViewModel profileViewModel;
     private FragmentProfileBinding fragmentProfileBinding;
     private MainActivityInterface mainActivityInterface;
+    int id;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -66,11 +67,17 @@ public class ProfileFragment extends Fragment {
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = prefs.getString("token","");
         JWT jwt = new JWT(token);
-        int id = Integer.parseInt(jwt.getClaim("user_id").asString());
+        id = Integer.parseInt(jwt.getClaim("profile_id").asString());
         subscribe();
         Utils.showLoading(getContext());
         profileViewModel.getUser(id);
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        profileViewModel.getUser(id);
+        super.onResume();
     }
 
     @Override

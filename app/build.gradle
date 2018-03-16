@@ -57,10 +57,10 @@ dependencies {
     compile "me.jessyan:retrofit-url-manager:${retrofitUrlInterceptorVersion}"
     //https://github.com/JessYanCoding/RetrofitUrlManager
     compile "com.auth0.android:jwtdecode:${jsonWebTokenVersion}"
-
+    compile "com.android.support:recyclerview-v7:${supportLibVersion}"
+    compile "com.bignerdranch.android:expandablerecyclerview:${expandRecyclerVersion}"
     annotationProcessor "com.google.dagger:dagger-compiler:${daggerLibraryVersion}"
     compile "com.google.dagger:dagger:${daggerLibraryVersion}"
-
     compile "com.jakewharton.retrofit:retrofit2-rxjava2-adapter:${rx2JavaLibraryVersion}"
     compile "io.reactivex.rxjava2:rxandroid:${rxandroidLibraryVersion}"
     compile "io.reactivex.rxjava2:rxjava:${rxjavaLibraryVersion}"

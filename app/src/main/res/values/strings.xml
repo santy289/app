@@ -58,4 +58,14 @@
     <string name="edit_profile">Edit Profile</string>
     <string name="empty_name">The name cannot be empty</string>
     <string name="empty_email">The email cannot be empty</string>
+    <string name="workflow_manager">Workflow Manager</string>
+    <string name="workflow">Workflow</string>
+    <string name="modules">Modules</string>
+    <string name="accounts">Accounts</string>
+    <string name="sales">Sales</string>
+    <string name="business_oportunities">Business Oportunities</string>
+    <string name="synchronize">Sync up</string>
+    <string name="synchronization">Synchronization</string>
+    <string name="workflow_list">Workflows listing</string>
+    <string name="btn_add">+ Add</string>
 </resources>

@@ -1,11 +1,14 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflow;
 
-import com.rootnetapp.rootnetintranet.models.responses.workflows.Assignee;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.Author;
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Embedded;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
+
 import com.rootnetapp.rootnetintranet.models.responses.workflows.CalculatedField;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowStateInfo;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowType;
 import com.squareup.moshi.Json;
 
 import java.util.List;
@@ -14,40 +17,85 @@ import java.util.List;
  * Created by Propietario on 15/03/2018.
  */
 
+@Entity
 public class Workflow {
 
+//---------entity fields---------
+
+    @PrimaryKey
+    @ColumnInfo(name = "id")
     @Json(name = "id")
     private int id;
+
+    @ColumnInfo(name = "title")
     @Json(name = "title")
     private String title;
+
+    @ColumnInfo(name = "workflow_type_key")
     @Json(name = "workflow_type_key")
     private String workflowTypeKey;
+
+    @ColumnInfo(name = "description")
     @Json(name = "description")
     private String description;
+
+    @ColumnInfo(name = "start")
     @Json(name = "start")
     private String start;
-    @Json(name = "end")
-    private String end;
+
+    @ColumnInfo(name = "status")
     @Json(name = "status")
     private boolean status;
+
+    @ColumnInfo(name = "open")
     @Json(name = "open")
     private boolean open;
+
+    @ColumnInfo(name = "workflow_state_id")
+    private int workflowStateId;
+
+//----------------------
+//---------Relations-----
+
+    @Embedded
     @Json(name = "author")
-    private Author author;
-    @Json(name = "workflow_state")
-    private int workflowState;
-    @Json(name = "workflow_state_info")
-    private WorkflowStateInfo workflowStateInfo;
+    private Person author;
+
+    @Embedded
     @Json(name = "workflow_type")
     private WorkflowType workflowType;
+
+//-----------------
+
+    @Ignore
+    @Json(name = "end")
+    private String end;
+
+    @Ignore
+    @Json(name = "workflow_state")
+    private int workflowState;
+
+    @Ignore
+    @Json(name = "workflow_state_info")
+    private WorkflowStateInfo workflowStateInfo;
+
+    @Ignore
     @Json(name = "assignees")
-    private List<Assignee> assignees = null;
+    private List<Person> assignees = null;
+
+    @Ignore
     @Json(name = "responsible")
     private List<Object> responsible = null;
+
+    @Ignore
     @Json(name = "calculated_fields")
     private List<CalculatedField> calculatedFields = null;
+
+    @Ignore
     @Json(name = "metas")
     private List<Object> metas = null;
+
+    @Ignore
     @Json(name = "presets")
     private List<Preset> presets = null;
 
@@ -115,11 +163,11 @@ public class Workflow {
         this.open = open;
     }
 
-    public Author getAuthor() {
+    public Person getAuthor() {
         return author;
     }
 
-    public void setAuthor(Author author) {
+    public void setAuthor(Person author) {
         this.author = author;
     }
 
@@ -147,11 +195,11 @@ public class Workflow {
         this.workflowType = workflowType;
     }
 
-    public List<Assignee> getAssignees() {
+    public List<Person> getAssignees() {
         return assignees;
     }
 
-    public void setAssignees(List<Assignee> assignees) {
+    public void setAssignees(List<Person> assignees) {
         this.assignees = assignees;
     }
 
@@ -187,4 +235,27 @@ public class Workflow {
         this.presets = presets;
     }
 
+    /*public int getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(int authorId) {
+        this.authorId = authorId;
+    }*/
+
+    public int getWorkflowStateId() {
+        return workflowStateId;
+    }
+
+    public void setWorkflowStateId(int workflowStateId) {
+        this.workflowStateId = workflowStateId;
+    }
+
+   /* public int getWorkflowTypeId() {
+        return workflowTypeId;
+    }
+
+    public void setWorkflowTypeId(int workflowTypeId) {
+        this.workflowTypeId = workflowTypeId;
+    }*/
 }

@@ -63,6 +63,8 @@ public class LoginActivity extends AppCompatActivity {
             try {
                 domain = jsonAdapter.fromJson(json);
                 RetrofitUrlManager.getInstance().putDomain("api", "https://" + domain.getClient().getApiUrl());
+                //todo PRUEBAS
+                RetrofitUrlManager.getInstance().putDomain("localhost", "http://192.168.42.183/");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -74,15 +76,11 @@ public class LoginActivity extends AppCompatActivity {
         final Observer<LoginResponse> loginObserver = ((LoginResponse data) -> {
             Utils.hideLoading();
             if (null != data) {
-                //Todo Pedir data del user aqui o en mainActivity? (PREGUNTAR)
-                //Todo Guardar TOKEN en las preferences para las demas consultas.
                 SharedPreferences.Editor editor = sharedPref.edit();
-
                 editor.putString("token",data.getToken()).apply();
-
                 //todo manejo de JWT
-                JWT jwt = new JWT(data.getToken());
-                /*String username = jwt.getClaim("username").asString();
+                /*JWT jwt = new JWT(data.getToken());
+                String username = jwt.getClaim("username").asString();
                 String userType = jwt.getClaim("user_type").asString();
                 String locale = jwt.getClaim("locale").asString();
                 String name = jwt.getClaim("full_name").asString();
@@ -90,7 +88,6 @@ public class LoginActivity extends AppCompatActivity {
                 //claim.asString();
                 Log.d("test", "username: "+username+
                 " Type: "+userType+" locale: "+locale+" Name: "+name);*/
-
                 startActivity(new Intent(this, SyncActivity.class));
                 finishAffinity();
             }

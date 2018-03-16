@@ -5,11 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -34,7 +31,7 @@ public class SyncActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer "+ prefs.getString("token","");
         subscribe();
-        syncHelper.synchronize(token);
+        syncHelper.clearData(token);
     }
 
     private void subscribe() {

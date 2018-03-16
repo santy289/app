@@ -6,6 +6,7 @@ import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse
 import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
 import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -16,6 +17,7 @@ import retrofit2.http.Headers;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 /**
  * Created by Propietario on 09/03/2018.
@@ -65,9 +67,12 @@ public interface ApiInterface {
                                           @Field("email") String email,
                                           @Field("phone_number")String phoneNumber);
 
-
-    /*
-http://example-api.rootnetapp.local/v1/intranet/workflows?limit=50&open=true&page=0&query=&status=true
-    */
+    @Headers({"Domain-Name: localhost"})
+    @GET("v1/intranet/workflows?")
+    Observable<WorkflowResponse> getWorkflows(@Header("Authorization") String authorization,
+                                              @Query("limit") int limit,
+                                              @Query("open") boolean open,
+                                              @Query("page") int page,
+                                              @Query("status") boolean status);
 
 }

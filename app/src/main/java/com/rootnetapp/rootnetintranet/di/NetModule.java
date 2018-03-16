@@ -44,7 +44,9 @@ public class NetModule {
     @Singleton
     public AppDatabase provideDatabase(Context context){
         return Room.databaseBuilder(context,
-                AppDatabase.class, "IntranetDB").build();
+                AppDatabase.class, "IntranetDB")
+                .fallbackToDestructiveMigration()
+                .build();
     }
 
     @Provides

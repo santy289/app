@@ -7,31 +7,38 @@
             android:id="@+id/nav_timeline"
             android:title="@string/timeline" />
         <item
-            android:id="@+id/nav_community"
-            android:title="@string/community">
+            android:title="@string/workflow">
             <menu>
                 <item
-                    android:id="@+id/nav_share"
-                    android:icon="@drawable/ic_menu_share"
-                    android:title="Share" />
+                    android:id="@+id/nav_workflowmanager"
+                    android:title="@string/workflow_manager" />
                 <item
-                    android:id="@+id/nav_send"
-                    android:icon="@drawable/ic_menu_send"
-                    android:title="Send" />
+                    android:id="@+id/nav_workflows"
+                    android:title="@string/workflows" />
             </menu>
         </item>
         <item
-            android:id="@+id/nav_workflows"
-            android:title="@string/workflows" />
+            android:title="@string/modules">
+            <menu>
+                <item
+                    android:id="@+id/nav_accounts"
+                    android:title="@string/accounts" />
+                <item
+                    android:id="@+id/nav_sales"
+                    android:title="@string/sales" />
+                <item
+                    android:id="@+id/nav_business"
+                    android:title="@string/business_oportunities" />
+            </menu>
+        </item>
         <item
-            android:id="@+id/nav_projects"
-            android:title="@string/projects" />
-        <item
-            android:id="@+id/nav_resourcing"
-            android:title="@string/resourcing" />
-        <item
-            android:id="@+id/nav_reports"
-            android:title="@string/reports" />
+            android:title="@string/synchronization">
+            <menu>
+                <item
+                    android:id="@+id/nav_sync"
+                    android:title="@string/synchronize" />
+            </menu>
+        </item>
         <item
             android:id="@+id/nav_profile"
             android:title="@string/profile" />

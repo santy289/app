@@ -1,4 +1,5 @@
-package com.rootnetapp.rootnetintranet.models.responses.workflows;
+package com.rootnetapp.rootnetintranet.data.local.db.workflow;
+
 
 import com.squareup.moshi.Json;
 
@@ -6,21 +7,23 @@ import com.squareup.moshi.Json;
  * Created by Propietario on 15/03/2018.
  */
 
-public class Assignee {
+public class Person {
 
     @Json(name = "id")
-    private int id;
+     int personId;
+
     @Json(name = "full_name")
-    private String fullName;
+     String fullName;
+
     @Json(name = "picture")
-    private String picture;
+     String picture;
 
     public int getId() {
-        return id;
+        return personId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setId(int personId) {
+        this.personId = personId;
     }
 
     public String getFullName() {

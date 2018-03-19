@@ -38,6 +38,6 @@ ext {
     retrofitUrlInterceptorVersion   = '1.2.0'
     jsonWebTokenVersion             = '1.1.1'
     roomVersion                     = '1.0.0'
-    expandRecyclerVersion           = '1.0.3'
+    expandRecyclerVersion           = '1.3'
 
 }

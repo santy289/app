@@ -68,4 +68,11 @@
     <string name="synchronization">Synchronization</string>
     <string name="workflow_list">Workflows listing</string>
     <string name="btn_add">+ Add</string>
+    <string name="description">Description</string>
+    <string name="lastname">Last Name</string>
+    <string name="creator">Creator</string>
+    <string name="type">Type</string>
+    <string name="created_at">Created At</string>
+    <string name="condition">Condition</string>
+    <string name="country">Country</string>
 </resources>

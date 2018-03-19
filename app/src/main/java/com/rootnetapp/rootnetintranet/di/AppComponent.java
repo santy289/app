@@ -13,6 +13,8 @@ import com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment.ResetPasswordFr
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment.ResetPasswordModule;
 import com.rootnetapp.rootnetintranet.ui.resetPass.tokenfragment.RequestTokenFragment;
 import com.rootnetapp.rootnetintranet.ui.resetPass.tokenfragment.RequestTokenModule;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowModule;
 
 import javax.inject.Singleton;
 
@@ -34,7 +36,8 @@ import dagger.Provides;
                 ResetPasswordModule.class,
                 RequestTokenModule.class,
                 ProfileModule.class,
-                EditProfileModule.class
+                EditProfileModule.class,
+                WorkflowModule.class
         }
 )
 
@@ -54,4 +57,5 @@ public interface AppComponent {
 
     void inject(EditProfileActivity editProfileActivity);
 
+    void inject(WorkflowFragment workflowFragment);
 }

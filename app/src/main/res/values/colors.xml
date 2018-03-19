@@ -4,8 +4,11 @@
     <color name="colorPrimaryDark">#24303c</color>
     <color name="colorAccent">#e94247</color>
 
+    <color name="detail">#f5f6f8</color>
+
     <color name="headerColor">#445a70</color>
     <color name="white">#ffffff</color>
     <color name="transparent">#a1000000</color>
+    <color name="green">#7ab95c</color>
 
 </resources>

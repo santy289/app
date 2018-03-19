@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, MainActivityInterface{
@@ -67,6 +68,10 @@ public class MainActivity extends AppCompatActivity
         switch (id){
             case R.id.nav_profile:{
                 showFragment(ProfileFragment.newInstance(this),false);
+                break;
+            }
+            case R.id.nav_workflows:{
+                showFragment(WorkflowFragment.newInstance(this),false);
                 break;
             }
         }

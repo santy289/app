@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.auth0.android.jwt.Claim;
 import com.auth0.android.jwt.JWT;
+import com.bumptech.glide.Glide;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ActivityLoginBinding;
@@ -62,8 +63,10 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             try {
                 domain = jsonAdapter.fromJson(json);
-                RetrofitUrlManager.getInstance().putDomain("api", "https://" + domain.getClient().getApiUrl());
-                //todo PRUEBAS
+                Utils.imageDomain = "https://" + domain.getClient().getApiUrl();
+                Glide.with(this).load(Utils.URL+domain.getClient().getLogoUrl()).into(loginBinding.logo);
+                RetrofitUrlManager.getInstance().putDomain("api", Utils.imageDomain);
+                //todo solo para PRUEBAS
                 RetrofitUrlManager.getInstance().putDomain("localhost", "http://192.168.42.183/");
             } catch (IOException e) {
                 e.printStackTrace();

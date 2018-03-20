@@ -1,5 +1,8 @@
 package com.rootnetapp.rootnetintranet.models.responses.workflows;
 
+import android.arch.persistence.room.Embedded;
+import android.arch.persistence.room.Ignore;
+
 import com.squareup.moshi.Json;
 
 import java.util.List;
@@ -9,13 +12,16 @@ import java.util.List;
  */
 
 public class WorkflowStateInfo {
-
     @Json(name = "_new")
     private boolean _new;
     @Json(name = "_deleted")
     private boolean deleted;
+
+    @Ignore
     @Json(name = "modified_columns")
     private List<Object> modifiedColumns = null;
+
+    @Embedded(prefix = "col_")
     @Json(name = "virtual_columns")
     private VirtualColumns virtualColumns;
     @Json(name = "start_copy")
@@ -48,8 +54,11 @@ public class WorkflowStateInfo {
     private boolean alreadyInValidation;
     @Json(name = "already_in_clear_all_references_deep")
     private boolean alreadyInClearAllReferencesDeep;
+
+    @Ignore
     @Json(name = "sortable_queries")
     private List<Object> sortableQueries = null;
+    @Ignore
     @Json(name = "validation_failures")
     private List<Object> validationFailures = null;
 

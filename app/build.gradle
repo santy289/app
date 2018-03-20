@@ -63,6 +63,9 @@ dependencies {
     compile "com.jakewharton.retrofit:retrofit2-rxjava2-adapter:${rx2JavaLibraryVersion}"
     compile "io.reactivex.rxjava2:rxandroid:${rxandroidLibraryVersion}"
     compile "io.reactivex.rxjava2:rxjava:${rxjavaLibraryVersion}"
+    compile "de.hdodenhof:circleimageview:${circleImageViewVersion}"
+    compile "com.github.bumptech.glide:glide:${glideVersion}"
+    annotationProcessor "com.github.bumptech.glide:compiler:${glideVersion}"
 
     testCompile 'junit:junit:4.12'
 }

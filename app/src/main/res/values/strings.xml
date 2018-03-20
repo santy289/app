@@ -75,4 +75,11 @@
     <string name="created_at">Created At</string>
     <string name="condition">Condition</string>
     <string name="country">Country</string>
+    <string name="workflow_type">Workflow Type</string>
+    <string name="owner">Owner</string>
+    <string name="actual_state">Actual State</string>
+    <string name="status">Status</string>
+    <string name="updated_at">Updated At</string>
+    <string name="active">Active</string>
+    <string name="inactive">Inactive</string>
 </resources>

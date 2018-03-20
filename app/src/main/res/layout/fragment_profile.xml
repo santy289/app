@@ -15,7 +15,7 @@
             android:orientation="horizontal"
             android:background="@color/colorPrimary">
 
-            <ImageView
+            <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/img_user"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
@@ -39,10 +39,11 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_margin="10dp"
-                android:src="@drawable/logo"/>
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_margin="20dp"
+                android:tint="@color/headerColor"
+                android:src="@drawable/ic_contact_phone_black_24dp"/>
 
             <TextView
                 android:id="@+id/tv_phone"
@@ -58,10 +59,11 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_margin="10dp"
-                android:src="@drawable/logo"/>
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_margin="20dp"
+                android:tint="@color/headerColor"
+                android:src="@drawable/ic_mail_black_24dp"/>
 
             <TextView
                 android:id="@+id/tv_email"
@@ -77,10 +79,11 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_margin="10dp"
-                android:src="@drawable/logo"/>
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_margin="20dp"
+                android:tint="@color/headerColor"
+                android:src="@drawable/ic_turned_in_black_24dp"/>
 
             <TextView
                 android:id="@+id/tv_department"

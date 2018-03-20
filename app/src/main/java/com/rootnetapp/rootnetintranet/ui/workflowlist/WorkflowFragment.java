@@ -13,6 +13,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.PopupWindow;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -89,6 +91,23 @@ public class WorkflowFragment extends Fragment {
         });
         workflowViewModel.getObservableWorkflows().observe(this, workflowsObserver);
         workflowViewModel.getObservableError().observe(this, errorObserver);
+    }
+
+    public PopupWindow popupMenu()
+    {
+        final PopupWindow popupWindow = new PopupWindow(getContext());
+
+        // inflate your layout or dynamically add view
+        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        View view = inflater.inflate(R.layout.workflow_filters_menu, null);
+
+        popupWindow.setFocusable(true);
+        popupWindow.setWidth(WindowManager.LayoutParams.WRAP_CONTENT);
+        popupWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
+        popupWindow.setContentView(view);
+
+        return popupWindow;
     }
 
 }

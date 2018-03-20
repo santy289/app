@@ -51,11 +51,11 @@ public class Workflow {
     @Json(name = "open")
     private boolean open;
 
-    @ColumnInfo(name = "workflow_state_id")
-    private int workflowStateId;
+    /*@ColumnInfo(name = "workflow_state_id")
+    private int workflowStateId;*/
 
 //----------------------
-//---------Relations-----
+//---------Relations----
 
     @Embedded
     @Json(name = "author")
@@ -67,15 +67,15 @@ public class Workflow {
 
 //-----------------
 
-    @Ignore
+    @ColumnInfo(name = "end")
     @Json(name = "end")
     private String end;
 
-    @Ignore
+    @ColumnInfo(name = "workflow_state")
     @Json(name = "workflow_state")
     private int workflowState;
 
-    @Ignore
+    @Embedded(prefix = "state_")
     @Json(name = "workflow_state_info")
     private WorkflowStateInfo workflowStateInfo;
 
@@ -241,7 +241,7 @@ public class Workflow {
 
     public void setAuthorId(int authorId) {
         this.authorId = authorId;
-    }*/
+    }
 
     public int getWorkflowStateId() {
         return workflowStateId;
@@ -251,7 +251,7 @@ public class Workflow {
         this.workflowStateId = workflowStateId;
     }
 
-   /* public int getWorkflowTypeId() {
+   public int getWorkflowTypeId() {
         return workflowTypeId;
     }
 

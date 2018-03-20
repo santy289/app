@@ -2,7 +2,6 @@
 <layout xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-
         <variable
             name="LoginViewModel"
             type="com.rootnetapp.rootnetintranet.ui.login.LoginViewModel" />
@@ -28,12 +27,13 @@
                 android:paddingTop="100dp">
 
                 <ImageView
+                    android:id="@+id/logo"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="100dp"
                     android:adjustViewBounds="true"
                     android:cropToPadding="false"
                     android:focusableInTouchMode="true"
-                    android:scaleType="centerInside"
+                    android:scaleType="fitCenter"
                     android:src="@drawable/logo" />
 
                 <TextView

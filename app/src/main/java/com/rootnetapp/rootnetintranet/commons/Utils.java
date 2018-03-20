@@ -17,6 +17,8 @@ public class Utils {
 
     public static final String remainderOfDomain = ".rootnetapp.com";
 
+    public static String imageDomain;
+
     private static ProgressDialog progress;
 
     public static void showLoading(Context ctx){

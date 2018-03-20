@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.auth0.android.jwt.JWT;
+import com.bumptech.glide.Glide;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
@@ -101,13 +102,14 @@ public class ProfileFragment extends Fragment {
         final Observer<User> userObserver = ((User data) -> {
             Utils.hideLoading();
             if (null != data) {
-                fragmentProfileBinding.layoutProfile.setVisibility(View.VISIBLE);
+                Glide.with(this).load(Utils.imageDomain+data.getPicture()).into(fragmentProfileBinding.imgUser);
                 fragmentProfileBinding.tvName.setText(data.getFullName());
                 //todo modificar DAO para soportar departamentos
                 //todo implementar DAO de departamentos
                 fragmentProfileBinding.tvDepartment.setText("asdf");
                 fragmentProfileBinding.tvPhone.setText(data.getPhoneNumber());
                 fragmentProfileBinding.tvEmail.setText(data.getEmail());
+                fragmentProfileBinding.layoutProfile.setVisibility(View.VISIBLE);
             }
         });
         final Observer<Integer> errorObserver = ((Integer data) -> {

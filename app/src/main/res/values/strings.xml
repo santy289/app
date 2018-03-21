@@ -90,4 +90,6 @@
     <string name="created_date">Created Date</string>
     <string name="descending">Descending</string>
     <string name="ascending">Ascending</string>
+    <string name="workflow_name">Workflow Name</string>
+    <string name="number">Number</string>
 </resources>

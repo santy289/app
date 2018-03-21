@@ -90,10 +90,10 @@ public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowView
 
     private void redrawExpansion(WorkflowViewholder holder, int i) {
         if (isExpanded.get(i)) {
-            Glide.with(recycler).load(R.drawable.ic_keyboard_arrow_up_black_24dp).into(holder.binding.btnArrow);
+            holder.binding.btnArrow.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
             holder.binding.layoutDetails.setVisibility(View.VISIBLE);
         } else {
-            Glide.with(recycler).load(R.drawable.ic_keyboard_arrow_down_black_24dp).into(holder.binding.btnArrow);
+            holder.binding.btnArrow.setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
             holder.binding.layoutDetails.setVisibility(View.GONE);
         }
     }

@@ -82,4 +82,12 @@
     <string name="updated_at">Updated At</string>
     <string name="active">Active</string>
     <string name="inactive">Inactive</string>
+    <string name="filters">Filters</string>
+    <string name="my_workflows">My workflows</string>
+    <string name="sorting">Sort By</string>
+    <string name="workflow_number">Workflow Number</string>
+    <string name="updated_date">Updated Date</string>
+    <string name="created_date">Created Date</string>
+    <string name="descending">Descending</string>
+    <string name="ascending">Ascending</string>
 </resources>

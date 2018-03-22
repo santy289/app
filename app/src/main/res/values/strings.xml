@@ -92,4 +92,10 @@
     <string name="ascending">Ascending</string>
     <string name="workflow_name">Workflow Name</string>
     <string name="number">Number</string>
+    <string name="creation_date">Creation Date</string>
+    <string name="basic_info">Basic Information</string>
+    <string name="workflow_team">Workflow Team</string>
+    <string name="add_workflow">+ Add Workflow</string>
+    <string name="project_owner">Proyect Owner</string>
+    <string name="edit">Edit</string>
 </resources>

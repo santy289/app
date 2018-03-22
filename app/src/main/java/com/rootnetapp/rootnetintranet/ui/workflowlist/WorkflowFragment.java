@@ -26,6 +26,7 @@ import com.rootnetapp.rootnetintranet.databinding.WorkflowFiltersMenuBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowExpandableAdapter;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowDialog;
 
 import java.util.List;
 
@@ -77,15 +78,12 @@ public class WorkflowFragment extends Fragment {
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = prefs.getString("token", "");
         workflowViewModel.getWorkflows(token);
-
-        fragmentWorkflowBinding.btnFilters.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                PopupWindow popupwindow_obj = popupMenu();
-                popupwindow_obj.showAsDropDown(fragmentWorkflowBinding.btnFilters, -40, 18);
-            }
+        fragmentWorkflowBinding.btnFilters.setOnClickListener(view1 -> {
+            PopupWindow popupwindow_obj = popupMenu();
+            popupwindow_obj.showAsDropDown(fragmentWorkflowBinding.btnFilters, -40, 18);
         });
-
+        fragmentWorkflowBinding.btnAdd.setOnClickListener(view12 ->
+                mainActivityInterface.showDialog(CreateWorkflowDialog.newInstance()));
         return view;
     }
 
@@ -134,6 +132,25 @@ public class WorkflowFragment extends Fragment {
         workflowFiltersMenuBinding.chbxWorkflownumber.setOnClickListener(this::onRadioButtonClicked);
         workflowFiltersMenuBinding.chbxCreatedate.setOnClickListener(this::onRadioButtonClicked);
         workflowFiltersMenuBinding.chbxUpdatedate.setOnClickListener(this::onRadioButtonClicked);
+        if(sorting.getNumberSortOrder().equals(sortOrder.ASC)){
+            workflowFiltersMenuBinding.swchWorkflownumber.setChecked(true);
+            workflowFiltersMenuBinding.swchWorkflownumber.setText(getString(R.string.ascending));
+        }else{
+            workflowFiltersMenuBinding.swchWorkflownumber.setChecked(false);
+        }
+        if(sorting.getCreatedSortOrder().equals(sortOrder.ASC)){
+            workflowFiltersMenuBinding.swchCreatedate.setChecked(true);
+            workflowFiltersMenuBinding.swchCreatedate.setText(getString(R.string.ascending));
+
+        }else{
+            workflowFiltersMenuBinding.swchCreatedate.setChecked(false);
+        }
+        if(sorting.getUpdatedSortOrder().equals(sortOrder.ASC)){
+            workflowFiltersMenuBinding.swchUpdatedate.setChecked(true);
+            workflowFiltersMenuBinding.swchUpdatedate.setText(getString(R.string.ascending));
+        }else{
+            workflowFiltersMenuBinding.swchUpdatedate.setChecked(false);
+        }
         workflowFiltersMenuBinding.swchWorkflownumber.setOnCheckedChangeListener((compoundButton, b) -> {
             if (b) {
                 sorting.setNumberSortOrder(sortOrder.ASC);
@@ -164,21 +181,7 @@ public class WorkflowFragment extends Fragment {
             }
             workflowViewModel.applyFilters(sorting);
         });
-        if(sorting.getNumberSortOrder().equals(sortOrder.ASC)){
-            workflowFiltersMenuBinding.swchWorkflownumber.setChecked(true);
-        }else{
-            workflowFiltersMenuBinding.swchWorkflownumber.setChecked(false);
-        }
-        if(sorting.getCreatedSortOrder().equals(sortOrder.ASC)){
-            workflowFiltersMenuBinding.chbxCreatedate.setChecked(true);
-        }else{
-            workflowFiltersMenuBinding.chbxCreatedate.setChecked(false);
-        }
-        if(sorting.getUpdatedSortOrder().equals(sortOrder.ASC)){
-            workflowFiltersMenuBinding.chbxUpdatedate.setChecked(true);
-        }else{
-            workflowFiltersMenuBinding.chbxUpdatedate.setChecked(false);
-        }
+
         return popupWindow;
     }
 

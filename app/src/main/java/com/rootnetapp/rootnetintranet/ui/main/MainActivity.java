@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -88,6 +89,20 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void showActivity(Class<?> activityClass) {
         startActivity(new Intent(this, activityClass));
+    }
+
+    @Override
+    public void showDialog(DialogFragment dialogFragment) {
+        disposeDialog();
+        dialogFragment.show(fragmentManager, "dialog");
+    }
+
+    @Override
+    public void disposeDialog() {
+        Fragment frag = fragmentManager.findFragmentByTag("dialog");
+        if (frag != null) {
+            fragmentManager.beginTransaction().remove(frag).commit();
+        }
     }
 
 }

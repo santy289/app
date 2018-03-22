@@ -1,6 +1,8 @@
 package com.rootnetapp.rootnetintranet.di;
 
 import com.rootnetapp.rootnetintranet.ui.SyncActivity;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowDialog;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowModule;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainModule;
 import com.rootnetapp.rootnetintranet.ui.editprofile.EditProfileActivity;
@@ -37,7 +39,8 @@ import dagger.Provides;
                 RequestTokenModule.class,
                 ProfileModule.class,
                 EditProfileModule.class,
-                WorkflowModule.class
+                WorkflowModule.class,
+                CreateWorkflowModule.class
         }
 )
 
@@ -58,4 +61,6 @@ public interface AppComponent {
     void inject(EditProfileActivity editProfileActivity);
 
     void inject(WorkflowFragment workflowFragment);
+
+    void inject(CreateWorkflowDialog createWorkflowDialog);
 }

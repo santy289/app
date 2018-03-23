@@ -7,6 +7,7 @@ import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
 import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -74,5 +75,9 @@ public interface ApiInterface {
                                               @Query("open") boolean open,
                                               @Query("page") int page,
                                               @Query("status") boolean status);
+
+    @Headers({"Domain-Name: localhost"})
+    @GET("v1/intranet/workflows/types")
+    Observable<WorkflowTypesResponse> getWorkflowTypes(@Header("Authorization") String authorization);
 
 }

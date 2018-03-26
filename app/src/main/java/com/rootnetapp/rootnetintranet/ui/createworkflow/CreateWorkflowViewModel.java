@@ -3,11 +3,18 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.country.Country;
+import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 
 import java.util.List;
 
@@ -18,28 +25,94 @@ import java.util.List;
 public class CreateWorkflowViewModel extends ViewModel {
 
     private MutableLiveData<List<WorkflowType>> mWorkflowsLiveData;
+    private MutableLiveData<ListsResponse> mListLiveData;
+    private MutableLiveData<ProductsResponse> mProductLiveData;
+    private MutableLiveData<ServicesResponse> mServiceLiveData;
+    private MutableLiveData<WorkflowUserResponse> mUserLiveData;
+    private MutableLiveData<CountriesResponse> mCountriesLiveData;
+    private MutableLiveData<Object> mCreateLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
+    private MutableLiveData<Integer> mCreateErrorLiveData;
     private CreateWorkflowRepository createWorkflowRepository;
     private String auth;
     //todo REMOVE, solo testing
-    private String auth2 = "Bearer "+ Utils.testToken;
+    private String auth2 = "Bearer " + Utils.testToken;
 
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.createWorkflowRepository = createWorkflowRepository;
     }
 
-    public void getWorkflowTypes(String auth){
-        //todo SOLO TESTING mientras no esta el backend live
-        createWorkflowRepository.getWorkflowTypes(auth2).subscribe(this::onTypesSuccess, this::onTypesFailure);
+    public void getWorkflowTypes(String auth) {
+        //todo auth2 SOLO TESTING mientras no esta el backend live
+        Log.d("test", "getWorkflowTypes: ");
+        //createWorkflowRepository.getWorkflowTypes(auth2).subscribe(this::onTypesSuccess, this::onFailure);
     }
+
+    public void getList(String auth, int id) {
+        //todo auth2 SOLO TESTING mientras no esta el backend live
+        createWorkflowRepository.getList(auth2, id).subscribe(this::onListSuccess, this::onFailure);
+    }
+
+    public void getProducts(String auth) {
+        //todo auth2 SOLO TESTING mientras no esta el backend live
+        createWorkflowRepository.getProducts(auth2).subscribe(this::onProductsSuccess, this::onFailure);
+    }
+
+    public void getServices(String auth) {
+        //todo auth2 SOLO TESTING mientras no esta el backend live
+        createWorkflowRepository.getServices(auth2).subscribe(this::onServicesSuccess, this::onFailure);
+    }
+
+    public void getUsers(String auth) {
+        //todo auth2 SOLO TESTING mientras no esta el backend live
+        createWorkflowRepository.getUsers(auth2).subscribe(this::onUsersSuccess, this::onFailure);
+    }
+
+    public void getCountries(String auth) {
+        //todo auth2 SOLO TESTING mientras no esta el backend live
+        createWorkflowRepository.getCountries(auth2).subscribe(this::onCountriesSuccess, this::onFailure);
+    }
+
+    /*public void createWorkflow(String auth, int workflowTypeId, String title, String workflowMetas,
+                               String start, String description) {
+        //todo auth2 SOLO TESTING mientras no esta el backend live
+        createWorkflowRepository.createWorkflow(auth2, workflowTypeId, title, workflowMetas,
+                start, description).subscribe(this::onCreateSuccess, this::onCreateFailure);
+    }*/
 
     private void onTypesSuccess(WorkflowTypesResponse workflowTypesResponse) {
         mWorkflowsLiveData.setValue(workflowTypesResponse.getList());
     }
 
-    private void onTypesFailure(Throwable throwable) {
-        mErrorLiveData.setValue(R.string.failure_connect);
+    private void onListSuccess(ListsResponse listsResponse) {
+        mListLiveData.setValue(listsResponse);
+    }
 
+    private void onProductsSuccess(ProductsResponse productsResponse) {
+        mProductLiveData.setValue(productsResponse);
+    }
+
+    private void onServicesSuccess(ServicesResponse servicesResponse) {
+        mServiceLiveData.setValue(servicesResponse);
+    }
+
+    private void onUsersSuccess(WorkflowUserResponse workflowUserResponse) {
+        mUserLiveData.setValue(workflowUserResponse);
+    }
+
+    private void onCountriesSuccess(CountriesResponse countriesResponse) {
+        mCountriesLiveData.setValue(countriesResponse);
+    }
+/*
+    private void onCreateSuccess(Object o) {
+
+    }*/
+
+    private void onFailure(Throwable throwable) {
+        mErrorLiveData.setValue(R.string.failure_connect);
+    }
+    private void onCreateFailure(Throwable throwable) {
+        mCreateErrorLiveData.setValue(R.string.failure_connect);
     }
 
     protected LiveData<List<WorkflowType>> getObservableWorkflows() {
@@ -49,11 +122,60 @@ public class CreateWorkflowViewModel extends ViewModel {
         return mWorkflowsLiveData;
     }
 
+    public LiveData<ListsResponse> getObservableList() {
+        if (mListLiveData == null) {
+            mListLiveData = new MutableLiveData<>();
+        }
+        return mListLiveData;
+    }
+
+    public LiveData<ProductsResponse> getObservableProduct() {
+        if (mProductLiveData == null) {
+            mProductLiveData = new MutableLiveData<>();
+        }
+        return mProductLiveData;
+    }
+
+    public LiveData<ServicesResponse> getObservableService() {
+        if (mServiceLiveData == null) {
+            mServiceLiveData = new MutableLiveData<>();
+        }
+        return mServiceLiveData;
+    }
+
+    public LiveData<WorkflowUserResponse> getObservableWorkflowUser() {
+        if (mUserLiveData == null) {
+            mUserLiveData = new MutableLiveData<>();
+        }
+        return mUserLiveData;
+    }
+
+    public LiveData<CountriesResponse> getObservableCountries() {
+        if (mCountriesLiveData == null) {
+            mCountriesLiveData = new MutableLiveData<>();
+        }
+        return mCountriesLiveData;
+    }
+
+    public LiveData<Object> getObservableCreate() {
+        if (mCreateLiveData == null) {
+            mCreateLiveData = new MutableLiveData<>();
+        }
+        return mCreateLiveData;
+    }
+
     protected LiveData<Integer> getObservableError() {
         if (mErrorLiveData == null) {
             mErrorLiveData = new MutableLiveData<>();
         }
         return mErrorLiveData;
+    }
+
+    protected LiveData<Integer> getObservableCreateError() {
+        if (mCreateErrorLiveData == null) {
+            mCreateErrorLiveData = new MutableLiveData<>();
+        }
+        return mCreateErrorLiveData;
     }
 
 }

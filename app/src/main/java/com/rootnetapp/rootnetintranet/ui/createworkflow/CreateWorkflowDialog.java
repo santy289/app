@@ -30,6 +30,12 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Field;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.CustomCountryPicker;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.CustomSpinner;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.ListSpinner;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.ProductoSpinner;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.ServicioSpinner;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.UsuariosSpinner;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
@@ -50,6 +56,7 @@ public class CreateWorkflowDialog extends DialogFragment {
     CreateWorkflowViewModel viewModel;
     private DialogCreateWorkflowBinding binding;
     private List<View> view_list;
+    private List<WorkflowType> workflowTypes;
 
     public static CreateWorkflowDialog newInstance() {
         CreateWorkflowDialog fragment = new CreateWorkflowDialog();
@@ -70,6 +77,7 @@ public class CreateWorkflowDialog extends DialogFragment {
                 .get(CreateWorkflowViewModel.class);
         view_list = new ArrayList<>();
         binding.btnClose.setOnClickListener(view -> dismiss());
+        binding.btnCreate.setOnClickListener(view -> createWorkflow());
         subscribe();
         viewModel.getWorkflowTypes("");
         return binding.getRoot();
@@ -78,6 +86,7 @@ public class CreateWorkflowDialog extends DialogFragment {
     private void subscribe() {
         final Observer<List<WorkflowType>> workflowsObserver = ((List<WorkflowType> data) -> {
             if (null != data) {
+                this.workflowTypes.addAll(data);
                 // Spinner Drop down elements
                 List<String> types = new ArrayList<>();
                 for (WorkflowType type : data) {
@@ -91,7 +100,7 @@ public class CreateWorkflowDialog extends DialogFragment {
                 // attaching data adapter to spinner
                 binding.spnWorkflowtype.setAdapter(dataAdapter);
                 // Spinner click listener
-                binding.spnWorkflowtype.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                /*binding.spnWorkflowtype.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                         //todo FieldConfig llega mal formateado del backend, si se arregla eso, se elimina este workaround
@@ -193,71 +202,66 @@ public class CreateWorkflowDialog extends DialogFragment {
                                                 break;
                                             }
                                             case "Lista": {
-                                                LayoutInflater vi = (LayoutInflater) getContext()
-                                                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                                                View v = vi.inflate(R.layout.prototype_list, null);
-                                                binding.layoutDinamicFields.addView(v,
-                                                        new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                                                                ViewGroup.LayoutParams.WRAP_CONTENT));
-                                                view_list.add(v);
-                                                TextView title = v.findViewById(R.id.field_title);
-                                                title.setText(field.getFieldName());
-                                                Spinner spinner = v.findViewById(R.id.field_spinner);
-                                                List<String> spn_data = new ArrayList<>();
-
-                                                if(config.getListInfo() != null){
-                                                    if (config.getListInfo().getElements() != null){
-                                                        for (Element item : config.getListInfo().getElements()) {
-                                                            spn_data.add(item.getName());
-                                                        }
-                                                    }
+                                                if (config.getListInfo() != null) {
+                                                    ListSpinner spinner = new ListSpinner(getActivity(),
+                                                            field, config.getListInfo().getId());
+                                                    binding.layoutDinamicFields.addView(spinner,
+                                                            new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                                                    ViewGroup.LayoutParams.WRAP_CONTENT));
+                                                    view_list.add(spinner);
                                                 }
-                                                // Creating adapter for spinner
-                                                ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(getActivity(),
-                                                        android.R.layout.simple_spinner_item, spn_data);
-                                                // Drop down layout style - list view with radio button
-                                                dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                                // attaching data adapter to spinner
-                                                spinner.setAdapter(dataAdapter);
                                                 break;
                                             }
                                             case "Producto": {
-
+                                                ProductoSpinner spinner = new ProductoSpinner(getActivity(),
+                                                        field);
+                                                binding.layoutDinamicFields.addView(spinner,
+                                                        new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                                                ViewGroup.LayoutParams.WRAP_CONTENT));
+                                                view_list.add(spinner);
                                                 break;
                                             }
                                             case "Servicio": {
-
+                                                ServicioSpinner spinner = new ServicioSpinner(getActivity(),
+                                                        field);
+                                                binding.layoutDinamicFields.addView(spinner,
+                                                        new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                                                ViewGroup.LayoutParams.WRAP_CONTENT));
+                                                view_list.add(spinner);
                                                 break;
                                             }
                                             case "Usuario": {
-
+                                                UsuariosSpinner spinner = new UsuariosSpinner(getActivity(), field);
+                                                binding.layoutDinamicFields.addView(spinner,
+                                                        new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                                                ViewGroup.LayoutParams.WRAP_CONTENT));
+                                                view_list.add(spinner);
                                                 break;
                                             }
                                             case "Teléfono": {
-                                                LayoutInflater vi = (LayoutInflater) getContext()
-                                                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                                                View v = vi.inflate(R.layout.prototype_textinput, null);
-                                                binding.layoutDinamicFields.addView(v,
+                                                CustomCountryPicker picker = new CustomCountryPicker(getActivity(),
+                                                        field, CustomCountryPicker.PickerType.CODIGO_TELEFONICO);
+                                                binding.layoutDinamicFields.addView(picker,
                                                         new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                                                 ViewGroup.LayoutParams.WRAP_CONTENT));
-                                                view_list.add(v);
-                                                TextView title = v.findViewById(R.id.field_title);
-                                                title.setText(field.getFieldName());
-                                                AppCompatEditText et = v.findViewById(R.id.field_input);
-                                                et.setInputType(InputType.TYPE_CLASS_PHONE);
-                                                et.setMaxLines(1);
+                                                view_list.add(picker);
                                                 break;
                                             }
                                             case "Moneda": {
-
+                                                CustomCountryPicker picker = new CustomCountryPicker(getActivity(),
+                                                        field, CustomCountryPicker.PickerType.MONEDA);
+                                                binding.layoutDinamicFields.addView(picker,
+                                                        new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                                                ViewGroup.LayoutParams.WRAP_CONTENT));
+                                                view_list.add(picker);
                                                 break;
                                             }
                                             case "Archivo": {
-
+                                                //todo COMO SUBO ARCHIVOS??
                                                 break;
                                             }
                                             case "Contacto": {
-
+                                                //todo La consulta da error 500
                                                 break;
                                             }
                                         }
@@ -266,8 +270,6 @@ public class CreateWorkflowDialog extends DialogFragment {
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-
-
                         }
                     }
 
@@ -275,18 +277,43 @@ public class CreateWorkflowDialog extends DialogFragment {
                     public void onNothingSelected(AdapterView<?> adapterView) {
                     }
                 });
-
+            */
             }
         });
         final Observer<Integer> errorObserver = ((Integer data) -> {
             if (null != data) {
                 //TODO mejorar toast
                 Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
-                dismiss();
+                //dismiss();
             }
         });
         viewModel.getObservableWorkflows().observe(this, workflowsObserver);
         viewModel.getObservableError().observe(this, errorObserver);
+    }
+
+    private void createWorkflow() {
+        /*int workflowTypeId = workflowTypes.get(binding.spnWorkflowtype.getSelectedItemPosition())
+                .getId();
+        String title = binding.inputWorkflowname.getText().toString();
+        String start = binding.pickerStart.getYear()+ "-" +binding.pickerStart.getMonth() + "-" +binding.pickerStart.getDayOfMonth() ;
+        String description = binding.inputWorkflowdescription.getText().toString();
+
+        final Observer<Object> workflowsObserver = ((Object data) -> {
+            if (null != data) {
+                //todo inform changes
+                dismiss();
+            }
+        });
+
+        final Observer<Integer> errorObserver = ((Integer data) -> {
+            if (null != data) {
+                //TODO mejorar toast
+                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
+            }
+        });
+        viewModel.getObservableCreate().observe(this, workflowsObserver);
+        viewModel.getObservableCreateError().observe(this, errorObserver);
+        viewModel.createWorkflow("",workflowTypeId, title, "", start, description);*/
     }
 
 }

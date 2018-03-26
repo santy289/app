@@ -154,6 +154,7 @@
                 android:text="@string/creation_date" />
 
             <DatePicker
+                android:id="@+id/picker_start"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:datePickerMode="spinner"
@@ -298,6 +299,7 @@
                 android:paddingEnd="20dp"/>
 
             <Button
+                android:id="@+id/btn_create"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/green"

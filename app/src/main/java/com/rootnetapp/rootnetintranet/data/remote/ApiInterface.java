@@ -1,15 +1,21 @@
 package com.rootnetapp.rootnetintranet.data.remote;
 
 
+import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
+import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordResponse;
+import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 
 import io.reactivex.Observable;
+import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -52,8 +58,8 @@ public interface ApiInterface {
     @FormUrlEncoded
     Observable<ResetPasswordResponse> resetPassword(@Field("token") String token,
                                                     @Field("username") String username,
-                                                    @Field("password")String password,
-                                                    @Field("repeat_new_password")String repeatNewPassword);
+                                                    @Field("password") String password,
+                                                    @Field("repeat_new_password") String repeatNewPassword);
 
     @Headers({"Domain-Name: api"})
     @GET("v1/profiles?enabled=all")
@@ -63,10 +69,10 @@ public interface ApiInterface {
     @PATCH("v1/profiles/{id}")
     @FormUrlEncoded
     Observable<EditUserResponse> editUser(@Header("Authorization") String authorization,
-                                          @Path("id")int id,
+                                          @Path("id") int id,
                                           @Field("full_name") String fullName,
                                           @Field("email") String email,
-                                          @Field("phone_number")String phoneNumber);
+                                          @Field("phone_number") String phoneNumber);
 
     @Headers({"Domain-Name: localhost"})
     @GET("v1/intranet/workflows?")
@@ -79,5 +85,36 @@ public interface ApiInterface {
     @Headers({"Domain-Name: localhost"})
     @GET("v1/intranet/workflows/types")
     Observable<WorkflowTypesResponse> getWorkflowTypes(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: localhost"})
+    @GET("v1/list/{id}/item")
+    Observable<ListsResponse> getListItems(@Header("Authorization") String authorization,
+                                           @Path("id") int id);
+
+    @Headers({"Domain-Name: localhost"})
+    @GET("v1/contacts/products?all=true")
+    Observable<ProductsResponse> getProducts(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: localhost"})
+    @GET("v1/contacts/services?all=true")
+    Observable<ServicesResponse> getServices(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: localhost"})
+    @GET("v1/client/35/users")
+    Observable<WorkflowUserResponse> getWorkflowUsers(@Header("Authorization") String authorization);
+
+    @GET("v1/check/countries")
+    Observable<CountriesResponse> getCountries(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: localhost"})
+    @GET("v1/intranet/workflows")
+    @FormUrlEncoded
+    Observable<Object> createWorkflow(@Header("Authorization") String authorization,
+                                      @Field("workflow_type_id") int workflowTypeId,
+                                      @Field("title") String title,
+                                      @Field("workflow_metas") String workflowMetas,
+                                      @Field("start") String start,
+                                      @Field("description") String description);
+
 
 }

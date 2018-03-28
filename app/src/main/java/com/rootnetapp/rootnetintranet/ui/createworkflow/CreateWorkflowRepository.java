@@ -3,6 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow;
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
@@ -62,9 +63,9 @@ public class CreateWorkflowRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<Object> createWorkflow(String auth, int workflowTypeId,
-                                                              String title, String workflowMetas,
-                                                              String start, String description) {
+    public Observable<CreateWorkflowResponse> createWorkflow(String auth, int workflowTypeId,
+                                                             String title, String workflowMetas,
+                                                             String start, String description) {
         return service.createWorkflow(auth, workflowTypeId, title, workflowMetas, start ,description).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }

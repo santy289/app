@@ -35,7 +35,7 @@
                     android:layout_centerVertical="true"
                     android:paddingEnd="20dp"
                     android:paddingStart="20dp"
-                    android:src="@drawable/ic_access_time_black_24dp" />
+                    android:src="@drawable/ic_close_black_24dp" />
 
                 <View
                     android:layout_width="match_parent"
@@ -221,36 +221,32 @@
                 android:paddingStart="20dp"
                 android:paddingEnd="20dp"
                 android:gravity="center_vertical"
-                android:weightSum="4"
                 android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_margin="10dp"
                     android:textColor="@color/colorPrimary"
+                    android:padding="10dp"
                     android:text="@string/project_owner"/>
 
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_margin="10dp"
-                    android:text="placeholder name"/>
+                    android:padding="10dp"
+                    android:text="Jon Doe"/>
 
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:layout_width="60dp"
                     android:layout_height="60dp"
-                    android:layout_margin="15dp"
+                    android:padding="10dp"
                     android:src="@drawable/ic_menu_send"/>
 
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_margin="10dp"
                     android:textColor="@color/colorPrimary"
+                    android:padding="10dp"
                     android:text="@string/edit"/>
 
             </LinearLayout>
@@ -265,7 +261,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingEnd="10dp"
-                    android:text="@string/workflow_team"
+                    android:text="@string/department"
                     android:textColor="@color/colorPrimary"/>
 
                 <View

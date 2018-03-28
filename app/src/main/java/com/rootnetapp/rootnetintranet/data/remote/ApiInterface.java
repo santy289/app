@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.data.remote;
 
 
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
@@ -107,14 +108,14 @@ public interface ApiInterface {
     Observable<CountriesResponse> getCountries(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: localhost"})
-    @GET("v1/intranet/workflows")
+    @POST("v1/intranet/workflows")
     @FormUrlEncoded
-    Observable<Object> createWorkflow(@Header("Authorization") String authorization,
-                                      @Field("workflow_type_id") int workflowTypeId,
-                                      @Field("title") String title,
-                                      @Field("workflow_metas") String workflowMetas,
-                                      @Field("start") String start,
-                                      @Field("description") String description);
+    Observable<CreateWorkflowResponse> createWorkflow(@Header("Authorization") String authorization,
+                                                      @Field("workflow_type_id") int workflowTypeId,
+                                                      @Field("title") String title,
+                                                      @Field("workflow_metas") String workflowMetas,
+                                                      @Field("start") String start,
+                                                      @Field("description") String description);
 
 
 }

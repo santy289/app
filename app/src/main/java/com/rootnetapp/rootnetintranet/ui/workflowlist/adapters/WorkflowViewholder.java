@@ -13,11 +13,6 @@ public class WorkflowViewholder extends RecyclerView.ViewHolder {
 
     final WorkflowItemBinding binding;
 
-    /*public void bind(Item item) {
-        binding.setItem(item);
-        binding.executePendingBindings();
-    }*/
-
     public WorkflowViewholder(WorkflowItemBinding binding) {
         super(binding.getRoot());
         this.binding = binding;

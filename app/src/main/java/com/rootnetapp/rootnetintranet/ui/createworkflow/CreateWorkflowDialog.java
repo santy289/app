@@ -7,6 +7,8 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.AppCompatEditText;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,6 +18,7 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,10 +28,16 @@ import com.google.gson.GsonBuilder;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.DialogCreateWorkflowBinding;
+import com.rootnetapp.rootnetintranet.models.requests.createworkflow.CountryData;
+import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
+import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
+import com.rootnetapp.rootnetintranet.models.responses.createworkflow.Workflow;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Element;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Field;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.CustomCountryPicker;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.CustomSpinner;
@@ -36,10 +45,14 @@ import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.ListSpinner;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.ProductoSpinner;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.ServicioSpinner;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.UsuariosSpinner;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragmentInterface;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.DepartmentAdapter;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
+import com.squareup.moshi.Types;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,9 +70,12 @@ public class CreateWorkflowDialog extends DialogFragment {
     private DialogCreateWorkflowBinding binding;
     private List<View> view_list;
     private List<WorkflowType> workflowTypes;
+    private int selectedType = -1;
+    private WorkflowFragmentInterface anInterface;
 
-    public static CreateWorkflowDialog newInstance() {
+    public static CreateWorkflowDialog newInstance(WorkflowFragmentInterface anInterface) {
         CreateWorkflowDialog fragment = new CreateWorkflowDialog();
+        fragment.anInterface = anInterface;
         return fragment;
     }
 
@@ -76,6 +92,8 @@ public class CreateWorkflowDialog extends DialogFragment {
                 .of(this, createWorkflowViewModelFactory)
                 .get(CreateWorkflowViewModel.class);
         view_list = new ArrayList<>();
+        workflowTypes = new ArrayList<>();
+        binding.recDepartment.setLayoutManager(new GridLayoutManager(getContext(), 2, LinearLayoutManager.HORIZONTAL, false));
         binding.btnClose.setOnClickListener(view -> dismiss());
         binding.btnCreate.setOnClickListener(view -> createWorkflow());
         subscribe();
@@ -84,33 +102,27 @@ public class CreateWorkflowDialog extends DialogFragment {
     }
 
     private void subscribe() {
-        final Observer<List<WorkflowType>> workflowsObserver = ((List<WorkflowType> data) -> {
+        final Observer<WorkflowTypesResponse> workflowsObserver = ((WorkflowTypesResponse data) -> {
             if (null != data) {
-                this.workflowTypes.addAll(data);
-                // Spinner Drop down elements
+                this.workflowTypes.addAll(data.getList());
                 List<String> types = new ArrayList<>();
-                for (WorkflowType type : data) {
+                for (WorkflowType type : data.getList()) {
                     types.add(type.getName());
                 }
-                // Creating adapter for spinner
                 ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(getActivity(),
                         android.R.layout.simple_spinner_item, types);
-                // Drop down layout style - list view with radio button
                 dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                // attaching data adapter to spinner
                 binding.spnWorkflowtype.setAdapter(dataAdapter);
-                // Spinner click listener
-                /*binding.spnWorkflowtype.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                binding.spnWorkflowtype.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                        //todo FieldConfig llega mal formateado del backend, si se arregla eso, se elimina este workaround
-
+                        selectedType = i;
                         for (View aView : view_list) {
                             binding.layoutDinamicFields.removeView(aView);
                         }
                         view_list.clear();
-                        for (Field field : data.get(i).getFields()) {
-                            field.getFieldConfig().substring(1, field.getFieldConfig().length() - 1);
+                        for (Field field : data.getList().get(i).getFields()) {
+                            //todo FieldConfig llega mal formateado del backend, si se arregla eso, se elimina este workaround
                             Moshi moshi = new Moshi.Builder().build();
                             JsonAdapter<FieldConfig> jsonAdapter = moshi.adapter(FieldConfig.class);
                             FieldConfig config = null;
@@ -118,8 +130,6 @@ public class CreateWorkflowDialog extends DialogFragment {
                                 config = jsonAdapter.fromJson(field.getFieldConfig());
                                 if (config.getFormShow() != null) {
                                     if (config.getFormShow()) {
-                                        //insertar campo dinamico
-                                        Log.d("test", "onItemSelected: Show new " + config.getTypeInfo().getValueType());
                                         switch (config.getTypeInfo().getName()) {
                                             case "Texto": {
                                                 LayoutInflater vi = (LayoutInflater) getContext()
@@ -186,6 +196,18 @@ public class CreateWorkflowDialog extends DialogFragment {
                                                                 ViewGroup.LayoutParams.WRAP_CONTENT));
                                                 view_list.add(v);
                                                 CheckBox title = v.findViewById(R.id.field_checkbox);
+                                                title.setText(field.getFieldName());
+                                                break;
+                                            }
+                                            case "Date": {
+                                                LayoutInflater vi = (LayoutInflater) getContext()
+                                                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                                                View v = vi.inflate(R.layout.prototype_date, null);
+                                                binding.layoutDinamicFields.addView(v,
+                                                        new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                                                ViewGroup.LayoutParams.WRAP_CONTENT));
+                                                view_list.add(v);
+                                                TextView title = v.findViewById(R.id.field_title);
                                                 title.setText(field.getFieldName());
                                                 break;
                                             }
@@ -256,15 +278,28 @@ public class CreateWorkflowDialog extends DialogFragment {
                                                 view_list.add(picker);
                                                 break;
                                             }
+                                            case "Enlace": {
+                                                LayoutInflater vi = (LayoutInflater) getContext()
+                                                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                                                View v = vi.inflate(R.layout.prototype_textinput, null);
+                                                binding.layoutDinamicFields.addView(v,
+                                                        new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                                                ViewGroup.LayoutParams.WRAP_CONTENT));
+                                                view_list.add(v);
+                                                TextView title = v.findViewById(R.id.field_title);
+                                                title.setText(field.getFieldName());
+                                                break;
+                                            }
                                             case "Archivo": {
-                                                //todo COMO SUBO ARCHIVOS??
                                                 break;
                                             }
                                             case "Contacto": {
-                                                //todo La consulta da error 500
                                                 break;
                                             }
                                         }
+                                    }
+                                    else{
+                                        view_list.add(null);
                                     }
                                 }
                             } catch (IOException e) {
@@ -277,14 +312,14 @@ public class CreateWorkflowDialog extends DialogFragment {
                     public void onNothingSelected(AdapterView<?> adapterView) {
                     }
                 });
-            */
+                binding.recDepartment.setAdapter(new DepartmentAdapter());
             }
         });
         final Observer<Integer> errorObserver = ((Integer data) -> {
             if (null != data) {
                 //TODO mejorar toast
                 Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
-                //dismiss();
+                dismiss();
             }
         });
         viewModel.getObservableWorkflows().observe(this, workflowsObserver);
@@ -292,15 +327,126 @@ public class CreateWorkflowDialog extends DialogFragment {
     }
 
     private void createWorkflow() {
-        /*int workflowTypeId = workflowTypes.get(binding.spnWorkflowtype.getSelectedItemPosition())
+        int workflowTypeId = workflowTypes.get(binding.spnWorkflowtype.getSelectedItemPosition())
                 .getId();
         String title = binding.inputWorkflowname.getText().toString();
-        String start = binding.pickerStart.getYear()+ "-" +binding.pickerStart.getMonth() + "-" +binding.pickerStart.getDayOfMonth() ;
+        String start = binding.pickerStart.getYear() + "-" + binding.pickerStart.getMonth() + "-" + binding.pickerStart.getDayOfMonth();
         String description = binding.inputWorkflowdescription.getText().toString();
+        List<WorkflowMetas> metas = new ArrayList<>();
 
-        final Observer<Object> workflowsObserver = ((Object data) -> {
+        int i = 0;
+        for (Field field : workflowTypes.get(selectedType).getFields()) {
+            Moshi moshi = new Moshi.Builder().build();
+            JsonAdapter<FieldConfig> jsonAdapter = moshi.adapter(FieldConfig.class);
+            FieldConfig config = null;
+            try {
+                config = jsonAdapter.fromJson(field.getFieldConfig());
+                if (config.getFormShow() != null) {
+                    if (config.getFormShow()) {
+                        WorkflowMetas wm = new WorkflowMetas();
+                        switch (config.getTypeInfo().getName()) {
+                            case "Texto":
+                            case "Area de Texto":
+                            case "Email":
+                            case "Numerico": {
+                                View v = view_list.get(i);
+                                AppCompatEditText et = v.findViewById(R.id.field_input);
+                                wm.setValue(et.getText().toString());
+                                break;
+                            }
+                            case "Checkbox": {
+                                View v = view_list.get(i);
+                                CheckBox checkBox = v.findViewById(R.id.field_checkbox);
+                                wm.setValue(String.valueOf(checkBox.isChecked()));
+                                break;
+                            }
+                            case "Date": {
+                                View v = view_list.get(i);
+                                DatePicker picker = v.findViewById(R.id.field_datepicker);
+                                String date = picker.getYear() + "-" + picker.getMonth() + "-" + picker.getDayOfMonth();
+                                wm.setValue(date);
+                                break;
+                            }
+                            case "Fecha": {
+                                View v = view_list.get(i);
+                                DatePicker picker = v.findViewById(R.id.field_datepicker);
+                                String date = picker.getYear() + "-" + picker.getMonth() + "-" + picker.getDayOfMonth();
+                                wm.setValue(date);
+                                break;
+                            }
+                            case "Lista": {
+                                ListSpinner v = (ListSpinner) view_list.get(i);
+                                wm.setValue(String.valueOf(v.getSelectedItem().getId()));
+                                break;
+                            }
+                            case "Producto": {
+                                ProductoSpinner v = (ProductoSpinner) view_list.get(i);
+                                wm.setValue(String.valueOf(v.getSelectedItem().getId()));
+                                break;
+                            }
+                            case "Servicio": {
+                                ServicioSpinner v = (ServicioSpinner) view_list.get(i);
+                                wm.setValue(String.valueOf(v.getSelectedItem().getId()));
+                                break;
+                            }
+                            case "Usuario": {
+                                UsuariosSpinner v = (UsuariosSpinner) view_list.get(i);
+                                JsonAdapter<WorkflowUser> adpt = moshi.adapter(WorkflowUser.class);
+                                wm.setValue(adpt.toJson(v.getSelectedItem()));
+                                break;
+                            }
+                            case "Teléfono": {
+                                CustomCountryPicker v = (CustomCountryPicker) view_list.get(i);
+                                JsonAdapter<CountryData> adpt = moshi.adapter(CountryData.class);
+                                CountryData data = new CountryData();
+                                data.setValue(v.getNumber());
+                                data.setCountryId(v.getCountry().getCountryId());
+                                wm.setValue(adpt.toJson(data));
+                                break;
+                            }
+                            case "Moneda": {
+                                CustomCountryPicker v = (CustomCountryPicker) view_list.get(i);
+                                JsonAdapter<CountryData> adpt = moshi.adapter(CountryData.class);
+                                CountryData data = new CountryData();
+                                data.setValue(v.getNumber());
+                                data.setCountryId(v.getCountry().getCountryId());
+                                wm.setValue(adpt.toJson(data));
+                                break;
+                            }
+                            case "Enlace": {
+                                //todo no funciona en la web?
+                                break;
+                            }
+                            case "Archivo": {
+                                //todo Buscar Como Subir archivos??
+                                break;
+                            }
+                            case "Contacto": {
+                                //todo La consulta da error 500
+                                break;
+                            }
+                        }
+                        wm.setWorkflowTypeFieldId(field.getId());
+                        metas.add(wm);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            i++;
+        }
+
+
+        Type listMyData = Types.newParameterizedType(List.class, WorkflowMetas.class);
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<List<WorkflowMetas>> jsonAdapter = moshi.adapter(listMyData);
+
+        String workflowMetas = jsonAdapter.toJson(metas);
+
+        final Observer<CreateWorkflowResponse> workflowsObserver = ((CreateWorkflowResponse data) -> {
             if (null != data) {
-                //todo inform changes
+                Toast.makeText(getContext(), "Success", Toast.LENGTH_LONG).show();
+                anInterface.dataAdded();
                 dismiss();
             }
         });
@@ -313,7 +459,7 @@ public class CreateWorkflowDialog extends DialogFragment {
         });
         viewModel.getObservableCreate().observe(this, workflowsObserver);
         viewModel.getObservableCreateError().observe(this, errorObserver);
-        viewModel.createWorkflow("",workflowTypeId, title, "", start, description);*/
+        viewModel.createWorkflow("", workflowTypeId, title, workflowMetas, start, description);
     }
 
 }

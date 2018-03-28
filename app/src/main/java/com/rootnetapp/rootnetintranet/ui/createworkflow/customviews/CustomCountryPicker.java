@@ -4,9 +4,11 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.widget.AppCompatEditText;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -36,6 +38,7 @@ public class CustomCountryPicker extends FrameLayout {
     private List<Country> items;
     private List<String> spn_data;
     private Spinner spinner;
+    private AppCompatEditText input;
     private FragmentActivity activity;
     private PickerType type;
 
@@ -43,12 +46,14 @@ public class CustomCountryPicker extends FrameLayout {
         super(activity);
         this.activity = activity;
         this.type = type;
+        this.items = new ArrayList<>();
         LayoutInflater inflater = (LayoutInflater) activity
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.prototype_country_textinput, this, true);
         TextView title = findViewById(R.id.field_title);
         title.setText(field.getFieldName());
         spinner = findViewById(R.id.field_spinner);
+        input = findViewById(R.id.field_input);
         spn_data = new ArrayList<>();
         ((RootnetApp) activity.getApplication()).getAppComponent().
                 inject(this);
@@ -62,7 +67,7 @@ public class CustomCountryPicker extends FrameLayout {
     private void subscribe() {
         final Observer<CountriesResponse> countryObserver = ((CountriesResponse data) -> {
             if (null != data) {
-                items = data.getCountries();
+                items.addAll(data.getCountries());
                 for (Country item : items) {
                     if (type.equals(PickerType.MONEDA)) {
                         spn_data.add(item.getCurrency() + " - " + item.getDescription());
@@ -70,27 +75,21 @@ public class CustomCountryPicker extends FrameLayout {
                         spn_data.add(item.getPhoneCode() + " - " + item.getDescription());
                     }
                 }
-                // Creating adapter for spinner
                 ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(getContext(),
                         android.R.layout.simple_spinner_item, spn_data);
-                // Drop down layout style - list view with radio button
                 dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                // attaching data adapter to spinner
                 spinner.setAdapter(dataAdapter);
             }
         });
         viewModel.getObservableCountries().observe(activity, countryObserver);
-
     }
 
     public Country getCountry() {
-
-        return null;
+        return items.get(spinner.getSelectedItemPosition());
     }
 
     public int getNumber() {
-
-        return 0;
+        return Integer.valueOf(input.getText().toString());
     }
 
     public enum PickerType {

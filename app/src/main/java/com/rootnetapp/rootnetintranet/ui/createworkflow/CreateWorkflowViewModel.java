@@ -8,7 +8,7 @@ import android.util.Log;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
-import com.rootnetapp.rootnetintranet.models.responses.country.Country;
+import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
@@ -24,13 +24,13 @@ import java.util.List;
 
 public class CreateWorkflowViewModel extends ViewModel {
 
-    private MutableLiveData<List<WorkflowType>> mWorkflowsLiveData;
+    private MutableLiveData<WorkflowTypesResponse> mWorkflowsLiveData;
     private MutableLiveData<ListsResponse> mListLiveData;
     private MutableLiveData<ProductsResponse> mProductLiveData;
     private MutableLiveData<ServicesResponse> mServiceLiveData;
     private MutableLiveData<WorkflowUserResponse> mUserLiveData;
     private MutableLiveData<CountriesResponse> mCountriesLiveData;
-    private MutableLiveData<Object> mCreateLiveData;
+    private MutableLiveData<CreateWorkflowResponse> mCreateLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Integer> mCreateErrorLiveData;
     private CreateWorkflowRepository createWorkflowRepository;
@@ -45,7 +45,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     public void getWorkflowTypes(String auth) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
         Log.d("test", "getWorkflowTypes: ");
-        //createWorkflowRepository.getWorkflowTypes(auth2).subscribe(this::onTypesSuccess, this::onFailure);
+        createWorkflowRepository.getWorkflowTypes(auth2).subscribe(this::onTypesSuccess, this::onFailure);
     }
 
     public void getList(String auth, int id) {
@@ -73,15 +73,18 @@ public class CreateWorkflowViewModel extends ViewModel {
         createWorkflowRepository.getCountries(auth2).subscribe(this::onCountriesSuccess, this::onFailure);
     }
 
-    /*public void createWorkflow(String auth, int workflowTypeId, String title, String workflowMetas,
+    public void createWorkflow(String auth, int workflowTypeId, String title, String workflowMetas,
                                String start, String description) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
         createWorkflowRepository.createWorkflow(auth2, workflowTypeId, title, workflowMetas,
                 start, description).subscribe(this::onCreateSuccess, this::onCreateFailure);
-    }*/
+    }
 
     private void onTypesSuccess(WorkflowTypesResponse workflowTypesResponse) {
-        mWorkflowsLiveData.setValue(workflowTypesResponse.getList());
+        for (WorkflowType type : workflowTypesResponse.getList()) {
+            Log.d("test", "onTypesSuccess: "+type.getName());
+        }
+        mWorkflowsLiveData.setValue(workflowTypesResponse);
     }
 
     private void onListSuccess(ListsResponse listsResponse) {
@@ -103,10 +106,10 @@ public class CreateWorkflowViewModel extends ViewModel {
     private void onCountriesSuccess(CountriesResponse countriesResponse) {
         mCountriesLiveData.setValue(countriesResponse);
     }
-/*
-    private void onCreateSuccess(Object o) {
 
-    }*/
+    private void onCreateSuccess(CreateWorkflowResponse createWorkflowResponse) {
+        mCreateLiveData.setValue(createWorkflowResponse);
+    }
 
     private void onFailure(Throwable throwable) {
         mErrorLiveData.setValue(R.string.failure_connect);
@@ -115,7 +118,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         mCreateErrorLiveData.setValue(R.string.failure_connect);
     }
 
-    protected LiveData<List<WorkflowType>> getObservableWorkflows() {
+    protected LiveData<WorkflowTypesResponse> getObservableWorkflows() {
         if (mWorkflowsLiveData == null) {
             mWorkflowsLiveData = new MutableLiveData<>();
         }
@@ -157,7 +160,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         return mCountriesLiveData;
     }
 
-    public LiveData<Object> getObservableCreate() {
+    public LiveData<CreateWorkflowResponse> getObservableCreate() {
         if (mCreateLiveData == null) {
             mCreateLiveData = new MutableLiveData<>();
         }

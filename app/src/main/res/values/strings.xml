@@ -98,4 +98,5 @@
     <string name="add_workflow">+ Add Workflow</string>
     <string name="project_owner">Proyect Owner</string>
     <string name="edit">Edit</string>
+    <string name="department">Department</string>
 </resources>

@@ -32,7 +32,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-public class WorkflowFragment extends Fragment {
+public class WorkflowFragment extends Fragment implements WorkflowFragmentInterface {
 
     @Inject
     WorkflowViewModelFactory workflowViewModelFactory;
@@ -40,7 +40,9 @@ public class WorkflowFragment extends Fragment {
     private FragmentWorkflowBinding fragmentWorkflowBinding;
     private WorkflowFiltersMenuBinding workflowFiltersMenuBinding;
     private MainActivityInterface mainActivityInterface;
+    private WorkflowExpandableAdapter adapter;
     private Sort sorting;
+    private String token;
 
     public WorkflowFragment() {
         // Required empty public constructor
@@ -76,14 +78,14 @@ public class WorkflowFragment extends Fragment {
         subscribe();
         //TODO preferences inyectadas con Dagger
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String token = prefs.getString("token", "");
+        token = prefs.getString("token", "");
         workflowViewModel.getWorkflows(token);
         fragmentWorkflowBinding.btnFilters.setOnClickListener(view1 -> {
             PopupWindow popupwindow_obj = popupMenu();
             popupwindow_obj.showAsDropDown(fragmentWorkflowBinding.btnFilters, -40, 18);
         });
         fragmentWorkflowBinding.btnAdd.setOnClickListener(view12 ->
-                mainActivityInterface.showDialog(CreateWorkflowDialog.newInstance()));
+                mainActivityInterface.showDialog(CreateWorkflowDialog.newInstance(this)));
         return view;
     }
 
@@ -91,7 +93,9 @@ public class WorkflowFragment extends Fragment {
         final Observer<List<Workflow>> workflowsObserver = ((List<Workflow> data) -> {
             Utils.hideLoading();
             if (null != data) {
-                fragmentWorkflowBinding.recWorkflows.setAdapter(new WorkflowExpandableAdapter(data));
+                adapter = new WorkflowExpandableAdapter(data);
+                fragmentWorkflowBinding.recWorkflows.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
             }
         });
         final Observer<Integer> errorObserver = ((Integer data) -> {
@@ -132,23 +136,23 @@ public class WorkflowFragment extends Fragment {
         workflowFiltersMenuBinding.chbxWorkflownumber.setOnClickListener(this::onRadioButtonClicked);
         workflowFiltersMenuBinding.chbxCreatedate.setOnClickListener(this::onRadioButtonClicked);
         workflowFiltersMenuBinding.chbxUpdatedate.setOnClickListener(this::onRadioButtonClicked);
-        if(sorting.getNumberSortOrder().equals(sortOrder.ASC)){
+        if (sorting.getNumberSortOrder().equals(sortOrder.ASC)) {
             workflowFiltersMenuBinding.swchWorkflownumber.setChecked(true);
             workflowFiltersMenuBinding.swchWorkflownumber.setText(getString(R.string.ascending));
-        }else{
+        } else {
             workflowFiltersMenuBinding.swchWorkflownumber.setChecked(false);
         }
-        if(sorting.getCreatedSortOrder().equals(sortOrder.ASC)){
+        if (sorting.getCreatedSortOrder().equals(sortOrder.ASC)) {
             workflowFiltersMenuBinding.swchCreatedate.setChecked(true);
             workflowFiltersMenuBinding.swchCreatedate.setText(getString(R.string.ascending));
 
-        }else{
+        } else {
             workflowFiltersMenuBinding.swchCreatedate.setChecked(false);
         }
-        if(sorting.getUpdatedSortOrder().equals(sortOrder.ASC)){
+        if (sorting.getUpdatedSortOrder().equals(sortOrder.ASC)) {
             workflowFiltersMenuBinding.swchUpdatedate.setChecked(true);
             workflowFiltersMenuBinding.swchUpdatedate.setText(getString(R.string.ascending));
-        }else{
+        } else {
             workflowFiltersMenuBinding.swchUpdatedate.setChecked(false);
         }
         workflowFiltersMenuBinding.swchWorkflownumber.setOnCheckedChangeListener((compoundButton, b) -> {
@@ -192,39 +196,39 @@ public class WorkflowFragment extends Fragment {
         // Check which radio button was clicked
         switch (view.getId()) {
             case R.id.chbx_workflownumber: {
-                if (checked){
-                    if(sorting.getSortingType().equals(sortType.BYNUMBER)){
+                if (checked) {
+                    if (sorting.getSortingType().equals(sortType.BYNUMBER)) {
                         sorting.setSortingType(sortType.NONE);
-                        if(view.getParent() instanceof RadioGroup) {
-                            ((RadioGroup)view.getParent()).clearCheck();
+                        if (view.getParent() instanceof RadioGroup) {
+                            ((RadioGroup) view.getParent()).clearCheck();
                         }
-                    }else{
+                    } else {
                         sorting.setSortingType(sortType.BYNUMBER);
                     }
                 }
                 break;
             }
             case R.id.chbx_createdate: {
-                if (checked){
-                    if(sorting.getSortingType().equals(sortType.BYCREATE)){
+                if (checked) {
+                    if (sorting.getSortingType().equals(sortType.BYCREATE)) {
                         sorting.setSortingType(sortType.NONE);
-                        if(view.getParent() instanceof RadioGroup) {
-                            ((RadioGroup)view.getParent()).clearCheck();
+                        if (view.getParent() instanceof RadioGroup) {
+                            ((RadioGroup) view.getParent()).clearCheck();
                         }
-                    }else{
+                    } else {
                         sorting.setSortingType(sortType.BYCREATE);
                     }
                 }
                 break;
             }
             case R.id.chbx_updatedate: {
-                if (checked){
-                    if(sorting.getSortingType().equals(sortType.BYUPDATE)){
+                if (checked) {
+                    if (sorting.getSortingType().equals(sortType.BYUPDATE)) {
                         sorting.setSortingType(sortType.NONE);
-                        if(view.getParent() instanceof RadioGroup) {
-                            ((RadioGroup)view.getParent()).clearCheck();
+                        if (view.getParent() instanceof RadioGroup) {
+                            ((RadioGroup) view.getParent()).clearCheck();
                         }
-                    }else{
+                    } else {
                         sorting.setSortingType(sortType.BYUPDATE);
                     }
                 }
@@ -232,6 +236,11 @@ public class WorkflowFragment extends Fragment {
             }
         }
         workflowViewModel.applyFilters(sorting);
+    }
+
+    @Override
+    public void dataAdded() {
+        workflowViewModel.getWorkflows(token);
     }
 
     public class Sort {

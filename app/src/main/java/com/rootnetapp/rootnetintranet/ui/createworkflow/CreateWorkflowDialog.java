@@ -10,29 +10,22 @@ import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.InputType;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.DatePicker;
-import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.DialogCreateWorkflowBinding;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.CountryData;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
-import com.rootnetapp.rootnetintranet.models.responses.createworkflow.Workflow;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Element;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Field;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
@@ -40,7 +33,6 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTyp
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.CustomCountryPicker;
-import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.CustomSpinner;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.ListSpinner;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.ProductoSpinner;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.ServicioSpinner;
@@ -110,7 +102,7 @@ public class CreateWorkflowDialog extends DialogFragment {
                     types.add(type.getName());
                 }
                 ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(getActivity(),
-                        android.R.layout.simple_spinner_item, types);
+                        R.layout.spinner_item, types);
                 dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 binding.spnWorkflowtype.setAdapter(dataAdapter);
                 binding.spnWorkflowtype.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -195,7 +187,7 @@ public class CreateWorkflowDialog extends DialogFragment {
                                                         new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                                                 ViewGroup.LayoutParams.WRAP_CONTENT));
                                                 view_list.add(v);
-                                                CheckBox title = v.findViewById(R.id.field_checkbox);
+                                                TextView title = v.findViewById(R.id.field_title);
                                                 title.setText(field.getFieldName());
                                                 break;
                                             }
@@ -356,7 +348,7 @@ public class CreateWorkflowDialog extends DialogFragment {
                             }
                             case "Checkbox": {
                                 View v = view_list.get(i);
-                                CheckBox checkBox = v.findViewById(R.id.field_checkbox);
+                                Switch checkBox = v.findViewById(R.id.field_checkbox);
                                 wm.setValue(String.valueOf(checkBox.isChecked()));
                                 break;
                             }

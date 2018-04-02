@@ -11,13 +11,39 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="placeholder title"
+        android:textColor="@color/colorPrimaryDark"
         android:paddingBottom="5dp"/>
 
-    <Spinner
-        android:id="@+id/field_spinner"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginEnd="30dp"/>
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:background="@drawable/spinner_bg"
+        android:orientation="horizontal">
+
+        <Spinner
+            android:id="@+id/field_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:textSize="15sp"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:layout_marginStart="5dp"
+            android:spinnerMode="dropdown" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_keyboard_arrow_down_black_24dp" />
+
+    </RelativeLayout>
 
 </LinearLayout>

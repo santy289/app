@@ -42,7 +42,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:tint="@color/headerColor"
+                android:tint="@color/detailsColor"
                 android:padding="10dp"
                 android:src="@drawable/ic_keyboard_arrow_down_black_24dp" />
 
@@ -53,6 +53,8 @@
                 android:layout_centerVertical="true"
                 android:layout_toStartOf="@id/btn_arrow"
                 android:padding="10dp"
+                android:tint="@color/colorAccent"
+                android:visibility="gone"
                 android:src="@drawable/ic_access_time_black_24dp" />
 
             <ImageView
@@ -70,8 +72,7 @@
             android:id="@+id/layout_details"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/border"
-            android:visibility="gone">
+            android:background="@drawable/border">
 
             <LinearLayout
                 android:id="@+id/list_detail"
@@ -83,7 +84,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="2dp"
-                    android:background="@color/detail"
+                    android:background="@color/workflowListBg"
                     android:orientation="horizontal"
                     android:padding="18dp"
                     android:weightSum="3"
@@ -95,8 +96,8 @@
                         android:layout_weight="1"
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
-                        android:text="@string/workflow_type"
-                        android:textStyle="bold" />
+                        android:textColor="@color/colorPrimaryDark"
+                        android:text="@string/workflow_type"/>
 
                     <TextView
                         android:id="@+id/tv_workflowtype"
@@ -112,8 +113,10 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_margin="2dp"
+                    android:background="@color/white"
                     android:orientation="horizontal"
-                    android:padding="20dp"
+                    android:padding="18dp"
                     android:weightSum="3"
                     android:gravity="center">
 
@@ -124,7 +127,7 @@
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
                         android:text="@string/owner"
-                        android:textStyle="bold" />
+                        android:textColor="@color/colorPrimaryDark" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -157,7 +160,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="2dp"
-                    android:background="@color/detail"
+                    android:background="@color/workflowListBg"
                     android:orientation="horizontal"
                     android:padding="18dp"
                     android:weightSum="3"
@@ -169,7 +172,7 @@
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
                         android:text="@string/actual_state"
-                        android:textStyle="bold" />
+                        android:textColor="@color/colorPrimaryDark" />
 
                     <TextView
                         android:id="@+id/tv_actualstate"
@@ -197,7 +200,7 @@
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
                         android:text="@string/status"
-                        android:textStyle="bold" />
+                        android:textColor="@color/colorPrimaryDark" />
 
                     <TextView
                         android:id="@+id/tv_status"
@@ -214,7 +217,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="2dp"
-                    android:background="@color/detail"
+                    android:background="@color/workflowListBg"
                     android:orientation="horizontal"
                     android:padding="18dp"
                     android:weightSum="3"
@@ -227,7 +230,7 @@
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
                         android:text="@string/created_at"
-                        android:textStyle="bold" />
+                        android:textColor="@color/colorPrimaryDark" />
 
                     <TextView
                         android:id="@+id/tv_createdat"
@@ -254,7 +257,7 @@
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
                         android:text="@string/updated_at"
-                        android:textStyle="bold" />
+                        android:textColor="@color/colorPrimaryDark" />
                     <TextView
                         android:id="@+id/tv_updated_at"
                         android:layout_width="0dp"

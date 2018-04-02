@@ -42,7 +42,7 @@
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_margin="20dp"
-                android:tint="@color/headerColor"
+                android:tint="@color/detailsColor"
                 android:src="@drawable/ic_contact_phone_black_24dp"/>
 
             <TextView
@@ -62,7 +62,7 @@
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_margin="20dp"
-                android:tint="@color/headerColor"
+                android:tint="@color/detailsColor"
                 android:src="@drawable/ic_mail_black_24dp"/>
 
             <TextView
@@ -82,7 +82,7 @@
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_margin="20dp"
-                android:tint="@color/headerColor"
+                android:tint="@color/detailsColor"
                 android:src="@drawable/ic_turned_in_black_24dp"/>
 
             <TextView

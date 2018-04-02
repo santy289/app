@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
+
     <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="@dimen/filters_width"
         android:layout_height="@dimen/filters_height"
@@ -32,7 +33,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:layout_margin="5dp" />
+                    android:layout_margin="5dp"
+                    android:theme="@style/SwitchStyle" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -54,7 +56,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:layout_margin="5dp" />
+                    android:layout_margin="5dp"
+                    android:theme="@style/SwitchStyle" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -72,12 +75,40 @@
                 android:layout_margin="15dp"
                 android:text="@string/workflow_type" />
 
-            <Spinner
-                android:id="@+id/spn_workflowtype"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="15dp"
-                android:spinnerMode="dialog" />
+                android:layout_marginBottom="15dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginStart="15dp"
+                android:background="@drawable/spinner_bg"
+                android:orientation="horizontal"
+                android:textSize="15sp"
+                android:paddingBottom="5dp"
+                android:paddingEnd="10dp"
+                android:paddingStart="10dp"
+                android:paddingTop="5dp">
+
+                <Spinner
+                    android:id="@+id/spn_workflowtype"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="5dp"
+                    android:background="@android:color/transparent"
+                    android:gravity="center"
+                    android:spinnerMode="dropdown" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_keyboard_arrow_down_black_24dp" />
+
+            </RelativeLayout>
 
             <TextView
                 android:layout_width="match_parent"
@@ -123,6 +154,7 @@
                     android:layout_marginEnd="15dp"
                     android:layout_marginStart="15dp"
                     android:layout_marginTop="15dp"
+                    android:buttonTint="@color/colorPrimaryDark"
                     android:text="@string/workflow_number" />
 
                 <Switch
@@ -132,7 +164,8 @@
                     android:layout_marginBottom="15dp"
                     android:layout_marginEnd="15dp"
                     android:layout_marginStart="15dp"
-                    android:text="@string/descending" />
+                    android:text="@string/descending"
+                    android:theme="@style/SwitchStyle" />
 
                 <RadioButton
                     android:id="@+id/chbx_createdate"
@@ -141,6 +174,7 @@
                     android:layout_marginEnd="15dp"
                     android:layout_marginStart="15dp"
                     android:layout_marginTop="15dp"
+                    android:buttonTint="@color/colorPrimaryDark"
                     android:text="@string/created_date" />
 
                 <Switch
@@ -150,7 +184,8 @@
                     android:layout_marginBottom="15dp"
                     android:layout_marginEnd="15dp"
                     android:layout_marginStart="15dp"
-                    android:text="@string/descending" />
+                    android:text="@string/descending"
+                    android:theme="@style/SwitchStyle" />
 
                 <RadioButton
                     android:id="@+id/chbx_updatedate"
@@ -159,6 +194,7 @@
                     android:layout_marginEnd="15dp"
                     android:layout_marginStart="15dp"
                     android:layout_marginTop="15dp"
+                    android:buttonTint="@color/colorPrimaryDark"
                     android:text="@string/workflow_number" />
 
                 <Switch
@@ -168,7 +204,8 @@
                     android:layout_marginBottom="15dp"
                     android:layout_marginEnd="15dp"
                     android:layout_marginStart="15dp"
-                    android:text="@string/descending" />
+                    android:text="@string/descending"
+                    android:theme="@style/SwitchStyle" />
 
             </RadioGroup>
 

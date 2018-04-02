@@ -4,20 +4,23 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:background="@color/white"
         tools:context="com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="20dp"
-            android:textSize="25sp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:textSize="18sp"
             android:textColor="@color/colorPrimaryDark"
-            android:textStyle="bold"
             android:text="@string/workflow_list"/>
 
         <View
             android:layout_width="match_parent"
-            android:background="@color/colorPrimary"
+            android:background="@color/detailsColor"
             android:layout_height="1dp"/>
 
         <RelativeLayout
@@ -26,8 +29,8 @@
             android:orientation="horizontal"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp">
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp">
 
             <Button
                 android:id="@+id/btn_filters"
@@ -40,19 +43,48 @@
                 android:textColor="@color/white"
                 android:text="@string/filters"/>
 
-            <SearchView
-                android:id="@+id/searchview"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_toStartOf="@id/btn_filters"/>
+                android:layout_marginEnd="15dp"
+                android:layout_toStartOf="@id/btn_filters"
+                android:background="@drawable/spinner_bg"
+                android:orientation="horizontal"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp">
+
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/input_search"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/noColor"
+                    android:hint="@string/search"
+                    android:inputType="text"
+                    android:textSize="15sp"
+                    android:maxLines="1"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"/>
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_keyboard_arrow_down_black_24dp" />
+            </RelativeLayout>
 
         </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp">
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp">
 
             <CheckBox
                 android:id="@+id/chbx"

@@ -67,7 +67,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 R.layout.fragment_workflow, container, false);
         View view = fragmentWorkflowBinding.getRoot();
         ((RootnetApp) getActivity().getApplication()).getAppComponent().inject(this);
-        mainActivityInterface.changeTitle(getString(R.string.workflow_list));
+        mainActivityInterface.changeTitle("");
         workflowViewModel = ViewModelProviders
                 .of(this, workflowViewModelFactory)
                 .get(WorkflowViewModel.class);

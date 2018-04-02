@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
+import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Field;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
@@ -50,7 +51,7 @@ public class ListSpinner extends CustomSpinner {
 
                 // Creating adapter for spinner
                 ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(getContext(),
-                        android.R.layout.simple_spinner_item, spn_data);
+                        R.layout.spinner_item, spn_data);
                 // Drop down layout style - list view with radio button
                 dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 // attaching data adapter to spinner

@@ -3,43 +3,21 @@ package com.rootnetapp.rootnetintranet.models.responses.workflows;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.squareup.moshi.Json;
 
-import java.util.List;
-
 /**
- * Created by Propietario on 15/03/2018.
+ * Created by root on 03/04/18.
  */
 
 public class WorkflowResponse {
 
-    @Json(name = "list")
-    private List<Workflow> list = null;
-    @Json(name = "pager")
-    private Pager pager;
-    @Json(name = "stateCounter")
-    private StateCounter stateCounter;
+    @Json(name = "workflow")
+    private Workflow workflow = null;
 
-    public List<Workflow> getList() {
-        return list;
+    public Workflow getWorkflow() {
+        return workflow;
     }
 
-    public void setList(List<Workflow> list) {
-        this.list = list;
-    }
-
-    public Pager getPager() {
-        return pager;
-    }
-
-    public void setPager(Pager pager) {
-        this.pager = pager;
-    }
-
-    public StateCounter getStateCounter() {
-        return stateCounter;
-    }
-
-    public void setStateCounter(StateCounter stateCounter) {
-        this.stateCounter = stateCounter;
+    public void setWorkflow(Workflow workflow) {
+        this.workflow = workflow;
     }
 
 }

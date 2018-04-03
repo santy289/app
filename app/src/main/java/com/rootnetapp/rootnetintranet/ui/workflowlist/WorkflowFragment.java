@@ -25,6 +25,7 @@ import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowBinding;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowFiltersMenuBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowExpandableAdapter;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowDialog;
 
@@ -67,7 +68,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 R.layout.fragment_workflow, container, false);
         View view = fragmentWorkflowBinding.getRoot();
         ((RootnetApp) getActivity().getApplication()).getAppComponent().inject(this);
-        mainActivityInterface.changeTitle("");
         workflowViewModel = ViewModelProviders
                 .of(this, workflowViewModelFactory)
                 .get(WorkflowViewModel.class);
@@ -93,7 +93,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         final Observer<List<Workflow>> workflowsObserver = ((List<Workflow> data) -> {
             Utils.hideLoading();
             if (null != data) {
-                adapter = new WorkflowExpandableAdapter(data);
+                adapter = new WorkflowExpandableAdapter(data, this);
                 fragmentWorkflowBinding.recWorkflows.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
             }
@@ -241,6 +241,12 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     @Override
     public void dataAdded() {
         workflowViewModel.getWorkflows(token);
+    }
+
+    @Override
+    public void showDetail(Workflow item) {
+        mainActivityInterface.showFragment(WorkflowDetailFragment.newInstance(item,
+                mainActivityInterface),true);
     }
 
     public class Sort {

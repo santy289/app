@@ -62,7 +62,6 @@ public class ProfileFragment extends Fragment {
         profileViewModel = ViewModelProviders
                 .of(this, profileViewModelFactory)
                 .get(ProfileViewModel.class);
-        mainActivityInterface.changeTitle(getString(R.string.profile));
         setHasOptionsMenu(true);
         //TODO preferences inyectadas con Dagger
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);

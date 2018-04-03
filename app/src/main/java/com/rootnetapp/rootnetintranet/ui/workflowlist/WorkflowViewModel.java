@@ -7,7 +7,7 @@ import android.arch.lifecycle.ViewModel;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -15,7 +15,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -61,11 +60,11 @@ public class WorkflowViewModel extends ViewModel {
                 this::onWorkflowFailure);
     }
 
-    private void onServiceSuccess(WorkflowResponse workflowResponse) {
-        workflows.addAll(workflowResponse.getList());
-        if (!workflowResponse.getPager().isIsLastPage()) {
+    private void onServiceSuccess(WorkflowsResponse workflowsResponse) {
+        workflows.addAll(workflowsResponse.getList());
+        if (!workflowsResponse.getPager().isIsLastPage()) {
             //todo CAMBIAR AUTH
-            getWorkflowsFromService(auth2, workflowResponse.getPager().getNextPage());
+            getWorkflowsFromService(auth2, workflowsResponse.getPager().getNextPage());
         } else {
             workflowRepository.setWorkflowsOnInternal(workflows).subscribe(this::onWorkflowSuccess,
                     this::onWorkflowFailure);

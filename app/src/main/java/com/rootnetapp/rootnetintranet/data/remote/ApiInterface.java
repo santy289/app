@@ -11,12 +11,13 @@ import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordRe
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 
 import io.reactivex.Observable;
-import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -77,11 +78,11 @@ public interface ApiInterface {
 
     @Headers({"Domain-Name: localhost"})
     @GET("v1/intranet/workflows?")
-    Observable<WorkflowResponse> getWorkflows(@Header("Authorization") String authorization,
-                                              @Query("limit") int limit,
-                                              @Query("open") boolean open,
-                                              @Query("page") int page,
-                                              @Query("status") boolean status);
+    Observable<WorkflowsResponse> getWorkflows(@Header("Authorization") String authorization,
+                                               @Query("limit") int limit,
+                                               @Query("open") boolean open,
+                                               @Query("page") int page,
+                                               @Query("status") boolean status);
 
     @Headers({"Domain-Name: localhost"})
     @GET("v1/intranet/workflows/types")
@@ -117,5 +118,13 @@ public interface ApiInterface {
                                                       @Field("start") String start,
                                                       @Field("description") String description);
 
+    @Headers({"Domain-Name: localhost"})
+    @GET("v1/intranet/workflows/types/{id}")
+    Observable<WorkflowTypeResponse> getWorkflowType(@Header("Authorization") String authorization,
+                                                     @Path("id")int typeId);
 
+    @Headers({"Domain-Name: localhost"})
+    @GET("v1/intranet/workflows/{id}")
+    Observable<WorkflowResponse> getWorkflow(@Header("Authorization") String authorization,
+                                             @Path("id")int workflowId);
 }

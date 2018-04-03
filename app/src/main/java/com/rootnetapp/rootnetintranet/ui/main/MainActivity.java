@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         mainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         setSupportActionBar(mainBinding.toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mainBinding.drawerLayout, mainBinding.toolbar
                 , R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity
         mainBinding.navView.setCheckedItem(R.id.nav_timeline);
     }
 
+    @Override
     public void showFragment(Fragment fragment, boolean addtobackstack) {
         String tag = fragment.getClass().getSimpleName();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -79,11 +81,6 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = mainBinding.drawerLayout;
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    @Override
-    public void changeTitle(String title) {
-        mainBinding.toolbar.setTitle(title);
     }
 
     @Override

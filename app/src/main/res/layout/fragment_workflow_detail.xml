@@ -1,0 +1,381 @@
+<layout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:orientation="vertical"
+        tools:context="com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:paddingBottom="10dp"
+            android:paddingEnd="15dp"
+            android:paddingStart="15dp"
+            android:paddingTop="10dp"
+            android:text="@string/workflow_id"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="@color/detailsColor" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingEnd="15dp"
+                android:paddingStart="15dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/border"
+                    android:orientation="vertical">
+
+                    <RelativeLayout
+                        android:id="@+id/hdr_graph"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="15dp"
+                        android:paddingEnd="10dp"
+                        android:paddingStart="10dp"
+                        android:paddingTop="15dp">
+
+                        <TextView
+                            android:id="@+id/tv_workflowproject"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginEnd="10dp"
+                            android:layout_marginStart="10dp"
+                            android:text="@string/workflow_project"
+                            android:textColor="@color/colorPrimary" />
+
+                        <ImageView
+                            android:id="@+id/img_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_toEndOf="@id/tv_workflowproject"
+                            android:paddingEnd="50dp"
+                            android:src="@drawable/open" />
+
+                        <ImageView
+                            android:id="@+id/btn_arrow"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:padding="10dp"
+                            android:src="@drawable/ic_keyboard_arrow_down_black_24dp"
+                            android:tint="@color/detailsColor" />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/lyt_graph"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/workflow_detail_standard_height"
+                        android:paddingBottom="10dp"
+                        android:paddingEnd="10dp"
+                        android:paddingStart="10dp"
+                        android:paddingTop="10dp"
+                        android:visibility="gone">
+
+                        <RelativeLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="15dp"
+                            android:background="@drawable/spinner_bg"
+                            android:orientation="horizontal"
+                            android:paddingBottom="10dp"
+                            android:paddingEnd="10dp"
+                            android:paddingStart="10dp"
+                            android:paddingTop="10dp">
+
+                            <ImageView
+                                android:id="@+id/spinner_img"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_perm_identity_black_24dp" />
+
+                            <Spinner
+                                android:id="@+id/spn_status"
+                                android:layout_width="70dp"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_gravity="center"
+                                android:layout_marginStart="5dp"
+                                android:layout_toEndOf="@id/spinner_img"
+                                android:background="@android:color/transparent"
+                                android:gravity="center"
+                                android:spinnerMode="dropdown"
+                                android:textSize="15sp" />
+
+                            <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_gravity="center"
+                                android:layout_toEndOf="@id/spn_status"
+                                android:src="@drawable/ic_keyboard_arrow_down_black_24dp" />
+                        </RelativeLayout>
+
+                    </RelativeLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:background="@color/detailsColor" />
+
+                    <RelativeLayout
+                        android:id="@+id/hdr_important"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="15dp"
+                        android:paddingEnd="10dp"
+                        android:paddingStart="10dp"
+                        android:paddingTop="15dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginEnd="10dp"
+                            android:layout_marginStart="10dp"
+                            android:layout_toStartOf="@+id/btn_arrow_2"
+                            android:text="@string/important_things"
+                            android:textColor="@color/colorPrimary" />
+
+
+                        <ImageView
+                            android:id="@+id/btn_arrow_2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:padding="10dp"
+                            android:src="@drawable/ic_keyboard_arrow_down_black_24dp"
+                            android:tint="@color/detailsColor" />
+
+                    </RelativeLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:background="@color/detailsColor" />
+
+                    <FrameLayout
+                        android:id="@+id/lyt_important"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/workflow_detail_standard_height"
+                        android:background="@color/workflowListBg"
+                        android:paddingBottom="10dp"
+                        android:paddingEnd="10dp"
+                        android:paddingStart="10dp"
+                        android:paddingTop="10dp"
+                        android:visibility="gone">
+
+                        <android.support.v7.widget.RecyclerView
+                            android:id="@+id/rec_steps"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+
+                    </FrameLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:background="@color/detailsColor" />
+
+                    <RelativeLayout
+                        android:id="@+id/hdr_nextstep"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="15dp"
+                        android:paddingEnd="10dp"
+                        android:paddingStart="10dp"
+                        android:paddingTop="15dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginEnd="10dp"
+                            android:layout_marginStart="10dp"
+                            android:layout_toStartOf="@+id/btn_arrow_3"
+                            android:text="@string/next_step_approver"
+                            android:textColor="@color/colorPrimary" />
+
+
+                        <ImageView
+                            android:id="@+id/btn_arrow_3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:padding="10dp"
+                            android:src="@drawable/ic_keyboard_arrow_down_black_24dp"
+                            android:tint="@color/detailsColor" />
+
+                    </RelativeLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:background="@color/detailsColor" />
+
+                    <RelativeLayout
+                        android:id="@+id/lyt_nextstep"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@color/workflowListBg"
+                        android:padding="10dp"
+                        android:visibility="gone">
+
+                        <RelativeLayout
+                            android:id="@+id/lyt_spinner"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <Button
+                                android:id="@+id/btn_approve"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:layout_margin="5dp"
+                                android:backgroundTint="@color/green"
+                                android:text=">"
+                                android:textColor="@color/white" />
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_toStartOf="@id/btn_approve"
+                                android:background="@drawable/spinner_bg"
+                                android:paddingBottom="10dp"
+                                android:paddingEnd="10dp"
+                                android:paddingStart="10dp"
+                                android:paddingTop="10dp">
+
+                                <Spinner
+                                    android:id="@+id/field_spinner"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_centerVertical="true"
+                                    android:layout_gravity="center"
+                                    android:layout_marginStart="5dp"
+                                    android:background="@android:color/transparent"
+                                    android:gravity="center"
+                                    android:spinnerMode="dropdown"
+                                    android:textSize="15sp" />
+
+                                <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_alignParentEnd="true"
+                                    android:layout_centerVertical="true"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/ic_keyboard_arrow_down_black_24dp" />
+                            </RelativeLayout>
+
+                        </RelativeLayout>
+
+                        <TextView
+                            android:id="@+id/txt_approvers"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@+id/lyt_spinner"
+                            android:paddingBottom="5dp"
+                            android:paddingTop="10dp"
+                            android:text="@string/next_approver"
+                            android:textStyle="bold" />
+
+                        <android.support.v7.widget.RecyclerView
+                            android:id="@+id/rec_approvers"
+                            android:layout_width="match_parent"
+                            android:layout_height="150dp"
+                            android:layout_below="@+id/txt_approvers" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_below="@+id/rec_approvers"
+                            android:text="@string/mass_approval"
+                            android:textColor="@color/colorPrimary" />
+
+                    </RelativeLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:background="@color/detailsColor" />
+
+                    <RelativeLayout
+                        android:id="@+id/hdr_info"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="15dp"
+                        android:paddingEnd="10dp"
+                        android:paddingStart="10dp"
+                        android:paddingTop="15dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginEnd="10dp"
+                            android:layout_marginStart="10dp"
+                            android:layout_toStartOf="@+id/btn_arrow_4"
+                            android:text="@string/workflow_info"
+                            android:textColor="@color/colorPrimary" />
+
+
+                        <ImageView
+                            android:id="@+id/btn_arrow_4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:padding="10dp"
+                            android:src="@drawable/ic_keyboard_arrow_down_black_24dp"
+                            android:tint="@color/detailsColor" />
+
+                    </RelativeLayout>
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/rec_info"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/workflow_detail_standard_height"
+                        android:padding="10dp"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </LinearLayout>
+
+</layout>
+

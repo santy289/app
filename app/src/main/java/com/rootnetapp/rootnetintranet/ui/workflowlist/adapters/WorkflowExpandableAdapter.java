@@ -11,6 +11,7 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowItemBinding;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragmentInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +26,12 @@ public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowView
     private List<Boolean> isChecked;
     private List<Boolean> isExpanded;
     private ViewGroup recycler;
+    private WorkflowFragmentInterface anInterface;
 
-    public WorkflowExpandableAdapter(List<Workflow> workflows) {
+    public WorkflowExpandableAdapter(List<Workflow> workflows,
+                                     WorkflowFragmentInterface anInterface) {
         this.workflows = workflows;
+        this.anInterface = anInterface;
         isChecked = new ArrayList<>();
         isExpanded = new ArrayList<>();
         for (Workflow item : workflows) {
@@ -77,10 +81,19 @@ public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowView
         holder.binding.btnArrow.setOnClickListener(view -> {
             isExpanded.set(i, !isExpanded.get(i));
             redrawExpansion(holder, i);
-            TransitionManager.beginDelayedTransition(recycler);
+            //todo con doble click la app crashea por la transicion
+            //TransitionManager.beginDelayedTransition(recycler);
         });
         holder.binding.chbxSelected.setOnCheckedChangeListener((compoundButton, b) ->
                 isChecked.set(i, b));
+
+        holder.binding.btnDetail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                anInterface.showDetail(item);
+            }
+        });
+
     }
 
     private void redrawCheckbox(WorkflowViewholder holder, int i) {

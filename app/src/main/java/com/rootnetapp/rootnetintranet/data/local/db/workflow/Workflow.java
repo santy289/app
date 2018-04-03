@@ -7,6 +7,7 @@ import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
 import com.rootnetapp.rootnetintranet.models.responses.workflows.CalculatedField;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowStateInfo;
 import com.squareup.moshi.Json;
@@ -65,6 +66,11 @@ public class Workflow {
     @Json(name = "workflow_type")
     private WorkflowType workflowType;
 
+    //@Embedded
+    @Ignore
+    @Json(name = "metas")
+    private List<Meta> metas = null;
+
 //-----------------
 
     @ColumnInfo(name = "end")
@@ -90,10 +96,6 @@ public class Workflow {
     @Ignore
     @Json(name = "calculated_fields")
     private List<CalculatedField> calculatedFields = null;
-
-    @Ignore
-    @Json(name = "metas")
-    private List<Object> metas = null;
 
     @Ignore
     @Json(name = "presets")
@@ -219,11 +221,11 @@ public class Workflow {
         this.calculatedFields = calculatedFields;
     }
 
-    public List<Object> getMetas() {
+    public List<Meta> getMetas() {
         return metas;
     }
 
-    public void setMetas(List<Object> metas) {
+    public void setMetas(List<Meta> metas) {
         this.metas = metas;
     }
 

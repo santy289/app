@@ -25,7 +25,7 @@ public class Status {
     @Json(name = "machine_name")
     private String machineName;
     @Json(name = "parentId")
-    private int parentId;
+    private Integer parentId;
     @Json(name = "steps")
     private List<Step> steps = null;
 
@@ -85,11 +85,11 @@ public class Status {
         this.machineName = machineName;
     }
 
-    public int getParentId() {
+    public Integer getParentId() {
         return parentId;
     }
 
-    public void setParentId(int parentId) {
+    public void setParentId(Integer parentId) {
         this.parentId = parentId;
     }
 

@@ -7,7 +7,7 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,11 +65,11 @@ public class SyncHelper {
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(this::success, this::failure);
     }
 
-    private void onWorkflowsSuccess(WorkflowResponse workflowResponse) {
-        workflows.addAll(workflowResponse.getList());
-        if(!workflowResponse.getPager().isIsLastPage()){
+    private void onWorkflowsSuccess(WorkflowsResponse workflowsResponse) {
+        workflows.addAll(workflowsResponse.getList());
+        if(!workflowsResponse.getPager().isIsLastPage()){
             //todo CAMBIAR AUTH
-            getAllWorkflows(auth2, workflowResponse.getPager().getNextPage());
+            getAllWorkflows(auth2, workflowsResponse.getPager().getNextPage());
         }else{
             Observable.fromCallable(() -> {
                 database.workflowDao().insertAll(workflows);

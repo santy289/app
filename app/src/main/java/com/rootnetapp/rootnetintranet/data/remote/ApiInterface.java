@@ -1,14 +1,17 @@
 package com.rootnetapp.rootnetintranet.data.remote;
 
 
+import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse;
+import com.rootnetapp.rootnetintranet.models.responses.file.FilesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
@@ -127,4 +130,23 @@ public interface ApiInterface {
     @GET("v1/intranet/workflows/{id}")
     Observable<WorkflowResponse> getWorkflow(@Header("Authorization") String authorization,
                                              @Path("id")int workflowId);
+
+    @Headers({"Domain-Name: localhost"})
+    @GET("v1/intranet/templates/{id}")
+    Observable<TemplatesResponse> getTemplate(@Header("Authorization") String authorization,
+                                              @Path("id") int templateId);
+
+
+    @Headers({"Domain-Name: localhost"})
+    @GET("v1/intranet/workflows/{id}/files")
+    Observable<FilesResponse> getFiles(@Header("Authorization") String authorization,
+                                       @Path("id") int workflowId);
+
+    @Headers({"Domain-Name: localhost"})
+    @GET("v1/intranet/workflow/{id}/comments?")
+    Observable<CommentsResponse> getComments(@Header("Authorization") String authorization,
+                                             @Path("id") int workflowId,
+                                             @Query("limit") int limit,
+                                             @Query("page") int page);
+
 }

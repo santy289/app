@@ -115,4 +115,12 @@
     <string name="campaign">Campaign</string>
     <string name="origin">Origin</string>
     <string name="axe">Axe</string>
+    <string name="people_involved">PEOPLE INVOLVED IN ALL WORKFLOWS</string>
+    <string name="approval_history">WORKFLOW APPROVAL HISTORY</string>
+    <string name="approved">Approved:</string>
+    <string name="template">TEMPLATE:</string>
+    <string name="upload">UPLOAD</string>
+    <string name="versions">Versions</string>
+    <string name="comments">COMMENTS</string>
+    <string name="comment">Comment</string>
 </resources>

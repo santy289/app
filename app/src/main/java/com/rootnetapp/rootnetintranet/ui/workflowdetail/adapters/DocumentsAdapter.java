@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.databinding.DocumentsItemBinding;
@@ -21,13 +22,18 @@ import java.util.List;
 
 public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder>{
 
-    private List<Preset> totalDocuments;
+    public List<Preset> totalDocuments;
     List<DocumentsFile> files;
     private Context context;
+    public List<Boolean> isSelected;
 
     public DocumentsAdapter(List<Preset> totalDocuments, List<DocumentsFile> files) {
         this.totalDocuments = totalDocuments;
         this.files = files;
+        this.isSelected = new ArrayList<>();
+        for (Preset item : totalDocuments) {
+            this.isSelected.add(false);
+        }
     }
 
     @Override
@@ -51,6 +57,12 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder>{
             }
         }
         holder.binding.tvName.setText(item.getName());
+        holder.binding.chbxItem.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                isSelected.set(i, b);
+            }
+        });
         if(file!=null){
             holder.binding.imgUploaded.setImageResource(R.drawable.ic_check_black_24dp);
             holder.binding.imgUploaded.setColorFilter(ContextCompat.getColor(context, R.color.green),

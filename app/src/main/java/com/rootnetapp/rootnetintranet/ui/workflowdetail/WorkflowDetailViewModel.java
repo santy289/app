@@ -7,7 +7,11 @@ import android.arch.lifecycle.ViewModel;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
+import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
+import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
+import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.file.DocumentsFile;
 import com.rootnetapp.rootnetintranet.models.responses.file.FilesResponse;
@@ -30,13 +34,13 @@ public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<Templates> mTemplateLiveData;
     private MutableLiveData<List<DocumentsFile>> mFilesLiveData;
     private MutableLiveData<List<Comment>> mCommentsLiveData;
-
+    private MutableLiveData<Comment> mCommentLiveData;
+    private MutableLiveData<Boolean> mAttachLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
     private WorkflowDetailRepository repository;
     private String auth;
     //todo REMOVE, solo testing
     private String auth2 = "Bearer "+ Utils.testToken;
-
 
     public WorkflowDetailViewModel(WorkflowDetailRepository workflowDetailRepository) {
         this.repository = workflowDetailRepository;
@@ -62,6 +66,14 @@ public class WorkflowDetailViewModel extends ViewModel {
         repository.getComments(auth2, workflowId).subscribe(this::onCommentsSuccess, this::onFailure);
     }
 
+    public void postComment(String auth, int workflowId, String comment, List<CommentFile> files) {
+        repository.postComment(auth2, workflowId, comment, files).subscribe(this::onCommentSuccess, this::onFailure);
+    }
+
+    public void attachFile(String auth, List<WorkflowPresetsRequest> request, CommentFile fileRequest) {
+        repository.attachFile(auth2, request, fileRequest).subscribe(this::onAttachSuccess, this::onFailure);
+    }
+
     private void onTypeSuccess(WorkflowTypeResponse response) {
         mTypeLiveData.setValue(response.getWorkflowType());
     }
@@ -80,6 +92,14 @@ public class WorkflowDetailViewModel extends ViewModel {
 
     private void onCommentsSuccess(CommentsResponse commentsResponse) {
         mCommentsLiveData.setValue(commentsResponse.getResponse());
+    }
+
+    private void onCommentSuccess(CommentResponse commentResponse) {
+        mCommentLiveData.setValue(commentResponse.getResponse());
+    }
+
+    private void onAttachSuccess(AttachResponse attachResponse) {
+        mAttachLiveData.setValue(true);
     }
 
     private void onFailure(Throwable throwable) {
@@ -119,6 +139,20 @@ public class WorkflowDetailViewModel extends ViewModel {
             mCommentsLiveData = new MutableLiveData<>();
         }
         return mCommentsLiveData;
+    }
+
+    public LiveData<Comment> getObservableComment() {
+        if (mCommentLiveData == null) {
+            mCommentLiveData = new MutableLiveData<>();
+        }
+        return mCommentLiveData;
+    }
+
+    public LiveData<Boolean> getObservableAttach() {
+        if (mAttachLiveData == null) {
+            mAttachLiveData = new MutableLiveData<>();
+        }
+        return mAttachLiveData;
     }
 
     protected LiveData<Integer> getObservableError() {

@@ -1,6 +1,10 @@
 package com.rootnetapp.rootnetintranet.data.remote;
 
 
+import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
+import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
+import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
+import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
@@ -19,6 +23,8 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsRespon
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
+
+import java.util.List;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -124,12 +130,12 @@ public interface ApiInterface {
     @Headers({"Domain-Name: localhost"})
     @GET("v1/intranet/workflows/types/{id}")
     Observable<WorkflowTypeResponse> getWorkflowType(@Header("Authorization") String authorization,
-                                                     @Path("id")int typeId);
+                                                     @Path("id") int typeId);
 
     @Headers({"Domain-Name: localhost"})
     @GET("v1/intranet/workflows/{id}")
     Observable<WorkflowResponse> getWorkflow(@Header("Authorization") String authorization,
-                                             @Path("id")int workflowId);
+                                             @Path("id") int workflowId);
 
     @Headers({"Domain-Name: localhost"})
     @GET("v1/intranet/templates/{id}")
@@ -148,5 +154,20 @@ public interface ApiInterface {
                                              @Path("id") int workflowId,
                                              @Query("limit") int limit,
                                              @Query("page") int page);
+
+    @Headers({"Domain-Name: localhost"})
+    @POST("v1/intranet/workflow/{id}/comment")
+    @FormUrlEncoded
+    Observable<CommentResponse> postComment(@Header("Authorization") String authorization,
+                                            @Path("id") int workflowId,
+                                            @Field("description") String description,
+                                            @Field("files") List<CommentFile> files);
+
+    @Headers({"Domain-Name: localhost"})
+    @POST("v1/intranet/workflows/records/file")
+    @FormUrlEncoded
+    Observable<AttachResponse> attachFile(@Header("Authorization") String authorization,
+                                          @Field("workflows") List<WorkflowPresetsRequest> request,
+                                          @Field("file") CommentFile fileRequest);
 
 }

@@ -123,4 +123,11 @@
     <string name="versions">Versions</string>
     <string name="comments">COMMENTS</string>
     <string name="comment">Comment</string>
+    <string name="empty_comment">The comment cannot be empty</string>
+    <string name="error_comment">Error uploading comment</string>
+    <string name="uploaded_file">File to upload: </string>
+    <string name="attach">ATTACH</string>
+    <string name="remove_file">REMOVE FILE</string>
+    <string name="select_file">Please select a file to upload</string>
+    <string name="select_preset">Select what type of document you are uploading</string>
 </resources>

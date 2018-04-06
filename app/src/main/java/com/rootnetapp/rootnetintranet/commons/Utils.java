@@ -1,11 +1,29 @@
 package com.rootnetapp.rootnetintranet.commons;
 
+import android.app.Application;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.CursorLoader;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.util.Base64;
+import android.util.Base64OutputStream;
+import android.webkit.MimeTypeMap;
 
 import com.rootnetapp.rootnetintranet.R;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.URISyntaxException;
 
 /**
  * Created by Propietario on 09/03/2018.
@@ -22,23 +40,55 @@ public class Utils {
 
     private static ProgressDialog progress;
 
-    public static void showLoading(Context ctx){
+    public static void showLoading(Context ctx) {
         progress = new ProgressDialog(ctx);
         progress.show();
         progress.setMessage(ctx.getString(R.string.loading_message));
         progress.setCancelable(false);
     }
 
-    public static void hideLoading(){
-        if (null != progress && progress.isShowing()){
+    public static void hideLoading() {
+        if (null != progress && progress.isShowing()) {
             progress.dismiss();
         }
     }
 
-    public static boolean isConnected() throws InterruptedException, IOException
-    {
+    public static boolean isConnected() throws InterruptedException, IOException {
         String command = "ping -c 1 google.com";
-        return (Runtime.getRuntime().exec (command).waitFor() == 0);
+        return (Runtime.getRuntime().exec(command).waitFor() == 0);
+    }
+
+    public static File byteToFile(byte[] bytearray) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream bis = new ByteArrayInputStream(bytearray);
+        ObjectInputStream ois = new ObjectInputStream(bis);
+        File fileFromBytes = null;
+        fileFromBytes = (File) ois.readObject();
+        bis.close();
+        ois.close();
+        return fileFromBytes;
+    }
+
+    public static byte[] fileToByte(File file) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeObject(file);
+        bos.close();
+        oos.close();
+        return bos.toByteArray();
+    }
+
+    public static String getMimeType(Uri uri, Context appCtx) {
+        String mimeType = null;
+        if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+            ContentResolver cr = appCtx.getContentResolver();
+            mimeType = cr.getType(uri);
+        } else {
+            String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
+                    .toString());
+            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                    fileExtension.toLowerCase());
+        }
+        return mimeType;
     }
 
 }

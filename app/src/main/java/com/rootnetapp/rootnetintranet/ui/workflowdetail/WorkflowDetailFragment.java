@@ -1,21 +1,26 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 
-
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
+import android.text.TextUtils;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailBinding;
+import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
+import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
 import com.rootnetapp.rootnetintranet.models.responses.file.DocumentsFile;
 import com.rootnetapp.rootnetintranet.models.responses.templates.Templates;
@@ -37,12 +42,15 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.StepsAdapter;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
+
+import static android.app.Activity.RESULT_OK;
 
 public class WorkflowDetailFragment extends Fragment {
 
@@ -53,6 +61,12 @@ public class WorkflowDetailFragment extends Fragment {
     private MainActivityInterface mainActivityInterface;
     private Workflow item;
     private List<Preset> presets;
+    private CommentsAdapter commentsAdapter = null;
+    private static final int FILE_SELECT_CODE = 555;
+    //private String encodedFile = null;
+    private CommentFile fileRequest = null;
+    private List<CommentFile> files;
+    private DocumentsAdapter documentsAdapter = null;
 
     public WorkflowDetailFragment() {
         // Required empty public constructor
@@ -94,6 +108,7 @@ public class WorkflowDetailFragment extends Fragment {
         binding.recPeopleinvolved.setAdapter(new PeopleInvolvedAdapter());
         binding.recApprovalhistory.setAdapter(new ApprovalAdapter());
         //fin testing
+        files = new ArrayList<>();
         subscribe();
         binding.hdrGraph.setOnClickListener(this::headerClicked);
         binding.hdrImportant.setOnClickListener(this::headerClicked);
@@ -101,6 +116,9 @@ public class WorkflowDetailFragment extends Fragment {
         binding.hdrInfo.setOnClickListener(this::headerClicked);
         binding.hdrPeopleinvolved.setOnClickListener(this::headerClicked);
         binding.hdrApprovalhistory.setOnClickListener(this::headerClicked);
+        binding.btnComment.setOnClickListener(this::comment);
+        binding.btnAttachment.setOnClickListener(this::showFileChooser);
+        binding.btnUpload.setOnClickListener(this::uploadFiles);
         workflowDetailViewModel.getWorkflow("", item.getId());
         workflowDetailViewModel.getWorkflowType("", item.getWorkflowType().getId());
         workflowDetailViewModel.getComments("", item.getId());
@@ -172,6 +190,92 @@ public class WorkflowDetailFragment extends Fragment {
         }
     }
 
+    private void comment(View view) {
+
+        String comment = binding.inputComment.getText().toString();
+        binding.inputComment.setError(null);
+        if (TextUtils.isEmpty(comment)) {
+            binding.inputComment.setError(getString(R.string.empty_comment));
+        } else {
+            Utils.showLoading(getContext());
+            workflowDetailViewModel.postComment("", item.getId(), comment, files);
+        }
+    }
+
+    private void uploadFiles(View view) {
+
+        if ((fileRequest != null) && (documentsAdapter != null)) {
+            List<WorkflowPresetsRequest> request = new ArrayList<>();
+            List<Integer> presets = new ArrayList<>();
+            int i = 0;
+            for (Boolean isSelected : documentsAdapter.isSelected) {
+                if (isSelected) {
+                    presets.add(documentsAdapter.totalDocuments.get(i).getId());
+                }
+                i++;
+            }
+            if(presets.isEmpty()){
+                Toast.makeText(getContext(), getString(R.string.select_preset),
+                        Toast.LENGTH_SHORT).show();
+            }else{
+                request.add(new WorkflowPresetsRequest(item.getId(), presets));
+                Utils.showLoading(getContext());
+                workflowDetailViewModel.attachFile("", request, fileRequest);
+            }
+        } else {
+            Toast.makeText(getContext(), getString(R.string.select_file),
+                    Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    private void showFileChooser(View view) {
+
+        if (fileRequest == null) {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("*/*");
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            try {
+                startActivityForResult(
+                        Intent.createChooser(intent, "Select a File to Upload"),
+                        FILE_SELECT_CODE);
+            } catch (android.content.ActivityNotFoundException ex) {
+                // Potentially direct the user to the Market with a Dialog
+                Toast.makeText(getContext(), "Please install a File Manager.",
+                        Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            fileRequest = null;
+            binding.btnAttachment.setText(R.string.attach);
+            binding.tvFileuploaded.setText(binding.tvFileuploaded.getText());
+        }
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case FILE_SELECT_CODE:
+                if (resultCode == RESULT_OK) {
+                    try {
+                        File file = new File(data.getData().toString());
+                        byte[] bytes = Utils.fileToByte(file);
+                        String filename = file.getName();
+                        //todo funcion actualizar texto
+                        binding.tvFileuploaded.setText(binding.tvFileuploaded.getText() + " " + filename);
+                        binding.btnAttachment.setText(R.string.remove_file);
+                        String encodedFile = Base64.encodeToString(bytes, Base64.DEFAULT);
+                        String fileType = Utils.getMimeType(data.getData(),getContext());
+                        fileRequest = new CommentFile(encodedFile, fileType, filename, (int)file.length());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
     private void subscribe() {
         final Observer<Workflow> workflowObserver = ((Workflow data) -> {
             if (null != data) {
@@ -186,11 +290,11 @@ public class WorkflowDetailFragment extends Fragment {
                     FieldConfig config = null;
                     try {
                         config = jsonAdapter.fromJson(item.getWorkflowTypeFieldConfig());
-                        if (config.getShow()){
-                            try{
+                        if (config.getShow()) {
+                            try {
                                 String value = (String) item.getDisplayValue();
                                 infoList.add(new Information(item.getWorkflowTypeFieldName(), value));
-                            }catch (Exception ex){
+                            } catch (Exception ex) {
                                 ex.printStackTrace();
                             }
                         }
@@ -198,7 +302,7 @@ public class WorkflowDetailFragment extends Fragment {
                         e.printStackTrace();
                     }
                 }
-            binding.recInfo.setAdapter(new InformationAdapter(infoList));
+                binding.recInfo.setAdapter(new InformationAdapter(infoList));
             }
         });
 
@@ -211,7 +315,7 @@ public class WorkflowDetailFragment extends Fragment {
                         break;
                     }
                 }
-                if ((currentStatus != null) && (currentStatus.getSteps()!=null)){
+                if ((currentStatus != null) && (currentStatus.getSteps() != null)) {
                     Collections.sort(currentStatus.getSteps(), (s1, s2) -> {
                         /*For ascending order*/
                         return s1.getOrder() - s2.getOrder();
@@ -227,34 +331,59 @@ public class WorkflowDetailFragment extends Fragment {
 
         final Observer<Templates> templateObserver = ((Templates data) -> {
             if (null != data) {
-                binding.tvTemplatetitle.setText(getString(R.string.template)+" "+data.getName());
+                binding.tvTemplatetitle.setText(getString(R.string.template) + " " + data.getName());
                 workflowDetailViewModel.getFiles("", item.getId());
             }
         });
 
         final Observer<List<DocumentsFile>> filesObserver = ((List<DocumentsFile> data) -> {
             if (null != data) {
-                binding.recDocuments.setAdapter(new DocumentsAdapter(presets, data));
+                documentsAdapter = new DocumentsAdapter(presets, data);
+                binding.recDocuments.setAdapter(documentsAdapter);
             }
         });
 
         final Observer<List<Comment>> commentsObserver = ((List<Comment> data) -> {
             if (null != data) {
-                binding.recComments.setAdapter(new CommentsAdapter(data));
+                commentsAdapter = new CommentsAdapter(data);
+                binding.recComments.setAdapter(commentsAdapter);
+            }
+        });
+
+        final Observer<Comment> commentObserver = ((Comment data) -> {
+            Utils.hideLoading();
+            if ((null != data) && (null != commentsAdapter)) {
+                commentsAdapter.comments.add(0, data);
+                commentsAdapter.notifyDataSetChanged();
+            } else {
+                Toast.makeText(getContext(), getString(R.string.error_comment), Toast.LENGTH_LONG).show();
+            }
+        });
+
+        final Observer<Boolean> attachObserver = ((Boolean data) -> {
+            Utils.hideLoading();
+            if ((null != data) && (data)) {
+                workflowDetailViewModel.getFiles("", item.getId());
+            } else {
+                Toast.makeText(getContext(), "error", Toast.LENGTH_LONG).show();
             }
         });
 
         final Observer<Integer> errorObserver = ((Integer data) -> {
             if (null != data) {
                 //TODO mejorar toast
+                Utils.hideLoading();
                 Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
             }
         });
+
         workflowDetailViewModel.getObservableWorkflow().observe(this, workflowObserver);
         workflowDetailViewModel.getObservableType().observe(this, typeObserver);
         workflowDetailViewModel.getObservableTemplate().observe(this, templateObserver);
         workflowDetailViewModel.getObservableFiles().observe(this, filesObserver);
         workflowDetailViewModel.getObservableComments().observe(this, commentsObserver);
+        workflowDetailViewModel.getObservableComment().observe(this, commentObserver);
+        workflowDetailViewModel.getObservableAttach().observe(this, attachObserver);
         workflowDetailViewModel.getObservableError().observe(this, errorObserver);
     }
 

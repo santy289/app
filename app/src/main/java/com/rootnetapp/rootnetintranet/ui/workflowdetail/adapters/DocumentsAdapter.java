@@ -68,7 +68,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder>{
             holder.binding.imgUploaded.setColorFilter(ContextCompat.getColor(context, R.color.green),
                     android.graphics.PorterDuff.Mode.SRC_IN);
             holder.binding.tvDescription.setText(file.getName());
-            holder.binding.tvDate.setText(file.getCreatedAt());
+            String date = file.getCreatedAt().split(" ")[0];
+            String hour = file.getCreatedAt().split(" ")[1];
+            holder.binding.tvDate.setText(date + " - " + hour);
         }else{
             holder.binding.imgUploaded.setImageResource(R.drawable.ic_close_black_24dp);
             holder.binding.imgUploaded.setColorFilter(ContextCompat.getColor(context, R.color.colorAccent),
@@ -80,9 +82,13 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder>{
         holder.binding.lytHeader.setOnClickListener(view -> {
             if (holder.binding.lytDetails.getVisibility() == View.GONE) {
                 holder.binding.imgArrow.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
+                holder.binding.imgArrow.setColorFilter(ContextCompat.getColor(context, R.color.arrow),
+                        android.graphics.PorterDuff.Mode.SRC_IN);
                 holder.binding.lytDetails.setVisibility(View.VISIBLE);
             } else {
                 holder.binding.imgArrow.setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
+                holder.binding.imgArrow.setColorFilter(ContextCompat.getColor(context, R.color.transparentArrow),
+                        android.graphics.PorterDuff.Mode.SRC_IN);
                 holder.binding.lytDetails.setVisibility(View.GONE);
             }
         });

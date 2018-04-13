@@ -16,7 +16,7 @@ import java.util.List;
  * Created by root on 04/04/18.
  */
 
-public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder>{
+public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> {
 
     public List<Comment> comments;
     private Context context;
@@ -38,10 +38,12 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder>{
     @Override
     public void onBindViewHolder(CommentsViewholder holder, int i) {
         Comment item = comments.get(i);
-        Glide.with(context).load(Utils.imageDomain+item.getUserInfo().getPicture()).
+        Glide.with(context).load(Utils.domain + item.getUserInfo().getPicture()).
                 into(holder.binding.imgUser);
         holder.binding.tvName.setText(item.getUserInfo().getFullName());
-        holder.binding.tvDate.setText(item.getDate());
+        String date = item.getDate().split("T")[0];
+        String hour = (item.getDate().split("T")[1]).split("-")[0];
+        holder.binding.tvDate.setText(date + " - " + hour);
         holder.binding.tvComment.setText(item.getDescription());
     }
 

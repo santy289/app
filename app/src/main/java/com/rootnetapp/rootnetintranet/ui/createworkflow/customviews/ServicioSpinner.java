@@ -29,7 +29,7 @@ public class ServicioSpinner extends CustomSpinner {
     CreateWorkflowViewModel viewModel;
     private List<Service> items;
 
-    public ServicioSpinner(FragmentActivity activity, Field field) {
+    public ServicioSpinner(FragmentActivity activity, Field field, String auth) {
         super(activity, field);
         ((RootnetApp) activity.getApplication()).getAppComponent().
                 inject(this);
@@ -37,7 +37,7 @@ public class ServicioSpinner extends CustomSpinner {
                 .of(activity, createWorkflowViewModelFactory)
                 .get(CreateWorkflowViewModel.class);
         subscribe();
-        viewModel.getServices("");
+        viewModel.getServices(auth);
     }
 
     @Override

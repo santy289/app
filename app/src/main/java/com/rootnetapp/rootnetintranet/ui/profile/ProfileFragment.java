@@ -101,7 +101,7 @@ public class ProfileFragment extends Fragment {
         final Observer<User> userObserver = ((User data) -> {
             Utils.hideLoading();
             if (null != data) {
-                Glide.with(this).load(Utils.imageDomain+data.getPicture()).into(fragmentProfileBinding.imgUser);
+                Glide.with(this).load(Utils.imgDomain +data.getPicture().trim()).into(fragmentProfileBinding.imgUser);
                 fragmentProfileBinding.tvName.setText(data.getFullName());
                 //todo modificar DAO para soportar departamentos
                 //todo implementar DAO de departamentos

@@ -42,7 +42,7 @@ public class CustomCountryPicker extends FrameLayout {
     private FragmentActivity activity;
     private PickerType type;
 
-    public CustomCountryPicker(FragmentActivity activity, Field field, PickerType type) {
+    public CustomCountryPicker(FragmentActivity activity, Field field, PickerType type, String auth) {
         super(activity);
         this.activity = activity;
         this.type = type;
@@ -61,7 +61,7 @@ public class CustomCountryPicker extends FrameLayout {
                 .of(activity, createWorkflowViewModelFactory)
                 .get(CreateWorkflowViewModel.class);
         subscribe();
-        viewModel.getCountries("");
+        viewModel.getCountries(auth);
     }
 
     private void subscribe() {

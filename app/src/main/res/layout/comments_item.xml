@@ -4,15 +4,15 @@
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
+        android:layout_marginTop="2.5dp"
+        android:layout_marginBottom="2.5dp"
         android:background="@color/workflowListBg">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/img_user"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_margin="10dp"
+            android:layout_margin="5dp"
             android:src="@drawable/ic_perm_identity_black_24dp"/>
 
         <LinearLayout
@@ -23,14 +23,17 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginTop="10dp">
 
                 <TextView
                     android:id="@+id/tv_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    android:layout_margin="10dp"
                     android:layout_centerVertical="true"
                     android:text="date"/>
 
@@ -41,7 +44,7 @@
                     android:textStyle="bold"
                     android:textColor="@color/colorPrimary"
                     android:layout_toStartOf="@id/tv_date"
-                    android:layout_margin="10dp"
+                    android:layout_marginEnd="15dp"
                     android:layout_centerVertical="true"
                     android:text="Jon Doe"/>
 
@@ -51,7 +54,11 @@
                 android:id="@+id/tv_comment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:textSize="12sp"
                 android:text="asdadjkadhkjashdkjajskdhahdkjahsdjahjdakhdjkadhakhdkajshdkjahsjdhakdhaksj"/>
 
         </LinearLayout>

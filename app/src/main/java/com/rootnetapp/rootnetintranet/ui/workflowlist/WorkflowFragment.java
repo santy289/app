@@ -78,7 +78,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         subscribe();
         //TODO preferences inyectadas con Dagger
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        token = prefs.getString("token", "");
+        token = "Bearer "+ prefs.getString("token","");
         workflowViewModel.getWorkflows(token);
         fragmentWorkflowBinding.btnFilters.setOnClickListener(view1 -> {
             PopupWindow popupwindow_obj = popupMenu();

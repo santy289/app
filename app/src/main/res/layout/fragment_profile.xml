@@ -19,8 +19,7 @@
                 android:id="@+id/img_user"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:layout_margin="10dp"
-                android:src="@drawable/logo"/>
+                android:layout_margin="10dp"/>
 
             <TextView
                 android:id="@+id/tv_name"

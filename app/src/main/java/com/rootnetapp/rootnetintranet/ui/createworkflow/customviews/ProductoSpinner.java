@@ -30,7 +30,7 @@ public class ProductoSpinner extends CustomSpinner {
     CreateWorkflowViewModel viewModel;
     private List<Product> items;
 
-    public ProductoSpinner(FragmentActivity activity, Field field) {
+    public ProductoSpinner(FragmentActivity activity, Field field, String auth) {
         super(activity, field);
         ((RootnetApp) activity.getApplication()).getAppComponent().
                 inject(this);
@@ -38,7 +38,7 @@ public class ProductoSpinner extends CustomSpinner {
                 .of(activity, createWorkflowViewModelFactory)
                 .get(CreateWorkflowViewModel.class);
         subscribe();
-        viewModel.getProducts("");
+        viewModel.getProducts(auth);
     }
 
     @Override

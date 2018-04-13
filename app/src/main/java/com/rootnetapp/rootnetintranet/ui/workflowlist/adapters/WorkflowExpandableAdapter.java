@@ -1,7 +1,8 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist.adapters;
 
+import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.transition.TransitionManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowView
     private List<Boolean> isExpanded;
     private ViewGroup recycler;
     private WorkflowFragmentInterface anInterface;
+    private Context context;
 
     public WorkflowExpandableAdapter(List<Workflow> workflows,
                                      WorkflowFragmentInterface anInterface) {
@@ -44,6 +46,7 @@ public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowView
     public WorkflowViewholder onCreateViewHolder(ViewGroup viewGroup, int i) {
         LayoutInflater layoutInflater =
                 LayoutInflater.from(viewGroup.getContext());
+        context = viewGroup.getContext();
         WorkflowItemBinding itemBinding =
                 WorkflowItemBinding.inflate(layoutInflater, viewGroup, false);
         recycler = viewGroup;
@@ -59,7 +62,7 @@ public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowView
         //Esto deberia venir siempre de la consulta al servicio.
         if (item.getAuthor() != null) {
             holder.binding.tvOwner.setText(item.getAuthor().getFullName());
-            Glide.with(recycler).load(Utils.imageDomain+item.getAuthor().getPicture()).into(holder.binding.imgProfile);
+            Glide.with(recycler).load(Utils.domain +item.getAuthor().getPicture()).into(holder.binding.imgProfile);
         }
         if(item.getWorkflowStateInfo() != null){
             if(item.getWorkflowStateInfo().getVirtualColumns() != null){
@@ -72,9 +75,11 @@ public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowView
         } else {
             holder.binding.tvStatus.setText(recycler.getContext().getString(R.string.inactive));
         }
-        holder.binding.tvCreatedat.setText(item.getStart());
-        //todo updated!
 
+        String date = item.getStart().split("T")[0];
+        String hour = (item.getStart().split("T")[1]).split("-")[0];
+        holder.binding.tvCreatedat.setText(date + " - " + hour);
+        //todo updated!
         holder.binding.chbxSelected.setOnCheckedChangeListener(null);
         redrawCheckbox(holder, i);
         redrawExpansion(holder, i);
@@ -104,9 +109,13 @@ public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowView
     private void redrawExpansion(WorkflowViewholder holder, int i) {
         if (isExpanded.get(i)) {
             holder.binding.btnArrow.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
-            holder.binding.layoutDetails.setVisibility(View.VISIBLE);
+            holder.binding.btnArrow.setColorFilter(ContextCompat.getColor(context, R.color.arrow),
+                    android.graphics.PorterDuff.Mode.SRC_IN);
+                    holder.binding.layoutDetails.setVisibility(View.VISIBLE);
         } else {
             holder.binding.btnArrow.setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
+            holder.binding.btnArrow.setColorFilter(ContextCompat.getColor(context, R.color.transparentArrow),
+                    android.graphics.PorterDuff.Mode.SRC_IN);
             holder.binding.layoutDetails.setVisibility(View.GONE);
         }
     }

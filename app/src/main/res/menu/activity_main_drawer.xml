@@ -5,21 +5,24 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_timeline"
-            android:title="@string/timeline" />
+            android:title="@string/items" />
         <item
             android:title="@string/workflow">
             <menu>
+                <group android:checkableBehavior="single">
                 <item
                     android:id="@+id/nav_workflowmanager"
                     android:title="@string/workflow_manager" />
                 <item
                     android:id="@+id/nav_workflows"
                     android:title="@string/workflows" />
+                </group>
             </menu>
         </item>
         <item
             android:title="@string/modules">
             <menu>
+                <group android:checkableBehavior="single">
                 <item
                     android:id="@+id/nav_accounts"
                     android:title="@string/accounts" />
@@ -29,14 +32,17 @@
                 <item
                     android:id="@+id/nav_business"
                     android:title="@string/business_oportunities" />
+                </group>
             </menu>
         </item>
         <item
             android:title="@string/synchronization">
             <menu>
+                <group android:checkableBehavior="single">
                 <item
                     android:id="@+id/nav_sync"
                     android:title="@string/synchronize" />
+                </group>
             </menu>
         </item>
         <item

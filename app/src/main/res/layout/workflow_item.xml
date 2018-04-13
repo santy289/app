@@ -22,7 +22,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
-                android:buttonTint="@color/colorPrimary" />
+                android:buttonTint="@color/transparentArrow" />
 
             <TextView
                 android:id="@+id/tv_title"
@@ -42,7 +42,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:tint="@color/detailsColor"
+                android:tint="@color/transparentArrow"
                 android:padding="10dp"
                 android:src="@drawable/ic_keyboard_arrow_down_black_24dp" />
 
@@ -53,8 +53,7 @@
                 android:layout_centerVertical="true"
                 android:layout_toStartOf="@id/btn_arrow"
                 android:padding="10dp"
-                android:tint="@color/colorAccent"
-                android:visibility="gone"
+                android:tint="@color/green"
                 android:src="@drawable/ic_access_time_black_24dp" />
 
             <ImageView
@@ -96,6 +95,8 @@
                         android:layout_weight="1"
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
+                        android:textAllCaps="true"
+                        android:textSize="12sp"
                         android:textColor="@color/colorPrimaryDark"
                         android:text="@string/workflow_type"/>
 
@@ -106,6 +107,7 @@
                         android:layout_weight="2"
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
+                        android:textSize="12sp"
                         android:text="LOREM"
                         android:textColor="@color/colorPrimary" />
                 </LinearLayout>
@@ -126,6 +128,8 @@
                         android:layout_weight="1"
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
+                        android:textAllCaps="true"
+                        android:textSize="12sp"
                         android:text="@string/owner"
                         android:textColor="@color/colorPrimaryDark" />
 
@@ -142,6 +146,7 @@
                             android:layout_height="wrap_content"
                             android:paddingEnd="10dp"
                             android:paddingStart="10dp"
+                            android:textSize="12sp"
                             android:text="LOREM"
                             android:textColor="@color/colorPrimary" />
 
@@ -171,6 +176,8 @@
                         android:layout_weight="1"
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
+                        android:textAllCaps="true"
+                        android:textSize="12sp"
                         android:text="@string/actual_state"
                         android:textColor="@color/colorPrimaryDark" />
 
@@ -181,6 +188,7 @@
                         android:layout_weight="2"
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
+                        android:textSize="12sp"
                         android:text="LOREM"
                         android:textColor="@color/colorPrimary" />
                 </LinearLayout>
@@ -199,6 +207,8 @@
                         android:layout_weight="1"
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
+                        android:textAllCaps="true"
+                        android:textSize="12sp"
                         android:text="@string/status"
                         android:textColor="@color/colorPrimaryDark" />
 
@@ -209,6 +219,7 @@
                         android:layout_weight="2"
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
+                        android:textSize="12sp"
                         android:text="LOREM"
                         android:textColor="@color/colorPrimary" />
                 </LinearLayout>
@@ -229,6 +240,8 @@
                         android:layout_weight="1"
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
+                        android:textAllCaps="true"
+                        android:textSize="12sp"
                         android:text="@string/created_at"
                         android:textColor="@color/colorPrimaryDark" />
 
@@ -239,6 +252,7 @@
                         android:layout_weight="2"
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
+                        android:textSize="12sp"
                         android:text="LOREM"
                         android:textColor="@color/colorPrimary" />
                 </LinearLayout>
@@ -256,6 +270,8 @@
                         android:layout_weight="1"
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
+                        android:textAllCaps="true"
+                        android:textSize="12sp"
                         android:text="@string/updated_at"
                         android:textColor="@color/colorPrimaryDark" />
                     <TextView
@@ -265,6 +281,7 @@
                         android:layout_weight="2"
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
+                        android:textSize="12sp"
                         android:text="LOREM"
                         android:textColor="@color/colorPrimary" />
                 </LinearLayout>
@@ -273,7 +290,7 @@
                 android:id="@+id/fab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:backgroundTint="@color/colorPrimary"
+                app:backgroundTint="@color/fab_color"
                 android:tint="@color/white"
                 android:layout_margin="20dp"
                 android:layout_alignBottom="@+id/list_detail"

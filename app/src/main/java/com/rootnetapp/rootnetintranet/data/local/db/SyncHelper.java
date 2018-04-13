@@ -27,9 +27,8 @@ public class SyncHelper {
     private AppDatabase database;
     private int totalQueries =2, queriesCompleted =0;
     private List<Workflow> workflows;
-    //todo REMOVE, solo testing
-    private String auth2 = "Bearer "+ Utils.testToken;
-
+    private String auth;
+    private String auth2;
 
     public SyncHelper(ApiInterface apiInterface, AppDatabase database) {
         this.apiInterface = apiInterface;
@@ -38,22 +37,25 @@ public class SyncHelper {
     }
 
     public void clearData(String auth) {
+        //todo token test
+        this.auth2 = "Bearer "+ Utils.testToken;
+        this.auth = auth;
         Observable.fromCallable(() -> {
             database.userDao().clearUser();
             database.workflowDao().clearWorkflows();
-            return auth;
+            return true;
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(this::getData, this::failure);
     }
 
-    private void getData(String auth) {
+    private void getData(boolean boo) {
         apiInterface.getUsers(auth).subscribeOn(Schedulers.newThread()).
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe(this::onUsersSuccess, this::failure);
-        getAllWorkflows(auth2, 0);
+        getAllWorkflows(0);
     }
 
-    private void getAllWorkflows(String auth, int page) {
-        apiInterface.getWorkflows(auth, 2, true, page, true).subscribeOn(Schedulers.newThread()).
+    private void getAllWorkflows(int page) {
+        apiInterface.getWorkflows(auth2, 50, true, page, true).subscribeOn(Schedulers.newThread()).
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe(this::onWorkflowsSuccess, this::failure);
     }
@@ -68,8 +70,7 @@ public class SyncHelper {
     private void onWorkflowsSuccess(WorkflowsResponse workflowsResponse) {
         workflows.addAll(workflowsResponse.getList());
         if(!workflowsResponse.getPager().isIsLastPage()){
-            //todo CAMBIAR AUTH
-            getAllWorkflows(auth2, workflowsResponse.getPager().getNextPage());
+            getAllWorkflows(workflowsResponse.getPager().getNextPage());
         }else{
             Observable.fromCallable(() -> {
                 database.workflowDao().insertAll(workflows);

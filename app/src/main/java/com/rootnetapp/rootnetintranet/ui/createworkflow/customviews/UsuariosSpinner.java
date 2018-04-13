@@ -31,7 +31,7 @@ public class UsuariosSpinner extends CustomSpinner {
     CreateWorkflowViewModel viewModel;
     private List<WorkflowUser> items;
 
-    public UsuariosSpinner(FragmentActivity activity, Field field) {
+    public UsuariosSpinner(FragmentActivity activity, Field field, String auth) {
         super(activity, field);
         ((RootnetApp) activity.getApplication()).getAppComponent().
                 inject(this);
@@ -39,7 +39,7 @@ public class UsuariosSpinner extends CustomSpinner {
                 .of(activity, createWorkflowViewModelFactory)
                 .get(CreateWorkflowViewModel.class);
         subscribe();
-        viewModel.getUsers("");
+        viewModel.getUsers(auth);
     }
 
     @Override

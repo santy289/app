@@ -16,6 +16,11 @@ import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse
 import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.InteractionResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.PostCommentResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.PostSubCommentResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.SubCommentsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
@@ -48,7 +53,7 @@ public interface ApiInterface {
     Observable<ClientResponse> getDomain(@Field("domain") String domain);
 
     @Headers({"Domain-Name: api"})
-    @POST("/v1/login_check")
+    @POST("v1/login_check")
     @FormUrlEncoded
     Observable<LoginResponse> login(@Field("username") String user,
                                     @Field("password") String password);
@@ -85,6 +90,7 @@ public interface ApiInterface {
                                           @Field("email") String email,
                                           @Field("phone_number") String phoneNumber);
 
+    //@Headers({"Domain-Name: api"})
     @Headers({"Domain-Name: localhost"})
     @GET("v1/intranet/workflows?")
     Observable<WorkflowsResponse> getWorkflows(@Header("Authorization") String authorization,
@@ -93,23 +99,28 @@ public interface ApiInterface {
                                                @Query("page") int page,
                                                @Query("status") boolean status);
 
+    //@Headers({"Domain-Name: api"})
     @Headers({"Domain-Name: localhost"})
     @GET("v1/intranet/workflows/types")
     Observable<WorkflowTypesResponse> getWorkflowTypes(@Header("Authorization") String authorization);
 
+    //@Headers({"Domain-Name: api"})
     @Headers({"Domain-Name: localhost"})
     @GET("v1/list/{id}/item")
     Observable<ListsResponse> getListItems(@Header("Authorization") String authorization,
                                            @Path("id") int id);
 
+    //@Headers({"Domain-Name: api"})
     @Headers({"Domain-Name: localhost"})
     @GET("v1/contacts/products?all=true")
     Observable<ProductsResponse> getProducts(@Header("Authorization") String authorization);
 
+    //@Headers({"Domain-Name: api"})
     @Headers({"Domain-Name: localhost"})
     @GET("v1/contacts/services?all=true")
     Observable<ServicesResponse> getServices(@Header("Authorization") String authorization);
 
+    //@Headers({"Domain-Name: api"})
     @Headers({"Domain-Name: localhost"})
     @GET("v1/client/35/users")
     Observable<WorkflowUserResponse> getWorkflowUsers(@Header("Authorization") String authorization);
@@ -117,6 +128,7 @@ public interface ApiInterface {
     @GET("v1/check/countries")
     Observable<CountriesResponse> getCountries(@Header("Authorization") String authorization);
 
+    //@Headers({"Domain-Name: api"})
     @Headers({"Domain-Name: localhost"})
     @POST("v1/intranet/workflows")
     @FormUrlEncoded
@@ -127,27 +139,32 @@ public interface ApiInterface {
                                                       @Field("start") String start,
                                                       @Field("description") String description);
 
+    //@Headers({"Domain-Name: api"})
     @Headers({"Domain-Name: localhost"})
     @GET("v1/intranet/workflows/types/{id}")
     Observable<WorkflowTypeResponse> getWorkflowType(@Header("Authorization") String authorization,
                                                      @Path("id") int typeId);
 
+    //@Headers({"Domain-Name: api"})
     @Headers({"Domain-Name: localhost"})
     @GET("v1/intranet/workflows/{id}")
     Observable<WorkflowResponse> getWorkflow(@Header("Authorization") String authorization,
                                              @Path("id") int workflowId);
 
+    //@Headers({"Domain-Name: api"})
     @Headers({"Domain-Name: localhost"})
     @GET("v1/intranet/templates/{id}")
     Observable<TemplatesResponse> getTemplate(@Header("Authorization") String authorization,
                                               @Path("id") int templateId);
 
 
+    //@Headers({"Domain-Name: api"})
     @Headers({"Domain-Name: localhost"})
     @GET("v1/intranet/workflows/{id}/files")
     Observable<FilesResponse> getFiles(@Header("Authorization") String authorization,
                                        @Path("id") int workflowId);
 
+    //@Headers({"Domain-Name: api"})
     @Headers({"Domain-Name: localhost"})
     @GET("v1/intranet/workflow/{id}/comments?")
     Observable<CommentsResponse> getComments(@Header("Authorization") String authorization,
@@ -155,6 +172,7 @@ public interface ApiInterface {
                                              @Query("limit") int limit,
                                              @Query("page") int page);
 
+    //@Headers({"Domain-Name: api"})
     @Headers({"Domain-Name: localhost"})
     @POST("v1/intranet/workflow/{id}/comment")
     @FormUrlEncoded
@@ -163,11 +181,48 @@ public interface ApiInterface {
                                             @Field("description") String description,
                                             @Field("files") List<CommentFile> files);
 
+    //@Headers({"Domain-Name: api"})
     @Headers({"Domain-Name: localhost"})
     @POST("v1/intranet/workflows/records/file")
     @FormUrlEncoded
     Observable<AttachResponse> attachFile(@Header("Authorization") String authorization,
                                           @Field("workflows") List<WorkflowPresetsRequest> request,
                                           @Field("file") CommentFile fileRequest);
+
+    @Headers({"Domain-Name: api"})
+    @GET("v1/timeline?")
+    Observable<TimelineResponse> getTimeline(@Header("Authorization") String authorization,
+                                             @Query("start") String start,
+                                             @Query("end") String end);
+
+    @Headers({"Domain-Name: api"})
+    @GET("v1/interaction?all=true&comment=500")
+    Observable<InteractionResponse> getTimelineComments(@Header("Authorization") String authorization);
+
+
+    @Headers({"Domain-Name: api"})
+    @GET("v1/interaction/comment?limit=500")
+    Observable<SubCommentsResponse> getSubComment(@Header("Authorization")String auth,
+                                                  @Query("associate")int associate,
+                                                  @Query("level")int level);
+
+    @Headers({"Domain-Name: api"})
+    @POST("v1/interaction")
+    @FormUrlEncoded
+    Observable<PostCommentResponse> postComment(@Header("Authorization")String auth,
+                                                @Field("interactionId") int interactionId,
+                                                @Field("entity") int entity,
+                                                @Field("entityType") String entityType,
+                                                @Field("description") String description,
+                                                @Field("author") int author);
+
+    @Headers({"Domain-Name: api"})
+    @POST("v1/interaction/comment")
+    @FormUrlEncoded
+    Observable<PostSubCommentResponse> postSubComment(@Header("Authorization")String auth,
+                                                      @Field("interaction") int interaction,
+                                                      @Field("associate") int associate,
+                                                      @Field("description") String description,
+                                                      @Field("author") int author);
 
 }

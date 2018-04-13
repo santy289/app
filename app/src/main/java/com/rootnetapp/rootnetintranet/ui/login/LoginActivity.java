@@ -13,8 +13,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.auth0.android.jwt.Claim;
-import com.auth0.android.jwt.JWT;
 import com.bumptech.glide.Glide;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -24,7 +22,6 @@ import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.SyncActivity;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
-import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetpassdialog.ResetPasswordDialog;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
@@ -63,9 +60,10 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             try {
                 domain = jsonAdapter.fromJson(json);
-                Utils.imageDomain = "https://" + domain.getClient().getApiUrl();
+                Utils.domain = "https://" + domain.getClient().getApiUrl();
+                Utils.imgDomain = "http://" + domain.getClient().getApiUrl();
                 Glide.with(this).load(Utils.URL+domain.getClient().getLogoUrl()).into(loginBinding.logo);
-                RetrofitUrlManager.getInstance().putDomain("api", Utils.imageDomain);
+                RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
                 //todo solo para PRUEBAS
                 RetrofitUrlManager.getInstance().putDomain("localhost", "http://192.168.42.183/");
             } catch (IOException e) {

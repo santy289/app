@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
+import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
 
 public class MainActivity extends AppCompatActivity
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity
         fragmentManager = getSupportFragmentManager();
         mainBinding.navView.setNavigationItemSelectedListener(this);
         mainBinding.navView.setCheckedItem(R.id.nav_timeline);
+        showFragment(TimelineFragment.newInstance(this), false);
     }
 
     @Override
@@ -69,15 +71,20 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id){
-            case R.id.nav_profile:{
-                showFragment(ProfileFragment.newInstance(this),false);
+            case R.id.nav_timeline:{
+                showFragment(TimelineFragment.newInstance(this),false);
                 break;
             }
             case R.id.nav_workflows:{
                 showFragment(WorkflowFragment.newInstance(this),false);
                 break;
             }
+            case R.id.nav_profile:{
+                showFragment(ProfileFragment.newInstance(this),false);
+                break;
+            }
         }
+        mainBinding.navView.setCheckedItem(id);
         DrawerLayout drawer = mainBinding.drawerLayout;
         drawer.closeDrawer(GravityCompat.START);
         return true;

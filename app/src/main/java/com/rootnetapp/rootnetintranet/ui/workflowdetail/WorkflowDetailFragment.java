@@ -2,10 +2,13 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
@@ -67,6 +70,7 @@ public class WorkflowDetailFragment extends Fragment {
     private CommentFile fileRequest = null;
     private List<CommentFile> files;
     private DocumentsAdapter documentsAdapter = null;
+    private String token;
 
     public WorkflowDetailFragment() {
         // Required empty public constructor
@@ -95,7 +99,12 @@ public class WorkflowDetailFragment extends Fragment {
         workflowDetailViewModel = ViewModelProviders
                 .of(this, workflowViewModelFactory)
                 .get(WorkflowDetailViewModel.class);
+        //TODO preferences inyectadas con Dagger
+        SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        token = "Bearer "+ prefs.getString("token","");
         //Utils.showLoading(getContext());
+        binding.tvWorkflowproject.setText(item.getTitle());
+        binding.tvWorkflowid.setText(binding.tvWorkflowid.getText()+" "+item.getWorkflowTypeKey());
         binding.recSteps.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recApprovers.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recInfo.setLayoutManager(new GridLayoutManager(getContext(), 2));
@@ -119,9 +128,9 @@ public class WorkflowDetailFragment extends Fragment {
         binding.btnComment.setOnClickListener(this::comment);
         binding.btnAttachment.setOnClickListener(this::showFileChooser);
         binding.btnUpload.setOnClickListener(this::uploadFiles);
-        workflowDetailViewModel.getWorkflow("", item.getId());
-        workflowDetailViewModel.getWorkflowType("", item.getWorkflowType().getId());
-        workflowDetailViewModel.getComments("", item.getId());
+        workflowDetailViewModel.getWorkflow(token, item.getId());
+        workflowDetailViewModel.getWorkflowType(token, item.getWorkflowType().getId());
+        workflowDetailViewModel.getComments(token, item.getId());
         return view;
     }
 
@@ -130,9 +139,13 @@ public class WorkflowDetailFragment extends Fragment {
             case R.id.hdr_graph: {
                 if (binding.lytGraph.getVisibility() == View.GONE) {
                     binding.btnArrow.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
+                    binding.btnArrow.setColorFilter(ContextCompat.getColor(getContext(), R.color.arrow),
+                            android.graphics.PorterDuff.Mode.SRC_IN);
                     binding.lytGraph.setVisibility(View.VISIBLE);
                 } else {
                     binding.btnArrow.setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
+                    binding.btnArrow.setColorFilter(ContextCompat.getColor(getContext(), R.color.transparentArrow),
+                            android.graphics.PorterDuff.Mode.SRC_IN);
                     binding.lytGraph.setVisibility(View.GONE);
                 }
                 break;
@@ -140,9 +153,13 @@ public class WorkflowDetailFragment extends Fragment {
             case R.id.hdr_important: {
                 if (binding.lytImportant.getVisibility() == View.GONE) {
                     binding.btnArrow2.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
+                    binding.btnArrow2.setColorFilter(ContextCompat.getColor(getContext(), R.color.arrow),
+                            android.graphics.PorterDuff.Mode.SRC_IN);
                     binding.lytImportant.setVisibility(View.VISIBLE);
                 } else {
                     binding.btnArrow2.setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
+                    binding.btnArrow2.setColorFilter(ContextCompat.getColor(getContext(), R.color.transparentArrow),
+                            android.graphics.PorterDuff.Mode.SRC_IN);
                     binding.lytImportant.setVisibility(View.GONE);
                 }
                 break;
@@ -150,9 +167,13 @@ public class WorkflowDetailFragment extends Fragment {
             case R.id.hdr_nextstep: {
                 if (binding.lytNextstep.getVisibility() == View.GONE) {
                     binding.btnArrow3.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
+                    binding.btnArrow3.setColorFilter(ContextCompat.getColor(getContext(), R.color.arrow),
+                            android.graphics.PorterDuff.Mode.SRC_IN);
                     binding.lytNextstep.setVisibility(View.VISIBLE);
                 } else {
                     binding.btnArrow3.setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
+                    binding.btnArrow3.setColorFilter(ContextCompat.getColor(getContext(), R.color.transparentArrow),
+                            android.graphics.PorterDuff.Mode.SRC_IN);
                     binding.lytNextstep.setVisibility(View.GONE);
                 }
                 break;
@@ -160,9 +181,13 @@ public class WorkflowDetailFragment extends Fragment {
             case R.id.hdr_info: {
                 if (binding.recInfo.getVisibility() == View.GONE) {
                     binding.btnArrow4.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
+                    binding.btnArrow4.setColorFilter(ContextCompat.getColor(getContext(), R.color.arrow),
+                            android.graphics.PorterDuff.Mode.SRC_IN);
                     binding.recInfo.setVisibility(View.VISIBLE);
                 } else {
                     binding.btnArrow4.setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
+                    binding.btnArrow4.setColorFilter(ContextCompat.getColor(getContext(), R.color.transparentArrow),
+                            android.graphics.PorterDuff.Mode.SRC_IN);
                     binding.recInfo.setVisibility(View.GONE);
                 }
                 break;
@@ -170,9 +195,13 @@ public class WorkflowDetailFragment extends Fragment {
             case R.id.hdr_peopleinvolved: {
                 if (binding.lytPeopleinvolved.getVisibility() == View.GONE) {
                     binding.btnArrow5.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
+                    binding.btnArrow5.setColorFilter(ContextCompat.getColor(getContext(), R.color.arrow),
+                            android.graphics.PorterDuff.Mode.SRC_IN);
                     binding.lytPeopleinvolved.setVisibility(View.VISIBLE);
                 } else {
                     binding.btnArrow5.setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
+                    binding.btnArrow5.setColorFilter(ContextCompat.getColor(getContext(), R.color.transparentArrow),
+                            android.graphics.PorterDuff.Mode.SRC_IN);
                     binding.lytPeopleinvolved.setVisibility(View.GONE);
                 }
                 break;
@@ -180,9 +209,13 @@ public class WorkflowDetailFragment extends Fragment {
             case R.id.hdr_approvalhistory: {
                 if (binding.recApprovalhistory.getVisibility() == View.GONE) {
                     binding.btnArrow6.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
+                    binding.btnArrow6.setColorFilter(ContextCompat.getColor(getContext(), R.color.arrow),
+                            android.graphics.PorterDuff.Mode.SRC_IN);
                     binding.recApprovalhistory.setVisibility(View.VISIBLE);
                 } else {
                     binding.btnArrow6.setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
+                    binding.btnArrow6.setColorFilter(ContextCompat.getColor(getContext(), R.color.transparentArrow),
+                            android.graphics.PorterDuff.Mode.SRC_IN);
                     binding.recApprovalhistory.setVisibility(View.GONE);
                 }
                 break;
@@ -198,7 +231,7 @@ public class WorkflowDetailFragment extends Fragment {
             binding.inputComment.setError(getString(R.string.empty_comment));
         } else {
             Utils.showLoading(getContext());
-            workflowDetailViewModel.postComment("", item.getId(), comment, files);
+            workflowDetailViewModel.postComment(token, item.getId(), comment, files);
         }
     }
 
@@ -220,7 +253,7 @@ public class WorkflowDetailFragment extends Fragment {
             }else{
                 request.add(new WorkflowPresetsRequest(item.getId(), presets));
                 Utils.showLoading(getContext());
-                workflowDetailViewModel.attachFile("", request, fileRequest);
+                workflowDetailViewModel.attachFile(token, request, fileRequest);
             }
         } else {
             Toast.makeText(getContext(), getString(R.string.select_file),
@@ -324,7 +357,7 @@ public class WorkflowDetailFragment extends Fragment {
                 } else {
                     binding.hdrImportant.setVisibility(View.GONE);
                 }
-                workflowDetailViewModel.getTemplate("", data.getTemplateId());
+                workflowDetailViewModel.getTemplate(token, data.getTemplateId());
                 presets = data.getPresets();
             }
         });
@@ -332,7 +365,7 @@ public class WorkflowDetailFragment extends Fragment {
         final Observer<Templates> templateObserver = ((Templates data) -> {
             if (null != data) {
                 binding.tvTemplatetitle.setText(getString(R.string.template) + " " + data.getName());
-                workflowDetailViewModel.getFiles("", item.getId());
+                workflowDetailViewModel.getFiles(token, item.getId());
             }
         });
 
@@ -363,7 +396,7 @@ public class WorkflowDetailFragment extends Fragment {
         final Observer<Boolean> attachObserver = ((Boolean data) -> {
             Utils.hideLoading();
             if ((null != data) && (data)) {
-                workflowDetailViewModel.getFiles("", item.getId());
+                workflowDetailViewModel.getFiles(token, item.getId());
             } else {
                 Toast.makeText(getContext(), "error", Toast.LENGTH_LONG).show();
             }

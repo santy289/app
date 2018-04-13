@@ -28,7 +28,7 @@
     <string name="token">Token</string>
     <string name="paste_token">Copy and paste the token sent.</string>
     <string name="check_email">An email with a validation token has been sent to your email account.</string>
-    <string name="timeline">Timeline</string>
+    <string name="items">Timeline</string>
     <string name="community">Community</string>
     <string name="workflows">Workflows</string>
     <string name="projects">Projects</string>
@@ -102,7 +102,7 @@
     <string name="amount">Amount</string>
     <string name="workflow_owner">Workflow Owner</string>
     <string name="search">Search</string>
-    <string name="workflow_id">WORKFLOWS ID</string>
+    <string name="workflow_id">WORKFLOW</string>
     <string name="workflow_project">Workflow Project</string>
     <string name="important_things">IMPORTANT THINGS ABOUT THIS STEP</string>
     <string name="workflow_info">WORKFLOWS INFORMATION</string>
@@ -130,4 +130,22 @@
     <string name="remove_file">REMOVE FILE</string>
     <string name="select_file">Please select a file to upload</string>
     <string name="select_preset">Select what type of document you are uploading</string>
+    <string name="month">month</string>
+    <string name="week">week</string>
+    <string name="day">day</string>
+    <string name="filtered_by">Filtered by:</string>
+    <string name="comment_ammount">Comments</string>
+    <string name="add_comment">Add a comment...</string>
+    <string name="today">Today</string>
+    <string name="current_week">Current week</string>
+    <string name="current_month">Current month</string>
+    <string name="select_date">Select date range</string>
+    <string name="end_date">End Date</string>
+    <string name="selected_period">Selected period</string>
+    <string name="tracking_created">has created a new tracking for</string>
+    <string name="status_created">has created a new status for</string>
+    <string name="txt_description">Description:</string>
+    <string name="txt_statusname">Status name</string>
+    <string name="reply">Reply</string>
+    <string name="no_timeline">There are currently no items matching your search parameters.</string>
 </resources>

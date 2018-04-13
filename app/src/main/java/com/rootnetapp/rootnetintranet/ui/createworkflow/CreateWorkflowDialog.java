@@ -3,6 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -64,6 +65,7 @@ public class CreateWorkflowDialog extends DialogFragment {
     private List<WorkflowType> workflowTypes;
     private int selectedType = -1;
     private WorkflowFragmentInterface anInterface;
+    private String token;
 
     public static CreateWorkflowDialog newInstance(WorkflowFragmentInterface anInterface) {
         CreateWorkflowDialog fragment = new CreateWorkflowDialog();
@@ -83,13 +85,16 @@ public class CreateWorkflowDialog extends DialogFragment {
         viewModel = ViewModelProviders
                 .of(this, createWorkflowViewModelFactory)
                 .get(CreateWorkflowViewModel.class);
+        //TODO preferences inyectadas con Dagger
+        SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        token = "Bearer "+ prefs.getString("token","");
         view_list = new ArrayList<>();
         workflowTypes = new ArrayList<>();
         binding.recDepartment.setLayoutManager(new GridLayoutManager(getContext(), 2, LinearLayoutManager.HORIZONTAL, false));
         binding.btnClose.setOnClickListener(view -> dismiss());
         binding.btnCreate.setOnClickListener(view -> createWorkflow());
         subscribe();
-        viewModel.getWorkflowTypes("");
+        viewModel.getWorkflowTypes(token);
         return binding.getRoot();
     }
 
@@ -228,7 +233,7 @@ public class CreateWorkflowDialog extends DialogFragment {
                                             }
                                             case "Producto": {
                                                 ProductoSpinner spinner = new ProductoSpinner(getActivity(),
-                                                        field);
+                                                        field, token);
                                                 binding.layoutDinamicFields.addView(spinner,
                                                         new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                                                 ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -237,7 +242,7 @@ public class CreateWorkflowDialog extends DialogFragment {
                                             }
                                             case "Servicio": {
                                                 ServicioSpinner spinner = new ServicioSpinner(getActivity(),
-                                                        field);
+                                                        field, token);
                                                 binding.layoutDinamicFields.addView(spinner,
                                                         new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                                                 ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -245,7 +250,7 @@ public class CreateWorkflowDialog extends DialogFragment {
                                                 break;
                                             }
                                             case "Usuario": {
-                                                UsuariosSpinner spinner = new UsuariosSpinner(getActivity(), field);
+                                                UsuariosSpinner spinner = new UsuariosSpinner(getActivity(), field, token);
                                                 binding.layoutDinamicFields.addView(spinner,
                                                         new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                                                 ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -254,7 +259,7 @@ public class CreateWorkflowDialog extends DialogFragment {
                                             }
                                             case "Teléfono": {
                                                 CustomCountryPicker picker = new CustomCountryPicker(getActivity(),
-                                                        field, CustomCountryPicker.PickerType.CODIGO_TELEFONICO);
+                                                        field, CustomCountryPicker.PickerType.CODIGO_TELEFONICO, token);
                                                 binding.layoutDinamicFields.addView(picker,
                                                         new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                                                 ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -263,7 +268,7 @@ public class CreateWorkflowDialog extends DialogFragment {
                                             }
                                             case "Moneda": {
                                                 CustomCountryPicker picker = new CustomCountryPicker(getActivity(),
-                                                        field, CustomCountryPicker.PickerType.MONEDA);
+                                                        field, CustomCountryPicker.PickerType.MONEDA, token);
                                                 binding.layoutDinamicFields.addView(picker,
                                                         new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                                                 ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -451,7 +456,7 @@ public class CreateWorkflowDialog extends DialogFragment {
         });
         viewModel.getObservableCreate().observe(this, workflowsObserver);
         viewModel.getObservableCreateError().observe(this, errorObserver);
-        viewModel.createWorkflow("", workflowTypeId, title, workflowMetas, start, description);
+        viewModel.createWorkflow(token, workflowTypeId, title, workflowMetas, start, description);
     }
 
 }

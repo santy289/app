@@ -37,16 +37,16 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     protected void getWorkflows(String auth) {
-        this.auth = auth;
+        this.auth = auth2;
+        //this.auth = auth;
         try {
             if (Utils.isConnected()) {
-                getWorkflowsFromService(auth2, 0);
+                getWorkflowsFromService(this.auth, 0);
             } else {
                 getWorkflowsFromLocal(null);
             }
         } catch (InterruptedException | IOException e) {
             getWorkflowsFromLocal(null);
-            //e.printStackTrace();
         }
     }
 
@@ -61,10 +61,11 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     private void onServiceSuccess(WorkflowsResponse workflowsResponse) {
+        workflows = new ArrayList<>();
         workflows.addAll(workflowsResponse.getList());
         if (!workflowsResponse.getPager().isIsLastPage()) {
             //todo CAMBIAR AUTH
-            getWorkflowsFromService(auth2, workflowsResponse.getPager().getNextPage());
+            getWorkflowsFromService(auth, workflowsResponse.getPager().getNextPage());
         } else {
             workflowRepository.setWorkflowsOnInternal(workflows).subscribe(this::onWorkflowSuccess,
                     this::onWorkflowFailure);

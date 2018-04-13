@@ -21,6 +21,8 @@ import com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment.ResetPasswordFr
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment.ResetPasswordModule;
 import com.rootnetapp.rootnetintranet.ui.resetPass.tokenfragment.RequestTokenFragment;
 import com.rootnetapp.rootnetintranet.ui.resetPass.tokenfragment.RequestTokenModule;
+import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
+import com.rootnetapp.rootnetintranet.ui.timeline.TimelineModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailModule;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
@@ -49,7 +51,8 @@ import dagger.Provides;
                 EditProfileModule.class,
                 WorkflowModule.class,
                 CreateWorkflowModule.class,
-                WorkflowDetailModule.class
+                WorkflowDetailModule.class,
+                TimelineModule.class
         }
 )
 
@@ -86,5 +89,7 @@ public interface AppComponent {
     void inject(CustomCountryPicker countryPicker);
 
     void inject(WorkflowDetailFragment workflowDetailFragment);
+
+    void inject(TimelineFragment timelineFragment);
 
 }

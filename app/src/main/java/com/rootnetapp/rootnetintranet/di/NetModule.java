@@ -13,10 +13,11 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.moshi.MoshiConverterFactory;
+
+import static com.rootnetapp.rootnetintranet.commons.MyOkHttpClient.getUnsafeOkHttpClient;
 
 @Module
 public class NetModule {
@@ -24,8 +25,10 @@ public class NetModule {
     @Provides
     @Singleton
     Retrofit provideRetrofit() {
-        OkHttpClient client = RetrofitUrlManager.getInstance().with(new OkHttpClient.Builder())
-                .build();
+        /*OkHttpClient client = RetrofitUrlManager.getInstance().with(new OkHttpClient.Builder())
+                .build();*/
+
+        OkHttpClient client = getUnsafeOkHttpClient();
         return new Retrofit.Builder()
                 .baseUrl(Utils.URL)
                 .client(client)

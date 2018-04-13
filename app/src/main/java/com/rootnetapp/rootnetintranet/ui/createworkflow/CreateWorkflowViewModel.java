@@ -34,7 +34,6 @@ public class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Integer> mCreateErrorLiveData;
     private CreateWorkflowRepository createWorkflowRepository;
-    private String auth;
     //todo REMOVE, solo testing
     private String auth2 = "Bearer " + Utils.testToken;
 

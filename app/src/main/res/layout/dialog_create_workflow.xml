@@ -4,7 +4,7 @@
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:minWidth="400dp">
+        android:minWidth="450dp">
 
         <RelativeLayout
             android:id="@+id/header"
@@ -117,7 +117,6 @@
                             android:layout_height="wrap_content"
                             android:padding="5dp"
                             android:textColor="@color/colorPrimaryDark"
-
                             android:text="@string/number" />
 
                         <android.support.v7.widget.AppCompatEditText

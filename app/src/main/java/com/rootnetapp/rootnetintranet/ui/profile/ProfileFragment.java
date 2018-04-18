@@ -16,14 +16,15 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.auth0.android.jwt.JWT;
-import com.bumptech.glide.Glide;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.databinding.FragmentProfileBinding;
+import com.rootnetapp.rootnetintranet.models.responses.user.Department;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.editprofile.EditProfileActivity;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
+import com.squareup.picasso.Picasso;
 
 import javax.inject.Inject;
 
@@ -65,7 +66,7 @@ public class ProfileFragment extends Fragment {
         setHasOptionsMenu(true);
         //TODO preferences inyectadas con Dagger
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String token = prefs.getString("token","");
+        String token = prefs.getString("token", "");
         JWT jwt = new JWT(token);
         id = Integer.parseInt(jwt.getClaim("profile_id").asString());
         subscribe();
@@ -101,11 +102,14 @@ public class ProfileFragment extends Fragment {
         final Observer<User> userObserver = ((User data) -> {
             Utils.hideLoading();
             if (null != data) {
-                Glide.with(this).load(Utils.imgDomain +data.getPicture().trim()).into(fragmentProfileBinding.imgUser);
+                String path = Utils.imgDomain + data.getPicture().trim();
+                Picasso.get().load(path).into(fragmentProfileBinding.imgUser);
                 fragmentProfileBinding.tvName.setText(data.getFullName());
-                //todo modificar DAO para soportar departamentos
-                //todo implementar DAO de departamentos
-                fragmentProfileBinding.tvDepartment.setText("asdf");
+                String departments = "";
+                for (Department dpt : data.getDepartment()) {
+                    departments += dpt.getName() + " ";
+                }
+                fragmentProfileBinding.tvDepartment.setText(departments);
                 fragmentProfileBinding.tvPhone.setText(data.getPhoneNumber());
                 fragmentProfileBinding.tvEmail.setText(data.getEmail());
                 fragmentProfileBinding.layoutProfile.setVisibility(View.VISIBLE);

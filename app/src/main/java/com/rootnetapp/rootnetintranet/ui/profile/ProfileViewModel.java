@@ -21,7 +21,7 @@ public class ProfileViewModel extends ViewModel {
         this.profileRepository = profileRepository;
     }
 
-    protected void getUser(int id) {
+    public void getUser(int id) {
         profileRepository.getUser(id).subscribe(this::onUserSuccess, this::onUserFailure);
     }
 
@@ -33,14 +33,14 @@ public class ProfileViewModel extends ViewModel {
         mErrorLiveData.setValue(R.string.failure_connect);
     }
 
-    protected LiveData<User> getObservableUser() {
+    public LiveData<User> getObservableUser() {
         if (mUserLiveData == null) {
             mUserLiveData = new MutableLiveData<>();
         }
         return mUserLiveData;
     }
 
-    protected LiveData<Integer> getObservableError() {
+    public LiveData<Integer> getObservableError() {
         if (mErrorLiveData == null) {
             mErrorLiveData = new MutableLiveData<>();
         }

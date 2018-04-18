@@ -17,6 +17,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.databinding.TimelineCommentItemBinding;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.Comment;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,8 +66,8 @@ public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineComment
             for (User user : people) {
                 if (user.getUserId() == item.getAuthor()) {
                     author = user;
-                    //todo setimage with glide
-                    //holder.binding.imgPoster
+                    String path = Utils.imgDomain + user.getPicture().trim();
+                    Picasso.get().load(path).into(holder.binding.imgPoster);
                     holder.binding.tvName.setText(user.getFullName());
                 }
             }

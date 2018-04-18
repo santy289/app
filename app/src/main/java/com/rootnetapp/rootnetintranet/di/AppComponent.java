@@ -15,12 +15,14 @@ import com.rootnetapp.rootnetintranet.ui.editprofile.EditProfileActivity;
 import com.rootnetapp.rootnetintranet.ui.editprofile.EditProfileModule;
 import com.rootnetapp.rootnetintranet.ui.login.LoginActivity;
 import com.rootnetapp.rootnetintranet.ui.login.LoginModule;
+import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileModule;
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment.ResetPasswordFragment;
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment.ResetPasswordModule;
 import com.rootnetapp.rootnetintranet.ui.resetPass.tokenfragment.RequestTokenFragment;
 import com.rootnetapp.rootnetintranet.ui.resetPass.tokenfragment.RequestTokenModule;
+import com.rootnetapp.rootnetintranet.ui.splash.SplashActivity;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
@@ -61,6 +63,10 @@ public interface AppComponent {
     void inject(DomainActivity domainActivity);
 
     void inject(LoginActivity loginActivity);
+
+    void inject(MainActivity mainActivity);
+
+    void inject(SplashActivity splashActivity);
 
     void inject(ResetPasswordFragment resetPasswordFragment);
 

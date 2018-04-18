@@ -17,7 +17,7 @@
             android:paddingEnd="15dp"
             android:paddingStart="15dp"
             android:paddingTop="10dp"
-            android:text="@string/items"
+            android:text="@string/timeline"
             android:textAllCaps="true"
             android:textColor="@color/colorPrimaryDark"
             android:textSize="18sp"
@@ -57,15 +57,34 @@
                     android:src="@drawable/ic_mail_black_24dp"
                     android:tint="@color/transparentArrow" />
 
-                <TextView
-                    android:id="@+id/tv_selecteddates"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginStart="4dp"
-                    android:text="Dec 1 2017 - Dec 31 2017"
-                    android:textColor="@color/colorPrimary"
-                    android:textSize="10sp" />
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_selecteddatetitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="4dp"
+                        android:text="Selected dates: "
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="10sp" />
+
+                    <TextView
+                        android:id="@+id/tv_selecteddates"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="4dp"
+                        android:text="(Dec 1 2017 - Dec 31 2017)"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="10sp" />
+
+                </LinearLayout>
+
+
 
             </LinearLayout>
 
@@ -79,30 +98,30 @@
 
                 <Button
                     android:id="@+id/btn_month"
-                    android:layout_width="55dp"
-                    android:layout_height="40dp"
+                    android:layout_width="45dp"
+                    android:layout_height="35dp"
                     android:background="@drawable/selectedfilter_bg"
                     android:text="@string/month"
                     android:textColor="@color/white"
-                    android:textSize="12sp" />
+                    android:textSize="9sp" />
 
                 <Button
                     android:id="@+id/btn_week"
-                    android:layout_width="55dp"
-                    android:layout_height="40dp"
+                    android:layout_width="45dp"
+                    android:layout_height="35dp"
                     android:background="@drawable/unselectedfilter_bg"
                     android:text="@string/week"
                     android:textColor="@color/unselected_filter_text"
-                    android:textSize="12sp" />
+                    android:textSize="9sp" />
 
                 <Button
                     android:id="@+id/btn_day"
-                    android:layout_width="55dp"
-                    android:layout_height="40dp"
+                    android:layout_width="45dp"
+                    android:layout_height="35dp"
                     android:background="@drawable/unselectedfilter_bg"
                     android:text="@string/day"
                     android:textColor="@color/unselected_filter_text"
-                    android:textSize="12sp" />
+                    android:textSize="9sp" />
 
             </LinearLayout>
 

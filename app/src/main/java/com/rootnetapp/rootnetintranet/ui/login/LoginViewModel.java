@@ -21,7 +21,7 @@ public class LoginViewModel extends ViewModel {
         this.loginRepository = loginRepository;
     }
 
-    protected void login(String user, String password) {
+    public void login(String user, String password) {
         loginRepository.login(user, password).subscribe(this::onLoginSuccess, this::onLoginFailure);
     }
 
@@ -33,14 +33,14 @@ public class LoginViewModel extends ViewModel {
         mErrorLiveData.setValue(R.string.failure_connect);
     }
 
-    protected LiveData<LoginResponse> getObservableLogin() {
+    public LiveData<LoginResponse> getObservableLogin() {
         if (mLoginLiveData == null) {
             mLoginLiveData = new MutableLiveData<>();
         }
         return mLoginLiveData;
     }
 
-    protected LiveData<Integer> getObservableError() {
+    public LiveData<Integer> getObservableError() {
         if (mErrorLiveData == null) {
             mErrorLiveData = new MutableLiveData<>();
         }

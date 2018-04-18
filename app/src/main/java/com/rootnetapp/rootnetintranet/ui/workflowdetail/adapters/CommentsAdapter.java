@@ -5,10 +5,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import com.bumptech.glide.Glide;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.CommentsItemBinding;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -38,8 +38,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> {
     @Override
     public void onBindViewHolder(CommentsViewholder holder, int i) {
         Comment item = comments.get(i);
-        Glide.with(context).load(Utils.domain + item.getUserInfo().getPicture()).
-                into(holder.binding.imgUser);
+        Picasso.get().load(Utils.domain + item.getUserInfo().getPicture()).into(holder.binding.imgUser);
         holder.binding.tvName.setText(item.getUserInfo().getFullName());
         String date = item.getDate().split("T")[0];
         String hour = (item.getDate().split("T")[1]).split("-")[0];

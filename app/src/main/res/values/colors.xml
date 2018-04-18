@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#4b6d8d</color>
-    <color name="colorPrimaryDark">#24303c</color>
-    <color name="colorAccent">#e94247</color>
+    <color name="colorPrimary">#414759</color>
+    <color name="colorPrimaryDark">#414759</color>
+    <color name="colorAccent">#7283c1</color>
 
     <color name="detail">#f5f6f8</color>
     <color name="fab_color">#6d86c2</color>
     <color name="detailsColor">#7e7283c1</color>
     <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
     <color name="transparent">#a1000000</color>
     <color name="transparentArrow">#d1d7e8</color>
     <color name="arrow">#8197cc</color>
 
     <color name="green">#7ab95c</color>
+    <color name="red">#ca201d</color>
     <color name="noColor">#00000000</color>
     <color name="workflowListBg">#f8f9fc</color>
 

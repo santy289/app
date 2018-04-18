@@ -73,7 +73,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder>{
             holder.binding.tvDate.setText(date + " - " + hour);
         }else{
             holder.binding.imgUploaded.setImageResource(R.drawable.ic_close_black_24dp);
-            holder.binding.imgUploaded.setColorFilter(ContextCompat.getColor(context, R.color.colorAccent),
+            holder.binding.imgUploaded.setColorFilter(ContextCompat.getColor(context, R.color.red),
                     android.graphics.PorterDuff.Mode.SRC_IN);
         }
         if(i %2 ==0){

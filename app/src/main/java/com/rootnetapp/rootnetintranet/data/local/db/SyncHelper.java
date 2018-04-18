@@ -23,6 +23,7 @@ import io.reactivex.schedulers.Schedulers;
 public class SyncHelper {
 
     private MutableLiveData<Boolean> mSyncLiveData;
+    private MutableLiveData<Integer> mProgressLiveData;
     private ApiInterface apiInterface;
     private AppDatabase database;
     private int totalQueries =2, queriesCompleted =0;
@@ -82,6 +83,7 @@ public class SyncHelper {
 
     private void success(Object o) {
         queriesCompleted++;
+        mProgressLiveData.setValue(queriesCompleted);
         if(totalQueries == queriesCompleted){
             mSyncLiveData.setValue(true);
         }
@@ -98,4 +100,10 @@ public class SyncHelper {
         return mSyncLiveData;
     }
 
+    public LiveData<Integer> getObservableProgress() {
+        if (mProgressLiveData == null) {
+            mProgressLiveData = new MutableLiveData<>();
+        }
+        return mProgressLiveData;
+    }
 }

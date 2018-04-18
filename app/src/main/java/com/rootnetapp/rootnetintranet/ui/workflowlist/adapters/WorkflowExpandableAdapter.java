@@ -7,12 +7,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.bumptech.glide.Glide;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowItemBinding;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragmentInterface;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +62,7 @@ public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowView
         //Esto deberia venir siempre de la consulta al servicio.
         if (item.getAuthor() != null) {
             holder.binding.tvOwner.setText(item.getAuthor().getFullName());
-            Glide.with(recycler).load(Utils.domain +item.getAuthor().getPicture()).into(holder.binding.imgProfile);
+            Picasso.get().load(Utils.domain +item.getAuthor().getPicture()).into(holder.binding.imgProfile);
         }
         if(item.getWorkflowStateInfo() != null){
             if(item.getWorkflowStateInfo().getVirtualColumns() != null){

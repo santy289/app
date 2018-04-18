@@ -16,6 +16,7 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ActivityDomainBinding;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
+import com.rootnetapp.rootnetintranet.models.responses.domain.Product;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.login.LoginActivity;
 import com.squareup.moshi.JsonAdapter;
@@ -69,14 +70,23 @@ public class DomainActivity extends AppCompatActivity {
         final Observer<ClientResponse> domainObserver = ((ClientResponse data) -> {
             Utils.hideLoading();
             if (null != data) {
-                Moshi moshi = new Moshi.Builder().build();
-                JsonAdapter<ClientResponse> jsonAdapter = moshi.adapter(ClientResponse.class);
-                //todo Preguntar como implementar SharesPreferencesModule en los Viewmodels para cada tipo de clase guardada
-                SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-                sharedPref.edit().putString("domain", jsonAdapter.toJson(data)).apply();
-                //todo cambiar por consulta al viewmodel
-                startActivity(new Intent(this, LoginActivity.class));
-                finishAffinity();
+                boolean active = false;
+                for (Product product: data.getClient().getProducts()) {
+                    if(product.getMachineName().equals("intranet")){
+                        active = true;
+                        Moshi moshi = new Moshi.Builder().build();
+                        JsonAdapter<ClientResponse> jsonAdapter = moshi.adapter(ClientResponse.class);
+                        //todo Preguntar como implementar SharesPreferencesModule en los Viewmodels para cada tipo de clase guardada
+                        SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+                        sharedPref.edit().putString("domain", jsonAdapter.toJson(data)).apply();
+                        //todo cambiar por consulta al viewmodel
+                        startActivity(new Intent(this, LoginActivity.class));
+                        finishAffinity();
+                    }
+                }
+                if(!active){
+                    Toast.makeText(this, getString(R.string.product_not_enabled), Toast.LENGTH_LONG).show();
+                }
             }
         });
         final Observer<Integer> errorObserver = ((Integer data) -> {

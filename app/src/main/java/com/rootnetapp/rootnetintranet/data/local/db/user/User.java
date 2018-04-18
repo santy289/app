@@ -3,14 +3,74 @@ package com.rootnetapp.rootnetintranet.data.local.db.user;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.arch.persistence.room.TypeConverter;
+import android.arch.persistence.room.TypeConverters;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.rootnetapp.rootnetintranet.models.responses.user.Department;
 import com.squareup.moshi.Json;
+
+import java.lang.reflect.Type;
+import java.util.List;
 
 /**
  * Created by Propietario on 14/03/2018.
  */
 
+class UserConverters {
+    @TypeConverter
+    public static List<Department> stringToDepartments(String json) {
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<Department>>() {}.getType();
+        List<Department> departments = gson.fromJson(json, type);
+        return departments;
+    }
+
+    @TypeConverter
+    public static String departmentsToString(List<Department> list) {
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<Department>>() {}.getType();
+        String json = gson.toJson(list, type);
+        return json;
+    }
+
+    @TypeConverter
+    public static List<String> stringToList(String json) {
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<String>>() {}.getType();
+        List<String> strings = gson.fromJson(json, type);
+        return strings;
+    }
+
+    @TypeConverter
+    public static String listToString(List<String> list) {
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<String>>() {}.getType();
+        String json = gson.toJson(list, type);
+        return json;
+    }
+
+    @TypeConverter
+    public static List<Integer> stringToInteger(String json) {
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<Integer>>() {}.getType();
+        List<Integer> integers = gson.fromJson(json, type);
+        return integers;
+    }
+
+    @TypeConverter
+    public static String integerToString(List<Integer> list) {
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<Integer>>() {}.getType();
+        String json = gson.toJson(list, type);
+        return json;
+    }
+
+}
+
 @Entity
+@TypeConverters(UserConverters.class)
 public class User {
 
     @PrimaryKey
@@ -50,15 +110,19 @@ public class User {
     @Json(name = "locale")
     private String locale;
 
-    /*@Json(name = "enabledProducts")
+    @ColumnInfo(name = "enabledProducts")
+    @Json(name = "enabledProducts")
     private List<String> enabledProducts = null;
 
+    @ColumnInfo(name = "department")
     @Json(name = "department")
     private List<Department> department = null;
 
+    @ColumnInfo(name = "groups")
     @Json(name = "groups")
     private List<Integer> groups = null;
 
+    /*
     @Json(name = "roles")
     private Roles roles;*/
 
@@ -134,7 +198,7 @@ public class User {
         this.locale = locale;
     }
 
-    /*public List<String> getEnabledProducts() {
+    public List<String> getEnabledProducts() {
         return enabledProducts;
     }
 
@@ -156,7 +220,7 @@ public class User {
 
     public void setGroups(List<Integer> groups) {
         this.groups = groups;
-    }
+    }/*
 
     public Roles getRoles() {
         return roles;

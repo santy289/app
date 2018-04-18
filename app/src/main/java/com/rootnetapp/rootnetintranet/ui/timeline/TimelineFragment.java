@@ -9,7 +9,10 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -24,15 +27,13 @@ import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.timeline.adapters.TimelineAdapter;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
 
 
-public class TimelineFragment extends Fragment implements TimelineInterface{
+public class TimelineFragment extends Fragment implements TimelineInterface/*,
+        PopupMenu.OnMenuItemClickListener*/{
 
     @Inject
     TimelineViewModelFactory viewModelFactory;
@@ -81,7 +82,8 @@ public class TimelineFragment extends Fragment implements TimelineInterface{
         binding.btnSelectdates.setOnClickListener(this::selectDates);
         start = Utils.getMonthDay(0,1);
         end = Utils.getMonthDay(0,30);
-        binding.tvSelecteddates.setText(getString(R.string.current_month)+" ("+start+" - "+end+")");
+        binding.tvSelecteddates.setText("("+start+" - "+end+")");
+        binding.tvSelecteddatetitle.setText(getString(R.string.current_month));
         start = start+"T00:00:00-0000";
         end = end+"T00:00:00-0000";
         getTimeline();
@@ -103,7 +105,8 @@ public class TimelineFragment extends Fragment implements TimelineInterface{
                 binding.btnDay.setTextColor(getResources().getColor(R.color.unselected_filter_text));
                 start = Utils.getMonthDay(0,1);
                 end = Utils.getMonthDay(0,30);
-                binding.tvSelecteddates.setText(getString(R.string.current_month)+" ("+start+" - "+end+")");
+                binding.tvSelecteddates.setText("("+start+" - "+end+")");
+                binding.tvSelecteddatetitle.setText(getString(R.string.current_month));
                 start = start+"T00:00:00-0000";
                 end = end+"T00:00:00-0000";
                 break;
@@ -117,7 +120,8 @@ public class TimelineFragment extends Fragment implements TimelineInterface{
                 binding.btnDay.setTextColor(getResources().getColor(R.color.unselected_filter_text));
                 start = Utils.getWeekStart();
                 end = Utils.getWeekEnd();
-                binding.tvSelecteddates.setText(getString(R.string.current_week)+" ("+start+" - "+end+")");
+                binding.tvSelecteddates.setText("("+start+" - "+end+")");
+                binding.tvSelecteddatetitle.setText(getString(R.string.current_week));
                 start = start+"T00:00:00-0000";
                 end = end+"T00:00:00-0000";
                 break;
@@ -130,7 +134,8 @@ public class TimelineFragment extends Fragment implements TimelineInterface{
                 binding.btnDay.setBackground(getResources().getDrawable(R.drawable.selectedfilter_bg));
                 binding.btnDay.setTextColor(getResources().getColor(R.color.white));
                 start = Utils.getCurrentDate();
-                binding.tvSelecteddates.setText(getString(R.string.today)+" ("+start+")");
+                binding.tvSelecteddates.setText("("+start+")");
+                binding.tvSelecteddatetitle.setText(getString(R.string.today));
                 start = start+"T00:00:00-0000";
                 end = Utils.getCurrentDate()+"T23:59:59-0000";
                 break;
@@ -198,7 +203,8 @@ public class TimelineFragment extends Fragment implements TimelineInterface{
 
     @Override
     public void setDate(String start, String end) {
-        binding.tvSelecteddates.setText(getString(R.string.selected_period)+" ("+start+" - "+end+")");
+        binding.tvSelecteddates.setText("("+start+" - "+end+")");
+        binding.tvSelecteddatetitle.setText(getString(R.string.selected_period));
         this.start = start+"T00:00:00-0000";
         this.end = end+"T00:00:00-0000";
         getTimeline();
@@ -208,4 +214,24 @@ public class TimelineFragment extends Fragment implements TimelineInterface{
     public void reload() {
         getTimeline();
     }
+
+    /*private void imgClick(View v) {
+        PopupMenu popup = new PopupMenu(getContext(), v);
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.menu_timeline_filters, popup.getMenu());
+        popup.setOnMenuItemClickListener(this);
+        popup.show();
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.:
+
+                return true;
+            default:
+                return false;
+        }
+    }*/
+
 }

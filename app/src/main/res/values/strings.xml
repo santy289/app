@@ -28,7 +28,7 @@
     <string name="token">Token</string>
     <string name="paste_token">Copy and paste the token sent.</string>
     <string name="check_email">An email with a validation token has been sent to your email account.</string>
-    <string name="items">Timeline</string>
+    <string name="timeline">Timeline</string>
     <string name="community">Community</string>
     <string name="workflows">Workflows</string>
     <string name="projects">Projects</string>
@@ -66,7 +66,7 @@
     <string name="business_oportunities">Business Oportunities</string>
     <string name="synchronize">Sync up</string>
     <string name="synchronization">Synchronization</string>
-    <string name="workflow_list">WORKFLOWS LISTING</string>
+    <string name="workflow_list">WORKFLOWS</string>
     <string name="btn_add">+ Add</string>
     <string name="description">Description</string>
     <string name="lastname">Last Name</string>
@@ -148,4 +148,18 @@
     <string name="txt_statusname">Status name</string>
     <string name="reply">Reply</string>
     <string name="no_timeline">There are currently no items matching your search parameters.</string>
+    <string name="synchronizing">Synchronizing</string>
+    <string name="every_10_mins">Every 10 mins</string>
+    <string name="last_sync">Last sync:</string>
+    <string name="product_not_enabled">This product has not been assigned to your domain.</string>
+    <string name="pending_workflows">Pending Workflows</string>
+    <string name="analytics">Analytics</string>
+    <string name="company_overview">Company Overview</string>
+    <string name="date">Date</string>
+    <string name="title">Title</string>
+    <string name="author">Author</string>
+    <string name="days_open">Days open</string>
+    <string name="pending_approval">Pending for Approval</string>
+    <string name="updated">Updated</string>
+    <string name="out_of_time">Out of time</string>
 </resources>

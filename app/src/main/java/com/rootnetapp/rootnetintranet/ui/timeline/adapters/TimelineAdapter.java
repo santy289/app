@@ -21,6 +21,7 @@ import com.rootnetapp.rootnetintranet.models.responses.timeline.ItemComments;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineItem;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineInterface;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,8 +73,8 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
             for (User user : people) {
                 if (user.getUserId() == item.getAuthor()) {
                     author = user;
-                    //todo setimage with glide
-                    //holder.binding.imgPoster
+                    String path = Utils.imgDomain + user.getPicture().trim();
+                    Picasso.get().load(path).into(holder.binding.imgPoster);
                     title = user.getFullName();
                 }
             }

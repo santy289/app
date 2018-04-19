@@ -10,6 +10,7 @@ import android.view.Window;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.databinding.DialogSelectDateBinding;
+import com.rootnetapp.rootnetintranet.ui.manager.ManagerInterface;
 
 /**
  * Created by root on 11/04/18.
@@ -18,11 +19,20 @@ import com.rootnetapp.rootnetintranet.databinding.DialogSelectDateBinding;
 public class SelectDateDialog extends DialogFragment{
 
     private DialogSelectDateBinding binding;
-    private TimelineInterface anInterface;
+    private TimelineInterface timeInterface;
+    private ManagerInterface manInterface;
 
     public static SelectDateDialog newInstance(TimelineInterface anInterface) {
         SelectDateDialog fragment = new SelectDateDialog();
-        fragment.anInterface = anInterface;
+        fragment.timeInterface = anInterface;
+        fragment.manInterface = null;
+        return fragment;
+    }
+
+    public static SelectDateDialog newInstance(ManagerInterface anInterface) {
+        SelectDateDialog fragment = new SelectDateDialog();
+        fragment.manInterface = anInterface;
+        fragment.timeInterface = null;
         return fragment;
     }
 
@@ -45,7 +55,12 @@ public class SelectDateDialog extends DialogFragment{
         String end = binding.pickerEnddate.getYear()+"-"
                 +(binding.pickerStartdate.getMonth()+1)+"-"
                 +binding.pickerEnddate.getDayOfMonth();
-        anInterface.setDate(start, end);
+
+        if(manInterface!=null){
+            manInterface.setDate(start, end);
+        }else if(timeInterface!=null){
+            timeInterface.setDate(start, end);
+        }
         dismiss();
     }
 

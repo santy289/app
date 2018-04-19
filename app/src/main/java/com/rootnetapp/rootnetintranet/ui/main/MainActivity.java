@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity
                 break;
             }
             case R.id.nav_workflowmanager: {
-                showFragment(WorkflowManagerFragment.newInstance(), false);
+                showFragment(WorkflowManagerFragment.newInstance(this), false);
                 mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
                 break;
             }

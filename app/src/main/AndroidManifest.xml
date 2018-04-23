@@ -23,20 +23,20 @@
             android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.domain.DomainActivity"
-            android:theme="@style/LoginStyle">
-        </activity>
+            android:theme="@style/LoginStyle"></activity>
         <activity
             android:name=".ui.login.LoginActivity"
             android:theme="@style/LoginStyle" />
         <activity
-            android:name=".ui.SyncActivity"
+            android:name=".ui.sync.SyncActivity"
             android:label="@string/title_activity_sync"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.editprofile.EditProfileActivity"
             android:label="@string/title_activity_edit_profile"
             android:theme="@style/AppTheme" />
-        <activity android:name=".ui.splash.SplashActivity"
+        <activity
+            android:name=".ui.splash.SplashActivity"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -44,6 +44,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".services.manager.WorkflowManagerService"
+            android:enabled="true"
+            android:exported="false"></service>
     </application>
 
 </manifest>

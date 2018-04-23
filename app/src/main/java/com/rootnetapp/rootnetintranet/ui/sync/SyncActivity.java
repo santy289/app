@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.ui;
+package com.rootnetapp.rootnetintranet.ui.sync;
 
 import android.arch.lifecycle.Observer;
 import android.content.Context;
@@ -11,7 +11,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.data.local.db.SyncHelper;
+import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
 
 import javax.inject.Inject;

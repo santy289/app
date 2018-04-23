@@ -43,6 +43,8 @@
             android:id="@+id/rec_workflows"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingStart="15dp"
+            android:paddingEnd="15dp"
             android:layout_below="@id/header"/>
 
     </RelativeLayout>

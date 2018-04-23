@@ -45,6 +45,10 @@ public class PendingWorkflowsAdapter  extends RecyclerView.Adapter<PendingWorkfl
     @Override
     public void onBindViewHolder(PendingWorkflowsViewholder holder, int i) {
 
+        if(i%2==0){
+            holder.binding.tvHeaderdate.setTextColor(ContextCompat.getColor(context, R.color.red));
+        }
+
         holder.binding.lytHeader.setOnClickListener(view -> {
             if (holder.binding.lytDetail.getVisibility() == View.GONE) {
                 holder.binding.btnArrow.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);

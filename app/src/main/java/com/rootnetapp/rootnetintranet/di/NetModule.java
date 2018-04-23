@@ -6,7 +6,7 @@ import android.content.Context;
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
-import com.rootnetapp.rootnetintranet.data.local.db.SyncHelper;
+import com.rootnetapp.rootnetintranet.ui.sync.SyncHelper;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 
 import javax.inject.Singleton;

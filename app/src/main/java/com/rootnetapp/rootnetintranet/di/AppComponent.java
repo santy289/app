@@ -1,6 +1,8 @@
 package com.rootnetapp.rootnetintranet.di;
 
-import com.rootnetapp.rootnetintranet.ui.SyncActivity;
+import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerModule;
+import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerService;
+import com.rootnetapp.rootnetintranet.ui.sync.SyncActivity;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowDialog;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowModule;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.CustomCountryPicker;
@@ -33,7 +35,6 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowModule;
 import javax.inject.Singleton;
 
 import dagger.Component;
-import dagger.Provides;
 
 /**
  * Created by Propietario on 09/03/2018.
@@ -54,7 +55,8 @@ import dagger.Provides;
                 WorkflowModule.class,
                 CreateWorkflowModule.class,
                 WorkflowDetailModule.class,
-                TimelineModule.class
+                TimelineModule.class,
+                WorkflowManagerModule.class
         }
 )
 
@@ -97,5 +99,7 @@ public interface AppComponent {
     void inject(WorkflowDetailFragment workflowDetailFragment);
 
     void inject(TimelineFragment timelineFragment);
+
+    void inject(WorkflowManagerService workflowManagerService);
 
 }

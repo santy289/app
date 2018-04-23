@@ -3,6 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.manager;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import android.view.Window;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.databinding.DialogWorkflowManagerBinding;
+import com.rootnetapp.rootnetintranet.ui.manager.adapters.ManagerDialogAdapter;
 
 /**
  * Created by root on 19/04/18.
@@ -55,9 +57,10 @@ public class ManagerWorkflowsDialog extends DialogFragment {
             }
         }
         binding.btnClose.setOnClickListener(view -> dismiss());
+        binding.recWorkflows.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recWorkflows.setAdapter(new ManagerDialogAdapter());
         return binding.getRoot();
     }
-
 
     public enum DialogTypes{
         PENDING, WORKFLOWS, OUT_OF_TIME, UPDATED

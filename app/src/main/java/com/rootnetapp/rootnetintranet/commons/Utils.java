@@ -1,15 +1,9 @@
 package com.rootnetapp.rootnetintranet.commons;
 
-import android.app.Application;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.CursorLoader;
-import android.database.Cursor;
 import android.net.Uri;
-import android.provider.MediaStore;
-import android.util.Base64;
-import android.util.Base64OutputStream;
 import android.webkit.MimeTypeMap;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -17,13 +11,9 @@ import com.rootnetapp.rootnetintranet.R;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;

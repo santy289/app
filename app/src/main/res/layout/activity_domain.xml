@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <data>
+        <variable
+            name="DomainViewModel"
+            type="com.rootnetapp.rootnetintranet.ui.domain.DomainViewModel" />
+    </data>
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.rootnetapp.rootnetintranet.ui.domain.DomainActivity">
+
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingBottom="100dp"
+                android:paddingTop="100dp">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:cropToPadding="false"
+                    android:focusableInTouchMode="true"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/logo" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/marginVertical_domain"
+                    android:layout_marginEnd="@dimen/marginHorizontal_domain"
+                    android:layout_marginStart="@dimen/marginHorizontal_domain"
+                    android:layout_marginTop="@dimen/marginVertical_domain"
+                    android:text="@string/cloud_based"
+                    android:textColor="@color/white" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/marginVertical_domain"
+                    android:layout_marginEnd="@dimen/marginHorizontal_domain"
+                    android:layout_marginStart="@dimen/marginHorizontal_domain"
+                    android:layout_marginTop="@dimen/marginVertical_domain"
+                    android:orientation="horizontal"
+                    android:weightSum="10">
+
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/til_domain"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="6"
+                        android:textColorHint="@color/colorAccent">
+
+                        <android.support.v7.widget.AppCompatEditText
+                            android:id="@+id/input_domain"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:hint="@string/subdomain"
+                            android:textColor="@color/white" />
+
+                    </android.support.design.widget.TextInputLayout>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="4"
+                        android:gravity="center_vertical"
+                        android:text="@string/url_half"
+                        android:textColor="@color/white" />
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btn_check_domain"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/marginVertical_domain"
+                    android:layout_marginEnd="@dimen/marginHorizontal_domain"
+                    android:layout_marginStart="@dimen/marginHorizontal_domain"
+                    android:layout_marginTop="@dimen/marginVertical_domain"
+                    android:backgroundTint="@color/colorPrimaryDark"
+                    android:onClick="onClick"
+                    android:text="@string/check_domain"
+                    android:textColor="@color/white" />
+
+                <TextView
+                    android:id="@+id/btn_get_plan"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/marginVertical_domain"
+                    android:text="@string/get_plan"
+                    android:textColor="@color/colorAccent"
+                    android:onClick="onClick" />
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </FrameLayout>
+
+</layout>

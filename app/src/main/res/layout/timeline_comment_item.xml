@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/transparentArrow"
+        android:padding="2dp">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/img_poster"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:padding="2dp"
+            android:src="@drawable/ic_perm_identity_black_24dp" />
+
+        <LinearLayout
+            android:id="@+id/lyt_cmnt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/img_poster"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="2dp">
+
+                <TextView
+                    android:id="@+id/tv_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingEnd="5dp"
+                    android:text="Jon Doe"
+                    android:textColor="@color/selected_filter"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_comment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="gjgjh ghhjj ghjfg dsfsd"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_reply"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:textColor="@color/selected_filter"
+                    android:text="@string/reply"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tv_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:text="x time ago"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/line"
+            android:layout_width="2dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_marginStart="5dp"
+            android:background="@color/selected_filter"
+            android:layout_alignTop="@+id/rec_comments"
+            android:layout_alignBottom="@+id/lyt_comments"
+            android:visibility="gone"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rec_comments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/line"
+            android:layout_below="@+id/lyt_cmnt"
+            android:visibility="gone"/>
+
+        <RelativeLayout
+            android:id="@+id/lyt_comments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/rec_comments"
+            android:layout_toEndOf="@+id/line"
+            android:background="@color/transparentArrow"
+            android:visibility="gone">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/img_profile"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_centerVertical="true"/>
+
+            <android.support.v7.widget.AppCompatEditText
+                android:id="@+id/input_comment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/edit_text_bg"
+                android:layout_toEndOf="@id/img_profile"
+                android:layout_toStartOf="@id/btn_comment"
+                android:layout_centerVertical="true"
+                android:hint="@string/add_comment"
+                android:textSize="12sp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp" />
+
+            <Button
+                android:id="@+id/btn_comment"
+                android:layout_width="90dp"
+                android:layout_height="40dp"
+                android:layout_margin="10dp"
+                android:layout_alignParentEnd="true"
+                android:textSize="12sp"
+                android:layout_centerVertical="true"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/selected_filter"
+                android:text="@string/comment"/>
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+</layout>

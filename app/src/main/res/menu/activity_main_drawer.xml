@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_timeline"
+            android:title="@string/timeline" />
+        <item
+            android:title="@string/workflow">
+            <menu>
+                <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/nav_workflowmanager"
+                    android:title="@string/workflow_manager" />
+                <item
+                    android:id="@+id/nav_workflows"
+                    android:title="@string/workflows" />
+                </group>
+            </menu>
+        </item>
+        <item
+            android:title="@string/modules">
+            <menu>
+                <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/nav_accounts"
+                    android:title="@string/accounts" />
+                <item
+                    android:id="@+id/nav_sales"
+                    android:title="@string/sales" />
+                <item
+                    android:id="@+id/nav_business"
+                    android:title="@string/business_oportunities" />
+                </group>
+            </menu>
+        </item>
+        <item
+            android:title="@string/synchronization">
+            <menu>
+                <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/nav_sync"
+                    android:title="@string/synchronize" />
+                </group>
+            </menu>
+        </item>
+        <item
+            android:id="@+id/nav_profile"
+            android:title="@string/profile" />
+        <item
+            android:id="@+id/nav_exit"
+            android:title="@string/exit" />
+    </group>
+</menu>

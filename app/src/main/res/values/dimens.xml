@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="marginVertical_domain">5dp</dimen>
+    <dimen name="marginHorizontal_domain">15dp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="nav_header_vertical_spacing">8dp</dimen>
+    <dimen name="nav_header_height">176dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="filters_width">200dp</dimen>
+    <dimen name="filters_height">400dp</dimen>
+    <dimen name="workflow_detail_standard_height">200dp</dimen>
+</resources>

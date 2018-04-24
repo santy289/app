@@ -1,6 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#414759</color>
+    <color name="colorPrimaryDark">#414759</color>
+    <color name="colorAccent">#7283c1</color>
+
+    <color name="detail">#f5f6f8</color>
+    <color name="fab_color">#6d86c2</color>
+    <color name="detailsColor">#7e7283c1</color>
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#a1000000</color>
+    <color name="transparentArrow">#d1d7e8</color>
+    <color name="arrow">#8197cc</color>
+
+    <color name="green">#7ab95c</color>
+    <color name="red">#ca201d</color>
+    <color name="noColor">#00000000</color>
+    <color name="workflowListBg">#f8f9fc</color>
+
+    <color name="selected_filter">#7283c1</color>
+    <color name="unselected_filter">#f3f6fb</color>
+
+    <color name="unselected_filter_text">#c6cedc</color>
+    <color name="grey_bg">#f6f6f6</color>
+
+    <color name="text_orange">#d2b04f</color>
+    <color name="text_yellow">#bdc372</color>
+    <color name="text_red">#ab2328</color>
+    <color name="text_light_green">#827ab95c</color>
+    <color name="text_light_red">#82ca201d</color>
+
 </resources>

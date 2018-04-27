@@ -41,8 +41,8 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    //android
 
+    //android
     compile 'com.android.support:appcompat-v7:' + rootProject.supportLibVersion;
     compile 'com.android.support.constraint:constraint-layout:' + rootProject.constraintLayoutVersion;
     compile 'com.android.support:recyclerview-v7:' + rootProject.supportLibVersion;
@@ -69,7 +69,8 @@ dependencies {
     compile "io.reactivex.rxjava2:rxandroid:${rxandroidLibraryVersion}"
     compile "io.reactivex.rxjava2:rxjava:${rxjavaLibraryVersion}"
     compile "de.hdodenhof:circleimageview:${circleImageViewVersion}"
-    compile 'com.squareup.picasso:picasso:2.71828'
+    compile "com.squareup.picasso:picasso:${picassoVersion}"
+    compile "com.google.firebase:firebase-messaging:${firebaseVersion}"
 
     testCompile 'junit:junit:4.12'
 

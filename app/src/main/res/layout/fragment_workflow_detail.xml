@@ -48,10 +48,10 @@
                         android:id="@+id/hdr_graph"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingBottom="15dp"
+                        android:paddingBottom="5dp"
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
-                        android:paddingTop="15dp">
+                        android:paddingTop="5dp">
 
                         <TextView
                             android:id="@+id/tv_workflowproject"
@@ -106,10 +106,10 @@
                         android:id="@+id/hdr_important"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingBottom="15dp"
+                        android:paddingBottom="5dp"
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
-                        android:paddingTop="15dp">
+                        android:paddingTop="5dp">
 
                         <TextView
                             android:layout_width="match_parent"
@@ -164,10 +164,10 @@
                         android:id="@+id/hdr_nextstep"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingBottom="15dp"
+                        android:paddingBottom="5dp"
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
-                        android:paddingTop="15dp">
+                        android:paddingTop="5dp">
 
                         <TextView
                             android:layout_width="match_parent"
@@ -291,10 +291,10 @@
                         android:id="@+id/hdr_info"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingBottom="15dp"
+                        android:paddingBottom="5dp"
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
-                        android:paddingTop="15dp">
+                        android:paddingTop="5dp">
 
                         <TextView
                             android:layout_width="match_parent"
@@ -342,10 +342,10 @@
                         android:id="@+id/hdr_peopleinvolved"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingBottom="15dp"
+                        android:paddingBottom="5dp"
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
-                        android:paddingTop="15dp">
+                        android:paddingTop="5dp">
 
                         <TextView
                             android:layout_width="match_parent"
@@ -426,10 +426,10 @@
                         android:id="@+id/hdr_approvalhistory"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingBottom="15dp"
+                        android:paddingBottom="5dp"
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
-                        android:paddingTop="15dp">
+                        android:paddingTop="5dp">
 
                         <TextView
                             android:layout_width="match_parent"
@@ -469,6 +469,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/lyt_documentstitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
@@ -492,6 +493,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/lyt_documentsheader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
@@ -541,6 +543,7 @@
                     android:background="@drawable/border" />
 
                 <LinearLayout
+                    android:id="@+id/lyt_attach"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"

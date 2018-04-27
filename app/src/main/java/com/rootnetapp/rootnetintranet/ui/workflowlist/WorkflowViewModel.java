@@ -31,14 +31,14 @@ public class WorkflowViewModel extends ViewModel {
     private List<Workflow> workflows, unordered;
     private String auth;
     //todo REMOVE, solo testing
-    private String auth2 = "Bearer "+Utils.testToken;
+    //private String auth2 = "Bearer "+Utils.testToken;
     public WorkflowViewModel(WorkflowRepository workflowRepository) {
         this.workflowRepository = workflowRepository;
     }
 
     protected void getWorkflows(String auth) {
-        this.auth = auth2;
-        //this.auth = auth;
+        //this.auth = auth2;
+        this.auth = auth;
         try {
             if (Utils.isConnected()) {
                 getWorkflowsFromService(this.auth, 0);

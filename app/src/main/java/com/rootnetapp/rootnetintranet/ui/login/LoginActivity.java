@@ -85,7 +85,7 @@ public class LoginActivity extends AppCompatActivity {
                 editor.putString("username", user).apply();
                 editor.putString("password", password).apply();
                 //todo manejo de JWT
-                JWT jwt = new JWT(data.getToken());
+                /*JWT jwt = new JWT(data.getToken());
                 String username = jwt.getClaim("username").asString();
                 String userType = jwt.getClaim("user_type").asString();
                 String locale = jwt.getClaim("locale").asString();
@@ -93,7 +93,7 @@ public class LoginActivity extends AppCompatActivity {
                 //String department = jwt.getClaim("department").asString();
                 //claim.asString();
                 Log.d("test", "username: " + username +
-                        " Type: " + userType + " locale: " + locale + " Name: " + name);
+                        " Type: " + userType + " locale: " + locale + " Name: " + name);*/
                 startActivity(new Intent(this, SyncActivity.class));
                 finishAffinity();
             }

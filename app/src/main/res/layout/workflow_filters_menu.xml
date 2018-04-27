@@ -14,14 +14,12 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="15dp"
+                android:padding="15dp"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
+                android:background="@color/selected_filter"
                 android:text="@string/filters" />
-
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/colorPrimary" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -41,10 +39,18 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_margin="15dp"
+                    android:textColor="@color/selected_filter"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
                     android:layout_toStartOf="@id/swch_myworkflows"
                     android:text="@string/my_workflows" />
 
             </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/transparent" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -64,15 +70,26 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_margin="15dp"
+                    android:textColor="@color/selected_filter"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
                     android:layout_toStartOf="@id/swch_status"
                     android:text="@string/status" />
 
             </RelativeLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/transparent" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="15dp"
+                android:textColor="@color/selected_filter"
+                android:textStyle="bold"
+                android:textSize="12sp"
                 android:text="@string/workflow_type" />
 
             <RelativeLayout
@@ -110,10 +127,18 @@
 
             </RelativeLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/transparent" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="15dp"
+                android:textColor="@color/selected_filter"
+                android:textStyle="bold"
+                android:textSize="12sp"
                 android:text="@string/created_at" />
 
             <!--<DatePicker
@@ -121,10 +146,18 @@
                 android:layout_height="wrap_content"
                 android:datePickerMode="spinner"/>-->
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/transparent" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="15dp"
+                android:textColor="@color/selected_filter"
+                android:textStyle="bold"
+                android:textSize="12sp"
                 android:text="@string/updated_at" />
 
             <!--<DatePicker
@@ -135,13 +168,12 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="15dp"
+                android:padding="15dp"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
+                android:background="@color/selected_filter"
                 android:text="@string/sorting" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/colorPrimary" />
 
             <RadioGroup
                 android:layout_width="match_parent"
@@ -154,6 +186,9 @@
                     android:layout_marginEnd="15dp"
                     android:layout_marginStart="15dp"
                     android:layout_marginTop="15dp"
+                    android:textColor="@color/selected_filter"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
                     android:buttonTint="@color/colorPrimaryDark"
                     android:text="@string/workflow_number" />
 
@@ -164,8 +199,16 @@
                     android:layout_marginBottom="15dp"
                     android:layout_marginEnd="15dp"
                     android:layout_marginStart="15dp"
+                    android:textColor="@color/selected_filter"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
                     android:text="@string/descending"
                     android:theme="@style/SwitchStyle" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/transparent" />
 
                 <RadioButton
                     android:id="@+id/chbx_createdate"
@@ -174,6 +217,9 @@
                     android:layout_marginEnd="15dp"
                     android:layout_marginStart="15dp"
                     android:layout_marginTop="15dp"
+                    android:textColor="@color/selected_filter"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
                     android:buttonTint="@color/colorPrimaryDark"
                     android:text="@string/created_date" />
 
@@ -184,8 +230,16 @@
                     android:layout_marginBottom="15dp"
                     android:layout_marginEnd="15dp"
                     android:layout_marginStart="15dp"
+                    android:textColor="@color/selected_filter"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
                     android:text="@string/descending"
                     android:theme="@style/SwitchStyle" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/transparent" />
 
                 <RadioButton
                     android:id="@+id/chbx_updatedate"
@@ -194,6 +248,9 @@
                     android:layout_marginEnd="15dp"
                     android:layout_marginStart="15dp"
                     android:layout_marginTop="15dp"
+                    android:textColor="@color/selected_filter"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
                     android:buttonTint="@color/colorPrimaryDark"
                     android:text="@string/workflow_number" />
 
@@ -204,8 +261,16 @@
                     android:layout_marginBottom="15dp"
                     android:layout_marginEnd="15dp"
                     android:layout_marginStart="15dp"
+                    android:textColor="@color/selected_filter"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
                     android:text="@string/descending"
                     android:theme="@style/SwitchStyle" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/transparent" />
 
             </RadioGroup>
 

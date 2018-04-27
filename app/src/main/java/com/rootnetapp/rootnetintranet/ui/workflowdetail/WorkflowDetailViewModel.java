@@ -5,7 +5,6 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
@@ -39,38 +38,38 @@ public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<Integer> mErrorLiveData;
     private WorkflowDetailRepository repository;
     //todo REMOVE, solo testing
-    private String auth2 = "Bearer "+ Utils.testToken;
+    //private String auth2 = "Bearer "+ Utils.testToken;
 
     public WorkflowDetailViewModel(WorkflowDetailRepository workflowDetailRepository) {
         this.repository = workflowDetailRepository;
     }
 
     public void getWorkflowType(String auth, int typeId) {
-        repository.getWorkflowType(auth2, typeId).subscribe(this::onTypeSuccess, this::onFailure);
+        repository.getWorkflowType(auth, typeId).subscribe(this::onTypeSuccess, this::onFailure);
     }
 
     public void getWorkflow(String auth, int workflowId) {
-        repository.getWorkflow(auth2, workflowId).subscribe(this::onWorkflowSuccess, this::onFailure);
+        repository.getWorkflow(auth, workflowId).subscribe(this::onWorkflowSuccess, this::onFailure);
     }
 
     public void getTemplate(String auth, int templateId) {
-        repository.getTemplate(auth2, templateId).subscribe(this::onTemplateSuccess, this::onFailure);
+        repository.getTemplate(auth, templateId).subscribe(this::onTemplateSuccess, this::onFailure);
     }
 
     public void getFiles(String auth, int workflowId) {
-        repository.getFiles(auth2, workflowId).subscribe(this::onFilesSuccess, this::onFailure);
+        repository.getFiles(auth, workflowId).subscribe(this::onFilesSuccess, this::onFailure);
     }
 
     public void getComments(String auth, int workflowId) {
-        repository.getComments(auth2, workflowId).subscribe(this::onCommentsSuccess, this::onFailure);
+        repository.getComments(auth, workflowId).subscribe(this::onCommentsSuccess, this::onFailure);
     }
 
     public void postComment(String auth, int workflowId, String comment, List<CommentFile> files) {
-        repository.postComment(auth2, workflowId, comment, files).subscribe(this::onCommentSuccess, this::onFailure);
+        repository.postComment(auth, workflowId, comment, files).subscribe(this::onPostCommentSuccess, this::onFailure);
     }
 
     public void attachFile(String auth, List<WorkflowPresetsRequest> request, CommentFile fileRequest) {
-        repository.attachFile(auth2, request, fileRequest).subscribe(this::onAttachSuccess, this::onFailure);
+        repository.attachFile(auth, request, fileRequest).subscribe(this::onAttachSuccess, this::onFailure);
     }
 
     private void onTypeSuccess(WorkflowTypeResponse response) {
@@ -93,7 +92,7 @@ public class WorkflowDetailViewModel extends ViewModel {
         mCommentsLiveData.setValue(commentsResponse.getResponse());
     }
 
-    private void onCommentSuccess(CommentResponse commentResponse) {
+    private void onPostCommentSuccess(CommentResponse commentResponse) {
         mCommentLiveData.setValue(commentResponse.getResponse());
     }
 

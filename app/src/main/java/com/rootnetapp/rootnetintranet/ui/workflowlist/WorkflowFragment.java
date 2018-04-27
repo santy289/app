@@ -93,9 +93,18 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         final Observer<List<Workflow>> workflowsObserver = ((List<Workflow> data) -> {
             Utils.hideLoading();
             if (null != data) {
-                adapter = new WorkflowExpandableAdapter(data, this);
-                fragmentWorkflowBinding.recWorkflows.setAdapter(adapter);
-                adapter.notifyDataSetChanged();
+                if(data.size()!=0){
+                    fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.GONE);
+                    adapter = new WorkflowExpandableAdapter(data, this);
+                    fragmentWorkflowBinding.recWorkflows.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
+                }else{
+                    fragmentWorkflowBinding.recWorkflows.setVisibility(View.GONE);
+                    fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.VISIBLE);
+                }
+            }else{
+                fragmentWorkflowBinding.recWorkflows.setVisibility(View.GONE);
+                fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.VISIBLE);
             }
         });
         final Observer<Integer> errorObserver = ((Integer data) -> {
@@ -109,7 +118,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.getObservableError().observe(this, errorObserver);
     }
 
-    public PopupWindow popupMenu() {
+    private PopupWindow popupMenu() {
         final PopupWindow popupWindow = new PopupWindow(getContext());
 
         // inflate your layout or dynamically add view
@@ -189,7 +198,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         return popupWindow;
     }
 
-    public void onRadioButtonClicked(View view) {
+    private void onRadioButtonClicked(View view) {
         // Is the button now checked?
         boolean checked = ((RadioButton) view).isChecked();
 

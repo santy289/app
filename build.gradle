@@ -43,6 +43,9 @@ ext {
     jsonWebTokenVersion             = '1.1.1'
     roomVersion                     = '1.0.0'
     circleImageViewVersion          = '2.2.0'
-    glideVersion                  = '4.6.1'
+    glideVersion                    = '4.6.1'
+    picassoVersion                  = '2.71828'
+    firebaseVersion                 ='15.0.0'
+
 
 }

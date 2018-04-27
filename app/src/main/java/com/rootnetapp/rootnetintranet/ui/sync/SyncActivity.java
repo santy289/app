@@ -11,6 +11,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerService;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
 
@@ -37,6 +38,7 @@ public class SyncActivity extends AppCompatActivity {
         bar.setMax(2);
         subscribe();
         syncHelper.clearData(token);
+
     }
 
     private void subscribe() {

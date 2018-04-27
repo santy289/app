@@ -3,9 +3,12 @@ package com.rootnetapp.rootnetintranet.ui.manager.adapters;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ManagerDialogItemBinding;
+import com.rootnetapp.rootnetintranet.ui.manager.ManagerInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,15 +20,21 @@ import java.util.List;
 public class ManagerDialogAdapter extends RecyclerView.Adapter<ManagerDialogViewholder> {
 
     //todo SOLO TESTING mientras no hay backend
-    private List<Integer> workflows;
+    private List<Integer> testWorkflows;
+    private List<Workflow> workflows;
+    private ManagerInterface anInterface;
     private Context context;
 
-    public ManagerDialogAdapter() {
-        workflows = new ArrayList<>();
-        int i=0;
-        while(i<8){
-            workflows.add(1);
-            i++;
+    public ManagerDialogAdapter(List<Workflow> workflows, ManagerInterface anInterface) {
+        if (workflows != null) {
+            this.workflows = workflows;
+        } else {
+            testWorkflows = new ArrayList<>();
+            int i = 0;
+            while (i < 8) {
+                testWorkflows.add(1);
+                i++;
+            }
         }
     }
 
@@ -39,12 +48,24 @@ public class ManagerDialogAdapter extends RecyclerView.Adapter<ManagerDialogView
     }
 
     @Override
-    public void onBindViewHolder(ManagerDialogViewholder managerDialogViewholder, int i) {
+    public void onBindViewHolder(ManagerDialogViewholder holder, int i) {
+
+        if (workflows != null) {
+            Workflow item = workflows.get(i);
+            holder.binding.tvWorkflowid.setText(String.valueOf(item.getId()));
+            holder.binding.tvActualstate.setText(item.getWorkflowStateInfo().getName());
+            holder.binding.tvWorkflowtype.setText(item.getWorkflowType().getName());
+            holder.binding.lytHeader.setOnClickListener(view ->
+                    anInterface.showWorkflow(item.getId()));
+        }
 
     }
 
     @Override
     public int getItemCount() {
-        return workflows.size();
+        if (workflows != null) {
+            return workflows.size();
+        }
+        return testWorkflows.size();
     }
 }

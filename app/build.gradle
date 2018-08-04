@@ -1,19 +1,16 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    compileSdkVersion 27
+    buildToolsVersion "27.0.3"
     defaultConfig {
         applicationId "com.rootnetapp.rootnetintranet"
         minSdkVersion 21
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        jackOptions {
-            enabled true
-        }
     }
     buildTypes {
         release {
@@ -35,42 +32,52 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.android.support:support-v4:26.1.0'
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    //android
-
-    compile 'com.android.support:appcompat-v7:' + rootProject.supportLibVersion;
-    compile 'com.android.support.constraint:constraint-layout:' + rootProject.constraintLayoutVersion;
-    compile 'com.android.support:recyclerview-v7:' + rootProject.supportLibVersion;
-    compile 'com.android.support:cardview-v7:' + rootProject.supportLibVersion;
-    compile 'com.android.support:design:' + rootProject.supportLibVersion;
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "com.android.support.constraint:constraint-layout:$rootProject.constraintLayoutVersion"
+    implementation "com.android.support:support-v4:$rootProject.supportLibVersion"
+    implementation "com.android.support:support-annotations:$rootProject.supportLibVersion"
+    implementation "com.android.support:appcompat-v7:$rootProject.supportLibVersion"
+    implementation "com.android.support:recyclerview-v7:$rootProject.supportLibVersion"
+    implementation "com.android.support:cardview-v7:$rootProject.supportLibVersion"
+    implementation "com.android.support:design:$rootProject.supportLibVersion"
 
     //android arch components
-    compile 'android.arch.lifecycle:runtime:' + rootProject.archLifecycleVersion;
-    compile 'android.arch.lifecycle:extensions:' + rootProject.archLifecycleVersion;
-    annotationProcessor 'android.arch.lifecycle:compiler:' + rootProject.archLifecycleVersion;
-    compile "android.arch.persistence.room:runtime:${roomVersion}"
-    annotationProcessor "android.arch.persistence.room:compiler:${roomVersion}"
+    implementation "android.arch.lifecycle:runtime:$rootProject.archLifecycleVersion"
+    implementation "android.arch.lifecycle:extensions:$rootProject.archLifecycleVersion"
+    implementation "android.arch.lifecycle:common-java8:$rootProject.archLifecycleVersion"
+
+    //room
+    implementation "android.arch.persistence.room:runtime:$rootProject.roomVersion"
+    annotationProcessor "android.arch.persistence.room:compiler:$rootProject.roomVersion"
+    implementation "android.arch.persistence.room:rxjava2:$rootProject.roomVersion"
+
+    //google
+    annotationProcessor "com.google.dagger:dagger-compiler:$rootProject.daggerLibraryVersion"
+    implementation "com.google.dagger:dagger:$rootProject.daggerLibraryVersion"
 
     //3rd party
-    compile 'com.squareup.retrofit2:retrofit:' + rootProject.retrofit;
-    compile 'com.squareup.retrofit2:converter-moshi:' + rootProject.retrofit;
-    compile "me.jessyan:retrofit-url-manager:${retrofitUrlInterceptorVersion}"
-    //https://github.com/JessYanCoding/RetrofitUrlManager
-    compile "com.auth0.android:jwtdecode:${jsonWebTokenVersion}"
-    compile "com.android.support:recyclerview-v7:${supportLibVersion}"
-    annotationProcessor "com.google.dagger:dagger-compiler:${daggerLibraryVersion}"
-    compile "com.google.dagger:dagger:${daggerLibraryVersion}"
-    compile "com.jakewharton.retrofit:retrofit2-rxjava2-adapter:${rx2JavaLibraryVersion}"
-    compile "io.reactivex.rxjava2:rxandroid:${rxandroidLibraryVersion}"
-    compile "io.reactivex.rxjava2:rxjava:${rxjavaLibraryVersion}"
-    compile "de.hdodenhof:circleimageview:${circleImageViewVersion}"
+    implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofit"
+    implementation "com.squareup.retrofit2:converter-moshi:$rootProject.retrofit"
+    implementation "me.jessyan:retrofit-url-manager:$rootProject.retrofitUrlInterceptorVersion"
+
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$rootProject.rxjavaLibraryVersion"
+    implementation "io.reactivex.rxjava2:rxandroid:$rootProject.rxandroidLibraryVersion"
+    implementation "io.reactivex.rxjava2:rxjava:$rootProject.rxjavaLibraryVersion"
+    implementation "de.hdodenhof:circleimageview:${circleImageViewVersion}"
+
+    compile 'io.jsonwebtoken:jjwt-api:0.10.1'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.10.1'
+    runtimeOnly('io.jsonwebtoken:jjwt-orgjson:0.10.1') {
+        exclude group: 'org.json', module: 'json' //provided by Android natively
+    }
+
     compile 'com.squareup.picasso:picasso:2.71828'
+    implementation 'com.github.bumptech.glide:glide:4.7.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
 
-    testCompile 'junit:junit:4.12'
-
+    //Test
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    testImplementation 'junit:junit:4.12'
+    implementation 'com.auth0.android:jwtdecode:1.1.1'
 }

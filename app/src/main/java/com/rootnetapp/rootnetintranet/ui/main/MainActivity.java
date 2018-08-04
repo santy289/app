@@ -22,8 +22,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-
-import com.auth0.android.jwt.JWT;
+import com.bumptech.glide.Glide;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
@@ -39,7 +38,7 @@ import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
-import com.squareup.picasso.Picasso;
+import com.auth0.android.jwt.JWT;
 
 import java.io.IOException;
 
@@ -91,8 +90,9 @@ public class MainActivity extends AppCompatActivity
                 Utils.domain = "https://" + domain.getClient().getApiUrl();
                 Utils.imgDomain = "http://" + domain.getClient().getApiUrl();
                 Utils.imgDomain = Utils.imgDomain.replace("/v1", "");
-                Picasso.get().load(Utils.URL + domain.getClient().getLogoUrl()).into(mainBinding.imgLogo);
-                Picasso.get().load(Utils.URL + domain.getClient().getLogoUrl()).into(mainBinding.toolbarLogo);
+
+                Glide.with(this).load(Utils.URL + domain.getClient().getLogoUrl()).into(mainBinding.imgLogo);
+                Glide.with(this).load(Utils.URL + domain.getClient().getLogoUrl()).into(mainBinding.toolbarLogo);
                 RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
                 //todo solo para PRUEBAS
                 RetrofitUrlManager.getInstance().putDomain("localhost", "http://192.168.42.183/");
@@ -106,7 +106,9 @@ public class MainActivity extends AppCompatActivity
         mainBinding.navProfile.setOnClickListener(this::drawerClicks);
         mainBinding.buttonWorkflow.setOnClickListener(this::drawerClicks);
         mainBinding.navExit.setOnClickListener(this::drawerClicks);
-        mainBinding.toolbarImage.setOnClickListener(this::imgClick);
+
+        //mainBinding.toolbarImage.setOnClickListener(this::imgClick);
+
         showFragment(TimelineFragment.newInstance(this), false);
         subscribe();
         String token = sharedPref.getString("token","");
@@ -184,7 +186,7 @@ public class MainActivity extends AppCompatActivity
         final Observer<User> userObserver = ((User data) -> {
             if (null != data) {
                 String path = Utils.imgDomain + data.getPicture().trim();
-                Picasso.get().load(path).into(mainBinding.toolbarImage);
+                Glide.with(this).load(path).into(mainBinding.toolbarImage);
             }
         });
         final Observer<Integer> errorObserver = ((Integer data) -> {

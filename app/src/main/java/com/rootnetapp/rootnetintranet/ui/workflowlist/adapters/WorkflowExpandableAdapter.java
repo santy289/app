@@ -62,7 +62,8 @@ public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowView
         //Esto deberia venir siempre de la consulta al servicio.
         if (item.getAuthor() != null) {
             holder.binding.tvOwner.setText(item.getAuthor().getFullName());
-            Picasso.get().load(Utils.domain +item.getAuthor().getPicture()).into(holder.binding.imgProfile);
+            String path = Utils.imgDomain + item.getAuthor().getPicture().trim();
+            Picasso.get().load(path).into(holder.binding.imgProfile);
         }
         if(item.getWorkflowStateInfo() != null){
             if(item.getWorkflowStateInfo().getVirtualColumns() != null){

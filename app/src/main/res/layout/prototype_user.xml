@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <Switch
+        android:id="@+id/field_swtch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_margin="5dp"
+        android:checked="true"
+        android:theme="@style/SwitchStyle" />
+
+    <TextView
+        android:id="@+id/field_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_margin="15dp"
+        android:textColor="@color/selected_filter"
+        android:textStyle="bold"
+        android:textSize="12sp"
+        android:layout_toStartOf="@id/field_swtch"
+        android:text="PLACEHOLDER" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/field_name"
+        android:background="@color/transparent" />
+
+</RelativeLayout>

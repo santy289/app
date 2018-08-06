@@ -17,4 +17,6 @@ public interface MainActivityInterface {
 
     void disposeDialog();
 
+    void showWorkflow(int id);
+
 }

@@ -16,6 +16,8 @@ import com.rootnetapp.rootnetintranet.models.responses.timeline.SubCommentsRespo
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineItem;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser;
+import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 
 import java.util.List;
 
@@ -27,6 +29,7 @@ public class TimelineViewModel extends ViewModel {
 
     private MutableLiveData<List<TimelineItem>> mTypeLiveData;
     private MutableLiveData<List<User>> mUsersLiveData;
+    private MutableLiveData<List<WorkflowUser>> mWorkflowUsersLiveData;
     private MutableLiveData<List<ItemComments>> mCommentsLiveData;
     private MutableLiveData<List<Comment>> mSubCommentsLiveData;
     private MutableLiveData<Interaction> mPostCommentsLiveData;
@@ -38,12 +41,17 @@ public class TimelineViewModel extends ViewModel {
         this.repository = repository;
     }
 
-    public void getTimeline(String auth, String start, String end) {
-        repository.getTimeline(auth, start, end).subscribe(this::onTimelineSuccess, this::onFailure);
+    public void getTimeline(String auth, String start, String end,
+                            List<String> users, List<String> modules) {
+        repository.getTimeline(auth, start, end, users, modules).subscribe(this::onTimelineSuccess, this::onFailure);
     }
 
     public void getUsers(String auth) {
         repository.getUsers(auth).subscribe(this::onUsersSuccess, this::onFailure);
+    }
+
+    public void getWorkflowUsers(String auth) {
+        repository.getWorkflowUsers(auth).subscribe(this::onWorkflowUsersSuccess, this::onFailure);
     }
 
     public void getComments(String auth) {
@@ -72,6 +80,10 @@ public class TimelineViewModel extends ViewModel {
 
     private void onUsersSuccess(UserResponse userResponse) {
         mUsersLiveData.setValue(userResponse.getProfiles());
+    }
+
+    private void onWorkflowUsersSuccess(WorkflowUserResponse workflowUserResponse) {
+        mWorkflowUsersLiveData.setValue(workflowUserResponse.getUsers());
     }
 
     private void onCommentsSuccess(InteractionResponse interactionResponse) {
@@ -106,6 +118,13 @@ public class TimelineViewModel extends ViewModel {
             mUsersLiveData = new MutableLiveData<>();
         }
         return mUsersLiveData;
+    }
+
+    protected LiveData<List<WorkflowUser>> getObservableWorkflowUsers() {
+        if (mWorkflowUsersLiveData == null) {
+            mWorkflowUsersLiveData = new MutableLiveData<>();
+        }
+        return mWorkflowUsersLiveData;
     }
 
     protected LiveData<List<ItemComments>> getObservableComments() {

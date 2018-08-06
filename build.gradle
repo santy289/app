@@ -41,5 +41,8 @@ ext {
     roomVersion                     = "1.1.1"
     circleImageViewVersion          = '2.2.0'
     glideVersion                    = "4.7.1"
+    picassoVersion                  = '2.71828'
+    firebaseVersion                 ='15.0.0'
+
 
 }

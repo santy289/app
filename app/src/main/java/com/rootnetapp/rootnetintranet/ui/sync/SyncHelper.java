@@ -30,7 +30,7 @@ public class SyncHelper {
     private int totalQueries =2, queriesCompleted =0;
     private List<Workflow> workflows;
     private String auth;
-    private String auth2;
+    //private String auth2;
 
     public SyncHelper(ApiInterface apiInterface, AppDatabase database) {
         this.apiInterface = apiInterface;
@@ -40,7 +40,7 @@ public class SyncHelper {
 
     public void clearData(String auth) {
         //todo token test
-        this.auth2 = "Bearer "+ Utils.testToken;
+        //this.auth2 = "Bearer "+ Utils.testToken;
         this.auth = auth;
         Observable.fromCallable(() -> {
             database.userDao().clearUser();
@@ -57,7 +57,7 @@ public class SyncHelper {
     }
 
     private void getAllWorkflows(int page) {
-        apiInterface.getWorkflows(auth2, 50, true, page, true).subscribeOn(Schedulers.newThread()).
+        apiInterface.getWorkflows(auth, 50, true, page, true).subscribeOn(Schedulers.newThread()).
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe(this::onWorkflowsSuccess, this::failure);
     }

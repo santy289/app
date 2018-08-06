@@ -357,7 +357,16 @@ public class WorkflowDetailFragment extends Fragment {
                 } else {
                     binding.hdrImportant.setVisibility(View.GONE);
                 }
-                workflowDetailViewModel.getTemplate(token, data.getTemplateId());
+                if(data.getTemplateId()!= 0){
+                    workflowDetailViewModel.getTemplate(token, data.getTemplateId());
+                }else{
+                    // lyt_documentstitle
+                    binding.lytAttach.setVisibility(View.GONE);
+                    binding.recDocuments.setVisibility(View.GONE);
+                    binding.tvFileuploaded.setVisibility(View.GONE);
+                    binding.lytDocumentsheader.setVisibility(View.GONE);
+                    binding.lytDocumentstitle.setVisibility(View.GONE);
+                }
                 presets = data.getPresets();
             }
         });
@@ -379,6 +388,9 @@ public class WorkflowDetailFragment extends Fragment {
         final Observer<List<Comment>> commentsObserver = ((List<Comment> data) -> {
             if (null != data) {
                 commentsAdapter = new CommentsAdapter(data);
+                binding.recComments.setAdapter(commentsAdapter);
+            }else{
+                commentsAdapter = new CommentsAdapter(new ArrayList<>());
                 binding.recComments.setAdapter(commentsAdapter);
             }
         });

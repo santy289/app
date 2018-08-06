@@ -1,7 +1,10 @@
 package com.rootnetapp.rootnetintranet.di;
 
-import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerModule;
+import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerServiceModule;
 import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerService;
+import com.rootnetapp.rootnetintranet.ui.main.MainActivityModule;
+import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerFragment;
+import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerModule;
 import com.rootnetapp.rootnetintranet.ui.sync.SyncActivity;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowDialog;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowModule;
@@ -43,6 +46,7 @@ import dagger.Component;
 @Singleton
 @Component(
         modules = {
+                MainActivityModule.class,
                 AppModule.class,
                 NetModule.class,
                 SharedPreferencesModule.class,
@@ -56,6 +60,7 @@ import dagger.Component;
                 CreateWorkflowModule.class,
                 WorkflowDetailModule.class,
                 TimelineModule.class,
+                WorkflowManagerServiceModule.class,
                 WorkflowManagerModule.class
         }
 )
@@ -101,5 +106,7 @@ public interface AppComponent {
     void inject(TimelineFragment timelineFragment);
 
     void inject(WorkflowManagerService workflowManagerService);
+
+    void inject(WorkflowManagerFragment workflowManagerFragment);
 
 }

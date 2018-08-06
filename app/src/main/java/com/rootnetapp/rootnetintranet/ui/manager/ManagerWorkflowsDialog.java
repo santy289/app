@@ -10,8 +10,11 @@ import android.view.ViewGroup;
 import android.view.Window;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.DialogWorkflowManagerBinding;
 import com.rootnetapp.rootnetintranet.ui.manager.adapters.ManagerDialogAdapter;
+
+import java.util.List;
 
 /**
  * Created by root on 19/04/18.
@@ -22,11 +25,14 @@ public class ManagerWorkflowsDialog extends DialogFragment {
     private DialogWorkflowManagerBinding binding;
     private ManagerInterface anInterface;
     private DialogTypes type;
+    private List<Workflow> workflows;
 
-    public static ManagerWorkflowsDialog newInstance(ManagerInterface anInterface, DialogTypes type) {
+    public static ManagerWorkflowsDialog newInstance(ManagerInterface anInterface, DialogTypes type,
+                                                     List<Workflow> workflows) {
         ManagerWorkflowsDialog fragment = new ManagerWorkflowsDialog();
         fragment.anInterface = anInterface;
         fragment.type = type;
+        fragment.workflows = workflows;
         return fragment;
     }
 
@@ -38,31 +44,31 @@ public class ManagerWorkflowsDialog extends DialogFragment {
         //((RootnetApp) getActivity().getApplication()).getAppComponent().inject(this);
         setCancelable(false);
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-        switch (type){
-            case PENDING:{
+        switch (type) {
+            case PENDING: {
                 binding.square.setText(R.string.pending_workflows);
                 break;
             }
-            case WORKFLOWS:{
+            case WORKFLOWS: {
                 binding.square.setText(R.string.workflows);
                 break;
             }
-            case OUT_OF_TIME:{
+            case OUT_OF_TIME: {
                 binding.square.setText(R.string.out_of_time);
                 break;
             }
-            case UPDATED:{
+            case UPDATED: {
                 binding.square.setText(R.string.updated);
                 break;
             }
         }
         binding.btnClose.setOnClickListener(view -> dismiss());
         binding.recWorkflows.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recWorkflows.setAdapter(new ManagerDialogAdapter());
+        binding.recWorkflows.setAdapter(new ManagerDialogAdapter(workflows, anInterface));
         return binding.getRoot();
     }
 
-    public enum DialogTypes{
+    public enum DialogTypes {
         PENDING, WORKFLOWS, OUT_OF_TIME, UPDATED
     }
 

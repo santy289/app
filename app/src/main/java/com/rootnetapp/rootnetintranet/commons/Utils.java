@@ -6,6 +6,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.webkit.MimeTypeMap;
 
+import com.rootnetapp.rootnetintranet.BuildConfig;
 import com.rootnetapp.rootnetintranet.R;
 
 import java.io.ByteArrayInputStream;
@@ -24,7 +25,7 @@ import java.util.Date;
 
 public class Utils {
 
-    public static final String URL = "http://api.rootnetapp.com";
+    public static final String URL = BuildConfig.BASE_URL;
 
     public static final String remainderOfDomain = ".rootnetapp.com";
 

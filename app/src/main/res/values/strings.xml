@@ -5,7 +5,7 @@
     <string name="url_half">.rootnetapp.com</string>
     <string name="check_domain">Check Domain</string>
     <string name="get_plan">Get a plan</string>
-    <string name="failure_connect">Ha ocurrido un error de conexión, por favor vuelva a intentarlo</string>
+    <string name="failure_connect">Network error, please try again</string>
     <string name="loading_message">Loading</string>
     <string name="username">Username</string>
     <string name="password">Password</string>

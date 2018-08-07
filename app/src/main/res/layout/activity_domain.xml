@@ -68,7 +68,8 @@
                             android:layout_height="wrap_content"
                             android:maxLines="1"
                             android:hint="@string/subdomain"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/white"
+                            android:inputType="textUri"/>
 
                     </android.support.design.widget.TextInputLayout>
 

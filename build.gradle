@@ -42,7 +42,8 @@ ext {
     circleImageViewVersion          = '2.2.0'
     glideVersion                    = "4.7.1"
     picassoVersion                  = '2.71828'
-    firebaseVersion                 ='15.0.0'
-
-
+    firebaseVersion                 = "17.1.0"
+    espresso                        = "3.0.2"
+    testRunner                      = "1.0.2"
+    jUnit                           = "4.12"
 }

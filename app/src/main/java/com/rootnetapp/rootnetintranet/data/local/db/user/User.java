@@ -14,10 +14,6 @@ import com.squareup.moshi.Json;
 import java.lang.reflect.Type;
 import java.util.List;
 
-/**
- * Created by Propietario on 14/03/2018.
- */
-
 class UserConverters {
     @TypeConverter
     public static List<Department> stringToDepartments(String json) {

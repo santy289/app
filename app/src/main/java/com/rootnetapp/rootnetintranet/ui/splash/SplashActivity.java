@@ -62,8 +62,6 @@ public class SplashActivity extends AppCompatActivity {
                     Utils.domain = "https://" + domain.getClient().getApiUrl();
                     Utils.imgDomain = "http://" + domain.getClient().getApiUrl();
                     RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
-                    //todo solo para PRUEBAS
-                    RetrofitUrlManager.getInstance().putDomain("localhost", "http://192.168.42.183/");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

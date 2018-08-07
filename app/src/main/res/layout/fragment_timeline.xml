@@ -97,12 +97,12 @@
                 android:layout_marginStart="20dp">
 
                 <Button
-                    android:id="@+id/btn_month"
+                    android:id="@+id/btn_day"
                     android:layout_width="45dp"
                     android:layout_height="35dp"
-                    android:background="@drawable/selectedfilter_bg"
-                    android:text="@string/month"
-                    android:textColor="@color/white"
+                    android:background="@drawable/unselectedfilter_bg"
+                    android:text="@string/day"
+                    android:textColor="@color/unselected_filter_text"
                     android:textSize="9sp" />
 
                 <Button
@@ -115,12 +115,12 @@
                     android:textSize="9sp" />
 
                 <Button
-                    android:id="@+id/btn_day"
+                    android:id="@+id/btn_month"
                     android:layout_width="45dp"
                     android:layout_height="35dp"
-                    android:background="@drawable/unselectedfilter_bg"
-                    android:text="@string/day"
-                    android:textColor="@color/unselected_filter_text"
+                    android:background="@drawable/selectedfilter_bg"
+                    android:text="@string/month"
+                    android:textColor="@color/white"
                     android:textSize="9sp" />
 
             </LinearLayout>
@@ -189,7 +189,7 @@
             android:paddingEnd="15dp"
             android:paddingTop="10dp"
             android:paddingStart="15dp"
-            android:text="@string/no_timeline"
+            android:text="@string/no_items"
             android:visibility="gone"/>
 
     </LinearLayout>

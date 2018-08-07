@@ -1,6 +1,10 @@
 package com.rootnetapp.rootnetintranet.ui.manager;
 
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,20 +12,36 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PendingWorkflows;
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowManagerBinding;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
+import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.manager.adapters.PendingWorkflowsAdapter;
 import com.rootnetapp.rootnetintranet.ui.timeline.SelectDateDialog;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineInterface;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
 public class WorkflowManagerFragment extends Fragment implements ManagerInterface {
+
+    @Inject
+    WorkflowManagerViewModelFactory factory;
+    WorkflowManagerViewModel viewModel;
 
     private FragmentWorkflowManagerBinding binding;
     private MainActivityInterface anInterface;
-    private String start, end;
+    private String start, end, token;
+    private int page = 0;
+    private List<Workflow> workflows;
 
     public WorkflowManagerFragment() {
         // Required empty public constructor
@@ -45,9 +65,15 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         binding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_workflow_manager, container, false);
         View view = binding.getRoot();
+        ((RootnetApp) getActivity().getApplication()).getAppComponent().inject(this);
+        viewModel = ViewModelProviders
+                .of(this, factory)
+                .get(WorkflowManagerViewModel.class);
+        //TODO preferences inyectadas con Dagger
+        SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        token = "Bearer "+ prefs.getString("token","");
         binding.recPendingworkflows.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recPendingworkflows.setAdapter(new PendingWorkflowsAdapter());
-        //subscribe();
+        subscribe();
         binding.btnMonth.setOnClickListener(this::filterClicked);
         binding.btnWeek.setOnClickListener(this::filterClicked);
         binding.btnDay.setOnClickListener(this::filterClicked);
@@ -56,18 +82,63 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         binding.btnWorkflows.setOnClickListener(this::showWorkflowsDialog);
         binding.btnOutoftime.setOnClickListener(this::showWorkflowsDialog);
         binding.btnUpdated.setOnClickListener(this::showWorkflowsDialog);
+        binding.btnShowmore.setOnClickListener(this::showMoreClicked);
         start = Utils.getMonthDay(0,1);
         end = Utils.getMonthDay(0,30);
         binding.tvSelecteddates.setText("("+start+" - "+end+")");
         binding.tvSelecteddatetitle.setText(getString(R.string.current_month));
         start = start+"T00:00:00-0000";
         end = end+"T00:00:00-0000";
-        //getTimeline();
+        workflows = new ArrayList<>();
+        getPendingWorkflows();
         return view;
+    }
+
+    public void getPendingWorkflows() {
+        Utils.showLoading(getContext());
+        viewModel.getPendingWorkflows(token, page);
+    }
+
+    private void subscribe() {
+        final Observer<WorkflowsResponse> workflowsObserver = ((WorkflowsResponse data) -> {
+            Utils.hideLoading();
+            if (null != data) {
+                workflows.addAll(data.getList());
+                if(data.getPager().isIsLastPage()){
+                    binding.btnShowmore.setVisibility(View.GONE);
+                }else{
+                    binding.btnShowmore.setVisibility(View.VISIBLE);
+                }
+                if (workflows.size() != 0) {
+                    binding.lytNoworkflows.setVisibility(View.GONE);
+                    binding.recPendingworkflows.setVisibility(View.VISIBLE);
+                    binding.recPendingworkflows.setAdapter(new PendingWorkflowsAdapter(workflows, this));
+                } else {
+                    binding.recPendingworkflows.setVisibility(View.GONE);
+                    binding.lytNoworkflows.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        final Observer<Integer> errorObserver = ((Integer data) -> {
+            if (null != data) {
+                //TODO mejorar toast
+                Utils.hideLoading();
+                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
+            }
+        });
+
+        viewModel.getObservableWorkflows().observe(this, workflowsObserver);
+        viewModel.getObservableError().observe(this, errorObserver);
     }
 
     private void selectDates(View view) {
         anInterface.showDialog(SelectDateDialog.newInstance(this));
+    }
+
+    private void showMoreClicked(View view) {
+        page++;
+        getPendingWorkflows();
     }
 
     private void filterClicked(View view) {
@@ -117,7 +188,9 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
                 break;
             }
         }
-        //getTimeline();
+        workflows = new ArrayList<>();
+        page = 0;
+        getPendingWorkflows();
     }
 
     @Override
@@ -126,29 +199,36 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         binding.tvSelecteddatetitle.setText(getString(R.string.selected_period));
         this.start = start+"T00:00:00-0000";
         this.end = end+"T00:00:00-0000";
-        //getTimeline();
+        workflows = new ArrayList<>();
+        page = 0;
+        getPendingWorkflows();
+    }
+
+    @Override
+    public void showWorkflow(int id) {
+        anInterface.showWorkflow(id);
     }
 
     private void showWorkflowsDialog(View view) {
         switch (view.getId()){
             case R.id.btn_pendingapproval:{
                 anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                        ManagerWorkflowsDialog.DialogTypes.PENDING));
+                        ManagerWorkflowsDialog.DialogTypes.PENDING, null));
                 break;
             }
             case R.id.btn_workflows:{
                 anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                        ManagerWorkflowsDialog.DialogTypes.WORKFLOWS));
+                        ManagerWorkflowsDialog.DialogTypes.WORKFLOWS, null));
                 break;
             }
             case R.id.btn_outoftime:{
                 anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                        ManagerWorkflowsDialog.DialogTypes.OUT_OF_TIME));
+                        ManagerWorkflowsDialog.DialogTypes.OUT_OF_TIME, null));
                 break;
             }
             case R.id.btn_updated:{
                 anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                        ManagerWorkflowsDialog.DialogTypes.UPDATED));
+                        ManagerWorkflowsDialog.DialogTypes.UPDATED, null));
                 break;
             }
         }

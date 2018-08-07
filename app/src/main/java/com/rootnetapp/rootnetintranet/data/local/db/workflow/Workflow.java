@@ -62,9 +62,13 @@ public class Workflow {
     @Json(name = "author")
     private Person author;
 
-    @Embedded
+    @Embedded(prefix = "type_")
     @Json(name = "workflow_type")
     private WorkflowType workflowType;
+
+    @Embedded(prefix = "state_")
+    @Json(name = "workflow_state_info")
+    private WorkflowStateInfo workflowStateInfo;
 
     //@Embedded
     @Ignore
@@ -80,10 +84,6 @@ public class Workflow {
     @ColumnInfo(name = "workflow_state")
     @Json(name = "workflow_state")
     private int workflowState;
-
-    @Embedded(prefix = "state_")
-    @Json(name = "workflow_state_info")
-    private WorkflowStateInfo workflowStateInfo;
 
     @Ignore
     @Json(name = "assignees")

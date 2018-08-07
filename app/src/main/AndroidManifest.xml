@@ -23,7 +23,8 @@
             android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.domain.DomainActivity"
-            android:theme="@style/LoginStyle"></activity>
+            android:theme="@style/LoginStyle">
+        </activity>
         <activity
             android:name=".ui.login.LoginActivity"
             android:theme="@style/LoginStyle" />
@@ -44,11 +45,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <service
             android:name=".services.manager.WorkflowManagerService"
             android:enabled="true"
-            android:exported="false"></service>
+            android:exported="false">
+        </service>
+        <service android:name=".notifications.MessageReceiver">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <service android:name=".notifications.InstanceIdService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

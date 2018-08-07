@@ -147,7 +147,7 @@
     <string name="txt_description">Description:</string>
     <string name="txt_statusname">Status name</string>
     <string name="reply">Reply</string>
-    <string name="no_timeline">There are currently no items matching your search parameters.</string>
+    <string name="no_items">There are currently no items matching your search parameters.</string>
     <string name="synchronizing">Synchronizing</string>
     <string name="every_10_mins">Every 10 mins</string>
     <string name="last_sync">Last sync:</string>
@@ -165,4 +165,7 @@
     <string name="open">Open</string>
     <string name="closed">Closed</string>
     <string name="show_more">Show More</string>
+    <string name="tracking">Tracking</string>
+    <string name="sales_force">Sales Force - Status</string>
+    <string name="users">Users</string>
 </resources>

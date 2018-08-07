@@ -7,6 +7,9 @@ import com.rootnetapp.rootnetintranet.models.responses.timeline.PostSubCommentRe
 import com.rootnetapp.rootnetintranet.models.responses.timeline.SubCommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
+
+import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -25,13 +28,19 @@ public class TimelineRepository {
     }
 
 
-    public Observable<TimelineResponse> getTimeline(String auth, String start, String end) {
-        return service.getTimeline(auth, start, end).subscribeOn(Schedulers.newThread())
+    public Observable<TimelineResponse> getTimeline(String auth, String start, String end,
+                                                    List<String> users, List<String> modules) {
+        return service.getTimeline(auth, start, end, users, modules).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Observable<UserResponse> getUsers(String auth) {
         return service.getUsers(auth).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<WorkflowUserResponse> getWorkflowUsers(String auth) {
+        return service.getWorkflowUsers(auth).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
@@ -58,4 +67,5 @@ public class TimelineRepository {
         return service.postSubComment(auth, interaction, associate, description, author).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
+
 }

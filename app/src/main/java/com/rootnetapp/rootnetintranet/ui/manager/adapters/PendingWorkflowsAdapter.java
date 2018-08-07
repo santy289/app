@@ -8,7 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowManagerItemBinding;
+import com.rootnetapp.rootnetintranet.ui.manager.ManagerInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,17 +21,13 @@ import java.util.List;
 
 public class PendingWorkflowsAdapter  extends RecyclerView.Adapter<PendingWorkflowsViewholder>{
 
-    //todo SOLO TESTING mientras no hay backend
-    private List<Integer> workflows;
+    private List<Workflow> workflows;
     private Context context;
+    private ManagerInterface anInterface;
 
-    public PendingWorkflowsAdapter() {
-        workflows = new ArrayList<>();
-        int i=0;
-        while(i<4){
-            workflows.add(1);
-            i++;
-        }
+    public PendingWorkflowsAdapter(List<Workflow> workflows, ManagerInterface anInterface) {
+        this.workflows = workflows;
+        this.anInterface = anInterface;
     }
 
     @Override
@@ -45,9 +43,19 @@ public class PendingWorkflowsAdapter  extends RecyclerView.Adapter<PendingWorkfl
     @Override
     public void onBindViewHolder(PendingWorkflowsViewholder holder, int i) {
 
-        if(i%2==0){
+        Workflow item = workflows.get(i);
+        holder.binding.tvHeadername.setText(item.getWorkflowTypeKey());
+        holder.binding.tvHeaderowner.setText(item.getAuthor().getFullName());
+
+        String date = item.getStart().split("T")[0];
+        String hour = (item.getStart().split("T")[1]).split("-")[0];
+        holder.binding.tvDate.setText(date + " - " + hour);
+        holder.binding.tvTitle.setText(item.getTitle());
+        holder.binding.tvAuthor.setText(item.getAuthor().getFullName());
+
+        /*if(i%2==0){
             holder.binding.tvHeaderdate.setTextColor(ContextCompat.getColor(context, R.color.red));
-        }
+        }*/
 
         holder.binding.lytHeader.setOnClickListener(view -> {
             if (holder.binding.lytDetail.getVisibility() == View.GONE) {

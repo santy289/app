@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.services.manager;
+package com.rootnetapp.rootnetintranet.ui.manager;
 
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 
@@ -6,7 +6,7 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * Created by root on 23/04/18.
+ * Created by root on 27/04/18.
  */
 
 @Module

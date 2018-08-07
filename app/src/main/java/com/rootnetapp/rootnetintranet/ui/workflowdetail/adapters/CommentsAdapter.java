@@ -38,7 +38,8 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> {
     @Override
     public void onBindViewHolder(CommentsViewholder holder, int i) {
         Comment item = comments.get(i);
-        Picasso.get().load(Utils.domain + item.getUserInfo().getPicture()).into(holder.binding.imgUser);
+        String path = Utils.imgDomain + item.getUserInfo().getPicture();
+        Picasso.get().load(path).into(holder.binding.imgUser);
         holder.binding.tvName.setText(item.getUserInfo().getFullName());
         String date = item.getDate().split("T")[0];
         String hour = (item.getDate().split("T")[1]).split("-")[0];

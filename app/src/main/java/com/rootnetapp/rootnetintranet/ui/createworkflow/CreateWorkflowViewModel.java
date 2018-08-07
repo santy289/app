@@ -35,7 +35,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<Integer> mCreateErrorLiveData;
     private CreateWorkflowRepository createWorkflowRepository;
     //todo REMOVE, solo testing
-    private String auth2 = "Bearer " + Utils.testToken;
+    //private String auth2 = "Bearer " + Utils.testToken;
 
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.createWorkflowRepository = createWorkflowRepository;
@@ -44,38 +44,38 @@ public class CreateWorkflowViewModel extends ViewModel {
     public void getWorkflowTypes(String auth) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
         Log.d("test", "getWorkflowTypes: ");
-        createWorkflowRepository.getWorkflowTypes(auth2).subscribe(this::onTypesSuccess, this::onFailure);
+        createWorkflowRepository.getWorkflowTypes(auth).subscribe(this::onTypesSuccess, this::onFailure);
     }
 
     public void getList(String auth, int id) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
-        createWorkflowRepository.getList(auth2, id).subscribe(this::onListSuccess, this::onFailure);
+        createWorkflowRepository.getList(auth, id).subscribe(this::onListSuccess, this::onFailure);
     }
 
     public void getProducts(String auth) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
-        createWorkflowRepository.getProducts(auth2).subscribe(this::onProductsSuccess, this::onFailure);
+        createWorkflowRepository.getProducts(auth).subscribe(this::onProductsSuccess, this::onFailure);
     }
 
     public void getServices(String auth) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
-        createWorkflowRepository.getServices(auth2).subscribe(this::onServicesSuccess, this::onFailure);
+        createWorkflowRepository.getServices(auth).subscribe(this::onServicesSuccess, this::onFailure);
     }
 
     public void getUsers(String auth) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
-        createWorkflowRepository.getUsers(auth2).subscribe(this::onUsersSuccess, this::onFailure);
+        createWorkflowRepository.getUsers(auth).subscribe(this::onUsersSuccess, this::onFailure);
     }
 
     public void getCountries(String auth) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
-        createWorkflowRepository.getCountries(auth2).subscribe(this::onCountriesSuccess, this::onFailure);
+        createWorkflowRepository.getCountries(auth).subscribe(this::onCountriesSuccess, this::onFailure);
     }
 
     public void createWorkflow(String auth, int workflowTypeId, String title, String workflowMetas,
                                String start, String description) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
-        createWorkflowRepository.createWorkflow(auth2, workflowTypeId, title, workflowMetas,
+        createWorkflowRepository.createWorkflow(auth, workflowTypeId, title, workflowMetas,
                 start, description).subscribe(this::onCreateSuccess, this::onCreateFailure);
     }
 

@@ -2,24 +2,22 @@
 
 buildscript {
     repositories {
+        google()
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.1.3'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
 }
-
-
-
 allprojects {
     repositories {
-        mavenCentral()
         google()
         jcenter()
-        maven { url 'https://maven.google.com' }
+        mavenCentral()
+        mavenLocal()
     }
 }
 
@@ -30,19 +28,22 @@ task clean(type: Delete) {
 }
 
 ext {
-    supportLibVersion               = "26.1.0"
-    constraintLayoutVersion         = "1.0.2"
-    archLifecycleVersion            = "1.0.0"
-    retrofit                        = "2.3.0"
-    butterknife                     = "8.8.1"
-    daggerLibraryVersion            = '2.13'
-    rxandroidLibraryVersion         = '2.0.1'
-    rxjavaLibraryVersion            = '2.1.7'
+    supportLibVersion               = "27.1.1"
+    constraintLayoutVersion         = "1.1.2"
+    archLifecycleVersion            = "1.1.1"
+    retrofit                        = "2.4.0"
+    daggerLibraryVersion            = "2.16"
+    rxandroidLibraryVersion         = "2.0.2"
+    rxjavaLibraryVersion            = "2.2.0"
     rx2JavaLibraryVersion           = '1.0.0'
-    retrofitUrlInterceptorVersion   = '1.2.0'
-    jsonWebTokenVersion             = '1.1.1'
-    roomVersion                     = '1.0.0'
+    retrofitUrlInterceptorVersion   = "1.4.0"
+    jsonWebTokenVersion             = "1.1.1"
+    roomVersion                     = "1.1.1"
     circleImageViewVersion          = '2.2.0'
-    glideVersion                  = '4.6.1'
-
+    glideVersion                    = "4.7.1"
+    picassoVersion                  = '2.71828'
+    firebaseVersion                 = "17.1.0"
+    espresso                        = "3.0.2"
+    testRunner                      = "1.0.2"
+    jUnit                           = "4.12"
 }

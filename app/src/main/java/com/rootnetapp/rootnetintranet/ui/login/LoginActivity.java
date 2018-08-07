@@ -13,11 +13,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.auth0.android.jwt.JWT;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ActivityLoginBinding;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
+import com.rootnetapp.rootnetintranet.models.responses.login.JWToken;
 import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.sync.SyncActivity;
@@ -26,11 +26,8 @@ import com.rootnetapp.rootnetintranet.ui.resetPass.resetpassdialog.ResetPassword
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.picasso.Picasso;
-
 import java.io.IOException;
-
 import javax.inject.Inject;
-
 import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
 
 public class LoginActivity extends AppCompatActivity {
@@ -40,6 +37,8 @@ public class LoginActivity extends AppCompatActivity {
     LoginViewModel loginViewModel;
     private ActivityLoginBinding loginBinding;
     private SharedPreferences sharedPref;
+
+    private static final String TAG = "LoginActivity.Rootnet";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,16 +56,16 @@ public class LoginActivity extends AppCompatActivity {
         String json = sharedPref.getString("domain", "");
         //todo cambiar por consulta al viewmodel
         if (json.isEmpty()) {
-            Log.d("test", "onCreate: ALGO PASO");//todo mejorar esta validacion
+            Log.d(TAG, "onCreate: ALGO PASO");//todo mejorar esta validacion
         } else {
             try {
                 domain = jsonAdapter.fromJson(json);
-                Utils.domain = "https://" + domain.getClient().getApiUrl();
                 Utils.imgDomain = "http://" + domain.getClient().getApiUrl();
                 Picasso.get().load(Utils.URL + domain.getClient().getLogoUrl()).into(loginBinding.logo);
+                String newApiUrl = domain.getClient().getApiUrl();
+                newApiUrl = Utils.replaceLast(newApiUrl, "/v1/", "");
+                Utils.domain = "https://" + newApiUrl;
                 RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
-                //todo solo para PRUEBAS
-                RetrofitUrlManager.getInstance().putDomain("localhost", "http://192.168.42.183/");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -79,21 +78,22 @@ public class LoginActivity extends AppCompatActivity {
             Utils.hideLoading();
             if (null != data) {
                 SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString("token", data.getToken()).apply();
+                String token = data.getToken();
+                editor.putString("token", token).apply();
                 String user = loginBinding.inputUser.getText().toString().trim();
                 String password = loginBinding.inputPassword.getText().toString().trim();
                 editor.putString("username", user).apply();
                 editor.putString("password", password).apply();
-                //todo manejo de JWT
-                JWT jwt = new JWT(data.getToken());
-                String username = jwt.getClaim("username").asString();
-                String userType = jwt.getClaim("user_type").asString();
-                String locale = jwt.getClaim("locale").asString();
-                String name = jwt.getClaim("full_name").asString();
-                //String department = jwt.getClaim("department").asString();
-                //claim.asString();
+
+                JWToken result = Utils.decode(token);
+                String username = result.getUserName();
+                String userType = result.getUserType();
+                String locale = result.getLocale();
+                String name = result.getFullName();
+
                 Log.d("test", "username: " + username +
                         " Type: " + userType + " locale: " + locale + " Name: " + name);
+
                 startActivity(new Intent(this, SyncActivity.class));
                 finishAffinity();
             }

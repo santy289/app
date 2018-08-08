@@ -16,19 +16,12 @@ import android.widget.Toast;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ActivityLoginBinding;
-import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
-import com.rootnetapp.rootnetintranet.models.responses.login.JWToken;
-import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.sync.SyncActivity;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetpassdialog.ResetPasswordDialog;
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
 import com.squareup.picasso.Picasso;
-import java.io.IOException;
 import javax.inject.Inject;
-import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -36,9 +29,8 @@ public class LoginActivity extends AppCompatActivity {
     LoginViewModelFactory loginViewModelFactory;
     LoginViewModel loginViewModel;
     private ActivityLoginBinding loginBinding;
-    private SharedPreferences sharedPref;
 
-    private static final String TAG = "LoginActivity.Rootnet";
+    private static final String TAG = "LoginActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,57 +40,12 @@ public class LoginActivity extends AppCompatActivity {
         loginViewModel = ViewModelProviders
                 .of(this, loginViewModelFactory)
                 .get(LoginViewModel.class);
-        ClientResponse domain;
-        Moshi moshi = new Moshi.Builder().build();
-        JsonAdapter<ClientResponse> jsonAdapter = moshi.adapter(ClientResponse.class);
-        //todo Preguntar como implementar SharesPreferencesModule en los Viewmodels para cada tipo de clase guardada
-        sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String json = sharedPref.getString("domain", "");
-        //todo cambiar por consulta al viewmodel
-        if (json.isEmpty()) {
-            Log.d(TAG, "onCreate: ALGO PASO");//todo mejorar esta validacion
-        } else {
-            try {
-                domain = jsonAdapter.fromJson(json);
-                Utils.imgDomain = "http://" + domain.getClient().getApiUrl();
-                Picasso.get().load(Utils.URL + domain.getClient().getLogoUrl()).into(loginBinding.logo);
-                String newApiUrl = domain.getClient().getApiUrl();
-                newApiUrl = Utils.replaceLast(newApiUrl, "/v1/", "");
-                Utils.domain = "https://" + newApiUrl;
-                RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
         subscribe();
+        SharedPreferences sharedPreferences = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        loginViewModel.initLoginViewModel(sharedPreferences);
     }
 
     private void subscribe() {
-        final Observer<LoginResponse> loginObserver = ((LoginResponse data) -> {
-            Utils.hideLoading();
-            if (null != data) {
-                SharedPreferences.Editor editor = sharedPref.edit();
-                String token = data.getToken();
-                editor.putString("token", token).apply();
-                String user = loginBinding.inputUser.getText().toString().trim();
-                String password = loginBinding.inputPassword.getText().toString().trim();
-                editor.putString("username", user).apply();
-                editor.putString("password", password).apply();
-
-                JWToken result = Utils.decode(token);
-                String username = result.getUserName();
-                String userType = result.getUserType();
-                String locale = result.getLocale();
-                String name = result.getFullName();
-
-                Log.d("test", "username: " + username +
-                        " Type: " + userType + " locale: " + locale + " Name: " + name);
-
-                startActivity(new Intent(this, SyncActivity.class));
-                finishAffinity();
-            }
-        });
-
         final Observer<Integer> errorObserver = ((Integer data) -> {
             Utils.hideLoading();
             if (null != data) {
@@ -106,8 +53,14 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(this, getString(data), Toast.LENGTH_LONG).show();
             }
         });
-        loginViewModel.getObservableLogin().observe(this, loginObserver);
+
+        final Observer<String> showLogoObserver = (this::showLogo);
+        final Observer<String[]> saveToPreferenceObserver = (this::saveInPreferences);
+        final Observer<Boolean> goToSyncActivityObserver = (this::goToSyncActivity);
         loginViewModel.getObservableError().observe(this, errorObserver);
+        loginViewModel.getObservableShowLogo().observe(this, showLogoObserver);
+        loginViewModel.getObservableSaveToPreference().observe(this, saveToPreferenceObserver);
+        loginViewModel.getObservableGoToSyncActivity().observe(this, goToSyncActivityObserver);
     }
 
     private void login() {
@@ -145,6 +98,21 @@ public class LoginActivity extends AppCompatActivity {
             default:
                 break;
         }
+    }
+
+    private void showLogo(String logoUrl) {
+        Log.d(TAG, "showLogo: " + Utils.URL + logoUrl);
+        Picasso.get().load(Utils.URL + logoUrl).into(loginBinding.logo);
+    }
+
+    private void saveInPreferences(String[] content) {
+        SharedPreferences.Editor editor = getSharedPreferences("Sessions", Context.MODE_PRIVATE).edit();
+        editor.putString(content[0], content[1]).apply();
+    }
+
+    private void goToSyncActivity(boolean open) {
+        startActivity(new Intent(this, SyncActivity.class));
+        finishAffinity();
     }
 
 }

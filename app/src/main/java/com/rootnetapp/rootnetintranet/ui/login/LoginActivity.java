@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ActivityLoginBinding;
@@ -20,7 +21,6 @@ import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.sync.SyncActivity;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetpassdialog.ResetPasswordDialog;
-import com.squareup.picasso.Picasso;
 import javax.inject.Inject;
 
 public class LoginActivity extends AppCompatActivity {
@@ -102,7 +102,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void showLogo(String logoUrl) {
         Log.d(TAG, "showLogo: " + Utils.URL + logoUrl);
-        Picasso.get().load(Utils.URL + logoUrl).into(loginBinding.logo);
+        Glide.with(this).load(Utils.URL + logoUrl).into(loginBinding.logo);
     }
 
     private void saveInPreferences(String[] content) {

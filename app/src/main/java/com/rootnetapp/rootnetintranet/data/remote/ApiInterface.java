@@ -45,29 +45,29 @@ import retrofit2.http.Query;
 
 public interface ApiInterface {
 
-    @POST("/v1/check/client")
+    @POST("check/client")
     @FormUrlEncoded
     Observable<ClientResponse> getDomain(@Field("domain") String domain);
 
     @Headers({"Domain-Name: api"})
-    @POST("v1/login_check")
+    @POST("login_check")
     @FormUrlEncoded
     Observable<LoginResponse> login(@Field("username") String user,
                                     @Field("password") String password);
 
     @Headers({"Domain-Name: api"})
-    @POST("v1/check/send/email")
+    @POST("check/send/email")
     @FormUrlEncoded
     Observable<ResetPasswordResponse> requestToken(@Field("username") String username,
                                                    @Field("client_id") String client_id);
 
     @Headers({"Domain-Name: api"})
-    @POST("v1/check/token")
+    @POST("check/token")
     @FormUrlEncoded
     Observable<ResetPasswordResponse> validateToken(@Field("token") String token);
 
     @Headers({"Domain-Name: api"})
-    @POST("v1/check/reset/password")
+    @POST("check/reset/password")
     @FormUrlEncoded
     Observable<ResetPasswordResponse> resetPassword(@Field("token") String token,
                                                     @Field("username") String username,
@@ -75,11 +75,11 @@ public interface ApiInterface {
                                                     @Field("repeat_new_password") String repeatNewPassword);
 
     @Headers({"Domain-Name: api"})
-    @GET("v1/profiles?enabled=all")
+    @GET("profiles?enabled=all")
     Observable<UserResponse> getUsers(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
-    @PATCH("v1/profiles/{id}")
+    @PATCH("profiles/{id}")
     @FormUrlEncoded
     Observable<EditUserResponse> editUser(@Header("Authorization") String authorization,
                                           @Path("id") int id,
@@ -88,7 +88,7 @@ public interface ApiInterface {
                                           @Field("phone_number") String phoneNumber);
 
     @Headers({"Domain-Name: api"})
-    @GET("v1/intranet/workflows?")
+    @GET("intranet/workflows?")
     Observable<WorkflowsResponse> getWorkflows(@Header("Authorization") String authorization,
                                                @Query("limit") int limit,
                                                @Query("open") boolean open,
@@ -96,16 +96,16 @@ public interface ApiInterface {
                                                @Query("status") boolean status);
 
     @Headers({"Domain-Name: api"})
-    @GET("v1/intranet/workflows/types")
+    @GET("intranet/workflows/types")
     Observable<WorkflowTypesResponse> getWorkflowTypes(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
-    @GET("v1/list/{id}/item")
+    @GET("list/{id}/item")
     Observable<ListsResponse> getListItems(@Header("Authorization") String authorization,
                                            @Path("id") int id);
 
     @Headers({"Domain-Name: api"})
-    @GET("v1/contacts/products?all=true")
+    @GET("contacts/products?all=true")
     Observable<ProductsResponse> getProducts(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
@@ -113,14 +113,14 @@ public interface ApiInterface {
     Observable<ServicesResponse> getServices(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
-    @GET("v1/client/35/users")
+    @GET("client/35/users")
     Observable<WorkflowUserResponse> getWorkflowUsers(@Header("Authorization") String authorization);
 
-    @GET("v1/check/countries")
+    @GET("check/countries")
     Observable<CountriesResponse> getCountries(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
-    @POST("v1/intranet/workflows")
+    @POST("intranet/workflows")
     @FormUrlEncoded
     Observable<CreateWorkflowResponse> createWorkflow(@Header("Authorization") String authorization,
                                                       @Field("workflow_type_id") int workflowTypeId,

@@ -5,6 +5,7 @@ import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerService;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityModule;
 import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerFragment;
 import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerModule;
+import com.rootnetapp.rootnetintranet.ui.splash.SplashModule;
 import com.rootnetapp.rootnetintranet.ui.sync.SyncActivity;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowDialog;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowModule;
@@ -57,7 +58,8 @@ import dagger.Component;
                 WorkflowDetailModule.class,
                 TimelineModule.class,
                 WorkflowManagerServiceModule.class,
-                WorkflowManagerModule.class
+                WorkflowManagerModule.class,
+                SplashModule.class
         }
 )
 

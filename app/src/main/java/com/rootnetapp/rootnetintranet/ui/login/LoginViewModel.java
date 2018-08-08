@@ -57,7 +57,6 @@ public class LoginViewModel extends ViewModel {
                 Utils.imgDomain = "http://" + domain.getClient().getApiUrl();
                 showLogo.setValue(domain.getClient().getLogoUrl());
                 String newApiUrl = domain.getClient().getApiUrl();
-                newApiUrl = Utils.replaceLast(newApiUrl, "/v1/", "");
                 Utils.domain = "https://" + newApiUrl;
                 RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
             } catch (IOException e) {
@@ -67,7 +66,6 @@ public class LoginViewModel extends ViewModel {
     }
 
     public void login(String user, String password) {
-        //loginRepository.login(user, password).subscribe(this::onLoginSuccess, this::onLoginFailure);
         this.userName = user;
         this.password = password;
         Disposable disposable = loginRepository.login(user, password).subscribe(this::onLoginSuccess, this::onLoginFailure);
@@ -75,8 +73,6 @@ public class LoginViewModel extends ViewModel {
     }
 
     private void onLoginSuccess(LoginResponse loginResponse) {
-        //mLoginLiveData.setValue(loginResponse);
-
         Utils.hideLoading();
         if (null != loginResponse) {
             String token = loginResponse.getToken();

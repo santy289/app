@@ -4,10 +4,6 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
-/**
- * Created by Propietario on 10/03/2018.
- */
-
 public class LoginViewModelFactory implements ViewModelProvider.Factory{
 
     private LoginRepository loginRepository;

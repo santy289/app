@@ -8,10 +8,6 @@ import android.arch.persistence.room.Query;
 
 import java.util.List;
 
-/**
- * Created by Propietario on 14/03/2018.
- */
-
 @Dao
 public interface UserDao {
     @Query("SELECT * FROM user")

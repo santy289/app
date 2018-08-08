@@ -5,10 +5,6 @@ import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import dagger.Module;
 import dagger.Provides;
 
-/**
- * Created by Propietario on 10/03/2018.
- */
-
 @Module
 public class LoginModule {
 

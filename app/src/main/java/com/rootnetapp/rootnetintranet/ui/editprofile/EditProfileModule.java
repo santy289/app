@@ -6,10 +6,6 @@ import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import dagger.Module;
 import dagger.Provides;
 
-/**
- * Created by Propietario on 15/03/2018.
- */
-
 @Module
 public class EditProfileModule {
 

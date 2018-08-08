@@ -7,10 +7,6 @@ import android.arch.lifecycle.ViewModel;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
 
-/**
- * Created by Propietario on 10/03/2018.
- */
-
 public class LoginViewModel extends ViewModel {
 
     private MutableLiveData<LoginResponse> mLoginLiveData;

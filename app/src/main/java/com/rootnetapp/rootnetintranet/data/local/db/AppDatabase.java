@@ -8,10 +8,6 @@ import com.rootnetapp.rootnetintranet.data.local.db.user.UserDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDao;
 
-/**
- * Created by Propietario on 14/03/2018.
- */
-
 @Database(entities = {
         User.class,
         Workflow.class

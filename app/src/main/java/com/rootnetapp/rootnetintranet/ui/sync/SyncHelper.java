@@ -27,6 +27,8 @@ public class SyncHelper {
     private String auth;
     //private String auth2;
 
+    private final static String TAG = "SyncHelper";
+
     public SyncHelper(ApiInterface apiInterface, AppDatabase database) {
         this.apiInterface = apiInterface;
         this.database = database;

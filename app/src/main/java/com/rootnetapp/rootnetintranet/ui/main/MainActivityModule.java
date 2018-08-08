@@ -7,10 +7,6 @@ import com.rootnetapp.rootnetintranet.ui.profile.ProfileViewModelFactory;
 import dagger.Module;
 import dagger.Provides;
 
-/**
- * Created by root on 24/04/18.
- */
-
 @Module
 public class MainActivityModule {
 

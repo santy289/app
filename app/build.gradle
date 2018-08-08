@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion "27.0.3"
+    compileSdkVersion 28
+    buildToolsVersion "28.0.2"
     defaultConfig {
         applicationId "com.rootnetapp.rootnetintranet"
         minSdkVersion 21
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         vectorDrawables.useSupportLibrary = true
@@ -48,6 +48,7 @@ dependencies {
     //android arch components
     implementation "android.arch.lifecycle:runtime:$rootProject.archLifecycleVersion"
     implementation "android.arch.lifecycle:extensions:$rootProject.archLifecycleVersion"
+    implementation "android.arch.work:work-runtime:$rootProject.workManager"
     implementation "android.arch.lifecycle:common-java8:$rootProject.archLifecycleVersion"
 
     //room
@@ -67,9 +68,9 @@ dependencies {
     implementation "com.squareup.retrofit2:adapter-rxjava2:$rootProject.rxjavaLibraryVersion"
     implementation "io.reactivex.rxjava2:rxandroid:$rootProject.rxandroidLibraryVersion"
     implementation "io.reactivex.rxjava2:rxjava:$rootProject.rxjavaLibraryVersion"
-    implementation "de.hdodenhof:circleimageview:${circleImageViewVersion}"
+    implementation "de.hdodenhof:circleimageview:$rootProject.circleImageViewVersion"
 
-    compile 'com.squareup.picasso:picasso:2.71828'
+    implementation 'com.squareup.picasso:picasso:2.71828'
     implementation "com.github.bumptech.glide:glide:$rootProject.glideVersion"
     annotationProcessor "com.github.bumptech.glide:compiler:$rootProject.glideVersion"
     implementation "com.google.firebase:firebase-messaging:$rootProject.firebaseVersion"
@@ -79,5 +80,6 @@ dependencies {
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$rootProject.espresso"
     testImplementation "junit:junit:$rootProject.jUnit"
     implementation 'com.auth0.android:jwtdecode:1.1.1'
+    implementation "de.hdodenhof:circleimageview:$rootProject.circleImageViewVersion"
 
 }

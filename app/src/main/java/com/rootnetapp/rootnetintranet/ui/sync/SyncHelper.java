@@ -2,7 +2,9 @@ package com.rootnetapp.rootnetintranet.ui.sync;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.util.Log;
 
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
@@ -15,6 +17,8 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
+import okhttp3.HttpUrl;
 
 public class SyncHelper {
 
@@ -47,16 +51,25 @@ public class SyncHelper {
     }
 
     private void getData(boolean boo) {
+        String domain = Utils.domain;
+        HttpUrl manager = RetrofitUrlManager.getInstance().fetchDomain("api");
+        String testSTring = manager.url().toString();
         apiInterface.getUsers(auth).subscribeOn(Schedulers.newThread()).
                 observeOn(AndroidSchedulers.mainThread()).
-                subscribe(this::onUsersSuccess, this::failure);
+                subscribe(this::onUsersSuccess, throwable -> {
+                    Log.d(TAG, "getData: error " + throwable.getMessage() );
+                    mSyncLiveData.setValue(false);
+                });
         getAllWorkflows(0);
     }
 
     private void getAllWorkflows(int page) {
         apiInterface.getWorkflows(auth, 50, true, page, true).subscribeOn(Schedulers.newThread()).
                 observeOn(AndroidSchedulers.mainThread()).
-                subscribe(this::onWorkflowsSuccess, this::failure);
+                subscribe(this::onWorkflowsSuccess, throwable -> {
+                    Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
+                    mSyncLiveData.setValue(false);
+                });
     }
 
     private void onUsersSuccess(UserResponse userResponse) {

@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity
                 Glide.with(this).load(Utils.URL + domain.getClient().getLogoUrl()).into(mainBinding.toolbarLogo);
                 RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
                 //todo solo para PRUEBAS
-                RetrofitUrlManager.getInstance().putDomain("localhost", "http://192.168.42.183/");
+                //RetrofitUrlManager.getInstance().putDomain("localhost", "http://192.168.42.183/");
             } catch (IOException e) {
                 e.printStackTrace();
             }

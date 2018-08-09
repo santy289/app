@@ -74,32 +74,36 @@ public class LoginViewModel extends ViewModel {
 
     private void onLoginSuccess(LoginResponse loginResponse) {
         Utils.hideLoading();
-        if (null != loginResponse) {
-            String token = loginResponse.getToken();
-            String[] content = new String[2];
-            content[0] = "token";
-            content[1] = token;
-            saveToPreference.setValue(content);
 
-            content[0] = "username";
-            content[1] = userName.trim();
-            saveToPreference.setValue(content);
-
-            content[0] = "password";
-            content[1] = password.trim();
-            saveToPreference.setValue(content);
-
-            JWToken result = Utils.decode(token);
-            String username = result.getUserName();
-            String userType = result.getUserType();
-            String locale = result.getLocale();
-            String name = result.getFullName();
-
-            Log.d("test", "username: " + username +
-                    " Type: " + userType + " locale: " + locale + " Name: " + name);
-
-            goToSyncActivity.setValue(true);
+        if (loginResponse == null) {
+            return;
         }
+
+        String token = loginResponse.getToken();
+        String[] content = new String[2];
+        content[0] = "token";
+        content[1] = token;
+        saveToPreference.setValue(content);
+
+        content[0] = "username";
+        content[1] = userName.trim();
+        saveToPreference.setValue(content);
+
+        content[0] = "password";
+        content[1] = password.trim();
+        saveToPreference.setValue(content);
+
+        JWToken result = Utils.decode(token);
+        String username = result.getUserName();
+        String userType = result.getUserType();
+        String locale = result.getLocale();
+        String name = result.getFullName();
+
+        Log.d("test", "username: " + username +
+                " Type: " + userType + " locale: " + locale + " Name: " + name);
+
+        goToSyncActivity.setValue(true);
+
     }
 
     private void onLoginFailure(Throwable throwable) {

@@ -45,7 +45,10 @@ import retrofit2.http.Query;
 
 public interface ApiInterface {
 
-    @POST("check/client")
+    /* El unico con v1 porque el base url en gradle properties no tiene el v1.
+       Los demas no tienen v1 porque el endpoint esta enviando la api_domain + /v1/ en la url
+    */
+    @POST("v1/check/client")
     @FormUrlEncoded
     Observable<ClientResponse> getDomain(@Field("domain") String domain);
 
@@ -109,7 +112,7 @@ public interface ApiInterface {
     Observable<ProductsResponse> getProducts(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
-    @GET("v1/contacts/services?all=true")
+    @GET("contacts/services?all=true")
     Observable<ServicesResponse> getServices(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
@@ -130,35 +133,35 @@ public interface ApiInterface {
                                                       @Field("description") String description);
 
     @Headers({"Domain-Name: api"})
-    @GET("v1/intranet/workflows/types/{id}")
+    @GET("intranet/workflows/types/{id}")
     Observable<WorkflowTypeResponse> getWorkflowType(@Header("Authorization") String authorization,
                                                      @Path("id") int typeId);
 
     @Headers({"Domain-Name: api"})
-    @GET("v1/intranet/workflows/{id}")
+    @GET("intranet/workflows/{id}")
     Observable<WorkflowResponse> getWorkflow(@Header("Authorization") String authorization,
                                              @Path("id") int workflowId);
 
     @Headers({"Domain-Name: api"})
-    @GET("v1/intranet/templates/{id}")
+    @GET("intranet/templates/{id}")
     Observable<TemplatesResponse> getTemplate(@Header("Authorization") String authorization,
                                               @Path("id") int templateId);
 
 
     @Headers({"Domain-Name: api"})
-    @GET("v1/intranet/workflows/{id}/files")
+    @GET("intranet/workflows/{id}/files")
     Observable<FilesResponse> getFiles(@Header("Authorization") String authorization,
                                        @Path("id") int workflowId);
 
     @Headers({"Domain-Name: api"})
-    @GET("v1/intranet/workflow/{id}/comments?")
+    @GET("intranet/workflow/{id}/comments?")
     Observable<CommentsResponse> getComments(@Header("Authorization") String authorization,
                                              @Path("id") int workflowId,
                                              @Query("limit") int limit,
                                              @Query("page") int page);
 
     @Headers({"Domain-Name: api"})
-    @POST("v1/intranet/workflow/{id}/comment")
+    @POST("intranet/workflow/{id}/comment")
     @FormUrlEncoded
     Observable<CommentResponse> postComment(@Header("Authorization") String authorization,
                                             @Path("id") int workflowId,
@@ -166,14 +169,14 @@ public interface ApiInterface {
                                             @Field("files") List<CommentFile> files);
 
     @Headers({"Domain-Name: api"})
-    @POST("v1/intranet/workflows/records/file")
+    @POST("intranet/workflows/records/file")
     @FormUrlEncoded
     Observable<AttachResponse> attachFile(@Header("Authorization") String authorization,
                                           @Field("workflows") List<WorkflowPresetsRequest> request,
                                           @Field("file") CommentFile fileRequest);
 
     @Headers({"Domain-Name: api"})
-    @GET("v1/timeline?")
+    @GET("timeline?")
     Observable<TimelineResponse> getTimeline(@Header("Authorization") String authorization,
                                              @Query("start") String start,
                                              @Query("end") String end,
@@ -181,18 +184,18 @@ public interface ApiInterface {
                                              @Query("entity[]") List<String> modules);
 
     @Headers({"Domain-Name: api"})
-    @GET("v1/interaction?all=true&comment=500")
+    @GET("interaction?all=true&comment=500")
     Observable<InteractionResponse> getTimelineComments(@Header("Authorization") String authorization);
 
 
     @Headers({"Domain-Name: api"})
-    @GET("v1/interaction/comment?limit=500")
+    @GET("interaction/comment?limit=500")
     Observable<SubCommentsResponse> getSubComment(@Header("Authorization")String auth,
                                                   @Query("associate")int associate,
                                                   @Query("level")int level);
 
     @Headers({"Domain-Name: api"})
-    @POST("v1/interaction")
+    @POST("interaction")
     @FormUrlEncoded
     Observable<PostCommentResponse> postComment(@Header("Authorization")String auth,
                                                 @Field("interactionId") int interactionId,
@@ -202,7 +205,7 @@ public interface ApiInterface {
                                                 @Field("author") int author);
 
     @Headers({"Domain-Name: api"})
-    @POST("v1/interaction/comment")
+    @POST("interaction/comment")
     @FormUrlEncoded
     Observable<PostSubCommentResponse> postSubComment(@Header("Authorization")String auth,
                                                       @Field("interaction") int interaction,

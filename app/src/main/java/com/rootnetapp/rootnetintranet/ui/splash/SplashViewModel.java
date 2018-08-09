@@ -3,25 +3,31 @@ package com.rootnetapp.rootnetintranet.ui.splash;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
+import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
 
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
 
 public class SplashViewModel extends ViewModel {
     private MutableLiveData<Boolean> goToDomain;
     private MutableLiveData<Boolean> goToSync;
+    private MutableLiveData<String[]> saveToPreference;
     private SplashRepository splashRepository;
     private final CompositeDisposable disposables = new CompositeDisposable();
+
+    private final static String TAG = "SplashViewModel";
 
     public SplashViewModel(SplashRepository splashRepository) {
         this.splashRepository = splashRepository;
@@ -35,7 +41,9 @@ public class SplashViewModel extends ViewModel {
     public void initSplashViewModel(SharedPreferences sharedPreferences) {
         String token = sharedPreferences.getString("token", "");
         if (TextUtils.isEmpty(token)) {
-            goToDomain.setValue(true);
+            String user = sharedPreferences.getString("username", "");
+            String password = sharedPreferences.getString("password", "");
+            attemptToLogin(user, password);
             return;
         }
 
@@ -57,8 +65,30 @@ public class SplashViewModel extends ViewModel {
             goToDomain.setValue(true);
             return;
         }
-
         goToSync.setValue(true);
+    }
+
+    public void attemptToLogin(String user, String password) {
+        if(TextUtils.isEmpty(user)||TextUtils.isEmpty(password)){
+            goToDomain.setValue(true);
+            return;
+        }
+        Disposable disposable = splashRepository.login(user, password).subscribe(loginResponse -> {
+            if (loginResponse == null) {
+                goToDomain.setValue(true);
+                return;
+            }
+            String token = loginResponse.getToken();
+            String[] content = new String[2];
+            content[0] = "token";
+            content[1] = token;
+            saveToPreference.setValue(content);
+            goToSync.setValue(true);
+        }, throwable -> {
+            Log.d(TAG, "attemptToLogin: Smomething failed with network request: " + throwable.getMessage());
+            goToDomain.setValue(true);
+        });
+        disposables.add(disposable);
     }
 
     public LiveData<Boolean> getObservableGoToDomain() {
@@ -72,6 +102,13 @@ public class SplashViewModel extends ViewModel {
             goToSync = new MutableLiveData<>();
         }
         return goToSync;
+    }
+
+    public LiveData<String[]> getObservableSaveToPreference() {
+        if (saveToPreference == null) {
+            saveToPreference = new MutableLiveData<>();
+        }
+        return saveToPreference;
     }
 
 }

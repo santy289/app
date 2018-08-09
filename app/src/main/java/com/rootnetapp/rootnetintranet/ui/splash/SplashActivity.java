@@ -35,8 +35,10 @@ public class SplashActivity extends AppCompatActivity {
     private void subscribe() {
         final Observer<Boolean> goToDomainObserver = (this::goToDomain);
         final Observer<Boolean> goToSyncObserver = (this::goToSync);
+        final Observer<String[]> saveToPreferenceObserver = (this::saveInPreferences);
         splashViewModel.getObservableGoToDomain().observe(this, goToDomainObserver);
         splashViewModel.getObservableGoToSync().observe(this, goToSyncObserver);
+        splashViewModel.getObservableSaveToPreference().observe(this, saveToPreferenceObserver);
     }
 
     private void goToDomain(Boolean open) {
@@ -47,5 +49,10 @@ public class SplashActivity extends AppCompatActivity {
     private void goToSync(Boolean open) {
         startActivity(new Intent(SplashActivity.this, SyncActivity.class));
         finishAffinity();
+    }
+
+    private void saveInPreferences(String[] content) {
+        SharedPreferences.Editor editor = getSharedPreferences("Sessions", Context.MODE_PRIVATE).edit();
+        editor.putString(content[0], content[1]).apply();
     }
 }

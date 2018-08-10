@@ -3,11 +3,13 @@ package com.rootnetapp.rootnetintranet.ui.workflowlist;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.content.SharedPreferences;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
+import com.rootnetapp.rootnetintranet.ui.domain.Sort;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -19,29 +21,50 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Created by root on 19/03/18.
- */
-
 public class WorkflowViewModel extends ViewModel {
+
+    protected interface OnWorkflowResultsListener {
+        void onResult(List<Workflow> workflows);
+    }
 
     private MutableLiveData<List<Workflow>> mUserLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
+    private MutableLiveData<Boolean> showLoading;
     private WorkflowRepository workflowRepository;
+    private LiveData<List<Workflow>> liveWorkflows, liveUnordered;
+
     private List<Workflow> workflows, unordered;
-    private String auth;
+    private String token;
     //todo REMOVE, solo testing
     //private String auth2 = "Bearer "+Utils.testToken;
     public WorkflowViewModel(WorkflowRepository workflowRepository) {
         this.workflowRepository = workflowRepository;
+        liveWorkflows = this.workflowRepository.getAllWorkflows();
+    }
+
+    @Override
+    protected void onCleared() {
+        workflowRepository.clearDisposables();
+    }
+
+    protected LiveData<List<Workflow>> getAllWorkflows() {
+        return liveWorkflows;
+    }
+
+    protected void insert(Workflow workflow) {
+        workflowRepository.insertWorkflow(workflow);
+    }
+
+    protected void initWorkflowList(SharedPreferences sharedPreferences) {
+        token = "Bearer "+ sharedPreferences.getString("token","");
+        getWorkflows(token);
     }
 
     protected void getWorkflows(String auth) {
-        //this.auth = auth2;
-        this.auth = auth;
+        this.token = auth;
         try {
             if (Utils.isConnected()) {
-                getWorkflowsFromService(this.auth, 0);
+                getWorkflowsFromService(this.token, 0);
             } else {
                 getWorkflowsFromLocal(null);
             }
@@ -65,7 +88,7 @@ public class WorkflowViewModel extends ViewModel {
         workflows.addAll(workflowsResponse.getList());
         if (!workflowsResponse.getPager().isIsLastPage()) {
             //todo CAMBIAR AUTH
-            getWorkflowsFromService(auth, workflowsResponse.getPager().getNextPage());
+            getWorkflowsFromService(token, workflowsResponse.getPager().getNextPage());
         } else {
             workflowRepository.setWorkflowsOnInternal(workflows).subscribe(this::onWorkflowSuccess,
                     this::onWorkflowFailure);
@@ -96,7 +119,14 @@ public class WorkflowViewModel extends ViewModel {
         return mErrorLiveData;
     }
 
-    public void applyFilters(WorkflowFragment.Sort sorting) {
+    protected LiveData<Boolean> getObservableShowLoading() {
+        if (showLoading == null) {
+            showLoading = new MutableLiveData<>();
+        }
+        return showLoading;
+    }
+
+    public void applyFilters(Sort sorting) {
         List<Workflow> workflows = mUserLiveData.getValue();
 
         switch (sorting.getSortingType()) {
@@ -107,7 +137,7 @@ public class WorkflowViewModel extends ViewModel {
             }
             case BYNUMBER: {
                 Collections.sort(workflows, (s1, s2) -> {
-                    if (sorting.getNumberSortOrder().equals(WorkflowFragment.sortOrder.ASC)) {
+                    if (sorting.getNumberSortOrder().equals(Sort.sortOrder.ASC)) {
                         /*For ascending order*/
                         return s1.getId() - s2.getId();
                     } else {
@@ -125,7 +155,7 @@ public class WorkflowViewModel extends ViewModel {
                     try {
                         Date date1 = format.parse(str1);
                         Date date2 = format.parse(str2);
-                        if (sorting.getCreatedSortOrder().equals(WorkflowFragment.sortOrder.ASC)) {
+                        if (sorting.getCreatedSortOrder().equals(Sort.sortOrder.ASC)) {
                             return date1.compareTo(date2);
                         } else {
                             return date2.compareTo(date1);

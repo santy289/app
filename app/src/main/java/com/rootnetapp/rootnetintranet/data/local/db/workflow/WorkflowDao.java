@@ -1,5 +1,6 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflow;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
@@ -7,10 +8,6 @@ import android.arch.persistence.room.Query;
 import android.database.Cursor;
 
 import java.util.List;
-
-/**
- * Created by root on 16/03/18.
- */
 
 @Dao
 public abstract class WorkflowDao {
@@ -29,6 +26,9 @@ public abstract class WorkflowDao {
     @Query("SELECT * FROM workflow")
     public abstract List<Workflow> getAllWorkflows();
 
+    @Query("SELECT * FROM workflow")
+    public abstract LiveData<List<Workflow>> getWorkflows();
+
     @Query("SELECT * FROM workflow WHERE id = :id")
     public abstract Workflow getWorkflow(int id);
 
@@ -37,6 +37,9 @@ public abstract class WorkflowDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract void insertAllWorkflows(List<Workflow> workflows);
+
+    @Insert
+    public abstract void insertWorkflow(Workflow workflow);
 
     @Query("DELETE FROM workflow")
     public abstract void clearWorkflows();

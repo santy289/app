@@ -6,10 +6,6 @@ import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import dagger.Module;
 import dagger.Provides;
 
-/**
- * Created by root on 22/03/18.
- */
-
 @Module
 public class CreateWorkflowModule {
 

@@ -7,10 +7,6 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-/**
- * Created by Propietario on 15/03/2018.
- */
-
 public class ProfileRepository {
 
     private AppDatabase database;

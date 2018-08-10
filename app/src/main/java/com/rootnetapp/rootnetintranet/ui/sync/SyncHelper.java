@@ -51,9 +51,6 @@ public class SyncHelper {
     }
 
     private void getData(boolean boo) {
-        String domain = Utils.domain;
-        HttpUrl manager = RetrofitUrlManager.getInstance().fetchDomain("api");
-        String testSTring = manager.url().toString();
         apiInterface.getUsers(auth).subscribeOn(Schedulers.newThread()).
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe(this::onUsersSuccess, throwable -> {

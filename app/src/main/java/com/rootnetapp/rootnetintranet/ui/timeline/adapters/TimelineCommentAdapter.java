@@ -22,10 +22,6 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by root on 10/04/18.
- */
-
 public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineCommentViewholder> {
 
     private List<Comment> comments;

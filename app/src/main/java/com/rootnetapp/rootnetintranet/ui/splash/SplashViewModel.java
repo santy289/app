@@ -3,14 +3,12 @@ package com.rootnetapp.rootnetintranet.ui.splash;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
-import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
@@ -58,7 +56,7 @@ public class SplashViewModel extends ViewModel {
             JsonAdapter<ClientResponse> jsonAdapter = moshi.adapter(ClientResponse.class);
             ClientResponse domain = jsonAdapter.fromJson(json);
             Utils.domain = "https://" + domain.getClient().getApiUrl();
-            Utils.imgDomain = "http://" + domain.getClient().getApiUrl();
+            Utils.imgDomain = "http://" + domain.getClient().getApiUrl() + "/";
             RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
         } catch (IOException e) {
             e.printStackTrace();

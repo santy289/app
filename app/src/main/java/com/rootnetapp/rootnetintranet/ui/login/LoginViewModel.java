@@ -54,7 +54,7 @@ public class LoginViewModel extends ViewModel {
         } else {
             try {
                 domain = jsonAdapter.fromJson(json);
-                Utils.imgDomain = "http://" + domain.getClient().getApiUrl();
+                Utils.imgDomain = "http://" + domain.getClient().getApiUrl() + "/";
                 showLogo.setValue(domain.getClient().getLogoUrl());
                 String newApiUrl = domain.getClient().getApiUrl();
                 Utils.domain = "https://" + newApiUrl;

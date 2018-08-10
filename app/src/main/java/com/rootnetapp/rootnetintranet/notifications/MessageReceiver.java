@@ -11,10 +11,6 @@ import com.google.firebase.messaging.RemoteMessage;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
 
-/**
- * Created by root on 25/04/18.
- */
-
 public class MessageReceiver extends FirebaseMessagingService {
     private static final int REQUEST_CODE = 1;
     private static final int NOTIFICATION_ID = 6578;

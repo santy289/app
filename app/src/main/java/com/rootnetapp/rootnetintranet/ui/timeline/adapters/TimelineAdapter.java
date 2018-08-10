@@ -26,10 +26,6 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by root on 09/04/18.
- */
-
 public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
 
     private List<TimelineItem> items;

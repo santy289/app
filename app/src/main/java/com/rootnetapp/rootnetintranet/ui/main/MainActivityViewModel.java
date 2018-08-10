@@ -3,47 +3,114 @@ package com.rootnetapp.rootnetintranet.ui.main;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.util.Log;
 
+import com.auth0.android.jwt.JWT;
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 
-/**
- * Created by root on 24/04/18.
- */
+import java.io.IOException;
+
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
 
 public class MainActivityViewModel extends ViewModel {
 
     private MainActivityRepository repository;
-    private MutableLiveData<User> mUserLiveData;
     private MutableLiveData<Cursor> mWorkflowsLiveData;
-    private MutableLiveData<Workflow> mWorkflowLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Integer> mWorkfErrorLiveData;
+    private MutableLiveData<String[]> setImgInView;
+    private MutableLiveData<Boolean> collapseMenu;
+    private MutableLiveData<Boolean> hideKeyboard;
+    private MutableLiveData<Workflow> goToWorkflowDetail;
+    private final CompositeDisposable disposables = new CompositeDisposable();
+
+    protected final static String IMG_LOGO = "imgLogo";
+    protected final static String IMG_BAR_LOGO = "imgBarLogo";
+    protected final static String IMG_TOOLBAR = "imgToolbar";
+    private final static String TAG = "MainActivityViewModel";
 
     public MainActivityViewModel(MainActivityRepository repository) {
         this.repository = repository;
     }
 
+    @Override
+    protected void onCleared() {
+        disposables.clear();
+    }
+
+    protected void initMainViewModel(SharedPreferences sharedPreferences) {
+        String json = sharedPreferences.getString("domain", "");
+        if (json.isEmpty()) {
+            Log.d("test", "onCreate: ALGO PASO");//todo mejorar esta validacion
+            return;
+        }
+
+        try {
+            Moshi moshi = new Moshi.Builder().build();
+            JsonAdapter<ClientResponse> jsonAdapter = moshi.adapter(ClientResponse.class);
+            ClientResponse domain;
+            domain = jsonAdapter.fromJson(json);
+            Utils.domain = "https://" + domain.getClient().getApiUrl();
+            Utils.imgDomain = "http://" + domain.getClient().getDomain() + "/";
+            String[] content = new String[2];
+            content[0] = MainActivityViewModel.IMG_LOGO;
+            content[1] = Utils.URL + domain.getClient().getLogoUrl();
+            setImgInView.setValue(content);
+            content[0] = MainActivityViewModel.IMG_BAR_LOGO;
+            content[1] = Utils.URL + domain.getClient().getLogoUrl();
+            setImgInView.setValue(content);
+
+            RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
+        } catch (IOException e) {
+            Log.d(TAG, "initMainViewModel: error: " + e.getMessage());
+        }
+
+        String token = sharedPreferences.getString("token", "");
+        JWT jwt = new JWT(token);
+        int id = Integer.parseInt(jwt.getClaim("profile_id").asString());
+        getUser(id);
+    }
+
     public void getUser(int id) {
-        repository.getUser(id).subscribe(this::onUserSuccess, this::onFailure);
+        Disposable disposable = repository.getUser(id).subscribe(this::onUserSuccess, this::onFailure);
+        disposables.add(disposable);
     }
 
     public void getWorkflowsLike(String text) {
-        repository.getWorkflowsLike(text).subscribe(this::onWorkflowsSuccess, this::onWorflowsFailure);
+        Disposable disposable = repository.getWorkflowsLike(text).subscribe(this::onWorkflowsSuccess, this::onWorflowsFailure);
+        disposables.add(disposable);
     }
 
     public void getWorkflow(int id) {
-        repository.getWorkflow(id).subscribe(this::onWorkflowSuccess, this::onFailure);
+        Disposable disposable = repository.getWorkflow(id).subscribe(this::onWorkflowSuccess, this::onFailure);
+        disposables.add(disposable);
     }
 
     private void onWorkflowSuccess(Workflow workflow) {
-        mWorkflowLiveData.setValue(workflow);
+        if (workflow == null) {
+            return;
+        }
+        collapseMenu.setValue(true);
+        hideKeyboard.setValue(true);
+        goToWorkflowDetail.setValue(workflow);
     }
 
     private void onUserSuccess(User user) {
-        mUserLiveData.setValue(user);
+        String path = Utils.imgDomain + user.getPicture().trim();
+        String[] content = new String[2];
+        content[0] = IMG_TOOLBAR;
+        content[1] = path;
+        setImgInView.setValue(content);
     }
 
     private void onWorkflowsSuccess(Cursor cursor) {
@@ -51,18 +118,13 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     private void onFailure(Throwable throwable) {
+        Log.d(TAG, "onFailure: " + throwable.getMessage());
         mErrorLiveData.setValue(R.string.failure_connect);
     }
 
     private void onWorflowsFailure(Throwable throwable) {
+        Log.d(TAG, "onWorflowsFailure: " + throwable.getMessage());
         mWorkfErrorLiveData.setValue(R.string.failure_connect);
-    }
-
-    public LiveData<User> getObservableUser() {
-        if (mUserLiveData == null) {
-            mUserLiveData = new MutableLiveData<>();
-        }
-        return mUserLiveData;
     }
 
     public LiveData<Cursor> getObservableWorkflows() {
@@ -70,13 +132,6 @@ public class MainActivityViewModel extends ViewModel {
             mWorkflowsLiveData = new MutableLiveData<>();
         }
         return mWorkflowsLiveData;
-    }
-
-    public LiveData<Workflow> getObservableWorkflow() {
-        if (mWorkflowLiveData == null) {
-            mWorkflowLiveData = new MutableLiveData<>();
-        }
-        return mWorkflowLiveData;
     }
 
     public LiveData<Integer> getObservableError() {
@@ -91,6 +146,34 @@ public class MainActivityViewModel extends ViewModel {
             mWorkfErrorLiveData = new MutableLiveData<>();
         }
         return mWorkfErrorLiveData;
+    }
+
+    public LiveData<String[]> getObservableSetImgInView() {
+        if (setImgInView == null) {
+            setImgInView = new MutableLiveData<>();
+        }
+        return setImgInView;
+    }
+
+    protected LiveData<Boolean> getObservableCollapseMenu() {
+        if (collapseMenu == null) {
+            collapseMenu = new MutableLiveData<>();
+        }
+        return collapseMenu;
+    }
+
+    protected LiveData<Boolean> getObservableHideKeyboard() {
+        if (hideKeyboard == null) {
+            hideKeyboard = new MutableLiveData<>();
+        }
+        return hideKeyboard;
+    }
+
+    protected LiveData<Workflow> getObservableGoToWorkflowDetail() {
+        if (goToWorkflowDetail == null) {
+            goToWorkflowDetail = new MutableLiveData<>();
+        }
+        return goToWorkflowDetail;
     }
 
 }

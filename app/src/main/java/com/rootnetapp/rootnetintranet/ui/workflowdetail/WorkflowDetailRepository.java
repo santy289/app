@@ -19,10 +19,6 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-/**
- * Created by root on 02/04/18.
- */
-
 public class WorkflowDetailRepository {
 
     private AppDatabase database;

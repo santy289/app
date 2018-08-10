@@ -21,10 +21,6 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser
 
 import java.util.List;
 
-/**
- * Created by root on 10/04/18.
- */
-
 public class TimelineViewModel extends ViewModel {
 
     private MutableLiveData<List<TimelineItem>> mTypeLiveData;

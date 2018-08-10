@@ -3,10 +3,6 @@ package com.rootnetapp.rootnetintranet.ui.main;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 
-/**
- * Created by Propietario on 15/03/2018.
- */
-
 public interface MainActivityInterface {
 
     void showActivity(Class<?> activityClass);

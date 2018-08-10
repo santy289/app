@@ -6,11 +6,6 @@ import com.rootnetapp.rootnetintranet.di.AppComponent;
 import com.rootnetapp.rootnetintranet.di.AppModule;
 import com.rootnetapp.rootnetintranet.di.DaggerAppComponent;
 
-
-/**
- * Created by Propietario on 09/03/2018.
- */
-
 public class RootnetApp extends Application {
 
     public static AppComponent appComponent;

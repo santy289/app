@@ -10,10 +10,6 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-/**
- * Created by root on 24/04/18.
- */
-
 public class MainActivityRepository {
 
     private AppDatabase database;

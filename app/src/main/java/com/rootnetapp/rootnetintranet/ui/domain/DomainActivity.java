@@ -15,12 +15,8 @@ import android.widget.Toast;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ActivityDomainBinding;
-import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
-import com.rootnetapp.rootnetintranet.models.responses.domain.Product;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.login.LoginActivity;
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
 
 import javax.inject.Inject;
 
@@ -67,28 +63,6 @@ public class DomainActivity extends AppCompatActivity {
     }
 
     private void subscribe() {
-        final Observer<ClientResponse> domainObserver = ((ClientResponse data) -> {
-            Utils.hideLoading();
-            if (null != data) {
-                boolean active = false;
-                for (Product product: data.getClient().getProducts()) {
-                    if(product.getMachineName().equals("intranet")){
-                        active = true;
-                        Moshi moshi = new Moshi.Builder().build();
-                        JsonAdapter<ClientResponse> jsonAdapter = moshi.adapter(ClientResponse.class);
-                        //todo Preguntar como implementar SharesPreferencesModule en los Viewmodels para cada tipo de clase guardada
-                        SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-                        sharedPref.edit().putString("domain", jsonAdapter.toJson(data)).apply();
-                        //todo cambiar por consulta al viewmodel
-                        startActivity(new Intent(this, LoginActivity.class));
-                        finishAffinity();
-                    }
-                }
-                if(!active){
-                    Toast.makeText(this, getString(R.string.product_not_enabled), Toast.LENGTH_LONG).show();
-                }
-            }
-        });
         final Observer<Integer> errorObserver = ((Integer data) -> {
             Utils.hideLoading();
             if (null != data) {
@@ -96,8 +70,29 @@ public class DomainActivity extends AppCompatActivity {
                 Toast.makeText(this, getString(data), Toast.LENGTH_LONG).show();
             }
         });
-        domainViewModel.getObservableDomain().observe(this, domainObserver);
+        final Observer<Boolean> hideLoadingWidgetObserver = ((show) -> Utils.hideLoading());
+        final Observer<String> saveToPreferenceObserver = (this::saveInPreferences);
+        final Observer<Integer> showToastObserver = (this::showToast);
+        final Observer<Boolean> openLoginObserver = (this::openLogin);
         domainViewModel.getObservableError().observe(this, errorObserver);
+        domainViewModel.getObservableSaveToPreferences().observe(this, saveToPreferenceObserver);
+        domainViewModel.getObservableShowToast().observe(this, showToastObserver);
+        domainViewModel.getObservableOpenLogin().observe(this, openLoginObserver);
+        domainViewModel.getObservableHideLoadingWidget().observe(this, hideLoadingWidgetObserver);
+    }
+
+    private void saveInPreferences(String jsonString) {
+        SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        sharedPref.edit().putString("domain", jsonString).apply();
+    }
+
+    private void openLogin(boolean open) {
+        startActivity(new Intent(this, LoginActivity.class));
+        finishAffinity();
+    }
+
+    private void showToast(int resId) {
+        Toast.makeText(this, resId, Toast.LENGTH_LONG).show();
     }
 
 }

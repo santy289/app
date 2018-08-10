@@ -12,11 +12,6 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-
-/**
- * Created by root on 06/04/18.
- */
-
 public class MyOkHttpClient {
     public static OkHttpClient getUnsafeOkHttpClient() {
         try {

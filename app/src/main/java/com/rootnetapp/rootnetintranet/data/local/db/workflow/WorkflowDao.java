@@ -13,13 +13,6 @@ import java.util.List;
 public abstract class WorkflowDao {
 
     public void insertAll(List<Workflow> workflows) {
-        for(Workflow workflow: workflows) {
-
-
-            /*if(workflow.getWorkflowStateInfo() != null){
-                workflow.setWorkflowStateId(workflow.getWorkflowStateInfo().getId());
-            }*/
-        }
         insertAllWorkflows(workflows);
     }
 

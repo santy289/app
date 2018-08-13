@@ -4,8 +4,8 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.util.Log;
 
-import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
+import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
@@ -16,9 +16,9 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
-import okhttp3.HttpUrl;
 
 public class SyncHelper {
 
@@ -29,7 +29,7 @@ public class SyncHelper {
     private int totalQueries =2, queriesCompleted =0;
     private List<Workflow> workflows;
     private String auth;
-    //private String auth2;
+    private final CompositeDisposable disposables = new CompositeDisposable();
 
     private final static String TAG = "SyncHelper";
 
@@ -39,41 +39,51 @@ public class SyncHelper {
         this.workflows = new ArrayList<>();
     }
 
-    public void clearData(String auth) {
-        //todo token test
-        //this.auth2 = "Bearer "+ Utils.testToken;
-        this.auth = auth;
-        Observable.fromCallable(() -> {
-            database.userDao().clearUser();
-            database.workflowDao().clearWorkflows();
-            return true;
-        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(this::getData, this::failure);
+    protected void syncData(String token) {
+        this.auth = token;
+        getUser();
+        getAllWorkflows(0);
     }
 
-    private void getData(boolean boo) {
-        apiInterface.getUsers(auth).subscribeOn(Schedulers.newThread()).
+    protected void clearDisposables() {
+        disposables.clear();
+    }
+
+    private void getUser() {
+        Disposable disposable = apiInterface.getUsers(auth).subscribeOn(Schedulers.newThread()).
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe(this::onUsersSuccess, throwable -> {
                     Log.d(TAG, "getData: error " + throwable.getMessage() );
                     mSyncLiveData.setValue(false);
                 });
-        getAllWorkflows(0);
+        disposables.add(disposable);
     }
 
     private void getAllWorkflows(int page) {
-        apiInterface.getWorkflows(auth, 50, true, page, true).subscribeOn(Schedulers.newThread()).
-                observeOn(AndroidSchedulers.mainThread()).
-                subscribe(this::onWorkflowsSuccess, throwable -> {
+        Disposable disposable = apiInterface
+                .getWorkflows(auth, 50, true, page, true)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onWorkflowsSuccess, throwable -> {
                     Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
                     mSyncLiveData.setValue(false);
                 });
+        disposables.add(disposable);
     }
 
     private void onUsersSuccess(UserResponse userResponse) {
-        Observable.fromCallable(() -> {
-            database.userDao().insertAll(userResponse.getProfiles());
+        Disposable disposable = Observable.fromCallable(() -> {
+            List<User> users = userResponse.getProfiles();
+            if (users == null) {
+                return false;
+            }
+            database.userDao().clearUser();
+            database.userDao().insertAll(users);
             return true;
-        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(this::success, this::failure);
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::success, this::failure);
+        disposables.add(disposable);
     }
 
     private void onWorkflowsSuccess(WorkflowsResponse workflowsResponse) {
@@ -81,15 +91,18 @@ public class SyncHelper {
         if(!workflowsResponse.getPager().isIsLastPage()){
             getAllWorkflows(workflowsResponse.getPager().getNextPage());
         }else{
-            Observable.fromCallable(() -> {
+            Disposable disposable = Observable.fromCallable(() -> {
+                database.workflowDao().clearWorkflows();
                 database.workflowDao().insertAll(workflows);
                 return true;
-            }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+            }).subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::success, this::failure);
+            disposables.add(disposable);
         }
     }
 
-    private void success(Object o) {
+    private void success(Boolean o) {
         queriesCompleted++;
         mProgressLiveData.setValue(queriesCompleted);
         if(totalQueries == queriesCompleted){

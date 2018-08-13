@@ -5,13 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerService;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
 
@@ -30,15 +30,22 @@ public class SyncActivity extends AppCompatActivity {
         ((RootnetApp) getApplication()).getAppComponent().inject(this);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        //TODO preferences inyectadas con Dagger
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowTitleEnabled(false);
+        }
         SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
         bar = findViewById(R.id.progress_bar);
         bar.setMax(2);
         subscribe();
-        syncHelper.clearData(token);
+        syncHelper.syncData(token);
+    }
 
+    @Override
+    protected void onDestroy() {
+        syncHelper.clearDisposables();
+        super.onDestroy();
     }
 
     private void subscribe() {

@@ -22,10 +22,6 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTyp
 
 import java.util.List;
 
-/**
- * Created by root on 02/04/18.
- */
-
 public class WorkflowDetailViewModel extends ViewModel {
 
     private MutableLiveData<WorkflowType> mTypeLiveData;

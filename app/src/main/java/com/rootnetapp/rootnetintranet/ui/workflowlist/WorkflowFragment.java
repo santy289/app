@@ -7,10 +7,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +47,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     private Sort sorting;
     private String token;
 
+    private static final String TAG = "WorkflowFragment";
+
     public WorkflowFragment() {
         // Required empty public constructor
     }
@@ -73,10 +75,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .of(this, workflowViewModelFactory)
                 .get(WorkflowViewModel.class);
         sorting = new Sort();
+        subscribe();
         setupWorkflowRecyclerView();
         setupClickListeners();
-        subscribe();
-        Utils.showLoading(getContext());
+        //Utils.showLoading(getContext());
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         workflowViewModel.initWorkflowList(prefs);
         return view;
@@ -85,6 +87,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     private void setupWorkflowRecyclerView() {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         fragmentWorkflowBinding.recWorkflows.setLayoutManager(mLayoutManager);
+        adapter = new WorkflowExpandableAdapter(this);
+        fragmentWorkflowBinding.recWorkflows.setAdapter(adapter);
     }
 
     private void setupClickListeners() {
@@ -106,12 +110,13 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     private void subscribe() {
         final Observer<List<Workflow>> workflowsObserver = ((List<Workflow> data) -> {
-            Utils.hideLoading();
+            Log.d(TAG, "subscribe: HEREHERHE");
+            //Utils.hideLoading();
             if (null != data) {
                 if(data.size()!=0){
                     fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.GONE);
-                    adapter = new WorkflowExpandableAdapter(this);
-                    fragmentWorkflowBinding.recWorkflows.setAdapter(adapter);
+//                    adapter = new WorkflowExpandableAdapter(this);
+//                    fragmentWorkflowBinding.recWorkflows.setAdapter(adapter);
 //                    adapter.notifyDataSetChanged();
                 }else{
                     fragmentWorkflowBinding.recWorkflows.setVisibility(View.GONE);
@@ -123,17 +128,25 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             }
         });
         final Observer<Integer> errorObserver = ((Integer data) -> {
-            Utils.hideLoading();
+            //Utils.hideLoading();
             if (null != data) {
-                //TODO mejorar toast
                 Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
             }
         });
         final Observer<List<Workflow>> getAllWorkflowsObserver = (listWorkflows -> {
-            if (adapter == null) {
+            if (adapter == null || listWorkflows == null) {
+                fragmentWorkflowBinding.recWorkflows.setVisibility(View.GONE);
+                fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.VISIBLE);
+                return;
+            }
+            if(listWorkflows.size() < 1){
+                fragmentWorkflowBinding.recWorkflows.setVisibility(View.GONE);
+                fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.VISIBLE);
                 return;
             }
             adapter.setWorkflows(listWorkflows);
+            fragmentWorkflowBinding.recWorkflows.setVisibility(View.VISIBLE);
+            fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.GONE);
         });
         final Observer<Boolean> showLoadingObserver = (this::showLoading);
         workflowViewModel.getObservableWorkflows().observe(this, workflowsObserver);

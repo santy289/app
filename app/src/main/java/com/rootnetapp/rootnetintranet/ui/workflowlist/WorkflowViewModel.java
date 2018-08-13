@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -21,12 +22,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+
 public class WorkflowViewModel extends ViewModel {
-
-    protected interface OnWorkflowResultsListener {
-        void onResult(List<Workflow> workflows);
-    }
-
     private MutableLiveData<List<Workflow>> mUserLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
@@ -35,8 +34,9 @@ public class WorkflowViewModel extends ViewModel {
 
     private List<Workflow> workflows, unordered;
     private String token;
-    //todo REMOVE, solo testing
-    //private String auth2 = "Bearer "+Utils.testToken;
+    private final CompositeDisposable disposables = new CompositeDisposable();
+
+    private static final String TAG = "WorkflowViewModel";
     public WorkflowViewModel(WorkflowRepository workflowRepository) {
         this.workflowRepository = workflowRepository;
         liveWorkflows = this.workflowRepository.getAllWorkflows();
@@ -44,6 +44,7 @@ public class WorkflowViewModel extends ViewModel {
 
     @Override
     protected void onCleared() {
+        disposables.clear();
         workflowRepository.clearDisposables();
     }
 
@@ -65,44 +66,49 @@ public class WorkflowViewModel extends ViewModel {
         try {
             if (Utils.isConnected()) {
                 getWorkflowsFromService(this.token, 0);
-            } else {
-                getWorkflowsFromLocal(null);
             }
         } catch (InterruptedException | IOException e) {
-            getWorkflowsFromLocal(null);
+            Log.d(TAG, "getWorkflows: Problems updating workflows - " + e.getMessage());
         }
     }
 
     private void getWorkflowsFromService(String auth, int page) {
-        workflowRepository.getWorkflowsFromService(auth, page).subscribe(this::onServiceSuccess,
-                this::getWorkflowsFromLocal);
+        Disposable disposable = workflowRepository
+                .getWorkflowsFromService(auth, page)
+                .subscribe(
+                        this::onServiceSuccess,
+                        throwable -> Log.d(TAG, "getWorkflowsFromService: Cant get workflows from network - " + throwable.getMessage())
+                );
+        disposables.add(disposable);
     }
 
-    private void getWorkflowsFromLocal(Throwable throwable) {
-        workflowRepository.getWorkflowsFromInternal().subscribe(this::onWorkflowSuccess,
-                this::onWorkflowFailure);
-    }
 
     private void onServiceSuccess(WorkflowsResponse workflowsResponse) {
         workflows = new ArrayList<>();
         workflows.addAll(workflowsResponse.getList());
         if (!workflowsResponse.getPager().isIsLastPage()) {
-            //todo CAMBIAR AUTH
+            // calling multiple times until we get to the last page.
             getWorkflowsFromService(token, workflowsResponse.getPager().getNextPage());
-        } else {
-            workflowRepository.setWorkflowsOnInternal(workflows).subscribe(this::onWorkflowSuccess,
-                    this::onWorkflowFailure);
+        }
+        else {
+            //TODO when we are done downloading all pages then call from internal
+            Disposable disposable = workflowRepository
+                    .setWorkflowsOnInternal(workflows)
+                    .subscribe(
+                            this::onWorkflowSuccess,
+                            throwable -> {
+                                Log.d(TAG, "onServiceSuccess: problem saving to db - " + throwable.getMessage());
+                                mErrorLiveData.setValue(R.string.failure_connect);
+                            }
+                    );
+            disposables.add(disposable);
         }
     }
 
     private void onWorkflowSuccess(List<Workflow> workflowList) {
         unordered = new ArrayList<>();
         unordered.addAll(workflowList);
-        mUserLiveData.setValue(workflowList);
-    }
-
-    private void onWorkflowFailure(Throwable throwable) {
-        mErrorLiveData.setValue(R.string.failure_connect);
+        //mUserLiveData.setValue(workflowList);
     }
 
     protected LiveData<List<Workflow>> getObservableWorkflows() {
@@ -128,11 +134,14 @@ public class WorkflowViewModel extends ViewModel {
 
     public void applyFilters(Sort sorting) {
         List<Workflow> workflows = mUserLiveData.getValue();
+        if (workflows == null) {
+            return;
+        }
 
         switch (sorting.getSortingType()) {
             case NONE: {
-                workflows = new ArrayList<>();
-                workflows.addAll(unordered);
+                workflows = new ArrayList<>(unordered); //TODO check if it works passing it on the constructor
+//                workflows.addAll(unordered);
                 break;
             }
             case BYNUMBER: {

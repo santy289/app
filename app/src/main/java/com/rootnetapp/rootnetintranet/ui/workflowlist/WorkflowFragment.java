@@ -93,7 +93,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     private void setupClickListeners() {
         fragmentWorkflowBinding.btnFilters.setOnClickListener(view1 -> {
-            PopupWindow popupwindow_obj = popupMenu();
+            PopupWindow popupwindow_obj = initPopMenu();
             popupwindow_obj.showAsDropDown(fragmentWorkflowBinding.btnFilters, -40, 18);
         });
         fragmentWorkflowBinding.btnAdd.setOnClickListener(view12 ->
@@ -144,18 +144,27 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.VISIBLE);
                 return;
             }
-            adapter.setWorkflows(listWorkflows);
+            // before updating check if we need to apply filters.
+            if (sorting.getSortingType() == Sort.sortType.NONE) {
+                adapter.setWorkflows(listWorkflows);
+            } else {
+                workflowViewModel.applyFilters(sorting);
+            }
             fragmentWorkflowBinding.recWorkflows.setVisibility(View.VISIBLE);
             fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.GONE);
         });
+        final Observer<List<Workflow>> updateWithSortedListObserver = (
+                listWorklows -> adapter.setWorkflows(listWorklows)
+        );
         final Observer<Boolean> showLoadingObserver = (this::showLoading);
         workflowViewModel.getObservableWorkflows().observe(this, workflowsObserver);
         workflowViewModel.getObservableError().observe(this, errorObserver);
         workflowViewModel.getObservableShowLoading().observe(this, showLoadingObserver);
         workflowViewModel.getAllWorkflows().observe(this, getAllWorkflowsObserver);
+        workflowViewModel.getObservableUpdateWithSortedList().observe(this, updateWithSortedListObserver);
     }
 
-    private PopupWindow popupMenu() {
+    private PopupWindow initPopMenu() {
         final PopupWindow popupWindow = new PopupWindow(getContext());
 
         // inflate your layout or dynamically add view
@@ -179,9 +188,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 break;
             }
         }
-        workflowFiltersMenuBinding.chbxWorkflownumber.setOnClickListener(this::onRadioButtonClicked);
-        workflowFiltersMenuBinding.chbxCreatedate.setOnClickListener(this::onRadioButtonClicked);
-        workflowFiltersMenuBinding.chbxUpdatedate.setOnClickListener(this::onRadioButtonClicked);
+
         if (sorting.getNumberSortOrder().equals(Sort.sortOrder.ASC)) {
             workflowFiltersMenuBinding.swchWorkflownumber.setChecked(true);
             workflowFiltersMenuBinding.swchWorkflownumber.setText(getString(R.string.ascending));
@@ -201,6 +208,17 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         } else {
             workflowFiltersMenuBinding.swchUpdatedate.setChecked(false);
         }
+
+        setFilterBoxListeners();
+
+        return popupWindow;
+    }
+
+    private void setFilterBoxListeners() {
+        workflowFiltersMenuBinding.chbxWorkflownumber.setOnClickListener(this::onRadioButtonClicked);
+        workflowFiltersMenuBinding.chbxCreatedate.setOnClickListener(this::onRadioButtonClicked);
+        workflowFiltersMenuBinding.chbxUpdatedate.setOnClickListener(this::onRadioButtonClicked);
+
         workflowFiltersMenuBinding.swchWorkflownumber.setOnCheckedChangeListener((compoundButton, b) -> {
             if (b) {
                 sorting.setNumberSortOrder(Sort.sortOrder.ASC);
@@ -231,8 +249,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             }
             workflowViewModel.applyFilters(sorting);
         });
-
-        return popupWindow;
     }
 
     private void onRadioButtonClicked(View view) {

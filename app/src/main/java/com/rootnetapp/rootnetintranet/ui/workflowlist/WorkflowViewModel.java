@@ -31,6 +31,7 @@ public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<Boolean> showLoading;
     private WorkflowRepository workflowRepository;
     private LiveData<List<Workflow>> liveWorkflows, liveUnordered;
+    private MutableLiveData<List<Workflow>> updateWithSortedList;
 
     private List<Workflow> workflows, unordered;
     private String token;
@@ -82,7 +83,6 @@ public class WorkflowViewModel extends ViewModel {
         disposables.add(disposable);
     }
 
-
     private void onServiceSuccess(WorkflowsResponse workflowsResponse) {
         workflows = new ArrayList<>();
         workflows.addAll(workflowsResponse.getList());
@@ -91,11 +91,11 @@ public class WorkflowViewModel extends ViewModel {
             getWorkflowsFromService(token, workflowsResponse.getPager().getNextPage());
         }
         else {
-            //TODO when we are done downloading all pages then call from internal
+            // Update database with new workflows from network.
             Disposable disposable = workflowRepository
-                    .setWorkflowsOnInternal(workflows)
+                    .setWorkflowsLocalUpdate(workflows)
                     .subscribe(
-                            this::onWorkflowSuccess,
+                            this::onWorkflowSuccessUpdate,
                             throwable -> {
                                 Log.d(TAG, "onServiceSuccess: problem saving to db - " + throwable.getMessage());
                                 mErrorLiveData.setValue(R.string.failure_connect);
@@ -105,35 +105,13 @@ public class WorkflowViewModel extends ViewModel {
         }
     }
 
-    private void onWorkflowSuccess(List<Workflow> workflowList) {
-        unordered = new ArrayList<>();
-        unordered.addAll(workflowList);
-        //mUserLiveData.setValue(workflowList);
-    }
-
-    protected LiveData<List<Workflow>> getObservableWorkflows() {
-        if (mUserLiveData == null) {
-            mUserLiveData = new MutableLiveData<>();
-        }
-        return mUserLiveData;
-    }
-
-    protected LiveData<Integer> getObservableError() {
-        if (mErrorLiveData == null) {
-            mErrorLiveData = new MutableLiveData<>();
-        }
-        return mErrorLiveData;
-    }
-
-    protected LiveData<Boolean> getObservableShowLoading() {
-        if (showLoading == null) {
-            showLoading = new MutableLiveData<>();
-        }
-        return showLoading;
+    private void onWorkflowSuccessUpdate(List<Workflow> workflowList) {
+        Log.d(TAG, "onWorkflowSuccessUpdate: local database workflows updated.");
     }
 
     public void applyFilters(Sort sorting) {
-        List<Workflow> workflows = mUserLiveData.getValue();
+//        List<Workflow> workflows = mUserLiveData.getValue();
+        List<Workflow> workflows = liveWorkflows.getValue();
         if (workflows == null) {
             return;
         }
@@ -182,6 +160,35 @@ public class WorkflowViewModel extends ViewModel {
             }
         }
 
-        mUserLiveData.setValue(workflows);
+//        mUserLiveData.setValue(workflows);
+        updateWithSortedList.setValue(workflows);
+    }
+
+    protected LiveData<List<Workflow>> getObservableWorkflows() {
+        if (mUserLiveData == null) {
+            mUserLiveData = new MutableLiveData<>();
+        }
+        return mUserLiveData;
+    }
+
+    protected LiveData<Integer> getObservableError() {
+        if (mErrorLiveData == null) {
+            mErrorLiveData = new MutableLiveData<>();
+        }
+        return mErrorLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowLoading() {
+        if (showLoading == null) {
+            showLoading = new MutableLiveData<>();
+        }
+        return showLoading;
+    }
+
+    protected LiveData<List<Workflow>> getObservableUpdateWithSortedList() {
+        if (updateWithSortedList == null) {
+            updateWithSortedList = new MutableLiveData<>();
+        }
+        return updateWithSortedList;
     }
 }

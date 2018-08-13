@@ -1,7 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.domain;
 
-import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
-
 public class Sort {
     public enum sortType {
         NONE,

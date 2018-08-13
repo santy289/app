@@ -57,10 +57,12 @@ public class WorkflowRepository {
     }
 
     public Observable<WorkflowsResponse> getWorkflowsFromService(String auth, int page) {
-        return service.getWorkflows(auth, 50, true, page, true).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
+        return service.getWorkflows(auth, 50, true, page, true)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<List<Workflow>> setWorkflowsOnInternal(List<Workflow> workflows){
+    public Observable<List<Workflow>> setWorkflowsLocalUpdate(List<Workflow> workflows){
         return Observable.fromCallable(() -> {
             database.workflowDao().insertAll(workflows);
             return workflows;

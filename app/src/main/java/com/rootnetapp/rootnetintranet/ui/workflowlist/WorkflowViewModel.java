@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.content.SharedPreferences;
+import android.support.annotation.IdRes;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -29,18 +30,23 @@ public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<List<Workflow>> mUserLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
-    private WorkflowRepository workflowRepository;
-    private LiveData<List<Workflow>> liveWorkflows, liveUnordered;
     private MutableLiveData<List<Workflow>> updateWithSortedList;
+    private MutableLiveData<int[]> toggleRadioButton;
+    private MutableLiveData<int[]> toggleSwitch;
+    private LiveData<List<Workflow>> liveWorkflows, liveUnordered;
 
+    private WorkflowRepository workflowRepository;
     private List<Workflow> workflows, unordered;
-    private String token;
     private final CompositeDisposable disposables = new CompositeDisposable();
 
+    private Sort sort;
+    private String token;
     private static final String TAG = "WorkflowViewModel";
+
     public WorkflowViewModel(WorkflowRepository workflowRepository) {
         this.workflowRepository = workflowRepository;
         liveWorkflows = this.workflowRepository.getAllWorkflows();
+        sort = new Sort();
     }
 
     @Override
@@ -71,6 +77,111 @@ public class WorkflowViewModel extends ViewModel {
         } catch (InterruptedException | IOException e) {
             Log.d(TAG, "getWorkflows: Problems updating workflows - " + e.getMessage());
         }
+    }
+
+    protected void initSortBy() {
+        switch (sort.getSortingType()) {
+            case BYNUMBER: {
+                toggleRadioButton(WorkflowFragment.RADIO_NUMBER, WorkflowFragment.CHECK);
+                break;
+            }
+            case BYCREATE: {
+                toggleRadioButton(WorkflowFragment.RADIO_CREATED_DATE, WorkflowFragment.CHECK);
+                break;
+            }
+            case BYUPDATE: {
+                toggleRadioButton(WorkflowFragment.RADIO_UPDATED_DATE, WorkflowFragment.CHECK);
+                break;
+            }
+        }
+        if (sort.getNumberSortOrder().equals(Sort.sortOrder.ASC)) {
+            toggleSwitch(WorkflowFragment.SWITCH_NUMBER, WorkflowFragment.CHECK);
+        } else {
+            toggleSwitch(WorkflowFragment.SWITCH_NUMBER, WorkflowFragment.UNCHECK);
+        }
+        if (sort.getCreatedSortOrder().equals(Sort.sortOrder.ASC)) {
+            toggleSwitch(WorkflowFragment.SWITCH_CREATED_DATE, WorkflowFragment.CHECK);
+        } else {
+            toggleSwitch(WorkflowFragment.SWITCH_CREATED_DATE, WorkflowFragment.UNCHECK);
+        }
+        if (sort.getUpdatedSortOrder().equals(Sort.sortOrder.ASC)) {
+            toggleSwitch(WorkflowFragment.SWITCH_UPDATED_DATE, WorkflowFragment.CHECK);
+        } else {
+            toggleSwitch(WorkflowFragment.SWITCH_UPDATED_DATE, WorkflowFragment.UNCHECK);
+        }
+    }
+
+    protected void radioButtonClicked(boolean isChecked, @IdRes int viewId) {
+        switch (viewId) {
+            case R.id.chbx_workflownumber: {
+                if (isChecked) {
+                    if (sort.getSortingType().equals(Sort.sortType.BYNUMBER)) {
+                        sort.setSortingType(Sort.sortType.NONE);
+                        clearRadioButtonGroup();
+                    } else {
+                        sort.setSortingType(Sort.sortType.BYNUMBER);
+                    }
+                }
+                break;
+            }
+            case R.id.chbx_createdate: {
+                if (isChecked) {
+                    if (sort.getSortingType().equals(Sort.sortType.BYCREATE)) {
+                        sort.setSortingType(Sort.sortType.NONE);
+                        clearRadioButtonGroup();
+                    } else {
+                        sort.setSortingType(Sort.sortType.BYCREATE);
+                    }
+                }
+                break;
+            }
+            case R.id.chbx_updatedate: {
+                if (isChecked) {
+                    if (sort.getSortingType().equals(Sort.sortType.BYUPDATE)) {
+                        sort.setSortingType(Sort.sortType.NONE);
+                        clearRadioButtonGroup();
+                    } else {
+                        sort.setSortingType(Sort.sortType.BYUPDATE);
+                    }
+                }
+                break;
+            }
+        }
+        applyFilters(sort);
+    }
+
+    protected void handleSwitchOnClick(int viewRadioType, Sort.sortType sortType, boolean isChecked) {
+        if (isChecked) {
+            toggleRadioButton(viewRadioType, WorkflowFragment.CHECK);
+            sort.setSortingType(sortType);
+            sort.setNumberSortOrder(Sort.sortOrder.ASC);
+        } else {
+            sort.setNumberSortOrder(Sort.sortOrder.DESC);
+
+        }
+        applyFilters(sort);
+    }
+
+    protected Sort.sortType getSortingType() {
+        return sort.getSortingType();
+    }
+
+    private void clearRadioButtonGroup() {
+        toggleRadioButton(WorkflowFragment.RADIO_CLEAR_ALL, WorkflowFragment.UNCHECK);
+    }
+
+    private void toggleRadioButton(int viewRadioType, int viewIsCheckType) {
+        int[] toggleRadio = new int[2];
+        toggleRadio[WorkflowFragment.INDEX_TYPE] = viewRadioType;
+        toggleRadio[WorkflowFragment.INDEX_CHECK] = viewIsCheckType;
+        toggleRadioButton.setValue(toggleRadio);
+    }
+
+    private void toggleSwitch(int viewRadioType, int viewIsCheckType) {
+        int[] toggleRadio = new int[2];
+        toggleRadio[WorkflowFragment.INDEX_TYPE] = viewRadioType;
+        toggleRadio[WorkflowFragment.INDEX_CHECK] = viewIsCheckType;
+        toggleSwitch.setValue(toggleRadio);
     }
 
     private void getWorkflowsFromService(String auth, int page) {
@@ -109,7 +220,11 @@ public class WorkflowViewModel extends ViewModel {
         Log.d(TAG, "onWorkflowSuccessUpdate: local database workflows updated.");
     }
 
-    public void applyFilters(Sort sorting) {
+    public void applyFilters() {
+        applyFilters(sort);
+    }
+
+    private void applyFilters(Sort sorting) {
 //        List<Workflow> workflows = mUserLiveData.getValue();
         List<Workflow> workflows = liveWorkflows.getValue();
         if (workflows == null) {
@@ -118,8 +233,7 @@ public class WorkflowViewModel extends ViewModel {
 
         switch (sorting.getSortingType()) {
             case NONE: {
-                workflows = new ArrayList<>(unordered); //TODO check if it works passing it on the constructor
-//                workflows.addAll(unordered);
+                // Apply no sorting.
                 break;
             }
             case BYNUMBER: {
@@ -191,4 +305,19 @@ public class WorkflowViewModel extends ViewModel {
         }
         return updateWithSortedList;
     }
+
+    protected LiveData<int[]> getObservableToggleRadioButton() {
+        if (toggleRadioButton == null) {
+            toggleRadioButton = new MutableLiveData<>();
+        }
+        return toggleRadioButton;
+    }
+
+    protected LiveData<int[]> getObservableToggleSwitch() {
+        if (toggleSwitch == null) {
+            toggleSwitch = new MutableLiveData<>();
+        }
+        return toggleSwitch;
+    }
+
 }

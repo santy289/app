@@ -111,7 +111,7 @@ public class WorkflowViewModel extends ViewModel {
         }
     }
 
-    protected void radioButtonClicked(boolean isChecked, @IdRes int viewId) {
+    protected void handleRadioButtonClicked(boolean isChecked, @IdRes int viewId) {
         switch (viewId) {
             case R.id.chbx_workflownumber: {
                 if (isChecked) {
@@ -120,6 +120,7 @@ public class WorkflowViewModel extends ViewModel {
                         clearRadioButtonGroup();
                     } else {
                         sort.setSortingType(Sort.sortType.BYNUMBER);
+                        clearOtherSwitchesBut(Sort.sortType.BYNUMBER);
                     }
                 }
                 break;
@@ -131,6 +132,7 @@ public class WorkflowViewModel extends ViewModel {
                         clearRadioButtonGroup();
                     } else {
                         sort.setSortingType(Sort.sortType.BYCREATE);
+                        clearOtherSwitchesBut(Sort.sortType.BYCREATE);
                     }
                 }
                 break;
@@ -142,6 +144,7 @@ public class WorkflowViewModel extends ViewModel {
                         clearRadioButtonGroup();
                     } else {
                         sort.setSortingType(Sort.sortType.BYUPDATE);
+                        clearOtherSwitchesBut(Sort.sortType.BYUPDATE);
                     }
                 }
                 break;
@@ -150,16 +153,40 @@ public class WorkflowViewModel extends ViewModel {
         applyFilters(sort);
     }
 
-    protected void handleSwitchOnClick(int viewRadioType, Sort.sortType sortType, boolean isChecked) {
+    protected void handleSwitchOnClick(
+            int viewRadioType,
+            Sort.sortType sortType,
+            boolean isChecked
+    ) {
         if (isChecked) {
             toggleRadioButton(viewRadioType, WorkflowFragment.CHECK);
             sort.setSortingType(sortType);
             sort.setNumberSortOrder(Sort.sortOrder.ASC);
+            clearOtherSwitchesBut(sortType);
         } else {
             sort.setNumberSortOrder(Sort.sortOrder.DESC);
 
         }
         applyFilters(sort);
+    }
+
+    private void clearOtherSwitchesBut(Sort.sortType ofType) {
+        switch (ofType) {
+            case BYNUMBER:
+                toggleSwitch(WorkflowFragment.SWITCH_CREATED_DATE, WorkflowFragment.UNCHECK);
+                toggleSwitch(WorkflowFragment.SWITCH_UPDATED_DATE, WorkflowFragment.UNCHECK);
+                break;
+            case BYCREATE:
+                toggleSwitch(WorkflowFragment.SWITCH_NUMBER, WorkflowFragment.UNCHECK);
+                toggleSwitch(WorkflowFragment.SWITCH_UPDATED_DATE, WorkflowFragment.UNCHECK);
+                break;
+            case BYUPDATE:
+                toggleSwitch(WorkflowFragment.SWITCH_CREATED_DATE, WorkflowFragment.UNCHECK);
+                toggleSwitch(WorkflowFragment.SWITCH_NUMBER, WorkflowFragment.UNCHECK);
+                break;
+            default:
+                Log.d(TAG, "clearOtherSwitchesBut: Using wrong Sorty type which is uknown.");
+        }
     }
 
     protected Sort.sortType getSortingType() {
@@ -177,9 +204,9 @@ public class WorkflowViewModel extends ViewModel {
         toggleRadioButton.setValue(toggleRadio);
     }
 
-    private void toggleSwitch(int viewRadioType, int viewIsCheckType) {
+    private void toggleSwitch(int viewSwitchType, int viewIsCheckType) {
         int[] toggleRadio = new int[2];
-        toggleRadio[WorkflowFragment.INDEX_TYPE] = viewRadioType;
+        toggleRadio[WorkflowFragment.INDEX_TYPE] = viewSwitchType;
         toggleRadio[WorkflowFragment.INDEX_CHECK] = viewIsCheckType;
         toggleSwitch.setValue(toggleRadio);
     }

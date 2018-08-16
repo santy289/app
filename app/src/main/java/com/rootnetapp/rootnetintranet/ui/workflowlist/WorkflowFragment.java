@@ -44,7 +44,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     private MainActivityInterface mainActivityInterface;
     private WorkflowExpandableAdapter adapter;
     private String token;
-    private Sort sorting;
 
     protected static final int SWITCH_NUMBER = 500;
     protected static final int SWITCH_CREATED_DATE = 501;
@@ -214,15 +213,22 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowFiltersMenuBinding.chbxUpdatedate.setOnClickListener(this::onRadioButtonClicked);
 
         // ascending / descending listeners
-        workflowFiltersMenuBinding.swchWorkflownumber.setOnCheckedChangeListener((compoundButton, isChecked) -> {
+
+        workflowFiltersMenuBinding.swchWorkflownumber.setOnClickListener(view -> {
+            Switch aSwitch = ((Switch)view);
+            boolean isChecked = aSwitch.isChecked();
             workflowViewModel.handleSwitchOnClick(RADIO_NUMBER, Sort.sortType.BYNUMBER, isChecked);
             setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchWorkflownumber, isChecked);
         });
-        workflowFiltersMenuBinding.swchCreatedate.setOnCheckedChangeListener((compoundButton, isChecked) -> {
+        workflowFiltersMenuBinding.swchCreatedate.setOnClickListener(view -> {
+            Switch aSwitch = ((Switch)view);
+            boolean isChecked = aSwitch.isChecked();
             workflowViewModel.handleSwitchOnClick(RADIO_CREATED_DATE, Sort.sortType.BYCREATE, isChecked);
             setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchCreatedate, isChecked);
         });
-        workflowFiltersMenuBinding.swchUpdatedate.setOnCheckedChangeListener((compoundButton, isChecked) -> {
+        workflowFiltersMenuBinding.swchUpdatedate.setOnClickListener(view -> {
+            Switch aSwitch = ((Switch)view);
+            boolean isChecked = aSwitch.isChecked();
             workflowViewModel.handleSwitchOnClick(RADIO_UPDATED_DATE, Sort.sortType.BYUPDATE, isChecked);
             setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchUpdatedate, isChecked);
         });
@@ -277,7 +283,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     private void onRadioButtonClicked(View view) {
         boolean checked = ((RadioButton) view).isChecked();
-        workflowViewModel.radioButtonClicked(checked, view.getId());
+        workflowViewModel.handleRadioButtonClicked(checked, view.getId());
     }
 
     @Override

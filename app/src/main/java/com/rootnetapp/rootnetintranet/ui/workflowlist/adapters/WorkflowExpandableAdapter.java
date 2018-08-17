@@ -3,23 +3,20 @@ package com.rootnetapp.rootnetintranet.ui.workflowlist.adapters;
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowItemBinding;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragmentInterface;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
-
-/**
- * Created by root on 19/03/18.
- */
 
 public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowViewholder> {
 
@@ -30,23 +27,14 @@ public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowView
     private WorkflowFragmentInterface anInterface;
     private Context context;
 
-    public WorkflowExpandableAdapter(List<Workflow> workflows,
-                                     WorkflowFragmentInterface anInterface) {
-        this.workflows = workflows;
+    public WorkflowExpandableAdapter(WorkflowFragmentInterface anInterface) {
         this.anInterface = anInterface;
-        isChecked = new ArrayList<>();
-        isExpanded = new ArrayList<>();
-        for (Workflow item : workflows) {
-            isChecked.add(false);
-            isExpanded.add(false);
-        }
     }
 
     @Override
     public WorkflowViewholder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        LayoutInflater layoutInflater =
-                LayoutInflater.from(viewGroup.getContext());
         context = viewGroup.getContext();
+        LayoutInflater layoutInflater = LayoutInflater.from(context);
         WorkflowItemBinding itemBinding =
                 WorkflowItemBinding.inflate(layoutInflater, viewGroup, false);
         recycler = viewGroup;
@@ -55,15 +43,26 @@ public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowView
 
     @Override
     public void onBindViewHolder(WorkflowViewholder holder, int i) {
+        if (workflows == null || workflows.size() < 1) {
+            //TODO handle empty list
+            return;
+        }
+
         Workflow item = workflows.get(i);
         holder.binding.tvTitle.setText(item.getTitle() + " - " + item.getWorkflowTypeKey());
         holder.binding.tvWorkflowtype.setText(item.getWorkflowType().getName());
         //todo remover validaciones, solo testing!
         //Esto deberia venir siempre de la consulta al servicio.
         if (item.getAuthor() != null) {
-            holder.binding.tvOwner.setText(item.getAuthor().getFullName());
-            String path = Utils.imgDomain + item.getAuthor().getPicture().trim();
-            Picasso.get().load(path).into(holder.binding.imgProfile);
+            String fullName = item.getAuthor().getFullName();
+            if (!TextUtils.isEmpty(fullName)) {
+                holder.binding.tvOwner.setText(fullName);
+            }
+            String picture = item.getAuthor().getPicture();
+            if (!TextUtils.isEmpty(picture)) {
+                String path = Utils.imgDomain + picture.trim();
+                Glide.with(context).load(path).into(holder.binding.imgProfile);
+            }
         }
         if(item.getWorkflowStateInfo() != null){
             if(item.getWorkflowStateInfo().getVirtualColumns() != null){
@@ -123,7 +122,31 @@ public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowView
 
     @Override
     public int getItemCount() {
+        if (workflows == null) {
+            return 0;
+        }
         return workflows.size();
+    }
+
+    public void setWorkflows(List<Workflow> workflows) {
+        boolean firstLoad = false;
+        if (this.workflows == null) {
+            firstLoad = true;
+        }
+        this.workflows = workflows;
+        if (firstLoad){
+            resetChecksAndExpands();
+        }
+        notifyDataSetChanged();
+    }
+
+    private void resetChecksAndExpands() {
+        isChecked = new ArrayList<>();
+        isExpanded = new ArrayList<>();
+        for (Workflow item : workflows) {
+            isChecked.add(false);
+            isExpanded.add(false);
+        }
     }
 
 }

@@ -1,8 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
-import com.rootnetapp.rootnetintranet.ui.profile.ProfileRepository;
-import com.rootnetapp.rootnetintranet.ui.profile.ProfileViewModelFactory;
 
 import dagger.Module;
 import dagger.Provides;

@@ -47,7 +47,7 @@ public class SplashViewModel extends ViewModel {
 
         String json = sharedPreferences.getString("domain", "");
         if (json.isEmpty()) {
-            Log.d("test", "onCreate: ALGO PASO");//todo mejorar esta validacion
+            Log.d(TAG, "initSplashViewModel: No domain value, opening Domain activity");
             goToDomain.setValue(true);
             return;
         }
@@ -55,6 +55,10 @@ public class SplashViewModel extends ViewModel {
             Moshi moshi = new Moshi.Builder().build();
             JsonAdapter<ClientResponse> jsonAdapter = moshi.adapter(ClientResponse.class);
             ClientResponse domain = jsonAdapter.fromJson(json);
+            if (domain == null && domain.getClient() == null) {
+                Log.d(TAG, "initSplashViewModel: domain is null or client value is null");
+                goToDomain.setValue(true);
+            }
             Utils.domain = "https://" + domain.getClient().getApiUrl();
             Utils.imgDomain = "http://" + domain.getClient().getApiUrl() + "/";
             RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);

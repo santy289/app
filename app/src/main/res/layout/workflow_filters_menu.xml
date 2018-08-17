@@ -176,6 +176,7 @@
                 android:text="@string/sorting" />
 
             <RadioGroup
+                android:id="@+id/radio_group_sort_by"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 

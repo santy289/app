@@ -1,6 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist;
 
-
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -10,12 +9,13 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -24,6 +24,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowBinding;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowFiltersMenuBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.domain.Sort;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowExpandableAdapter;
@@ -42,8 +43,23 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     private WorkflowFiltersMenuBinding workflowFiltersMenuBinding;
     private MainActivityInterface mainActivityInterface;
     private WorkflowExpandableAdapter adapter;
-    private Sort sorting;
     private String token;
+
+    protected static final int SWITCH_NUMBER = 500;
+    protected static final int SWITCH_CREATED_DATE = 501;
+    protected static final int SWITCH_UPDATED_DATE = 502;
+    protected static final int RADIO_NUMBER = 600;
+    protected static final int RADIO_CREATED_DATE = 601;
+    protected static final int RADIO_UPDATED_DATE = 602;
+    protected static final int RADIO_CLEAR_ALL = 603;
+
+    protected static final int CHECK = 11;
+    protected static final int UNCHECK = 10;
+    protected static final int INDEX_TYPE = 0;
+    protected static final int INDEX_CHECK = 1;
+
+
+    private static final String TAG = "WorkflowFragment";
 
     public WorkflowFragment() {
         // Required empty public constructor
@@ -63,7 +79,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         fragmentWorkflowBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_workflow, container, false);
         View view = fragmentWorkflowBinding.getRoot();
@@ -71,33 +86,48 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel = ViewModelProviders
                 .of(this, workflowViewModelFactory)
                 .get(WorkflowViewModel.class);
+        subscribe();
+        setupWorkflowRecyclerView();
+        setupClickListeners();
+        //Utils.showLoading(getContext());
+        SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        workflowViewModel.initWorkflowList(prefs);
+        return view;
+    }
+
+
+
+    private void setupWorkflowRecyclerView() {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         fragmentWorkflowBinding.recWorkflows.setLayoutManager(mLayoutManager);
-        Utils.showLoading(getContext());
-        sorting = new Sort();
-        subscribe();
-        //TODO preferences inyectadas con Dagger
-        SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        token = "Bearer "+ prefs.getString("token","");
-        workflowViewModel.getWorkflows(token);
+        adapter = new WorkflowExpandableAdapter(this);
+        fragmentWorkflowBinding.recWorkflows.setAdapter(adapter);
+    }
+
+    private void setupClickListeners() {
         fragmentWorkflowBinding.btnFilters.setOnClickListener(view1 -> {
-            PopupWindow popupwindow_obj = popupMenu();
+            PopupWindow popupwindow_obj = initPopMenu();
             popupwindow_obj.showAsDropDown(fragmentWorkflowBinding.btnFilters, -40, 18);
         });
         fragmentWorkflowBinding.btnAdd.setOnClickListener(view12 ->
                 mainActivityInterface.showDialog(CreateWorkflowDialog.newInstance(this)));
-        return view;
+    }
+
+    private void showLoading(Boolean show) {
+        if (show) {
+            Utils.showLoading(getContext());
+        } else {
+            Utils.hideLoading();
+        }
     }
 
     private void subscribe() {
         final Observer<List<Workflow>> workflowsObserver = ((List<Workflow> data) -> {
-            Utils.hideLoading();
+
+            //Utils.hideLoading();
             if (null != data) {
                 if(data.size()!=0){
                     fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.GONE);
-                    adapter = new WorkflowExpandableAdapter(data, this);
-                    fragmentWorkflowBinding.recWorkflows.setAdapter(adapter);
-                    adapter.notifyDataSetChanged();
                 }else{
                     fragmentWorkflowBinding.recWorkflows.setVisibility(View.GONE);
                     fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.VISIBLE);
@@ -108,17 +138,60 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             }
         });
         final Observer<Integer> errorObserver = ((Integer data) -> {
-            Utils.hideLoading();
+            //Utils.hideLoading();
             if (null != data) {
-                //TODO mejorar toast
                 Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
             }
         });
+        final Observer<List<Workflow>> getAllWorkflowsObserver = (listWorkflows -> {
+            if (adapter == null || listWorkflows == null) {
+                fragmentWorkflowBinding.recWorkflows.setVisibility(View.GONE);
+                fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.VISIBLE);
+                return;
+            }
+            if(listWorkflows.size() < 1){
+                fragmentWorkflowBinding.recWorkflows.setVisibility(View.GONE);
+                fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.VISIBLE);
+                return;
+            }
+            // before updating check if we need to apply filters.
+            if (workflowViewModel.getSortingType() == Sort.sortType.NONE) {
+                adapter.setWorkflows(listWorkflows);
+            } else {
+                workflowViewModel.applyFilters();
+            }
+            fragmentWorkflowBinding.recWorkflows.setVisibility(View.VISIBLE);
+            fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.GONE);
+        });
+        final Observer<List<Workflow>> updateWithSortedListObserver = (
+                listWorklows -> adapter.setWorkflows(listWorklows)
+        );
+        final Observer<int[]> toggleRadioButtonObserver = (toggle -> {
+            if (toggle == null || toggle.length < 1) {
+                return;
+            }
+            boolean check = toggle[INDEX_CHECK] == CHECK;
+            toggleRadioButtonFilter(toggle[INDEX_TYPE], check);
+        });
+        final Observer<int[]> toggleSwitchObserver = (toggle -> {
+            if (toggle == null || toggle.length < 1) {
+                return;
+            }
+            boolean check = toggle[INDEX_CHECK] == CHECK;
+            toggleAscendingDescendingSwitch(toggle[INDEX_TYPE], check);
+        });
+
+        final Observer<Boolean> showLoadingObserver = (this::showLoading);
         workflowViewModel.getObservableWorkflows().observe(this, workflowsObserver);
         workflowViewModel.getObservableError().observe(this, errorObserver);
+        workflowViewModel.getObservableShowLoading().observe(this, showLoadingObserver);
+        workflowViewModel.getAllWorkflows().observe(this, getAllWorkflowsObserver);
+        workflowViewModel.getObservableUpdateWithSortedList().observe(this, updateWithSortedListObserver);
+        workflowViewModel.getObservableToggleRadioButton().observe(this, toggleRadioButtonObserver);
+        workflowViewModel.getObservableToggleSwitch().observe(this, toggleSwitchObserver);
     }
 
-    private PopupWindow popupMenu() {
+    private PopupWindow initPopMenu() {
         final PopupWindow popupWindow = new PopupWindow(getContext());
 
         // inflate your layout or dynamically add view
@@ -128,123 +201,89 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         popupWindow.setWidth((int) getResources().getDimension(R.dimen.filters_width));
         popupWindow.setHeight((int) getResources().getDimension(R.dimen.filters_height));
         popupWindow.setContentView(workflowFiltersMenuBinding.getRoot());
-        switch (sorting.getSortingType()) {
-            case BYNUMBER: {
-                workflowFiltersMenuBinding.chbxWorkflownumber.setChecked(true);
-                break;
-            }
-            case BYCREATE: {
-                workflowFiltersMenuBinding.chbxCreatedate.setChecked(true);
-                break;
-            }
-            case BYUPDATE: {
-                workflowFiltersMenuBinding.chbxUpdatedate.setChecked(true);
-                break;
-            }
-        }
-        workflowFiltersMenuBinding.chbxWorkflownumber.setOnClickListener(this::onRadioButtonClicked);
-        workflowFiltersMenuBinding.chbxCreatedate.setOnClickListener(this::onRadioButtonClicked);
-        workflowFiltersMenuBinding.chbxUpdatedate.setOnClickListener(this::onRadioButtonClicked);
-        if (sorting.getNumberSortOrder().equals(sortOrder.ASC)) {
-            workflowFiltersMenuBinding.swchWorkflownumber.setChecked(true);
-            workflowFiltersMenuBinding.swchWorkflownumber.setText(getString(R.string.ascending));
-        } else {
-            workflowFiltersMenuBinding.swchWorkflownumber.setChecked(false);
-        }
-        if (sorting.getCreatedSortOrder().equals(sortOrder.ASC)) {
-            workflowFiltersMenuBinding.swchCreatedate.setChecked(true);
-            workflowFiltersMenuBinding.swchCreatedate.setText(getString(R.string.ascending));
-
-        } else {
-            workflowFiltersMenuBinding.swchCreatedate.setChecked(false);
-        }
-        if (sorting.getUpdatedSortOrder().equals(sortOrder.ASC)) {
-            workflowFiltersMenuBinding.swchUpdatedate.setChecked(true);
-            workflowFiltersMenuBinding.swchUpdatedate.setText(getString(R.string.ascending));
-        } else {
-            workflowFiltersMenuBinding.swchUpdatedate.setChecked(false);
-        }
-        workflowFiltersMenuBinding.swchWorkflownumber.setOnCheckedChangeListener((compoundButton, b) -> {
-            if (b) {
-                sorting.setNumberSortOrder(sortOrder.ASC);
-                workflowFiltersMenuBinding.swchWorkflownumber.setText(getString(R.string.ascending));
-            } else {
-                sorting.setNumberSortOrder(sortOrder.DESC);
-                workflowFiltersMenuBinding.swchWorkflownumber.setText(getString(R.string.descending));
-            }
-            workflowViewModel.applyFilters(sorting);
-        });
-        workflowFiltersMenuBinding.swchCreatedate.setOnCheckedChangeListener((compoundButton, b) -> {
-            if (b) {
-                sorting.setCreatedSortOrder(sortOrder.ASC);
-                workflowFiltersMenuBinding.swchCreatedate.setText(getString(R.string.ascending));
-            } else {
-                sorting.setCreatedSortOrder(sortOrder.DESC);
-                workflowFiltersMenuBinding.swchCreatedate.setText(getString(R.string.descending));
-            }
-            workflowViewModel.applyFilters(sorting);
-        });
-        workflowFiltersMenuBinding.swchUpdatedate.setOnCheckedChangeListener((compoundButton, b) -> {
-            if (b) {
-                sorting.setUpdatedSortOrder(sortOrder.ASC);
-                workflowFiltersMenuBinding.swchUpdatedate.setText(getString(R.string.ascending));
-            } else {
-                sorting.setUpdatedSortOrder(sortOrder.DESC);
-                workflowFiltersMenuBinding.swchUpdatedate.setText(getString(R.string.descending));
-            }
-            workflowViewModel.applyFilters(sorting);
-        });
-
+        workflowViewModel.initSortBy();
+        setFilterBoxListeners();
         return popupWindow;
     }
 
-    private void onRadioButtonClicked(View view) {
-        // Is the button now checked?
-        boolean checked = ((RadioButton) view).isChecked();
+    private void setFilterBoxListeners() {
+        // radio button listeners
+        workflowFiltersMenuBinding.chbxWorkflownumber.setOnClickListener(this::onRadioButtonClicked);
+        workflowFiltersMenuBinding.chbxCreatedate.setOnClickListener(this::onRadioButtonClicked);
+        workflowFiltersMenuBinding.chbxUpdatedate.setOnClickListener(this::onRadioButtonClicked);
 
-        // Check which radio button was clicked
-        switch (view.getId()) {
-            case R.id.chbx_workflownumber: {
-                if (checked) {
-                    if (sorting.getSortingType().equals(sortType.BYNUMBER)) {
-                        sorting.setSortingType(sortType.NONE);
-                        if (view.getParent() instanceof RadioGroup) {
-                            ((RadioGroup) view.getParent()).clearCheck();
-                        }
-                    } else {
-                        sorting.setSortingType(sortType.BYNUMBER);
-                    }
-                }
+        // ascending / descending listeners
+
+        workflowFiltersMenuBinding.swchWorkflownumber.setOnClickListener(view -> {
+            Switch aSwitch = ((Switch)view);
+            boolean isChecked = aSwitch.isChecked();
+            workflowViewModel.handleSwitchOnClick(RADIO_NUMBER, Sort.sortType.BYNUMBER, isChecked);
+            setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchWorkflownumber, isChecked);
+        });
+        workflowFiltersMenuBinding.swchCreatedate.setOnClickListener(view -> {
+            Switch aSwitch = ((Switch)view);
+            boolean isChecked = aSwitch.isChecked();
+            workflowViewModel.handleSwitchOnClick(RADIO_CREATED_DATE, Sort.sortType.BYCREATE, isChecked);
+            setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchCreatedate, isChecked);
+        });
+        workflowFiltersMenuBinding.swchUpdatedate.setOnClickListener(view -> {
+            Switch aSwitch = ((Switch)view);
+            boolean isChecked = aSwitch.isChecked();
+            workflowViewModel.handleSwitchOnClick(RADIO_UPDATED_DATE, Sort.sortType.BYUPDATE, isChecked);
+            setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchUpdatedate, isChecked);
+        });
+    }
+
+    private void toggleAscendingDescendingSwitch(int switchType, boolean check) {
+        switch (switchType) {
+            case SWITCH_NUMBER:
+                workflowFiltersMenuBinding.swchWorkflownumber.setChecked(check);
+                setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchWorkflownumber, check);
                 break;
-            }
-            case R.id.chbx_createdate: {
-                if (checked) {
-                    if (sorting.getSortingType().equals(sortType.BYCREATE)) {
-                        sorting.setSortingType(sortType.NONE);
-                        if (view.getParent() instanceof RadioGroup) {
-                            ((RadioGroup) view.getParent()).clearCheck();
-                        }
-                    } else {
-                        sorting.setSortingType(sortType.BYCREATE);
-                    }
-                }
+            case SWITCH_CREATED_DATE:
+                workflowFiltersMenuBinding.swchCreatedate.setChecked(check);
+                setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchCreatedate, check);
                 break;
-            }
-            case R.id.chbx_updatedate: {
-                if (checked) {
-                    if (sorting.getSortingType().equals(sortType.BYUPDATE)) {
-                        sorting.setSortingType(sortType.NONE);
-                        if (view.getParent() instanceof RadioGroup) {
-                            ((RadioGroup) view.getParent()).clearCheck();
-                        }
-                    } else {
-                        sorting.setSortingType(sortType.BYUPDATE);
-                    }
-                }
+            case SWITCH_UPDATED_DATE:
+                workflowFiltersMenuBinding.swchUpdatedate.setChecked(check);
+                setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchUpdatedate, check);
                 break;
-            }
+            default:
+                Log.d(TAG, "toggleAscendingDescendingSwitch: Trying to perform a toggle and there is no related Switch object");
+                break;
         }
-        workflowViewModel.applyFilters(sorting);
+    }
+
+    private void setSwitchAscendingDescendingText(Switch switchType, boolean check) {
+        if (check) {
+            switchType.setText(getString(R.string.ascending));
+        } else {
+            switchType.setText(getString(R.string.descending));
+        }
+    }
+
+    private void toggleRadioButtonFilter(int radioType, boolean check) {
+        switch (radioType) {
+            case RADIO_NUMBER:
+                workflowFiltersMenuBinding.chbxWorkflownumber.setChecked(check);
+                break;
+            case RADIO_CREATED_DATE:
+                workflowFiltersMenuBinding.chbxCreatedate.setChecked(check);
+                break;
+            case RADIO_UPDATED_DATE:
+                workflowFiltersMenuBinding.chbxUpdatedate.setChecked(check);
+                break;
+            case RADIO_CLEAR_ALL:
+                workflowFiltersMenuBinding.radioGroupSortBy.clearCheck();
+            default:
+                Log.d(TAG, "toggleRadioButtonFilter: Trying to perform toggle on uknown radio button");
+                break;
+        }
+    }
+
+    private void onRadioButtonClicked(View view) {
+        boolean checked = ((RadioButton) view).isChecked();
+        workflowViewModel.handleRadioButtonClicked(checked, view.getId());
     }
 
     @Override
@@ -258,62 +297,5 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 mainActivityInterface),true);
     }
 
-    public class Sort {
 
-        private sortType sortingType;
-        private sortOrder numberSortOrder;
-        private sortOrder createdSortOrder;
-        private sortOrder updatedSortOrder;
-
-        public Sort() {
-            this.sortingType = sortType.NONE;
-            this.numberSortOrder = sortOrder.DESC;
-            this.createdSortOrder = sortOrder.DESC;
-            this.updatedSortOrder = sortOrder.DESC;
-        }
-
-        public sortType getSortingType() {
-            return sortingType;
-        }
-
-        public void setSortingType(sortType sortingType) {
-            this.sortingType = sortingType;
-        }
-
-        public sortOrder getNumberSortOrder() {
-            return numberSortOrder;
-        }
-
-        public void setNumberSortOrder(sortOrder numberSortOrder) {
-            this.numberSortOrder = numberSortOrder;
-        }
-
-        public sortOrder getCreatedSortOrder() {
-            return createdSortOrder;
-        }
-
-        public void setCreatedSortOrder(sortOrder createdSortOrder) {
-            this.createdSortOrder = createdSortOrder;
-        }
-
-        public sortOrder getUpdatedSortOrder() {
-            return updatedSortOrder;
-        }
-
-        public void setUpdatedSortOrder(sortOrder updatedSortOrder) {
-            this.updatedSortOrder = updatedSortOrder;
-        }
-    }
-
-    enum sortType {
-        NONE,
-        BYNUMBER,
-        BYCREATE,
-        BYUPDATE
-    }
-
-    enum sortOrder {
-        ASC,
-        DESC
-    }
 }

@@ -14,10 +14,6 @@ import com.squareup.moshi.Json;
 
 import java.util.List;
 
-/**
- * Created by Propietario on 15/03/2018.
- */
-
 @Entity
 public class Workflow {
 

@@ -269,6 +269,24 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void goToDomain(Boolean open) {
+        startActivity(new Intent(MainActivity.this, DomainActivity.class));
+        finishAffinity();
+    }
+
+    private void attemptToLogin() {
+        SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        String user = prefs.getString("username", "");
+        String password = prefs.getString("password", "");
+        viewModel.attemptLogin(user, password);
+    }
+
+    private void saveInPreferences(String key, String content) {
+        SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        sharedPref.edit().putString(key, content).apply();
+    }
+
+
     protected void collapseActionView(Boolean collapse) {
         if(mSearch != null){
             mSearch.collapseActionView();
@@ -299,10 +317,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void subscribe() {
+        subscribeForLogin();
         final Observer<Integer> errorObserver = ((Integer data) -> {
-            if (null != data) {
-                viewModel.getUser(id);
-            }
+            // TODO handle error when we cant find Users, workflowlike and workflow
         });
         final Observer<String[]> setImgInViewObserver = (this::setImageIn);
         final Observer<Boolean> collapseMenuObserver = (this::collapseActionView);
@@ -314,5 +331,15 @@ public class MainActivity extends AppCompatActivity
         viewModel.getObservableHideKeyboard().observe(this, hideKeyboardObserver);
         viewModel.getObservableGoToWorkflowDetail().observe(this, goToWorkflowDetailObserver);
     }
+
+    private void subscribeForLogin() {
+        final Observer<Boolean> attemptTokenRefreshObserver = (response -> attemptToLogin());
+        final Observer<String> saveToPreferenceObserver = (content -> saveInPreferences("token", content));
+        final Observer<Boolean> goToDomainObserver = (this::goToDomain);
+        viewModel.getObservableAttemptTokenRefresh().observe(this, attemptTokenRefreshObserver);
+        viewModel.getObservableSaveToPreference().observe(this, saveToPreferenceObserver);
+        viewModel.getObservableGoToDomain().observe(this, goToDomainObserver);
+    }
+
 
 }

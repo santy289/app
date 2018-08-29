@@ -58,6 +58,7 @@ public class SplashViewModel extends ViewModel {
             if (domain == null && domain.getClient() == null) {
                 Log.d(TAG, "initSplashViewModel: domain is null or client value is null");
                 goToDomain.setValue(true);
+                return;
             }
             Utils.domain = "https://" + domain.getClient().getApiUrl();
             Utils.imgDomain = "http://" + domain.getClient().getApiUrl() + "/";

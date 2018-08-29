@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
+import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 
 import dagger.Module;
 import dagger.Provides;
@@ -9,8 +10,8 @@ import dagger.Provides;
 public class MainActivityModule {
 
     @Provides
-    MainActivityRepository provideMainActivityRepository(AppDatabase database) {
-        return new MainActivityRepository(database);
+    MainActivityRepository provideMainActivityRepository(AppDatabase database, ApiInterface apiInterface) {
+        return new MainActivityRepository(database, apiInterface);
     }
 
     @Provides

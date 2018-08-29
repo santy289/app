@@ -18,8 +18,10 @@ import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
 
 public class MainActivityViewModel extends ViewModel {
@@ -32,6 +34,10 @@ public class MainActivityViewModel extends ViewModel {
     private MutableLiveData<Boolean> collapseMenu;
     private MutableLiveData<Boolean> hideKeyboard;
     private MutableLiveData<Workflow> goToWorkflowDetail;
+    private MutableLiveData<Boolean> attemptTokenRefresh;
+    private MutableLiveData<String> saveToPreference;
+    private MutableLiveData<Boolean> goToDomain;
+
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     protected final static String IMG_LOGO = "imgLogo";
@@ -93,6 +99,26 @@ public class MainActivityViewModel extends ViewModel {
 
     public void getWorkflow(int id) {
         Disposable disposable = repository.getWorkflow(id).subscribe(this::onWorkflowSuccess, this::onFailure);
+        disposables.add(disposable);
+    }
+
+    protected void attemptLogin(String user, String password) {
+        Disposable disposable = repository.login(user, password)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(loginResponse -> {
+                    if (loginResponse == null) {
+                        goToDomain.setValue(true);
+                        return;
+                    }
+                    String token = loginResponse.getToken();
+                    saveToPreference.setValue(token);
+                    String authToken = "Bearer " + token;
+
+                }, throwable -> {
+                    Log.d(TAG, "attemptToLogin: Smomething failed with network request: " + throwable.getMessage());
+                    goToDomain.setValue(true);
+                });
         disposables.add(disposable);
     }
 
@@ -176,4 +202,24 @@ public class MainActivityViewModel extends ViewModel {
         return goToWorkflowDetail;
     }
 
+    public LiveData<String> getObservableSaveToPreference() {
+        if (saveToPreference == null) {
+            saveToPreference = new MutableLiveData<>();
+        }
+        return saveToPreference;
+    }
+
+    public LiveData<Boolean> getObservableAttemptTokenRefresh() {
+        if (attemptTokenRefresh == null) {
+            attemptTokenRefresh = new MutableLiveData<>();
+        }
+        return attemptTokenRefresh;
+    }
+
+    public LiveData<Boolean> getObservableGoToDomain() {
+        if (goToDomain == null) {
+            goToDomain = new MutableLiveData<>();
+        }
+        return goToDomain;
+    }
 }

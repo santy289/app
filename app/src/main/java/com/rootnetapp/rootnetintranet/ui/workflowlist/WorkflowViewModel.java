@@ -11,7 +11,6 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
-import com.rootnetapp.rootnetintranet.ui.domain.Sort;
 
 import java.io.IOException;
 import java.text.DateFormat;

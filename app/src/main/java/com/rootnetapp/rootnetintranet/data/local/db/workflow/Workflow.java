@@ -6,6 +6,7 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowType;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.CalculatedField;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
@@ -40,6 +41,10 @@ public class Workflow {
     @Json(name = "start")
     private String start;
 
+    @ColumnInfo(name = "end")
+    @Json(name = "end")
+    private String end;
+
     @ColumnInfo(name = "status")
     @Json(name = "status")
     private boolean status;
@@ -47,6 +52,14 @@ public class Workflow {
     @ColumnInfo(name = "open")
     @Json(name = "open")
     private boolean open;
+
+    @ColumnInfo(name = "created_at")
+    @Json(name = "created_at")
+    private String createdAt;
+
+    @ColumnInfo(name = "updated_at")
+    @Json(name = "updated_at")
+    private String updatedAt;
 
     /*@ColumnInfo(name = "workflow_state_id")
     private int workflowStateId;*/
@@ -66,16 +79,12 @@ public class Workflow {
     @Json(name = "workflow_state_info")
     private WorkflowStateInfo workflowStateInfo;
 
-    //@Embedded
     @Ignore
     @Json(name = "metas")
     private List<Meta> metas = null;
 
 //-----------------
 
-    @ColumnInfo(name = "end")
-    @Json(name = "end")
-    private String end;
 
     @ColumnInfo(name = "workflow_state")
     @Json(name = "workflow_state")
@@ -231,6 +240,22 @@ public class Workflow {
 
     public void setPresets(List<Preset> presets) {
         this.presets = presets;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     /*public int getAuthorId() {

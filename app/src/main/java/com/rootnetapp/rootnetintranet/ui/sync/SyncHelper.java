@@ -144,6 +144,10 @@ public class SyncHelper {
         disposables.add(disposable);
     }
 
+    private void error(String message) {
+        Log.d(TAG, "error: Something happened " + message);
+    }
+
     private void onWorkflowTypesSuccess(WorkflowTypesResponse response) {
         Disposable disposable = Observable.fromCallable(() -> {
             List<WorkflowType> workflowTypes = response.getList();

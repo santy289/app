@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.data.local.db.workflow;
+package com.rootnetapp.rootnetintranet.data.local.db.workflowtype;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
@@ -13,10 +13,10 @@ import com.squareup.moshi.Json;
 public class WorkflowType {
 
     @Json(name = "id")
-    int workflowId;
+    public int workflowId;
 
     @Json(name = "name")
-    String name;
+    public String name;
 
     public int getId() {
         return workflowId;

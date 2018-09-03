@@ -5,6 +5,7 @@ import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
@@ -19,8 +20,8 @@ import java.util.List;
 @Entity(foreignKeys = @ForeignKey(entity = WorkflowTypeDb.class,
                                             parentColumns = "id",
                                             childColumns = "workflow_type_id",
-                                            onDelete = ForeignKey.SET_NULL))
-        //indices = {@Index("workflow_type_id")})
+                                            onDelete = ForeignKey.CASCADE),
+        indices = {@Index("workflow_type_id")})
 public class WorkflowDb {
 
     @PrimaryKey
@@ -73,29 +74,12 @@ public class WorkflowDb {
     @Json(name = "author")
     private WorkflowUser author;
 
-    // TODO ignoring this Type because we are going to save its id into WorflowTypeID
-    @Ignore
-    @Json(name = "workflow_type")
-    private WorkflowTypeDb workflowType;
 
     @ColumnInfo(name = "workflow_type_id") //TODO save id from WorkflowType
-    private Integer workflowTypeId;
-
-    //TODO try to see how to save this Object.
-    @Ignore
-    @Json(name = "workflow_state_info")
-    private WorkflowStateInfo workflowStateInfo;
-
-    // TODO see how to save Meta and if it is important to save as seperate objects, or just as a json representation.
-    @Ignore
-    @Json(name = "metas")
-    private List<Meta> metas = null;
+    @Json(name = "workflow_type_id")
+    private int workflowTypeId;
 
 //-----------------
-
-    @ColumnInfo(name = "workflow_state")
-    @Json(name = "workflow_state")
-    private int workflowState;
 
     @Ignore
     @Json(name = "assignees")
@@ -106,35 +90,8 @@ public class WorkflowDb {
     private List<Object> responsible = null;
 
     @Ignore
-    @Json(name = "calculated_fields")
-    private List<CalculatedField> calculatedFields = null;
-
-    @Ignore
     @Json(name = "presets")
     private List<Preset> presets = null;
-
-//    @Ignore
-//    public WorkflowDb(int id, String title, String workflowTypeKey, String description, String start, String end, boolean status, boolean open, String createdAt, String updatedAt, WorkflowUser author, WorkflowType workflowType, WorkflowStateInfo workflowStateInfo, List<Meta> metas, int workflowState, List<Person> assignees, List<Object> responsible, List<CalculatedField> calculatedFields, List<Preset> presets) {
-//        this.id = id;
-//        this.title = title;
-//        this.workflowTypeKey = workflowTypeKey;
-//        this.description = description;
-//        this.start = start;
-//        this.end = end;
-//        this.status = status;
-//        this.open = open;
-//        this.createdAt = createdAt;
-//        this.updatedAt = updatedAt;
-//        this.author = author;
-//        this.workflowType = workflowType;
-//        this.workflowStateInfo = workflowStateInfo;
-//        this.metas = metas;
-//        this.workflowState = workflowState;
-//        this.assignees = assignees;
-//        this.responsible = responsible;
-//        this.calculatedFields = calculatedFields;
-//        this.presets = presets;
-//    }
 
     public int getId() {
         return id;
@@ -208,30 +165,6 @@ public class WorkflowDb {
         this.author = author;
     }
 
-    public int getWorkflowState() {
-        return workflowState;
-    }
-
-    public void setWorkflowState(int workflowState) {
-        this.workflowState = workflowState;
-    }
-
-    public WorkflowStateInfo getWorkflowStateInfo() {
-        return workflowStateInfo;
-    }
-
-    public void setWorkflowStateInfo(WorkflowStateInfo workflowStateInfo) {
-        this.workflowStateInfo = workflowStateInfo;
-    }
-
-    public WorkflowTypeDb getWorkflowType() {
-        return workflowType;
-    }
-
-    public void setWorkflowType(WorkflowTypeDb workflowType) {
-        this.workflowType = workflowType;
-    }
-
     public List<Person> getAssignees() {
         return assignees;
     }
@@ -246,22 +179,6 @@ public class WorkflowDb {
 
     public void setResponsible(List<Object> responsible) {
         this.responsible = responsible;
-    }
-
-    public List<CalculatedField> getCalculatedFields() {
-        return calculatedFields;
-    }
-
-    public void setCalculatedFields(List<CalculatedField> calculatedFields) {
-        this.calculatedFields = calculatedFields;
-    }
-
-    public List<Meta> getMetas() {
-        return metas;
-    }
-
-    public void setMetas(List<Meta> metas) {
-        this.metas = metas;
     }
 
     public List<Preset> getPresets() {

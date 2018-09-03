@@ -119,9 +119,8 @@ public class SyncHelper {
         }else{
             Disposable disposable = Observable.fromCallable(() -> {
                 WorkflowDbDao workflowDbDao = database.workflowDbDao();
-                List<WorkflowDb> newWorkflowDb = DBHelper.prepareWorkflowDbForStorage(workflowDbs);
                 workflowDbDao.deleteAllWorkflows();
-                workflowDbDao.insertWorkflows(newWorkflowDb);
+                workflowDbDao.insertWorkflows(workflowDbs);
                 return true;
             }).subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())

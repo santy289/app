@@ -23,8 +23,10 @@ import com.rootnetapp.rootnetintranet.models.responses.timeline.SubCommentsRespo
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
@@ -99,8 +101,22 @@ public interface ApiInterface {
                                                @Query("status") boolean status);
 
     @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?")
+    Observable<WorkflowResponseDb> getWorkflowsTest(@Header("Authorization") String authorization,
+                                                    @Query("limit") int limit,
+                                                    @Query("open") boolean open,
+                                                    @Query("page") int page,
+                                                    @Query("status") boolean status);
+
+
+    @Headers({"Domain-Name: api"})
     @GET("intranet/workflows/types")
     Observable<WorkflowTypesResponse> getWorkflowTypes(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows/types")
+    Observable<WorkflowTypeDbResponse> testGetWorkflowTypes(@Header("Authorization") String authorization);
+
 
     @Headers({"Domain-Name: api"})
     @GET("list/{id}/item")

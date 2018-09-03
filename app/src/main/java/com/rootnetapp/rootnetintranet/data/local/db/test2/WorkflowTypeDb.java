@@ -1,39 +1,50 @@
-package com.rootnetapp.rootnetintranet.models.responses.workflowtypes;
+package com.rootnetapp.rootnetintranet.data.local.db.test2;
 
-import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.Index;
+import android.arch.persistence.room.PrimaryKey;
+
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Field;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.squareup.moshi.Json;
 
 import java.util.List;
 
-/**
- * Created by root on 23/03/18.
- */
-
-public class WorkflowType {
-
-
-    public void setPresets(List<Preset> presets) {
-        this.presets = presets;
-    }@Json(name = "id")
+@Entity(indices = {@Index("id")})
+public class WorkflowTypeDb {
+    @PrimaryKey
+    @Json(name = "id")
     private int id;
+
     @Json(name = "name")
     private String name;
+
     @Json(name = "key")
     private String key;
+
     @Json(name = "initial")
     private int initial;
+
+    @ColumnInfo(name = "workflow_count")
     @Json(name = "workflow_count")
     private int workflowCount;
+
     @Json(name = "active")
     private boolean active;
-    @Json(name = "status")
-    private List<Status> status = null;
-    @Json(name = "fields")
-    private List<Field> fields = null;
+
+    @ColumnInfo(name = "template_id")
     @Json(name = "template_id")
     private int templateId;
-    @Json(name = "presets")
-    private List<Preset> presets = null;
+
+    @Ignore
+    @Json(name = "status")
+    private List<Status> status = null;
+
+    @Ignore
+    @Json(name = "fields")
+    private List<Field> fields = null;
 
     public int getId() {
         return id;
@@ -106,10 +117,5 @@ public class WorkflowType {
     public void setTemplateId(int templateId) {
         this.templateId = templateId;
     }
-
-    public List<Preset> getPresets() {
-        return presets;
-    }
-
 
 }

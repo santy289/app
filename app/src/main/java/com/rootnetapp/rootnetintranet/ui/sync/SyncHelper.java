@@ -5,8 +5,15 @@ import android.arch.lifecycle.MutableLiveData;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
+import com.rootnetapp.rootnetintranet.data.local.db.DBHelper;
+import com.rootnetapp.rootnetintranet.data.local.db.test.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.test.WorkflowDbDao;
+import com.rootnetapp.rootnetintranet.data.local.db.test2.WorkflowTypeDb;
+import com.rootnetapp.rootnetintranet.data.local.db.test2.WorkflowTypeDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
@@ -34,37 +41,109 @@ public class SyncHelper {
     private ApiInterface apiInterface;
     private AppDatabase database;
     private List<Workflow> workflows;
+    private List<WorkflowDb> workflowDbs;
     private final CompositeDisposable disposables = new CompositeDisposable();
 
-    private int totalQueries =2, queriesCompleted =0;
+    private int queriesDoneSoFar = 0;
     private String auth;
 
     private final static String TAG = "SyncHelper";
+    protected static final int MAX_ENDPOINT_CALLS = 4; // TODO put this back to 2 when done testing.
 
     public SyncHelper(ApiInterface apiInterface, AppDatabase database) {
         this.apiInterface = apiInterface;
         this.database = database;
         this.workflows = new ArrayList<>();
+        this.workflowDbs = new ArrayList<>();
     }
 
     protected void syncData(String token) {
         this.auth = token;
         getUser(token);
         getAllWorkflows(token, 0);
+
+        // TODO testing remove this later
+        getWorkflowTypesDb(token);
+        getWorkflowsDb(token, 0);
     }
 
-    protected void clearDisposables() {
-        disposables.clear();
-    }
+    /*************** *****************/
 
-    private void getUser(String token) {
-        Disposable disposable = apiInterface.getUsers(token).subscribeOn(Schedulers.newThread()).
-                observeOn(AndroidSchedulers.mainThread()).
-                subscribe(this::onUsersSuccess, throwable -> {
-                    Log.d(TAG, "getData: error " + throwable.getMessage() );
+    private void getWorkflowsDb(String token, int page) {
+        Disposable disposable = apiInterface
+                .getWorkflowsTest(token, 50, true, page, true)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::getWorkflowDbSuccess, throwable -> {
+                    Log.d(TAG, "getWorkflowsDb: error: " + throwable.getMessage());
                     handleNetworkError(throwable);
                 });
         disposables.add(disposable);
+    }
+
+    private void getWorkflowTypesDb(String token) {
+        Disposable disposable = apiInterface
+                .testGetWorkflowTypes(token)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onWorkflowTypesDbSuccess, throwable -> {
+                    Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
+                    handleNetworkError(throwable);
+                });
+        disposables.add(disposable);
+    }
+
+    private void onWorkflowTypesDbSuccess(WorkflowTypeDbResponse response) {
+        Disposable disposable = Observable.fromCallable(() -> {
+            List<WorkflowTypeDb> workflowTypes = response.getList();
+            if (workflowTypes == null) {
+                return false;
+            }
+            WorkflowTypeDbDao workflowTypeDbDao = database.workflowTypeDbDao();
+            workflowTypeDbDao.deleteAllWorkfloyTypes();
+            workflowTypeDbDao.insertWorkflowTypes(workflowTypes);
+
+            getWorkflowsDb(auth, 0);
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::success, this::onWorkflowTypesDbFailure);
+        disposables.add(disposable);
+    }
+
+    private void getWorkflowDbSuccess(WorkflowResponseDb workflowsResponse) {
+        workflowDbs.addAll(workflowsResponse.getList());
+
+        if(!workflowsResponse.getPager().isIsLastPage()){
+            getWorkflowsDb(auth, workflowsResponse.getPager().getNextPage());
+        }else{
+            Disposable disposable = Observable.fromCallable(() -> {
+                WorkflowDbDao workflowDbDao = database.workflowDbDao();
+                List<WorkflowDb> newWorkflowDb = DBHelper.prepareWorkflowDbForStorage(workflowDbs);
+                workflowDbDao.deleteAllWorkflows();
+                workflowDbDao.insertWorkflows(newWorkflowDb);
+                return true;
+            }).subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::success, this::worflowDbDaoTransactionsFailure);
+            disposables.add(disposable);
+        }
+    }
+
+    private void worflowDbDaoTransactionsFailure(Throwable throwable) {
+        mSyncLiveData.setValue(false);
+    }
+
+    private void onWorkflowTypesDbFailure(Throwable throwable) {
+        mSyncLiveData.setValue(false);
+    }
+
+
+    /*************** *****************/
+
+
+    protected void clearDisposables() {
+        disposables.clear();
     }
 
     private void getAllWorkflows(String token, int page) {
@@ -74,6 +153,16 @@ public class SyncHelper {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onWorkflowsSuccess, throwable -> {
                     Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
+                    handleNetworkError(throwable);
+                });
+        disposables.add(disposable);
+    }
+
+    private void getUser(String token) {
+        Disposable disposable = apiInterface.getUsers(token).subscribeOn(Schedulers.newThread()).
+                observeOn(AndroidSchedulers.mainThread()).
+                subscribe(this::onUsersSuccess, throwable -> {
+                    Log.d(TAG, "getData: error " + throwable.getMessage() );
                     handleNetworkError(throwable);
                 });
         disposables.add(disposable);
@@ -92,11 +181,13 @@ public class SyncHelper {
     }
 
     private void handleNetworkError(Throwable throwable) {
-        HttpException networkError = (HttpException) throwable;
-        if (networkError == null) {
-            mSyncLiveData.setValue(false);
+        if (!(throwable instanceof HttpException)) {
             return;
         }
+
+        HttpException networkError = (HttpException) throwable;
+        mSyncLiveData.setValue(false);
+
         if (networkError.code() != 401) {
             proceedWithUnhandledException();
             return;
@@ -140,8 +231,12 @@ public class SyncHelper {
             return true;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::success, this::failure);
+                .subscribe(this::success, this::userfailure);
         disposables.add(disposable);
+    }
+
+    private void userfailure(Throwable throwable) {
+        mSyncLiveData.setValue(false);
     }
 
     private void error(String message) {
@@ -163,6 +258,8 @@ public class SyncHelper {
         disposables.add(disposable);
     }
 
+
+
     private void onWorkflowsSuccess(WorkflowsResponse workflowsResponse) {
         workflows.addAll(workflowsResponse.getList());
         if(!workflowsResponse.getPager().isIsLastPage()){
@@ -180,9 +277,9 @@ public class SyncHelper {
     }
 
     private void success(Boolean o) {
-        queriesCompleted++;
-        mProgressLiveData.setValue(queriesCompleted);
-        if(totalQueries == queriesCompleted){
+        queriesDoneSoFar++;
+        mProgressLiveData.setValue(queriesDoneSoFar);
+        if(MAX_ENDPOINT_CALLS == queriesDoneSoFar){
             mSyncLiveData.setValue(true);
         }
     }

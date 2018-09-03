@@ -39,7 +39,7 @@ public class SyncActivity extends AppCompatActivity {
         String token = "Bearer " + prefs.getString("token", "");
 
         bar = findViewById(R.id.progress_bar);
-        bar.setMax(2);
+        bar.setMax(SyncHelper.MAX_ENDPOINT_CALLS);
         subscribe();
         syncHelper.syncData(token);
     }

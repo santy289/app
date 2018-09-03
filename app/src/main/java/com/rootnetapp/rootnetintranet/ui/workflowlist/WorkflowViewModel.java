@@ -6,11 +6,13 @@ import android.arch.lifecycle.ViewModel;
 import android.content.SharedPreferences;
 import android.support.annotation.IdRes;
 import android.util.Log;
+import android.view.View;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowExpandableAdapter;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -32,6 +34,7 @@ public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<List<Workflow>> updateWithSortedList;
     private MutableLiveData<int[]> toggleRadioButton;
     private MutableLiveData<int[]> toggleSwitch;
+    private MutableLiveData<Boolean> showList;
     private LiveData<List<Workflow>> liveWorkflows, liveUnordered;
 
     private WorkflowRepository workflowRepository;
@@ -167,6 +170,23 @@ public class WorkflowViewModel extends ViewModel {
 
         }
         applyFilters(sort);
+    }
+
+    protected void handleUiAndIncomingList(WorkflowExpandableAdapter adapter, List<Workflow> listWorkflows) {
+        if (adapter == null || listWorkflows == null) {
+            showList.setValue(false);
+            return;
+        }
+        if(listWorkflows.size() < 1){
+            showList.setValue(false);
+            return;
+        }
+        if (getSortingType() == Sort.sortType.NONE) {
+            adapter.setWorkflows(listWorkflows);
+        } else {
+            applyFilters();
+        }
+        showList.setValue(true);
     }
 
     private void clearOtherSwitchesBut(Sort.sortType ofType) {
@@ -346,4 +366,10 @@ public class WorkflowViewModel extends ViewModel {
         return toggleSwitch;
     }
 
+    public LiveData<Boolean> getObservableShowList() {
+        if (showList == null) {
+            showList = new MutableLiveData<>();
+        }
+        return showList;
+    }
 }

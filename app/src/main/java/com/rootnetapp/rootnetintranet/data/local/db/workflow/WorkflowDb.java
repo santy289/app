@@ -1,16 +1,13 @@
-package com.rootnetapp.rootnetintranet.data.local.db.test;
+package com.rootnetapp.rootnetintranet.data.local.db.workflow;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.Ignore;
-import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
-import android.support.annotation.Nullable;
 
-import com.rootnetapp.rootnetintranet.data.local.db.test2.WorkflowTypeDb;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Person;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.CalculatedField;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;

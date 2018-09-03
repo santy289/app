@@ -120,9 +120,18 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         }
     }
 
+    private void showListContent(boolean show) {
+        if (show) {
+            fragmentWorkflowBinding.recWorkflows.setVisibility(View.VISIBLE);
+            fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.GONE);
+        } else {
+            fragmentWorkflowBinding.recWorkflows.setVisibility(View.GONE);
+            fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.VISIBLE);
+        }
+    }
+
     private void subscribe() {
         final Observer<List<Workflow>> workflowsObserver = ((List<Workflow> data) -> {
-
             //Utils.hideLoading();
             if (null != data) {
                 if(data.size()!=0){
@@ -142,29 +151,11 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
             }
         });
-        final Observer<List<Workflow>> getAllWorkflowsObserver = (listWorkflows -> {
-            if (adapter == null || listWorkflows == null) {
-                fragmentWorkflowBinding.recWorkflows.setVisibility(View.GONE);
-                fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.VISIBLE);
-                return;
-            }
-            if(listWorkflows.size() < 1){
-                fragmentWorkflowBinding.recWorkflows.setVisibility(View.GONE);
-                fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.VISIBLE);
-                return;
-            }
-            // before updating check if we need to apply filters.
-            if (workflowViewModel.getSortingType() == Sort.sortType.NONE) {
-                adapter.setWorkflows(listWorkflows);
-            } else {
-                workflowViewModel.applyFilters();
-            }
-            fragmentWorkflowBinding.recWorkflows.setVisibility(View.VISIBLE);
-            fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.GONE);
-        });
-        final Observer<List<Workflow>> updateWithSortedListObserver = (
-                listWorklows -> adapter.setWorkflows(listWorklows)
-        );
+
+        final Observer<List<Workflow>> getAllWorkflowsObserver = (listWorkflows -> workflowViewModel.handleUiAndIncomingList(adapter, listWorkflows));
+
+        final Observer<List<Workflow>> updateWithSortedListObserver = (listWorklows -> adapter.setWorkflows(listWorklows));
+
         final Observer<int[]> toggleRadioButtonObserver = (toggle -> {
             if (toggle == null || toggle.length < 1) {
                 return;
@@ -172,6 +163,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             boolean check = toggle[INDEX_CHECK] == CHECK;
             toggleRadioButtonFilter(toggle[INDEX_TYPE], check);
         });
+
         final Observer<int[]> toggleSwitchObserver = (toggle -> {
             if (toggle == null || toggle.length < 1) {
                 return;
@@ -180,7 +172,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             toggleAscendingDescendingSwitch(toggle[INDEX_TYPE], check);
         });
 
+        final Observer<Boolean> showListObserver = (this::showListContent);
+
         final Observer<Boolean> showLoadingObserver = (this::showLoading);
+
         workflowViewModel.getObservableWorkflows().observe(this, workflowsObserver);
         workflowViewModel.getObservableError().observe(this, errorObserver);
         workflowViewModel.getObservableShowLoading().observe(this, showLoadingObserver);
@@ -188,6 +183,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.getObservableUpdateWithSortedList().observe(this, updateWithSortedListObserver);
         workflowViewModel.getObservableToggleRadioButton().observe(this, toggleRadioButtonObserver);
         workflowViewModel.getObservableToggleSwitch().observe(this, toggleSwitchObserver);
+        workflowViewModel.getObservableShowList().observe(this, showListObserver);
     }
 
     private PopupWindow initPopMenu() {

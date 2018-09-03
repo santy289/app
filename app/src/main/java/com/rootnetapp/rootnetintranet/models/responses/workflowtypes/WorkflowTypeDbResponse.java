@@ -1,6 +1,6 @@
 package com.rootnetapp.rootnetintranet.models.responses.workflowtypes;
 
-import com.rootnetapp.rootnetintranet.data.local.db.test2.WorkflowTypeDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.squareup.moshi.Json;
 
 import java.util.List;

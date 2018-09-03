@@ -6,10 +6,10 @@ import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.DBHelper;
-import com.rootnetapp.rootnetintranet.data.local.db.test.WorkflowDb;
-import com.rootnetapp.rootnetintranet.data.local.db.test.WorkflowDbDao;
-import com.rootnetapp.rootnetintranet.data.local.db.test2.WorkflowTypeDb;
-import com.rootnetapp.rootnetintranet.data.local.db.test2.WorkflowTypeDbDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;

@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.data.local.db.test;
+package com.rootnetapp.rootnetintranet.data.local.db.workflow;
 
 import android.arch.persistence.room.ColumnInfo;
 

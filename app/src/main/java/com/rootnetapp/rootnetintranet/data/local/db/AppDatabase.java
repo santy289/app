@@ -3,10 +3,10 @@ package com.rootnetapp.rootnetintranet.data.local.db;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.RoomDatabase;
 
-import com.rootnetapp.rootnetintranet.data.local.db.test.WorkflowDb;
-import com.rootnetapp.rootnetintranet.data.local.db.test.WorkflowDbDao;
-import com.rootnetapp.rootnetintranet.data.local.db.test2.WorkflowTypeDb;
-import com.rootnetapp.rootnetintranet.data.local.db.test2.WorkflowTypeDbDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.data.local.db.user.UserDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;

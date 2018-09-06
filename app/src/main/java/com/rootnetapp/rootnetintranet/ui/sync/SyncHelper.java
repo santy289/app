@@ -5,7 +5,6 @@ import android.arch.lifecycle.MutableLiveData;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
-import com.rootnetapp.rootnetintranet.data.local.db.DBHelper;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
@@ -20,6 +19,7 @@ import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,7 +71,7 @@ public class SyncHelper {
 
     private void getWorkflowsDb(String token, int page) {
         Disposable disposable = apiInterface
-                .getWorkflowsTest(token, 50, true, page, true)
+                .getWorkflowsDb(token, 50, true, page, true)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::getWorkflowDbSuccess, throwable -> {
@@ -180,6 +180,11 @@ public class SyncHelper {
     }
 
     private void handleNetworkError(Throwable throwable) {
+        if (throwable instanceof UnknownHostException) {
+            // TODO go to timeline but fail because there is no internet connection.
+            return;
+        }
+
         if (!(throwable instanceof HttpException)) {
             return;
         }

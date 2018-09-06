@@ -310,10 +310,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     protected void goToWorkflowDetail(Workflow workflow) {
-        showFragment(
-                WorkflowDetailFragment.newInstance(workflow, this),
-                true
-        );
+//        showFragment(
+//                WorkflowDetailFragment.newInstance(workflow, this),
+//                true
+//        );
     }
 
     private void subscribe() {

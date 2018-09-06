@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailBinding;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
@@ -62,7 +63,7 @@ public class WorkflowDetailFragment extends Fragment {
     WorkflowDetailViewModel workflowDetailViewModel;
     private FragmentWorkflowDetailBinding binding;
     private MainActivityInterface mainActivityInterface;
-    private Workflow item;
+    private WorkflowDb item;
     private List<Preset> presets;
     private CommentsAdapter commentsAdapter = null;
     private static final int FILE_SELECT_CODE = 555;
@@ -76,7 +77,7 @@ public class WorkflowDetailFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static WorkflowDetailFragment newInstance(Workflow item, MainActivityInterface mainActivityInterface) {
+    public static WorkflowDetailFragment newInstance(WorkflowDb item, MainActivityInterface mainActivityInterface) {
         WorkflowDetailFragment fragment = new WorkflowDetailFragment();
         fragment.item = item;
         fragment.mainActivityInterface = mainActivityInterface;
@@ -129,7 +130,7 @@ public class WorkflowDetailFragment extends Fragment {
         binding.btnAttachment.setOnClickListener(this::showFileChooser);
         binding.btnUpload.setOnClickListener(this::uploadFiles);
         workflowDetailViewModel.getWorkflow(token, item.getId());
-        workflowDetailViewModel.getWorkflowType(token, item.getWorkflowType().getId());
+        workflowDetailViewModel.getWorkflowType(token, item.getWorkflowTypeId());
         workflowDetailViewModel.getComments(token, item.getId());
         return view;
     }
@@ -343,7 +344,7 @@ public class WorkflowDetailFragment extends Fragment {
             if (null != data) {
                 Status currentStatus = null;
                 for (Status status : data.getStatus()) {
-                    if (status.getId() == item.getWorkflowStateInfo().getId()) {
+                    if (status.getId() == item.getCurrentStatus()) {
                         currentStatus = status;
                         break;
                     }

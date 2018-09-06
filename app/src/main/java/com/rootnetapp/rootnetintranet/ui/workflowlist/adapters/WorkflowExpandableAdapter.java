@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import com.bumptech.glide.Glide;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowItemBinding;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragmentInterface;
 
@@ -20,7 +20,7 @@ import java.util.List;
 
 public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowViewholder> {
 
-    private List<Workflow> workflows;
+    private List<WorkflowDb> workflows;
     private List<Boolean> isChecked;
     private List<Boolean> isExpanded;
     private ViewGroup recycler;
@@ -48,9 +48,27 @@ public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowView
             return;
         }
 
-        Workflow item = workflows.get(i);
+        /*
+        MAIN TITLE = WorkflowDB.title + WorkflowDB.workflowTypeKey
+        typ of workflow / tipo de workflow = getWorkflowType().getName() / WorkflowTypeDb.name
+        Owner Dueño =  WorkflowDB.author.fullName
+        Status/ Estatus = Active Inactive  WorkflowDB.status (true/false)
+        Actual state = Estado actual ? WorkflowDb.currentStatusName ("levantamiento")
+        creado en /created on = WorflowDb.createdAt
+        actualizado en = WorkflowDb.updatedAt
+
+
+        item.getAuthor().getPicture();
+
+         */
+
+        WorkflowDb item = workflows.get(i);
         holder.binding.tvTitle.setText(item.getTitle() + " - " + item.getWorkflowTypeKey());
-        holder.binding.tvWorkflowtype.setText(item.getWorkflowType().getName());
+
+        // TODO need this
+        //holder.binding.tvWorkflowtype.setText(item.getWorkflowType().getName());
+
+
         //todo remover validaciones, solo testing!
         //Esto deberia venir siempre de la consulta al servicio.
         if (item.getAuthor() != null) {
@@ -58,17 +76,26 @@ public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowView
             if (!TextUtils.isEmpty(fullName)) {
                 holder.binding.tvOwner.setText(fullName);
             }
-            String picture = item.getAuthor().getPicture();
-            if (!TextUtils.isEmpty(picture)) {
-                String path = Utils.imgDomain + picture.trim();
-                Glide.with(context).load(path).into(holder.binding.imgProfile);
-            }
+
+            // TODO put this back for now no author picture, we need to take the id and
+            // TODO find it in the table of profiles(future version) or users (currently called this way)
+            // TODO need this
+            //String picture = item.getAuthor().getPicture(); //TODO not able to get picture just yet, we need profile table
+// TODO need this
+//            if (!TextUtils.isEmpty(picture)) {
+//                String path = Utils.imgDomain + picture.trim();
+//                Glide.with(context).load(path).into(holder.binding.imgProfile);
+//            }
         }
-        if(item.getWorkflowStateInfo() != null){
-            if(item.getWorkflowStateInfo().getVirtualColumns() != null){
-                holder.binding.tvActualstate.setText(item.getWorkflowStateInfo().getVirtualColumns().getName());
-            }
-        }
+
+        //TODO need this
+//        if(item.getWorkflowStateInfo() != null){
+//            if(item.getWorkflowStateInfo().getVirtualColumns() != null){
+//                holder.binding.tvActualstate.setText(item.getWorkflowStateInfo().getVirtualColumns().getName());
+//            }
+//        }
+
+
         //todo fin de solo testing!
         if (item.isStatus()) {
             holder.binding.tvStatus.setText(recycler.getContext().getString(R.string.active));
@@ -99,6 +126,7 @@ public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowView
             }
         });
 
+        holder.binding.executePendingBindings();
     }
 
     private void redrawCheckbox(WorkflowViewholder holder, int i) {
@@ -128,7 +156,7 @@ public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowView
         return workflows.size();
     }
 
-    public void setWorkflows(List<Workflow> workflows) {
+    public void setWorkflows(List<WorkflowDb> workflows) {
         boolean firstLoad = false;
         if (this.workflows == null) {
             firstLoad = true;
@@ -143,7 +171,7 @@ public class WorkflowExpandableAdapter extends RecyclerView.Adapter<WorkflowView
     private void resetChecksAndExpands() {
         isChecked = new ArrayList<>();
         isExpanded = new ArrayList<>();
-        for (Workflow item : workflows) {
+        for (WorkflowDb item : workflows) {
             isChecked.add(false);
             isExpanded.add(false);
         }

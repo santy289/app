@@ -53,6 +53,14 @@ public class WorkflowDb {
     @Json(name = "status")
     private boolean status;
 
+    @ColumnInfo(name = "current_status")
+    @Json(name = "current_status")
+    private int currentStatus;
+
+    @ColumnInfo(name = "current_status_name")
+    @Json(name = "current_status_name")
+    private String currentStatusName;
+
     @ColumnInfo(name = "open")
     @Json(name = "open")
     private boolean open;
@@ -205,11 +213,28 @@ public class WorkflowDb {
         this.updatedAt = updatedAt;
     }
 
-    public Integer getWorkflowTypeId() {
+    public int getWorkflowTypeId() {
         return workflowTypeId;
     }
 
-    public void setWorkflowTypeId(Integer workflowTypeId) {
+    public void setWorkflowTypeId(int workflowTypeId) {
         this.workflowTypeId = workflowTypeId;
     }
+
+    public int getCurrentStatus() {
+        return currentStatus;
+    }
+
+    public void setCurrentStatus(int currentStatus) {
+        this.currentStatus = currentStatus;
+    }
+
+    public String getCurrentStatusName() {
+        return currentStatusName;
+    }
+
+    public void setCurrentStatusName(String currentStatusName) {
+        this.currentStatusName = currentStatusName;
+    }
+
 }

@@ -102,11 +102,11 @@ public interface ApiInterface {
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?")
-    Observable<WorkflowResponseDb> getWorkflowsTest(@Header("Authorization") String authorization,
-                                                    @Query("limit") int limit,
-                                                    @Query("open") boolean open,
-                                                    @Query("page") int page,
-                                                    @Query("status") boolean status);
+    Observable<WorkflowResponseDb> getWorkflowsDb(@Header("Authorization") String authorization,
+                                                  @Query("limit") int limit,
+                                                  @Query("open") boolean open,
+                                                  @Query("page") int page,
+                                                  @Query("status") boolean status);
 
 
     @Headers({"Domain-Name: api"})

@@ -6,7 +6,10 @@ import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Transaction;
 import android.arch.persistence.room.Update;
+
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowTypeAndWorkflows;
 
 import java.util.List;
 
@@ -39,5 +42,8 @@ public interface WorkflowDbDao {
     @Query("SELECT * FROM workflowdb WHERE user_id = :userId")
     public LiveData<List<WorkflowDb>> getObservableWorkflowsByUser(int userId);
 
+    @Transaction
+    @Query("SELECT id, name FROM WorkflowTypeDb WHERE id = :workflowTypeId")
+    public List<WorkflowTypeAndWorkflows> loadWorkflowTypeAndWorkflows(int workflowTypeId);
 
 }

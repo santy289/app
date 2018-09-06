@@ -6,12 +6,11 @@ import android.arch.lifecycle.ViewModel;
 import android.content.SharedPreferences;
 import android.support.annotation.IdRes;
 import android.util.Log;
-import android.view.View;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowExpandableAdapter;
 
 import java.io.IOException;
@@ -28,17 +27,16 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 public class WorkflowViewModel extends ViewModel {
-    private MutableLiveData<List<Workflow>> mUserLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
-    private MutableLiveData<List<Workflow>> updateWithSortedList;
+    private MutableLiveData<List<WorkflowDb>> updateWithSortedList;
     private MutableLiveData<int[]> toggleRadioButton;
     private MutableLiveData<int[]> toggleSwitch;
     private MutableLiveData<Boolean> showList;
-    private LiveData<List<Workflow>> liveWorkflows, liveUnordered;
+    private LiveData<List<WorkflowDb>> liveWorkflows, liveUnordered;
 
     private WorkflowRepository workflowRepository;
-    private List<Workflow> workflows, unordered;
+    private List<WorkflowDb> workflows, unordered;
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     private Sort sort;
@@ -57,11 +55,11 @@ public class WorkflowViewModel extends ViewModel {
         workflowRepository.clearDisposables();
     }
 
-    protected LiveData<List<Workflow>> getAllWorkflows() {
+    protected LiveData<List<WorkflowDb>> getAllWorkflows() {
         return liveWorkflows;
     }
 
-    protected void insert(Workflow workflow) {
+    protected void insert(WorkflowDb workflow) {
         workflowRepository.insertWorkflow(workflow);
     }
 
@@ -172,7 +170,7 @@ public class WorkflowViewModel extends ViewModel {
         applyFilters(sort);
     }
 
-    protected void handleUiAndIncomingList(WorkflowExpandableAdapter adapter, List<Workflow> listWorkflows) {
+    protected void handleUiAndIncomingList(WorkflowExpandableAdapter adapter, List<WorkflowDb> listWorkflows) {
         if (adapter == null || listWorkflows == null) {
             showList.setValue(false);
             return;
@@ -238,9 +236,11 @@ public class WorkflowViewModel extends ViewModel {
                         throwable -> Log.d(TAG, "getWorkflowsFromService: Cant get workflows from network - " + throwable.getMessage())
                 );
         disposables.add(disposable);
+
+        workflowRepository.test();
     }
 
-    private void onServiceSuccess(WorkflowsResponse workflowsResponse) {
+    private void onServiceSuccess(WorkflowResponseDb workflowsResponse) {
         workflows = new ArrayList<>();
         workflows.addAll(workflowsResponse.getList());
         if (!workflowsResponse.getPager().isIsLastPage()) {
@@ -262,17 +262,16 @@ public class WorkflowViewModel extends ViewModel {
         }
     }
 
-    private void onWorkflowSuccessUpdate(List<Workflow> workflowList) {
+    private void onWorkflowSuccessUpdate(List<WorkflowDb> workflowList) {
         Log.d(TAG, "onWorkflowSuccessUpdate: local database workflows updated.");
     }
 
-    public void applyFilters() {
+    private void applyFilters() {
         applyFilters(sort);
     }
 
     private void applyFilters(Sort sorting) {
-//        List<Workflow> workflows = mUserLiveData.getValue();
-        List<Workflow> workflows = liveWorkflows.getValue();
+        List<WorkflowDb> workflows = liveWorkflows.getValue();
         if (workflows == null) {
             return;
         }
@@ -320,15 +319,7 @@ public class WorkflowViewModel extends ViewModel {
             }
         }
 
-//        mUserLiveData.setValue(workflows);
         updateWithSortedList.setValue(workflows);
-    }
-
-    protected LiveData<List<Workflow>> getObservableWorkflows() {
-        if (mUserLiveData == null) {
-            mUserLiveData = new MutableLiveData<>();
-        }
-        return mUserLiveData;
     }
 
     protected LiveData<Integer> getObservableError() {
@@ -345,7 +336,7 @@ public class WorkflowViewModel extends ViewModel {
         return showLoading;
     }
 
-    protected LiveData<List<Workflow>> getObservableUpdateWithSortedList() {
+    protected LiveData<List<WorkflowDb>> getObservableUpdateWithSortedList() {
         if (updateWithSortedList == null) {
             updateWithSortedList = new MutableLiveData<>();
         }

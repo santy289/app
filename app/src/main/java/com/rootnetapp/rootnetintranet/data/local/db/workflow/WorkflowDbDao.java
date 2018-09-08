@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflow;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.paging.DataSource;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
@@ -40,7 +41,7 @@ public interface WorkflowDbDao {
             "workflowdb.start, workflowdb.status, workflowdb.`end` " +
             "FROM workflowdb, workflowtypedb " +
             "WHERE workflowdb.workflow_type_id = workflowtypedb.id")
-    public LiveData<List<WorkflowListItem>> getWorkflows();
+    public DataSource.Factory<Integer, WorkflowListItem> getWorkflows();
 
 
 
@@ -50,8 +51,8 @@ public interface WorkflowDbDao {
     @Query("SELECT * FROM workflowdb WHERE user_id = :userId")
     public LiveData<List<WorkflowDb>> getObservableWorkflowsByUser(int userId);
 
-    @Transaction
-    @Query("SELECT id, name FROM WorkflowTypeDb WHERE id = :workflowTypeId")
-    public List<WorkflowTypeAndWorkflows> loadWorkflowTypeAndWorkflows(int workflowTypeId);
+//    @Transaction
+//    @Query("SELECT id, name FROM WorkflowTypeDb WHERE id = :workflowTypeId")
+//    public List<WorkflowTypeAndWorkflows> loadWorkflowTypeAndWorkflows(int workflowTypeId);
 
 }

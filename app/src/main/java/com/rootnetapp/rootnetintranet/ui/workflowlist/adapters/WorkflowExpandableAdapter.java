@@ -1,10 +1,11 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist.adapters;
 
+import android.arch.paging.PagedList;
+import android.arch.paging.PagedListAdapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.recyclerview.extensions.ListAdapter;
 import android.support.v7.util.DiffUtil;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -19,7 +20,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragmentInterface;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WorkflowExpandableAdapter extends ListAdapter<WorkflowListItem, WorkflowViewholder> {
+public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem, WorkflowViewholder> {
 
     private List<Boolean> isChecked;
     private List<Boolean> isExpanded;
@@ -139,7 +140,7 @@ public class WorkflowExpandableAdapter extends ListAdapter<WorkflowListItem, Wor
 
 
     @Override
-    public void submitList(@Nullable List<WorkflowListItem> list) {
+    public void submitList(@Nullable PagedList<WorkflowListItem> list) {
         super.submitList(list);
         setWorkflows(list);
     }

@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowlist;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.arch.paging.PagedList;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
@@ -103,7 +104,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         fragmentWorkflowBinding.recWorkflows.setAdapter(adapter);
     }
 
-    private void updateAdapterList(List<WorkflowListItem> workflowDbList) {
+    private void updateAdapterList(PagedList<WorkflowListItem> workflowDbList) {
         adapter.submitList(workflowDbList);
     }
 
@@ -143,7 +144,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         });
 
         // Used when we have a general workflow.
-        final Observer<List<WorkflowListItem>> getAllWorkflowsObserver = (listWorkflows -> {
+        final Observer<PagedList<WorkflowListItem>> getAllWorkflowsObserver = (listWorkflows -> {
             if (adapter == null) {
                 return;
             }
@@ -151,7 +152,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         });
 
         // Used when we have some filter operation happening.
-        final Observer<List<WorkflowListItem>> updateWithSortedListObserver = (this::updateAdapterList);
+        final Observer<PagedList<WorkflowListItem>> updateWithSortedListObserver = (this::updateAdapterList);
 
         final Observer<int[]> toggleRadioButtonObserver = (toggle -> {
             if (toggle == null || toggle.length < 1) {

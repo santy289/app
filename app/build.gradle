@@ -50,6 +50,7 @@ dependencies {
     implementation "android.arch.lifecycle:extensions:$rootProject.archLifecycleVersion"
     implementation "android.arch.work:work-runtime:$rootProject.workManager"
     implementation "android.arch.lifecycle:common-java8:$rootProject.archLifecycleVersion"
+    implementation "android.arch.paging:runtime:1.0.1"
 
     //room
     implementation "android.arch.persistence.room:runtime:$rootProject.roomVersion"

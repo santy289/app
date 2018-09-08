@@ -3,6 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowlist;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.arch.paging.PagedList;
 import android.content.SharedPreferences;
 import android.support.annotation.IdRes;
 import android.util.Log;
@@ -24,11 +25,11 @@ import io.reactivex.disposables.CompositeDisposable;
 public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
-    private MutableLiveData<List<WorkflowListItem>> updateWithSortedList;
+    private MutableLiveData<PagedList<WorkflowListItem>> updateWithSortedList;
     private MutableLiveData<int[]> toggleRadioButton;
     private MutableLiveData<int[]> toggleSwitch;
     private MutableLiveData<Boolean> showList;
-    private LiveData<List<WorkflowListItem>> liveWorkflows, liveUnordered;
+    private LiveData<PagedList<WorkflowListItem>> liveWorkflows, liveUnordered;
 
     private WorkflowRepository workflowRepository;
     private List<WorkflowDb> workflows, unordered;
@@ -50,7 +51,7 @@ public class WorkflowViewModel extends ViewModel {
         workflowRepository.clearDisposables();
     }
 
-    protected LiveData<List<WorkflowListItem>> getAllWorkflows() {
+    protected LiveData<PagedList<WorkflowListItem>> getAllWorkflows() {
         return liveWorkflows;
     }
 
@@ -167,7 +168,7 @@ public class WorkflowViewModel extends ViewModel {
         applyFilters(sort);
     }
 
-    protected void handleUiAndIncomingList(List<WorkflowListItem> listWorkflows) {
+    protected void handleUiAndIncomingList(PagedList<WorkflowListItem> listWorkflows) {
         if (listWorkflows == null) {
             showList.setValue(false);
             return;
@@ -268,7 +269,7 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     private void applyFilters(Sort sorting) {
-        List<WorkflowListItem> workflows = liveWorkflows.getValue();
+        PagedList<WorkflowListItem> workflows = liveWorkflows.getValue();
         if (workflows == null) {
             return;
         }
@@ -333,7 +334,7 @@ public class WorkflowViewModel extends ViewModel {
         return showLoading;
     }
 
-    protected LiveData<List<WorkflowListItem>> getObservableUpdateWithSortedList() {
+    protected LiveData<PagedList<WorkflowListItem>> getObservableUpdateWithSortedList() {
         if (updateWithSortedList == null) {
             updateWithSortedList = new MutableLiveData<>();
         }

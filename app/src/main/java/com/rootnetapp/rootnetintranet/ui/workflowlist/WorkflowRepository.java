@@ -1,6 +1,9 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.paging.DataSource;
+import android.arch.paging.LivePagedListBuilder;
+import android.arch.paging.PagedList;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
@@ -25,7 +28,7 @@ public class WorkflowRepository {
     private AppDatabase database;
     private ApiInterface service;
     private WorkflowDbDao workflowDbDao;
-    private LiveData<List<WorkflowListItem>> allWorkflows;
+    private LiveData<PagedList<WorkflowListItem>> allWorkflows;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
@@ -33,14 +36,24 @@ public class WorkflowRepository {
         this.service = service;
         this.database = database;
         workflowDbDao = this.database.workflowDbDao();
-        allWorkflows = workflowDbDao.getWorkflows();
+        DataSource.Factory<Integer, WorkflowListItem> factory = workflowDbDao.getWorkflows();
+
+        PagedList.Config pagedListConfig =
+                (new PagedList.Config.Builder())
+                        .setEnablePlaceholders(false)
+                        .setPrefetchDistance(15)
+                        .setInitialLoadSizeHint(30)
+                        .setPageSize(20).build();
+
+        LivePagedListBuilder<Integer, WorkflowListItem> builder = new LivePagedListBuilder<>(factory, pagedListConfig);
+        allWorkflows = builder.build();
     }
 
     public void clearDisposables() {
         disposables.clear();
     }
 
-    public LiveData<List<WorkflowListItem>> getAllWorkflows() {
+    public LiveData<PagedList<WorkflowListItem>> getAllWorkflows() {
         return allWorkflows;
     }
 
@@ -55,13 +68,13 @@ public class WorkflowRepository {
     }
 
     public void test() {
-        Disposable disposable = Completable.fromCallable(() -> {
-            List<WorkflowTypeAndWorkflows> result = database.workflowDbDao().loadWorkflowTypeAndWorkflows(16);
-            return true;
-        }).subscribeOn(Schedulers.newThread())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe();
-        disposables.add(disposable);
+//        Disposable disposable = Completable.fromCallable(() -> {
+//            List<WorkflowTypeAndWorkflows> result = database.workflowDbDao().loadWorkflowTypeAndWorkflows(16);
+//            return true;
+//        }).subscribeOn(Schedulers.newThread())
+//          .observeOn(AndroidSchedulers.mainThread())
+//          .subscribe();
+//        disposables.add(disposable);
     }
 
     public Observable<List<WorkflowDb>> getWorkflowsFromInternal() {

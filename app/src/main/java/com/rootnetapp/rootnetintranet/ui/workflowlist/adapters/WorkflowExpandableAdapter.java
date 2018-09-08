@@ -62,26 +62,11 @@ public class WorkflowExpandableAdapter extends ListAdapter<WorkflowListItem, Wor
             return;
         }
 
-        /*
-        MAIN TITLE = WorkflowDB.title + WorkflowDB.workflowTypeKey
-        typ of workflow / tipo de workflow = getWorkflowType().getName() / WorkflowTypeDb.name
-        Owner Dueño =  WorkflowDB.author.fullName
-        Status/ Estatus = Active Inactive  WorkflowDB.status (true/false)
-        Actual state = Estado actual ? WorkflowDb.currentStatusName ("levantamiento")
-        creado en /created on = WorflowDb.createdAt
-        actualizado en = WorkflowDb.updatedAt
-
-
-        item.getAuthor().getPicture();
-
-         */
-
         WorkflowListItem item = getItem(i);
         String mainTitle = item.getTitle() + " - " + item.getWorkflowTypeKey();
-        holder.binding.tvTitle.setText(mainTitle);
 
-        // TODO need this
-        //holder.binding.tvWorkflowtype.setText(item.getWorkflowType().getName());
+        holder.binding.tvTitle.setText(mainTitle);
+        holder.binding.tvWorkflowtype.setText(item.getWorkflowTypeName());
 
 
         String fullName = item.getFullName();
@@ -89,23 +74,11 @@ public class WorkflowExpandableAdapter extends ListAdapter<WorkflowListItem, Wor
             holder.binding.tvOwner.setText(fullName);
         }
 
-            // TODO put this back for now no author picture, we need to take the workflowId and
-            // TODO find it in the table of profiles(future version) or users (currently called this way)
-            // TODO need this
-            //String picture = item.getAuthor().getPicture(); //TODO not able to get picture just yet, we need profile table
-// TODO need this
-//            if (!TextUtils.isEmpty(picture)) {
-//                String path = Utils.imgDomain + picture.trim();
-//                Glide.with(context).load(path).into(holder.binding.imgProfile);
-//            }
-
-
         if(item.getCurrentStatusName() != null){
             holder.binding.tvActualstate.setText(item.getCurrentStatusName());
         }
 
         Context context = holder.binding.tvStatus.getContext();
-        //todo fin de solo testing!
         if (item.isStatus()) {
             holder.binding.tvStatus.setText(context.getString(R.string.active));
         } else {
@@ -116,7 +89,11 @@ public class WorkflowExpandableAdapter extends ListAdapter<WorkflowListItem, Wor
         String hour = (item.getStart().split("T")[1]).split("-")[0];
         String dateText = date + " - " + hour;
         holder.binding.tvCreatedat.setText(dateText);
-        //todo updated!
+        date = item.getUpdatedAt().split("T")[0];
+        hour = (item.getUpdatedAt().split("T")[1]).split("-")[0];
+        dateText = date + " - " + hour;
+        holder.binding.tvUpdatedAt.setText(dateText);
+
         holder.binding.chbxSelected.setOnCheckedChangeListener(null);
         redrawCheckbox(holder, i);
         redrawExpansion(holder, i);

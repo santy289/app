@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.ui.workflowlist;
+package com.rootnetapp.rootnetintranet.ui.workflowlist.repo;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;

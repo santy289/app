@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowlist;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
 
 import dagger.Module;
 import dagger.Provides;

@@ -11,6 +11,7 @@ import android.util.Log;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
 
 import java.text.DateFormat;
 import java.text.ParseException;

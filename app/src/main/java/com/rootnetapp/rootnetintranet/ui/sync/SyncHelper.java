@@ -71,7 +71,7 @@ public class SyncHelper {
 
     private void getWorkflowsDb(String token, int page) {
         Disposable disposable = apiInterface
-                .getWorkflowsDb(token, 50, true, page, true)
+                .getWorkflowsDb(token, 50, true, page, true, false)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::getWorkflowDbSuccess, throwable -> {

@@ -6,6 +6,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowTypeAndWorkflows;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
@@ -24,7 +25,7 @@ public class WorkflowRepository {
     private AppDatabase database;
     private ApiInterface service;
     private WorkflowDbDao workflowDbDao;
-    private LiveData<List<WorkflowDb>> allWorkflows;
+    private LiveData<List<WorkflowListItem>> allWorkflows;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
@@ -39,7 +40,7 @@ public class WorkflowRepository {
         disposables.clear();
     }
 
-    public LiveData<List<WorkflowDb>> getAllWorkflows() {
+    public LiveData<List<WorkflowListItem>> getAllWorkflows() {
         return allWorkflows;
     }
 
@@ -69,7 +70,7 @@ public class WorkflowRepository {
     }
 
     public Observable<WorkflowResponseDb> getWorkflowsFromService(String auth, int page) {
-        return service.getWorkflowsDb(auth, 50, true, page, true)
+        return service.getWorkflowsDb(auth, 50, true, page, true, false)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }

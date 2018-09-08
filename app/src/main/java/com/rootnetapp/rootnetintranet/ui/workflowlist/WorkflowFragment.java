@@ -22,6 +22,7 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowBinding;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowFiltersMenuBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
@@ -102,8 +103,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         fragmentWorkflowBinding.recWorkflows.setAdapter(adapter);
     }
 
-    private void updateAdapterList(List<WorkflowDb> workflowDbList) {
-        adapter.setWorkflows(workflowDbList);
+    private void updateAdapterList(List<WorkflowListItem> workflowDbList) {
+        adapter.submitList(workflowDbList);
     }
 
     private void setupClickListeners() {
@@ -142,10 +143,15 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         });
 
         // Used when we have a general workflow.
-        final Observer<List<WorkflowDb>> getAllWorkflowsObserver = (listWorkflows -> workflowViewModel.handleUiAndIncomingList(adapter, listWorkflows));
+        final Observer<List<WorkflowListItem>> getAllWorkflowsObserver = (listWorkflows -> {
+            if (adapter == null) {
+                return;
+            }
+            workflowViewModel.handleUiAndIncomingList(listWorkflows);
+        });
 
         // Used when we have some filter operation happening.
-        final Observer<List<WorkflowDb>> updateWithSortedListObserver = (this::updateAdapterList);
+        final Observer<List<WorkflowListItem>> updateWithSortedListObserver = (this::updateAdapterList);
 
         final Observer<int[]> toggleRadioButtonObserver = (toggle -> {
             if (toggle == null || toggle.length < 1) {
@@ -273,7 +279,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     @Override
     public void dataAdded() {
-        workflowViewModel.getWorkflows(token);
+        //workflowViewModel.getWorkflows(token);
     }
 
     @Override

@@ -9,6 +9,7 @@ import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Transaction;
 import android.arch.persistence.room.Update;
 
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowTypeAndWorkflows;
 
 import java.util.List;
@@ -33,8 +34,15 @@ public interface WorkflowDbDao {
     @Query("SELECT * FROM workflowdb")
     public List<WorkflowDb> getAllWorkflows();
 
-    @Query("SELECT * FROM workflowdb")
-    public LiveData<List<WorkflowDb>> getWorkflows();
+    @Query("SELECT workflowdb.id AS workflowId, workflowtypedb.id AS workflowTypeId, " +
+            "workflowtypedb.name AS workflowTypeName, workflowdb.title, workflowdb.workflow_type_key, " +
+            "workflowdb.full_name, workflowdb.current_status_name, workflowdb.created_at, workflowdb.updated_at, " +
+            "workflowdb.start, workflowdb.status, workflowdb.`end` " +
+            "FROM workflowdb, workflowtypedb " +
+            "WHERE workflowdb.workflow_type_id = workflowtypedb.id")
+    public LiveData<List<WorkflowListItem>> getWorkflows();
+
+
 
     @Query("SELECT * FROM workflowdb WHERE workflow_type_id = :workflowTypeId")
     public LiveData<List<WorkflowDb>> getWorkflowsByType(int workflowTypeId);

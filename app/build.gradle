@@ -43,7 +43,7 @@ dependencies {
     implementation "com.android.support:appcompat-v7:$rootProject.supportLibVersion"
     implementation "com.android.support:recyclerview-v7:$rootProject.supportLibVersion"
     implementation "com.android.support:cardview-v7:$rootProject.supportLibVersion"
-    implementation "com.android.support:design:$rootProject.supportLibVersion"
+    implementation "com.android.support:design:28.0.0-rc01"
 
     //android arch components
     implementation "android.arch.lifecycle:runtime:$rootProject.archLifecycleVersion"

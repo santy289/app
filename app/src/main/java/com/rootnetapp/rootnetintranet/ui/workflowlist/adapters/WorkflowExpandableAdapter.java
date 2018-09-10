@@ -58,7 +58,8 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
 
     @Override
     public void onBindViewHolder(WorkflowViewholder holder, int i) {
-        if (getItemCount() < 1) {
+        int count = getItemCount();
+        if (count < 1) {
             //TODO handle empty list
             return;
         }
@@ -141,27 +142,43 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
 
     @Override
     public void submitList(@Nullable PagedList<WorkflowListItem> list) {
+        if (list != null) {
+            int count = list.size();
+            setWorkflows(count);
+        }
         super.submitList(list);
-        setWorkflows(list);
     }
 
-    public void setWorkflows(List<WorkflowListItem> workflows) {
+    public void setWorkflows(int listSize) {
         if (!firstLoad) {
+            updateChecks(listSize);
             return;
         }
         // First time loading items
-        resetChecksAndExpands();
+        resetChecksAndExpands(listSize);
         firstLoad = false;
     }
 
-    private void resetChecksAndExpands() {
+    private void resetChecksAndExpands(int listSize) {
         isChecked = new ArrayList<>();
         isExpanded = new ArrayList<>();
         int i = 0;
-        while (i < getItemCount()) {
+        while (i < listSize) {
             isChecked.add(false);
             isExpanded.add(false);
             ++i;
+        }
+    }
+
+    private void updateChecks(int listSize) {
+        int currentCount = getItemCount();
+        int difference = listSize - currentCount;
+        if (difference < 1) {
+            return;
+        }
+        for (int i = 0; i < difference; i++) {
+            isChecked.add(false);
+            isExpanded.add(false);
         }
     }
 

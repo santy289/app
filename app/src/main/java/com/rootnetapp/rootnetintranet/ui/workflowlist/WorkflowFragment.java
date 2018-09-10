@@ -21,7 +21,6 @@ import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowBinding;
@@ -32,7 +31,6 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowExpandableAdapter;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowDialog;
 
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -88,12 +86,13 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel = ViewModelProviders
                 .of(this, workflowViewModelFactory)
                 .get(WorkflowViewModel.class);
-        subscribe();
+
         setupWorkflowRecyclerView();
         setupClickListeners();
         //Utils.showLoading(getContext());
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         workflowViewModel.initWorkflowList(prefs);
+        subscribe();
         return view;
     }
 

@@ -42,7 +42,6 @@ public class WorkflowViewModel extends ViewModel {
 
     public WorkflowViewModel(WorkflowRepository workflowRepository) {
         this.workflowRepository = workflowRepository;
-        liveWorkflows = this.workflowRepository.getAllWorkflows();
         sort = new Sort();
     }
 
@@ -61,22 +60,11 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     protected void initWorkflowList(SharedPreferences sharedPreferences) {
-        //workflowRepository.test();
+        token = "Bearer "+ sharedPreferences.getString("token","");
+        workflowRepository.setWorkflowList(token);
+        liveWorkflows = workflowRepository.getAllWorkflows();
 
-        //token = "Bearer "+ sharedPreferences.getString("token","");
-//        getWorkflows(token);
     }
-
-//    protected void getWorkflows(String auth) {
-//        this.token = auth;
-//        try {
-//            if (Utils.isConnected()) {
-//                getWorkflowsFromService(this.token, 0);
-//            }
-//        } catch (InterruptedException | IOException e) {
-//            Log.d(TAG, "getWorkflows: Problems updating workflows - " + e.getMessage());
-//        }
-//    }
 
     protected void initSortBy() {
         switch (sort.getSortingType()) {
@@ -228,42 +216,6 @@ public class WorkflowViewModel extends ViewModel {
         toggleRadio[WorkflowFragment.INDEX_CHECK] = viewIsCheckType;
         toggleSwitch.setValue(toggleRadio);
     }
-
-//    private void getWorkflowsFromService(String auth, int page) {
-//        Disposable disposable = workflowRepository
-//                .getWorkflowsFromService(auth, page)
-//                .subscribe(
-//                        this::onServiceSuccess,
-//                        throwable -> Log.d(TAG, "getWorkflowsFromService: Cant get workflows from network - " + throwable.getMessage())
-//                );
-//        disposables.add(disposable);
-//    }
-
-//    private void onServiceSuccess(WorkflowResponseDb workflowsResponse) {
-//        workflows = new ArrayList<>();
-//        workflows.addAll(workflowsResponse.getList());
-//        if (!workflowsResponse.getPager().isIsLastPage()) {
-//            // calling multiple times until we get to the last page.
-//            getWorkflowsFromService(token, workflowsResponse.getPager().getNextPage());
-//        }
-//        else {
-//            // Update database with new workflows from network.
-//            Disposable disposable = workflowRepository
-//                    .setWorkflowsLocalUpdate(workflows)
-//                    .subscribe(
-//                            this::onWorkflowSuccessUpdate,
-//                            throwable -> {
-//                                Log.d(TAG, "onServiceSuccess: problem saving to db - " + throwable.getMessage());
-//                                mErrorLiveData.setValue(R.string.failure_connect);
-//                            }
-//                    );
-//            disposables.add(disposable);
-//        }
-//    }
-
-//    private void onWorkflowSuccessUpdate(List<WorkflowDb> workflowList) {
-//        Log.d(TAG, "onWorkflowSuccessUpdate: local database workflows updated.");
-//    }
 
     private void applyFilters() {
         applyFilters(sort);

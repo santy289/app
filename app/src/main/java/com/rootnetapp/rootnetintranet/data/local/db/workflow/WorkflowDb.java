@@ -9,10 +9,7 @@ import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.CalculatedField;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowStateInfo;
 import com.squareup.moshi.Json;
 
 import java.util.List;

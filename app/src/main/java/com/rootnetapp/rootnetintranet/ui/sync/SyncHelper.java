@@ -18,6 +18,7 @@ import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -60,18 +61,20 @@ public class SyncHelper {
     protected void syncData(String token) {
         this.auth = token;
         getUser(token);
-        getAllWorkflows(token, 0);
-
-        // TODO testing remove this later
+        getAllWorkflows(token, 1);
         getWorkflowTypesDb(token);
-        getWorkflowsDb(token, 0);
     }
 
-    /*************** *****************/
 
     private void getWorkflowsDb(String token, int page) {
         Disposable disposable = apiInterface
-                .getWorkflowsDb(token, 50, true, page, true, false)
+                .getWorkflowsDb(
+                        token,
+                        WorkflowRepository.ENDPOINT_PAGE_SIZE,
+                        true,
+                        page,
+                        true,
+                        false)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::getWorkflowDbSuccess, throwable -> {
@@ -102,8 +105,7 @@ public class SyncHelper {
             WorkflowTypeDbDao workflowTypeDbDao = database.workflowTypeDbDao();
             workflowTypeDbDao.deleteAllWorkfloyTypes();
             workflowTypeDbDao.insertWorkflowTypes(workflowTypes);
-
-            getWorkflowsDb(auth, 0);
+            getWorkflowsDb(auth, 1);
             return true;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -113,20 +115,16 @@ public class SyncHelper {
 
     private void getWorkflowDbSuccess(WorkflowResponseDb workflowsResponse) {
         workflowDbs.addAll(workflowsResponse.getList());
-
-        if(!workflowsResponse.getPager().isIsLastPage()){
-            getWorkflowsDb(auth, workflowsResponse.getPager().getNextPage());
-        }else{
-            Disposable disposable = Observable.fromCallable(() -> {
-                WorkflowDbDao workflowDbDao = database.workflowDbDao();
-                workflowDbDao.deleteAllWorkflows();
-                workflowDbDao.insertWorkflows(workflowDbs);
-                return true;
-            }).subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::success, this::worflowDbDaoTransactionsFailure);
-            disposables.add(disposable);
-        }
+        Disposable disposable = Observable.fromCallable(() -> {
+            WorkflowDbDao workflowDbDao = database.workflowDbDao();
+            // TODO put in a transaction DAO function
+            workflowDbDao.deleteAllWorkflows();
+            workflowDbDao.insertWorkflows(workflowDbs);
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::success, this::worflowDbDaoTransactionsFailure);
+        disposables.add(disposable);
     }
 
     private void worflowDbDaoTransactionsFailure(Throwable throwable) {
@@ -136,10 +134,6 @@ public class SyncHelper {
     private void onWorkflowTypesDbFailure(Throwable throwable) {
         mSyncLiveData.setValue(false);
     }
-
-
-    /*************** *****************/
-
 
     protected void clearDisposables() {
         disposables.clear();

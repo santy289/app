@@ -169,4 +169,5 @@
     <string name="tracking">Tracking</string>
     <string name="sales_force">Fuerza de Ventas - Estatus</string>
     <string name="users">Usuarios</string>
+    <string name="no_selection">Sin Selección</string>
 </resources>

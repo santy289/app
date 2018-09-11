@@ -64,6 +64,10 @@ public class WorkflowViewModel extends ViewModel {
         liveWorkflows = workflowRepository.getAllWorkflows();
     }
 
+    protected void handleWorkflowTypeFilter(int workflowTypeId) {
+
+    }
+
     protected void initSortBy() {
         switch (sort.getSortingType()) {
             case BYNUMBER: {

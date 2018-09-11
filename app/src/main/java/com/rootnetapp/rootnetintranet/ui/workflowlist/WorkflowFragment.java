@@ -49,6 +49,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     private MainActivityInterface mainActivityInterface;
     private WorkflowExpandableAdapter adapter;
     private String token;
+    private String[] types;
+    private int[] typeIds;
 
     protected static final int SWITCH_NUMBER = 500;
     protected static final int SWITCH_CREATED_DATE = 501;
@@ -222,8 +224,15 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             return;
         }
 
-        String[] types = new String[itemMenus.size()];
-        for (int i = 0; i < itemMenus.size(); i++) {
+        typeIds = new int[itemMenus.size()];
+        types = new String[itemMenus.size()];
+        typeIds[0] = 0;
+        types[0] = getString(R.string.no_selection);
+        WorkflowTypeItemMenu menu;
+        int until = itemMenus.size();
+        for (int i = 1; i < until; i++) {
+            menu = itemMenus.get(i);
+            typeIds[i] = menu.getId();
             types[i] = itemMenus.get(i).name;
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
@@ -231,12 +240,19 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 android.R.layout.simple_spinner_item,
                 types
         );
-//        adapter.setDropDownViewResource(android.R.layout.spin);
 
         workflowFiltersMenuBinding.spnWorkflowtype.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
+                if (types == null || typeIds == null) {
+                    return;
+                }
+                int arrayIndex = (int) id;
+                if (arrayIndex == 0) {
+                    return;
+                }
+                int typeId = typeIds[arrayIndex];
+                workflowViewModel.handleWorkflowTypeFilter(typeId);
             }
 
             @Override

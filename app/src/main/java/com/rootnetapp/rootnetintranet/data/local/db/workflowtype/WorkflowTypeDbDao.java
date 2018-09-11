@@ -8,6 +8,8 @@ import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
+
 import java.util.List;
 
 @Dao
@@ -32,5 +34,8 @@ public interface WorkflowTypeDbDao {
 
     @Query("SELECT * FROM workflowtypedb")
     public LiveData<List<WorkflowTypeDb>> getObservableWorkflowTypes();
+
+    @Query("SELECT id, name FROM workflowtypedb")
+    public LiveData<List<WorkflowTypeItemMenu>> getObservableTypesForMenu();
 
 }

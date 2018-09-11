@@ -10,6 +10,8 @@ import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 
@@ -32,7 +34,9 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     private AppDatabase database;
     private ApiInterface service;
     private WorkflowDbDao workflowDbDao;
+    private WorkflowTypeDbDao workflowTypeDbDao;
     private LiveData<PagedList<WorkflowListItem>> allWorkflows;
+    private LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
     private DataSource<Integer, WorkflowListItem> workflowListItemDataSource;
     private WorkflowListBoundaryCallback callback;
     private PagedList.Config pagedListConfig;
@@ -44,16 +48,22 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         this.service = service;
         this.database = database;
         workflowDbDao = this.database.workflowDbDao();
+        workflowTypeDbDao = this.database.workflowTypeDbDao();
         pagedListConfig = (new PagedList.Config.Builder())
                     .setEnablePlaceholders(false)
                     .setPageSize(LIST_PAGE_SIZE)
                     .build();
+        this.workflowTypeMenuItems = workflowTypeDbDao.getObservableTypesForMenu();
     }
 
     @Override
     public void handleResponse(List<WorkflowDb> workflowsResponse, int lastPage) {
         this.lastPage = lastPage;
         insertWorkflows(workflowsResponse);
+    }
+
+    public LiveData<List<WorkflowTypeItemMenu>> getWorkflowTypeMenuItems() {
+        return workflowTypeMenuItems;
     }
 
     public void setWorkflowList(String token) {

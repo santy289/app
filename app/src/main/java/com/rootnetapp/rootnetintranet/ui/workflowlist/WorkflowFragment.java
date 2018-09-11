@@ -14,6 +14,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.PopupWindow;
 import android.widget.RadioButton;
 import android.widget.Switch;
@@ -23,6 +25,7 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowBinding;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowFiltersMenuBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
@@ -31,6 +34,8 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowExpandableAdapter;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowDialog;
 
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -111,6 +116,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         fragmentWorkflowBinding.btnFilters.setOnClickListener(view1 -> {
             PopupWindow popupwindow_obj = initPopMenu();
             popupwindow_obj.showAsDropDown(fragmentWorkflowBinding.btnFilters, -40, 18);
+            subscribeToTypeMenu();
         });
         fragmentWorkflowBinding.btnAdd.setOnClickListener(view12 ->
                 mainActivityInterface.showDialog(CreateWorkflowDialog.newInstance(this)));
@@ -180,6 +186,17 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.getObservableToggleRadioButton().observe(this, toggleRadioButtonObserver);
         workflowViewModel.getObservableToggleSwitch().observe(this, toggleSwitchObserver);
         workflowViewModel.getObservableShowList().observe(this, showListObserver);
+
+    }
+
+    private void subscribeToTypeMenu() {
+        final Observer<List<WorkflowTypeItemMenu>> typeListMenuObserver = (list -> {
+            if (list == null) {
+                return;
+            }
+            setupSpinnerWorkflowType(list);
+        });
+        workflowViewModel.getObservableTypeItemMenu().observe(this, typeListMenuObserver);
     }
 
     private PopupWindow initPopMenu() {
@@ -195,6 +212,40 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.initSortBy();
         setFilterBoxListeners();
         return popupWindow;
+    }
+
+    private void setupSpinnerWorkflowType(List<WorkflowTypeItemMenu> itemMenus) {
+        if (this.getContext() == null) {
+            return;
+        }
+        if (workflowFiltersMenuBinding == null || workflowFiltersMenuBinding.spnWorkflowtype == null) {
+            return;
+        }
+
+        String[] types = new String[itemMenus.size()];
+        for (int i = 0; i < itemMenus.size(); i++) {
+            types[i] = itemMenus.get(i).name;
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                getContext(),
+                android.R.layout.simple_spinner_item,
+                types
+        );
+//        adapter.setDropDownViewResource(android.R.layout.spin);
+
+        workflowFiltersMenuBinding.spnWorkflowtype.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        workflowFiltersMenuBinding.spnWorkflowtype.setAdapter(adapter);
     }
 
     private void setFilterBoxListeners() {

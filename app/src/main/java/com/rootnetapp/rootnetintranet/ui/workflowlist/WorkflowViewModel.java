@@ -11,6 +11,7 @@ import android.util.Log;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
 
 import java.text.DateFormat;
@@ -31,6 +32,7 @@ public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<int[]> toggleSwitch;
     private MutableLiveData<Boolean> showList;
     private LiveData<PagedList<WorkflowListItem>> liveWorkflows, liveUnordered;
+    private LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
 
     private WorkflowRepository workflowRepository;
     private List<WorkflowDb> workflows, unordered;
@@ -43,16 +45,13 @@ public class WorkflowViewModel extends ViewModel {
     public WorkflowViewModel(WorkflowRepository workflowRepository) {
         this.workflowRepository = workflowRepository;
         sort = new Sort();
+        workflowTypeMenuItems = this.workflowRepository.getWorkflowTypeMenuItems();
     }
 
     @Override
     protected void onCleared() {
         disposables.clear();
         workflowRepository.clearDisposables();
-    }
-
-    protected LiveData<PagedList<WorkflowListItem>> getAllWorkflows() {
-        return liveWorkflows;
     }
 
     protected void insert(WorkflowDb workflow) {
@@ -63,7 +62,6 @@ public class WorkflowViewModel extends ViewModel {
         token = "Bearer "+ sharedPreferences.getString("token","");
         workflowRepository.setWorkflowList(token);
         liveWorkflows = workflowRepository.getAllWorkflows();
-
     }
 
     protected void initSortBy() {
@@ -314,4 +312,13 @@ public class WorkflowViewModel extends ViewModel {
         }
         return showList;
     }
+
+    protected LiveData<PagedList<WorkflowListItem>> getAllWorkflows() {
+        return liveWorkflows;
+    }
+
+    protected LiveData<List<WorkflowTypeItemMenu>> getObservableTypeItemMenu() {
+        return workflowTypeMenuItems;
+    }
+
 }

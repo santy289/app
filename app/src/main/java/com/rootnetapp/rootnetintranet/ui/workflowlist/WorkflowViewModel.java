@@ -8,35 +8,30 @@ import android.support.annotation.IdRes;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
-import com.rootnetapp.rootnetintranet.ui.domain.Sort;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 
 public class WorkflowViewModel extends ViewModel {
-    private MutableLiveData<List<Workflow>> mUserLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
-    private MutableLiveData<List<Workflow>> updateWithSortedList;
+    private MutableLiveData<List<WorkflowListItem>> updateWithSortedList;
     private MutableLiveData<int[]> toggleRadioButton;
     private MutableLiveData<int[]> toggleSwitch;
-    private LiveData<List<Workflow>> liveWorkflows, liveUnordered;
+    private MutableLiveData<Boolean> showList;
+    private LiveData<List<WorkflowListItem>> liveWorkflows, liveUnordered;
 
     private WorkflowRepository workflowRepository;
-    private List<Workflow> workflows, unordered;
+    private List<WorkflowDb> workflows, unordered;
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     private Sort sort;
@@ -55,29 +50,31 @@ public class WorkflowViewModel extends ViewModel {
         workflowRepository.clearDisposables();
     }
 
-    protected LiveData<List<Workflow>> getAllWorkflows() {
+    protected LiveData<List<WorkflowListItem>> getAllWorkflows() {
         return liveWorkflows;
     }
 
-    protected void insert(Workflow workflow) {
+    protected void insert(WorkflowDb workflow) {
         workflowRepository.insertWorkflow(workflow);
     }
 
     protected void initWorkflowList(SharedPreferences sharedPreferences) {
-        token = "Bearer "+ sharedPreferences.getString("token","");
-        getWorkflows(token);
+        //workflowRepository.test();
+
+        //token = "Bearer "+ sharedPreferences.getString("token","");
+//        getWorkflows(token);
     }
 
-    protected void getWorkflows(String auth) {
-        this.token = auth;
-        try {
-            if (Utils.isConnected()) {
-                getWorkflowsFromService(this.token, 0);
-            }
-        } catch (InterruptedException | IOException e) {
-            Log.d(TAG, "getWorkflows: Problems updating workflows - " + e.getMessage());
-        }
-    }
+//    protected void getWorkflows(String auth) {
+//        this.token = auth;
+//        try {
+//            if (Utils.isConnected()) {
+//                getWorkflowsFromService(this.token, 0);
+//            }
+//        } catch (InterruptedException | IOException e) {
+//            Log.d(TAG, "getWorkflows: Problems updating workflows - " + e.getMessage());
+//        }
+//    }
 
     protected void initSortBy() {
         switch (sort.getSortingType()) {
@@ -170,6 +167,25 @@ public class WorkflowViewModel extends ViewModel {
         applyFilters(sort);
     }
 
+    protected void handleUiAndIncomingList(List<WorkflowListItem> listWorkflows) {
+        if (listWorkflows == null) {
+            showList.setValue(false);
+            return;
+        }
+        if(listWorkflows.size() < 1){
+            showList.setValue(false);
+            return;
+        }
+        if (getSortingType() == Sort.sortType.NONE) {
+//            adapter.setWorkflows(listWorkflows);
+            updateWithSortedList.setValue(listWorkflows);
+
+        } else {
+            applyFilters();
+        }
+        showList.setValue(true);
+    }
+
     private void clearOtherSwitchesBut(Sort.sortType ofType) {
         switch (ofType) {
             case BYNUMBER:
@@ -211,49 +227,48 @@ public class WorkflowViewModel extends ViewModel {
         toggleSwitch.setValue(toggleRadio);
     }
 
-    private void getWorkflowsFromService(String auth, int page) {
-        Disposable disposable = workflowRepository
-                .getWorkflowsFromService(auth, page)
-                .subscribe(
-                        this::onServiceSuccess,
-                        throwable -> Log.d(TAG, "getWorkflowsFromService: Cant get workflows from network - " + throwable.getMessage())
-                );
-        disposables.add(disposable);
-    }
+//    private void getWorkflowsFromService(String auth, int page) {
+//        Disposable disposable = workflowRepository
+//                .getWorkflowsFromService(auth, page)
+//                .subscribe(
+//                        this::onServiceSuccess,
+//                        throwable -> Log.d(TAG, "getWorkflowsFromService: Cant get workflows from network - " + throwable.getMessage())
+//                );
+//        disposables.add(disposable);
+//    }
 
-    private void onServiceSuccess(WorkflowsResponse workflowsResponse) {
-        workflows = new ArrayList<>();
-        workflows.addAll(workflowsResponse.getList());
-        if (!workflowsResponse.getPager().isIsLastPage()) {
-            // calling multiple times until we get to the last page.
-            getWorkflowsFromService(token, workflowsResponse.getPager().getNextPage());
-        }
-        else {
-            // Update database with new workflows from network.
-            Disposable disposable = workflowRepository
-                    .setWorkflowsLocalUpdate(workflows)
-                    .subscribe(
-                            this::onWorkflowSuccessUpdate,
-                            throwable -> {
-                                Log.d(TAG, "onServiceSuccess: problem saving to db - " + throwable.getMessage());
-                                mErrorLiveData.setValue(R.string.failure_connect);
-                            }
-                    );
-            disposables.add(disposable);
-        }
-    }
+//    private void onServiceSuccess(WorkflowResponseDb workflowsResponse) {
+//        workflows = new ArrayList<>();
+//        workflows.addAll(workflowsResponse.getList());
+//        if (!workflowsResponse.getPager().isIsLastPage()) {
+//            // calling multiple times until we get to the last page.
+//            getWorkflowsFromService(token, workflowsResponse.getPager().getNextPage());
+//        }
+//        else {
+//            // Update database with new workflows from network.
+//            Disposable disposable = workflowRepository
+//                    .setWorkflowsLocalUpdate(workflows)
+//                    .subscribe(
+//                            this::onWorkflowSuccessUpdate,
+//                            throwable -> {
+//                                Log.d(TAG, "onServiceSuccess: problem saving to db - " + throwable.getMessage());
+//                                mErrorLiveData.setValue(R.string.failure_connect);
+//                            }
+//                    );
+//            disposables.add(disposable);
+//        }
+//    }
 
-    private void onWorkflowSuccessUpdate(List<Workflow> workflowList) {
-        Log.d(TAG, "onWorkflowSuccessUpdate: local database workflows updated.");
-    }
+//    private void onWorkflowSuccessUpdate(List<WorkflowDb> workflowList) {
+//        Log.d(TAG, "onWorkflowSuccessUpdate: local database workflows updated.");
+//    }
 
-    public void applyFilters() {
+    private void applyFilters() {
         applyFilters(sort);
     }
 
     private void applyFilters(Sort sorting) {
-//        List<Workflow> workflows = mUserLiveData.getValue();
-        List<Workflow> workflows = liveWorkflows.getValue();
+        List<WorkflowListItem> workflows = liveWorkflows.getValue();
         if (workflows == null) {
             return;
         }
@@ -267,10 +282,10 @@ public class WorkflowViewModel extends ViewModel {
                 Collections.sort(workflows, (s1, s2) -> {
                     if (sorting.getNumberSortOrder().equals(Sort.sortOrder.ASC)) {
                         /*For ascending order*/
-                        return s1.getId() - s2.getId();
+                        return s1.getWorkflowId() - s2.getWorkflowId();
                     } else {
                         /*For descending order*/
-                        return s2.getId() - s1.getId();
+                        return s2.getWorkflowId() - s1.getWorkflowId();
                     }
                 });
                 break;
@@ -301,15 +316,7 @@ public class WorkflowViewModel extends ViewModel {
             }
         }
 
-//        mUserLiveData.setValue(workflows);
         updateWithSortedList.setValue(workflows);
-    }
-
-    protected LiveData<List<Workflow>> getObservableWorkflows() {
-        if (mUserLiveData == null) {
-            mUserLiveData = new MutableLiveData<>();
-        }
-        return mUserLiveData;
     }
 
     protected LiveData<Integer> getObservableError() {
@@ -326,7 +333,7 @@ public class WorkflowViewModel extends ViewModel {
         return showLoading;
     }
 
-    protected LiveData<List<Workflow>> getObservableUpdateWithSortedList() {
+    protected LiveData<List<WorkflowListItem>> getObservableUpdateWithSortedList() {
         if (updateWithSortedList == null) {
             updateWithSortedList = new MutableLiveData<>();
         }
@@ -347,4 +354,10 @@ public class WorkflowViewModel extends ViewModel {
         return toggleSwitch;
     }
 
+    public LiveData<Boolean> getObservableShowList() {
+        if (showList == null) {
+            showList = new MutableLiveData<>();
+        }
+        return showList;
+    }
 }

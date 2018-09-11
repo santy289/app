@@ -21,10 +21,11 @@ import android.widget.Toast;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowBinding;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowFiltersMenuBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
-import com.rootnetapp.rootnetintranet.ui.domain.Sort;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowExpandableAdapter;
@@ -95,13 +96,15 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         return view;
     }
 
-
-
     private void setupWorkflowRecyclerView() {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         fragmentWorkflowBinding.recWorkflows.setLayoutManager(mLayoutManager);
         adapter = new WorkflowExpandableAdapter(this);
         fragmentWorkflowBinding.recWorkflows.setAdapter(adapter);
+    }
+
+    private void updateAdapterList(List<WorkflowListItem> workflowDbList) {
+        adapter.submitList(workflowDbList);
     }
 
     private void setupClickListeners() {
@@ -121,51 +124,35 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         }
     }
 
-    private void subscribe() {
-        final Observer<List<Workflow>> workflowsObserver = ((List<Workflow> data) -> {
+    private void showListContent(boolean show) {
+        if (show) {
+            fragmentWorkflowBinding.recWorkflows.setVisibility(View.VISIBLE);
+            fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.GONE);
+        } else {
+            fragmentWorkflowBinding.recWorkflows.setVisibility(View.GONE);
+            fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.VISIBLE);
+        }
+    }
 
-            //Utils.hideLoading();
-            if (null != data) {
-                if(data.size()!=0){
-                    fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.GONE);
-                }else{
-                    fragmentWorkflowBinding.recWorkflows.setVisibility(View.GONE);
-                    fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.VISIBLE);
-                }
-            }else{
-                fragmentWorkflowBinding.recWorkflows.setVisibility(View.GONE);
-                fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.VISIBLE);
-            }
-        });
+    private void subscribe() {
         final Observer<Integer> errorObserver = ((Integer data) -> {
             //Utils.hideLoading();
             if (null != data) {
                 Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
             }
         });
-        final Observer<List<Workflow>> getAllWorkflowsObserver = (listWorkflows -> {
-            if (adapter == null || listWorkflows == null) {
-                fragmentWorkflowBinding.recWorkflows.setVisibility(View.GONE);
-                fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.VISIBLE);
+
+        // Used when we have a general workflow.
+        final Observer<List<WorkflowListItem>> getAllWorkflowsObserver = (listWorkflows -> {
+            if (adapter == null) {
                 return;
             }
-            if(listWorkflows.size() < 1){
-                fragmentWorkflowBinding.recWorkflows.setVisibility(View.GONE);
-                fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.VISIBLE);
-                return;
-            }
-            // before updating check if we need to apply filters.
-            if (workflowViewModel.getSortingType() == Sort.sortType.NONE) {
-                adapter.setWorkflows(listWorkflows);
-            } else {
-                workflowViewModel.applyFilters();
-            }
-            fragmentWorkflowBinding.recWorkflows.setVisibility(View.VISIBLE);
-            fragmentWorkflowBinding.lytNoworkflows.setVisibility(View.GONE);
+            workflowViewModel.handleUiAndIncomingList(listWorkflows);
         });
-        final Observer<List<Workflow>> updateWithSortedListObserver = (
-                listWorklows -> adapter.setWorkflows(listWorklows)
-        );
+
+        // Used when we have some filter operation happening.
+        final Observer<List<WorkflowListItem>> updateWithSortedListObserver = (this::updateAdapterList);
+
         final Observer<int[]> toggleRadioButtonObserver = (toggle -> {
             if (toggle == null || toggle.length < 1) {
                 return;
@@ -173,6 +160,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             boolean check = toggle[INDEX_CHECK] == CHECK;
             toggleRadioButtonFilter(toggle[INDEX_TYPE], check);
         });
+
         final Observer<int[]> toggleSwitchObserver = (toggle -> {
             if (toggle == null || toggle.length < 1) {
                 return;
@@ -181,14 +169,17 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             toggleAscendingDescendingSwitch(toggle[INDEX_TYPE], check);
         });
 
+        final Observer<Boolean> showListObserver = (this::showListContent);
+
         final Observer<Boolean> showLoadingObserver = (this::showLoading);
-        workflowViewModel.getObservableWorkflows().observe(this, workflowsObserver);
+
         workflowViewModel.getObservableError().observe(this, errorObserver);
         workflowViewModel.getObservableShowLoading().observe(this, showLoadingObserver);
         workflowViewModel.getAllWorkflows().observe(this, getAllWorkflowsObserver);
         workflowViewModel.getObservableUpdateWithSortedList().observe(this, updateWithSortedListObserver);
         workflowViewModel.getObservableToggleRadioButton().observe(this, toggleRadioButtonObserver);
         workflowViewModel.getObservableToggleSwitch().observe(this, toggleSwitchObserver);
+        workflowViewModel.getObservableShowList().observe(this, showListObserver);
     }
 
     private PopupWindow initPopMenu() {
@@ -288,11 +279,11 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     @Override
     public void dataAdded() {
-        workflowViewModel.getWorkflows(token);
+        //workflowViewModel.getWorkflows(token);
     }
 
     @Override
-    public void showDetail(Workflow item) {
+    public void showDetail(WorkflowDb item) {
         mainActivityInterface.showFragment(WorkflowDetailFragment.newInstance(item,
                 mainActivityInterface),true);
     }

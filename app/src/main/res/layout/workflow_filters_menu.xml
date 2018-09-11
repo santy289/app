@@ -151,15 +151,6 @@
                 android:layout_height="1dp"
                 android:background="@color/transparent" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="15dp"
-                android:textColor="@color/selected_filter"
-                android:textStyle="bold"
-                android:textSize="12sp"
-                android:text="@string/updated_at" />
-
             <!--<DatePicker
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -4,9 +4,12 @@ import android.arch.lifecycle.LiveData;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowTypeAndWorkflows;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 
 import java.util.List;
 
@@ -21,29 +24,29 @@ public class WorkflowRepository {
 
     private AppDatabase database;
     private ApiInterface service;
-    private WorkflowDao workflowDao;
-    private LiveData<List<Workflow>> allWorkflows;
+    private WorkflowDbDao workflowDbDao;
+    private LiveData<List<WorkflowListItem>> allWorkflows;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     public WorkflowRepository(ApiInterface service, AppDatabase database) {
         this.service = service;
         this.database = database;
-        workflowDao = this.database.workflowDao();
-        allWorkflows = workflowDao.getWorkflows();
+        workflowDbDao = this.database.workflowDbDao();
+        allWorkflows = workflowDbDao.getWorkflows();
     }
 
     public void clearDisposables() {
         disposables.clear();
     }
 
-    public LiveData<List<Workflow>> getAllWorkflows() {
+    public LiveData<List<WorkflowListItem>> getAllWorkflows() {
         return allWorkflows;
     }
 
-    public void insertWorkflow(Workflow workflow) {
+    public void insertWorkflow(WorkflowDb workflow) {
         Disposable disposable = Completable.fromCallable(() -> {
-            database.workflowDao().insertWorkflow(workflow);
+            database.workflowDbDao().insertWorkflow(workflow);
             return true;
         }).subscribeOn(Schedulers.newThread())
           .observeOn(AndroidSchedulers.mainThread())
@@ -51,20 +54,30 @@ public class WorkflowRepository {
         disposables.add(disposable);
     }
 
-    public Observable<List<Workflow>> getWorkflowsFromInternal() {
-        return Observable.fromCallable(()-> database.workflowDao().getAllWorkflows())
+    public void test() {
+        Disposable disposable = Completable.fromCallable(() -> {
+            List<WorkflowTypeAndWorkflows> result = database.workflowDbDao().loadWorkflowTypeAndWorkflows(16);
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe();
+        disposables.add(disposable);
+    }
+
+    public Observable<List<WorkflowDb>> getWorkflowsFromInternal() {
+        return Observable.fromCallable(()-> database.workflowDbDao().getAllWorkflows())
                 .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<WorkflowsResponse> getWorkflowsFromService(String auth, int page) {
-        return service.getWorkflows(auth, 50, true, page, true)
+    public Observable<WorkflowResponseDb> getWorkflowsFromService(String auth, int page) {
+        return service.getWorkflowsDb(auth, 50, true, page, true, false)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<List<Workflow>> setWorkflowsLocalUpdate(List<Workflow> workflows){
+    public Observable<List<WorkflowDb>> setWorkflowsLocalUpdate(List<WorkflowDb> workflows){
         return Observable.fromCallable(() -> {
-            database.workflowDao().insertAll(workflows);
+            database.workflowDbDao().insertWorkflows(workflows);
             return workflows;
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
     }

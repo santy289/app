@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.ui.domain;
+package com.rootnetapp.rootnetintranet.ui.workflowlist;
 
 public class Sort {
     public enum sortType {

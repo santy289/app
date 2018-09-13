@@ -150,7 +150,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         }
     }
 
-    private void setWorkflowsObserver() {
+    private void addWorkflowsObserver() {
         workflowViewModel.getAllWorkflows().observe(this, getAllWorkflowsObserver);
     }
 
@@ -162,7 +162,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             }
         });
 
-        final Observer<Boolean> setWorkflowsObserver = (setWorkflows -> setWorkflowsObserver());
+        final Observer<Boolean> addWorkflowsObserver = (setWorkflows -> addWorkflowsObserver());
 
         // Used when we have some filter operation happening.
         final Observer<PagedList<WorkflowListItem>> updateWithSortedListObserver = (this::updateAdapterList);
@@ -189,12 +189,12 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
         workflowViewModel.getObservableError().observe(this, errorObserver);
         workflowViewModel.getObservableShowLoading().observe(this, showLoadingObserver);
-        setWorkflowsObserver();
+        addWorkflowsObserver();
         workflowViewModel.getObservableUpdateWithSortedList().observe(this, updateWithSortedListObserver);
         workflowViewModel.getObservableToggleRadioButton().observe(this, toggleRadioButtonObserver);
         workflowViewModel.getObservableToggleSwitch().observe(this, toggleSwitchObserver);
         workflowViewModel.getObservableShowList().observe(this, showListObserver);
-        workflowViewModel.getObservableSetWorkflowObserver().observe(this, setWorkflowsObserver);
+        workflowViewModel.getObservableAddWorkflowObserver().observe(this, addWorkflowsObserver);
 
     }
 
@@ -257,7 +257,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 int arrayIndex = (int) id;
                 int typeId = typeIds[arrayIndex];
                 workflowViewModel.handleWorkflowTypeFilter(WorkflowFragment.this, typeId);
-                workflowViewModel.getAllWorkflows().observe(WorkflowFragment.this, getAllWorkflowsObserver);
             }
 
             @Override

@@ -32,7 +32,7 @@ public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<int[]> toggleRadioButton;
     private MutableLiveData<int[]> toggleSwitch;
     private MutableLiveData<Boolean> showList;
-    private MutableLiveData<Boolean> setWorkflowObserver;
+    private MutableLiveData<Boolean> addWorkflowObserver;
     private LiveData<PagedList<WorkflowListItem>> liveWorkflows, liveUnordered;
     private LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
 
@@ -62,6 +62,10 @@ public class WorkflowViewModel extends ViewModel {
 
     protected void initWorkflowList(SharedPreferences sharedPreferences) {
         token = "Bearer "+ sharedPreferences.getString("token","");
+        setWorkflowListNoFilters(token);
+    }
+
+    private void setWorkflowListNoFilters(String token) {
         workflowRepository.setWorkflowList(token);
         liveWorkflows = workflowRepository.getAllWorkflows();
     }
@@ -69,14 +73,14 @@ public class WorkflowViewModel extends ViewModel {
     protected void handleWorkflowTypeFilter(LifecycleOwner lifecycleOwner, int workflowTypeId) {
         liveWorkflows.removeObservers(lifecycleOwner);
         if (workflowTypeId == 0) {
-            // No Type selection.
-            setWorkflowObserver.postValue(true);
+            setWorkflowListNoFilters(token);
+            addWorkflowObserver.postValue(true);
             return;
         }
 
         workflowRepository.setWorkflowListByType(token, workflowTypeId);
         liveWorkflows = workflowRepository.getAllWorkflows();
-        setWorkflowObserver.postValue(true);
+        addWorkflowObserver.postValue(true);
     }
 
     protected void initSortBy() {
@@ -340,11 +344,11 @@ public class WorkflowViewModel extends ViewModel {
         return workflowTypeMenuItems;
     }
 
-    protected LiveData<Boolean> getObservableSetWorkflowObserver() {
-        if (setWorkflowObserver == null) {
-            setWorkflowObserver = new MutableLiveData<>();
+    protected LiveData<Boolean> getObservableAddWorkflowObserver() {
+        if (addWorkflowObserver == null) {
+            addWorkflowObserver = new MutableLiveData<>();
         }
-        return setWorkflowObserver;
+        return addWorkflowObserver;
     }
 
 }

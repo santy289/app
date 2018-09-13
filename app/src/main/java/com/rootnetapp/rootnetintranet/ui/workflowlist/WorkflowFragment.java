@@ -66,6 +66,14 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     protected static final int INDEX_CHECK = 1;
 
 
+    // Used when we have a general workflow.
+    final Observer<PagedList<WorkflowListItem>> getAllWorkflowsObserver = (listWorkflows -> {
+        if (adapter == null) {
+            return;
+        }
+        workflowViewModel.handleUiAndIncomingList(listWorkflows);
+    });
+
     private static final String TAG = "WorkflowFragment";
 
     public WorkflowFragment() {
@@ -142,6 +150,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         }
     }
 
+    private void setWorkflowsObserver() {
+        workflowViewModel.getAllWorkflows().observe(this, getAllWorkflowsObserver);
+    }
+
     private void subscribe() {
         final Observer<Integer> errorObserver = ((Integer data) -> {
             //Utils.hideLoading();
@@ -150,13 +162,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             }
         });
 
-        // Used when we have a general workflow.
-        final Observer<PagedList<WorkflowListItem>> getAllWorkflowsObserver = (listWorkflows -> {
-            if (adapter == null) {
-                return;
-            }
-            workflowViewModel.handleUiAndIncomingList(listWorkflows);
-        });
+        final Observer<Boolean> setWorkflowsObserver = (setWorkflows -> setWorkflowsObserver());
 
         // Used when we have some filter operation happening.
         final Observer<PagedList<WorkflowListItem>> updateWithSortedListObserver = (this::updateAdapterList);
@@ -183,11 +189,12 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
         workflowViewModel.getObservableError().observe(this, errorObserver);
         workflowViewModel.getObservableShowLoading().observe(this, showLoadingObserver);
-        workflowViewModel.getAllWorkflows().observe(this, getAllWorkflowsObserver);
+        setWorkflowsObserver();
         workflowViewModel.getObservableUpdateWithSortedList().observe(this, updateWithSortedListObserver);
         workflowViewModel.getObservableToggleRadioButton().observe(this, toggleRadioButtonObserver);
         workflowViewModel.getObservableToggleSwitch().observe(this, toggleSwitchObserver);
         workflowViewModel.getObservableShowList().observe(this, showListObserver);
+        workflowViewModel.getObservableSetWorkflowObserver().observe(this, setWorkflowsObserver);
 
     }
 
@@ -248,11 +255,9 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                     return;
                 }
                 int arrayIndex = (int) id;
-                if (arrayIndex == 0) {
-                    return;
-                }
                 int typeId = typeIds[arrayIndex];
-                workflowViewModel.handleWorkflowTypeFilter(typeId);
+                workflowViewModel.handleWorkflowTypeFilter(WorkflowFragment.this, typeId);
+                workflowViewModel.getAllWorkflows().observe(WorkflowFragment.this, getAllWorkflowsObserver);
             }
 
             @Override

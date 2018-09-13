@@ -1,5 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist;
 
+import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
@@ -31,6 +32,7 @@ public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<int[]> toggleRadioButton;
     private MutableLiveData<int[]> toggleSwitch;
     private MutableLiveData<Boolean> showList;
+    private MutableLiveData<Boolean> setWorkflowObserver;
     private LiveData<PagedList<WorkflowListItem>> liveWorkflows, liveUnordered;
     private LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
 
@@ -64,8 +66,17 @@ public class WorkflowViewModel extends ViewModel {
         liveWorkflows = workflowRepository.getAllWorkflows();
     }
 
-    protected void handleWorkflowTypeFilter(int workflowTypeId) {
+    protected void handleWorkflowTypeFilter(LifecycleOwner lifecycleOwner, int workflowTypeId) {
+        liveWorkflows.removeObservers(lifecycleOwner);
+        if (workflowTypeId == 0) {
+            // No Type selection.
+            setWorkflowObserver.postValue(true);
+            return;
+        }
 
+        workflowRepository.setWorkflowListByType(token, workflowTypeId);
+        liveWorkflows = workflowRepository.getAllWorkflows();
+        setWorkflowObserver.postValue(true);
     }
 
     protected void initSortBy() {
@@ -321,8 +332,19 @@ public class WorkflowViewModel extends ViewModel {
         return liveWorkflows;
     }
 
+    protected void removeObserver(LifecycleOwner lifecycleOwner) {
+        liveWorkflows.removeObservers(lifecycleOwner);
+    }
+
     protected LiveData<List<WorkflowTypeItemMenu>> getObservableTypeItemMenu() {
         return workflowTypeMenuItems;
+    }
+
+    protected LiveData<Boolean> getObservableSetWorkflowObserver() {
+        if (setWorkflowObserver == null) {
+            setWorkflowObserver = new MutableLiveData<>();
+        }
+        return setWorkflowObserver;
     }
 
 }

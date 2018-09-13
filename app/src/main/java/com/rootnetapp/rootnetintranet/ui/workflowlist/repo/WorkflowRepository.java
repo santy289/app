@@ -85,6 +85,21 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
 //        allWorkflows = new LivePagedListBuilder<>(dataSourceFactory, pagedListConfig).build();
     }
 
+    public void setWorkflowListByType(String token, int typeId) {
+        DataSource.Factory<Integer, WorkflowListItem> factory = workflowDbDao.getWorkflowsBy(typeId);
+        callback = new WorkflowListBoundaryCallback(
+                service,
+                token,
+                currentPage,
+                this
+        );
+
+        allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)
+                .setBoundaryCallback(callback)
+                .build();
+
+    }
+
     public void invalidateDataSource() {
         workflowListItemDataSource.invalidate();
     }

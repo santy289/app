@@ -43,6 +43,15 @@ public interface WorkflowDbDao {
             "WHERE workflowdb.workflow_type_id = workflowtypedb.id")
     public DataSource.Factory<Integer, WorkflowListItem> getWorkflows();
 
+    @Query("SELECT workflowdb.id AS workflowId, workflowtypedb.id AS workflowTypeId, " +
+            "workflowtypedb.name AS workflowTypeName, workflowdb.title, workflowdb.workflow_type_key, " +
+            "workflowdb.full_name, workflowdb.current_status_name, workflowdb.created_at, workflowdb.updated_at, " +
+            "workflowdb.start, workflowdb.status, workflowdb.`end` " +
+            "FROM workflowtypedb INNER JOIN workflowdb " +
+            "ON workflowdb.workflow_type_id = workflowtypedb.id " +
+            "WHERE workflowdb.workflow_type_id = :workflowTypeId")
+    public DataSource.Factory<Integer, WorkflowListItem> getWorkflowsBy(int workflowTypeId);
+
 
 
     @Query("SELECT * FROM workflowdb WHERE workflow_type_id = :workflowTypeId")

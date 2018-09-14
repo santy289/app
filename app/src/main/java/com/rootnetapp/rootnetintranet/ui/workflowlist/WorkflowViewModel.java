@@ -87,24 +87,6 @@ public class WorkflowViewModel extends ViewModel {
         }
 
         workflowRepository.rawQueryWorkflowListByFilters(isCheckedStatus, workflowTypeId, token);
-
-
-// TODO this block is working in case we need to fall back.
-//        String query = "SELECT workflowdb.id AS workflowId, workflowtypedb.id AS workflowTypeId, " +
-//                "workflowtypedb.name AS workflowTypeName, workflowdb.title, workflowdb.workflow_type_key, " +
-//                "workflowdb.full_name, workflowdb.current_status_name, workflowdb.created_at, workflowdb.updated_at, " +
-//                "workflowdb.start, workflowdb.status, workflowdb.`end` " +
-//                "FROM workflowtypedb INNER JOIN workflowdb " +
-//                "ON workflowdb.workflow_type_id = workflowtypedb.id " +
-//                "WHERE workflowdb.workflow_type_id = ? " +
-//                "AND workflowdb.status = ?";
-//        SimpleSQLiteQuery sqlQuery = new SimpleSQLiteQuery(query, new Object[]{workflowTypeId, isCheckedStatus});
-//        workflowRepository.getWorkflowsByFilters(token, sqlQuery);
-
-
-        // TODO put back if things don't work
-        // workflowRepository.setWorkflowListByType(token, workflowTypeId);
-
         liveWorkflows = workflowRepository.getAllWorkflows();
         addWorkflowObserver.postValue(true);
     }

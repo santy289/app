@@ -255,24 +255,12 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 if (types == null || typeIds == null) {
                     return;
                 }
-                int arrayIndex = (int) id;
-                int typeId = typeIds[arrayIndex];
-
-
-                // TODO send these filter items to the function.
-                boolean isCheckedMyWorkflows = workflowFiltersMenuBinding.swchMyworkflows.isChecked();
-                boolean isCheckedStatus = workflowFiltersMenuBinding.swchStatus.isChecked();
-                workflowViewModel.handleWorkflowTypeFilters(
-                        WorkflowFragment.this,
-                        typeId,
-                        isCheckedMyWorkflows,
-                        isCheckedStatus);
-
+                prepareWorkflowListWithFilters();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
+                // Not needed but class needs to override it.
             }
         });
 
@@ -298,21 +286,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
         });
 
-        workflowFiltersMenuBinding.swchStatus.setOnClickListener(view -> {
-            Switch statusSwitch = ((Switch) view);
-            boolean isCheckedStatus = statusSwitch.isChecked();
-            boolean isCheckedMyWorkflows = workflowFiltersMenuBinding.swchMyworkflows.isChecked();
-            int typeIdPositionInArray = workflowFiltersMenuBinding.spnWorkflowtype.getSelectedItemPosition();
-            int workflowTypeId = typeIds[typeIdPositionInArray];
-
-            // TODO send this to the view to update the ui recycler view.
-            workflowViewModel.handleWorkflowTypeFilters(
-                    WorkflowFragment.this,
-                    workflowTypeId,
-                    isCheckedMyWorkflows,
-                    isCheckedStatus);
-        });
-
+        workflowFiltersMenuBinding.swchStatus.setOnClickListener(view -> prepareWorkflowListWithFilters());
 
         // radio button listeners
         workflowFiltersMenuBinding.chbxWorkflownumber.setOnClickListener(this::onRadioButtonClicked);

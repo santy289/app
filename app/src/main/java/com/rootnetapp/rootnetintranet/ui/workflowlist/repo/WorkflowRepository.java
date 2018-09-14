@@ -114,9 +114,6 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 "WHERE workflowdb.status = ? ";
         Object[] objects = new Object[]{status};
         startRawQuery(queryString, token, objects);
-
-//        SimpleSQLiteQuery sqlQuery = new SimpleSQLiteQuery(queryString, new Object[]{status});
-        //getWorkflowsByFilters(token, sqlQuery);
     }
 
     public void rawQueryWorkflowListByFilters(boolean status, int workflowTypeId, String token) {

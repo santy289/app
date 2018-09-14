@@ -106,7 +106,6 @@ public interface ApiInterface {
                                                   @Query("limit") int limit,
                                                   @Query("open") boolean open,
                                                   @Query("page") int page,
-                                                  @Query("status") boolean status,
                                                   @Query("workflow_type") boolean showTypeDetails);
 
 

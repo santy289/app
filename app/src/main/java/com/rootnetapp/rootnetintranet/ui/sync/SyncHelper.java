@@ -73,7 +73,6 @@ public class SyncHelper {
                         WorkflowRepository.ENDPOINT_PAGE_SIZE,
                         true,
                         page,
-                        true,
                         false)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())

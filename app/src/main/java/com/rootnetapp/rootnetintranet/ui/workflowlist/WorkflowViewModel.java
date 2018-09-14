@@ -5,6 +5,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.arch.paging.PagedList;
+import android.arch.persistence.db.SimpleSQLiteQuery;
 import android.content.SharedPreferences;
 import android.support.annotation.IdRes;
 import android.util.Log;
@@ -44,6 +45,8 @@ public class WorkflowViewModel extends ViewModel {
     private String token;
     private static final String TAG = "WorkflowViewModel";
 
+    public static final int NO_TYPE_SELECTED = 0;
+
     public WorkflowViewModel(WorkflowRepository workflowRepository) {
         this.workflowRepository = workflowRepository;
         sort = new Sort();
@@ -70,15 +73,38 @@ public class WorkflowViewModel extends ViewModel {
         liveWorkflows = workflowRepository.getAllWorkflows();
     }
 
-    protected void handleWorkflowTypeFilter(LifecycleOwner lifecycleOwner, int workflowTypeId) {
+    protected void handleWorkflowTypeFilters(
+            LifecycleOwner lifecycleOwner,
+            int workflowTypeId,
+            boolean isCheckedMyWorkflows,
+            boolean isCheckedStatus) {
         liveWorkflows.removeObservers(lifecycleOwner);
-        if (workflowTypeId == 0) {
-            setWorkflowListNoFilters(token);
+        if (workflowTypeId == NO_TYPE_SELECTED) {
+            workflowRepository.rawQueryWorkflowListByFilters(isCheckedStatus, token);
+            liveWorkflows = workflowRepository.getAllWorkflows();
             addWorkflowObserver.postValue(true);
             return;
         }
 
-        workflowRepository.setWorkflowListByType(token, workflowTypeId);
+        workflowRepository.rawQueryWorkflowListByFilters(isCheckedStatus, workflowTypeId, token);
+
+
+// TODO this block is working in case we need to fall back.
+//        String query = "SELECT workflowdb.id AS workflowId, workflowtypedb.id AS workflowTypeId, " +
+//                "workflowtypedb.name AS workflowTypeName, workflowdb.title, workflowdb.workflow_type_key, " +
+//                "workflowdb.full_name, workflowdb.current_status_name, workflowdb.created_at, workflowdb.updated_at, " +
+//                "workflowdb.start, workflowdb.status, workflowdb.`end` " +
+//                "FROM workflowtypedb INNER JOIN workflowdb " +
+//                "ON workflowdb.workflow_type_id = workflowtypedb.id " +
+//                "WHERE workflowdb.workflow_type_id = ? " +
+//                "AND workflowdb.status = ?";
+//        SimpleSQLiteQuery sqlQuery = new SimpleSQLiteQuery(query, new Object[]{workflowTypeId, isCheckedStatus});
+//        workflowRepository.getWorkflowsByFilters(token, sqlQuery);
+
+
+        // TODO put back if things don't work
+        // workflowRepository.setWorkflowListByType(token, workflowTypeId);
+
         liveWorkflows = workflowRepository.getAllWorkflows();
         addWorkflowObserver.postValue(true);
     }

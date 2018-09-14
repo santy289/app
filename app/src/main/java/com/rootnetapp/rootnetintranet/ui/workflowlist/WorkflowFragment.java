@@ -128,6 +128,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             popupwindow_obj.showAsDropDown(fragmentWorkflowBinding.btnFilters, -40, 18);
             subscribeToTypeMenu();
         });
+
         fragmentWorkflowBinding.btnAdd.setOnClickListener(view12 ->
                 mainActivityInterface.showDialog(CreateWorkflowDialog.newInstance(this)));
     }
@@ -256,7 +257,17 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 }
                 int arrayIndex = (int) id;
                 int typeId = typeIds[arrayIndex];
-                workflowViewModel.handleWorkflowTypeFilter(WorkflowFragment.this, typeId);
+
+
+                // TODO send these filter items to the function.
+                boolean isCheckedMyWorkflows = workflowFiltersMenuBinding.swchMyworkflows.isChecked();
+                boolean isCheckedStatus = workflowFiltersMenuBinding.swchStatus.isChecked();
+                workflowViewModel.handleWorkflowTypeFilters(
+                        WorkflowFragment.this,
+                        typeId,
+                        isCheckedMyWorkflows,
+                        isCheckedStatus);
+
             }
 
             @Override
@@ -268,7 +279,41 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowFiltersMenuBinding.spnWorkflowtype.setAdapter(adapter);
     }
 
+    private void prepareWorkflowListWithFilters() {
+        boolean isCheckedMyWorkflows = workflowFiltersMenuBinding.swchMyworkflows.isChecked();
+        boolean isCheckedStatus = workflowFiltersMenuBinding.swchStatus.isChecked();
+        int typeIdPositionInArray = workflowFiltersMenuBinding.spnWorkflowtype.getSelectedItemPosition();
+        int workflowTypeId = typeIds[typeIdPositionInArray];
+        workflowViewModel.handleWorkflowTypeFilters(
+                WorkflowFragment.this,
+                workflowTypeId,
+                isCheckedMyWorkflows,
+                isCheckedStatus);
+    }
+
     private void setFilterBoxListeners() {
+        // filter switch listeners
+        workflowFiltersMenuBinding.swchMyworkflows.setOnClickListener(view -> {
+            // TODO Endpoint at this time can't find my filters.
+
+        });
+
+        workflowFiltersMenuBinding.swchStatus.setOnClickListener(view -> {
+            Switch statusSwitch = ((Switch) view);
+            boolean isCheckedStatus = statusSwitch.isChecked();
+            boolean isCheckedMyWorkflows = workflowFiltersMenuBinding.swchMyworkflows.isChecked();
+            int typeIdPositionInArray = workflowFiltersMenuBinding.spnWorkflowtype.getSelectedItemPosition();
+            int workflowTypeId = typeIds[typeIdPositionInArray];
+
+            // TODO send this to the view to update the ui recycler view.
+            workflowViewModel.handleWorkflowTypeFilters(
+                    WorkflowFragment.this,
+                    workflowTypeId,
+                    isCheckedMyWorkflows,
+                    isCheckedStatus);
+        });
+
+
         // radio button listeners
         workflowFiltersMenuBinding.chbxWorkflownumber.setOnClickListener(this::onRadioButtonClicked);
         workflowFiltersMenuBinding.chbxCreatedate.setOnClickListener(this::onRadioButtonClicked);

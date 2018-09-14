@@ -4,6 +4,8 @@ import android.arch.lifecycle.LiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
+import android.arch.persistence.db.SimpleSQLiteQuery;
+import android.arch.persistence.db.SupportSQLiteQuery;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
@@ -44,6 +46,8 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     private final static String TAG = "WorkflowRepository";
     private final CompositeDisposable disposables = new CompositeDisposable();
 
+    private final String baseWorkflowListQuery;
+
     public WorkflowRepository(ApiInterface service, AppDatabase database) {
         this.service = service;
         this.database = database;
@@ -54,6 +58,12 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                     .setPageSize(LIST_PAGE_SIZE)
                     .build();
         this.workflowTypeMenuItems = workflowTypeDbDao.getObservableTypesForMenu();
+        baseWorkflowListQuery = "SELECT workflowdb.id AS workflowId, workflowtypedb.id AS workflowTypeId, " +
+                "workflowtypedb.name AS workflowTypeName, workflowdb.title, workflowdb.workflow_type_key, " +
+                "workflowdb.full_name, workflowdb.current_status_name, workflowdb.created_at, workflowdb.updated_at, " +
+                "workflowdb.start, workflowdb.status, workflowdb.`end` " +
+                "FROM workflowtypedb INNER JOIN workflowdb " +
+                "ON workflowdb.workflow_type_id = workflowtypedb.id ";
     }
 
     @Override
@@ -97,7 +107,44 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)
                 .setBoundaryCallback(callback)
                 .build();
+    }
 
+    public void rawQueryWorkflowListByFilters(boolean status, String token) {
+        String queryString = baseWorkflowListQuery +
+                "WHERE workflowdb.status = ? ";
+        Object[] objects = new Object[]{status};
+        startRawQuery(queryString, token, objects);
+
+//        SimpleSQLiteQuery sqlQuery = new SimpleSQLiteQuery(queryString, new Object[]{status});
+        //getWorkflowsByFilters(token, sqlQuery);
+    }
+
+    public void rawQueryWorkflowListByFilters(boolean status, int workflowTypeId, String token) {
+        String queryString = baseWorkflowListQuery +
+                "WHERE workflowdb.status = ? " +
+                "AND workflowdb.workflow_type_id = ?";
+        Object[] objects = new Object[]{status, workflowTypeId};
+        startRawQuery(queryString, token, objects);
+    }
+
+    private void startRawQuery(String queryString, String token, Object[] objects) {
+        SimpleSQLiteQuery sqlQuery = new SimpleSQLiteQuery(queryString, objects);
+        getWorkflowsByFilters(token, sqlQuery);
+    }
+
+
+    private void getWorkflowsByFilters(String token, SupportSQLiteQuery query) {
+        DataSource.Factory<Integer, WorkflowListItem> factory = workflowDbDao.getWorkflowsWithFilter(query);
+        callback = new WorkflowListBoundaryCallback(
+                service,
+                token,
+                currentPage,
+                this
+        );
+
+        allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)
+                .setBoundaryCallback(callback)
+                .build();
     }
 
     public void invalidateDataSource() {
@@ -149,7 +196,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     }
 
     public Observable<WorkflowResponseDb> getWorkflowsFromService(String auth, int page) {
-        return service.getWorkflowsDb(auth, 50, true, page, true, false)
+        return service.getWorkflowsDb(auth, 50, true, page,  false)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }

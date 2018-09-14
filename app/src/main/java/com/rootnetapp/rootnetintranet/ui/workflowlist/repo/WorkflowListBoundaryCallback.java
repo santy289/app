@@ -59,7 +59,6 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
                         WorkflowRepository.ENDPOINT_PAGE_SIZE,
                         true,
                         nextPage,
-                        true,
                         false)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())

@@ -93,7 +93,7 @@
             android:layout_marginEnd="15dp">
 
             <CheckBox
-                android:id="@+id/chbx"
+                android:id="@+id/chbx_select_all"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
@@ -104,7 +104,7 @@
                 android:id="@+id/img_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/chbx"
+                android:layout_toEndOf="@id/chbx_select_all"
                 android:src="@drawable/ic_more_vert_black_24dp"
                 android:tint="@color/colorPrimary"
                 android:layout_margin="5dp"

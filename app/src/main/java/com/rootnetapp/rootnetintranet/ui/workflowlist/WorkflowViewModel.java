@@ -158,6 +158,11 @@ public class WorkflowViewModel extends ViewModel {
         addWorkflowObserver.postValue(true);
     }
 
+    protected void handleCheckboxAllOnClick(boolean isChecked) {
+        String test = "e";
+
+    }
+
     protected void initSortBy() {
         switch (sort.getSortingType()) {
             case BYNUMBER: {
@@ -262,6 +267,10 @@ public class WorkflowViewModel extends ViewModel {
         showList.setValue(true);
     }
 
+    protected Sort.sortType getSortingType() {
+        return sort.getSortingType();
+    }
+
     private void clearOtherSwitchesBut(Sort.sortType ofType) {
         switch (ofType) {
             case BYNUMBER:
@@ -279,10 +288,6 @@ public class WorkflowViewModel extends ViewModel {
             default:
                 Log.d(TAG, "clearOtherSwitchesBut: Using wrong Sorty type which is uknown.");
         }
-    }
-
-    protected Sort.sortType getSortingType() {
-        return sort.getSortingType();
     }
 
     private void clearRadioButtonGroup() {

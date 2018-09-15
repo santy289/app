@@ -142,6 +142,11 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
         fragmentWorkflowBinding.btnAdd.setOnClickListener(view12 ->
                 mainActivityInterface.showDialog(CreateWorkflowDialog.newInstance(this)));
+
+        fragmentWorkflowBinding.chbxSelectAll.setOnClickListener(view -> {
+            boolean isChecked = fragmentWorkflowBinding.chbxSelectAll.isChecked();
+            workflowViewModel.handleCheckboxAllOnClick(isChecked);
+        });
     }
 
     private void showLoading(Boolean show) {

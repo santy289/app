@@ -26,11 +26,15 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
     private List<Boolean> isExpanded;
     private WorkflowFragmentInterface anInterface;
     private boolean firstLoad;
+    private int selectCounter;
+    private ArrayList<Integer> selectedItems;
 
     public WorkflowExpandableAdapter(WorkflowFragmentInterface anInterface) {
         super(WorkflowExpandableAdapter.DIFF_CALLBACK);
         this.anInterface = anInterface;
         this.firstLoad = true;
+        this.selectCounter = 0;
+        selectedItems = new ArrayList<>();
     }
 
     private static final DiffUtil.ItemCallback<WorkflowListItem> DIFF_CALLBACK =
@@ -149,7 +153,11 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
         super.submitList(list);
     }
 
-    public void setWorkflows(int listSize) {
+    public void setAllCheckboxes(boolean isCheck) {
+
+    }
+
+    private void setWorkflows(int listSize) {
         if (!firstLoad) {
             updateChecks(listSize);
             return;

@@ -229,7 +229,6 @@ public class WorkflowViewModel extends ViewModel {
             clearOtherSwitchesBut(sortType);
         } else {
             sort.setNumberSortOrder(Sort.sortOrder.DESC);
-            sort.setSortingType(Sort.sortType.NONE);
         }
         //applyFilters(sort);
     }

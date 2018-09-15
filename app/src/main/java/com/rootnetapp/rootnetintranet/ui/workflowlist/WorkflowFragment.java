@@ -290,12 +290,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 isCheckedStatus);
     }
 
-    private void prepareWorkflowListWithFiltersAndSorting() {
-//        workflowFiltersMenuBinding.chbxWorkflownumber.setOnClickListener(this::onRadioButtonClicked);
-//        workflowFiltersMenuBinding.chbxCreatedate.setOnClickListener(this::onRadioButtonClicked);
-//        workflowFiltersMenuBinding.chbxUpdatedate.setOnClickListener(this::onRadioButtonClicked);
-    }
-
     private void onRadioButtonClicked(View view) {
         boolean checked = ((RadioButton) view).isChecked();
         workflowViewModel.handleRadioButtonClicked(checked, view.getId());

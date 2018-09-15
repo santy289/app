@@ -91,37 +91,21 @@ public class WorkflowViewModel extends ViewModel {
             }
             case BYNUMBER: {
                 if (workflowTypeId == NO_TYPE_SELECTED) {
-                    if (sort.getNumberSortOrder().equals(Sort.sortOrder.ASC)) {
-                        workflowRepository.rawQueryWorkflowListByFilters(
-                                isCheckedStatus,
-                                WorkflowRepository.WORKFLOWID,
-                                false,
-                                token);
-                    } else {
-                        workflowRepository.rawQueryWorkflowListByFilters(
-                                isCheckedStatus,
-                                WorkflowRepository.WORKFLOWID,
-                                true,
-                                token);
-                    }
+                    boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
+                    workflowRepository.rawQueryWorkflowListByFilters(
+                            isCheckedStatus,
+                            WorkflowRepository.WORKFLOWID,
+                            isDescending,
+                            token);
                 } else {
-                    if (sort.getNumberSortOrder().equals(Sort.sortOrder.ASC)) {
-                        workflowRepository.rawQueryWorkflowListByFilters(
-                                isCheckedStatus,
-                                workflowTypeId,
-                                WorkflowRepository.WORKFLOWID,
-                                false,
-                                token);
-                    } else {
-                        workflowRepository.rawQueryWorkflowListByFilters(
-                                isCheckedStatus,
-                                workflowTypeId,
-                                WorkflowRepository.WORKFLOWID,
-                                true,
-                                token);
-                    }
+                    boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
+                    workflowRepository.rawQueryWorkflowListByFilters(
+                            isCheckedStatus,
+                            workflowTypeId,
+                            WorkflowRepository.WORKFLOWID,
+                            isDescending,
+                            token);
                 }
-
                 reloadWorkflowsList();
                 break;
             }
@@ -245,7 +229,7 @@ public class WorkflowViewModel extends ViewModel {
             clearOtherSwitchesBut(sortType);
         } else {
             sort.setNumberSortOrder(Sort.sortOrder.DESC);
-
+            sort.setSortingType(Sort.sortType.NONE);
         }
         //applyFilters(sort);
     }

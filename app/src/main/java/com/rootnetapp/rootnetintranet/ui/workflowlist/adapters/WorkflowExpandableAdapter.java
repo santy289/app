@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,8 +18,12 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.databinding.WorkflowItemBinding;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragmentInterface;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem, WorkflowViewholder> {
 
@@ -26,15 +31,11 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
     private List<Boolean> isExpanded;
     private WorkflowFragmentInterface anInterface;
     private boolean firstLoad;
-    private int selectCounter;
-    private ArrayList<Integer> selectedItems;
 
     public WorkflowExpandableAdapter(WorkflowFragmentInterface anInterface) {
         super(WorkflowExpandableAdapter.DIFF_CALLBACK);
         this.anInterface = anInterface;
         this.firstLoad = true;
-        this.selectCounter = 0;
-        selectedItems = new ArrayList<>();
     }
 
     private static final DiffUtil.ItemCallback<WorkflowListItem> DIFF_CALLBACK =
@@ -74,7 +75,6 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
         holder.binding.tvTitle.setText(mainTitle);
         holder.binding.tvWorkflowtype.setText(item.getWorkflowTypeName());
 
-
         String fullName = item.getFullName();
         if (!TextUtils.isEmpty(fullName)) {
             holder.binding.tvOwner.setText(fullName);
@@ -91,14 +91,10 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
             holder.binding.tvStatus.setText(context.getString(R.string.inactive));
         }
 
-        String date = item.getStart().split("T")[0];
-        String hour = (item.getStart().split("T")[1]).split("-")[0];
-        String dateText = date + " - " + hour;
-        holder.binding.tvCreatedat.setText(dateText);
-        date = item.getUpdatedAt().split("T")[0];
-        hour = (item.getUpdatedAt().split("T")[1]).split("-")[0];
-        dateText = date + " - " + hour;
-        holder.binding.tvUpdatedAt.setText(dateText);
+        String createdAt = item.getCreatedAtFormatted();
+        String updatedAt = item.getUpdatedAtFormatted();
+        holder.binding.tvCreatedat.setText(createdAt);
+        holder.binding.tvUpdatedAt.setText(updatedAt);
 
         holder.binding.chbxSelected.setOnCheckedChangeListener(null);
         redrawCheckbox(holder, i);
@@ -112,12 +108,9 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
         holder.binding.chbxSelected.setOnCheckedChangeListener((compoundButton, b) ->
                 isChecked.set(i, b));
 
-        holder.binding.btnDetail.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // TODO put back because interface was removed
-                //anInterface.showDetail(item);
-            }
+        holder.binding.btnDetail.setOnClickListener(view -> {
+            // TODO put back because interface was removed
+            //anInterface.showDetail(item);
         });
 
         holder.binding.executePendingBindings();
@@ -154,7 +147,10 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
     }
 
     public void setAllCheckboxes(boolean isCheck) {
-
+        for (int i = 0; i < getItemCount(); i++) {
+            isChecked.set(i, isCheck);
+        }
+        notifyDataSetChanged();
     }
 
     private void setWorkflows(int listSize) {

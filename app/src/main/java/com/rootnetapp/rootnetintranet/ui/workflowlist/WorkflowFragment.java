@@ -204,6 +204,13 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
         final Observer<Boolean> showLoadingObserver = (this::showLoading);
 
+        final Observer<Boolean> setAllCeckboxesObserver = (isChecked -> {
+            if (isChecked == null) {
+                return;
+            }
+            adapter.setAllCheckboxes(isChecked);
+        });
+
         workflowViewModel.getObservableError().observe(this, errorObserver);
         workflowViewModel.getObservableShowLoading().observe(this, showLoadingObserver);
         addWorkflowsObserver();
@@ -212,7 +219,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.getObservableToggleSwitch().observe(this, toggleSwitchObserver);
         workflowViewModel.getObservableShowList().observe(this, showListObserver);
         workflowViewModel.getObservableAddWorkflowObserver().observe(this, addWorkflowsObserver);
-
+        workflowViewModel.getObservableSetAllCheckboxesList().observe(this, setAllCeckboxesObserver);
     }
 
     private void subscribeToTypeMenu() {

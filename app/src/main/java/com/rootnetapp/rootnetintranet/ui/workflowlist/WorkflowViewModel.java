@@ -33,6 +33,7 @@ public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<int[]> toggleSwitch;
     private MutableLiveData<Boolean> showList;
     private MutableLiveData<Boolean> addWorkflowObserver;
+    private MutableLiveData<Boolean> setAllCheckboxesList;
     private LiveData<PagedList<WorkflowListItem>> liveWorkflows, liveUnordered;
     private LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
 
@@ -159,8 +160,7 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     protected void handleCheckboxAllOnClick(boolean isChecked) {
-        String test = "e";
-
+        setAllCheckboxesList.postValue(isChecked);
     }
 
     protected void initSortBy() {
@@ -423,6 +423,13 @@ public class WorkflowViewModel extends ViewModel {
             addWorkflowObserver = new MutableLiveData<>();
         }
         return addWorkflowObserver;
+    }
+
+    protected LiveData<Boolean> getObservableSetAllCheckboxesList() {
+        if (setAllCheckboxesList == null) {
+            setAllCheckboxesList = new MutableLiveData<>();
+        }
+        return setAllCheckboxesList;
     }
 
 }

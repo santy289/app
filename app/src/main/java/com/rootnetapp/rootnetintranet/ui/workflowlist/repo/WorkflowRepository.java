@@ -48,6 +48,8 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
 
     private final String baseWorkflowListQuery;
     public final static String WORKFLOWID = "workflowdb.id";
+    public final static String WORKFLOW_CREATED = "workflowdb.created_at";
+    public final static String WORKFLOW_UPDATED = "workflowdb.updated_at";
 
     public WorkflowRepository(ApiInterface service, AppDatabase database) {
         this.service = service;
@@ -130,12 +132,12 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 "WHERE workflowdb.status = ? " +
                 "AND workflowdb.workflow_type_id = ? ";
         if (isDescending) {
-            queryString += "ORDER BY ? DESC";
+            queryString += "ORDER BY " + column + " DESC";
         } else {
-            queryString += "ORDER BY ? ASC";
+            queryString += "ORDER BY " + column + " ASC";
         }
 
-        Object[] objects = new Object[]{status, workflowTypeId, column};
+        Object[] objects = new Object[]{status, workflowTypeId};
         startRawQuery(queryString, token, objects);
     }
 

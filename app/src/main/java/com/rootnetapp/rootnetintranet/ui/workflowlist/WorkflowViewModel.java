@@ -110,27 +110,43 @@ public class WorkflowViewModel extends ViewModel {
                 break;
             }
             case BYCREATE: {
-//                Collections.sort(workflows, (s1, s2) -> {
-//                    String str1 = s1.getStart().split("T")[0];
-//                    String str2 = s2.getStart().split("T")[0];
-//                    DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-//                    try {
-//                        Date date1 = format.parse(str1);
-//                        Date date2 = format.parse(str2);
-//                        if (sort.getCreatedSortOrder().equals(Sort.sortOrder.ASC)) {
-//                            return date1.compareTo(date2);
-//                        } else {
-//                            return date2.compareTo(date1);
-//                        }
-//                    } catch (ParseException e) {
-//                        e.printStackTrace();
-//                        return 1;
-//                    }
-//                });
-//                break;
+                if (workflowTypeId == NO_TYPE_SELECTED) {
+                    boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
+                    workflowRepository.rawQueryWorkflowListByFilters(
+                            isCheckedStatus,
+                            WorkflowRepository.WORKFLOW_CREATED,
+                            isDescending,
+                            token);
+                } else {
+                    boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
+                    workflowRepository.rawQueryWorkflowListByFilters(
+                            isCheckedStatus,
+                            workflowTypeId,
+                            WorkflowRepository.WORKFLOW_CREATED,
+                            isDescending,
+                            token);
+                }
+                reloadWorkflowsList();
+                break;
             }
             case BYUPDATE: {
-                //todo falta este dato del servicio.
+                if (workflowTypeId == NO_TYPE_SELECTED) {
+                    boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
+                    workflowRepository.rawQueryWorkflowListByFilters(
+                            isCheckedStatus,
+                            WorkflowRepository.WORKFLOW_UPDATED,
+                            isDescending,
+                            token);
+                } else {
+                    boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
+                    workflowRepository.rawQueryWorkflowListByFilters(
+                            isCheckedStatus,
+                            workflowTypeId,
+                            WorkflowRepository.WORKFLOW_UPDATED,
+                            isDescending,
+                            token);
+                }
+                reloadWorkflowsList();
                 break;
             }
         }

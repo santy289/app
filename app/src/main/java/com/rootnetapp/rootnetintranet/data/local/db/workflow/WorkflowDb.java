@@ -7,7 +7,9 @@ import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
+import android.arch.persistence.room.TypeConverters;
 
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.converters.StringDateConverter;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
 import com.squareup.moshi.Json;
@@ -62,10 +64,12 @@ public class WorkflowDb {
     @Json(name = "open")
     private boolean open;
 
+    @TypeConverters(StringDateConverter.class)
     @ColumnInfo(name = "created_at")
     @Json(name = "created_at")
     private String createdAt;
 
+    @TypeConverters(StringDateConverter.class)
     @ColumnInfo(name = "updated_at")
     @Json(name = "updated_at")
     private String updatedAt;

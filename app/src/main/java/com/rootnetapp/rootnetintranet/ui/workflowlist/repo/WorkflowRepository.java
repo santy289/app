@@ -47,6 +47,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     private final String baseWorkflowListQuery;
+    public final static String WORKFLOWID = "workflowdb.id";
 
     public WorkflowRepository(ApiInterface service, AppDatabase database) {
         this.service = service;
@@ -121,6 +122,32 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 "WHERE workflowdb.status = ? " +
                 "AND workflowdb.workflow_type_id = ?";
         Object[] objects = new Object[]{status, workflowTypeId};
+        startRawQuery(queryString, token, objects);
+    }
+
+    public void rawQueryWorkflowListByFilters(boolean status, int workflowTypeId, String column, boolean isDescending, String token) {
+        String queryString = baseWorkflowListQuery +
+                "WHERE workflowdb.status = ? " +
+                "AND workflowdb.workflow_type_id = ? ";
+        if (isDescending) {
+            queryString += "ORDER BY ? DESC";
+        } else {
+            queryString += "ORDER BY ? ASC";
+        }
+
+        Object[] objects = new Object[]{status, workflowTypeId, column};
+        startRawQuery(queryString, token, objects);
+    }
+
+    public void rawQueryWorkflowListByFilters(boolean status, String column, boolean isDescending, String token) {
+        String queryString = baseWorkflowListQuery +
+                "WHERE workflowdb.status = ? ";
+        if (isDescending) {
+            queryString += "ORDER BY " + column + " DESC ";
+        } else {
+            queryString += "ORDER BY " + column + " ASC ";
+        }
+        Object[] objects = new Object[]{status};
         startRawQuery(queryString, token, objects);
     }
 

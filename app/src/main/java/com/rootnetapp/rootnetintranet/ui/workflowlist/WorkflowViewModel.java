@@ -5,7 +5,6 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.arch.paging.PagedList;
-import android.arch.persistence.db.SimpleSQLiteQuery;
 import android.content.SharedPreferences;
 import android.support.annotation.IdRes;
 import android.util.Log;
@@ -79,14 +78,82 @@ public class WorkflowViewModel extends ViewModel {
             boolean isCheckedMyWorkflows,
             boolean isCheckedStatus) {
         liveWorkflows.removeObservers(lifecycleOwner);
-        if (workflowTypeId == NO_TYPE_SELECTED) {
-            workflowRepository.rawQueryWorkflowListByFilters(isCheckedStatus, token);
-            liveWorkflows = workflowRepository.getAllWorkflows();
-            addWorkflowObserver.postValue(true);
-            return;
-        }
 
-        workflowRepository.rawQueryWorkflowListByFilters(isCheckedStatus, workflowTypeId, token);
+        switch (sort.getSortingType()) {
+            case NONE: {
+                if (workflowTypeId == NO_TYPE_SELECTED) {
+                    workflowRepository.rawQueryWorkflowListByFilters(isCheckedStatus, token);
+                } else {
+                    workflowRepository.rawQueryWorkflowListByFilters(isCheckedStatus, workflowTypeId, token);
+                }
+                reloadWorkflowsList();
+                break;
+            }
+            case BYNUMBER: {
+                if (workflowTypeId == NO_TYPE_SELECTED) {
+                    if (sort.getNumberSortOrder().equals(Sort.sortOrder.ASC)) {
+                        workflowRepository.rawQueryWorkflowListByFilters(
+                                isCheckedStatus,
+                                WorkflowRepository.WORKFLOWID,
+                                false,
+                                token);
+                    } else {
+                        workflowRepository.rawQueryWorkflowListByFilters(
+                                isCheckedStatus,
+                                WorkflowRepository.WORKFLOWID,
+                                true,
+                                token);
+                    }
+                } else {
+                    if (sort.getNumberSortOrder().equals(Sort.sortOrder.ASC)) {
+                        workflowRepository.rawQueryWorkflowListByFilters(
+                                isCheckedStatus,
+                                workflowTypeId,
+                                WorkflowRepository.WORKFLOWID,
+                                false,
+                                token);
+                    } else {
+                        workflowRepository.rawQueryWorkflowListByFilters(
+                                isCheckedStatus,
+                                workflowTypeId,
+                                WorkflowRepository.WORKFLOWID,
+                                true,
+                                token);
+                    }
+                }
+
+                reloadWorkflowsList();
+                break;
+            }
+            case BYCREATE: {
+//                Collections.sort(workflows, (s1, s2) -> {
+//                    String str1 = s1.getStart().split("T")[0];
+//                    String str2 = s2.getStart().split("T")[0];
+//                    DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+//                    try {
+//                        Date date1 = format.parse(str1);
+//                        Date date2 = format.parse(str2);
+//                        if (sort.getCreatedSortOrder().equals(Sort.sortOrder.ASC)) {
+//                            return date1.compareTo(date2);
+//                        } else {
+//                            return date2.compareTo(date1);
+//                        }
+//                    } catch (ParseException e) {
+//                        e.printStackTrace();
+//                        return 1;
+//                    }
+//                });
+//                break;
+            }
+            case BYUPDATE: {
+                //todo falta este dato del servicio.
+                break;
+            }
+        }
+    }
+
+    private void reloadWorkflowsList() {
+//        liveWorkflows.removeObservers(lifecycleOwner); // TODO try putting this back and maybe it works and delete from handleWorkflowTypeFilters first line.
         liveWorkflows = workflowRepository.getAllWorkflows();
         addWorkflowObserver.postValue(true);
     }
@@ -162,7 +229,8 @@ public class WorkflowViewModel extends ViewModel {
                 break;
             }
         }
-        applyFilters(sort);
+
+        //applyFilters(sort);
     }
 
     protected void handleSwitchOnClick(
@@ -179,7 +247,7 @@ public class WorkflowViewModel extends ViewModel {
             sort.setNumberSortOrder(Sort.sortOrder.DESC);
 
         }
-        applyFilters(sort);
+        //applyFilters(sort);
     }
 
     protected void handleUiAndIncomingList(PagedList<WorkflowListItem> listWorkflows) {
@@ -191,13 +259,7 @@ public class WorkflowViewModel extends ViewModel {
             showList.setValue(false);
             return;
         }
-        if (getSortingType() == Sort.sortType.NONE) {
-//            adapter.setWorkflows(listWorkflows);
-            updateWithSortedList.setValue(listWorkflows);
-
-        } else {
-            applyFilters();
-        }
+        updateWithSortedList.setValue(listWorkflows);
         showList.setValue(true);
     }
 

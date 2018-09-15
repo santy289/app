@@ -111,6 +111,17 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         return view;
     }
 
+    @Override
+    public void dataAdded() {
+        //workflowViewModel.getWorkflows(token);
+    }
+
+    @Override
+    public void showDetail(WorkflowDb item) {
+        mainActivityInterface.showFragment(WorkflowDetailFragment.newInstance(item,
+                mainActivityInterface),true);
+    }
+
     private void setupWorkflowRecyclerView() {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         fragmentWorkflowBinding.recWorkflows.setLayoutManager(mLayoutManager);
@@ -279,6 +290,19 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 isCheckedStatus);
     }
 
+    private void prepareWorkflowListWithFiltersAndSorting() {
+//        workflowFiltersMenuBinding.chbxWorkflownumber.setOnClickListener(this::onRadioButtonClicked);
+//        workflowFiltersMenuBinding.chbxCreatedate.setOnClickListener(this::onRadioButtonClicked);
+//        workflowFiltersMenuBinding.chbxUpdatedate.setOnClickListener(this::onRadioButtonClicked);
+    }
+
+    private void onRadioButtonClicked(View view) {
+        boolean checked = ((RadioButton) view).isChecked();
+        workflowViewModel.handleRadioButtonClicked(checked, view.getId());
+        prepareWorkflowListWithFilters();
+    }
+
+
     private void setFilterBoxListeners() {
         // filter switch listeners
         workflowFiltersMenuBinding.swchMyworkflows.setOnClickListener(view -> {
@@ -300,18 +324,21 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             boolean isChecked = aSwitch.isChecked();
             workflowViewModel.handleSwitchOnClick(RADIO_NUMBER, Sort.sortType.BYNUMBER, isChecked);
             setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchWorkflownumber, isChecked);
+            prepareWorkflowListWithFilters();
         });
         workflowFiltersMenuBinding.swchCreatedate.setOnClickListener(view -> {
             Switch aSwitch = ((Switch)view);
             boolean isChecked = aSwitch.isChecked();
             workflowViewModel.handleSwitchOnClick(RADIO_CREATED_DATE, Sort.sortType.BYCREATE, isChecked);
             setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchCreatedate, isChecked);
+            prepareWorkflowListWithFilters();
         });
         workflowFiltersMenuBinding.swchUpdatedate.setOnClickListener(view -> {
             Switch aSwitch = ((Switch)view);
             boolean isChecked = aSwitch.isChecked();
             workflowViewModel.handleSwitchOnClick(RADIO_UPDATED_DATE, Sort.sortType.BYUPDATE, isChecked);
             setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchUpdatedate, isChecked);
+            prepareWorkflowListWithFilters();
         });
     }
 
@@ -357,26 +384,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             case RADIO_CLEAR_ALL:
                 workflowFiltersMenuBinding.radioGroupSortBy.clearCheck();
             default:
-                Log.d(TAG, "toggleRadioButtonFilter: Trying to perform toggle on uknown radio button");
+                Log.d(TAG, "toggleRadioButtonFilter: Trying to perform toggle on unknown radio button");
                 break;
         }
     }
-
-    private void onRadioButtonClicked(View view) {
-        boolean checked = ((RadioButton) view).isChecked();
-        workflowViewModel.handleRadioButtonClicked(checked, view.getId());
-    }
-
-    @Override
-    public void dataAdded() {
-        //workflowViewModel.getWorkflows(token);
-    }
-
-    @Override
-    public void showDetail(WorkflowDb item) {
-        mainActivityInterface.showFragment(WorkflowDetailFragment.newInstance(item,
-                mainActivityInterface),true);
-    }
-
-
 }

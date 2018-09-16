@@ -48,6 +48,10 @@ public class WorkflowDb {
     @Json(name = "end")
     private String end;
 
+    @ColumnInfo(name = "remaining_time")
+    @Json(name = "remaining_time")
+    private long remainingTime;
+
     @ColumnInfo(name = "status")
     @Json(name = "status")
     private boolean status;
@@ -148,6 +152,14 @@ public class WorkflowDb {
 
     public void setEnd(String end) {
         this.end = end;
+    }
+
+    public long getRemainingTime() {
+        return remainingTime;
+    }
+
+    public void setRemainingTime(long remainingTime) {
+        this.remainingTime = remainingTime;
     }
 
     public boolean isStatus() {

@@ -9,11 +9,9 @@ import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.RawQuery;
-import android.arch.persistence.room.Transaction;
 import android.arch.persistence.room.Update;
 
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowTypeAndWorkflows;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 
 import java.util.List;
@@ -38,7 +36,7 @@ public interface WorkflowDbDao {
     @Query("SELECT * FROM workflowdb")
     public List<WorkflowDb> getAllWorkflows();
 
-    @Query("SELECT workflowdb.id AS workflowId, workflowtypedb.id AS workflowTypeId, " +
+    @Query("SELECT workflowdb.id AS workflowId, workflowtypedb.id AS workflowTypeId, workflowdb.remaining_time AS remainingTime, " +
             "workflowtypedb.name AS workflowTypeName, workflowdb.title, workflowdb.workflow_type_key, " +
             "workflowdb.full_name, workflowdb.current_status_name, workflowdb.created_at, workflowdb.updated_at, " +
             "workflowdb.start, workflowdb.status, workflowdb.`end` " +
@@ -46,7 +44,7 @@ public interface WorkflowDbDao {
             "WHERE workflowdb.workflow_type_id = workflowtypedb.id")
     public DataSource.Factory<Integer, WorkflowListItem> getWorkflows();
 
-    @Query("SELECT workflowdb.id AS workflowId, workflowtypedb.id AS workflowTypeId, " +
+    @Query("SELECT workflowdb.id AS workflowId, workflowtypedb.id AS workflowTypeId, workflowdb.remaining_time AS remainingTime, " +
             "workflowtypedb.name AS workflowTypeName, workflowdb.title, workflowdb.workflow_type_key, " +
             "workflowdb.full_name, workflowdb.current_status_name, workflowdb.created_at, workflowdb.updated_at, " +
             "workflowdb.start, workflowdb.status, workflowdb.`end` " +

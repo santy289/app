@@ -14,6 +14,7 @@ import java.util.Objects;
 public class WorkflowListItem {
     public int workflowId;
     public int workflowTypeId;
+    public long remainingTime;
     public String workflowTypeName;
     public String title;
     @ColumnInfo(name = "workflow_type_key")
@@ -35,9 +36,9 @@ public class WorkflowListItem {
     @Ignore
     public boolean selected = false;
     @Ignore
-    public String formattedCreatedAt;
+    private String formattedCreatedAt;
     @Ignore
-    public String formattedUpdatedAt;
+    private String formattedUpdatedAt;
 
     public int getWorkflowId() {
         return workflowId;
@@ -45,6 +46,14 @@ public class WorkflowListItem {
 
     public void setWorkflowId(int workflowId) {
         this.workflowId = workflowId;
+    }
+
+    public long getRemainingTime() {
+        return remainingTime;
+    }
+
+    public void setRemainingTime(long remainingTime) {
+        this.remainingTime = remainingTime;
     }
 
     public String getTitle() {
@@ -89,42 +98,33 @@ public class WorkflowListItem {
 
     public String getCreatedAtFormatted() {
         if (TextUtils.isEmpty(formattedCreatedAt)) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat(
-                    "yyyy-MM-dd'T'HH:mm:ssZ",
-                    Locale.getDefault());
-            try {
-                Date convertedDate = dateFormat.parse(createdAt);
+            SimpleDateFormat finalFormat = new SimpleDateFormat(
+                    "dd-MM-yyyy",
+                    Locale.getDefault()
+            );
 
-                SimpleDateFormat finalFormat = new SimpleDateFormat(
-                        "dd-MM-yyyy",
-                        Locale.getDefault()
-                );
-                formattedCreatedAt = finalFormat.format(convertedDate);
-            } catch (ParseException e) {
-                Log.d("WorkflowItem", "StringDateToTimestamp: e = " + e.getMessage());
+            Date convertedDate = createDateObj(createdAt);
+            if (convertedDate == null) {
                 formattedCreatedAt = createdAt;
+                return formattedCreatedAt;
             }
+            formattedCreatedAt = finalFormat.format(convertedDate);
         }
         return formattedCreatedAt;
     }
 
     public String getUpdatedAtFormatted() {
         if (TextUtils.isEmpty(formattedUpdatedAt)) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat(
-                    "yyyy-MM-dd'T'HH:mm:ssZ",
-                    Locale.getDefault());
-            try {
-                Date convertedDate = dateFormat.parse(updatedAt);
-
-                SimpleDateFormat finalFormat = new SimpleDateFormat(
-                        "dd-MM-yyyy",
-                        Locale.getDefault()
-                );
-                formattedUpdatedAt = finalFormat.format(convertedDate);
-            } catch (ParseException e) {
-                Log.d("WorkflowItem", "StringDateToTimestamp: e = " + e.getMessage());
+            SimpleDateFormat finalFormat = new SimpleDateFormat(
+                    "dd-MM-yyyy",
+                    Locale.getDefault()
+            );
+            Date convertedDate = createDateObj(updatedAt);
+            if (convertedDate == null) {
                 formattedUpdatedAt = updatedAt;
+                return formattedUpdatedAt;
             }
+            formattedUpdatedAt = finalFormat.format(convertedDate);
         }
         return formattedUpdatedAt;
     }
@@ -183,6 +183,18 @@ public class WorkflowListItem {
 
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    private Date createDateObj(String createUpdateDate) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                "yyyy-MM-dd'T'HH:mm:ssZ",
+                Locale.getDefault());
+        try {
+            return dateFormat.parse(createUpdateDate);
+        } catch (ParseException e) {
+            Log.d("WorkflowItem", "createDateObj: e = " + e.getMessage());
+            return null;
+        }
     }
 
     @Override

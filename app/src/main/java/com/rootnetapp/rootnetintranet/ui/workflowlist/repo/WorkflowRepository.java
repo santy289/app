@@ -61,7 +61,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                     .setPageSize(LIST_PAGE_SIZE)
                     .build();
         this.workflowTypeMenuItems = workflowTypeDbDao.getObservableTypesForMenu();
-        baseWorkflowListQuery = "SELECT workflowdb.id AS workflowId, workflowtypedb.id AS workflowTypeId, " +
+        baseWorkflowListQuery = "SELECT workflowdb.id AS workflowId, workflowtypedb.id AS workflowTypeId, workflowdb.remaining_time AS remainingTime, " +
                 "workflowtypedb.name AS workflowTypeName, workflowdb.title, workflowdb.workflow_type_key, " +
                 "workflowdb.full_name, workflowdb.current_status_name, workflowdb.created_at, workflowdb.updated_at, " +
                 "workflowdb.start, workflowdb.status, workflowdb.`end` " +

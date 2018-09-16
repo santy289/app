@@ -3,6 +3,8 @@ package com.rootnetapp.rootnetintranet.ui.workflowlist.adapters;
 import android.arch.paging.PagedList;
 import android.arch.paging.PagedListAdapter;
 import android.content.Context;
+import android.support.annotation.ColorRes;
+import android.support.annotation.IntegerRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -70,20 +72,28 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
         }
 
         WorkflowListItem item = getItem(i);
-        String mainTitle = item.getTitle() + " - " + item.getWorkflowTypeKey();
 
+        // Clock
+        @ColorRes
+        int color = item.getRemainingTime() <= 0 ? R.color.red : R.color.green;
+        holder.binding.clock.setColorFilter(ContextCompat.getColor(
+                holder.binding.clock.getContext(),
+                color
+        ));
+
+        // Title
+        String mainTitle = item.getTitle() + " - " + item.getWorkflowTypeKey();
         holder.binding.tvTitle.setText(mainTitle);
         holder.binding.tvWorkflowtype.setText(item.getWorkflowTypeName());
 
+        //Details
         String fullName = item.getFullName();
         if (!TextUtils.isEmpty(fullName)) {
             holder.binding.tvOwner.setText(fullName);
         }
-
         if(item.getCurrentStatusName() != null){
             holder.binding.tvActualstate.setText(item.getCurrentStatusName());
         }
-
         Context context = holder.binding.tvStatus.getContext();
         if (item.isStatus()) {
             holder.binding.tvStatus.setText(context.getString(R.string.active));

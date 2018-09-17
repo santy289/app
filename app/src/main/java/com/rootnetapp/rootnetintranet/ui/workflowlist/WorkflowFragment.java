@@ -31,6 +31,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.Wo
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowBinding;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowFiltersMenuBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.WorkFlowCreateFragment;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowExpandableAdapter;
@@ -155,8 +156,12 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             subscribeToTypeMenu();
         });
 
-        fragmentWorkflowBinding.btnAdd.setOnClickListener(view12 ->
-                mainActivityInterface.showDialog(CreateWorkflowDialog.newInstance(this)));
+        fragmentWorkflowBinding.btnAdd.setOnClickListener(view12 -> {
+            mainActivityInterface.showFragment(WorkFlowCreateFragment.newInstance(
+                    mainActivityInterface),
+                    true
+            );
+        });
 
         fragmentWorkflowBinding.chbxSelectAll.setOnClickListener(view -> {
             boolean isChecked = fragmentWorkflowBinding.chbxSelectAll.isChecked();

@@ -7,6 +7,7 @@ import android.util.Log;
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.Field;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
@@ -85,7 +86,7 @@ public class SyncHelper {
 
     private void getWorkflowTypesDb(String token) {
         Disposable disposable = apiInterface
-                .testGetWorkflowTypes(token)
+                .getWorkflowTypesDb(token)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onWorkflowTypesDbSuccess, throwable -> {
@@ -101,9 +102,17 @@ public class SyncHelper {
             if (workflowTypes == null) {
                 return false;
             }
+
             WorkflowTypeDbDao workflowTypeDbDao = database.workflowTypeDbDao();
             workflowTypeDbDao.deleteAllWorkfloyTypes();
             workflowTypeDbDao.insertWorkflowTypes(workflowTypes);
+
+            workflowTypeDbDao.deleteAllFields();
+            for (int i = 0; i < workflowTypes.size(); i++) {
+                List<Field> fields = workflowTypes.get(i).getFields();
+                workflowTypeDbDao.insertAllFields(fields);
+            }
+
             getWorkflowsDb(auth, 1);
             return true;
         }).subscribeOn(Schedulers.newThread())

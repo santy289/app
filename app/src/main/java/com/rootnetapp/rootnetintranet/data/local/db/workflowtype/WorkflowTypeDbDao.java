@@ -20,6 +20,9 @@ public interface WorkflowTypeDbDao {
     @Insert
     public void insertWorkflowType(WorkflowTypeDb workflowTypeDb);
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    public void insertAllFields(List<Field> Fields);
+
     @Update
     public void updateWorkflowTypes(WorkflowTypeDb... workflowTypeDbs);
 
@@ -28,6 +31,9 @@ public interface WorkflowTypeDbDao {
 
     @Query("DELETE FROM workflowtypedb")
     public void deleteAllWorkfloyTypes();
+
+    @Query("DELETE FROM field")
+    public void deleteAllFields();
 
     @Query("SELECT * FROM workflowtypedb")
     public List<WorkflowTypeDb> getAllWorkflowTypes();

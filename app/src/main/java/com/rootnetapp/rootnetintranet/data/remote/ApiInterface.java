@@ -123,7 +123,7 @@ public interface ApiInterface {
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows/types")
-    Observable<WorkflowTypeDbResponse> testGetWorkflowTypes(@Header("Authorization") String authorization);
+    Observable<WorkflowTypeDbResponse> getWorkflowTypesDb(@Header("Authorization") String authorization);
 
 
     @Headers({"Domain-Name: api"})

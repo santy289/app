@@ -3,10 +3,13 @@ package com.rootnetapp.rootnetintranet.ui.login;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.auth0.android.jwt.JWT;
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.responses.login.JWToken;
@@ -48,7 +51,6 @@ public class LoginViewModel extends ViewModel {
         Moshi moshi = new Moshi.Builder().build();
         JsonAdapter<ClientResponse> jsonAdapter = moshi.adapter(ClientResponse.class);
         String json = sharedPreferences.getString("domain", "");
-        //todo cambiar por consulta al viewmodel
         if (json.isEmpty()) {
             Log.d(TAG, "onCreate: ALGO PASO");//todo mejorar esta validacion
         } else {
@@ -81,15 +83,15 @@ public class LoginViewModel extends ViewModel {
 
         String token = loginResponse.getToken();
         String[] content = new String[2];
-        content[0] = "token";
+        content[0] = PreferenceKeys.PREFERENCE_TOKEN;
         content[1] = token;
         saveToPreference.setValue(content);
 
-        content[0] = "username";
+        content[0] = PreferenceKeys.PREFERENCE_USER_NAME;
         content[1] = userName.trim();
         saveToPreference.setValue(content);
 
-        content[0] = "password";
+        content[0] = PreferenceKeys.PREFERENCE_PASSWORD;
         content[1] = password.trim();
         saveToPreference.setValue(content);
 
@@ -99,11 +101,13 @@ public class LoginViewModel extends ViewModel {
         String locale = result.getLocale();
         String name = result.getFullName();
 
-        Log.d("test", "username: " + username +
-                " Type: " + userType + " locale: " + locale + " Name: " + name);
+        JWT jwt = new JWT(token);
+        String profileId = jwt.getClaim("profile_id").asString();
+        content[0] = PreferenceKeys.PREFERENCE_PROFILE_ID;
+        content[1] = profileId;
+        saveToPreference.setValue(content);
 
         goToSyncActivity.setValue(true);
-
     }
 
     private void onLoginFailure(Throwable throwable) {

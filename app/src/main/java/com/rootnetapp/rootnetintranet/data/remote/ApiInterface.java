@@ -108,6 +108,14 @@ public interface ApiInterface {
                                                   @Query("page") int page,
                                                   @Query("workflow_type") boolean showTypeDetails);
 
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?")
+    Observable<WorkflowResponseDb> getMyPendingWorkflowsDb(@Header("Authorization") String authorization,
+                                                  @Query("limit") int limit,
+                                                  @Query("open") boolean open,
+                                                  @Query("page") int page,
+                                                  @Query("workflow_type") boolean showTypeDetails,
+                                                  @Query("responsible_id") int profileId);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows/types")

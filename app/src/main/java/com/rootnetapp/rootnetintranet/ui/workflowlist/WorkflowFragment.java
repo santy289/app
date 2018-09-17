@@ -22,6 +22,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -33,7 +34,6 @@ import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowExpandableAdapter;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowDialog;
-
 
 import java.util.List;
 
@@ -59,6 +59,9 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     protected static final int RADIO_CREATED_DATE = 601;
     protected static final int RADIO_UPDATED_DATE = 602;
     protected static final int RADIO_CLEAR_ALL = 603;
+    protected static final int SWITCH_PENDING = 700;
+    protected static final int SWITCH_STATUS = 701;
+    protected static final int SELECT_TYPE = 702;
 
     protected static final int CHECK = 11;
     protected static final int UNCHECK = 10;
@@ -104,9 +107,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
         setupWorkflowRecyclerView();
         setupClickListeners();
-        //Utils.showLoading(getContext());
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        workflowViewModel.initWorkflowList(prefs);
+        workflowViewModel.initWorkflowList(prefs, this);
         subscribe();
         return view;
     }
@@ -200,6 +202,22 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             toggleAscendingDescendingSwitch(toggle[INDEX_TYPE], check);
         });
 
+        final Observer<int[]> toggleSwitchFilterObserver = (toggle -> {
+            if (toggle == null || toggle.length < 1) {
+                return;
+            }
+            boolean check = toggle[INDEX_CHECK] == CHECK;
+            toogleFilterSwitch(toggle[INDEX_TYPE], check);
+        });
+
+        final Observer<Integer> setSelectTypeObserver = ( index -> {
+            if (index == null) {
+                workflowFiltersMenuBinding.spnWorkflowtype.setSelection(WorkflowViewModel.NO_TYPE_SELECTED);
+                return;
+            }
+            workflowFiltersMenuBinding.spnWorkflowtype.setSelection(index);
+        });
+
         final Observer<Boolean> showListObserver = (this::showListContent);
 
         final Observer<Boolean> showLoadingObserver = (this::showLoading);
@@ -220,6 +238,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.getObservableShowList().observe(this, showListObserver);
         workflowViewModel.getObservableAddWorkflowObserver().observe(this, addWorkflowsObserver);
         workflowViewModel.getObservableSetAllCheckboxesList().observe(this, setAllCeckboxesObserver);
+        workflowViewModel.getObservableToggleFilterSwitch().observe(this, toggleSwitchFilterObserver);
+        workflowViewModel.getObservableSetSelectType().observe(this, setSelectTypeObserver);
     }
 
     private void subscribeToTypeMenu() {
@@ -243,6 +263,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         popupWindow.setHeight((int) getResources().getDimension(R.dimen.filters_height));
         popupWindow.setContentView(workflowFiltersMenuBinding.getRoot());
         workflowViewModel.initSortBy();
+        workflowViewModel.initFilters();
         setFilterBoxListeners();
         return popupWindow;
     }
@@ -291,14 +312,15 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     }
 
     private void prepareWorkflowListWithFilters() {
-        boolean isCheckedMyWorkflows = workflowFiltersMenuBinding.swchMyworkflows.isChecked();
+        boolean isCheckedMyPendings = workflowFiltersMenuBinding.swchMyworkflows.isChecked();
         boolean isCheckedStatus = workflowFiltersMenuBinding.swchStatus.isChecked();
         int typeIdPositionInArray = workflowFiltersMenuBinding.spnWorkflowtype.getSelectedItemPosition();
         int workflowTypeId = typeIds[typeIdPositionInArray];
         workflowViewModel.handleWorkflowTypeFilters(
                 WorkflowFragment.this,
                 workflowTypeId,
-                isCheckedMyWorkflows,
+                typeIdPositionInArray,
+                isCheckedMyPendings,
                 isCheckedStatus);
     }
 
@@ -312,8 +334,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     private void setFilterBoxListeners() {
         // filter switch listeners
         workflowFiltersMenuBinding.swchMyworkflows.setOnClickListener(view -> {
-            // TODO Endpoint at this time can't find my filters.
-
+            boolean isChecked = workflowFiltersMenuBinding.swchMyworkflows.isChecked();
+            workflowViewModel.loadMyPendingWorkflows(isChecked, this);
         });
 
         workflowFiltersMenuBinding.swchStatus.setOnClickListener(view -> prepareWorkflowListWithFilters());
@@ -348,6 +370,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         });
     }
 
+
     private void toggleAscendingDescendingSwitch(int switchType, boolean check) {
         switch (switchType) {
             case SWITCH_NUMBER:
@@ -364,6 +387,20 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 break;
             default:
                 Log.d(TAG, "toggleAscendingDescendingSwitch: Trying to perform a toggle and there is no related Switch object");
+                break;
+        }
+    }
+
+    private void toogleFilterSwitch(int switchType, boolean check) {
+        switch (switchType) {
+            case SWITCH_PENDING:
+                workflowFiltersMenuBinding.swchMyworkflows.setChecked(check);
+                break;
+            case SWITCH_STATUS:
+                workflowFiltersMenuBinding.swchStatus.setChecked(check);
+                break;
+            default:
+                Log.d(TAG, "toogleFilterSwitch: Trying to perform a toggle and there is no related Switch object");
                 break;
         }
     }

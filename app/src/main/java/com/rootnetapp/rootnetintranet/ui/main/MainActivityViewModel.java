@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.auth0.android.jwt.JWT;
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
@@ -75,15 +76,14 @@ public class MainActivityViewModel extends ViewModel {
             content[0] = MainActivityViewModel.IMG_BAR_LOGO;
             content[1] = Utils.URL + domain.getClient().getLogoUrl();
             setImgInView.setValue(content);
-
             RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
         } catch (IOException e) {
             Log.d(TAG, "initMainViewModel: error: " + e.getMessage());
         }
 
-        String token = sharedPreferences.getString("token", "");
+        String token = sharedPreferences.getString(PreferenceKeys.PREFERENCE_TOKEN, "");
         JWT jwt = new JWT(token);
-        int id = Integer.parseInt(jwt.getClaim("profile_id").asString());
+        int id = Integer.parseInt(jwt.getClaim(PreferenceKeys.PREFERENCE_PROFILE_ID).asString());
         getUser(id);
     }
 

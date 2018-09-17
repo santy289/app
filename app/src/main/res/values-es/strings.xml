@@ -84,7 +84,7 @@
     <string name="active">Activo</string>
     <string name="inactive">Inactivo</string>
     <string name="filters">Filtros</string>
-    <string name="my_workflows">Mi Workflows</string>
+    <string name="my_workflows">Pendientes</string>
     <string name="sorting">Ordenar Por</string>
     <string name="workflow_number">Número de Workflow</string>
     <string name="updated_date">Fecha de Actualización</string>

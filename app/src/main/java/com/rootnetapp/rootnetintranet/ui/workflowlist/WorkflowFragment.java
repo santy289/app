@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -107,6 +108,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
         setupWorkflowRecyclerView();
         setupClickListeners();
+        setupSearchListener();
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         workflowViewModel.initWorkflowList(prefs, this);
         subscribe();
@@ -122,6 +124,17 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     public void showDetail(WorkflowDb item) {
         mainActivityInterface.showFragment(WorkflowDetailFragment.newInstance(item,
                 mainActivityInterface),true);
+    }
+
+    private void setupSearchListener() {
+        fragmentWorkflowBinding.inputSearch.setOnKeyListener((v, keyCode, event) -> {
+            if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                String searchText = fragmentWorkflowBinding.inputSearch.getText().toString();
+                workflowViewModel.filterBySearchText(searchText, this);
+                return true;
+            }
+            return false;
+        });
     }
 
     private void setupWorkflowRecyclerView() {

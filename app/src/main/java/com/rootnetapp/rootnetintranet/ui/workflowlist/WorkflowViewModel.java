@@ -6,7 +6,6 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.arch.paging.PagedList;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.IdRes;
 import android.text.TextUtils;
@@ -53,6 +52,7 @@ public class WorkflowViewModel extends ViewModel {
         this.workflowRepository = workflowRepository;
         sort = new Sort();
         workflowTypeMenuItems = this.workflowRepository.getWorkflowTypeMenuItems();
+        filterBoxSettings = new FilterBoxSettings();
     }
 
     @Override
@@ -88,6 +88,12 @@ public class WorkflowViewModel extends ViewModel {
             liveWorkflows.removeObservers(lifecycleOwner);
         }
         // liveWorkflows' Observer that was removed will be put back in one of the observers in subscribe.
+    }
+
+    protected void filterBySearchText(String searchText, LifecycleOwner lifecycleOwner) {
+        filterBoxSettings.setSearchText(searchText);
+        liveWorkflows.removeObservers(lifecycleOwner);
+        applyFilters(filterBoxSettings);
     }
 
     private void subscribe(LifecycleOwner lifecycleOwner) {
@@ -138,13 +144,15 @@ public class WorkflowViewModel extends ViewModel {
                     workflowRepository.rawQueryWorkflowListByFilters(
                             filterBoxSettings.isCheckedStatus(),
                             token,
-                            id);
+                            id,
+                            filterBoxSettings.getSearchText());
                 } else {
                     workflowRepository.rawQueryWorkflowListByFilters(
                             filterBoxSettings.isCheckedStatus(),
                             filterBoxSettings.getWorkflowTypeId(),
                             token,
-                            id);
+                            id,
+                            filterBoxSettings.getSearchText());
                 }
                 reloadWorkflowsList();
                 break;
@@ -157,7 +165,8 @@ public class WorkflowViewModel extends ViewModel {
                             WorkflowRepository.WORKFLOWID,
                             isDescending,
                             token,
-                            id);
+                            id,
+                            filterBoxSettings.getSearchText());
                 } else {
                     boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
                     workflowRepository.rawQueryWorkflowListByFilters(
@@ -166,7 +175,8 @@ public class WorkflowViewModel extends ViewModel {
                             WorkflowRepository.WORKFLOWID,
                             isDescending,
                             token,
-                            id);
+                            id,
+                            filterBoxSettings.getSearchText());
                 }
                 reloadWorkflowsList();
                 break;
@@ -179,7 +189,8 @@ public class WorkflowViewModel extends ViewModel {
                             WorkflowRepository.WORKFLOW_CREATED,
                             isDescending,
                             token,
-                            id);
+                            id,
+                            filterBoxSettings.getSearchText());
                 } else {
                     boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
                     workflowRepository.rawQueryWorkflowListByFilters(
@@ -188,7 +199,8 @@ public class WorkflowViewModel extends ViewModel {
                             WorkflowRepository.WORKFLOW_CREATED,
                             isDescending,
                             token,
-                            id);
+                            id,
+                            filterBoxSettings.getSearchText());
                 }
                 reloadWorkflowsList();
                 break;
@@ -201,7 +213,8 @@ public class WorkflowViewModel extends ViewModel {
                             WorkflowRepository.WORKFLOW_UPDATED,
                             isDescending,
                             token,
-                            id);
+                            id,
+                            filterBoxSettings.getSearchText());
                 } else {
                     boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
                     workflowRepository.rawQueryWorkflowListByFilters(
@@ -210,7 +223,8 @@ public class WorkflowViewModel extends ViewModel {
                             WorkflowRepository.WORKFLOW_UPDATED,
                             isDescending,
                             token,
-                            id);
+                            id,
+                            filterBoxSettings.getSearchText());
                 }
                 reloadWorkflowsList();
                 break;
@@ -233,10 +247,6 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     protected void initFilters() {
-        if (filterBoxSettings == null) {
-            filterBoxSettings = new FilterBoxSettings();
-        }
-
         if (filterBoxSettings.isCheckedMyPending()) {
             toggleFilterSwitch(WorkflowFragment.SWITCH_PENDING, WorkflowFragment.CHECK);
         } else {

@@ -19,6 +19,8 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.Wo
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 
+import org.w3c.dom.Text;
+
 import java.util.List;
 
 import io.reactivex.Completable;
@@ -118,44 +120,88 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 .build();
     }
 
-    public void rawQueryWorkflowListByFilters(boolean status, String token, String id) {
-        String queryString = baseWorkflowListQuery +
-                "WHERE workflowdb.status = ? ";
-        Object[] objects = new Object[]{status};
+    public void rawQueryWorkflowListByFilters(boolean status, String token, String id, String searchText) {
+        Object[] objects;
+        String queryString;
+        if (TextUtils.isEmpty(searchText)) {
+            queryString = baseWorkflowListQuery +
+                    "WHERE workflowdb.status = ? ";
+            objects = new Object[]{status};
+        } else {
+            searchText = "%" + searchText + "%";
+            queryString = baseWorkflowListQuery +
+                    "WHERE workflowdb.status = ? " +
+                    "AND workflowdb.title LIKE ? ";
+            objects = new Object[]{status, searchText};
+        }
         startRawQuery(queryString, token, objects, id);
     }
 
-    public void rawQueryWorkflowListByFilters(boolean status, int workflowTypeId, String token, String id) {
-        String queryString = baseWorkflowListQuery +
-                "WHERE workflowdb.status = ? " +
-                "AND workflowdb.workflow_type_id = ?";
-        Object[] objects = new Object[]{status, workflowTypeId};
+    public void rawQueryWorkflowListByFilters(boolean status, int workflowTypeId, String token, String id, String searchText) {
+        Object[] objects;
+        String queryString;
+        if (TextUtils.isEmpty(searchText)) {
+            queryString = baseWorkflowListQuery +
+                    "WHERE workflowdb.status = ? " +
+                    "AND workflowdb.workflow_type_id = ?";
+            objects = new Object[]{status, workflowTypeId};
+        } else {
+            searchText = "%" + searchText + "%";
+            queryString = baseWorkflowListQuery +
+                    "WHERE workflowdb.status = ? " +
+                    "AND workflowdb.workflow_type_id = ? " +
+                    "AND workflowdb.title LIKE ? ";
+            objects = new Object[]{status, workflowTypeId, searchText};
+        }
         startRawQuery(queryString, token, objects, id);
     }
 
-    public void rawQueryWorkflowListByFilters(boolean status, int workflowTypeId, String column, boolean isDescending, String token, String id) {
-        String queryString = baseWorkflowListQuery +
-                "WHERE workflowdb.status = ? " +
-                "AND workflowdb.workflow_type_id = ? ";
+    public void rawQueryWorkflowListByFilters(boolean status, int workflowTypeId, String column, boolean isDescending, String token, String id, String searchText) {
+        String queryString;
+        Object[] objects;
+
+        if (TextUtils.isEmpty(searchText)) {
+            queryString = baseWorkflowListQuery +
+                    "WHERE workflowdb.status = ? " +
+                    "AND workflowdb.workflow_type_id = ? ";
+            objects = new Object[]{status, workflowTypeId};
+        } else {
+            searchText = "%" + searchText + "%";
+            queryString = baseWorkflowListQuery +
+                    "WHERE workflowdb.status = ? " +
+                    "AND workflowdb.workflow_type_id = ? " +
+                    "AND workflowdb.title LIKE ? ";
+            objects = new Object[]{status, workflowTypeId, searchText};
+        }
         if (isDescending) {
             queryString += "ORDER BY " + column + " DESC";
         } else {
             queryString += "ORDER BY " + column + " ASC";
         }
 
-        Object[] objects = new Object[]{status, workflowTypeId};
         startRawQuery(queryString, token, objects, id);
     }
 
-    public void rawQueryWorkflowListByFilters(boolean status, String column, boolean isDescending, String token, String id) {
-        String queryString = baseWorkflowListQuery +
-                "WHERE workflowdb.status = ? ";
+    public void rawQueryWorkflowListByFilters(boolean status, String column, boolean isDescending, String token, String id, String searchText) {
+        String queryString;
+        Object[] objects;
+
+        if (TextUtils.isEmpty(searchText)) {
+            queryString = baseWorkflowListQuery +
+                    "WHERE workflowdb.status = ? ";
+            objects = new Object[]{status};
+        } else {
+            searchText = "%" + searchText + "%";
+            queryString = baseWorkflowListQuery +
+                    "WHERE workflowdb.status = ? " +
+                    "AND workflowdb.title LIKE ? ";
+            objects = new Object[]{status, searchText};
+        }
         if (isDescending) {
             queryString += "ORDER BY " + column + " DESC ";
         } else {
             queryString += "ORDER BY " + column + " ASC ";
         }
-        Object[] objects = new Object[]{status};
         startRawQuery(queryString, token, objects, id);
     }
 

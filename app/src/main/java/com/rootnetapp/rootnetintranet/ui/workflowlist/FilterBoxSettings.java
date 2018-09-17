@@ -5,19 +5,14 @@ public class FilterBoxSettings {
     private boolean isCheckedStatus;
     private int typeIdPositionInArray;
     private int workflowTypeId;
+    private String searchText;
 
     public FilterBoxSettings() {
         this.isCheckedMyPending = false;
         this.isCheckedStatus = true;
         this.typeIdPositionInArray = 0;
         this.workflowTypeId = 0;
-    }
-
-    public FilterBoxSettings(boolean isCheckedMyPending, boolean isCheckedStatus, int typeIdPositionInArray, int workflowTypeId) {
-        this.isCheckedMyPending = isCheckedMyPending;
-        this.isCheckedStatus = isCheckedStatus;
-        this.typeIdPositionInArray = typeIdPositionInArray;
-        this.workflowTypeId = workflowTypeId;
+        this.searchText = "";
     }
 
     public boolean isCheckedMyPending() {
@@ -50,5 +45,13 @@ public class FilterBoxSettings {
 
     public void setWorkflowTypeId(int workflowTypeId) {
         this.workflowTypeId = workflowTypeId;
+    }
+
+    public String getSearchText() {
+        return searchText;
+    }
+
+    public void setSearchText(String searchText) {
+        this.searchText = searchText;
     }
 }

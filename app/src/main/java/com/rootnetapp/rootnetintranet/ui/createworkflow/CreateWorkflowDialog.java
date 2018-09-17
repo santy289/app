@@ -51,10 +51,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-/**
- * Created by root on 21/03/18.
- */
-
 public class CreateWorkflowDialog extends DialogFragment {
 
     @Inject

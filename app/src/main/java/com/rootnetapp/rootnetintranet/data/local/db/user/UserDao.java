@@ -6,6 +6,8 @@ import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 
+import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
+
 import java.util.List;
 
 @Dao
@@ -15,6 +17,9 @@ public interface UserDao {
 
     @Query("SELECT * FROM user WHERE id = :userId")
     User getUserById(int userId);
+
+    @Query("SELECT id, fullName, picture FROM user")
+    public List<FormCreateProfile> getAllProfiles();
 
 //todo maybe remove
     @Query("UPDATE user SET fullName = :userFullname, email = :userEmail," +

@@ -3,6 +3,9 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow;
 import android.arch.lifecycle.LiveData;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.ProfileDao;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
+import com.rootnetapp.rootnetintranet.data.local.db.user.UserDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
@@ -30,6 +33,7 @@ public class CreateWorkflowRepository {
     private ApiInterface service;
     private AppDatabase database;
     private WorkflowTypeDbDao workflowTypeDbDao;
+    private UserDao profileDao;
 
     private LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
 
@@ -37,6 +41,7 @@ public class CreateWorkflowRepository {
         this.service = service;
         this.database = database;
         workflowTypeDbDao = this.database.workflowTypeDbDao();
+        profileDao = this.database.userDao();
         this.workflowTypeMenuItems = workflowTypeDbDao.getObservableTypesForMenu();
 
     }
@@ -47,6 +52,10 @@ public class CreateWorkflowRepository {
 
     public List<WorkflowTypeItemMenu> getWorklowTypeNames() {
         return workflowTypeDbDao.getListOfWorkflowNames();
+    }
+
+    public List<FormCreateProfile> getProfiles() {
+        return profileDao.getAllProfiles();
     }
 
     public Observable<WorkflowTypesResponse> getWorkflowTypes(String auth) {

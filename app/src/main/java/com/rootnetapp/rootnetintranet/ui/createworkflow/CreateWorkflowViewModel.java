@@ -1,14 +1,13 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
 import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
-import android.content.Context;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
@@ -21,7 +20,6 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.PrimitiveIterator;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -47,6 +45,11 @@ public class CreateWorkflowViewModel extends ViewModel {
 
     protected MutableLiveData<List<String>> setTypeList;
     protected MutableLiveData<Boolean> buildForm;
+    protected MutableLiveData<int[]> setTextField;
+    protected MutableLiveData<int[]> setTextFieldMultiLine;
+    protected MutableLiveData<int[]> setDatePicker;
+    protected MutableLiveData<Integer> setFormHeader;
+    protected MutableLiveData<FieldListSettings> setFieldList;
 
     private CreateWorkflowRepository createWorkflowRepository;
 
@@ -56,6 +59,14 @@ public class CreateWorkflowViewModel extends ViewModel {
 
     private FormSettings formSettings;
 
+    private int[] fieldSettings;
+
+    protected static final int REQUIRED = 10;
+    protected static final int NOT_REQUIRED = 11;
+
+    protected static final int INDEX_RES_STRING = 0;
+    protected static final int INDEX_REQUIRED = 1;
+
     //todo REMOVE, solo testing
     //private String auth2 = "Bearer " + Utils.testToken;
 
@@ -63,6 +74,11 @@ public class CreateWorkflowViewModel extends ViewModel {
         this.createWorkflowRepository = createWorkflowRepository;
         setTypeList = new MutableLiveData<>();
         buildForm = new MutableLiveData<>();
+        setTextField = new MutableLiveData<>();
+        setTextFieldMultiLine = new MutableLiveData<>();
+        setDatePicker = new MutableLiveData<>();
+        setFormHeader = new MutableLiveData<>();
+        setFieldList = new MutableLiveData<>();
     }
 
     protected void onCleared() {
@@ -70,42 +86,87 @@ public class CreateWorkflowViewModel extends ViewModel {
     }
 
     public void initForm(LifecycleOwner lifecycleOwner) {
-//        showLoading.setValue(true);
+        showLoading.setValue(true);
         if (formSettings == null) {
             formSettings = new FormSettings();
         }
-
-
         subscribe(lifecycleOwner);
+        setWorkflowTypes();
+    }
 
+    private void setWorkflowTypes() {
         Disposable disposable = Observable.fromCallable(() -> {
-            List<WorkflowTypeItemMenu> types = createWorkflowRepository.getWorklowTypeNames();
+            List<FormCreateProfile> types = createWorkflowRepository.getProfiles();
             if (types == null || types.size() < 1) {
                 return false;
             }
-
             String name;
             Integer id;
             for (int i = 0; i < types.size(); i++) {
-                name = types.get(i).getName();
+                name = types.get(i).getFullName();
                 id = types.get(i).getId();
                 formSettings.setId(id);
                 formSettings.setName(name);
             }
             setTypeList.postValue(formSettings.getNames());
-            buildForm.postValue(true);
             return true;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe( success -> {
-
+                    showLoading.setValue(false);
+                    setBaseFields();
                 }, throwable -> {
-
+                    showLoading.postValue(false);
                 });
         disposables.add(disposable);
-
-
     }
+
+    private void setBaseFields() {
+        int[] settingsDataTitle = new int[2];
+        settingsDataTitle[INDEX_RES_STRING] = R.string.title;
+        settingsDataTitle[INDEX_REQUIRED] = REQUIRED;
+        setTextField.postValue(settingsDataTitle);
+        int[] settingDataMulti = new int[2];
+        settingDataMulti[INDEX_RES_STRING] = R.string.description;
+        settingDataMulti[INDEX_REQUIRED] = REQUIRED;
+        setTextFieldMultiLine.postValue(settingDataMulti);
+        int[] settingDatePicker = new int[2];
+        settingDatePicker[INDEX_RES_STRING] = R.string.start_date;
+        settingDatePicker[INDEX_REQUIRED] = REQUIRED;
+        setDatePicker.postValue(settingDatePicker);
+        setFormHeader.postValue(R.string.workflow_team);
+        setTeamList();
+        buildForm.postValue(true);
+    }
+
+    private void setTeamList() {
+        Disposable disposable = Observable.fromCallable(() -> {
+            List<FormCreateProfile> profiles = createWorkflowRepository.getProfiles();
+            if (profiles == null || profiles.size() < 1) {
+                return false;
+            }
+            for (int i = 0; i < profiles.size(); i++) {
+                formSettings.setProfile(profiles.get(i));
+            }
+            formSettings.getProfileNames();
+            FieldListSettings fieldListSettings = new FieldListSettings();
+            fieldListSettings.items = formSettings.getProfileNames();
+            fieldListSettings.labelRes = R.string.owner;
+            fieldListSettings.required = true;
+            setFieldList.postValue(fieldListSettings);
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe( success -> {
+                    showLoading.setValue(false);
+                    buildForm.postValue(true);
+                }, throwable -> {
+                    showLoading.postValue(false);
+                    buildForm.postValue(true);
+                });
+        disposables.add(disposable);
+    }
+
 
     private void subscribe(LifecycleOwner lifecycleOwner) {
 

@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.Profile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.Field;
@@ -12,6 +13,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
@@ -44,6 +46,7 @@ public class SyncHelper {
     private AppDatabase database;
     private List<Workflow> workflows;
     private List<WorkflowDb> workflowDbs;
+    private List<Profile> profiles;
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     private int queriesDoneSoFar = 0;
@@ -57,6 +60,7 @@ public class SyncHelper {
         this.database = database;
         this.workflows = new ArrayList<>();
         this.workflowDbs = new ArrayList<>();
+        this.profiles = new ArrayList<>();
     }
 
     protected void syncData(String token) {
@@ -64,6 +68,7 @@ public class SyncHelper {
         getUser(token);
         getAllWorkflows(token, 1);
         getWorkflowTypesDb(token);
+        //getProfiles(token);
     }
 
 
@@ -94,6 +99,33 @@ public class SyncHelper {
                     handleNetworkError(throwable);
                 });
         disposables.add(disposable);
+    }
+
+    private void getProfiles(String token) {
+//        Disposable disposable = apiInterface
+//                .getProfiles(token)
+//                .subscribeOn(Schedulers.newThread())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(this::onProfileSuccess, throwable -> {
+//                    Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
+//                    handleNetworkError(throwable);
+//                });
+//        disposables.add(disposable);
+    }
+
+    private void onProfileSuccess(ProfileResponse userResponse) {
+//        Disposable disposable = Observable.fromCallable(() -> {
+//            List<Profile> profiles = userResponse.getProfiles();
+//            if (profiles == null) {
+//                return false;
+//            }
+//            database.profileDao().deleteAllProfiles();
+//            database.profileDao().insertProfiles(profiles);
+//            return true;
+//        }).subscribeOn(Schedulers.newThread())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(this::success, this::userfailure);
+//        disposables.add(disposable);
     }
 
     private void onWorkflowTypesDbSuccess(WorkflowTypeDbResponse response) {

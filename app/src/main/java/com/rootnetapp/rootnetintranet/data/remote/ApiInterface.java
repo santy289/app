@@ -21,6 +21,7 @@ import com.rootnetapp.rootnetintranet.models.responses.timeline.PostCommentRespo
 import com.rootnetapp.rootnetintranet.models.responses.timeline.PostSubCommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.SubCommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
+import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
@@ -82,6 +83,10 @@ public interface ApiInterface {
     @Headers({"Domain-Name: api"})
     @GET("profiles?enabled=all")
     Observable<UserResponse> getUsers(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: api"})
+    @GET("profiles?enabled=all")
+    Observable<ProfileResponse> getProfiles(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
     @PATCH("profiles/{id}")

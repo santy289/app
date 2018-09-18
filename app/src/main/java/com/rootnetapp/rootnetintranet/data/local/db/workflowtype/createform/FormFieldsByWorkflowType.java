@@ -4,12 +4,24 @@ import android.arch.persistence.room.ColumnInfo;
 
 public class FormFieldsByWorkflowType {
 
+    public int id;
     public int fieldId;
     public int workflowTypeId;
     public String workflowTypeName;
 
     @ColumnInfo(name = "field_name")
     public String fieldName;
+
+    @ColumnInfo(name = "field_config")
+    public String fieldConfig;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public int getFieldId() {
         return fieldId;
@@ -41,5 +53,13 @@ public class FormFieldsByWorkflowType {
 
     public void setFieldName(String fieldName) {
         this.fieldName = fieldName;
+    }
+
+    public String getFieldConfig() {
+        return fieldConfig;
+    }
+
+    public void setFieldConfig(String fieldConfig) {
+        this.fieldConfig = fieldConfig;
     }
 }

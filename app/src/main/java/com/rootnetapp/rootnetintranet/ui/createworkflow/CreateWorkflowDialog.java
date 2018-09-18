@@ -315,8 +315,8 @@ public class CreateWorkflowDialog extends DialogFragment {
                 dismiss();
             }
         });
-        viewModel.getObservableWorkflows().observe(this, workflowsObserver);
-        viewModel.getObservableError().observe(this, errorObserver);
+        //viewModel.getObservableWorkflows().observe(this, workflowsObserver);
+        //viewModel.getObservableError().observe(this, errorObserver);
     }
 
     private void createWorkflow() {

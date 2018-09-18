@@ -13,12 +13,16 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.Form
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
+import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,6 +104,18 @@ public class CreateWorkflowViewModel extends ViewModel {
             if (fields == null || fields.size() < 1) {
                 return false;
             }
+
+
+            FormFieldsByWorkflowType field;
+            FieldConfig fieldConfig;
+            Moshi moshi = new Moshi.Builder().build();
+            JsonAdapter<FieldConfig> jsonAdapter = moshi.adapter(FieldConfig.class);
+            for (int i = 0; i < fields.size(); i++) {
+                field = fields.get(i);
+                fieldConfig = jsonAdapter.fromJson(field.getFieldConfig());
+            }
+
+
             return true;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())

@@ -48,8 +48,8 @@ public interface WorkflowTypeDbDao {
     @Query("SELECT id, name FROM workflowtypedb")
     public List<WorkflowTypeItemMenu> getListOfWorkflowNames();
 
-    @Query("SELECT field.id AS fieldId, workflowtypedb.id AS workflowTypeId, " +
-            "workflowtypedb.name AS workflowTypeName, field.field_name " +
+    @Query("SELECT field.id AS id, field.field_id AS fieldId, workflowtypedb.id AS workflowTypeId, " +
+            "workflowtypedb.name AS workflowTypeName, field.field_name, field.field_config " +
             "FROM workflowtypedb INNER JOIN field " +
             "ON field.workflow_type_id = workflowtypedb.id " +
             "WHERE field.workflow_type_id = :byId")

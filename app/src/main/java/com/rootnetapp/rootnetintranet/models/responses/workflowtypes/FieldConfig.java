@@ -4,10 +4,6 @@ import com.squareup.moshi.Json;
 
 import java.util.List;
 
-/**
- * Created by root on 23/03/18.
- */
-
 public class FieldConfig {
 
     @Json(name = "associated_workflow_field_id")
@@ -32,6 +28,36 @@ public class FieldConfig {
     private Boolean formShow;
     @Json(name = "filterShow")
     private Boolean filterShow;
+    @Json(name = "base")
+    private Boolean base;
+    @Json(name = "machine_name")
+    private String machineName;
+    @Json(name = "entity_base_fields")
+    private String entityBaseFields;
+
+    public String getEntityBaseFields() {
+        return entityBaseFields;
+    }
+
+    public void setEntityBaseFields(String entityBaseFields) {
+        this.entityBaseFields = entityBaseFields;
+    }
+
+    public String getMachineName() {
+        return machineName;
+    }
+
+    public void setMachineName(String machineName) {
+        this.machineName = machineName;
+    }
+
+    public Boolean getBase() {
+        return base;
+    }
+
+    public void setBase(Boolean base) {
+        this.base = base;
+    }
 
     public String getAssociatedWorkflowFieldId() {
         return associatedWorkflowFieldId;

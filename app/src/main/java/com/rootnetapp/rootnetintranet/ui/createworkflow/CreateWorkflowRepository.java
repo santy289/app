@@ -1,6 +1,10 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
+import android.arch.lifecycle.LiveData;
+
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
@@ -9,6 +13,8 @@ import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
+
+import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -19,18 +25,28 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- * Created by root on 22/03/18.
- */
-
 public class CreateWorkflowRepository {
 
-    ApiInterface service;
-    AppDatabase database;
+    private ApiInterface service;
+    private AppDatabase database;
+    private WorkflowTypeDbDao workflowTypeDbDao;
+
+    private LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
 
     public CreateWorkflowRepository(ApiInterface service, AppDatabase database) {
         this.service = service;
         this.database = database;
+        workflowTypeDbDao = this.database.workflowTypeDbDao();
+        this.workflowTypeMenuItems = workflowTypeDbDao.getObservableTypesForMenu();
+
+    }
+
+    public LiveData<List<WorkflowTypeItemMenu>> getWorkflowTypeMenuItems() {
+        return workflowTypeMenuItems;
+    }
+
+    public List<WorkflowTypeItemMenu> getWorklowTypeNames() {
+        return workflowTypeDbDao.getListOfWorkflowNames();
     }
 
     public Observable<WorkflowTypesResponse> getWorkflowTypes(String auth) {

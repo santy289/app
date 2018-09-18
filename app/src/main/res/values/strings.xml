@@ -169,4 +169,6 @@
     <string name="sales_force">Sales Force - Status</string>
     <string name="users">Users</string>
     <string name="no_selection">No Selection</string>
+    <string name="form_workflow_type">Workflow Type</string>
+    <string name="pick_option">Pick any item</string>
 </resources>

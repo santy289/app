@@ -42,6 +42,10 @@ public class Field {
     @Json(name = "machine_name")
     private String machineName;
 
+    @ColumnInfo(name = "show_form")
+    @Json(name = "show_form")
+    private boolean showForm;
+
     public int getId() {
         return id;
     }
@@ -96,5 +100,13 @@ public class Field {
 
     public void setMachineName(String machineName) {
         this.machineName = machineName;
+    }
+
+    public boolean isShowForm() {
+        return showForm;
+    }
+
+    public void setShowForm(boolean showForm) {
+        this.showForm = showForm;
     }
 }

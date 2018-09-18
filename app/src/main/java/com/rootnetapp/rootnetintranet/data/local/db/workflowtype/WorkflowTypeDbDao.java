@@ -44,4 +44,7 @@ public interface WorkflowTypeDbDao {
     @Query("SELECT id, name FROM workflowtypedb")
     public LiveData<List<WorkflowTypeItemMenu>> getObservableTypesForMenu();
 
+    @Query("SELECT id, name FROM workflowtypedb")
+    public List<WorkflowTypeItemMenu> getListOfWorkflowNames();
+
 }

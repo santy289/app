@@ -1,11 +1,15 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
+import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.content.Context;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
@@ -15,7 +19,15 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTyp
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.PrimitiveIterator;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class CreateWorkflowViewModel extends ViewModel {
 
@@ -28,12 +40,76 @@ public class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<CreateWorkflowResponse> mCreateLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Integer> mCreateErrorLiveData;
+    private MutableLiveData<Boolean> showLoading;
+    private List<WorkflowTypeItemMenu> workflowTypeMenuItems;
+
+    private final CompositeDisposable disposables = new CompositeDisposable();
+
+    protected MutableLiveData<List<String>> setTypeList;
+    protected MutableLiveData<Boolean> buildForm;
+
     private CreateWorkflowRepository createWorkflowRepository;
+
+    private static final String TAG = "CreateViewModel";
+
+    private ArrayList<Integer> formFieldList;
+
+    private FormSettings formSettings;
+
     //todo REMOVE, solo testing
     //private String auth2 = "Bearer " + Utils.testToken;
 
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.createWorkflowRepository = createWorkflowRepository;
+        setTypeList = new MutableLiveData<>();
+        buildForm = new MutableLiveData<>();
+    }
+
+    protected void onCleared() {
+        disposables.clear();
+    }
+
+    public void initForm(LifecycleOwner lifecycleOwner) {
+//        showLoading.setValue(true);
+        if (formSettings == null) {
+            formSettings = new FormSettings();
+        }
+
+
+        subscribe(lifecycleOwner);
+
+        Disposable disposable = Observable.fromCallable(() -> {
+            List<WorkflowTypeItemMenu> types = createWorkflowRepository.getWorklowTypeNames();
+            if (types == null || types.size() < 1) {
+                return false;
+            }
+
+            String name;
+            Integer id;
+            for (int i = 0; i < types.size(); i++) {
+                name = types.get(i).getName();
+                id = types.get(i).getId();
+                formSettings.setId(id);
+                formSettings.setName(name);
+            }
+            setTypeList.postValue(formSettings.getNames());
+            buildForm.postValue(true);
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe( success -> {
+
+                }, throwable -> {
+
+                });
+        disposables.add(disposable);
+
+
+    }
+
+    private void subscribe(LifecycleOwner lifecycleOwner) {
+
+        //createWorkflowRepository.getWorkflowTypeMenuItems().observe(lifecycleOwner, getWorkflowTypes);
     }
 
     public void getWorkflowTypes(String auth) {
@@ -173,6 +249,13 @@ public class CreateWorkflowViewModel extends ViewModel {
             mCreateErrorLiveData = new MutableLiveData<>();
         }
         return mCreateErrorLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowLoading() {
+        if (showLoading == null) {
+            showLoading = new MutableLiveData<>();
+        }
+        return showLoading;
     }
 
 }

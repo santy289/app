@@ -27,371 +27,379 @@
                 android:background="@color/detailsColor" />
         </RelativeLayout>
 
-        <ScrollView
-            android:layout_below="@id/header"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rec_create_workflow"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_below="@id/header"
+            android:descendantFocusability="beforeDescendants" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minWidth="400dp"
-                android:orientation="vertical">
+        <!--<ScrollView-->
+            <!--android:layout_below="@id/header"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent">-->
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="20dp"
-                    android:weightSum="2">
+            <!--<LinearLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:minWidth="400dp"-->
+                <!--android:orientation="vertical">-->
 
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                <!--<LinearLayout-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:gravity="center_vertical"-->
+                    <!--android:orientation="horizontal"-->
+                    <!--android:padding="20dp"-->
+                    <!--android:weightSum="2">-->
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:padding="5dp"
-                            android:textColor="@color/colorPrimaryDark"
+                    <!--<LinearLayout-->
+                        <!--android:layout_width="0dp"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_weight="1"-->
+                        <!--android:orientation="vertical">-->
 
-                            android:text="@string/workflow_type" />
+                        <!--<TextView-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:padding="5dp"-->
+                            <!--android:textColor="@color/colorPrimaryDark"-->
 
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="15dp"
-                            android:background="@drawable/spinner_bg"
-                            android:orientation="horizontal"
-                            android:paddingStart="10dp"
-                            android:paddingEnd="10dp"
-                            android:paddingTop="5dp"
-                            android:paddingBottom="5dp">
+                            <!--android:text="@string/workflow_type" />-->
 
-                            <Spinner
-                                android:id="@+id/spn_workflowtype"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_centerVertical="true"
-                                android:layout_gravity="center"
-                                android:layout_marginStart="5dp"
-                                android:background="@android:color/transparent"
-                                android:gravity="center"
-                                android:textSize="15sp"
-                                android:spinnerMode="dropdown" />
+                        <!--<RelativeLayout-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_marginEnd="15dp"-->
+                            <!--android:background="@drawable/spinner_bg"-->
+                            <!--android:orientation="horizontal"-->
+                            <!--android:paddingStart="10dp"-->
+                            <!--android:paddingEnd="10dp"-->
+                            <!--android:paddingTop="5dp"-->
+                            <!--android:paddingBottom="5dp">-->
 
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:layout_centerVertical="true"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_keyboard_arrow_down_black_24dp" />
+                            <!--<Spinner-->
+                                <!--android:id="@+id/spn_workflowtype"-->
+                                <!--android:layout_width="match_parent"-->
+                                <!--android:layout_height="wrap_content"-->
+                                <!--android:layout_centerVertical="true"-->
+                                <!--android:layout_gravity="center"-->
+                                <!--android:layout_marginStart="5dp"-->
+                                <!--android:background="@android:color/transparent"-->
+                                <!--android:gravity="center"-->
+                                <!--android:textSize="15sp"-->
+                                <!--android:spinnerMode="dropdown" />-->
 
-                        </RelativeLayout>
+                            <!--<ImageView-->
+                                <!--android:layout_width="wrap_content"-->
+                                <!--android:layout_height="wrap_content"-->
+                                <!--android:layout_alignParentEnd="true"-->
+                                <!--android:layout_centerVertical="true"-->
+                                <!--android:layout_gravity="center"-->
+                                <!--android:src="@drawable/ic_keyboard_arrow_down_black_24dp" />-->
 
-                    </LinearLayout>
+                        <!--</RelativeLayout>-->
 
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                    <!--</LinearLayout>-->
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:padding="5dp"
-                            android:textColor="@color/colorPrimaryDark"
-                            android:text="@string/number" />
+                    <!--<LinearLayout-->
+                        <!--android:layout_width="0dp"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_weight="1"-->
+                        <!--android:orientation="vertical">-->
 
-                        <android.support.v7.widget.AppCompatEditText
-                            android:id="@+id/input_workflownumber"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/spinner_bg"
-                            android:hint="@string/number"
-                            android:maxLines="1"
-                            android:textSize="15sp"
-                            android:paddingStart="10dp"
-                            android:paddingEnd="10dp"
-                            android:paddingTop="5dp"
-                            android:paddingBottom="5dp" />
+                        <!--<TextView-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:padding="5dp"-->
+                            <!--android:textColor="@color/colorPrimaryDark"-->
+                            <!--android:text="@string/number" />-->
 
-                    </LinearLayout>
+                        <!--<android.support.v7.widget.AppCompatEditText-->
+                            <!--android:id="@+id/input_workflownumber"-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:background="@drawable/spinner_bg"-->
+                            <!--android:hint="@string/number"-->
+                            <!--android:maxLines="1"-->
+                            <!--android:textSize="15sp"-->
+                            <!--android:paddingStart="10dp"-->
+                            <!--android:paddingEnd="10dp"-->
+                            <!--android:paddingTop="5dp"-->
+                            <!--android:paddingBottom="5dp" />-->
 
-                </LinearLayout>
+                    <!--</LinearLayout>-->
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="20dp">
+                <!--</LinearLayout>-->
 
-                    <TextView
-                        android:id="@+id/title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingEnd="10dp"
-                        android:text="@string/workflow_name"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="20sp" />
+                <!--<RelativeLayout-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:padding="20dp">-->
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_centerVertical="true"
-                        android:layout_toEndOf="@id/title"
-                        android:background="@color/detailsColor" />
+                    <!--<TextView-->
+                        <!--android:id="@+id/title"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:paddingEnd="10dp"-->
+                        <!--android:text="@string/workflow_name"-->
+                        <!--android:textColor="@color/colorPrimaryDark"-->
+                        <!--android:textSize="20sp" />-->
 
-                </RelativeLayout>
+                    <!--<View-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="1dp"-->
+                        <!--android:layout_centerVertical="true"-->
+                        <!--android:layout_toEndOf="@id/title"-->
+                        <!--android:background="@color/detailsColor" />-->
 
-                <android.support.v7.widget.AppCompatEditText
-                    android:id="@+id/input_workflowname"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginStart="20dp"
-                    android:background="@drawable/spinner_bg"
-                    android:hint="@string/workflow_name"
-                    android:textSize="15sp"
-                    android:maxLines="1"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"/>
+                <!--</RelativeLayout>-->
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="20dp"
-                    android:orientation="vertical">
+                <!--<android.support.v7.widget.AppCompatEditText-->
+                    <!--android:id="@+id/input_workflowname"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_marginEnd="20dp"-->
+                    <!--android:layout_marginStart="20dp"-->
+                    <!--android:background="@drawable/spinner_bg"-->
+                    <!--android:hint="@string/workflow_name"-->
+                    <!--android:textSize="15sp"-->
+                    <!--android:maxLines="1"-->
+                    <!--android:paddingStart="10dp"-->
+                    <!--android:paddingEnd="10dp"-->
+                    <!--android:paddingTop="10dp"-->
+                    <!--android:paddingBottom="10dp"/>-->
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="5dp"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:text="@string/description" />
+                <!--<LinearLayout-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_margin="20dp"-->
+                    <!--android:orientation="vertical">-->
 
-                    <android.support.v7.widget.AppCompatEditText
-                        android:id="@+id/input_workflowdescription"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/spinner_bg"
-                        android:hint="@string/description"
-                        android:maxLines="1"
-                        android:textSize="15sp"
-                        android:paddingStart="10dp"
-                        android:paddingEnd="10dp"
-                        android:paddingTop="10dp"
-                        android:paddingBottom="10dp" />
+                    <!--<TextView-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:padding="5dp"-->
+                        <!--android:textColor="@color/colorPrimaryDark"-->
+                        <!--android:text="@string/description" />-->
 
-                </LinearLayout>
+                    <!--<android.support.v7.widget.AppCompatEditText-->
+                        <!--android:id="@+id/input_workflowdescription"-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:background="@drawable/spinner_bg"-->
+                        <!--android:hint="@string/description"-->
+                        <!--android:maxLines="1"-->
+                        <!--android:textSize="15sp"-->
+                        <!--android:paddingStart="10dp"-->
+                        <!--android:paddingEnd="10dp"-->
+                        <!--android:paddingTop="10dp"-->
+                        <!--android:paddingBottom="10dp" />-->
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="20dp"
-                    android:textColor="@color/colorPrimaryDark"
-                    android:text="@string/creation_date" />
+                <!--</LinearLayout>-->
 
-                <DatePicker
-                    android:id="@+id/picker_start"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:datePickerMode="spinner"
-                    android:paddingEnd="20dp"
-                    android:paddingStart="20dp" />
+                <!--<TextView-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:padding="20dp"-->
+                    <!--android:textColor="@color/colorPrimaryDark"-->
+                    <!--android:text="@string/creation_date" />-->
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="20dp">
+                <!--<DatePicker-->
+                    <!--android:id="@+id/picker_start"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:datePickerMode="spinner"-->
+                    <!--android:paddingEnd="20dp"-->
+                    <!--android:paddingStart="20dp" />-->
 
-                    <TextView
-                        android:id="@+id/title2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingEnd="10dp"
-                        android:text="@string/basic_info"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="20sp" />
+                <!--<RelativeLayout-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:padding="20dp">-->
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_centerVertical="true"
-                        android:layout_toEndOf="@id/title2"
-                        android:background="@color/detailsColor" />
+                    <!--<TextView-->
+                        <!--android:id="@+id/title2"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:paddingEnd="10dp"-->
+                        <!--android:text="@string/basic_info"-->
+                        <!--android:textColor="@color/colorPrimaryDark"-->
+                        <!--android:textSize="20sp" />-->
 
-                </RelativeLayout>
+                    <!--<View-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="1dp"-->
+                        <!--android:layout_centerVertical="true"-->
+                        <!--android:layout_toEndOf="@id/title2"-->
+                        <!--android:background="@color/detailsColor" />-->
 
-                <LinearLayout
-                    android:id="@+id/layout_dinamic_fields"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                <!--</RelativeLayout>-->
 
-                </LinearLayout>
+                <!--<LinearLayout-->
+                    <!--android:id="@+id/layout_dinamic_fields"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:orientation="vertical">-->
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="20dp">
+                <!--</LinearLayout>-->
 
-                    <TextView
-                        android:id="@+id/title3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingEnd="10dp"
-                        android:text="@string/workflow_team"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="20sp" />
+                <!--<RelativeLayout-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:padding="20dp">-->
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_centerVertical="true"
-                        android:layout_toEndOf="@id/title3"
-                        android:background="@color/detailsColor" />
+                    <!--<TextView-->
+                        <!--android:id="@+id/title3"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:paddingEnd="10dp"-->
+                        <!--android:text="@string/workflow_team"-->
+                        <!--android:textColor="@color/colorPrimaryDark"-->
+                        <!--android:textSize="20sp" />-->
 
-                </RelativeLayout>
+                    <!--<View-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="1dp"-->
+                        <!--android:layout_centerVertical="true"-->
+                        <!--android:layout_toEndOf="@id/title3"-->
+                        <!--android:background="@color/detailsColor" />-->
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="20dp">
+                <!--</RelativeLayout>-->
 
-                    <TextView
-                        android:id="@+id/title5"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingEnd="10dp"
-                        android:text="@string/workflow_owner"
-                        android:textColor="@color/colorPrimary" />
+                <!--<RelativeLayout-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:padding="20dp">-->
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_centerVertical="true"
-                        android:layout_toEndOf="@id/title5"
-                        android:background="@color/detailsColor" />
+                    <!--<TextView-->
+                        <!--android:id="@+id/title5"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:paddingEnd="10dp"-->
+                        <!--android:text="@string/workflow_owner"-->
+                        <!--android:textColor="@color/colorPrimary" />-->
 
-                </RelativeLayout>
+                    <!--<View-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="1dp"-->
+                        <!--android:layout_centerVertical="true"-->
+                        <!--android:layout_toEndOf="@id/title5"-->
+                        <!--android:background="@color/detailsColor" />-->
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:weightSum="4"
-                    android:orientation="horizontal"
-                    android:paddingEnd="20dp"
-                    android:paddingStart="20dp">
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:padding="10dp"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:text="Jon Doe" />
+                <!--</RelativeLayout>-->
 
-                    <de.hdodenhof.circleimageview.CircleImageView
+                <!--<LinearLayout-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:gravity="center_vertical"-->
+                    <!--android:weightSum="4"-->
+                    <!--android:orientation="horizontal"-->
+                    <!--android:paddingEnd="20dp"-->
+                    <!--android:paddingStart="20dp">-->
+                    <!--<TextView-->
+                        <!--android:layout_width="0dp"-->
+                        <!--android:layout_weight="1"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:padding="10dp"-->
+                        <!--android:textColor="@color/colorPrimaryDark"-->
+                        <!--android:text="Jon Doe" />-->
 
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="60dp"
-                        android:padding="10dp"
-                        android:src="@drawable/ic_perm_identity_black_24dp" />
+                    <!--<de.hdodenhof.circleimageview.CircleImageView-->
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:padding="10dp"
-                        android:text="@string/edit"
-                        android:textColor="@color/colorPrimary" />
+                        <!--android:layout_width="0dp"-->
+                        <!--android:layout_weight="1"-->
+                        <!--android:layout_height="60dp"-->
+                        <!--android:padding="10dp"-->
+                        <!--android:src="@drawable/ic_perm_identity_black_24dp" />-->
 
-                </LinearLayout>
+                    <!--<TextView-->
+                        <!--android:layout_width="0dp"-->
+                        <!--android:layout_weight="1"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:padding="10dp"-->
+                        <!--android:text="@string/edit"-->
+                        <!--android:textColor="@color/colorPrimary" />-->
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="20dp">
+                <!--</LinearLayout>-->
 
-                    <TextView
-                        android:id="@+id/title4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingEnd="10dp"
-                        android:text="@string/department"
-                        android:textColor="@color/colorPrimary" />
+                <!--<RelativeLayout-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:padding="20dp">-->
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_centerVertical="true"
-                        android:layout_toEndOf="@id/title4"
-                        android:background="@color/detailsColor" />
+                    <!--<TextView-->
+                        <!--android:id="@+id/title4"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:paddingEnd="10dp"-->
+                        <!--android:text="@string/department"-->
+                        <!--android:textColor="@color/colorPrimary" />-->
 
-                </RelativeLayout>
+                    <!--<View-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="1dp"-->
+                        <!--android:layout_centerVertical="true"-->
+                        <!--android:layout_toEndOf="@id/title4"-->
+                        <!--android:background="@color/detailsColor" />-->
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="15dp"
-                    android:layout_marginStart="15dp"
-                    android:background="@drawable/spinner_bg"
-                    android:orientation="horizontal"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:paddingTop="5dp"
-                    android:paddingBottom="5dp">
+                <!--</RelativeLayout>-->
 
-                    <Spinner
-                        android:id="@+id/spn_department"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_gravity="center"
-                        android:layout_marginStart="5dp"
-                        android:textSize="15sp"
-                        android:background="@android:color/transparent"
-                        android:gravity="center"
-                        android:spinnerMode="dropdown" />
+                <!--<RelativeLayout-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_marginEnd="15dp"-->
+                    <!--android:layout_marginStart="15dp"-->
+                    <!--android:background="@drawable/spinner_bg"-->
+                    <!--android:orientation="horizontal"-->
+                    <!--android:paddingStart="10dp"-->
+                    <!--android:paddingEnd="10dp"-->
+                    <!--android:paddingTop="5dp"-->
+                    <!--android:paddingBottom="5dp">-->
 
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_keyboard_arrow_down_black_24dp" />
+                    <!--<Spinner-->
+                        <!--android:id="@+id/spn_department"-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_centerVertical="true"-->
+                        <!--android:layout_gravity="center"-->
+                        <!--android:layout_marginStart="5dp"-->
+                        <!--android:textSize="15sp"-->
+                        <!--android:background="@android:color/transparent"-->
+                        <!--android:gravity="center"-->
+                        <!--android:spinnerMode="dropdown" />-->
 
-                </RelativeLayout>
+                    <!--<ImageView-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_alignParentEnd="true"-->
+                        <!--android:layout_centerVertical="true"-->
+                        <!--android:layout_gravity="center"-->
+                        <!--android:src="@drawable/ic_keyboard_arrow_down_black_24dp" />-->
 
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/rec_department"
-                    android:layout_width="match_parent"
-                    android:layout_height="100dp"
-                    android:paddingEnd="20dp"
-                    android:paddingStart="20dp" />
+                <!--</RelativeLayout>-->
 
-                <Button
-                    android:id="@+id/btn_create"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:layout_margin="20dp"
-                    android:backgroundTint="@color/green"
-                    android:padding="20dp"
-                    android:text="@string/add_workflow"
-                    android:textColor="@color/white" />
-            </LinearLayout>
+                <!--<android.support.v7.widget.RecyclerView-->
+                    <!--android:id="@+id/rec_department"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="100dp"-->
+                    <!--android:paddingEnd="20dp"-->
+                    <!--android:paddingStart="20dp" />-->
 
-        </ScrollView>
+                <!--<Button-->
+                    <!--android:id="@+id/btn_create"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_gravity="end"-->
+                    <!--android:layout_margin="20dp"-->
+                    <!--android:backgroundTint="@color/green"-->
+                    <!--android:padding="20dp"-->
+                    <!--android:text="@string/add_workflow"-->
+                    <!--android:textColor="@color/white" />-->
+            <!--</LinearLayout>-->
+
+        <!--</ScrollView>-->
 
     </RelativeLayout>
 

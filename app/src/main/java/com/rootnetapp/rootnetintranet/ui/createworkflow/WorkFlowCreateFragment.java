@@ -70,7 +70,10 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         viewModel = ViewModelProviders
                 .of(this, createWorkflowViewModelFactory)
                 .get(CreateWorkflowViewModel.class);
-        formBuilder = new FormBuilder(getContext(), fragmentCreateWorkflowBinding.recCreateWorkflow);
+        formBuilder = new FormBuilder(
+                getContext(),
+                fragmentCreateWorkflowBinding.recCreateWorkflow,
+                this);
         subscribe();
         viewModel.initForm(this);
         return view;
@@ -84,7 +87,11 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
 
     @Override
     public void onValueChanged(BaseFormElement baseFormElement) {
-
+        int tag = baseFormElement.getTag();
+        if (tag == CreateWorkflowViewModel.TAG_WORKFLOW_TYPE) {
+            String typeSelected = baseFormElement.getValue();
+            viewModel.generateFieldsByType(typeSelected);
+        }
     }
 
     private void showLoading(Boolean show) {
@@ -100,7 +107,8 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
                 .createInstance()
                 .setTitle(getString(R.string.form_workflow_type))
                 .setOptions(items).setPickerTitle(getString(R.string.pick_option));
-        workflowTypes.setValue(items.get(0));
+        String name = items.get(0);
+        workflowTypes.setValue(name);
         formItems.add(workflowTypes);
     }
 
@@ -109,6 +117,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         FormElementPickerSingle fieldList = FormElementPickerSingle
                 .createInstance()
                 .setTitle(label)
+                .setTag(settings.tag)
                 .setOptions(settings.items).setPickerTitle(getString(R.string.pick_option));
         fieldList.setValue(settings.items.get(0));
         formItems.add(fieldList);
@@ -161,8 +170,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         final Observer<Boolean> showLoadingObserver = (this::showLoading);
         viewModel.getObservableShowLoading().observe(this, showLoadingObserver);
 
-        final Observer<List<String>> setTypeList = (this::addFieldList);
-        viewModel.setTypeList.observe(this, setTypeList);
+        viewModel.setTypeList.observe(this, this::addFieldList);
 
         viewModel.buildForm.observe(this, ( build -> buildForm()));
 

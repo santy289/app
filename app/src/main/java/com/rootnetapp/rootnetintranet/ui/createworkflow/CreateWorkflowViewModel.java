@@ -8,6 +8,8 @@ import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
@@ -67,6 +69,8 @@ public class CreateWorkflowViewModel extends ViewModel {
     protected static final int INDEX_RES_STRING = 0;
     protected static final int INDEX_REQUIRED = 1;
 
+    protected static final int TAG_WORKFLOW_TYPE = 80;
+
     //todo REMOVE, solo testing
     //private String auth2 = "Bearer " + Utils.testToken;
 
@@ -85,6 +89,29 @@ public class CreateWorkflowViewModel extends ViewModel {
         disposables.clear();
     }
 
+    protected void generateFieldsByType(String typeName) {
+        int id = formSettings.findIdByTypeName(typeName);
+        if (id == 0) {
+            return;
+        }
+
+        Disposable disposable = Observable.fromCallable(() -> {
+            List<FormFieldsByWorkflowType> fields = createWorkflowRepository.getFiedsByWorkflowType(id);
+            if (fields == null || fields.size() < 1) {
+                return false;
+            }
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe( success -> {
+                    showLoading.setValue(false);
+                }, throwable -> {
+                    showLoading.postValue(false);
+                });
+        disposables.add(disposable);
+
+    }
+
     public void initForm(LifecycleOwner lifecycleOwner) {
         showLoading.setValue(true);
         if (formSettings == null) {
@@ -96,24 +123,33 @@ public class CreateWorkflowViewModel extends ViewModel {
 
     private void setWorkflowTypes() {
         Disposable disposable = Observable.fromCallable(() -> {
-            List<FormCreateProfile> types = createWorkflowRepository.getProfiles();
+            List<WorkflowTypeItemMenu> types = createWorkflowRepository.getWorklowTypeNames();
             if (types == null || types.size() < 1) {
                 return false;
             }
             String name;
             Integer id;
             for (int i = 0; i < types.size(); i++) {
-                name = types.get(i).getFullName();
+                name = types.get(i).getName();
                 id = types.get(i).getId();
                 formSettings.setId(id);
                 formSettings.setName(name);
             }
-            setTypeList.postValue(formSettings.getNames());
+
+
+            FieldListSettings fieldListSettings = new FieldListSettings();
+            fieldListSettings.items = formSettings.getNames();
+            fieldListSettings.labelRes = R.string.type;
+            fieldListSettings.required = true;
+            fieldListSettings.tag = TAG_WORKFLOW_TYPE;
+            setFieldList.postValue(fieldListSettings);
+
+
+//            setTypeList.postValue(formSettings.getNames());
             return true;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe( success -> {
-                    showLoading.setValue(false);
                     setBaseFields();
                 }, throwable -> {
                     showLoading.postValue(false);
@@ -166,6 +202,8 @@ public class CreateWorkflowViewModel extends ViewModel {
                 });
         disposables.add(disposable);
     }
+
+
 
 
     private void subscribe(LifecycleOwner lifecycleOwner) {

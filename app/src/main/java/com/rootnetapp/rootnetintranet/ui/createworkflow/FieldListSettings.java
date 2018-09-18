@@ -6,4 +6,5 @@ public class FieldListSettings {
     public ArrayList<String> items;
     public int labelRes;
     public boolean required;
+    public int tag;
 }

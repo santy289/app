@@ -7,6 +7,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.profile.ProfileDao;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.user.UserDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
@@ -56,6 +57,10 @@ public class CreateWorkflowRepository {
 
     public List<FormCreateProfile> getProfiles() {
         return profileDao.getAllProfiles();
+    }
+
+    public List<FormFieldsByWorkflowType> getFiedsByWorkflowType(int byId) {
+        return workflowTypeDbDao.getFields(byId);
     }
 
     public Observable<WorkflowTypesResponse> getWorkflowTypes(String auth) {

@@ -8,6 +8,7 @@ import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 
 import java.util.List;
@@ -46,5 +47,12 @@ public interface WorkflowTypeDbDao {
 
     @Query("SELECT id, name FROM workflowtypedb")
     public List<WorkflowTypeItemMenu> getListOfWorkflowNames();
+
+    @Query("SELECT field.id AS fieldId, workflowtypedb.id AS workflowTypeId, " +
+            "workflowtypedb.name AS workflowTypeName, field.field_name " +
+            "FROM workflowtypedb INNER JOIN field " +
+            "ON field.workflow_type_id = workflowtypedb.id " +
+            "WHERE field.workflow_type_id = :byId")
+    public List<FormFieldsByWorkflowType> getFields(int byId);
 
 }

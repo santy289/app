@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 
@@ -63,6 +64,20 @@ public class FormSettings {
 
     public void setIndexWorkflowTypeSelected(int indexWorkflowTypeSelected) {
         this.indexWorkflowTypeSelected = indexWorkflowTypeSelected;
+    }
+
+    public int findIdByTypeName(String name) {
+        String typeName;
+        int id = 0;
+        for (int i = 0; i < names.size(); i++) {
+            typeName = names.get(i);
+            if (!typeName.equals(name)) {
+                continue;
+            }
+            id = ids.get(i);
+            break;
+        }
+        return id;
     }
 
     public String getTitle() {

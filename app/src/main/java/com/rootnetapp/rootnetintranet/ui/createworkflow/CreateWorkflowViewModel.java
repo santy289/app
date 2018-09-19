@@ -61,6 +61,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     protected MutableLiveData<FieldData> setFieldDateWithData;
     protected MutableLiveData<FieldData> setFieldSwitchWithData;
     protected MutableLiveData<FieldData> setFieldEmailWithData;
+    protected MutableLiveData<FieldData> setFieldPhoneWithData;
     protected MutableLiveData<Boolean> refreshForm;
 
     private CreateWorkflowRepository createWorkflowRepository;
@@ -83,6 +84,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.createWorkflowRepository = createWorkflowRepository;
+        setFieldTextWithData = new MutableLiveData<>();
         setTypeList = new MutableLiveData<>();
         buildForm = new MutableLiveData<>();
         setTextField = new MutableLiveData<>();
@@ -90,13 +92,13 @@ public class CreateWorkflowViewModel extends ViewModel {
         setDatePicker = new MutableLiveData<>();
         setFormHeader = new MutableLiveData<>();
         setFieldList = new MutableLiveData<>();
-        setFieldTextWithData = new MutableLiveData<>();
         setFieldNumericWithData = new MutableLiveData<>();
         setFieldAreaWithData = new MutableLiveData<>();
         setFieldDateWithData = new MutableLiveData<>();
         refreshForm = new MutableLiveData<>();
         setFieldSwitchWithData = new MutableLiveData<>();
         setFieldEmailWithData = new MutableLiveData<>();
+        setFieldPhoneWithData = new MutableLiveData<>();
     }
 
     protected void onCleared() {
@@ -177,10 +179,44 @@ public class CreateWorkflowViewModel extends ViewModel {
             case FormSettings.TYPE_CHECKBOX:
                 handleCheckBox(field);
                 break;
+            case FormSettings.TYPE_PROJECT:
+                handleBuildEntity(field);
+                break;
+            case FormSettings.TYPE_ROLE:
+                handleBuildEntity(field);
+                break;
+            case FormSettings.TYPE_BIRTH_DATE:
+                handleBuildDate(field);
+                break;
+            case FormSettings.TYPE_PHONE:
+                handleBuildPhone(field);
+                break;
+            case FormSettings.TYPE_LINK:
+                handleBuildText(field);
+                break;
+             
             default:
                 handleList(field);
                 Log.d(TAG, "buildField: Not a generic type: " + typeInfo.getType() + " value: " + typeInfo.getValueType());
                 break;
+        }
+    }
+
+    private void handleBuildPhone(FormFieldsByWorkflowType field) {
+        FieldData fieldData = new FieldData();
+        fieldData.label = field.getFieldName();
+        fieldData.required = field.isRequired();
+        setFieldPhoneWithData.postValue(fieldData);
+    }
+
+    private void handleBuildEntity(FormFieldsByWorkflowType field) {
+        String valueType = field.getFieldConfigObject().getTypeInfo().getValueType();
+        switch (valueType) {
+            case FormSettings.VALUE_ENTITY:
+                // TODO list
+                break;
+            default:
+                Log.d(TAG, "handleBuildProject: Not recognized " + valueType);
         }
     }
 
@@ -189,11 +225,13 @@ public class CreateWorkflowViewModel extends ViewModel {
         FieldData fieldData = new FieldData();
         fieldData.label = field.getFieldName();
         fieldData.required = field.isRequired();
+
+        if (FormSettings.VALUE_STRING.equals(valueType) || FormSettings.VALUE_TEXT.equals(valueType)) {
+            setFieldTextWithData.postValue(fieldData);
+            return;
+        }
+
         switch (valueType) {
-            case FormSettings.VALUE_STRING:
-                // text field single line
-                setFieldTextWithData.postValue(fieldData);
-                break;
             case FormSettings.VALUE_INTEGER:
                 setFieldNumericWithData.postValue(fieldData);
                 break;

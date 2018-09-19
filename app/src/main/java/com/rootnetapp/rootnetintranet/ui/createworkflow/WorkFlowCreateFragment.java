@@ -33,6 +33,7 @@ import me.riddhimanadib.formmaster.model.FormElementSwitch;
 import me.riddhimanadib.formmaster.model.FormElementTextEmail;
 import me.riddhimanadib.formmaster.model.FormElementTextMultiLine;
 import me.riddhimanadib.formmaster.model.FormElementTextNumber;
+import me.riddhimanadib.formmaster.model.FormElementTextPhone;
 import me.riddhimanadib.formmaster.model.FormElementTextSingleLine;
 import me.riddhimanadib.formmaster.model.FormHeader;
 
@@ -135,9 +136,9 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         formItems.add(textField);
     }
 
-    private void addTexField(FieldData settingsData) {
-        String label = settingsData.label;
-        boolean required = settingsData.required;
+    private void addTexFieldData(FieldData fieldData) {
+        String label = fieldData.label;
+        boolean required = fieldData.required;
         FormElementTextSingleLine textField = FormElementTextSingleLine
                 .createInstance()
                 .setTitle(label)
@@ -211,9 +212,20 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         FormElementTextEmail emailField = FormElementTextEmail
                 .createInstance()
                 .setTitle(getString(R.string.email))
-                .setHint(getString(R.string.enter_email));
+                .setHint(getString(R.string.enter_email))
+                .setRequired(fieldData.required);
         formItems.add(emailField);
 
+    }
+
+    private void addPhoneField(FieldData fieldData) {
+        String label = fieldData.label;
+        boolean required = fieldData.required;
+        FormElementTextPhone phoneField = FormElementTextPhone
+                .createInstance()
+                .setTitle(label)
+                .setRequired(required);
+        formItems.add(phoneField);
     }
 
     private void formHeader(Integer labelRes) {
@@ -243,6 +255,9 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
     }
 
     private void subscribe() {
+
+        viewModel.setFieldTextWithData.observe(this, this::addTexFieldData);
+
         final Observer<Boolean> showLoadingObserver = (this::showLoading);
         viewModel.getObservableShowLoading().observe(this, showLoadingObserver);
 
@@ -260,8 +275,6 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
 
         viewModel.setFieldList.observe(this, this::addFieldList);
 
-        viewModel.setFieldTextWithData.observe(this, this::addTexField);
-
         viewModel.setFieldNumericWithData.observe(this, this::addNumericField);
 
         viewModel.setFieldAreaWithData.observe(this, this::addTextFieldMultiLines);
@@ -273,6 +286,8 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         viewModel.setFieldSwitchWithData.observe(this, this::addSwitchField);
 
         viewModel.setFieldEmailWithData.observe(this, this::addEmailField);
+
+        viewModel.setFieldPhoneWithData.observe(this, this::addPhoneField);
 
     }
 

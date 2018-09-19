@@ -21,12 +21,24 @@ public class FormSettings {
     public static final String TYPE_DATE = "date";
     public static final String TYPE_CHECKBOX = "checkbox";
     public static final String TYPE_SYSTEM_USERS = "system_users";
+    public static final String TYPE_PROJECT = "project";
+    public static final String TYPE_ROLE = "role";
+    public static final String TYPE_BIRTH_DATE = "birth_date";
+    public static final String TYPE_ACCOUNT = "account";
+    public static final String TYPE_LINK = "link";
+    public static final String TYPE_CURRENCY = "currency";
+    public static final String TYPE_PHONE = "phone";
+    public static final String TYPE_SERVICE = "service";
+    public static final String TYPE_PRODUCT = "product";
+    public static final String TYPE_LIST = "list";
     public static final String VALUE_EMAIL = "email";
     public static final String VALUE_INTEGER = "integer";
     public static final String VALUE_BOOLEAN = "boolean";
     public static final String VALUE_STRING = "string";
+    public static final String VALUE_TEXT = "text";
     public static final String VALUE_LIST = "list";
     public static final String VALUE_DATE = "date";
+    public static final String VALUE_ENTITY = "entity";
 
     public FormSettings() {
         names = new ArrayList<>();

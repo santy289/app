@@ -13,7 +13,7 @@ public class FieldConfig {
     @Json(name = "list_info")
     private ListInfo listInfo;
     @Json(name = "multiple")
-    private Boolean multiple;
+    private boolean multiple;
     @Json(name = "required")
     private Boolean required;
     @Json(name = "show_in")
@@ -29,7 +29,7 @@ public class FieldConfig {
     @Json(name = "filterShow")
     private Boolean filterShow;
     @Json(name = "base")
-    private Boolean base;
+    private boolean base;
     @Json(name = "machine_name")
     private String machineName;
     @Json(name = "entity_base_fields")
@@ -53,7 +53,7 @@ public class FieldConfig {
         this.machineName = machineName;
     }
 
-    public Boolean getBase() {
+    public boolean getBase() {
         return base;
     }
 
@@ -85,11 +85,11 @@ public class FieldConfig {
         this.listInfo = listInfo;
     }
 
-    public Boolean getMultiple() {
+    public boolean getMultiple() {
         return multiple;
     }
 
-    public void setMultiple(Boolean multiple) {
+    public void setMultiple(boolean multiple) {
         this.multiple = multiple;
     }
 

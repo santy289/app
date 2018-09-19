@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +28,9 @@ import me.riddhimanadib.formmaster.listener.OnFormElementValueChangedListener;
 import me.riddhimanadib.formmaster.model.BaseFormElement;
 import me.riddhimanadib.formmaster.model.FormElementPickerDate;
 import me.riddhimanadib.formmaster.model.FormElementPickerSingle;
+import me.riddhimanadib.formmaster.model.FormElementSwitch;
 import me.riddhimanadib.formmaster.model.FormElementTextMultiLine;
+import me.riddhimanadib.formmaster.model.FormElementTextNumber;
 import me.riddhimanadib.formmaster.model.FormElementTextSingleLine;
 import me.riddhimanadib.formmaster.model.FormHeader;
 
@@ -70,10 +73,6 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         viewModel = ViewModelProviders
                 .of(this, createWorkflowViewModelFactory)
                 .get(CreateWorkflowViewModel.class);
-        formBuilder = new FormBuilder(
-                getContext(),
-                fragmentCreateWorkflowBinding.recCreateWorkflow,
-                this);
         subscribe();
         viewModel.initForm(this);
         return view;
@@ -155,6 +154,15 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         formItems.add(textFieldMultiLine);
     }
 
+    private void addTextFieldMultiLines(FieldData fieldData) {
+        String label = fieldData.label;
+        FormElementTextMultiLine textFieldMultiLine = FormElementTextMultiLine
+                .createInstance()
+                .setTitle(label)
+                .setRequired(fieldData.required);
+        formItems.add(textFieldMultiLine);
+    }
+
     private void datePickerField(int[] settingsData) {
         String label = getString(settingsData[CreateWorkflowViewModel.INDEX_RES_STRING]);
         boolean required = settingsData[CreateWorkflowViewModel.INDEX_REQUIRED] == CreateWorkflowViewModel.REQUIRED;
@@ -166,6 +174,37 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         formItems.add(datePicker);
     }
 
+    private void datePickerField(FieldData fieldData) {
+        String label = fieldData.label;
+        boolean required = fieldData.required;
+        FormElementPickerDate datePicker = FormElementPickerDate
+                .createInstance()
+                .setTitle(label)
+                .setRequired(required)
+                .setDateFormat("MMM dd, yyyy");
+        formItems.add(datePicker);
+    }
+
+    private void addNumericField(FieldData fieldData) {
+        String label = fieldData.label;
+        boolean required = fieldData.required;
+        FormElementTextNumber numericField = FormElementTextNumber
+                .createInstance()
+                .setRequired(required)
+                .setTitle(label);
+        formItems.add(numericField);
+    }
+
+    private void addSwitchField(FieldData fieldData) {
+        String label = fieldData.label;
+        boolean required = fieldData.required;
+        FormElementSwitch switchField = FormElementSwitch
+                .createInstance()
+                .setRequired(required)
+                .setTitle(label);
+        formItems.add(switchField);
+    }
+
     private void formHeader(Integer labelRes) {
         String label = getString(labelRes);
         FormHeader formHeader = FormHeader.createInstance(label);
@@ -173,7 +212,23 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
     }
 
     private void buildForm() {
+//        List<BaseFormElement> newList = new ArrayList<>(formItems);
+        formBuilder = new FormBuilder(
+                getContext(),
+                fragmentCreateWorkflowBinding.recCreateWorkflow,
+                this);
         formBuilder.addFormElements(formItems);
+//        formItems = newList;
+//        refreshForm();
+    }
+
+    private void refreshForm() {
+        RecyclerView.Adapter adapter =
+                fragmentCreateWorkflowBinding.recCreateWorkflow.getAdapter();
+        if (adapter == null) {
+            return;
+        }
+        adapter.notifyDataSetChanged();
     }
 
     private void subscribe() {
@@ -195,6 +250,16 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         viewModel.setFieldList.observe(this, this::addFieldList);
 
         viewModel.setFieldTextWithData.observe(this, this::addTexField);
+
+        viewModel.setFieldNumericWithData.observe(this, this::addNumericField);
+
+        viewModel.setFieldAreaWithData.observe(this, this::addTextFieldMultiLines);
+
+        viewModel.setFieldDateWithData.observe(this, this::datePickerField);
+
+        viewModel.refreshForm.observe(this, refresh -> refreshForm());
+
+        viewModel.setFieldSwitchWithData.observe(this, this::addSwitchField);
 
     }
 

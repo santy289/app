@@ -56,6 +56,11 @@ public class CreateWorkflowViewModel extends ViewModel {
     protected MutableLiveData<Integer> setFormHeader;
     protected MutableLiveData<FieldListSettings> setFieldList;
     protected MutableLiveData<FieldData> setFieldTextWithData;
+    protected MutableLiveData<FieldData> setFieldNumericWithData;
+    protected MutableLiveData<FieldData> setFieldAreaWithData;
+    protected MutableLiveData<FieldData> setFieldDateWithData;
+    protected MutableLiveData<FieldData> setFieldSwitchWithData;
+    protected MutableLiveData<Boolean> refreshForm;
 
     private CreateWorkflowRepository createWorkflowRepository;
 
@@ -75,9 +80,6 @@ public class CreateWorkflowViewModel extends ViewModel {
 
     protected static final int TAG_WORKFLOW_TYPE = 80;
 
-    //todo REMOVE, solo testing
-    //private String auth2 = "Bearer " + Utils.testToken;
-
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.createWorkflowRepository = createWorkflowRepository;
         setTypeList = new MutableLiveData<>();
@@ -88,6 +90,11 @@ public class CreateWorkflowViewModel extends ViewModel {
         setFormHeader = new MutableLiveData<>();
         setFieldList = new MutableLiveData<>();
         setFieldTextWithData = new MutableLiveData<>();
+        setFieldNumericWithData = new MutableLiveData<>();
+        setFieldAreaWithData = new MutableLiveData<>();
+        setFieldDateWithData = new MutableLiveData<>();
+        refreshForm = new MutableLiveData<>();
+        setFieldSwitchWithData = new MutableLiveData<>();
     }
 
     protected void onCleared() {
@@ -136,16 +143,22 @@ public class CreateWorkflowViewModel extends ViewModel {
         List<FormFieldsByWorkflowType> fields = formSettings.getFields();
         for (int i = 0; i < fields.size(); i++) {
             FormFieldsByWorkflowType field = fields.get(i);
-            if (!field.isRequired()) {
+            if (!field.isShowForm()) {
                 continue;
             }
             FieldConfig fieldConfig = field.getFieldConfigObject();
+            boolean isBase = fieldConfig.getBase();
+            if (isBase) {
+                continue;
+            }
             if (fieldConfig.isPrecalculated()) {
                 continue;
             }
             buildField(field);
         }
+        String test = "s";
         buildForm.postValue(true);
+//        refreshForm.postValue(true);
     }
 
     private void buildField(FormFieldsByWorkflowType field) {
@@ -155,35 +168,93 @@ public class CreateWorkflowViewModel extends ViewModel {
                 handleBuildText(field);
                 break;
             case FormSettings.TYPE_DATE:
+                handleBuildDate(field);
                 break;
             case FormSettings.TYPE_SYSTEM_USERS:
                 break;
             case FormSettings.TYPE_TEXT_AREA:
+                handleBuildTextArea(field);
                 break;
             case FormSettings.TYPE_CHECKBOX:
+                handleCheckBox(field);
                 break;
             default:
-                Log.d(TAG, "buildField: Type not recognized: " + typeInfo.getType() + " value: " + typeInfo.getValueType());
+                handleList(field);
+                Log.d(TAG, "buildField: Not a generic type: " + typeInfo.getType() + " value: " + typeInfo.getValueType());
                 break;
         }
     }
 
     private void handleBuildText(FormFieldsByWorkflowType field) {
         String valueType = field.getFieldConfigObject().getTypeInfo().getValueType();
+        FieldData fieldData = new FieldData();
+        fieldData.label = field.getFieldName();
+        fieldData.required = field.isRequired();
         switch (valueType) {
             case FormSettings.VALUE_STRING:
                 // text field single line
-                FieldData fieldData = new FieldData();
-                fieldData.label = field.getFieldName();
-                fieldData.required = field.isRequired();
                 setFieldTextWithData.postValue(fieldData);
                 break;
             case FormSettings.VALUE_INTEGER:
-                
+                setFieldNumericWithData.postValue(fieldData);
                 break;
             case FormSettings.VALUE_EMAIL:
                 break;
         }
+    }
+
+    private void handleBuildTextArea(FormFieldsByWorkflowType field) {
+        String valueType = field.getFieldConfigObject().getTypeInfo().getValueType();
+        FieldData fieldData = new FieldData();
+        fieldData.label = field.getFieldName();
+        fieldData.required = field.isRequired();
+        switch (valueType) {
+            case FormSettings.VALUE_STRING:
+                setFieldAreaWithData.postValue(fieldData);
+                break;
+            default:
+                Log.d(TAG, "handleBuildTextArea: Value not recognized " + valueType);
+                break;
+        }
+    }
+
+    private void handleBuildDate(FormFieldsByWorkflowType field) {
+        String valueType = field.getFieldConfigObject().getTypeInfo().getValueType();
+        FieldData fieldData = new FieldData();
+        fieldData.label = field.getFieldName();
+        fieldData.required = field.isRequired();
+        switch (valueType) {
+            case FormSettings.VALUE_DATE:
+                setFieldDateWithData.postValue(fieldData);
+                break;
+            default:
+                Log.d(TAG, "handleBuildDate: Value not recognized " + valueType);
+                break;
+        }
+    }
+
+    private void handleCheckBox(FormFieldsByWorkflowType field) {
+        String valueType = field.getFieldConfigObject().getTypeInfo().getValueType();
+        FieldData fieldData = new FieldData();
+        fieldData.label = field.getFieldName();
+        fieldData.required = field.isRequired();
+        switch (valueType) {
+            case FormSettings.VALUE_BOOLEAN:
+                setFieldSwitchWithData.postValue(fieldData);
+                break;
+            default:
+                Log.d(TAG, "handleCheckBox: Value not recognized: " + valueType);
+                break;
+        }
+    }
+
+    private void handleList(FormFieldsByWorkflowType field) {
+        String valueType = field.getFieldConfigObject().getTypeInfo().getValueType();
+        if (!valueType.equals(FormSettings.VALUE_LIST)) {
+            return;
+        }
+        boolean isMultipleSelection = field.getFieldConfigObject().getMultiple();
+        // TODO do network request to get values for the list
     }
 
     public void initForm(LifecycleOwner lifecycleOwner) {
@@ -270,9 +341,6 @@ public class CreateWorkflowViewModel extends ViewModel {
                 });
         disposables.add(disposable);
     }
-
-
-
 
     private void subscribe(LifecycleOwner lifecycleOwner) {
 

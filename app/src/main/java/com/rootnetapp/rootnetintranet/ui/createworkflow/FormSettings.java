@@ -25,6 +25,8 @@ public class FormSettings {
     public static final String VALUE_INTEGER = "integer";
     public static final String VALUE_BOOLEAN = "boolean";
     public static final String VALUE_STRING = "string";
+    public static final String VALUE_LIST = "list";
+    public static final String VALUE_DATE = "date";
 
     public FormSettings() {
         names = new ArrayList<>();

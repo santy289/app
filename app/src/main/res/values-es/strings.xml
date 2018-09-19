@@ -172,4 +172,5 @@
     <string name="no_selection">Sin Selección</string>
     <string name="form_workflow_type">Tipo de Workflow</string>
     <string name="pick_option">Selecciona uno</string>
+    <string name="enter_email">Ingresar Email</string>
 </resources>

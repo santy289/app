@@ -60,6 +60,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     protected MutableLiveData<FieldData> setFieldAreaWithData;
     protected MutableLiveData<FieldData> setFieldDateWithData;
     protected MutableLiveData<FieldData> setFieldSwitchWithData;
+    protected MutableLiveData<FieldData> setFieldEmailWithData;
     protected MutableLiveData<Boolean> refreshForm;
 
     private CreateWorkflowRepository createWorkflowRepository;
@@ -95,6 +96,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         setFieldDateWithData = new MutableLiveData<>();
         refreshForm = new MutableLiveData<>();
         setFieldSwitchWithData = new MutableLiveData<>();
+        setFieldEmailWithData = new MutableLiveData<>();
     }
 
     protected void onCleared() {
@@ -139,7 +141,6 @@ public class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void showFields(FormSettings formSettings) {
-        Log.d(TAG, "showFields: ");
         List<FormFieldsByWorkflowType> fields = formSettings.getFields();
         for (int i = 0; i < fields.size(); i++) {
             FormFieldsByWorkflowType field = fields.get(i);
@@ -156,9 +157,7 @@ public class CreateWorkflowViewModel extends ViewModel {
             }
             buildField(field);
         }
-        String test = "s";
         buildForm.postValue(true);
-//        refreshForm.postValue(true);
     }
 
     private void buildField(FormFieldsByWorkflowType field) {
@@ -199,6 +198,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                 setFieldNumericWithData.postValue(fieldData);
                 break;
             case FormSettings.VALUE_EMAIL:
+                setFieldEmailWithData.postValue(fieldData);
                 break;
         }
     }

@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.Field;
 import com.rootnetapp.rootnetintranet.databinding.FragmentCreateWorkflowBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
@@ -29,6 +30,7 @@ import me.riddhimanadib.formmaster.model.BaseFormElement;
 import me.riddhimanadib.formmaster.model.FormElementPickerDate;
 import me.riddhimanadib.formmaster.model.FormElementPickerSingle;
 import me.riddhimanadib.formmaster.model.FormElementSwitch;
+import me.riddhimanadib.formmaster.model.FormElementTextEmail;
 import me.riddhimanadib.formmaster.model.FormElementTextMultiLine;
 import me.riddhimanadib.formmaster.model.FormElementTextNumber;
 import me.riddhimanadib.formmaster.model.FormElementTextSingleLine;
@@ -205,6 +207,15 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         formItems.add(switchField);
     }
 
+    private void addEmailField(FieldData fieldData) {
+        FormElementTextEmail emailField = FormElementTextEmail
+                .createInstance()
+                .setTitle(getString(R.string.email))
+                .setHint(getString(R.string.enter_email));
+        formItems.add(emailField);
+
+    }
+
     private void formHeader(Integer labelRes) {
         String label = getString(labelRes);
         FormHeader formHeader = FormHeader.createInstance(label);
@@ -260,6 +271,8 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         viewModel.refreshForm.observe(this, refresh -> refreshForm());
 
         viewModel.setFieldSwitchWithData.observe(this, this::addSwitchField);
+
+        viewModel.setFieldEmailWithData.observe(this, this::addEmailField);
 
     }
 

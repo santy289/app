@@ -1,11 +1,10 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
-import android.content.Context;
-import android.text.TextUtils;
-
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FormSettings {
     private ArrayList<String> names;
@@ -15,11 +14,23 @@ public class FormSettings {
     private String description;
     private long createdTimestamp;
     private ArrayList<FormCreateProfile> profiles;
+    private List<FormFieldsByWorkflowType> fields;
+
+    public static final String TYPE_TEXT = "text";
+    public static final String TYPE_TEXT_AREA = "textarea";
+    public static final String TYPE_DATE = "date";
+    public static final String TYPE_CHECKBOX = "checkbox";
+    public static final String TYPE_SYSTEM_USERS = "system_users";
+    public static final String VALUE_EMAIL = "email";
+    public static final String VALUE_INTEGER = "integer";
+    public static final String VALUE_BOOLEAN = "boolean";
+    public static final String VALUE_STRING = "string";
 
     public FormSettings() {
         names = new ArrayList<>();
         ids = new ArrayList<>();
         profiles = new ArrayList<>();
+        fields = new ArrayList<>();
         indexWorkflowTypeSelected = 0;
         title = "";
         description = "";
@@ -103,4 +114,13 @@ public class FormSettings {
     public void setCreatedTimestamp(long createdTimestamp) {
         this.createdTimestamp = createdTimestamp;
     }
+
+    public List<FormFieldsByWorkflowType> getFields() {
+        return fields;
+    }
+
+    public void setFields(List<FormFieldsByWorkflowType> fields) {
+        this.fields = fields;
+    }
+
 }

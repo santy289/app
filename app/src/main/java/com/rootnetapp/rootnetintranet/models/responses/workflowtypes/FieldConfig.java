@@ -34,6 +34,8 @@ public class FieldConfig {
     private String machineName;
     @Json(name = "entity_base_fields")
     private String entityBaseFields;
+    @Json(name = "precalculated")
+    private boolean precalculated;
 
     public String getEntityBaseFields() {
         return entityBaseFields;
@@ -147,5 +149,11 @@ public class FieldConfig {
         this.filterShow = filterShow;
     }
 
+    public boolean isPrecalculated() {
+        return precalculated;
+    }
 
+    public void setPrecalculated(boolean precalculated) {
+        this.precalculated = precalculated;
+    }
 }

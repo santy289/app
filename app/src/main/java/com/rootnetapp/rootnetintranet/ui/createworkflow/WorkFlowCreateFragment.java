@@ -134,6 +134,16 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         formItems.add(textField);
     }
 
+    private void addTexField(FieldData settingsData) {
+        String label = settingsData.label;
+        boolean required = settingsData.required;
+        FormElementTextSingleLine textField = FormElementTextSingleLine
+                .createInstance()
+                .setTitle(label)
+                .setRequired(required);
+        formItems.add(textField);
+    }
+
     // Multiple lines
     private void addTextFieldMultiLines(int[] settingsData) {
         String label = getString(settingsData[CreateWorkflowViewModel.INDEX_RES_STRING]);
@@ -183,6 +193,8 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         viewModel.setFormHeader.observe(this, this::formHeader);
 
         viewModel.setFieldList.observe(this, this::addFieldList);
+
+        viewModel.setFieldTextWithData.observe(this, this::addTexField);
 
     }
 

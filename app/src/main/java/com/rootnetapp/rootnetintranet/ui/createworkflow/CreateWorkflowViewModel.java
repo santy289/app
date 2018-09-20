@@ -1,11 +1,11 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
-import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.util.Log;
 
+import com.google.android.gms.dynamic.IFragmentWrapper;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
@@ -18,6 +18,7 @@ import com.rootnetapp.rootnetintranet.models.responses.role.Role;
 import com.rootnetapp.rootnetintranet.models.responses.services.Service;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListInfo;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
@@ -111,6 +112,15 @@ public class CreateWorkflowViewModel extends ViewModel {
         setListWithData = new MutableLiveData<>();
     }
 
+    public void initForm(String token) {
+        showLoading.setValue(true);
+        if (formSettings == null) {
+            formSettings = new FormSettings();
+        }
+        this.token = token;
+        setWorkflowTypes();
+    }
+
     protected void onCleared() {
         disposables.clear();
     }
@@ -123,6 +133,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         }
         showLoading.postValue(true);
         clearFormFields.setValue(true);
+//        formSettings.clearFormFieldData();
         Disposable disposable = Observable.fromCallable(() -> {
             List<FormFieldsByWorkflowType> fields = createWorkflowRepository.getFiedsByWorkflowType(id);
             if (fields == null || fields.size() < 1) {
@@ -223,6 +234,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         FieldData fieldData = new FieldData();
         fieldData.label = field.getFieldName();
         fieldData.required = field.isRequired();
+        formSettings.addFieldDataItem(fieldData);
         setFieldPhoneWithData.postValue(fieldData);
     }
 
@@ -244,6 +256,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         fieldData.required = field.isRequired();
 
         if (FormSettings.VALUE_STRING.equals(valueType) || FormSettings.VALUE_TEXT.equals(valueType)) {
+            formSettings.addFieldDataItem(fieldData);
             setFieldTextWithData.setValue(fieldData);
             return;
         }
@@ -256,6 +269,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                 setFieldEmailWithData.setValue(fieldData);
                 break;
         }
+        formSettings.addFieldDataItem(fieldData);
     }
 
     private void handleBuildTextArea(FormFieldsByWorkflowType field) {
@@ -271,6 +285,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                 Log.d(TAG, "handleBuildTextArea: Value not recognized " + valueType);
                 break;
         }
+        formSettings.addFieldDataItem(fieldData);
     }
 
     private void handleBuildDate(FormFieldsByWorkflowType field) {
@@ -286,6 +301,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                 Log.d(TAG, "handleBuildDate: Value not recognized " + valueType);
                 break;
         }
+        formSettings.addFieldDataItem(fieldData);
     }
 
     private void handleCheckBox(FormFieldsByWorkflowType field) {
@@ -301,6 +317,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                 Log.d(TAG, "handleCheckBox: Value not recognized: " + valueType);
                 break;
         }
+        formSettings.addFieldDataItem(fieldData);
     }
 
     private void handleBuildProduct(FormFieldsByWorkflowType field) {
@@ -427,6 +444,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         setListWithData.setValue(fieldData);
         buildForm.setValue(true);
         showLoading.setValue(false);
+        formSettings.addFieldDataItem(fieldData);
     }
 
     private void handleList(FormFieldsByWorkflowType field) {
@@ -437,6 +455,15 @@ public class CreateWorkflowViewModel extends ViewModel {
         }
 
         boolean isMultipleSelection = fieldConfig.getMultiple();
+
+        ListInfo listInfo = fieldConfig.getListInfo();
+        if (listInfo == null) {
+            if (fieldConfig.getTypeInfo().getType().equals(FormSettings.TYPE_SYSTEM_USERS)) {
+                setTeamList();
+            }
+            return;
+        }
+
         int listId = fieldConfig.getListInfo().getId();
         int customFieldId = field.getId();
         String customLabel = field.getFieldName();
@@ -506,16 +533,6 @@ public class CreateWorkflowViewModel extends ViewModel {
 
     }
 
-    public void initForm(LifecycleOwner lifecycleOwner, String token) {
-        showLoading.setValue(true);
-        if (formSettings == null) {
-            formSettings = new FormSettings();
-        }
-        this.token = token;
-        subscribe(lifecycleOwner);
-        setWorkflowTypes();
-    }
-
     private void setWorkflowTypes() {
         Disposable disposable = Observable.fromCallable(() -> {
             List<WorkflowTypeItemMenu> types = createWorkflowRepository.getWorklowTypeNames();
@@ -535,11 +552,13 @@ public class CreateWorkflowViewModel extends ViewModel {
             fieldListSettings.labelRes = R.string.type;
             fieldListSettings.required = true;
             fieldListSettings.tag = TAG_WORKFLOW_TYPE;
-            setFieldList.postValue(fieldListSettings);
-            return true;
+            //setFieldList.postValue(fieldListSettings);
+            return fieldListSettings;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe( success -> {
+                .subscribe( fieldListSettings -> {
+                    FieldListSettings data = (FieldListSettings) fieldListSettings;
+                    setFieldList.setValue(data);
                     setBaseFields();
                 }, throwable -> {
                     showLoading.postValue(false);
@@ -578,6 +597,7 @@ public class CreateWorkflowViewModel extends ViewModel {
             fieldListSettings.items = formSettings.getProfileNames();
             fieldListSettings.labelRes = R.string.owner;
             fieldListSettings.required = true;
+            fieldListSettings.tag = 88;
             setFieldList.postValue(fieldListSettings);
             return true;
         }).subscribeOn(Schedulers.newThread())
@@ -590,11 +610,6 @@ public class CreateWorkflowViewModel extends ViewModel {
                     buildForm.postValue(true);
                 });
         disposables.add(disposable);
-    }
-
-    private void subscribe(LifecycleOwner lifecycleOwner) {
-
-        //createWorkflowRepository.getWorkflowTypeMenuItems().observe(lifecycleOwner, getWorkflowTypes);
     }
 
     public void getWorkflowTypes(String auth) {

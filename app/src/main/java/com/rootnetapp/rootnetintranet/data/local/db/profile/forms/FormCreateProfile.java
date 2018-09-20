@@ -6,7 +6,7 @@ public class FormCreateProfile {
     @ColumnInfo(name = "id")
     public int id;
 
-    @ColumnInfo(name = "full_name")
+    @ColumnInfo(name = "fullName")
     public String fullName;
 
     @ColumnInfo(name = "picture")

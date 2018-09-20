@@ -82,7 +82,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer "+ prefs.getString("token","");
 
-        viewModel.initForm(this, token);
+        viewModel.initForm(token);
         return view;
     }
 

@@ -172,4 +172,5 @@
     <string name="form_workflow_type">Workflow Type</string>
     <string name="pick_option">Pick any item</string>
     <string name="enter_email">Enter Email</string>
+    <string name="create_workflow">Create Workflow</string>
 </resources>

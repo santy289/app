@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.Field;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
@@ -21,6 +22,9 @@ public class FormSettings {
     private ArrayList<FormCreateProfile> profiles;
     private List<FormFieldsByWorkflowType> fields;
     private ArrayList<ListField> formLists;
+    private ArrayList<FieldData> fieldItems;
+
+
 
     public static final String TYPE_TEXT = "text";
     public static final String TYPE_TEXT_AREA = "textarea";
@@ -52,6 +56,7 @@ public class FormSettings {
         profiles = new ArrayList<>();
         fields = new ArrayList<>();
         formLists = new ArrayList<>();
+        fieldItems = new ArrayList<>();
         indexWorkflowTypeSelected = 0;
         title = "";
         description = "";
@@ -217,5 +222,19 @@ public class FormSettings {
         return listField;
     }
 
+    public ArrayList<FieldData> getFieldItems() {
+        return fieldItems;
+    }
 
+    public void setFieldItems(ArrayList<FieldData> fieldItems) {
+        this.fieldItems = fieldItems;
+    }
+
+    public void addFieldDataItem(FieldData fieldData) {
+        fieldItems.add(fieldData);
+    }
+
+    public void clearFormFieldData() {
+        fieldItems.clear();
+    }
 }

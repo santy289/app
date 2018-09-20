@@ -125,8 +125,8 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
                 .createInstance()
                 .setTitle(label)
                 .setTag(settings.tag)
+//                .setValue(settings.items.get(0))
                 .setOptions(settings.items).setPickerTitle(getString(R.string.pick_option));
-        fieldList.setValue(settings.items.get(0));
         formItems.add(fieldList);
     }
 
@@ -245,7 +245,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
                     .setTitle(fieldData.label)
                     .setOptions(labels)
                     .setPickerTitle(getString(R.string.pick_option))
-                    .setNegativeText("Reset");
+                    .setNegativeText(getString(R.string.cancel));
             formItems.add(multipleList);
        } else {
             FormElementPickerSingle singleList = FormElementPickerSingle
@@ -264,14 +264,11 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
     }
 
     private void buildForm() {
-//        List<BaseFormElement> newList = new ArrayList<>(formItems);
         formBuilder = new FormBuilder(
                 getContext(),
                 fragmentCreateWorkflowBinding.recCreateWorkflow,
                 this);
         formBuilder.addFormElements(formItems);
-//        formItems = newList;
-//        refreshForm();
     }
 
     private void refreshForm() {
@@ -281,6 +278,13 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
             return;
         }
         adapter.notifyDataSetChanged();
+    }
+
+    private void clearFormFields(Boolean clear) {
+        if(6 >= formItems.size()){
+            return;
+        }
+        formItems.subList(6, formItems.size()).clear();
     }
 
     private void subscribe() {
@@ -319,6 +323,8 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         viewModel.setFieldPhoneWithData.observe(this, this::addPhoneField);
 
         viewModel.setListWithData.observe(this, this::addList);
+
+        viewModel.clearFormFields.observe(this, this::clearFormFields);
 
     }
 

@@ -68,6 +68,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     protected MutableLiveData<FieldData> setFieldPhoneWithData;
     protected MutableLiveData<FieldData> setListWithData;
     protected MutableLiveData<Boolean> refreshForm;
+    protected MutableLiveData<Boolean> clearFormFields;
 
     private CreateWorkflowRepository createWorkflowRepository;
 
@@ -99,6 +100,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         setDatePicker = new MutableLiveData<>();
         setFormHeader = new MutableLiveData<>();
         setFieldList = new MutableLiveData<>();
+        clearFormFields = new MutableLiveData<>();
         setFieldNumericWithData = new MutableLiveData<>();
         setFieldAreaWithData = new MutableLiveData<>();
         setFieldDateWithData = new MutableLiveData<>();
@@ -120,6 +122,7 @@ public class CreateWorkflowViewModel extends ViewModel {
             return;
         }
         showLoading.postValue(true);
+        clearFormFields.setValue(true);
         Disposable disposable = Observable.fromCallable(() -> {
             List<FormFieldsByWorkflowType> fields = createWorkflowRepository.getFiedsByWorkflowType(id);
             if (fields == null || fields.size() < 1) {
@@ -165,7 +168,7 @@ public class CreateWorkflowViewModel extends ViewModel {
             }
             buildField(field);
         }
-        buildForm.postValue(true);
+        buildForm.setValue(true);
     }
 
     private void buildField(FormFieldsByWorkflowType field) {

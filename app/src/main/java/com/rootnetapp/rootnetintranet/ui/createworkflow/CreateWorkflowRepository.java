@@ -13,6 +13,8 @@ import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.project.ProjectResponse;
+import com.rootnetapp.rootnetintranet.models.responses.role.RoleResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
@@ -80,6 +82,16 @@ public class CreateWorkflowRepository {
 
     public Observable<ServicesResponse> getServices(String auth) {
         return service.getServices(auth).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<RoleResponse> getRoles(String auth) {
+        return service.getRoles(auth).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<ProjectResponse> getProjects(String auth) {
+        return service.getProjects(auth).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 

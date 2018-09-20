@@ -14,6 +14,8 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.role.Role;
+import com.rootnetapp.rootnetintranet.models.responses.services.Service;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
@@ -185,10 +187,10 @@ public class CreateWorkflowViewModel extends ViewModel {
                 handleCheckBox(field);
                 break;
             case FormSettings.TYPE_PROJECT:
-                handleBuildEntity(field);
+                handleProject(field);
                 break;
             case FormSettings.TYPE_ROLE:
-                handleBuildEntity(field);
+                handeBuildRoles(field);
                 break;
             case FormSettings.TYPE_BIRTH_DATE:
                 handleBuildDate(field);
@@ -304,22 +306,124 @@ public class CreateWorkflowViewModel extends ViewModel {
         int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
     }
 
+    private void handleProject(FormFieldsByWorkflowType field) {
+        FieldConfig fieldConfig = field.getFieldConfigObject();
+        boolean isMultipleSelection = fieldConfig.getMultiple();
+        String customLabel = field.getFieldName();
+        int customFieldId = field.getId();
+        int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
+
+        // TODO endpoint at this point returns an empty array.
+//        Disposable disposable = createWorkflowRepository
+//                .getProjects(token)
+//                .subscribe( projectResponse -> {
+//
+//                    if (roleResponse.getCode() != 200) {
+//                        showLoading.setValue(false);
+//                        return;
+//                    }
+//                    List<Role> list = roleResponse.getList();
+//                    ListField listField = formSettings.addRolesLisToForm(
+//                            list,
+//                            customLabel,
+//                            customFieldId,
+//                            FormSettings.TYPE_ROLE
+//                    );
+//                    listField.isMultipleSelection = isMultipleSelection;
+//                    listField.associatedWorkflowTypeId = associatedWorkflowTypeId;
+//
+//                    if (listField.children.size() < 1) {
+//                        return;
+//                    }
+//                    showListField(listField);
+//                }, throwable -> {
+//                    showLoading.setValue(false);
+//                    Log.d(TAG, "handeBuildRoles: " + throwable.getMessage());
+//                });
+//
+//        disposables.add(disposable);
+    }
+
+    private void handeBuildRoles(FormFieldsByWorkflowType field) {
+        FieldConfig fieldConfig = field.getFieldConfigObject();
+        boolean isMultipleSelection = fieldConfig.getMultiple();
+        String customLabel = field.getFieldName();
+        int customFieldId = field.getId();
+        int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
+
+        Disposable disposable = createWorkflowRepository
+                .getRoles(token)
+                .subscribe( roleResponse -> {
+                    if (roleResponse.getCode() != 200) {
+                        showLoading.setValue(false);
+                        return;
+                    }
+                    List<Role> list = roleResponse.getList();
+                    ListField listField = formSettings.addRolesLisToForm(
+                            list,
+                            customLabel,
+                            customFieldId,
+                            FormSettings.TYPE_ROLE
+                    );
+                    listField.isMultipleSelection = isMultipleSelection;
+                    listField.associatedWorkflowTypeId = associatedWorkflowTypeId;
+
+                    if (listField.children.size() < 1) {
+                        return;
+                    }
+                    showListField(listField);
+                }, throwable -> {
+                    showLoading.setValue(false);
+                    Log.d(TAG, "handeBuildRoles: " + throwable.getMessage());
+                });
+
+        disposables.add(disposable);
+    }
+
     private void handleBuildService(FormFieldsByWorkflowType field) {
         FieldConfig fieldConfig = field.getFieldConfigObject();
         boolean isMultipleSelection = fieldConfig.getMultiple();
         String customLabel = field.getFieldName();
-
+        int customFieldId = field.getId();
+        int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
 
         Disposable disposable = createWorkflowRepository
                 .getServices(token)
                 .subscribe( servicesResponse -> {
-                    Log.d(TAG, "handleBuildService: here");
-                    
+                    if (servicesResponse.getCode() != 200) {
+                        showLoading.setValue(false);
+                        return;
+                    }
+                    List<Service> list = servicesResponse.getList();
+                    ListField listField = formSettings.addServiceListToForm(
+                            list,
+                            customLabel,
+                            customFieldId,
+                            FormSettings.TYPE_SERVICE
+                    );
+                    listField.isMultipleSelection = isMultipleSelection;
+                    listField.associatedWorkflowTypeId = associatedWorkflowTypeId;
+
+                    if (listField.children.size() < 1) {
+                        return;
+                    }
+
+                    showListField(listField);
                 }, throwable -> {
                     Log.d(TAG, "handleBuildService: can't get service: " + throwable.getMessage());
                     showLoading.setValue(false);
                 });
         disposables.add(disposable);
+    }
+
+    private void showListField(ListField listField) {
+        FieldData fieldData = new FieldData();
+        fieldData.label = listField.customLabel;
+        fieldData.list = listField.children;
+        fieldData.isMultipleSelection = listField.isMultipleSelection;
+        setListWithData.setValue(fieldData);
+        buildForm.setValue(true);
+        showLoading.setValue(false);
     }
 
     private void handleList(FormFieldsByWorkflowType field) {
@@ -331,6 +435,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 
         boolean isMultipleSelection = fieldConfig.getMultiple();
         int listId = fieldConfig.getListInfo().getId();
+        int customFieldId = field.getId();
         String customLabel = field.getFieldName();
         int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
 
@@ -347,7 +452,12 @@ public class CreateWorkflowViewModel extends ViewModel {
                         if (id != listId) {
                             continue;
                         }
-                        listField = formSettings.addListToForm(listItem, customLabel);
+                        listField = formSettings.addListToForm(
+                                listItem,
+                                customLabel,
+                                customFieldId,
+                                FormSettings.TYPE_LIST
+                        );
                         listField.isMultipleSelection = isMultipleSelection;
                         listField.associatedWorkflowTypeId = associatedWorkflowTypeId;
                         break;
@@ -356,14 +466,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                     if (listField == null || listField.children.size() < 1) {
                         return;
                     }
-
-                    FieldData fieldData = new FieldData();
-                    fieldData.label = customLabel;
-                    fieldData.list = listField.children;
-                    fieldData.isMultipleSelection = isMultipleSelection;
-                    setListWithData.setValue(fieldData);
-                    buildForm.setValue(true);
-                    showLoading.setValue(false);
+                    showListField(listField);
                 }, throwable -> {
                     showLoading.setValue(false);
                     Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());

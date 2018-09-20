@@ -4,6 +4,8 @@ import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProf
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
+import com.rootnetapp.rootnetintranet.models.responses.role.Role;
+import com.rootnetapp.rootnetintranet.models.responses.services.Service;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
 
 import java.util.ArrayList;
@@ -150,12 +152,14 @@ public class FormSettings {
         this.formLists = formLists;
     }
 
-    public ListField addListToForm(ListItem newList, String customLabel) {
+    public ListField addListToForm(ListItem newList, String customLabel, int customFieldId, String type) {
         ListField listField = new ListField();
         listField.id = newList.getId();
         listField.listId = newList.getListId();
         listField.listName = newList.getName();
         listField.customLabel = customLabel;
+        listField.customFieldId = customFieldId;
+        listField.listType = type;
 
         ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
         List<ListItem> incomingList = newList.getChildren();
@@ -173,4 +177,45 @@ public class FormSettings {
         formLists.add(listField);
         return listField;
     }
+
+    public ListField addServiceListToForm(List<Service> incomingList, String customLabel, int customFieldId, String type) {
+        ListField listField = new ListField();
+        listField.customFieldId = customFieldId;
+        listField.listType = type;
+        listField.customLabel = customLabel;
+
+        ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
+        for (int i = 0; i < incomingList.size(); i++) {
+            Service newItem = incomingList.get(i);
+            ListFieldItemMeta item = new ListFieldItemMeta(
+                    newItem.getId(),
+                    newItem.getName()
+            );
+            tempList.add(item);
+        }
+        listField.children = tempList;
+        formLists.add(listField);
+        return listField;
+    }
+
+    public ListField addRolesLisToForm(List<Role> incomingList, String customLabel, int customFieldId, String type) {
+        ListField listField = new ListField();
+        listField.customFieldId = customFieldId;
+        listField.listType = type;
+        listField.customLabel = customLabel;
+        ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
+        for (int i = 0; i < incomingList.size(); i++) {
+            Role newItem = incomingList.get(i);
+            ListFieldItemMeta item = new ListFieldItemMeta(
+                    newItem.getId(),
+                    newItem.getName()
+            );
+            tempList.add(item);
+        }
+        listField.children = tempList;
+        formLists.add(listField);
+        return listField;
+    }
+
+
 }

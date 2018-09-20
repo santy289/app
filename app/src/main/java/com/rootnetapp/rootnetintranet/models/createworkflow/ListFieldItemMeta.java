@@ -10,4 +10,8 @@ public class ListFieldItemMeta {
         this.name = name;
         this.listId = listId;
     }
+
+    public ListFieldItemMeta(int id, String name) {
+        this(id, name, 0);
+    }
 }

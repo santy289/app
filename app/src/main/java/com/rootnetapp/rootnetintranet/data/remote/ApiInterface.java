@@ -13,7 +13,9 @@ import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse
 import com.rootnetapp.rootnetintranet.models.responses.file.FilesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.project.ProjectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordResponse;
+import com.rootnetapp.rootnetintranet.models.responses.role.RoleResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.InteractionResponse;
@@ -143,6 +145,16 @@ public interface ApiInterface {
     @Headers({"Domain-Name: api"})
     @GET("contacts/services?all=true")
     Observable<ServicesResponse> getServices(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: api"})
+    @GET("roles?all=true")
+    Observable<RoleResponse> getRoles(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/projects?all=true")
+    Observable<ProjectResponse> getProjects(@Header("Authorization") String authorization);
+
+
 
     @Headers({"Domain-Name: api"})
     @GET("client/35/users")

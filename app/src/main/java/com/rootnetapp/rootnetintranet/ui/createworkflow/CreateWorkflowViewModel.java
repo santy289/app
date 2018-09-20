@@ -5,12 +5,12 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.util.Log;
 
-import com.google.android.gms.dynamic.IFragmentWrapper;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
+import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
@@ -28,6 +28,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -121,6 +122,11 @@ public class CreateWorkflowViewModel extends ViewModel {
         setWorkflowTypes();
     }
 
+    public void createWorkflow() {
+        ArrayList<FieldData> data = formSettings.getFieldItems();
+        Log.d(TAG, "createWorkflow: here");
+    }
+
     protected void onCleared() {
         disposables.clear();
     }
@@ -133,7 +139,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         }
         showLoading.postValue(true);
         clearFormFields.setValue(true);
-//        formSettings.clearFormFieldData();
+        formSettings.clearFormFieldData();
         Disposable disposable = Observable.fromCallable(() -> {
             List<FormFieldsByWorkflowType> fields = createWorkflowRepository.getFiedsByWorkflowType(id);
             if (fields == null || fields.size() < 1) {
@@ -457,7 +463,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         ListInfo listInfo = fieldConfig.getListInfo();
         if (listInfo == null) {
             if (fieldConfig.getTypeInfo().getType().equals(FormSettings.TYPE_SYSTEM_USERS)) {
-                setTeamList();
+                setTeamList(field);
             }
             return;
         }
@@ -522,6 +528,7 @@ public class CreateWorkflowViewModel extends ViewModel {
             fieldListSettings.labelRes = R.string.type;
             fieldListSettings.required = true;
             fieldListSettings.tag = TAG_WORKFLOW_TYPE;
+            saveTypeToFormSettings(fieldListSettings);
             return fieldListSettings;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -535,6 +542,30 @@ public class CreateWorkflowViewModel extends ViewModel {
                     showLoading.postValue(false);
                 });
         disposables.add(disposable);
+    }
+
+    private void saveTypeToFormSettings(FieldListSettings fieldListSettings) {
+        int customLabel = fieldListSettings.labelRes;
+
+        ArrayList<String> stringListItems = fieldListSettings.items;
+        ArrayList<ListFieldItemMeta> listData = new ArrayList<>();
+        String name;
+        ListFieldItemMeta itemMeta;
+
+        for (int i = 0; i < stringListItems.size(); i++) {
+            name = stringListItems.get(i);
+            itemMeta = new ListFieldItemMeta(
+                    TAG_WORKFLOW_TYPE,
+                    name
+            );
+            listData.add(itemMeta);
+        }
+        FieldData fieldData = new FieldData();
+        fieldData.resLabel = customLabel;
+        fieldData.list =  listData;
+        fieldData.tag = TAG_WORKFLOW_TYPE;
+        fieldData.isMultipleSelection = false;
+        formSettings.addFieldDataItem(fieldData);
     }
 
     private void setBaseFields() {
@@ -551,10 +582,10 @@ public class CreateWorkflowViewModel extends ViewModel {
         settingDatePicker[INDEX_REQUIRED] = REQUIRED;
         setDatePicker.postValue(settingDatePicker);
         setFormHeader.postValue(R.string.workflow_team);
-        setTeamList();
+        //setTeamList();
     }
 
-    private void setTeamList() {
+    private void setTeamList(FormFieldsByWorkflowType field) {
         Disposable disposable = Observable.fromCallable(() -> {
             List<FormCreateProfile> profiles = createWorkflowRepository.getProfiles();
             if (profiles == null || profiles.size() < 1) {
@@ -564,11 +595,35 @@ public class CreateWorkflowViewModel extends ViewModel {
                 formSettings.setProfile(profiles.get(i));
             }
             formSettings.getProfileNames();
+            ArrayList<String> stringListItems = formSettings.getProfileNames();
             FieldListSettings fieldListSettings = new FieldListSettings();
-            fieldListSettings.items = formSettings.getProfileNames();
+            fieldListSettings.items = stringListItems;
             fieldListSettings.labelRes = R.string.owner;
             fieldListSettings.required = true;
             fieldListSettings.tag = 88;
+
+
+            FieldConfig fieldConfig = field.getFieldConfigObject();
+            boolean isMultipleSelection = fieldConfig.getMultiple();
+            String customLabel = field.getFieldName();
+            int customFieldId = field.getId();
+
+            ArrayList<ListFieldItemMeta> listData = new ArrayList<>();
+            String name;
+            for (int i = 0; i < stringListItems.size(); i++) {
+                name = stringListItems.get(i);
+                ListFieldItemMeta itemMeta = new ListFieldItemMeta(
+                        customFieldId,
+                        name
+                );
+                listData.add(itemMeta);
+            }
+            FieldData fieldData = new FieldData();
+            fieldData.label = customLabel;
+            fieldData.list =  listData;
+            fieldData.tag = field.getId();
+            fieldData.isMultipleSelection = isMultipleSelection;
+            formSettings.addFieldDataItem(fieldData);
             setFieldList.postValue(fieldListSettings);
             return true;
         }).subscribeOn(Schedulers.newThread())

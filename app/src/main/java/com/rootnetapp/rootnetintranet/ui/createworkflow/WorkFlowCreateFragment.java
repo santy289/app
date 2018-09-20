@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -81,6 +82,11 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         subscribe();
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer "+ prefs.getString("token","");
+
+        fragmentCreateWorkflowBinding.btnCreate.setOnClickListener(v -> {
+//            viewModel.createWorkflow();
+            postFormData();
+        });
 
         viewModel.initForm(token);
         return view;
@@ -271,6 +277,14 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         formBuilder.addFormElements(formItems);
     }
 
+    private void postFormData() {
+        if (formBuilder.isValidForm()) {
+            Log.d(TAG, "postFormData: is valid");
+        } else {
+            Log.d(TAG, "postFormData: is not valid");
+        }
+    }
+
     private void refreshForm() {
         RecyclerView.Adapter adapter =
                 fragmentCreateWorkflowBinding.recCreateWorkflow.getAdapter();
@@ -279,6 +293,8 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         }
         adapter.notifyDataSetChanged();
     }
+
+
 
     private void clearFormFields(Boolean clear) {
 //        if(6 >= formItems.size()){

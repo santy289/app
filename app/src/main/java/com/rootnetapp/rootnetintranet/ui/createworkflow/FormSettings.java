@@ -233,6 +233,9 @@ public class FormSettings {
     }
 
     public void clearFormFieldData() {
-        fieldItems.clear();
+        if(1 >= fieldItems.size()){
+            return;
+        }
+        fieldItems.subList(1, fieldItems.size()).clear();
     }
 }

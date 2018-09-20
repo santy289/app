@@ -24,8 +24,6 @@ public class FormSettings {
     private ArrayList<ListField> formLists;
     private ArrayList<FieldData> fieldItems;
 
-
-
     public static final String TYPE_TEXT = "text";
     public static final String TYPE_TEXT_AREA = "textarea";
     public static final String TYPE_DATE = "date";

@@ -169,14 +169,12 @@ public class CreateWorkflowViewModel extends ViewModel {
             if (!field.isShowForm()) {
                 continue;
             }
+
             FieldConfig fieldConfig = field.getFieldConfigObject();
-            boolean isBase = fieldConfig.getBase();
-            if (isBase) {
-                continue;
-            }
             if (fieldConfig.isPrecalculated()) {
                 continue;
             }
+
             buildField(field);
         }
         buildForm.setValue(true);
@@ -502,35 +500,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                     Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
                 });
 
-
-//        Disposable disposable = Observable.fromCallable(() -> {
-//            List<FormFieldsByWorkflowType> fields = createWorkflowRepository.getFiedsByWorkflowType(id);
-//            if (fields == null || fields.size() < 1) {
-//                return false;
-//            }
-//            FormFieldsByWorkflowType field;
-//            FieldConfig fieldConfig;
-//            Moshi moshi = new Moshi.Builder().build();
-//            JsonAdapter<FieldConfig> jsonAdapter = moshi.adapter(FieldConfig.class);
-//            for (int i = 0; i < fields.size(); i++) {
-//                field = fields.get(i);
-//                fieldConfig = jsonAdapter.fromJson(field.getFieldConfig());
-//                field.setFieldConfigObject(fieldConfig);
-//            }
-//            formSettings.setFields(fields);
-//            return formSettings;
-//        }).subscribeOn(Schedulers.newThread())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe( formSettings -> {
-//                    showLoading.setValue(false);
-//                    FormSettings settings = (FormSettings) formSettings;
-//                    showFields(settings);
-//                }, throwable -> {
-//                    showLoading.postValue(false);
-//                });
         disposables.add(disposable);
-
-
     }
 
     private void setWorkflowTypes() {
@@ -552,14 +522,15 @@ public class CreateWorkflowViewModel extends ViewModel {
             fieldListSettings.labelRes = R.string.type;
             fieldListSettings.required = true;
             fieldListSettings.tag = TAG_WORKFLOW_TYPE;
-            //setFieldList.postValue(fieldListSettings);
             return fieldListSettings;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe( fieldListSettings -> {
                     FieldListSettings data = (FieldListSettings) fieldListSettings;
                     setFieldList.setValue(data);
-                    setBaseFields();
+                    //setBaseFields();
+                    buildForm.setValue(true);
+                    showLoading.setValue(false);
                 }, throwable -> {
                     showLoading.postValue(false);
                 });

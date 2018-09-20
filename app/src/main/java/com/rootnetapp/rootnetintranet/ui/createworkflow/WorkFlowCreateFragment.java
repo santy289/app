@@ -281,10 +281,16 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
     }
 
     private void clearFormFields(Boolean clear) {
-        if(6 >= formItems.size()){
+//        if(6 >= formItems.size()){
+//            return;
+//        }
+//        formItems.subList(6, formItems.size()).clear();
+
+
+        if(1 >= formItems.size()){
             return;
         }
-        formItems.subList(6, formItems.size()).clear();
+        formItems.subList(1, formItems.size()).clear();
     }
 
     private void subscribe() {

@@ -2,6 +2,8 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,7 +16,6 @@ import android.view.ViewGroup;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.Field;
 import com.rootnetapp.rootnetintranet.databinding.FragmentCreateWorkflowBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
@@ -28,6 +29,7 @@ import me.riddhimanadib.formmaster.FormBuilder;
 import me.riddhimanadib.formmaster.listener.OnFormElementValueChangedListener;
 import me.riddhimanadib.formmaster.model.BaseFormElement;
 import me.riddhimanadib.formmaster.model.FormElementPickerDate;
+import me.riddhimanadib.formmaster.model.FormElementPickerMulti;
 import me.riddhimanadib.formmaster.model.FormElementPickerSingle;
 import me.riddhimanadib.formmaster.model.FormElementSwitch;
 import me.riddhimanadib.formmaster.model.FormElementTextEmail;
@@ -77,7 +79,10 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
                 .of(this, createWorkflowViewModelFactory)
                 .get(CreateWorkflowViewModel.class);
         subscribe();
-        viewModel.initForm(this);
+        SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        String token = "Bearer "+ prefs.getString("token","");
+
+        viewModel.initForm(this, token);
         return view;
     }
 
@@ -228,6 +233,30 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         formItems.add(phoneField);
     }
 
+    private void addList(FieldData fieldData) {
+        List<String> labels = new ArrayList<>();
+        for (int i = 0; i < fieldData.list.size(); i++) {
+            labels.add(fieldData.list.get(i).name);
+        }
+
+        if (fieldData.isMultipleSelection) {
+            FormElementPickerMulti multipleList = FormElementPickerMulti
+                    .createInstance()
+                    .setTitle(fieldData.label)
+                    .setOptions(labels)
+                    .setPickerTitle(getString(R.string.pick_option))
+                    .setNegativeText("Reset");
+            formItems.add(multipleList);
+       } else {
+            FormElementPickerSingle singleList = FormElementPickerSingle
+                    .createInstance()
+                    .setTitle(fieldData.label)
+                    .setOptions(labels)
+                    .setPickerTitle(getString(R.string.pick_option));
+            formItems.add(singleList);
+       }
+    }
+
     private void formHeader(Integer labelRes) {
         String label = getString(labelRes);
         FormHeader formHeader = FormHeader.createInstance(label);
@@ -288,6 +317,8 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         viewModel.setFieldEmailWithData.observe(this, this::addEmailField);
 
         viewModel.setFieldPhoneWithData.observe(this, this::addPhoneField);
+
+        viewModel.setListWithData.observe(this, this::addList);
 
     }
 

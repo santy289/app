@@ -2,6 +2,9 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
+import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
+import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +18,7 @@ public class FormSettings {
     private long createdTimestamp;
     private ArrayList<FormCreateProfile> profiles;
     private List<FormFieldsByWorkflowType> fields;
+    private ArrayList<ListField> formLists;
 
     public static final String TYPE_TEXT = "text";
     public static final String TYPE_TEXT_AREA = "textarea";
@@ -45,6 +49,7 @@ public class FormSettings {
         ids = new ArrayList<>();
         profiles = new ArrayList<>();
         fields = new ArrayList<>();
+        formLists = new ArrayList<>();
         indexWorkflowTypeSelected = 0;
         title = "";
         description = "";
@@ -137,4 +142,35 @@ public class FormSettings {
         this.fields = fields;
     }
 
+    public ArrayList<ListField> getFormLists() {
+        return formLists;
+    }
+
+    public void setFormLists(ArrayList<ListField> formLists) {
+        this.formLists = formLists;
+    }
+
+    public ListField addListToForm(ListItem newList, String customLabel) {
+        ListField listField = new ListField();
+        listField.id = newList.getId();
+        listField.listId = newList.getListId();
+        listField.listName = newList.getName();
+        listField.customLabel = customLabel;
+
+        ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
+        List<ListItem> incomingList = newList.getChildren();
+        for (int i = 0; i < incomingList.size(); i++) {
+            ListItem newItem = incomingList.get(i);
+            ListFieldItemMeta item = new ListFieldItemMeta(
+                    newItem.getId(),
+                    newItem.getName(),
+                    newItem.getListId()
+            );
+            tempList.add(item);
+        }
+
+        listField.children = tempList;
+        formLists.add(listField);
+        return listField;
+    }
 }

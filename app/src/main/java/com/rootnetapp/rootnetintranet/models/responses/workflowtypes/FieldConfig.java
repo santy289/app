@@ -6,8 +6,8 @@ import java.util.List;
 
 public class FieldConfig {
 
-    @Json(name = "associated_workflow_field_id")
-    private String associatedWorkflowFieldId;
+    @Json(name = "associated_workflow_type_id")
+    private int associatedWorkflowTypedId;
     @Json(name = "is_associated")
     private Boolean isAssociated;
     @Json(name = "list_info")
@@ -61,12 +61,12 @@ public class FieldConfig {
         this.base = base;
     }
 
-    public String getAssociatedWorkflowFieldId() {
-        return associatedWorkflowFieldId;
+    public int getAssociatedWorkflowTypedId() {
+        return associatedWorkflowTypedId;
     }
 
-    public void setAssociatedWorkflowFieldId(String associatedWorkflowFieldId) {
-        this.associatedWorkflowFieldId = associatedWorkflowFieldId;
+    public void setAssociatedWorkflowTypedId(int associatedWorkflowTypedId) {
+        this.associatedWorkflowTypedId = associatedWorkflowTypedId;
     }
 
     public Boolean getIsAssociated() {

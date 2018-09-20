@@ -16,6 +16,7 @@ public class FormSettings {
     private ArrayList<String> names;
     private ArrayList<Integer> ids;
     private int indexWorkflowTypeSelected;
+    private int workflowTypeIdSelected;
     private String title;
     private String description;
     private long createdTimestamp;
@@ -59,6 +60,14 @@ public class FormSettings {
         title = "";
         description = "";
         createdTimestamp = 0;
+    }
+
+    public int getWorkflowTypeIdSelected() {
+        return workflowTypeIdSelected;
+    }
+
+    public void setWorkflowTypeIdSelected(int workflowTypeIdSelected) {
+        this.workflowTypeIdSelected = workflowTypeIdSelected;
     }
 
     public ArrayList<String> getNames() {

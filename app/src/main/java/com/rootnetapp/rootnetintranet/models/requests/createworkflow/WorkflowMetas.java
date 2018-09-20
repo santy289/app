@@ -2,10 +2,6 @@ package com.rootnetapp.rootnetintranet.models.requests.createworkflow;
 
 import com.squareup.moshi.Json;
 
-/**
- * Created by root on 27/03/18.
- */
-
 public class WorkflowMetas {
 
     @Json(name = "value")

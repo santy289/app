@@ -10,7 +10,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -88,6 +87,8 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
             postFormData();
         });
 
+        startBuilder();
+
         viewModel.initForm(token);
         return view;
     }
@@ -105,6 +106,13 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
             String typeSelected = baseFormElement.getValue();
             viewModel.generateFieldsByType(typeSelected);
         }
+    }
+
+    private void startBuilder() {
+        formBuilder = new FormBuilder(
+                getContext(),
+                fragmentCreateWorkflowBinding.recCreateWorkflow,
+                this);
     }
 
     private void showLoading(Boolean show) {
@@ -131,7 +139,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
                 .createInstance()
                 .setTitle(label)
                 .setTag(settings.tag)
-//                .setValue(settings.items.get(0))
+                .setValue(settings.items.get(0))
                 .setOptions(settings.items).setPickerTitle(getString(R.string.pick_option));
         formItems.add(fieldList);
     }
@@ -153,6 +161,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         FormElementTextSingleLine textField = FormElementTextSingleLine
                 .createInstance()
                 .setTitle(label)
+                .setTag(fieldData.tag)
                 .setRequired(required);
         formItems.add(textField);
     }
@@ -173,6 +182,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         FormElementTextMultiLine textFieldMultiLine = FormElementTextMultiLine
                 .createInstance()
                 .setTitle(label)
+                .setTag(fieldData.tag)
                 .setRequired(fieldData.required);
         formItems.add(textFieldMultiLine);
     }
@@ -194,6 +204,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         FormElementPickerDate datePicker = FormElementPickerDate
                 .createInstance()
                 .setTitle(label)
+                .setTag(fieldData.tag)
                 .setRequired(required)
                 .setDateFormat("MMM dd, yyyy");
         formItems.add(datePicker);
@@ -205,6 +216,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         FormElementTextNumber numericField = FormElementTextNumber
                 .createInstance()
                 .setRequired(required)
+                .setTag(fieldData.tag)
                 .setTitle(label);
         formItems.add(numericField);
     }
@@ -215,7 +227,9 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         FormElementSwitch switchField = FormElementSwitch
                 .createInstance()
                 .setRequired(required)
-                .setTitle(label);
+                .setTitle(label)
+                .setTag(fieldData.tag)
+                .setSwitchTexts("Yes", "No");
         formItems.add(switchField);
     }
 
@@ -223,6 +237,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         FormElementTextEmail emailField = FormElementTextEmail
                 .createInstance()
                 .setTitle(getString(R.string.email))
+                .setTag(fieldData.tag)
                 .setHint(getString(R.string.enter_email))
                 .setRequired(fieldData.required);
         formItems.add(emailField);
@@ -235,6 +250,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         FormElementTextPhone phoneField = FormElementTextPhone
                 .createInstance()
                 .setTitle(label)
+                .setTag(fieldData.tag)
                 .setRequired(required);
         formItems.add(phoneField);
     }
@@ -250,6 +266,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
                     .createInstance()
                     .setTitle(fieldData.label)
                     .setOptions(labels)
+                    .setTag(fieldData.tag)
                     .setPickerTitle(getString(R.string.pick_option))
                     .setNegativeText(getString(R.string.cancel));
             formItems.add(multipleList);
@@ -257,6 +274,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
             FormElementPickerSingle singleList = FormElementPickerSingle
                     .createInstance()
                     .setTitle(fieldData.label)
+                    .setTag(fieldData.tag)
                     .setOptions(labels)
                     .setPickerTitle(getString(R.string.pick_option));
             formItems.add(singleList);
@@ -270,19 +288,20 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
     }
 
     private void buildForm() {
-        formBuilder = new FormBuilder(
-                getContext(),
-                fragmentCreateWorkflowBinding.recCreateWorkflow,
-                this);
+//        formBuilder = new FormBuilder(
+//                getContext(),
+//                fragmentCreateWorkflowBinding.recCreateWorkflow,
+//                this);
+
+
         formBuilder.addFormElements(formItems);
     }
 
     private void postFormData() {
-        if (formBuilder.isValidForm()) {
-            Log.d(TAG, "postFormData: is valid");
-        } else {
-            Log.d(TAG, "postFormData: is not valid");
+        if (!formBuilder.isValidForm()) {
+            return;
         }
+        viewModel.postWorkflow(formBuilder);
     }
 
     private void refreshForm() {
@@ -293,8 +312,6 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         }
         adapter.notifyDataSetChanged();
     }
-
-
 
     private void clearFormFields(Boolean clear) {
 //        if(6 >= formItems.size()){

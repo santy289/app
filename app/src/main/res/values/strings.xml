@@ -173,4 +173,6 @@
     <string name="pick_option">Pick any item</string>
     <string name="enter_email">Enter Email</string>
     <string name="create_workflow">Create Workflow</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

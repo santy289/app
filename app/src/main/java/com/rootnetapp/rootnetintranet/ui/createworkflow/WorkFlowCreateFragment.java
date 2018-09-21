@@ -194,7 +194,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
                 .createInstance()
                 .setTitle(label)
                 .setRequired(required)
-                .setDateFormat("MMM dd, yyyy");
+                .setDateFormat("dd-MM-yyyy");
         formItems.add(datePicker);
     }
 
@@ -204,9 +204,9 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         FormElementPickerDate datePicker = FormElementPickerDate
                 .createInstance()
                 .setTitle(label)
+                .setDateFormat("dd-MM-yyyy")
                 .setTag(fieldData.tag)
-                .setRequired(required)
-                .setDateFormat("MMM dd, yyyy");
+                .setRequired(required);
         formItems.add(datePicker);
     }
 
@@ -229,7 +229,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
                 .setRequired(required)
                 .setTitle(label)
                 .setTag(fieldData.tag)
-                .setSwitchTexts("Yes", "No");
+                .setSwitchTexts(getString(R.string.yes), getString(R.string.no));
         formItems.add(switchField);
     }
 
@@ -298,9 +298,10 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
     }
 
     private void postFormData() {
-        if (!formBuilder.isValidForm()) {
-            return;
-        }
+        // TODO put back after debugging
+//        if (!formBuilder.isValidForm()) {
+//            return;
+//        }
         viewModel.postWorkflow(formBuilder);
     }
 
@@ -314,12 +315,6 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
     }
 
     private void clearFormFields(Boolean clear) {
-//        if(6 >= formItems.size()){
-//            return;
-//        }
-//        formItems.subList(6, formItems.size()).clear();
-
-
         if(1 >= formItems.size()){
             return;
         }

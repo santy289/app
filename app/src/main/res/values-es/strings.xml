@@ -174,4 +174,5 @@
     <string name="pick_option">Selecciona uno</string>
     <string name="enter_email">Ingresar Email</string>
     <string name="create_workflow">Crear Workflow</string>
+    <string name="yes">Sí</string>
 </resources>

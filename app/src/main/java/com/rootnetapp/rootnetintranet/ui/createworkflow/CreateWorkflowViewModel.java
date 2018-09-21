@@ -3,7 +3,9 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.text.TextUtils;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
@@ -14,7 +16,6 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
-import com.rootnetapp.rootnetintranet.models.responses.createworkflow.Workflow;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.role.Role;
 import com.rootnetapp.rootnetintranet.models.responses.services.Service;
@@ -29,8 +30,9 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTyp
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
+import com.squareup.moshi.Types;
 
-import java.lang.reflect.Array;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -131,37 +133,76 @@ public class CreateWorkflowViewModel extends ViewModel {
         disposables.clear();
     }
 
+    private WorkflowMetas createMetaData(FieldData fieldData, BaseFormElement baseFormElement) {
+        WorkflowMetas workflowMeta = new WorkflowMetas();
+        workflowMeta.setWorkflowTypeFieldId(baseFormElement.getTag());
+        String value = baseFormElement.getValue();
+        workflowMeta.setUnformattedValue(value);
+        formSettings.formatMetaData(workflowMeta, fieldData);
+        return workflowMeta;
+    }
+
     protected void postWorkflow(FormBuilder formBuilder) {
         ArrayList<FieldData> fieldItems = formSettings.getFieldItems();
         ArrayList<BaseFormElement> formElements = new ArrayList<>();
         FieldData fieldData;
         BaseFormElement baseFormElement;
-        for (int i = 0; i < fieldItems.size(); i++) {
-            fieldData = fieldItems.get(i);
-            baseFormElement = formBuilder.getFormElement(fieldData.tag);
-
-            formElements.add(baseFormElement);
-        }
-
-        int workflowTypeId = formSettings.getWorkflowTypeIdSelected();
-        String title = "app test";
-        String start = "";
-
         List<WorkflowMetas> metas = new ArrayList<>();
         WorkflowMetas workflowMetas;
         String value;
-        for (int i = 0; i < formElements.size(); i++) {
-            baseFormElement = formElements.get(i);
-            workflowMetas = new WorkflowMetas();
-            workflowMetas.setWorkflowTypeFieldId(baseFormElement.getTag());
-            value = baseFormElement.getValue();
-            workflowMetas.setValue(value);
+
+        for (int i = 1; i < fieldItems.size(); i++) {
+            fieldData = fieldItems.get(i);
+            baseFormElement = formBuilder.getFormElement(fieldData.tag);
+            workflowMetas = createMetaData(fieldData, baseFormElement);
             metas.add(workflowMetas);
         }
 
-        String test = "Sep 21, 2018";
+        ArrayList<Integer> removeIndex = new ArrayList<>();
+        WorkflowMetas testMeta;
+        for (int i = 1; i < metas.size(); i++) {
+            testMeta = metas.get(i);
+            if (TextUtils.isEmpty(testMeta.getValue()) || testMeta.getValue().equals("0") || testMeta.getValue().equals("[]")) {
+                removeIndex.add(testMeta.getWorkflowTypeFieldId());
+            }
+        }
+
+        for (int i = 0; i < removeIndex.size(); i++) {
+            int id = removeIndex.get(i);
+            for (int j = 0; j < metas.size(); j++) {
+                if (id == metas.get(j).getWorkflowTypeFieldId()) {
+                    metas.remove(metas.get(j));
+                }
+            }
+        }
+
+        int workflowTypeId = formSettings.getWorkflowTypeIdSelected();
+        String title = "app test 11111";
+        String description = "app description test 1111";
+        String start = "2018-09-22";
+
+        postToServer(metas, workflowTypeId, title, start, description);
 
         Log.d(TAG, "postWorkflow: ");
+    }
+
+    private void postToServer(List<WorkflowMetas> metas, int workflowTypeId, String title, String start, String description) {
+        Type listMyData = Types.newParameterizedType(List.class, WorkflowMetas.class);
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<List<WorkflowMetas>> jsonAdapter = moshi.adapter(listMyData);
+        String serverMetasFormat = jsonAdapter.toJson(metas);
+
+        Disposable disposable = createWorkflowRepository
+                .createWorkflow(
+                        token,
+                        workflowTypeId,
+                        title,
+                        serverMetasFormat,
+                        start,
+                        description)
+                .subscribe(this::onCreateSuccess, this::onCreateFailure);
+
+        disposables.add(disposable);
     }
 
     protected void generateFieldsByType(String typeName) {
@@ -640,6 +681,7 @@ public class CreateWorkflowViewModel extends ViewModel {
             }
             formSettings.getProfileNames();
             ArrayList<String> stringListItems = formSettings.getProfileNames();
+            ArrayList<Integer> idList = formSettings.getProfileIds();
             FieldListSettings fieldListSettings = new FieldListSettings();
             fieldListSettings.items = stringListItems;
             fieldListSettings.labelRes = R.string.owner;
@@ -654,10 +696,12 @@ public class CreateWorkflowViewModel extends ViewModel {
 
             ArrayList<ListFieldItemMeta> listData = new ArrayList<>();
             String name;
+            int id;
             for (int i = 0; i < stringListItems.size(); i++) {
                 name = stringListItems.get(i);
+                id = idList.get(i);
                 ListFieldItemMeta itemMeta = new ListFieldItemMeta(
-                        customFieldId,
+                        id,
                         name
                 );
                 listData.add(itemMeta);
@@ -750,11 +794,12 @@ public class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void onCreateSuccess(CreateWorkflowResponse createWorkflowResponse) {
-        mCreateLiveData.setValue(createWorkflowResponse);
+        //mCreateLiveData.setValue(createWorkflowResponse);
+        Log.d(TAG, "onCreateSuccess: HERE");
     }
 
     private void onFailure(Throwable throwable) {
-        mErrorLiveData.setValue(R.string.failure_connect);
+        Log.d(TAG, "onFailure: " + throwable.getMessage());
     }
     private void onCreateFailure(Throwable throwable) {
         mCreateErrorLiveData.setValue(R.string.failure_connect);

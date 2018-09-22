@@ -2,7 +2,10 @@ package com.rootnetapp.rootnetintranet.models.requests.createworkflow;
 
 import android.arch.persistence.room.Ignore;
 
+import com.google.gson.Gson;
 import com.squareup.moshi.Json;
+
+import org.json.JSONObject;
 
 public class WorkflowMetas {
 
@@ -37,4 +40,11 @@ public class WorkflowMetas {
     public void setUnformattedValue(String unformattedValue) {
         this.unformattedValue = unformattedValue;
     }
+
+    public void escapeValue() {
+        //value = JSONObject.quote(value);
+        Gson gson = new Gson();
+        value = gson.toJson(value);
+    }
+
 }

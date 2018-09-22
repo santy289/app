@@ -2,10 +2,6 @@ package com.rootnetapp.rootnetintranet.models.responses.domain;
 
 import com.squareup.moshi.Json;
 
-/**
- * Created by Propietario on 09/03/2018.
- */
-
 public class ClientResponse {
 
     @Json(name = "code")

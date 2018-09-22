@@ -10,6 +10,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbD
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
+import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
@@ -109,6 +110,16 @@ public class CreateWorkflowRepository {
                                                              String title, String workflowMetas,
                                                              String start, String description) {
         return service.createWorkflow(auth, workflowTypeId, title, workflowMetas, start ,description).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<CreateWorkflowResponse> createWorkflow(String token, CreateRequest body) {
+        return service.createWorkflow(token, body).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<CreateWorkflowResponse> createWorkflow(String token, String body) {
+        return service.createWorkflow(token, body).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 

@@ -1,12 +1,14 @@
 package com.rootnetapp.rootnetintranet.data.remote;
 
 
+import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.country.CountryDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse;
@@ -37,11 +39,13 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser
 import java.util.List;
 
 import io.reactivex.Observable;
+import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
+import retrofit2.http.Multipart;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
@@ -164,6 +168,10 @@ public interface ApiInterface {
     Observable<CountriesResponse> getCountries(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
+    @GET("check/countries")
+    Observable<CountryDbResponse> getCountriesDb(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: api"})
     @POST("intranet/workflows")
     @FormUrlEncoded
     Observable<CreateWorkflowResponse> createWorkflow(@Header("Authorization") String authorization,
@@ -172,6 +180,17 @@ public interface ApiInterface {
                                                       @Field("workflow_metas") String workflowMetas,
                                                       @Field("start") String start,
                                                       @Field("description") String description);
+
+
+    @Headers({"Domain-Name: api", "Content-Type: application/json;charset=UTF-8"})
+    @POST("intranet/workflows")
+    Observable<CreateWorkflowResponse> createWorkflow(@Header("Authorization") String authorization,
+                                                      @Body CreateRequest body);
+
+    @Headers({"Domain-Name: api"})
+    @POST("intranet/workflows")
+    Observable<CreateWorkflowResponse> createWorkflow(@Header("Authorization") String authorization,
+                                                      @Body String body);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows/types/{id}")

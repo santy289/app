@@ -18,7 +18,7 @@ public interface UserDao {
     @Query("SELECT * FROM user WHERE id = :userId")
     User getUserById(int userId);
 
-    @Query("SELECT id, fullName, picture FROM user")
+    @Query("SELECT id, fullName, picture, username, email FROM user")
     public List<FormCreateProfile> getAllProfiles();
 
 //todo maybe remove

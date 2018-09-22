@@ -10,5 +10,6 @@ public class FieldData {
     public boolean required;
     public boolean isMultipleSelection;
     public int tag;
+    public boolean escape;
     public ArrayList<ListFieldItemMeta> list;
 }

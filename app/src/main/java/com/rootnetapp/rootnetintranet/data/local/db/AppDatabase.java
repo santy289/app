@@ -3,6 +3,8 @@ package com.rootnetapp.rootnetintranet.data.local.db;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.RoomDatabase;
 
+import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDB;
+import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDBDao;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.Profile;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.ProfileDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
@@ -21,7 +23,8 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDao;
         WorkflowDb.class,
         WorkflowTypeDb.class,
         Field.class,
-        Profile.class
+        Profile.class,
+        CountryDB.class
 }, version = 5, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     public abstract UserDao userDao();
@@ -29,4 +32,5 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract WorkflowDbDao workflowDbDao();
     public abstract WorkflowTypeDbDao workflowTypeDbDao();
     public abstract ProfileDao profileDao();
+    public abstract CountryDBDao countryDBDao();
 }

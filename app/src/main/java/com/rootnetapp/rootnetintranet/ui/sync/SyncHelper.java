@@ -4,7 +4,11 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.util.Log;
 
+import com.rootnetapp.rootnetintranet.BuildConfig;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
+import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDB;
+import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDBDao;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.Profile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
@@ -13,6 +17,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.models.responses.country.CountryDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
@@ -32,6 +37,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
 import retrofit2.HttpException;
 
 public class SyncHelper {
@@ -68,9 +74,42 @@ public class SyncHelper {
         getUser(token);
         getAllWorkflows(token, 1);
         getWorkflowTypesDb(token);
+
         //getProfiles(token);
     }
 
+    private void getCountryData(String token) {
+        String base = BuildConfig.BASE_URL + "v1/";
+        RetrofitUrlManager.getInstance().putDomain("api", base);
+
+        Disposable disposable = apiInterface
+                .getCountriesDb(token)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::saveCountriesToDatabase, throwable -> {
+                    Log.d(TAG, "getCountryData: " + throwable.getMessage());
+                    RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
+                });
+
+        disposables.add(disposable);
+    }
+
+    private void saveCountriesToDatabase(CountryDbResponse response) {
+        RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
+        Disposable disposable = Observable.fromCallable(() -> {
+            List<CountryDB> list = response.getCountries();
+            if (list == null) {
+                return false;
+            }
+            CountryDBDao countryDBDao = database.countryDBDao();
+            countryDBDao.deleteAllCountries();
+            countryDBDao.insertCountryList(list);
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::success, this::onWorkflowTypesDbFailure);
+        disposables.add(disposable);
+    }
 
     private void getWorkflowsDb(String token, int page) {
         Disposable disposable = apiInterface
@@ -292,7 +331,9 @@ public class SyncHelper {
             return true;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::success, this::failure);
+                .subscribe( success -> {
+                    getCountryData(auth);
+                }, this::failure);
         disposables.add(disposable);
     }
 

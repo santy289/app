@@ -1,18 +1,17 @@
 package com.rootnetapp.rootnetintranet.models.responses.country;
 
+import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDB;
 import com.squareup.moshi.Json;
 
 import java.util.List;
 
-
-public class CountriesResponse {
-
+public class CountryDbResponse {
     @Json(name = "code")
     private int code;
     @Json(name = "status")
     private String status;
     @Json(name = "countries")
-    private List<Country> countries = null;
+    private List<CountryDB> countries = null;
 
     public int getCode() {
         return code;
@@ -30,12 +29,11 @@ public class CountriesResponse {
         this.status = status;
     }
 
-    public List<Country> getCountries() {
+    public List<CountryDB> getCountries() {
         return countries;
     }
 
-    public void setCountries(List<Country> countries) {
+    public void setCountries(List<CountryDB> countries) {
         this.countries = countries;
     }
-
 }

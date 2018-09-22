@@ -1,18 +1,25 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
+import android.support.v4.util.ArrayMap;
+import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseArray;
 
+import com.google.gson.Gson;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.Field;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.role.Role;
 import com.rootnetapp.rootnetintranet.models.responses.services.Service;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,7 +38,7 @@ public class FormSettings {
     private String description;
     private long createdTimestamp;
     private ArrayList<FormCreateProfile> profiles;
-    private List<FormFieldsByWorkflowType> fields;
+    private List<FormFieldsByWorkflowType> fields; // Full info of all fields.
     private ArrayList<ListField> formLists;
     private ArrayList<FieldData> fieldItems;
 
@@ -58,6 +65,7 @@ public class FormSettings {
     public static final String VALUE_LIST = "list";
     public static final String VALUE_DATE = "date";
     public static final String VALUE_ENTITY = "entity";
+    public static final String VALUE_COORD = "coords";
 
     public static final String TAG = "FormSettings";
 
@@ -122,6 +130,18 @@ public class FormSettings {
         return idList;
     }
 
+    public FormCreateProfile getProfileBy(String userName) {
+        FormCreateProfile profile;
+        for (int i = 0; i < profiles.size(); i++) {
+            profile = profiles.get(i);
+            if (profile.username.equals(userName)) {
+                return profile;
+            }
+        }
+        return null;
+    }
+
+
     public int getIndexWorkflowTypeSelected() {
         return indexWorkflowTypeSelected;
     }
@@ -156,6 +176,10 @@ public class FormSettings {
 
     private void format(WorkflowMetas metaData, TypeInfo typeInfo, FieldData fieldData) {
         String value = metaData.getUnformattedValue();
+        if (TextUtils.isEmpty(value)) {
+            return;
+        }
+
         switch (typeInfo.getValueType()) {
             case FormSettings.VALUE_BOOLEAN:
                 handleBoolean(typeInfo, metaData, value);
@@ -182,6 +206,7 @@ public class FormSettings {
             case FormSettings.VALUE_INTEGER:
                 if (typeInfo.getType().equals(TYPE_TEXT)) {
                     metaData.setValue(value);
+                    break;
                 }
                 metaData.setValue("");
                 // TODO if currency do something.
@@ -191,6 +216,11 @@ public class FormSettings {
                 handleList(fieldData, metaData, value);
                 break;
             case FormSettings.VALUE_LIST:
+                if (typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
+                    String json = getJsonStringForSystemUserType(value);
+                    metaData.setValue(json);
+                    break;
+                }
                 handleList(fieldData, metaData, value);
                 break;
             case FormSettings.VALUE_STRING:
@@ -204,6 +234,34 @@ public class FormSettings {
                 metaData.setValue("");
                 break;
         }
+
+        if (!fieldData.escape || typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
+            return;
+        }
+
+        String metaValue = metaData.getValue();
+        if (TextUtils.isEmpty(metaValue) || metaValue.equals("0") || metaValue.equals("[]")) {
+            return;
+        }
+        Gson gson = new Gson();
+        metaData.setValue(gson.toJson(metaValue));
+    }
+
+    private String getJsonStringForSystemUserType(String username) {
+        FormCreateProfile profile = getProfileBy(username);
+        if (profile == null) {
+            return "";
+        }
+
+        PostSystemUser postSystemUser = new PostSystemUser();
+        postSystemUser.id = profile.getId();
+        postSystemUser.username = profile.getUsername();
+        postSystemUser.email = profile.getEmail();
+
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<PostSystemUser> jsonAdapter = moshi.adapter(PostSystemUser.class);
+        String jsonString = jsonAdapter.toJson(postSystemUser);
+        return jsonString;
     }
 
     private void handleBoolean(TypeInfo typeInfo, WorkflowMetas metaData, String value) {
@@ -266,7 +324,7 @@ public class FormSettings {
         return 0;
     }
 
-    private TypeInfo findFieldDataById(int id) {
+    public TypeInfo findFieldDataById(int id) {
         FormFieldsByWorkflowType field;
         TypeInfo typeInfo;
         for (int i = 0; i < fields.size(); i++) {
@@ -389,6 +447,102 @@ public class FormSettings {
     public ArrayList<FieldData> getFieldItems() {
         return fieldItems;
     }
+
+    final static String MACHINE_NAME_TITLE = "wf_title";
+    final static String MACHINE_NAME_KEY = "wf_key";
+    final static String MACHINE_NAME_DESCRIPTION = "wf_description";
+    final static String MACHINE_NAME_START_DATE = "wf_start_date";
+    final static String MACHINE_NAME_END_DATE = "wf_end_date";
+    final static String MACHINE_NAME_STATUS = "wf_status";
+    final static String MACHINE_NAME_CURRENT_STATUS = "wf_current_status";
+    final static String MACHINE_NAME_OWNER = "wf_owner";
+    final static String MACHIEN_NAME_TYPE = "wf_type";
+    final static String MACHINE_NAME_REMAINING_TIME = "wf_remaining_time";
+
+    public ArrayList<Integer> idsForBaseFields = new ArrayList<>();
+
+    private ArrayMap<String, Integer> baseMachineNamesAndIds = new ArrayMap<>();
+
+    public String postTitle = "";
+
+    public ArrayMap<String, Integer> getBaseMachineNamesAndIds() {
+        return baseMachineNamesAndIds;
+    }
+
+    public ArrayList<FieldData> getFieldItemsForPost() {
+        ArrayList<FieldData> postFieldData = (ArrayList<FieldData>) fieldItems.clone();
+        FieldData fieldData;
+        int tag;
+        String machineName;
+        ArrayList<Integer> toRemove = new ArrayList<>();
+        for (int i = 0; i < postFieldData.size(); i++) {
+            fieldData = postFieldData.get(i);
+            tag = fieldData.tag;
+            if (tag == CreateWorkflowViewModel.TAG_WORKFLOW_TYPE) {
+                toRemove.add(tag);
+                continue;
+            }
+            machineName = findMachineNameBy(tag);
+            if (TextUtils.isEmpty(machineName)) {
+                continue;
+            }
+            if (machineName.equals(MACHINE_NAME_TITLE)) {
+                baseMachineNamesAndIds.put(MACHINE_NAME_TITLE, tag);
+                toRemove.add(tag);
+                continue;
+            }
+            if (machineName.equals(MACHINE_NAME_DESCRIPTION)) {
+                baseMachineNamesAndIds.put(MACHINE_NAME_DESCRIPTION, tag);
+                toRemove.add(tag);
+                continue;
+            }
+            if (machineName.equals(MACHINE_NAME_START_DATE)) {
+                baseMachineNamesAndIds.put(MACHINE_NAME_START_DATE, tag);
+                toRemove.add(tag);
+                continue;
+            }
+            if (machineName.equals(MACHINE_NAME_KEY) ||
+                    machineName.equals(MACHINE_NAME_END_DATE) ||
+                    machineName.equals(MACHINE_NAME_STATUS) ||
+                    machineName.equals(MACHINE_NAME_CURRENT_STATUS) ||
+                    machineName.equals(MACHINE_NAME_OWNER) ||
+                    machineName.equals(MACHIEN_NAME_TYPE) ||
+                    machineName.equals(MACHINE_NAME_REMAINING_TIME)) {
+                toRemove.add(tag);
+            }
+        }
+        int removeTag;
+        int id;
+        for (int i = 0; i < toRemove.size(); i++) {
+            removeTag = toRemove.get(i);
+            for (int j = 0; j < postFieldData.size(); j++) {
+               id = postFieldData.get(j).tag;
+               if (removeTag == id) {
+                   postFieldData.remove(j);
+                   break;
+               }
+            }
+        }
+
+        return postFieldData;
+
+    }
+
+
+
+
+
+    private String findMachineNameBy(int id) {
+        FormFieldsByWorkflowType field;
+        for (int i = 0; i < fields.size(); i++) {
+            field = fields.get(i);
+            if (field.getId() == id) {
+                return field.getFieldConfigObject().getMachineName();
+            }
+        }
+        return "";
+    }
+
 
     public void setFieldItems(ArrayList<FieldData> fieldItems) {
         this.fieldItems = fieldItems;

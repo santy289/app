@@ -178,4 +178,8 @@
     <string name="ok">OK</string>
     <string name="required_fields">Required Fields</string>
     <string name="complete_form">Fill this missing fields</string>
+    <string name="warning">Warning</string>
+    <string name="form_invalid_email">Invalid email. Check your email field and try again.</string>
+    <string name="fill_country_code">Enter a phone country code to continue.</string>
+    <string name="fill_currency_code">Enter a currency type to continue.</string>
 </resources>

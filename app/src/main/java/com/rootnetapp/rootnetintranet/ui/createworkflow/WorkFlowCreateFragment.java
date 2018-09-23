@@ -86,7 +86,6 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         String token = "Bearer "+ prefs.getString("token","");
 
         fragmentCreateWorkflowBinding.btnCreate.setOnClickListener(v -> {
-//            viewModel.createWorkflow();
             postFormData();
         });
 
@@ -305,6 +304,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
     }
 
     private void postFormData() {
+        // TODO put back after debugging
         if (!formBuilder.isValidForm()) {
             viewModel.checkForContent(formBuilder);
             return;

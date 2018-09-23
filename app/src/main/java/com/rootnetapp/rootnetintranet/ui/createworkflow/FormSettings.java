@@ -3,19 +3,17 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow;
 import android.support.v4.util.ArrayMap;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.SparseArray;
 
 import com.google.gson.Gson;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
-import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.Field;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostCountryCodeAndValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.role.Role;
 import com.rootnetapp.rootnetintranet.models.responses.services.Service;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 import com.squareup.moshi.JsonAdapter;
@@ -41,6 +39,7 @@ public class FormSettings {
     private List<FormFieldsByWorkflowType> fields; // Full info of all fields.
     private ArrayList<ListField> formLists;
     private ArrayList<FieldData> fieldItems;
+    private Moshi moshi;
 
     public static final String TYPE_TEXT = "text";
     public static final String TYPE_TEXT_AREA = "textarea";
@@ -67,6 +66,10 @@ public class FormSettings {
     public static final String VALUE_ENTITY = "entity";
     public static final String VALUE_COORD = "coords";
 
+    public static final int PA_CODE = 1;
+    public static final int FIELD_CODE_ID = -999;
+    public static final int FIELD_CURRENCY_ID = -998;
+
     public static final String TAG = "FormSettings";
 
     public FormSettings() {
@@ -80,6 +83,7 @@ public class FormSettings {
         title = "";
         description = "";
         createdTimestamp = 0;
+        moshi = new Moshi.Builder().build();
     }
 
     public int getWorkflowTypeIdSelected() {
@@ -130,6 +134,54 @@ public class FormSettings {
         return idList;
     }
 
+    public int countryCode;
+    public boolean hasValidCountryCode() {
+        if (countryCode > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    public int countryCurrency;
+    public boolean hasValidCountryCurrency() {
+        if (countryCurrency > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    public void setCountryCode(String fieldValue, FieldData fieldData) {
+        if (TextUtils.isEmpty(fieldValue)) {
+            return;
+        }
+
+        List<ListFieldItemMeta> codeList = fieldData.list;
+        ListFieldItemMeta codeMeta;
+        for (int i = 0; i < codeList.size(); i++) {
+            codeMeta = codeList.get(i);
+            if (!codeMeta.name.equals(fieldValue)) {
+                continue;
+            }
+            countryCode = codeMeta.id;
+        }
+     }
+
+    public void setCurrencyType(String fieldValue, FieldData fieldData) {
+        if (TextUtils.isEmpty(fieldValue)) {
+            return;
+        }
+
+        List<ListFieldItemMeta> codeList = fieldData.list;
+        ListFieldItemMeta codeMeta;
+        for (int i = 0; i < codeList.size(); i++) {
+            codeMeta = codeList.get(i);
+            if (!codeMeta.name.equals(fieldValue)) {
+                continue;
+            }
+            countryCurrency = codeMeta.id;
+        }
+    }
+
     public FormCreateProfile getProfileBy(String userName) {
         FormCreateProfile profile;
         for (int i = 0; i < profiles.size(); i++) {
@@ -140,7 +192,6 @@ public class FormSettings {
         }
         return null;
     }
-
 
     public int getIndexWorkflowTypeSelected() {
         return indexWorkflowTypeSelected;
@@ -180,6 +231,7 @@ public class FormSettings {
             return;
         }
 
+
         switch (typeInfo.getValueType()) {
             case FormSettings.VALUE_BOOLEAN:
                 handleBoolean(typeInfo, metaData, value);
@@ -192,7 +244,7 @@ public class FormSettings {
                 try {
                     Date convertedDate = dateFormat.parse(value);
                     SimpleDateFormat serverFormat = new SimpleDateFormat(
-                            "yyyy-dd-MM'T'HH:mm:ss.SSSZ",
+                            "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
                             Locale.getDefault());
                     metaDateString = serverFormat.format(convertedDate);
                 } catch (ParseException e) {
@@ -208,8 +260,12 @@ public class FormSettings {
                     metaData.setValue(value);
                     break;
                 }
+                if (typeInfo.getType().equals(TYPE_CURRENCY)) {
+                    String json = getJsonForCurrencyType(value);
+                    metaData.setValue(json);
+                    break;
+                }
                 metaData.setValue("");
-                // TODO if currency do something.
                 // TODO if it is a file.
                 break;
             case FormSettings.VALUE_ENTITY:
@@ -224,6 +280,11 @@ public class FormSettings {
                 handleList(fieldData, metaData, value);
                 break;
             case FormSettings.VALUE_STRING:
+                if (typeInfo.getType().equals(TYPE_PHONE)) {
+                    String json = getJsonForPhoneType(value);
+                    metaData.setValue(json);
+                    break;
+                }
                 metaData.setValue(value);
                 break;
             case FormSettings.VALUE_TEXT:
@@ -235,16 +296,49 @@ public class FormSettings {
                 break;
         }
 
-        if (!fieldData.escape || typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
+        // Do not escape this fields
+        if (!fieldData.escape
+                || typeInfo.getType().equals(TYPE_SYSTEM_USERS)
+                || typeInfo.getType().equals(TYPE_PHONE)
+                || typeInfo.getType().equals(TYPE_CURRENCY)) {
             return;
         }
 
+        // Escape these fields.
         String metaValue = metaData.getValue();
         if (TextUtils.isEmpty(metaValue) || metaValue.equals("0") || metaValue.equals("[]")) {
             return;
         }
         Gson gson = new Gson();
         metaData.setValue(gson.toJson(metaValue));
+    }
+
+    private String getJsonForCurrencyType(String currencyNumber) {
+        if (TextUtils.isEmpty(currencyNumber) || !hasValidCountryCurrency()) {
+            return "";
+        }
+
+        PostCountryCodeAndValue postCountryCodeAndValue = new PostCountryCodeAndValue();
+        postCountryCodeAndValue.countryId = countryCurrency;
+        postCountryCodeAndValue.value = Integer.valueOf(currencyNumber);
+
+        JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi.adapter(PostCountryCodeAndValue.class);
+        String jsonString = jsonAdapter.toJson(postCountryCodeAndValue);
+        return jsonString;
+    }
+
+    private String getJsonForPhoneType(String phoneNumber) {
+        if (TextUtils.isEmpty(phoneNumber) || !hasValidCountryCode()) {
+            return "";
+        }
+
+        PostCountryCodeAndValue postCountryCodeAndValue = new PostCountryCodeAndValue();
+        postCountryCodeAndValue.countryId = countryCode;
+        postCountryCodeAndValue.value = Integer.valueOf(phoneNumber);
+
+        JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi.adapter(PostCountryCodeAndValue.class);
+        String jsonString = jsonAdapter.toJson(postCountryCodeAndValue);
+        return jsonString;
     }
 
     private String getJsonStringForSystemUserType(String username) {

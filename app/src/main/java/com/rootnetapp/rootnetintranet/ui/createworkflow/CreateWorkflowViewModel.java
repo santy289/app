@@ -3,7 +3,6 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
-import android.arch.paging.PagedList;
 import android.text.TextUtils;
 import android.support.v4.util.ArrayMap;
 import android.util.Log;
@@ -12,9 +11,10 @@ import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProf
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
+import com.rootnetapp.rootnetintranet.models.createworkflow.CurrencyFieldData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
-import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PhoneFieldData;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
@@ -34,7 +34,6 @@ import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
-import java.text.Normalizer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -42,7 +41,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import io.reactivex.FlowableOnSubscribe;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -140,8 +138,26 @@ public class CreateWorkflowViewModel extends ViewModel {
     protected void onCleared() {
         disposables.clear();
     }
+    
+    private void handleInvalidEmail() {
+        DialogMessage dialog = new DialogMessage();
+        dialog.title = R.string.warning;
+        dialog.message = R.string.form_invalid_email;
+        showDialogMessage.setValue(dialog);
+    }
 
     private WorkflowMetas createMetaData(FieldData fieldData, BaseFormElement baseFormElement) {
+//        int fieldId = fieldData.tag;
+//        TypeInfo typeInfo = formSettings.findFieldDataById(fieldId);
+//        if (typeInfo.getValueType().equals(FormSettings.VALUE_EMAIL)) {
+//            // TODO put back this value after debugging
+//            if(!TextUtils.isEmpty(baseFormElement.getValue())
+//                    && !isValidEmail(baseFormElement.getValue())) {
+//               handleInvalidEmail();
+//               return null;
+//            }
+//        }
+
         WorkflowMetas workflowMeta = new WorkflowMetas();
         int workflowTypeFieldId = baseFormElement.getTag();
         String value = baseFormElement.getValue();
@@ -172,8 +188,9 @@ public class CreateWorkflowViewModel extends ViewModel {
         ArrayList<FieldData> fieldItems = formSettings.getFieldItemsForPost();
         ArrayMap<String, Integer> baseInfo = formSettings.getBaseMachineNamesAndIds();
         
-        if (baseInfo == null) {
+        if (baseInfo.isEmpty()) {
             Log.d(TAG, "postWorkflow: Need to initalize baseInfo");
+            // TODO eliga un tipo de workflow mensaje como dialog.
             return;
         }
         
@@ -193,10 +210,35 @@ public class CreateWorkflowViewModel extends ViewModel {
         WorkflowMetas workflowMetas;
         String value;
 
+
         for (int i = 0; i < fieldItems.size(); i++) {
             fieldData = fieldItems.get(i);
             baseFormElement = formBuilder.getFormElement(fieldData.tag);
+
+            int fieldId = fieldData.tag;
+            // Check for phone and currency fields
+            if (!hasValidFields(fieldId, baseFormElement.getValue())) {
+                return;
+            }
+
+            int customId = baseFormElement.getTag();
+            if (customId == FormSettings.FIELD_CODE_ID) {
+                Log.d(TAG, "postWorkflow: found");
+                formSettings.setCountryCode(baseFormElement.getValue(), fieldData);
+                continue;
+            }
+
+            if (customId == FormSettings.FIELD_CURRENCY_ID) {
+                Log.d(TAG, "postWorkflow: found");
+                formSettings.setCurrencyType(baseFormElement.getValue(), fieldData);
+                continue;
+            }
+
             workflowMetas = createMetaData(fieldData, baseFormElement);
+            if (workflowMetas == null) {
+                return;
+            }
+
             metas.add(workflowMetas);
         }
 
@@ -221,6 +263,46 @@ public class CreateWorkflowViewModel extends ViewModel {
         postToServer(metas, workflowTypeId, title, start, description);
     }
 
+    private boolean hasValidFields(int fieldId, String value) {
+        TypeInfo typeInfo = formSettings.findFieldDataById(fieldId);
+        DialogMessage dialogMessage;
+        if (typeInfo != null
+                && typeInfo.getType().equals(FormSettings.TYPE_PHONE)
+                && !TextUtils.isEmpty(value)
+                && !formSettings.hasValidCountryCode()
+                ) {
+            dialogMessage = new DialogMessage();
+            dialogMessage.message = R.string.fill_country_code;
+            dialogMessage.title = R.string.warning;
+            showDialogMessage.setValue(dialogMessage);
+            return false;
+        }
+
+        if (typeInfo != null
+                && typeInfo.getType().equals(FormSettings.TYPE_CURRENCY)
+                && !TextUtils.isEmpty(value)
+                && !formSettings.hasValidCountryCurrency()
+                ) {
+            dialogMessage = new DialogMessage();
+            dialogMessage.message = R.string.fill_currency_code;
+            dialogMessage.title = R.string.warning;
+            showDialogMessage.setValue(dialogMessage);
+            return false;
+        }
+
+        if (typeInfo != null
+                && typeInfo.getValueType().equals(FormSettings.VALUE_EMAIL)) {
+            // TODO put back this value after debugging
+            if(!TextUtils.isEmpty(value)
+                    && !isValidEmail(value)) {
+                handleInvalidEmail();
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private void postToServer(List<WorkflowMetas> metas, int workflowTypeId, String title, String start, String description) {
         CreateRequest createRequest = new CreateRequest();
         createRequest.workflowTypeId = workflowTypeId;
@@ -235,11 +317,11 @@ public class CreateWorkflowViewModel extends ViewModel {
         String jsonString = jsonAdapter.toJson(createRequest);
 
         // Accepts object
-//        Disposable disposable = createWorkflowRepository
-//                .createWorkflow(token, createRequest)
-//                .subscribe(this::onCreateSuccess, this::onCreateFailure);
-//
-//        disposables.add(disposable);
+        Disposable disposable = createWorkflowRepository
+                .createWorkflow(token, createRequest)
+                .subscribe(this::onCreateSuccess, this::onCreateFailure);
+
+        disposables.add(disposable);
     }
 
     protected void generateFieldsByType(String typeName) {
@@ -328,6 +410,9 @@ public class CreateWorkflowViewModel extends ViewModel {
             case FormSettings.TYPE_PHONE:
                 handleBuildPhone(field);
                 break;
+            case FormSettings.TYPE_CURRENCY:
+                handleCurrencyType(field);
+                break;
             case FormSettings.TYPE_LINK:
                 handleBuildText(field);
                 break;
@@ -356,8 +441,14 @@ public class CreateWorkflowViewModel extends ViewModel {
             field = list.get(i);
             baseFormElement = formBuilder.getFormElement(field.tag);
             if (baseFormElement.isRequired() && TextUtils.isEmpty(baseFormElement.getValue())) {
-                emptyRequiredElements.add(baseFormElement);
+                if (baseFormElement.getTag() != TAG_WORKFLOW_TYPE) {
+                    emptyRequiredElements.add(baseFormElement);
+                }
             }
+        }
+
+        if (emptyRequiredElements.size() == 0) {
+            return;
         }
 
         int size = emptyRequiredElements.size();
@@ -377,14 +468,106 @@ public class CreateWorkflowViewModel extends ViewModel {
 
     }
 
+    private final static boolean isValidEmail(CharSequence target) {
+        if (target == null)
+            return false;
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
+    }
+
+    private void handleCurrencyType(FormFieldsByWorkflowType field) {
+        FieldConfig fieldConfig = field.getFieldConfigObject();
+        Disposable disposable = createWorkflowRepository
+                .getCurrencyCodes()
+                .subscribe( currencyFieldData -> {
+                    //list
+                    ListField listField = new ListField();
+                    listField.customFieldId = FormSettings.FIELD_CURRENCY_ID;
+                    listField.listType = FormSettings.TYPE_CURRENCY;
+                    listField.customLabel = "Moneda";
+                    ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
+                    CurrencyFieldData currencyData;
+                    String currencyLabel;
+                    for (int i = 0; i < currencyFieldData.size(); i++) {
+                        currencyData = currencyFieldData.get(i);
+                        currencyLabel = currencyData.description + " - "+ currencyData.currency;
+                        ListFieldItemMeta item = new ListFieldItemMeta(
+                                currencyData.countryId,
+                                currencyLabel
+                        );
+                        tempList.add(item);
+                    }
+                    listField.children = tempList;
+                    listField.isMultipleSelection = false;
+                    listField.associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
+
+                    if (listField.children.size() < 1) {
+                        return;
+                    }
+
+                    showListField(listField, fieldConfig);
+
+                    FieldData currencyNumberFieldData = new FieldData();
+                    currencyNumberFieldData.label = field.getFieldName();
+                    currencyNumberFieldData.required = field.isRequired();
+                    currencyNumberFieldData.tag = field.getId();
+                    currencyNumberFieldData.escape = escape(field.getFieldConfigObject());
+                    formSettings.addFieldDataItem(currencyNumberFieldData);
+                    setFieldPhoneWithData.setValue(currencyNumberFieldData);
+                }, throwable -> {
+                    showLoading.setValue(false);
+                    Log.d(TAG, "handeBuildRoles: " + throwable.getMessage());
+                });
+
+        disposables.add(disposable);
+    }
+
     private void handleBuildPhone(FormFieldsByWorkflowType field) {
-        FieldData fieldData = new FieldData();
-        fieldData.label = field.getFieldName();
-        fieldData.required = field.isRequired();
-        fieldData.tag = field.getId();
-        fieldData.escape = escape(field.getFieldConfigObject());
-        formSettings.addFieldDataItem(fieldData);
-        setFieldPhoneWithData.postValue(fieldData);
+        FieldConfig fieldConfig = field.getFieldConfigObject();
+        Disposable disposable = createWorkflowRepository
+                .getCountryCodes()
+                .subscribe( phoneFieldData -> {
+
+                    //list
+                    ListField listField = new ListField();
+                    listField.customFieldId = FormSettings.FIELD_CODE_ID;
+                    listField.listType = FormSettings.TYPE_PHONE;
+                    listField.customLabel = "Code";
+                    ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
+                    PhoneFieldData phoneCode;
+                    String codeLabel;
+                    for (int i = 0; i < phoneFieldData.size(); i++) {
+                        phoneCode = phoneFieldData.get(i);
+                        codeLabel = phoneCode.phoneCode + " - "+ phoneCode.description;
+                        ListFieldItemMeta item = new ListFieldItemMeta(
+                                phoneCode.countryId,
+                                codeLabel
+                        );
+                        tempList.add(item);
+                    }
+                    listField.children = tempList;
+                    listField.isMultipleSelection = false;
+                    listField.associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
+
+                    if (listField.children.size() < 1) {
+                        return;
+                    }
+
+                    showListField(listField, fieldConfig);
+
+                    // Normal phone numeric field
+                    FieldData phoneNumberFieldData = new FieldData();
+                    phoneNumberFieldData.label = field.getFieldName();
+                    phoneNumberFieldData.required = field.isRequired();
+                    phoneNumberFieldData.tag = field.getId();
+                    phoneNumberFieldData.escape = escape(field.getFieldConfigObject());
+                    formSettings.addFieldDataItem(phoneNumberFieldData);
+                    setFieldPhoneWithData.setValue(phoneNumberFieldData);
+                }, throwable -> {
+                    showLoading.setValue(false);
+                    Log.d(TAG, "handeBuildRoles: " + throwable.getMessage());
+                });
+
+        disposables.add(disposable);
     }
 
     private boolean escape(FieldConfig fieldConfig) {

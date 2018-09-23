@@ -7,9 +7,14 @@ import android.arch.persistence.room.Query;
 
 import com.rootnetapp.rootnetintranet.data.local.db.profile.Profile;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
+import com.rootnetapp.rootnetintranet.models.createworkflow.CurrencyFieldData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PhoneFieldData;
 
 import java.util.List;
+
+import io.reactivex.Flowable;
+import io.reactivex.Observable;
+import io.reactivex.Single;
 
 @Dao
 public interface CountryDBDao {
@@ -19,7 +24,13 @@ public interface CountryDBDao {
     @Query("DELETE FROM countrydb")
     public int deleteAllCountries();
 
-    @Query("SELECT country_id, phone_code FROM countrydb WHERE country_id = :id")
-    public List<PhoneFieldData> getCountryId(int id);
+    @Query("SELECT country_id, description, phone_code FROM countrydb")
+    public Single<List<PhoneFieldData>> getAllCountriesCodes();
+
+    @Query("SELECT country_id, description, currency FROM countrydb")
+    public Single<List<CurrencyFieldData>> getAllCurrencyCodes();
+
+    @Query("SELECT country_id, description, phone_code FROM countrydb WHERE country_id = :id")
+    public Single<PhoneFieldData> getCountryCodeBy(int id);
 
 }

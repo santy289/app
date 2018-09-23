@@ -3,7 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow;
 import android.arch.lifecycle.LiveData;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
-import com.rootnetapp.rootnetintranet.data.local.db.profile.ProfileDao;
+import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDBDao;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.user.UserDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
@@ -11,6 +11,8 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.Form
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
+import com.rootnetapp.rootnetintranet.models.createworkflow.CurrencyFieldData;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PhoneFieldData;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
@@ -24,13 +26,9 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser
 import java.util.List;
 
 import io.reactivex.Observable;
-import io.reactivex.Observer;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class CreateWorkflowRepository {
 
@@ -38,16 +36,17 @@ public class CreateWorkflowRepository {
     private AppDatabase database;
     private WorkflowTypeDbDao workflowTypeDbDao;
     private UserDao profileDao;
+    private CountryDBDao countryDBDao;
 
     private LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
 
     public CreateWorkflowRepository(ApiInterface service, AppDatabase database) {
         this.service = service;
         this.database = database;
-        workflowTypeDbDao = this.database.workflowTypeDbDao();
-        profileDao = this.database.userDao();
+        this.workflowTypeDbDao = this.database.workflowTypeDbDao();
+        this.profileDao = this.database.userDao();
+        this.countryDBDao = this.database.countryDBDao();
         this.workflowTypeMenuItems = workflowTypeDbDao.getObservableTypesForMenu();
-
     }
 
     public LiveData<List<WorkflowTypeItemMenu>> getWorkflowTypeMenuItems() {
@@ -70,6 +69,17 @@ public class CreateWorkflowRepository {
         return service.getWorkflowTypes(auth).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
+
+    public Single<List<PhoneFieldData>> getCountryCodes() {
+        return countryDBDao.getAllCountriesCodes().subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Single<List<CurrencyFieldData>> getCurrencyCodes() {
+        return countryDBDao.getAllCurrencyCodes().subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
 
     public Observable<ListsResponse> getList(String auth, int id) {
         return service.getListItems(auth, id).subscribeOn(Schedulers.newThread())

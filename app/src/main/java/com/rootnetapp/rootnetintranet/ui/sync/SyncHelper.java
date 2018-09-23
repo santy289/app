@@ -202,7 +202,10 @@ public class SyncHelper {
             return true;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::success, this::worflowDbDaoTransactionsFailure);
+                .subscribe(
+                        success -> getCountryData(auth),
+                        this::worflowDbDaoTransactionsFailure
+                );
         disposables.add(disposable);
     }
 
@@ -218,6 +221,7 @@ public class SyncHelper {
         disposables.clear();
     }
 
+    @Deprecated
     private void getAllWorkflows(String token, int page) {
         Disposable disposable = apiInterface
                 .getWorkflows(token, 50, true, page, true)
@@ -332,18 +336,17 @@ public class SyncHelper {
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe( success -> {
-                    getCountryData(auth);
+
                 }, this::failure);
         disposables.add(disposable);
     }
 
-
-
+    @Deprecated
     private void onWorkflowsSuccess(WorkflowsResponse workflowsResponse) {
         workflows.addAll(workflowsResponse.getList());
-        if(!workflowsResponse.getPager().isIsLastPage()){
-            getAllWorkflows(auth, workflowsResponse.getPager().getNextPage());
-        }else{
+//        if(!workflowsResponse.getPager().isIsLastPage()){
+//            getAllWorkflows(auth, workflowsResponse.getPager().getNextPage());
+//        }else{
             Disposable disposable = Observable.fromCallable(() -> {
                 database.workflowDao().clearWorkflows();
                 database.workflowDao().insertAll(workflows);
@@ -352,7 +355,7 @@ public class SyncHelper {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::success, this::failure);
             disposables.add(disposable);
-        }
+//        }
     }
 
     private void success(Boolean o) {

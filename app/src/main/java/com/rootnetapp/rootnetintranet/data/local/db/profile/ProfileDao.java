@@ -18,6 +18,7 @@ public interface ProfileDao {
     @Query("DELETE FROM profile")
     public int deleteAllProfiles();
 
-    @Query("SELECT id, full_name, picture FROM profile")
-    public List<FormCreateProfile> getAllProfiles();
+    // TODO check which full name column naming to keep full_name or fullName because it is causing some issues with some other models and queries.
+//    @Query("SELECT id, full_name, picture FROM profile")
+//    public List<FormCreateProfile> getAllProfiles();
 }

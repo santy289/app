@@ -39,24 +39,24 @@ public class ValidateFormDialog extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         ListView listView = view.findViewById(R.id.form_dialog_list);
         TextView messageView = view.findViewById(R.id.form_dialog_message);
-
+        Button button = view.findViewById(R.id.form_dialog_button);
+        button.setOnClickListener( v -> dismiss());
         String title = getArguments().getString("title");
         String message = getArguments().getString("message");
         String[] list = getArguments().getStringArray("list");
+        if (list == null) {
+            listView.setVisibility(View.GONE);
+        } else {
+            listView.setAdapter(
+                    new ArrayAdapter<>(
+                            getContext(),
+                            android.R.layout.simple_list_item_1,
+                            list
+                    )
+            );
+        }
 
         getDialog().setTitle(title);
         messageView.setText(message);
-        listView.setAdapter(
-                new ArrayAdapter<>(
-                        getContext(),
-                        android.R.layout.simple_list_item_1,
-                        list
-                )
-        );
-
-        Button button = view.findViewById(R.id.form_dialog_button);
-        button.setOnClickListener( v -> {
-            dismiss();
-        });
     }
 }

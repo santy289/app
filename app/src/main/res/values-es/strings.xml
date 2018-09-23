@@ -177,4 +177,8 @@
     <string name="yes">Sí</string>
     <string name="required_fields">Campos Requeridos</string>
     <string name="complete_form">Necesita completar estos campos</string>
+    <string name="warning">Aviso</string>
+    <string name="form_invalid_email">El email es inválido. Revise por favor e intente de nuevo.</string>
+    <string name="fill_country_code">Favor de ingresar un código de país para continuar.</string>
+    <string name="fill_currency_code">Favor de ingresar un tipo de moneda para continuar.</string>
 </resources>

@@ -175,4 +175,7 @@
     <string name="create_workflow">Create Workflow</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="ok">OK</string>
+    <string name="required_fields">Required Fields</string>
+    <string name="complete_form">Fill this missing fields</string>
 </resources>

@@ -175,4 +175,6 @@
     <string name="enter_email">Ingresar Email</string>
     <string name="create_workflow">Crear Workflow</string>
     <string name="yes">Sí</string>
+    <string name="required_fields">Campos Requeridos</string>
+    <string name="complete_form">Necesita completar estos campos</string>
 </resources>

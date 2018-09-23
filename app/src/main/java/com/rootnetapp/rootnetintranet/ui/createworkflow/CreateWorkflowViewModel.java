@@ -30,6 +30,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
@@ -83,6 +84,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     protected MutableLiveData<FieldData> setListWithData;
     protected MutableLiveData<Boolean> refreshForm;
     protected MutableLiveData<Boolean> clearFormFields;
+    protected MutableLiveData<DialogMessage> showDialogMessage;
 
     private CreateWorkflowRepository createWorkflowRepository;
 
@@ -168,8 +170,13 @@ public class CreateWorkflowViewModel extends ViewModel {
 
     protected void postWorkflow(FormBuilder formBuilder) {
         ArrayList<FieldData> fieldItems = formSettings.getFieldItemsForPost();
-
         ArrayMap<String, Integer> baseInfo = formSettings.getBaseMachineNamesAndIds();
+        
+        if (baseInfo == null) {
+            Log.d(TAG, "postWorkflow: Need to initalize baseInfo");
+            return;
+        }
+        
         int titleTag = baseInfo.get(FormSettings.MACHINE_NAME_TITLE);
         int descriptionTag = baseInfo.get(FormSettings.MACHINE_NAME_DESCRIPTION);
         int startTag = baseInfo.get(FormSettings.MACHINE_NAME_START_DATE);
@@ -222,27 +229,17 @@ public class CreateWorkflowViewModel extends ViewModel {
         createRequest.start = start;
         createRequest.description = description;
 
-
-        // TODO for sending as a json string with escaping if necessary
+        // TODO remove this block later only for debugging
         Moshi moshi = new Moshi.Builder().build();
         JsonAdapter<CreateRequest> jsonAdapter = moshi.adapter(CreateRequest.class);
         String jsonString = jsonAdapter.toJson(createRequest);
 
-        //String test = JSONObject.quote(serverMetasFormat);
-
-
-        // TODO accepts string
+        // Accepts object
 //        Disposable disposable = createWorkflowRepository
-//                .createWorkflow(token, jsonString)
+//                .createWorkflow(token, createRequest)
 //                .subscribe(this::onCreateSuccess, this::onCreateFailure);
-
-
-        // TODO accepts object
-        Disposable disposable = createWorkflowRepository
-                .createWorkflow(token, createRequest)
-                .subscribe(this::onCreateSuccess, this::onCreateFailure);
-
-        disposables.add(disposable);
+//
+//        disposables.add(disposable);
     }
 
     protected void generateFieldsByType(String typeName) {
@@ -349,12 +346,38 @@ public class CreateWorkflowViewModel extends ViewModel {
         }
     }
 
+    public void checkForContent(FormBuilder formBuilder) {
+        List<FieldData> list = formSettings.getFieldItems();
+        FieldData field;
+        BaseFormElement baseFormElement;
+        ArrayList<BaseFormElement> emptyRequiredElements = new ArrayList<>();
+
+        for (int i = 0; i < list.size(); i++) {
+            field = list.get(i);
+            baseFormElement = formBuilder.getFormElement(field.tag);
+            if (baseFormElement.isRequired() && TextUtils.isEmpty(baseFormElement.getValue())) {
+                emptyRequiredElements.add(baseFormElement);
+            }
+        }
+
+        int size = emptyRequiredElements.size();
+        String[] fieldNames = new String[size];
+        for (int i = 0; i < emptyRequiredElements.size(); i++) {
+            fieldNames[i] = emptyRequiredElements.get(i).getTitle();
+        }
+
+        int title = R.string.required_fields;
+        int message = R.string.complete_form;
+        DialogMessage dialogMessage = new DialogMessage();
+        dialogMessage.list = fieldNames;
+        dialogMessage.title = title;
+        dialogMessage.message = message;
+
+        showDialogMessage.setValue(dialogMessage);
+
+    }
+
     private void handleBuildPhone(FormFieldsByWorkflowType field) {
-
-
-
-
-
         FieldData fieldData = new FieldData();
         fieldData.label = field.getFieldName();
         fieldData.required = field.isRequired();
@@ -1009,6 +1032,13 @@ public class CreateWorkflowViewModel extends ViewModel {
             showLoading = new MutableLiveData<>();
         }
         return showLoading;
+    }
+
+    protected LiveData<DialogMessage> getObservableShowDialogMessage() {
+        if (showDialogMessage == null) {
+            showDialogMessage = new MutableLiveData<>();
+        }
+        return showDialogMessage;
     }
 
 }

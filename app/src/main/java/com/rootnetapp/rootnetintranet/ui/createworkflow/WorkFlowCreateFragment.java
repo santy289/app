@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +19,8 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.FragmentCreateWorkflowBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.ValidateFormDialog;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 
 import java.util.ArrayList;
@@ -288,20 +291,24 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
     }
 
     private void buildForm() {
-//        formBuilder = new FormBuilder(
-//                getContext(),
-//                fragmentCreateWorkflowBinding.recCreateWorkflow,
-//                this);
-
-
         formBuilder.addFormElements(formItems);
     }
 
+    private void showDialog(DialogMessage dialogMessage) {
+        FragmentManager fm = getFragmentManager();
+        ValidateFormDialog dialog = ValidateFormDialog.newInstance(
+                getString(dialogMessage.title),
+                getString(dialogMessage.message),
+                dialogMessage.list
+        );
+        dialog.show(fm, "validate_dialog");
+    }
+
     private void postFormData() {
-        // TODO put back after debugging
-//        if (!formBuilder.isValidForm()) {
-//            return;
-//        }
+        if (!formBuilder.isValidForm()) {
+            viewModel.checkForContent(formBuilder);
+            return;
+        }
         viewModel.postWorkflow(formBuilder);
     }
 
@@ -327,6 +334,9 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
 
         final Observer<Boolean> showLoadingObserver = (this::showLoading);
         viewModel.getObservableShowLoading().observe(this, showLoadingObserver);
+
+        final Observer<DialogMessage> showDialogObserver = (this::showDialog);
+        viewModel.getObservableShowDialogMessage().observe(this, showDialogObserver);
 
         viewModel.setTypeList.observe(this, this::addFieldList);
 

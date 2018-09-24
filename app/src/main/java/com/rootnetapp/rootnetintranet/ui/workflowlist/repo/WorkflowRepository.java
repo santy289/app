@@ -110,6 +110,24 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
 //        allWorkflows = new LivePagedListBuilder<>(dataSourceFactory, pagedListConfig).build();
     }
 
+    public void getWorkflowsByType(String token, int typeId) {
+        Disposable disposable = service
+                .getWorkflowsByType(
+                        token,
+                        50,
+                        true,
+                        1,
+                        false,
+                        typeId)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::workflowDbSuccessNoFilter, throwable -> {
+                    Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
+                    handleRepoError.postValue(true);
+                });
+        disposables.add(disposable);
+    }
+
     public void setWorkflowListByType(String token, int typeId) {
         DataSource.Factory<Integer, WorkflowListItem> factory = workflowDbDao.getWorkflowsBy(typeId);
         callback = new WorkflowListBoundaryCallback(
@@ -129,13 +147,15 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         String queryString;
         if (TextUtils.isEmpty(searchText)) {
             queryString = baseWorkflowListQuery +
-                    "WHERE workflowdb.status = ? ";
+                    "WHERE workflowdb.status = ? " +
+                    "ORDER BY workflowdb.created_at DESC";
             objects = new Object[]{status};
         } else {
             searchText = "%" + searchText + "%";
             queryString = baseWorkflowListQuery +
                     "WHERE workflowdb.status = ? " +
-                    "AND workflowdb.title LIKE ? ";
+                    "AND workflowdb.title LIKE ? " +
+                    "ORDER BY workflowdb.created_at DESC";
             objects = new Object[]{status, searchText};
         }
         startRawQuery(queryString, token, objects, id);
@@ -147,14 +167,16 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         if (TextUtils.isEmpty(searchText)) {
             queryString = baseWorkflowListQuery +
                     "WHERE workflowdb.status = ? " +
-                    "AND workflowdb.workflow_type_id = ?";
+                    "AND workflowdb.workflow_type_id = ? " +
+                    "ORDER BY workflowdb.created_at DESC";
             objects = new Object[]{status, workflowTypeId};
         } else {
             searchText = "%" + searchText + "%";
             queryString = baseWorkflowListQuery +
                     "WHERE workflowdb.status = ? " +
                     "AND workflowdb.workflow_type_id = ? " +
-                    "AND workflowdb.title LIKE ? ";
+                    "AND workflowdb.title LIKE ? " +
+                    "ORDER BY workflowdb.created_at DESC";
             objects = new Object[]{status, workflowTypeId, searchText};
         }
         startRawQuery(queryString, token, objects, id);

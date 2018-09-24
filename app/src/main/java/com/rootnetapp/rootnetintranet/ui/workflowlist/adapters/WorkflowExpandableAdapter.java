@@ -114,10 +114,6 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
         holder.binding.tvCreatedat.setText(createdAt);
         holder.binding.tvUpdatedAt.setText(updatedAt);
 
-        if(item.getWorkflowTypeKey().equals("DES-60")) {
-            String test = "";
-        }
-
         int workflowId = item.getWorkflowId();
         holder.binding.chbxSelected.setOnCheckedChangeListener(null);
         redrawCheckbox(holder, workflowId);
@@ -137,14 +133,10 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
                 redrawExpansion(holder, expandedItemId);
 
             }
-            //isExpanded.set(i, !isExpanded.get(i));
-//            redrawExpansion(holder, i);
-
             //todo con doble click la app crashea por la transicion
             //TransitionManager.beginDelayedTransition(recycler);
         });
         holder.binding.chbxSelected.setOnCheckedChangeListener((compoundButton, b) -> {
-//            isChecked.set(i, b);
             int positionChecked = holder.getAdapterPosition();
             WorkflowListItem checkedItem = getItem(positionChecked);
             if (checkedItem != null) {
@@ -152,7 +144,6 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
                 if(!checkedItems.containsKey(checkedItemId)) {
                     checkedItems.put(checkedItemId, true);
                 } else {
-//                    Boolean checked = checkedItems.get(workflowId);
                     checkedItems.put(checkedItemId, b);
                 }
             }
@@ -169,9 +160,6 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
     }
 
     private void redrawCheckbox(WorkflowViewholder holder, int worflowId) {
-//        holder.binding.chbxSelected.setChecked(false);
-//        holder.binding.chbxSelected.setChecked(isChecked.get(i));
-
         Boolean hasValue = checkedItems.containsKey(worflowId);
         if (!hasValue) {
             holder.binding.chbxSelected.setChecked(false);
@@ -195,7 +183,6 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
 
         Boolean isSelected = expandedItems.get(workflowId);
 
-        //if (isExpanded.get(i)) {
         if (isSelected) {
             holder.binding.btnArrow.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
             holder.binding.btnArrow.setColorFilter(ContextCompat.getColor(context, R.color.arrow),
@@ -212,51 +199,18 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
 
     @Override
     public void submitList(@Nullable PagedList<WorkflowListItem> list) {
-//        if (list != null) {
-//            int count = list.size();
-//            setWorkflows(count);
-//        }
         super.submitList(list);
     }
 
     public void setAllCheckboxes(boolean isCheck) {
+        WorkflowListItem item;
         for (int i = 0; i < getItemCount(); i++) {
-            isChecked.set(i, isCheck);
+            item = getItem(i);
+            if (item == null) {
+                continue;
+            }
+            checkedItems.put(item.getWorkflowId(), isCheck);
         }
         notifyDataSetChanged();
     }
-
-//    private void setWorkflows(int listSize) {
-//        if (!firstLoad) {
-//            updateChecks(listSize);
-//            return;
-//        }
-//        // First time loading items
-//        resetChecksAndExpands(listSize);
-//        firstLoad = false;
-//    }
-
-//    private void resetChecksAndExpands(int listSize) {
-//        isChecked = new ArrayList<>();
-//        isExpanded = new ArrayList<>();
-//        int i = 0;
-//        while (i < listSize) {
-//            isChecked.add(false);
-//            isExpanded.add(false);
-//            ++i;
-//        }
-//    }
-//
-//    private void updateChecks(int listSize) {
-//        int currentCount = getItemCount();
-//        int difference = listSize - currentCount;
-//        if (difference < 1) {
-//            return;
-//        }
-//        for (int i = 0; i < difference; i++) {
-//            isChecked.add(false);
-//            isExpanded.add(false);
-//        }
-//    }
-
 }

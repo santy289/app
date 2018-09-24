@@ -21,6 +21,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
 import java.util.List;
 
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 
 public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<Integer> mErrorLiveData;
@@ -72,6 +73,16 @@ public class WorkflowViewModel extends ViewModel {
         subscribe(lifecycleOwner);
     }
 
+    protected void loadWorkflowsByType(int typeId, LifecycleOwner lifecycleOwner) {
+        showLoading.postValue(true);
+        if (typeId == NO_TYPE_SELECTED) {
+            workflowRepository.getAllWorkflowsNoFilters(token);
+        } else {
+            workflowRepository.getWorkflowsByType(token, typeId);
+        }
+        liveWorkflows.removeObservers(lifecycleOwner);
+    }
+
     protected void loadMyPendingWorkflows(boolean isChecked, LifecycleOwner lifecycleOwner) {
         if (TextUtils.isEmpty(userId)) {
             return;
@@ -81,12 +92,12 @@ public class WorkflowViewModel extends ViewModel {
             filterBoxSettings.setCheckedMyPending(true);
             int id = Integer.valueOf(userId);
             workflowRepository.getMyPendingWorkflows(id, token);
-            liveWorkflows.removeObservers(lifecycleOwner);
+
         } else {
             filterBoxSettings.setCheckedMyPending(false);
             workflowRepository.getAllWorkflowsNoFilters(token);
-            liveWorkflows.removeObservers(lifecycleOwner);
         }
+        liveWorkflows.removeObservers(lifecycleOwner);
         // liveWorkflows' Observer that was removed will be put back in one of the observers in subscribe.
     }
 

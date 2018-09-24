@@ -129,6 +129,15 @@ public interface ApiInterface {
                                                   @Query("responsible_id") int profileId);
 
     @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?")
+    Observable<WorkflowResponseDb> getWorkflowsByType(@Header("Authorization") String authorization,
+                                                           @Query("limit") int limit,
+                                                           @Query("open") boolean open,
+                                                           @Query("page") int page,
+                                                           @Query("workflow_type") boolean showTypeDetails,
+                                                           @Query("workflow_type_id") int typeId);
+
+    @Headers({"Domain-Name: api"})
     @GET("intranet/workflows/types")
     Observable<WorkflowTypesResponse> getWorkflowTypes(@Header("Authorization") String authorization);
 

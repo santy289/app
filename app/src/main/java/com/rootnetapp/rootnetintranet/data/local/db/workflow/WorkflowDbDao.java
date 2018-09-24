@@ -51,7 +51,8 @@ public interface WorkflowDbDao {
             "workflowdb.start, workflowdb.current_status, workflowdb.status, workflowdb.`end` " +
             "FROM workflowtypedb INNER JOIN workflowdb " +
             "ON workflowdb.workflow_type_id = workflowtypedb.id " +
-            "WHERE workflowdb.workflow_type_id = :workflowTypeId ")
+            "WHERE workflowdb.workflow_type_id = :workflowTypeId " +
+            "ORDER BY workflowdb.created_at DESC")
     public DataSource.Factory<Integer, WorkflowListItem> getWorkflowsBy(int workflowTypeId);
 
     @RawQuery(observedEntities = {

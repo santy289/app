@@ -50,7 +50,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     private WorkflowFiltersMenuBinding workflowFiltersMenuBinding;
     private MainActivityInterface mainActivityInterface;
     private WorkflowExpandableAdapter adapter;
-    private String token;
     private String[] types;
     private int[] typeIds;
 
@@ -296,7 +295,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
         typeIds = new int[itemMenus.size()];
         types = new String[itemMenus.size()];
-        typeIds[0] = 0;
+        typeIds[0] = WorkflowViewModel.NO_TYPE_SELECTED;
         types[0] = getString(R.string.no_selection);
         WorkflowTypeItemMenu menu;
         int until = itemMenus.size();
@@ -317,6 +316,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 if (types == null || typeIds == null) {
                     return;
                 }
+                int workflowTypeId = typeIds[position];
+                workflowViewModel.loadWorkflowsByType(workflowTypeId, WorkflowFragment.this);
                 prepareWorkflowListWithFilters();
             }
 

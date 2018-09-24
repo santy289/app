@@ -262,11 +262,17 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         for (int i = 0; i < fieldData.list.size(); i++) {
             labels.add(fieldData.list.get(i).name);
         }
+        String label;
+        if (fieldData.resLabel > 0) {
+            label = getString(fieldData.resLabel);
+        } else {
+            label = fieldData.label;
+        }
 
         if (fieldData.isMultipleSelection) {
             FormElementPickerMulti multipleList = FormElementPickerMulti
                     .createInstance()
-                    .setTitle(fieldData.label)
+                    .setTitle(label)
                     .setOptions(labels)
                     .setTag(fieldData.tag)
                     .setPickerTitle(getString(R.string.pick_option))
@@ -275,7 +281,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
        } else {
             FormElementPickerSingle singleList = FormElementPickerSingle
                     .createInstance()
-                    .setTitle(fieldData.label)
+                    .setTitle(label)
                     .setTag(fieldData.tag)
                     .setOptions(labels)
                     .setPickerTitle(getString(R.string.pick_option));
@@ -301,6 +307,12 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
                 dialogMessage.list
         );
         dialog.show(fm, "validate_dialog");
+    }
+
+    private void goBack() {
+        if (getFragmentManager() != null) {
+            getFragmentManager().popBackStack();
+        }
     }
 
     private void postFormData() {
@@ -369,6 +381,8 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         viewModel.setListWithData.observe(this, this::addList);
 
         viewModel.clearFormFields.observe(this, this::clearFormFields);
+
+        viewModel.goBack.observe(this, back -> goBack());
 
     }
 

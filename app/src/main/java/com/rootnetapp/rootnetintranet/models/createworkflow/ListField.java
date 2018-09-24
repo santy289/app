@@ -17,5 +17,5 @@ public class ListField {
     public ArrayList<ListFieldItemMeta> children;
     public int associatedWorkflowTypeId;
     public String listType;
-
+    public int resStringId;
 }

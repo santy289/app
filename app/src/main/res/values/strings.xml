@@ -182,4 +182,11 @@
     <string name="form_invalid_email">Invalid email. Check your email field and try again.</string>
     <string name="fill_country_code">Enter a phone country code to continue.</string>
     <string name="fill_currency_code">Enter a currency type to continue.</string>
+    <string name="country_code">Country Code</string>
+    <string name="currency_type">Currency Type</string>
+    <string name="created">Created</string>
+    <string name="workflow_created">Your workflow was created.</string>
+    <string name="error">Error</string>
+    <string name="error_create_workflow">Something happened while saving your new workflow. Try again later.</string>
+    <string name="choose_a_workflow">Choose a workflow type to continue.</string>
 </resources>

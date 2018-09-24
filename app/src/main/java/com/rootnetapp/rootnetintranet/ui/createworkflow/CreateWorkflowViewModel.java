@@ -83,6 +83,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     protected MutableLiveData<Boolean> refreshForm;
     protected MutableLiveData<Boolean> clearFormFields;
     protected MutableLiveData<DialogMessage> showDialogMessage;
+    protected MutableLiveData<Boolean> goBack;
 
     private CreateWorkflowRepository createWorkflowRepository;
 
@@ -119,6 +120,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         setFieldEmailWithData = new MutableLiveData<>();
         setFieldPhoneWithData = new MutableLiveData<>();
         setListWithData = new MutableLiveData<>();
+        goBack = new MutableLiveData<>();
     }
 
     public void initForm(String token) {
@@ -190,9 +192,14 @@ public class CreateWorkflowViewModel extends ViewModel {
         
         if (baseInfo.isEmpty()) {
             Log.d(TAG, "postWorkflow: Need to initalize baseInfo");
-            // TODO eliga un tipo de workflow mensaje como dialog.
+            DialogMessage dialogMessage = new DialogMessage();
+            dialogMessage.message = R.string.choose_a_workflow;
+            dialogMessage.title = R.string.required_fields;
+            showDialogMessage.setValue(dialogMessage);
             return;
         }
+
+        showLoading.setValue(true);
         
         int titleTag = baseInfo.get(FormSettings.MACHINE_NAME_TITLE);
         int descriptionTag = baseInfo.get(FormSettings.MACHINE_NAME_DESCRIPTION);
@@ -218,6 +225,7 @@ public class CreateWorkflowViewModel extends ViewModel {
             int fieldId = fieldData.tag;
             // Check for phone and currency fields
             if (!hasValidFields(fieldId, baseFormElement.getValue())) {
+                showLoading.setValue(false);
                 return;
             }
 
@@ -236,12 +244,13 @@ public class CreateWorkflowViewModel extends ViewModel {
 
             workflowMetas = createMetaData(fieldData, baseFormElement);
             if (workflowMetas == null) {
+                showLoading.setValue(false);
                 return;
             }
-
             metas.add(workflowMetas);
         }
 
+        // remove empty fields
         ArrayList<Integer> removeIndex = new ArrayList<>();
         WorkflowMetas testMeta;
         for (int i = 0; i < metas.size(); i++) {
@@ -483,7 +492,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                     ListField listField = new ListField();
                     listField.customFieldId = FormSettings.FIELD_CURRENCY_ID;
                     listField.listType = FormSettings.TYPE_CURRENCY;
-                    listField.customLabel = "Moneda";
+                    listField.resStringId = R.string.currency_type;
                     ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
                     CurrencyFieldData currencyData;
                     String currencyLabel;
@@ -531,7 +540,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                     ListField listField = new ListField();
                     listField.customFieldId = FormSettings.FIELD_CODE_ID;
                     listField.listType = FormSettings.TYPE_PHONE;
-                    listField.customLabel = "Code";
+                    listField.resStringId = R.string.country_code;
                     ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
                     PhoneFieldData phoneCode;
                     String codeLabel;
@@ -805,6 +814,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         FieldData fieldData = new FieldData();
         fieldData.label = listField.customLabel;
         fieldData.list = listField.children;
+        fieldData.resLabel = listField.resStringId;
         fieldData.isMultipleSelection = listField.isMultipleSelection;
         fieldData.tag = listField.customFieldId;
         fieldData.escape = escape(fieldConfig);
@@ -1137,13 +1147,24 @@ public class CreateWorkflowViewModel extends ViewModel {
 
     private void onCreateSuccess(CreateWorkflowResponse createWorkflowResponse) {
         //mCreateLiveData.setValue(createWorkflowResponse);
-        Log.d(TAG, "onCreateSuccess: HERE");
+        showLoading.setValue(false);
+        DialogMessage dialogMessage = new DialogMessage();
+        dialogMessage.title = R.string.created;
+        dialogMessage.message = R.string.workflow_created;
+        showDialogMessage.setValue(dialogMessage);
+        goBack.setValue(true);
     }
 
     private void onFailure(Throwable throwable) {
         Log.d(TAG, "onFailure: " + throwable.getMessage());
+        showLoading.setValue(false);
     }
     private void onCreateFailure(Throwable throwable) {
+        showLoading.setValue(false);
+        DialogMessage dialogMessage = new DialogMessage();
+        dialogMessage.title = R.string.error;
+        dialogMessage.message = R.string.error_create_workflow;
+        showDialogMessage.setValue(dialogMessage);
         Log.d(TAG, "onFailure: " + throwable.getMessage());
     }
 

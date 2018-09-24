@@ -46,10 +46,10 @@ public class FormSettings {
     public static final String TYPE_DATE = "date";
     public static final String TYPE_CHECKBOX = "checkbox";
     public static final String TYPE_SYSTEM_USERS = "system_users";
-    public static final String TYPE_PROJECT = "project";
+    public static final String TYPE_PROJECT = "project"; // empty response
     public static final String TYPE_ROLE = "role";
     public static final String TYPE_BIRTH_DATE = "birth_date";
-    public static final String TYPE_ACCOUNT = "account";
+    public static final String TYPE_ACCOUNT = "account"; // which account
     public static final String TYPE_LINK = "link";
     public static final String TYPE_CURRENCY = "currency";
     public static final String TYPE_PHONE = "phone";

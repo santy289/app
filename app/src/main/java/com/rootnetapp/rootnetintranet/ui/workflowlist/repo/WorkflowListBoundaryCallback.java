@@ -60,6 +60,8 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
             return;
         }
 
+        callback.showLoadingMore(true);
+
         int nextPage = currentPage + 1;
         if (nextPage > lastPage) {
             return;
@@ -78,7 +80,10 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
                             this::saveInDatabase,
-                            throwable -> Log.d(TAG, "WorkflowListBoundaryCallback: Cant get workflows from network - " + throwable.getMessage())
+                            throwable -> {
+                                Log.d(TAG, "WorkflowListBoundaryCallback: Cant get workflows from network - " + throwable.getMessage());
+                                callback.showLoadingMore(false);
+                            }
                     );
         } else {
             int userId = Integer.valueOf(id);

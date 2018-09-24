@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface IncomingWorkflowsCallback {
     void handleResponse(List<WorkflowDb> workflowsResponse, int lastPage);
+    void showLoadingMore(boolean loadMore);
 }

@@ -50,6 +50,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     private MutableLiveData<Boolean> handleRepoError;
     private MutableLiveData<Boolean> handleRepoSuccess;
     private MutableLiveData<Boolean> handleRepoSuccessNoFilters;
+    public MutableLiveData<Boolean> showLoadMore;
     private WorkflowListBoundaryCallback callback;
     private PagedList.Config pagedListConfig;
 
@@ -69,6 +70,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                     .setPageSize(LIST_PAGE_SIZE)
                     .build();
         this.workflowTypeMenuItems = workflowTypeDbDao.getObservableTypesForMenu();
+        showLoadMore = new MutableLiveData<>();
         baseWorkflowListQuery = "SELECT workflowdb.id AS workflowId, workflowtypedb.id AS workflowTypeId, workflowdb.remaining_time AS remainingTime, " +
                 "workflowtypedb.name AS workflowTypeName, workflowdb.title, workflowdb.workflow_type_key, " +
                 "workflowdb.full_name, workflowdb.current_status_name, workflowdb.created_at, workflowdb.updated_at, " +
@@ -81,6 +83,11 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     public void handleResponse(List<WorkflowDb> workflowsResponse, int lastPage) {
         this.lastPage = lastPage;
         insertWorkflows(workflowsResponse);
+    }
+
+    @Override
+    public void showLoadingMore(boolean show) {
+        showLoadMore.setValue(show);
     }
 
     public LiveData<List<WorkflowTypeItemMenu>> getWorkflowTypeMenuItems() {
@@ -280,12 +287,14 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> {
+                    showLoadingMore(false);
                     if (currentPage < lastPage) {
                         currentPage = currentPage + 1;
                     }
                     callback.updateCurrentPage(currentPage);
                 }, throwable -> {
                     callback.updateIsLoading(false);
+                    showLoadingMore(false);
                     Log.d(TAG, "failure: Can't save to DB: " + throwable.getMessage());
                 });
         disposables.add(disposable);

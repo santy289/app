@@ -30,12 +30,11 @@ import java.util.List;
 import java.util.Locale;
 
 public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem, WorkflowViewholder> {
-
-    private List<Boolean> isChecked;
-    private List<Boolean> isExpanded;
-
     private ArrayMap<Integer, Boolean> expandedItems;
     private ArrayMap<Integer, Boolean> checkedItems;
+
+    private final int VIEW_ITEM = 1;
+    private final int VIEW_PROG = 0;
 
     private WorkflowFragmentInterface anInterface;
     private boolean firstLoad;

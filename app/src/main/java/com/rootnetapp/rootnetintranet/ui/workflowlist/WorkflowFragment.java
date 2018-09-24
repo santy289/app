@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RadioButton;
 import android.widget.Switch;
@@ -52,6 +54,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     private WorkflowExpandableAdapter adapter;
     private String[] types;
     private int[] typeIds;
+    private BottomSheetBehavior bottomSheetBehavior;
 
     protected static final int SWITCH_NUMBER = 500;
     protected static final int SWITCH_CREATED_DATE = 501;
@@ -102,6 +105,9 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 R.layout.fragment_workflow, container, false);
         View view = fragmentWorkflowBinding.getRoot();
         ((RootnetApp) getActivity().getApplication()).getAppComponent().inject(this);
+        LinearLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         workflowViewModel = ViewModelProviders
                 .of(this, workflowViewModelFactory)
                 .get(WorkflowViewModel.class);
@@ -173,6 +179,14 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             Utils.showLoading(getContext());
         } else {
             Utils.hideLoading();
+        }
+    }
+
+    private void showBottomSheetLoading(Boolean show) {
+        if (show) {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        } else {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         }
     }
 
@@ -257,6 +271,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.getObservableSetAllCheckboxesList().observe(this, setAllCeckboxesObserver);
         workflowViewModel.getObservableToggleFilterSwitch().observe(this, toggleSwitchFilterObserver);
         workflowViewModel.getObservableSetSelectType().observe(this, setSelectTypeObserver);
+        workflowViewModel.showBottomSheetLoading.observe(this, this::showBottomSheetLoading);
+        workflowViewModel.getObservableLoadMore().observe(this, this::showBottomSheetLoading);
     }
 
     private void subscribeToTypeMenu() {

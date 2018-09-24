@@ -34,6 +34,7 @@ public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<Boolean> showList;
     private MutableLiveData<Boolean> addWorkflowObserver;
     private MutableLiveData<Boolean> setAllCheckboxesList;
+    public MutableLiveData<Boolean> showBottomSheetLoading;
     private LiveData<PagedList<WorkflowListItem>> liveWorkflows, liveUnordered;
     private LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
 
@@ -54,6 +55,7 @@ public class WorkflowViewModel extends ViewModel {
         sort = new Sort();
         workflowTypeMenuItems = this.workflowRepository.getWorkflowTypeMenuItems();
         filterBoxSettings = new FilterBoxSettings();
+        showBottomSheetLoading = new MutableLiveData<>();
     }
 
     @Override
@@ -124,6 +126,11 @@ public class WorkflowViewModel extends ViewModel {
         workflowRepository.getObservableHandleRepoError().observe(lifecycleOwner, handleRepoErrorObserver);
         workflowRepository.getObservableHandleRepoSuccess().observe(lifecycleOwner, handleRepoSuccessObserver);
         workflowRepository.getObservableHandleRepoSuccessNoFilter().observe(lifecycleOwner, handleRepoSuccessNoFilterObserver);
+
+    }
+
+    protected LiveData<Boolean> getObservableLoadMore() {
+        return workflowRepository.showLoadMore;
     }
 
     private void updateFilterBoxSettings(int workflowTypeId, int typeIdPositionInArray, boolean isCheckedMyPendings, boolean isCheckedStatus) {

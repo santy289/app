@@ -9,6 +9,7 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -25,9 +26,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowBinding;
@@ -37,13 +36,12 @@ import com.rootnetapp.rootnetintranet.ui.createworkflow.WorkFlowCreateFragment;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowExpandableAdapter;
-import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowDialog;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
-public class WorkflowFragment extends Fragment implements WorkflowFragmentInterface {
+public class WorkflowFragment extends Fragment implements WorkflowFragmentInterface, SwipeRefreshLayout.OnRefreshListener {
 
     @Inject
     WorkflowViewModelFactory workflowViewModelFactory;
@@ -75,6 +73,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     // Used when we have a general workflow.
     final Observer<PagedList<WorkflowListItem>> getAllWorkflowsObserver = (listWorkflows -> {
+        fragmentWorkflowBinding.swipeRefreshLayout.setRefreshing(false);
         if (adapter == null) {
             return;
         }
@@ -132,6 +131,12 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 mainActivityInterface),true);
     }
 
+    // swipe down to refresh - SwipeRefreshLayout
+    @Override
+    public void onRefresh() {
+        workflowViewModel.swipeToRefresh(this);
+    }
+
     private void setupSearchListener() {
         fragmentWorkflowBinding.inputSearch.setOnKeyListener((v, keyCode, event) -> {
             if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
@@ -148,6 +153,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         fragmentWorkflowBinding.recWorkflows.setLayoutManager(mLayoutManager);
         adapter = new WorkflowExpandableAdapter(this);
         fragmentWorkflowBinding.recWorkflows.setAdapter(adapter);
+        // Swipe to refresh recyclerView
+        fragmentWorkflowBinding.swipeRefreshLayout.setOnRefreshListener(this);
     }
 
     private void updateAdapterList(PagedList<WorkflowListItem> workflowDbList) {
@@ -179,6 +186,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             Utils.showLoading(getContext());
         } else {
             Utils.hideLoading();
+            fragmentWorkflowBinding.swipeRefreshLayout.setRefreshing(false);
+            showBottomSheetLoading(false);
         }
     }
 

@@ -118,6 +118,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     }
 
     public void getWorkflowsByType(String token, int typeId) {
+        currentPage = 1;
         Disposable disposable = service
                 .getWorkflowsByType(
                         token,
@@ -318,6 +319,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     }
 
     public void getMyPendingWorkflows(int profileId, String token) {
+        currentPage = 1;
         Disposable disposable = service
                 .getMyPendingWorkflowsDb(
                         token,
@@ -356,6 +358,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     }
 
     public void getAllWorkflowsNoFilters(String token) {
+        currentPage = 1;
         Disposable disposable = service
                 .getWorkflowsDb(
                         token,

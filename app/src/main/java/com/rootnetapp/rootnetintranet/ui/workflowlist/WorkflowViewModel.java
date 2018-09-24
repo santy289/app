@@ -64,6 +64,22 @@ public class WorkflowViewModel extends ViewModel {
         workflowRepository.clearDisposables();
     }
 
+    // First to be called
+    private void setWorkflowListNoFilters(String token) {
+        workflowRepository.setWorkflowList(token);
+        liveWorkflows = workflowRepository.getAllWorkflows();
+    }
+
+    protected void swipeToRefresh(LifecycleOwner lifecycleOwner) {
+        int id = filterBoxSettings.getWorkflowTypeId();
+        if (id > 0) {
+            workflowRepository.getWorkflowsByType(token, id);
+        } else {
+            workflowRepository.getAllWorkflowsNoFilters(token);
+        }
+        liveWorkflows.removeObservers(lifecycleOwner);
+    }
+
     protected void insert(WorkflowDb workflow) {
         workflowRepository.insertWorkflow(workflow);
     }
@@ -378,14 +394,6 @@ public class WorkflowViewModel extends ViewModel {
         updateWithSortedList.setValue(listWorkflows);
         showList.setValue(true);
     }
-
-    // First to be called
-    private void setWorkflowListNoFilters(String token) {
-        workflowRepository.setWorkflowList(token);
-        liveWorkflows = workflowRepository.getAllWorkflows();
-    }
-
-
 
     private void clearOtherSwitchesBut(Sort.sortType ofType) {
         switch (ofType) {

@@ -59,14 +59,11 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
         if (isLoading) {
             return;
         }
-
-        callback.showLoadingMore(true);
-
         int nextPage = currentPage + 1;
         if (nextPage > lastPage) {
             return;
         }
-
+        callback.showLoadingMore(true);
         Disposable disposable;
         if (TextUtils.isEmpty(id)) {
             disposable = service

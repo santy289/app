@@ -122,7 +122,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     }
 
     @Override
-    public void showDetail(WorkflowDb item) {
+    public void showDetail(WorkflowListItem item) {
         mainActivityInterface.showFragment(WorkflowDetailFragment.newInstance(item,
                 mainActivityInterface),true);
     }

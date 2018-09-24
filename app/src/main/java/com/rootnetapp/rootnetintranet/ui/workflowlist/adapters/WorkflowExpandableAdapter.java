@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowItemBinding;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragmentInterface;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowListBoundaryCallback;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,6 +33,10 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
 
     private List<Boolean> isChecked;
     private List<Boolean> isExpanded;
+
+    private ArrayMap<Integer, Boolean> expandedItems;
+    private ArrayMap<Integer, Boolean> checkedItems;
+
     private WorkflowFragmentInterface anInterface;
     private boolean firstLoad;
 
@@ -38,6 +44,8 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
         super(WorkflowExpandableAdapter.DIFF_CALLBACK);
         this.anInterface = anInterface;
         this.firstLoad = true;
+        this.expandedItems = new ArrayMap<>();
+        this.checkedItems = new ArrayMap<>();
     }
 
     private static final DiffUtil.ItemCallback<WorkflowListItem> DIFF_CALLBACK =
@@ -106,34 +114,89 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
         holder.binding.tvCreatedat.setText(createdAt);
         holder.binding.tvUpdatedAt.setText(updatedAt);
 
+        if(item.getWorkflowTypeKey().equals("DES-60")) {
+            String test = "";
+        }
+
+        int workflowId = item.getWorkflowId();
         holder.binding.chbxSelected.setOnCheckedChangeListener(null);
-        redrawCheckbox(holder, i);
-        redrawExpansion(holder, i);
+        redrawCheckbox(holder, workflowId);
+        redrawExpansion(holder, workflowId);
         holder.binding.btnArrow.setOnClickListener(view -> {
-            isExpanded.set(i, !isExpanded.get(i));
-            redrawExpansion(holder, i);
+            int expandedItem = holder.getAdapterPosition();
+            WorkflowListItem expandedWorkflow = getItem(expandedItem);
+            if (expandedWorkflow != null) {
+
+                int expandedItemId = expandedWorkflow.getWorkflowId();
+                if (!expandedItems.containsKey(expandedItemId)) {
+                    expandedItems.put(expandedItemId, true);
+                } else {
+                    Boolean selected = expandedItems.get(expandedItemId);
+                    expandedItems.put(expandedItemId, !selected);
+                }
+                redrawExpansion(holder, expandedItemId);
+
+            }
+            //isExpanded.set(i, !isExpanded.get(i));
+//            redrawExpansion(holder, i);
+
             //todo con doble click la app crashea por la transicion
             //TransitionManager.beginDelayedTransition(recycler);
         });
-        holder.binding.chbxSelected.setOnCheckedChangeListener((compoundButton, b) ->
-                isChecked.set(i, b));
+        holder.binding.chbxSelected.setOnCheckedChangeListener((compoundButton, b) -> {
+//            isChecked.set(i, b);
+            int positionChecked = holder.getAdapterPosition();
+            WorkflowListItem checkedItem = getItem(positionChecked);
+            if (checkedItem != null) {
+                int checkedItemId = checkedItem.getWorkflowId();
+                if(!checkedItems.containsKey(checkedItemId)) {
+                    checkedItems.put(checkedItemId, true);
+                } else {
+//                    Boolean checked = checkedItems.get(workflowId);
+                    checkedItems.put(checkedItemId, b);
+                }
+            }
+        });
 
         holder.binding.btnDetail.setOnClickListener(view -> {
             // TODO put back because interface was removed
-            //anInterface.showDetail(item);
+            int position = holder.getAdapterPosition();
+            WorkflowListItem selectedItem = getItem(position);
+            anInterface.showDetail(selectedItem);
         });
 
         holder.binding.executePendingBindings();
     }
 
-    private void redrawCheckbox(WorkflowViewholder holder, int i) {
-        holder.binding.chbxSelected.setChecked(false);
-        holder.binding.chbxSelected.setChecked(isChecked.get(i));
+    private void redrawCheckbox(WorkflowViewholder holder, int worflowId) {
+//        holder.binding.chbxSelected.setChecked(false);
+//        holder.binding.chbxSelected.setChecked(isChecked.get(i));
+
+        Boolean hasValue = checkedItems.containsKey(worflowId);
+        if (!hasValue) {
+            holder.binding.chbxSelected.setChecked(false);
+            return;
+        }
+        Boolean isChecked = checkedItems.get(worflowId);
+        holder.binding.chbxSelected.setChecked(isChecked);
     }
 
-    private void redrawExpansion(WorkflowViewholder holder, int i) {
+    private void redrawExpansion(WorkflowViewholder holder, int workflowId) {
         Context context = holder.binding.btnArrow.getContext();
-        if (isExpanded.get(i)) {
+
+        Boolean hasValue = expandedItems.containsKey(workflowId);
+        if (!hasValue) {
+            holder.binding.btnArrow.setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
+            holder.binding.btnArrow.setColorFilter(ContextCompat.getColor(context, R.color.transparentArrow),
+                    android.graphics.PorterDuff.Mode.SRC_IN);
+            holder.binding.layoutDetails.setVisibility(View.GONE);
+            return;
+        }
+
+        Boolean isSelected = expandedItems.get(workflowId);
+
+        //if (isExpanded.get(i)) {
+        if (isSelected) {
             holder.binding.btnArrow.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
             holder.binding.btnArrow.setColorFilter(ContextCompat.getColor(context, R.color.arrow),
                     android.graphics.PorterDuff.Mode.SRC_IN);
@@ -149,10 +212,10 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
 
     @Override
     public void submitList(@Nullable PagedList<WorkflowListItem> list) {
-        if (list != null) {
-            int count = list.size();
-            setWorkflows(count);
-        }
+//        if (list != null) {
+//            int count = list.size();
+//            setWorkflows(count);
+//        }
         super.submitList(list);
     }
 
@@ -163,37 +226,37 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
         notifyDataSetChanged();
     }
 
-    private void setWorkflows(int listSize) {
-        if (!firstLoad) {
-            updateChecks(listSize);
-            return;
-        }
-        // First time loading items
-        resetChecksAndExpands(listSize);
-        firstLoad = false;
-    }
+//    private void setWorkflows(int listSize) {
+//        if (!firstLoad) {
+//            updateChecks(listSize);
+//            return;
+//        }
+//        // First time loading items
+//        resetChecksAndExpands(listSize);
+//        firstLoad = false;
+//    }
 
-    private void resetChecksAndExpands(int listSize) {
-        isChecked = new ArrayList<>();
-        isExpanded = new ArrayList<>();
-        int i = 0;
-        while (i < listSize) {
-            isChecked.add(false);
-            isExpanded.add(false);
-            ++i;
-        }
-    }
-
-    private void updateChecks(int listSize) {
-        int currentCount = getItemCount();
-        int difference = listSize - currentCount;
-        if (difference < 1) {
-            return;
-        }
-        for (int i = 0; i < difference; i++) {
-            isChecked.add(false);
-            isExpanded.add(false);
-        }
-    }
+//    private void resetChecksAndExpands(int listSize) {
+//        isChecked = new ArrayList<>();
+//        isExpanded = new ArrayList<>();
+//        int i = 0;
+//        while (i < listSize) {
+//            isChecked.add(false);
+//            isExpanded.add(false);
+//            ++i;
+//        }
+//    }
+//
+//    private void updateChecks(int listSize) {
+//        int currentCount = getItemCount();
+//        int difference = listSize - currentCount;
+//        if (difference < 1) {
+//            return;
+//        }
+//        for (int i = 0; i < difference; i++) {
+//            isChecked.add(false);
+//            isExpanded.add(false);
+//        }
+//    }
 
 }

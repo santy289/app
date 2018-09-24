@@ -5,6 +5,8 @@ import android.arch.persistence.room.Ignore;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.squareup.moshi.Json;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -33,8 +35,12 @@ public class WorkflowListItem {
     public String end;
     @ColumnInfo(name = "status")
     public boolean status;
+    @ColumnInfo(name = "current_status")
+    public int currentStatus;
     @Ignore
     public boolean selected = false;
+    @Ignore
+    boolean isChecked = false;
     @Ignore
     private String formattedCreatedAt;
     @Ignore
@@ -177,12 +183,28 @@ public class WorkflowListItem {
         this.workflowTypeName = workflowTypeName;
     }
 
+    public int getCurrentStatus() {
+        return currentStatus;
+    }
+
+    public void setCurrentStatus(int currentStatus) {
+        this.currentStatus = currentStatus;
+    }
+
     public boolean isSelected() {
         return selected;
     }
 
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    public boolean isChecked() {
+        return isChecked;
+    }
+
+    public void setChecked(boolean checked) {
+        isChecked = checked;
     }
 
     private Date createDateObj(String createUpdateDate) {

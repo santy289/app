@@ -39,15 +39,16 @@ public interface WorkflowDbDao {
     @Query("SELECT workflowdb.id AS workflowId, workflowtypedb.id AS workflowTypeId, workflowdb.remaining_time AS remainingTime, " +
             "workflowtypedb.name AS workflowTypeName, workflowdb.title, workflowdb.workflow_type_key, " +
             "workflowdb.full_name, workflowdb.current_status_name, workflowdb.created_at, workflowdb.updated_at, " +
-            "workflowdb.start, workflowdb.status, workflowdb.`end` " +
+            "workflowdb.start, workflowdb.status, workflowdb.current_status, workflowdb.`end` " +
             "FROM workflowdb, workflowtypedb " +
-            "WHERE workflowdb.workflow_type_id = workflowtypedb.id")
+            "WHERE workflowdb.workflow_type_id = workflowtypedb.id " +
+            "ORDER BY workflowdb.created_at DESC")
     public DataSource.Factory<Integer, WorkflowListItem> getWorkflows();
 
     @Query("SELECT workflowdb.id AS workflowId, workflowtypedb.id AS workflowTypeId, workflowdb.remaining_time AS remainingTime, " +
             "workflowtypedb.name AS workflowTypeName, workflowdb.title, workflowdb.workflow_type_key, " +
             "workflowdb.full_name, workflowdb.current_status_name, workflowdb.created_at, workflowdb.updated_at, " +
-            "workflowdb.start, workflowdb.status, workflowdb.`end` " +
+            "workflowdb.start, workflowdb.current_status, workflowdb.status, workflowdb.`end` " +
             "FROM workflowtypedb INNER JOIN workflowdb " +
             "ON workflowdb.workflow_type_id = workflowtypedb.id " +
             "WHERE workflowdb.workflow_type_id = :workflowTypeId ")

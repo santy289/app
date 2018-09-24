@@ -22,6 +22,7 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailBinding;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
@@ -63,7 +64,7 @@ public class WorkflowDetailFragment extends Fragment {
     WorkflowDetailViewModel workflowDetailViewModel;
     private FragmentWorkflowDetailBinding binding;
     private MainActivityInterface mainActivityInterface;
-    private WorkflowDb item;
+    private WorkflowListItem item;
     private List<Preset> presets;
     private CommentsAdapter commentsAdapter = null;
     private static final int FILE_SELECT_CODE = 555;
@@ -77,7 +78,7 @@ public class WorkflowDetailFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static WorkflowDetailFragment newInstance(WorkflowDb item, MainActivityInterface mainActivityInterface) {
+    public static WorkflowDetailFragment newInstance(WorkflowListItem item, MainActivityInterface mainActivityInterface) {
         WorkflowDetailFragment fragment = new WorkflowDetailFragment();
         fragment.item = item;
         fragment.mainActivityInterface = mainActivityInterface;
@@ -129,9 +130,9 @@ public class WorkflowDetailFragment extends Fragment {
         binding.btnComment.setOnClickListener(this::comment);
         binding.btnAttachment.setOnClickListener(this::showFileChooser);
         binding.btnUpload.setOnClickListener(this::uploadFiles);
-        workflowDetailViewModel.getWorkflow(token, item.getId());
+        workflowDetailViewModel.getWorkflow(token, item.getWorkflowId());
         workflowDetailViewModel.getWorkflowType(token, item.getWorkflowTypeId());
-        workflowDetailViewModel.getComments(token, item.getId());
+        workflowDetailViewModel.getComments(token, item.getWorkflowId());
         return view;
     }
 
@@ -232,7 +233,7 @@ public class WorkflowDetailFragment extends Fragment {
             binding.inputComment.setError(getString(R.string.empty_comment));
         } else {
             Utils.showLoading(getContext());
-            workflowDetailViewModel.postComment(token, item.getId(), comment, files);
+            workflowDetailViewModel.postComment(token, item.getWorkflowId(), comment, files);
         }
     }
 
@@ -252,7 +253,7 @@ public class WorkflowDetailFragment extends Fragment {
                 Toast.makeText(getContext(), getString(R.string.select_preset),
                         Toast.LENGTH_SHORT).show();
             }else{
-                request.add(new WorkflowPresetsRequest(item.getId(), presets));
+                request.add(new WorkflowPresetsRequest(item.getWorkflowId(), presets));
                 Utils.showLoading(getContext());
                 workflowDetailViewModel.attachFile(token, request, fileRequest);
             }
@@ -375,7 +376,7 @@ public class WorkflowDetailFragment extends Fragment {
         final Observer<Templates> templateObserver = ((Templates data) -> {
             if (null != data) {
                 binding.tvTemplatetitle.setText(getString(R.string.template) + " " + data.getName());
-                workflowDetailViewModel.getFiles(token, item.getId());
+                workflowDetailViewModel.getFiles(token, item.getWorkflowId());
             }
         });
 
@@ -409,7 +410,7 @@ public class WorkflowDetailFragment extends Fragment {
         final Observer<Boolean> attachObserver = ((Boolean data) -> {
             Utils.hideLoading();
             if ((null != data) && (data)) {
-                workflowDetailViewModel.getFiles(token, item.getId());
+                workflowDetailViewModel.getFiles(token, item.getWorkflowId());
             } else {
                 Toast.makeText(getContext(), "error", Toast.LENGTH_LONG).show();
             }

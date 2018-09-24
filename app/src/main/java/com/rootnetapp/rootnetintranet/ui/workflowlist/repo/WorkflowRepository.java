@@ -32,8 +32,8 @@ import io.reactivex.schedulers.Schedulers;
 
 public class WorkflowRepository implements IncomingWorkflowsCallback {
 
-    public static int ENDPOINT_PAGE_SIZE = 20;
-    private static int LIST_PAGE_SIZE = 20;
+    public static int ENDPOINT_PAGE_SIZE = 5;
+    private static int LIST_PAGE_SIZE = 5;
     public final static String WORKFLOWID = "workflowdb.id";
     public final static String WORKFLOW_CREATED = "workflowdb.created_at";
     public final static String WORKFLOW_UPDATED = "workflowdb.updated_at";
@@ -72,7 +72,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         baseWorkflowListQuery = "SELECT workflowdb.id AS workflowId, workflowtypedb.id AS workflowTypeId, workflowdb.remaining_time AS remainingTime, " +
                 "workflowtypedb.name AS workflowTypeName, workflowdb.title, workflowdb.workflow_type_key, " +
                 "workflowdb.full_name, workflowdb.current_status_name, workflowdb.created_at, workflowdb.updated_at, " +
-                "workflowdb.start, workflowdb.status, workflowdb.`end` " +
+                "workflowdb.start, workflowdb.status, workflowdb.current_status, workflowdb.`end` " +
                 "FROM workflowtypedb INNER JOIN workflowdb " +
                 "ON workflowdb.workflow_type_id = workflowtypedb.id ";
     }
@@ -85,6 +85,10 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
 
     public LiveData<List<WorkflowTypeItemMenu>> getWorkflowTypeMenuItems() {
         return workflowTypeMenuItems;
+    }
+
+    public LiveData<PagedList<WorkflowListItem>> getAllWorkflows() {
+        return allWorkflows;
     }
 
     public void setWorkflowList(String token) {
@@ -243,10 +247,6 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     public void clearDisposables() {
         disposables.clear();
         callback.clearDisposables();
-    }
-
-    public LiveData<PagedList<WorkflowListItem>> getAllWorkflows() {
-        return allWorkflows;
     }
 
     public void insertWorkflows(List<WorkflowDb> worflows) {

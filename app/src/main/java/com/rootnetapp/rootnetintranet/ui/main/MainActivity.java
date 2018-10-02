@@ -25,6 +25,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
+import android.widget.Toolbar;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.rootnetapp.rootnetintranet.R;
@@ -321,6 +323,11 @@ public class MainActivity extends AppCompatActivity
         final Observer<Integer> errorObserver = ((Integer data) -> {
             // TODO handle error when we cant find Users, workflowlike and workflow
         });
+
+        final Observer<Integer> setSearchMenuObserver = ( layoutId -> {
+
+        });
+
         final Observer<String[]> setImgInViewObserver = (this::setImageIn);
         final Observer<Boolean> collapseMenuObserver = (this::collapseActionView);
         final Observer<Boolean> hideKeyboardObserver = (this::hideKeyboard);

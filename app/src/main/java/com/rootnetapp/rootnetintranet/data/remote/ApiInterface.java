@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.data.remote;
 
 
 import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
+import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
@@ -10,6 +11,7 @@ import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountryDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
+import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.file.FilesResponse;
@@ -37,6 +39,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTyp
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 
 import java.util.List;
+import java.util.Observer;
 
 import io.reactivex.Observable;
 import retrofit2.http.Body;
@@ -200,6 +203,11 @@ public interface ApiInterface {
     @POST("intranet/workflows")
     Observable<CreateWorkflowResponse> createWorkflow(@Header("Authorization") String authorization,
                                                       @Body String body);
+
+    @Headers({"Domain-Name: api"})
+    @POST("upload/file")
+    Observable<FileUploadResponse> uploadFile(@Header("Authorization") String authorization,
+                                              @Body FilePost body);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows/types/{id}")

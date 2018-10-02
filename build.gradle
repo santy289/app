@@ -6,7 +6,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.4'
+        classpath 'com.android.tools.build:gradle:3.2.0'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -28,7 +28,7 @@ task clean(type: Delete) {
 }
 
 ext {
-    supportLibVersion               = "28.0.0-rc02"
+    supportLibVersion               = "28.0.0"
     constraintLayoutVersion         = "1.1.3"
     archLifecycleVersion            = "1.1.1"
     retrofit                        = "2.4.0"
@@ -36,13 +36,14 @@ ext {
     rxandroidLibraryVersion         = "2.0.2"
     rxjavaLibraryVersion            = "2.2.0"
     retrofitUrlInterceptorVersion   = "1.4.0"
+    fileChooser                     = "1.1.10"
     jsonWebTokenVersion             = "1.1.1"
     roomVersion                     = "1.1.1"
-    workManager                     = "1.0.0-alpha08"
+    workManager                     = "1.0.0-alpha09"
     circleImageViewVersion          = "2.2.0"
     glideVersion                    = "4.7.1"
     picassoVersion                  = '2.71828'
-    firebaseVersion                 = "17.3.1"
+    firebaseVersion                 = "17.3.2"
     espresso                        = "3.0.2"
     testRunner                      = "1.0.2"
     jUnit                           = "4.12"

@@ -38,6 +38,8 @@ public class MainActivityViewModel extends ViewModel {
     private MutableLiveData<Boolean> attemptTokenRefresh;
     private MutableLiveData<String> saveToPreference;
     private MutableLiveData<Boolean> goToDomain;
+    protected MutableLiveData<Integer> setSearchMenuLayout;
+    protected MutableLiveData<Integer> setUploadMenuLayout;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
@@ -48,6 +50,7 @@ public class MainActivityViewModel extends ViewModel {
 
     public MainActivityViewModel(MainActivityRepository repository) {
         this.repository = repository;
+        this.setSearchMenuLayout = new MutableLiveData<>();
     }
 
     @Override
@@ -120,6 +123,11 @@ public class MainActivityViewModel extends ViewModel {
                     goToDomain.setValue(true);
                 });
         disposables.add(disposable);
+    }
+
+    protected void onCreateOptionsMenu() {
+        int defaultMenu = R.menu.menu_search;
+
     }
 
     private void onWorkflowSuccess(Workflow workflow) {

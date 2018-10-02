@@ -12,9 +12,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import com.obsez.android.lib.filechooser.ChooserDialog;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.FragmentCreateWorkflowBinding;
@@ -23,6 +28,7 @@ import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.ValidateFormDialog;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +61,9 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
     private List<BaseFormElement> formItems = new ArrayList<>();
 
     private static final String TAG = "CreateFragment";
+    private final String FILE_CHOOSER_DIR = "/storage/emulated/legacy";
+
+    private MenuItem uploadMenu;
 
     public WorkFlowCreateFragment() { }
 
@@ -62,6 +71,12 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         WorkFlowCreateFragment fragment = new WorkFlowCreateFragment();
         fragment.mainActivityInterface = mainActivityInterface;
         return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Nullable
@@ -110,11 +125,48 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_upload:
+                viewModel.showUploadFilePicker();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.workflow_create_menu, menu);
+        uploadMenu = menu.findItem(R.id.menu_upload);
+        uploadMenu.setVisible(false);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    private void setUploadMenu(Boolean visible) {
+        uploadMenu.setVisible(visible);
+    }
+
     private void startBuilder() {
         formBuilder = new FormBuilder(
                 getContext(),
                 fragmentCreateWorkflowBinding.recCreateWorkflow,
                 this);
+    }
+
+    private void chooseFile() {
+        new ChooserDialog().with(getContext())
+                .withStartFile(FILE_CHOOSER_DIR)
+                .withChosenListener(new ChooserDialog.Result() {
+                    @Override
+                    public void onChoosePath(String path, File pathFile) {
+                        viewModel.selectUploadFile(path, pathFile);
+                        Toast.makeText(getContext(), "FILE: " + path, Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .build()
+                .show();
     }
 
     private void showLoading(Boolean show) {
@@ -289,6 +341,20 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
        }
     }
 
+    private void fileUploadField(FieldData fieldData) {
+        List<String> labels = new ArrayList<>();
+        labels.add(fieldData.list.get(0).name);
+
+        FormElementPickerSingle singleList = FormElementPickerSingle
+                .createInstance()
+                .setTitle(fieldData.label)
+                .setTag(fieldData.tag)
+                .setOptions(labels)
+                .setValue(labels.get(0))
+                .setPickerTitle(getString(R.string.pick_option));
+        formItems.add(singleList);
+    }
+
     private void formHeader(Integer labelRes) {
         String label = getString(labelRes);
         FormHeader formHeader = FormHeader.createInstance(label);
@@ -316,7 +382,6 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
     }
 
     private void postFormData() {
-        // TODO put back after debugging
         if (!formBuilder.isValidForm()) {
             viewModel.checkForContent(formBuilder);
             return;
@@ -380,9 +445,15 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
 
         viewModel.setListWithData.observe(this, this::addList);
 
+        viewModel.setFileUploadField.observe(this, this::fileUploadField);
+
         viewModel.clearFormFields.observe(this, this::clearFormFields);
 
         viewModel.goBack.observe(this, back -> goBack());
+
+        viewModel.showUploadButton.observe(this, this::setUploadMenu);
+
+        viewModel.chooseFile.observe(this, choose -> chooseFile());
 
     }
 

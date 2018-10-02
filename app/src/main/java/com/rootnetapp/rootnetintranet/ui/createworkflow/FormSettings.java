@@ -7,8 +7,10 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
+import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PendingFileUpload;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCountryCodeAndValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
@@ -19,6 +21,9 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
+import org.w3c.dom.Text;
+
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,6 +31,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import me.riddhimanadib.formmaster.FormBuilder;
 
 public class FormSettings {
     private ArrayList<String> names;
@@ -40,6 +47,10 @@ public class FormSettings {
     private ArrayList<ListField> formLists;
     private ArrayList<FieldData> fieldItems;
     private Moshi moshi;
+    private String uploadFileName;
+    private String uploadFileExtension;
+    private PendingFileUpload pendingFileUpload;
+    private FormBuilder formBuilder;
 
     public static final String TYPE_TEXT = "text";
     public static final String TYPE_TEXT_AREA = "textarea";
@@ -56,6 +67,7 @@ public class FormSettings {
     public static final String TYPE_SERVICE = "service";
     public static final String TYPE_PRODUCT = "product";
     public static final String TYPE_LIST = "list";
+    public static final String TYPE_FILE = "file";
     public static final String VALUE_EMAIL = "email";
     public static final String VALUE_INTEGER = "integer";
     public static final String VALUE_BOOLEAN = "boolean";
@@ -96,6 +108,38 @@ public class FormSettings {
 
     public ArrayList<String> getNames() {
         return names;
+    }
+
+    public String getUploadFileName() {
+        return uploadFileName;
+    }
+
+    public FormBuilder getFormBuilder() {
+        return formBuilder;
+    }
+
+    public void setFormBuilder(FormBuilder formBuilder) {
+        this.formBuilder = formBuilder;
+    }
+
+    public void setUploadFileName(String uploadFileName) {
+        this.uploadFileName = uploadFileName;
+    }
+
+    public String getUploadFileExtension() {
+        return uploadFileExtension;
+    }
+
+    public void setUploadFileExtension(String uploadFileExtension) {
+        this.uploadFileExtension = uploadFileExtension;
+    }
+
+    public PendingFileUpload getPendingFileUpload() {
+        return pendingFileUpload;
+    }
+
+    public void setPendingFileUpload(PendingFileUpload pendingFileUpload) {
+        this.pendingFileUpload = pendingFileUpload;
     }
 
     public void setName(String name) {
@@ -265,6 +309,13 @@ public class FormSettings {
                     metaData.setValue(json);
                     break;
                 }
+
+                if (typeInfo.getType().equals(TYPE_FILE)) {
+                    String json = getFileMetaJson();
+                    metaData.setValue(json);
+                    break;
+                }
+
                 metaData.setValue("");
                 // TODO if it is a file.
                 break;
@@ -311,6 +362,21 @@ public class FormSettings {
         }
         Gson gson = new Gson();
         metaData.setValue(gson.toJson(metaValue));
+    }
+
+    private String getFileMetaJson() {
+        String name = pendingFileUpload.fileName;
+        int id = pendingFileUpload.fileId;
+        if (id == 0 || TextUtils.isEmpty(name)) {
+            return "";
+        }
+
+        FileMetaData fileMetaData = new FileMetaData();
+        fileMetaData.name = name;
+        fileMetaData.value = pendingFileUpload.fileId;
+        JsonAdapter<FileMetaData> jsonAdapter = moshi.adapter(FileMetaData.class);
+        String jsonString = jsonAdapter.toJson(fileMetaData);
+        return jsonString;
     }
 
     private String getJsonForCurrencyType(String currencyNumber) {
@@ -647,6 +713,7 @@ public class FormSettings {
     }
 
     public void clearFormFieldData() {
+        pendingFileUpload = null;
         if(1 >= fieldItems.size()){
             return;
         }

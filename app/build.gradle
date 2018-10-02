@@ -33,6 +33,10 @@ android {
         javaMaxHeapSize "4g"
     }
     useLibrary 'org.apache.http.legacy'
+
+    packagingOptions {
+        pickFirst 'META-INF/proguard/androidx-annotations.pro'
+    }
 }
 
 dependencies {
@@ -78,6 +82,7 @@ dependencies {
     implementation "com.github.bumptech.glide:glide:$rootProject.glideVersion"
     annotationProcessor "com.github.bumptech.glide:compiler:$rootProject.glideVersion"
     implementation "com.google.firebase:firebase-messaging:$rootProject.firebaseVersion"
+    implementation "com.obsez.android.lib.filechooser:filechooser:$rootProject.fileChooser"
 
     //Test
     androidTestImplementation "com.android.support.test:runner:$rootProject.testRunner"

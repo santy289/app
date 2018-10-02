@@ -189,4 +189,5 @@
     <string name="error_create_workflow">Algo ocurrió al intentar crear el nuevo workflow. Intente de nuevo mas tarde.</string>
     <string name="choose_a_workflow">Elija en tipo de workflow para continuar.</string>
     <string name="loading">Cargando</string>
+    <string name="file_too_big">El archivo es muy grande, límite de 10MB</string>
 </resources>

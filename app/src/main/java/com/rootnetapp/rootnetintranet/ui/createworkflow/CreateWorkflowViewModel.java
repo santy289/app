@@ -7,17 +7,22 @@ import android.text.TextUtils;
 import android.support.v4.util.ArrayMap;
 import android.util.Log;
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
 import com.rootnetapp.rootnetintranet.models.createworkflow.CurrencyFieldData;
+import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
+import com.rootnetapp.rootnetintranet.models.createworkflow.FilePostDetail;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PendingFileUpload;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PhoneFieldData;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
+import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.role.Role;
 import com.rootnetapp.rootnetintranet.models.responses.services.Service;
@@ -34,6 +39,7 @@ import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -80,10 +86,13 @@ public class CreateWorkflowViewModel extends ViewModel {
     protected MutableLiveData<FieldData> setFieldEmailWithData;
     protected MutableLiveData<FieldData> setFieldPhoneWithData;
     protected MutableLiveData<FieldData> setListWithData;
+    protected MutableLiveData<FieldData> setFileUploadField;
     protected MutableLiveData<Boolean> refreshForm;
     protected MutableLiveData<Boolean> clearFormFields;
     protected MutableLiveData<DialogMessage> showDialogMessage;
     protected MutableLiveData<Boolean> goBack;
+    protected MutableLiveData<Boolean> showUploadButton;
+    protected MutableLiveData<Boolean> chooseFile;
 
     private CreateWorkflowRepository createWorkflowRepository;
 
@@ -100,6 +109,8 @@ public class CreateWorkflowViewModel extends ViewModel {
     protected static final int INDEX_REQUIRED = 1;
 
     protected static final int TAG_WORKFLOW_TYPE = 80;
+
+    private final int UPLOAD_FILE_SIZE_LIMIT = 10;
 
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.createWorkflowRepository = createWorkflowRepository;
@@ -121,6 +132,9 @@ public class CreateWorkflowViewModel extends ViewModel {
         setFieldPhoneWithData = new MutableLiveData<>();
         setListWithData = new MutableLiveData<>();
         goBack = new MutableLiveData<>();
+        showUploadButton = new MutableLiveData<>();
+        chooseFile = new MutableLiveData<>();
+        setFileUploadField = new MutableLiveData<>();
     }
 
     public void initForm(String token) {
@@ -169,21 +183,88 @@ public class CreateWorkflowViewModel extends ViewModel {
         return workflowMeta;
     }
 
-    private String formatUiDateToPostDate(String uiDateFormat) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(
-                "dd-MM-yyyy",
-                Locale.getDefault());
-        String metaDateString = "";
-        try {
-            Date convertedDate = dateFormat.parse(uiDateFormat);
-            SimpleDateFormat serverFormat = new SimpleDateFormat(
-                    "yyyy-MM-dd",
-                    Locale.getDefault());
-            metaDateString = serverFormat.format(convertedDate);
-        } catch (ParseException e) {
-            Log.d(TAG, "StringDateToTimestamp: e = " + e.getMessage());
+    protected void showUploadFilePicker() {
+        chooseFile.setValue(true);
+    }
+
+    protected void selectUploadFile(String path, File file) {
+        if (!Utils.checkFileSize(UPLOAD_FILE_SIZE_LIMIT, file)) {
+            DialogMessage message = new DialogMessage();
+            message.message = R.string.file_too_big;
+            message.title = R.string.warning;
+            showDialogMessage.setValue(message);
+            return;
         }
-        return metaDateString;
+
+
+        PendingFileUpload pendingFileUpload = formSettings.getPendingFileUpload();
+        pendingFileUpload.fileName = path.substring(path.lastIndexOf("/") + 1);
+        pendingFileUpload.path = path;
+        ListFieldItemMeta field = new ListFieldItemMeta(0, pendingFileUpload.fileName);
+        ArrayList<ListFieldItemMeta> items = new ArrayList<>();
+        items.add(field);
+        pendingFileUpload.fieldData.list = items;
+        pendingFileUpload.file = file;
+
+        setFileUploadField.setValue(pendingFileUpload.fieldData);
+        buildForm.setValue(true);
+
+        formSettings.addFieldDataItem(pendingFileUpload.fieldData);
+
+
+
+
+// TODO put back when done debugging
+//        showLoading.setValue(true);
+//        Disposable disposable = Observable.fromCallable(() -> {
+//            String fileString = Utils.encodeFileToBase64Binary(file);
+//            return fileString;
+//        }).subscribeOn(Schedulers.newThread())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe( encodedFileString -> {
+//                    showLoading.setValue(false);
+//                    postFileRequest(path, encodedFileString);
+//                }, throwable -> {
+//                    showLoading.setValue(false);
+//                    Log.d(TAG, "uploadFile: Error while encoding to Base64");
+//                });
+//        disposables.add(disposable);
+    }
+
+    private void postFileRequest(String path, String encodedFileString) {
+        FilePostDetail filePostDetail = new FilePostDetail();
+        filePostDetail.setFile(encodedFileString);
+        String extension = path.substring(path.lastIndexOf("."));
+        String fileName = path.substring(path.lastIndexOf("/") + 1);
+        filePostDetail.setType(extension);
+        filePostDetail.setName(fileName);
+        filePostDetail.setFile(encodedFileString);
+
+        FilePost filePost = new FilePost();
+        filePost.setFile(filePostDetail);
+
+        showLoading.setValue(true);
+        Disposable disposable = createWorkflowRepository.uploadFile(token, filePost)
+                .subscribe( fileUploadResponse -> {
+                    showLoading.setValue(false);
+                    successUpload(fileUploadResponse);
+
+                }, throwable -> {
+                    showLoading.setValue(false);
+                    Log.d(TAG, "postFileRequest: file upload failed: " + throwable.getMessage());
+                });
+
+        disposables.add(disposable);
+    }
+
+    private void successUpload(FileUploadResponse fileUploadResponse) {
+        showLoading.setValue(true);
+        ArrayList<FieldData> fieldItems = formSettings.getFieldItemsForPost();
+        ArrayMap<String, Integer> baseInfo = formSettings.getBaseMachineNamesAndIds();
+        PendingFileUpload pendingFileUpload = formSettings.getPendingFileUpload();
+        int id = fileUploadResponse.getFileId();
+        pendingFileUpload.fileId = id;
+        startPostCreateWorkflow(baseInfo, formSettings.getFormBuilder(), fieldItems);
     }
 
     protected void postWorkflow(FormBuilder formBuilder) {
@@ -200,7 +281,37 @@ public class CreateWorkflowViewModel extends ViewModel {
         }
 
         showLoading.setValue(true);
-        
+
+        // TODO check if we have a file to upload first and then continue with the rest.
+        if (formSettings.getPendingFileUpload() == null) {
+            startPostCreateWorkflow(baseInfo, formBuilder, fieldItems);
+            return;
+        }
+
+        //for using later during actual post.
+        formSettings.setFormBuilder(formBuilder);
+        PendingFileUpload pendingFileUpload = formSettings.getPendingFileUpload();
+
+
+        Disposable disposable = Observable.fromCallable(() -> {
+            String fileString = Utils.encodeFileToBase64Binary(pendingFileUpload.file);
+            return fileString;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe( encodedFileString -> {
+                    showLoading.setValue(false);
+                    postFileRequest(pendingFileUpload.path, encodedFileString);
+                }, throwable -> {
+                    showLoading.setValue(false);
+                    Log.d(TAG, "uploadFile: Error while encoding to Base64");
+                });
+        disposables.add(disposable);
+
+
+
+    }
+
+    private void startPostCreateWorkflow(ArrayMap<String, Integer> baseInfo, FormBuilder formBuilder, ArrayList<FieldData> fieldItems) {
         int titleTag = baseInfo.get(FormSettings.MACHINE_NAME_TITLE);
         int descriptionTag = baseInfo.get(FormSettings.MACHINE_NAME_DESCRIPTION);
         int startTag = baseInfo.get(FormSettings.MACHINE_NAME_START_DATE);
@@ -336,12 +447,12 @@ public class CreateWorkflowViewModel extends ViewModel {
     protected void generateFieldsByType(String typeName) {
         int id = formSettings.findIdByTypeName(typeName);
         if (id == 0) {
-            showLoading.postValue(false);
+            showLoading.setValue(false);
             return;
         }
-        showLoading.postValue(true);
-        clearFormFields.setValue(true);
-        formSettings.clearFormFieldData();
+
+        showLoading.setValue(true);
+        clearForm();
         formSettings.setWorkflowTypeIdSelected(id);
         Disposable disposable = Observable.fromCallable(() -> {
             List<FormFieldsByWorkflowType> fields = createWorkflowRepository.getFiedsByWorkflowType(id);
@@ -369,6 +480,12 @@ public class CreateWorkflowViewModel extends ViewModel {
                 });
         disposables.add(disposable);
 
+    }
+
+    private void clearForm() {
+        clearFormFields.setValue(true);
+        showUploadButton.setValue(false);
+        formSettings.clearFormFieldData();
     }
 
     private void showFields(FormSettings formSettings) {
@@ -434,10 +551,52 @@ public class CreateWorkflowViewModel extends ViewModel {
             case FormSettings.TYPE_SERVICE:
                 handleBuildService(field);
                 break;
+            case FormSettings.TYPE_FILE:
+                handleFile(field);
+                break;
             default:
                 Log.d(TAG, "buildField: Not a generic type: " + typeInfo.getType() + " value: " + typeInfo.getValueType());
                 break;
         }
+    }
+
+    private void handleFile(FormFieldsByWorkflowType field) {
+        showUploadButton.setValue(true);
+
+        FieldConfig fieldConfig = field.getFieldConfigObject();
+//        int listId = fieldConfig.getTypeInfo().getId();
+        int customFieldId = field.getId();
+        String customLabel = field.getFieldName();
+        int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
+
+
+        ListField listField = new ListField();
+//        listField.listId = listId;
+        listField.customFieldId = customFieldId;
+        listField.customLabel = customLabel;
+        listField.associatedWorkflowTypeId = associatedWorkflowTypeId;
+        listField.isMultipleSelection = false;
+
+
+        FieldData fieldData = new FieldData();
+        fieldData.label = customLabel;
+        fieldData.isMultipleSelection = false;
+        fieldData.tag = customFieldId;
+        fieldData.escape = false;
+
+        PendingFileUpload pendingFileUpload = new PendingFileUpload();
+        pendingFileUpload.fieldData = fieldData;
+
+        formSettings.setPendingFileUpload(pendingFileUpload);
+
+
+//        setListWithData.setValue(fieldData);
+//        buildForm.setValue(true);
+//        showLoading.setValue(false);
+
+
+
+
     }
 
     public void checkForContent(FormBuilder formBuilder) {
@@ -535,7 +694,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = createWorkflowRepository
                 .getCountryCodes()
                 .subscribe( phoneFieldData -> {
-
                     //list
                     ListField listField = new ListField();
                     listField.customFieldId = FormSettings.FIELD_CODE_ID;
@@ -1078,6 +1236,23 @@ public class CreateWorkflowViewModel extends ViewModel {
                     buildForm.setValue(true);
                 });
         disposables.add(disposable);
+    }
+
+    private String formatUiDateToPostDate(String uiDateFormat) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                "dd-MM-yyyy",
+                Locale.getDefault());
+        String metaDateString = "";
+        try {
+            Date convertedDate = dateFormat.parse(uiDateFormat);
+            SimpleDateFormat serverFormat = new SimpleDateFormat(
+                    "yyyy-MM-dd",
+                    Locale.getDefault());
+            metaDateString = serverFormat.format(convertedDate);
+        } catch (ParseException e) {
+            Log.d(TAG, "StringDateToTimestamp: e = " + e.getMessage());
+        }
+        return metaDateString;
     }
 
     public void getWorkflowTypes(String auth) {

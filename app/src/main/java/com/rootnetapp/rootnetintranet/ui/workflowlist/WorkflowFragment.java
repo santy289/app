@@ -38,6 +38,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowExpandableAdapter;
 
 import java.util.List;
+import java.util.Observable;
 
 import javax.inject.Inject;
 
@@ -220,6 +221,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     }
 
     private void subscribe() {
+
         final Observer<Integer> errorObserver = ((Integer data) -> {
             //Utils.hideLoading();
             if (null != data) {
@@ -288,6 +290,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.getObservableSetSelectType().observe(this, setSelectTypeObserver);
         workflowViewModel.showBottomSheetLoading.observe(this, this::showBottomSheetLoading);
         workflowViewModel.getObservableLoadMore().observe(this, this::showBottomSheetLoading);
+        workflowViewModel.clearFilters.observe(this, this::clearFilters);
     }
 
     private void subscribeToTypeMenu() {
@@ -313,6 +316,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.initSortBy();
         workflowViewModel.initFilters();
         setFilterBoxListeners();
+
         return popupWindow;
     }
 
@@ -380,8 +384,21 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         prepareWorkflowListWithFilters();
     }
 
+    private void clearFilters(Boolean clear) {
+        if (workflowFiltersMenuBinding == null) {
+            return;
+        }
+        workflowFiltersMenuBinding.swchMyworkflows.setChecked(false);
+        workflowFiltersMenuBinding.swchStatus.setChecked(true);
+        workflowFiltersMenuBinding.spnWorkflowtype.setSelection(WorkflowViewModel.NO_TYPE_SELECTED);
+    }
+
 
     private void setFilterBoxListeners() {
+        workflowFiltersMenuBinding.buttonClearFilters.setOnClickListener(view -> {
+            workflowViewModel.clearFilters();
+        });
+
         // filter switch listeners
         workflowFiltersMenuBinding.swchMyworkflows.setOnClickListener(view -> {
             boolean isChecked = workflowFiltersMenuBinding.swchMyworkflows.isChecked();

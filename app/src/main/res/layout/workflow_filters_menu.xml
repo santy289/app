@@ -133,6 +133,18 @@
                 android:layout_height="1dp"
                 android:background="@color/transparent" />
 
+            <Button
+                android:id="@+id/button_clear_filters"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/clear_filters"
+                style="?android:attr/borderlessButtonStyle"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/transparent" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

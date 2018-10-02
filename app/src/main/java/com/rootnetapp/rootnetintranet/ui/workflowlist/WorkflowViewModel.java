@@ -35,6 +35,7 @@ public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<Boolean> addWorkflowObserver;
     private MutableLiveData<Boolean> setAllCheckboxesList;
     public MutableLiveData<Boolean> showBottomSheetLoading;
+    protected MutableLiveData<Boolean> clearFilters;
     private LiveData<PagedList<WorkflowListItem>> liveWorkflows, liveUnordered;
     private LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
 
@@ -56,6 +57,7 @@ public class WorkflowViewModel extends ViewModel {
         workflowTypeMenuItems = this.workflowRepository.getWorkflowTypeMenuItems();
         filterBoxSettings = new FilterBoxSettings();
         showBottomSheetLoading = new MutableLiveData<>();
+        clearFilters = new MutableLiveData<>();
     }
 
     @Override
@@ -123,6 +125,10 @@ public class WorkflowViewModel extends ViewModel {
         filterBoxSettings.setSearchText(searchText);
         liveWorkflows.removeObservers(lifecycleOwner);
         applyFilters(filterBoxSettings);
+    }
+
+    protected void clearFilters() {
+        clearFilters.setValue(true);
     }
 
     private void subscribe(LifecycleOwner lifecycleOwner) {

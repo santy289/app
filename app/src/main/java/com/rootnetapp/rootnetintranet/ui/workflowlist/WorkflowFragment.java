@@ -161,12 +161,18 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         adapter.submitList(workflowDbList);
     }
 
+    PopupWindow popupwindow_obj;
     private void setupClickListeners() {
+
         fragmentWorkflowBinding.btnFilters.setOnClickListener(view1 -> {
-            PopupWindow popupwindow_obj = initPopMenu();
+            view1.setEnabled(false);
+            popupwindow_obj = initPopMenu();
             popupwindow_obj.showAsDropDown(fragmentWorkflowBinding.btnFilters, -40, 18);
+            popupwindow_obj.setOnDismissListener(() -> fragmentWorkflowBinding.btnFilters.setEnabled(true));
             subscribeToTypeMenu();
         });
+
+
 
         fragmentWorkflowBinding.btnAdd.setOnClickListener(view12 -> {
             mainActivityInterface.showFragment(WorkFlowCreateFragment.newInstance(

@@ -221,7 +221,7 @@
                     android:textStyle="bold"
                     android:textSize="12sp"
                     android:buttonTint="@color/colorPrimaryDark"
-                    android:text="@string/workflow_number" />
+                    android:text="@string/updated_date" />
 
                 <Switch
                     android:id="@+id/swch_updatedate"

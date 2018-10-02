@@ -32,8 +32,8 @@ import io.reactivex.schedulers.Schedulers;
 
 public class WorkflowRepository implements IncomingWorkflowsCallback {
 
-    public static int ENDPOINT_PAGE_SIZE = 5;
-    private static int LIST_PAGE_SIZE = 5;
+    public static int ENDPOINT_PAGE_SIZE = 20;
+    private static int LIST_PAGE_SIZE = 20;
     public final static String WORKFLOWID = "workflowdb.id";
     public final static String WORKFLOW_CREATED = "workflowdb.created_at";
     public final static String WORKFLOW_UPDATED = "workflowdb.updated_at";

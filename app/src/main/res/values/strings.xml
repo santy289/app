@@ -86,8 +86,8 @@
     <string name="my_workflows">Pending Workflows</string>
     <string name="sorting">Sort By</string>
     <string name="workflow_number">Workflow Number</string>
-    <string name="updated_date">Updated Date</string>
-    <string name="created_date">Created Date</string>
+    <string name="updated_date">Date Updated</string>
+    <string name="created_date">Date Created</string>
     <string name="descending">Descending</string>
     <string name="ascending">Ascending</string>
     <string name="workflow_name">Workflow Name</string>

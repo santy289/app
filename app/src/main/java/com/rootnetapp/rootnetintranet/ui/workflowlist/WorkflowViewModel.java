@@ -142,7 +142,6 @@ public class WorkflowViewModel extends ViewModel {
         workflowRepository.getObservableHandleRepoError().observe(lifecycleOwner, handleRepoErrorObserver);
         workflowRepository.getObservableHandleRepoSuccess().observe(lifecycleOwner, handleRepoSuccessObserver);
         workflowRepository.getObservableHandleRepoSuccessNoFilter().observe(lifecycleOwner, handleRepoSuccessNoFilterObserver);
-
     }
 
     protected LiveData<Boolean> getObservableLoadMore() {
@@ -217,7 +216,7 @@ public class WorkflowViewModel extends ViewModel {
             }
             case BYCREATE: {
                 if (filterBoxSettings.getWorkflowTypeId() == NO_TYPE_SELECTED) {
-                    boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
+                    boolean isDescending = !sort.getCreatedSortOrder().equals(Sort.sortOrder.ASC);
                     workflowRepository.rawQueryWorkflowListByFilters(
                             filterBoxSettings.isCheckedStatus(),
                             WorkflowRepository.WORKFLOW_CREATED,
@@ -226,7 +225,7 @@ public class WorkflowViewModel extends ViewModel {
                             id,
                             filterBoxSettings.getSearchText());
                 } else {
-                    boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
+                    boolean isDescending = !sort.getCreatedSortOrder().equals(Sort.sortOrder.ASC);
                     workflowRepository.rawQueryWorkflowListByFilters(
                             filterBoxSettings.isCheckedStatus(),
                             filterBoxSettings.getWorkflowTypeId(),
@@ -241,7 +240,7 @@ public class WorkflowViewModel extends ViewModel {
             }
             case BYUPDATE: {
                 if (filterBoxSettings.getWorkflowTypeId() == NO_TYPE_SELECTED) {
-                    boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
+                    boolean isDescending = !sort.getUpdatedSortOrder().equals(Sort.sortOrder.ASC);
                     workflowRepository.rawQueryWorkflowListByFilters(
                             filterBoxSettings.isCheckedStatus(),
                             WorkflowRepository.WORKFLOW_UPDATED,
@@ -250,7 +249,7 @@ public class WorkflowViewModel extends ViewModel {
                             id,
                             filterBoxSettings.getSearchText());
                 } else {
-                    boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
+                    boolean isDescending = !sort.getUpdatedSortOrder().equals(Sort.sortOrder.ASC);
                     workflowRepository.rawQueryWorkflowListByFilters(
                             filterBoxSettings.isCheckedStatus(),
                             filterBoxSettings.getWorkflowTypeId(),
@@ -375,10 +374,41 @@ public class WorkflowViewModel extends ViewModel {
         if (isChecked) {
             toggleRadioButton(viewRadioType, WorkflowFragment.CHECK);
             sort.setSortingType(sortType);
-            sort.setNumberSortOrder(Sort.sortOrder.ASC);
+            if (sortType == Sort.sortType.BYNUMBER) {
+                sort.setNumberSortOrder(Sort.sortOrder.ASC);
+            } else if (sortType == Sort.sortType.BYCREATE) {
+                sort.setCreatedSortOrder(Sort.sortOrder.ASC);
+            } else if (sortType == Sort.sortType.BYUPDATE) {
+                sort.setUpdatedSortOrder(Sort.sortOrder.ASC);
+            }
             clearOtherSwitchesBut(sortType);
         } else {
-            sort.setNumberSortOrder(Sort.sortOrder.DESC);
+            if (sortType == Sort.sortType.BYNUMBER) {
+                sort.setNumberSortOrder(Sort.sortOrder.DESC);
+            } else if (sortType == Sort.sortType.BYCREATE) {
+                sort.setCreatedSortOrder(Sort.sortOrder.DESC);
+            } else if (sortType == Sort.sortType.BYUPDATE) {
+                sort.setUpdatedSortOrder(Sort.sortOrder.DESC);
+            }
+        }
+    }
+
+    private void updateSortObject(Sort.sortType ofType) {
+        switch (ofType) {
+            case BYNUMBER:
+                sort.setCreatedSortOrder(Sort.sortOrder.DESC);
+                sort.setUpdatedSortOrder(Sort.sortOrder.DESC);
+                break;
+            case BYCREATE:
+                sort.setNumberSortOrder(Sort.sortOrder.DESC);
+                sort.setUpdatedSortOrder(Sort.sortOrder.DESC);
+                break;
+            case BYUPDATE:
+                sort.setNumberSortOrder(Sort.sortOrder.DESC);
+                sort.setCreatedSortOrder(Sort.sortOrder.DESC);
+                break;
+            default:
+                Log.d(TAG, "updateSortObject: Can't update sort Object using this sort type.");
         }
     }
 
@@ -396,6 +426,9 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     private void clearOtherSwitchesBut(Sort.sortType ofType) {
+        updateSortObject(ofType);
+
+        // Update UI
         switch (ofType) {
             case BYNUMBER:
                 toggleSwitch(WorkflowFragment.SWITCH_CREATED_DATE, WorkflowFragment.UNCHECK);

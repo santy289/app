@@ -13,6 +13,8 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PendingFileUpload;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCountryCodeAndValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
+import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
+import com.rootnetapp.rootnetintranet.models.createworkflow.ProductJsonValue;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.role.Role;
 import com.rootnetapp.rootnetintranet.models.responses.services.Service;
@@ -317,7 +319,6 @@ public class FormSettings {
                 }
 
                 metaData.setValue("");
-                // TODO if it is a file.
                 break;
             case FormSettings.VALUE_ENTITY:
                 handleList(fieldData, metaData, value);
@@ -325,6 +326,11 @@ public class FormSettings {
             case FormSettings.VALUE_LIST:
                 if (typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
                     String json = getJsonStringForSystemUserType(value);
+                    metaData.setValue(json);
+                    break;
+                }
+                if (typeInfo.getType().equals(TYPE_PRODUCT)) {
+                    String json = getProductJson(value, fieldData, metaData);
                     metaData.setValue(json);
                     break;
                 }
@@ -351,7 +357,8 @@ public class FormSettings {
         if (!fieldData.escape
                 || typeInfo.getType().equals(TYPE_SYSTEM_USERS)
                 || typeInfo.getType().equals(TYPE_PHONE)
-                || typeInfo.getType().equals(TYPE_CURRENCY)) {
+                || typeInfo.getType().equals(TYPE_CURRENCY)
+                || typeInfo.getType().equals(TYPE_PRODUCT)) {
             return;
         }
 
@@ -362,6 +369,33 @@ public class FormSettings {
         }
         Gson gson = new Gson();
         metaData.setValue(gson.toJson(metaValue));
+    }
+
+    private String getProductJson(String value, FieldData fieldData, WorkflowMetas workflowMetas) {
+        ArrayList<ListFieldItemMeta> list = fieldData.list;
+        ListFieldItemMeta item;
+        int id = 0;
+        for (int i = 0; i < list.size(); i++) {
+            item = list.get(i);
+            if (item.name.equals(value)) {
+               id = item.id;
+               break;
+            }
+        }
+
+        if (id == 0) {
+            return "";
+        }
+
+        ProductJsonValue productJsonValue = new ProductJsonValue();
+        productJsonValue.setValue(String.valueOf(id));
+        productJsonValue.setWorkflowTypeFieldId(workflowMetas.getWorkflowTypeFieldId());
+
+        JsonAdapter<ProductJsonValue> jsonAdapter = moshi.adapter(ProductJsonValue.class);
+        String jsonString = jsonAdapter.toJson(productJsonValue);
+
+        return jsonString;
+
     }
 
     private String getFileMetaJson() {
@@ -593,6 +627,26 @@ public class FormSettings {
         ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
         for (int i = 0; i < incomingList.size(); i++) {
             Role newItem = incomingList.get(i);
+            ListFieldItemMeta item = new ListFieldItemMeta(
+                    newItem.getId(),
+                    newItem.getName()
+            );
+            tempList.add(item);
+        }
+        listField.children = tempList;
+        formLists.add(listField);
+        return listField;
+    }
+
+    public ListField addProductLisToForm(List<ProductFormList> incomingList, String customLabel, int customFieldId, String type) {
+        ListField listField = new ListField();
+        listField.customFieldId = customFieldId;
+        listField.listType = type;
+        listField.customLabel = customLabel;
+        ProductFormList newItem;
+        ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
+        for (int i = 0; i < incomingList.size(); i++) {
+            newItem = incomingList.get(i);
             ListFieldItemMeta item = new ListFieldItemMeta(
                     newItem.getId(),
                     newItem.getName()

@@ -228,13 +228,13 @@ public class CreateWorkflowDialog extends DialogFragment {
                                                 break;
                                             }
                                             case "Producto": {
-                                                ProductoSpinner spinner = new ProductoSpinner(getActivity(),
-                                                        field, token);
-                                                binding.layoutDinamicFields.addView(spinner,
-                                                        new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                                                                ViewGroup.LayoutParams.WRAP_CONTENT));
-                                                view_list.add(spinner);
-                                                break;
+//                                                ProductoSpinner spinner = new ProductoSpinner(getActivity(),
+//                                                        field, token);
+//                                                binding.layoutDinamicFields.addView(spinner,
+//                                                        new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+//                                                                ViewGroup.LayoutParams.WRAP_CONTENT));
+//                                                view_list.add(spinner);
+//                                                break;
                                             }
                                             case "Servicio": {
                                                 ServicioSpinner spinner = new ServicioSpinner(getActivity(),

@@ -1,12 +1,9 @@
 package com.rootnetapp.rootnetintranet.models.responses.products;
 
+import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
 import com.squareup.moshi.Json;
 
 import java.util.List;
-
-/**
- * Created by root on 26/03/18.
- */
 
 public class ProductsResponse {
 
@@ -15,7 +12,7 @@ public class ProductsResponse {
     @Json(name = "status")
     private String status;
     @Json(name = "list")
-    private List<Product> list = null;
+    private List<ProductFormList> list = null;
 
     public Integer getCode() {
         return code;
@@ -33,11 +30,11 @@ public class ProductsResponse {
         this.status = status;
     }
 
-    public List<Product> getList() {
+    public List<ProductFormList> getList() {
         return list;
     }
 
-    public void setList(List<Product> list) {
+    public void setList(List<ProductFormList> list) {
         this.list = list;
     }
 

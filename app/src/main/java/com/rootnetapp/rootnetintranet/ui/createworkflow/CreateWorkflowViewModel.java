@@ -19,6 +19,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PendingFileUpload;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PhoneFieldData;
+import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
@@ -196,7 +197,6 @@ public class CreateWorkflowViewModel extends ViewModel {
             return;
         }
 
-
         PendingFileUpload pendingFileUpload = formSettings.getPendingFileUpload();
         pendingFileUpload.fileName = path.substring(path.lastIndexOf("/") + 1);
         pendingFileUpload.path = path;
@@ -210,25 +210,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         buildForm.setValue(true);
 
         formSettings.addFieldDataItem(pendingFileUpload.fieldData);
-
-
-
-
-// TODO put back when done debugging
-//        showLoading.setValue(true);
-//        Disposable disposable = Observable.fromCallable(() -> {
-//            String fileString = Utils.encodeFileToBase64Binary(file);
-//            return fileString;
-//        }).subscribeOn(Schedulers.newThread())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe( encodedFileString -> {
-//                    showLoading.setValue(false);
-//                    postFileRequest(path, encodedFileString);
-//                }, throwable -> {
-//                    showLoading.setValue(false);
-//                    Log.d(TAG, "uploadFile: Error while encoding to Base64");
-//                });
-//        disposables.add(disposable);
     }
 
     private void postFileRequest(String path, String encodedFileString) {
@@ -283,7 +264,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         showLoading.setValue(true);
 
         // TODO check if we have a file to upload first and then continue with the rest.
-        if (formSettings.getPendingFileUpload() == null) {
+        if (formSettings.getPendingFileUpload() == null || formSettings.getPendingFileUpload().file == null) {
             startPostCreateWorkflow(baseInfo, formBuilder, fieldItems);
             return;
         }
@@ -856,6 +837,37 @@ public class CreateWorkflowViewModel extends ViewModel {
         FieldConfig fieldConfig = field.getFieldConfigObject();
         String customLabel = field.getFieldName();
         int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
+        boolean isMultipleSelection = fieldConfig.getMultiple();
+        int customFieldId = field.getId();
+
+        Disposable disposable = createWorkflowRepository
+                .getProducts(token)
+                .subscribe( productsResponse -> {
+                    if (productsResponse.getCode() != 200) {
+                        showLoading.setValue(false);
+                        return;
+                    }
+                    List<ProductFormList> list = productsResponse.getList();
+                    ListField listField = formSettings.addProductLisToForm(
+                            list,
+                            customLabel,
+                            customFieldId,
+                            FormSettings.TYPE_ROLE
+                    );
+                    listField.isMultipleSelection = isMultipleSelection;
+                    listField.associatedWorkflowTypeId = associatedWorkflowTypeId;
+
+                    if (listField.children.size() < 1) {
+                        return;
+                    }
+                    showListField(listField, fieldConfig);
+                }, throwable -> {
+                    showLoading.setValue(false);
+                    Log.d(TAG, "handeBuilProduct: " + throwable.getMessage());
+                });
+
+        disposables.add(disposable);
+
     }
 
     private void handleProject(FormFieldsByWorkflowType field) {

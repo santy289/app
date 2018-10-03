@@ -15,11 +15,11 @@ import android.util.Log;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
-import com.rootnetapp.rootnetintranet.models.workflowlist.SpinnerWorkflowTypeMenu;
+import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowTypeSpinnerAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
 
@@ -49,8 +49,16 @@ public class WorkflowViewModel extends ViewModel {
 
 
     //
-    private MutableLiveData<List<SpinnerWorkflowTypeMenu>> workflowTypeMenuItems;
+    private MutableLiveData<List<WorkflowTypeMenu>> workflowTypeMenuItems;
     private List<WorkflowTypeItemMenu> workflowTypeForMenu;
+
+
+
+    protected MutableLiveData<List<WorkflowTypeMenu>> rightDrawerFilterMenus;
+    protected MutableLiveData<List<WorkflowTypeMenu>> rightDrawerOptionMenus;
+    protected List<WorkflowTypeMenu> rightDrawerFilters;
+
+
 //
 
     private WorkflowRepository workflowRepository;
@@ -75,6 +83,8 @@ public class WorkflowViewModel extends ViewModel {
         showBottomSheetLoading = new MutableLiveData<>();
         clearFilters = new MutableLiveData<>();
         workflowTypeMenuItems = new MutableLiveData<>();
+        rightDrawerFilterMenus = new MutableLiveData<>();
+        rightDrawerOptionMenus = new MutableLiveData<>();
     }
 
     @Override
@@ -125,8 +135,10 @@ public class WorkflowViewModel extends ViewModel {
         subscribe(lifecycleOwner);
     }
 
-    protected void findCategories() {
+    protected void iniRightDrawerFilters() {
         getCategories(categoryId);
+        initRightDrawerFilterList();
+
     }
 
     private void getCategories(int id) {
@@ -140,6 +152,7 @@ public class WorkflowViewModel extends ViewModel {
                         return;
                     }
                     categoryList = list.get(0).getChildren();
+                    initWorkflowTypeMenus();
                 }, throwable -> {
                     showLoading.setValue(false);
                     Log.d(TAG, "getCategories: Can't get categories for all workflows");
@@ -147,9 +160,89 @@ public class WorkflowViewModel extends ViewModel {
         disposables.add(disposable);
     }
 
+    private void initWorkflowTypeMenus() {
+        //init workflow type filter
+        ListItem category;
+        WorkflowTypeItemMenu typeMenu;
+
+        ArrayMap<String, List<WorkflowTypeMenu>> result = new ArrayMap<>();
+
+        String categoryName;
+        List<WorkflowTypeMenu> tempMenus = new ArrayList<>();
+        List<WorkflowTypeMenu> noCategory = new ArrayList<>();
+        int idCat;
+        int catId;
+        for (int i = 0; i < categoryList.size(); i++) {
+            category = categoryList.get(i);
+            categoryName = category.getName();
+            for (int j = 0; j < workflowTypeForMenu.size(); j++) {
+                typeMenu = workflowTypeForMenu.get(j);
+                idCat = typeMenu.getCategory();
+                catId = category.getId();
+                if (idCat == catId) {
+                    String menuLabel = typeMenu.getName();
+                    WorkflowTypeMenu menu = new WorkflowTypeMenu(
+                            menuLabel,
+                            WorkflowTypeSpinnerAdapter.TYPE,
+                            typeMenu.getId()
+                    );
+                    tempMenus.add(menu);
+                }
+            }
+            if (tempMenus.isEmpty()) {
+                continue;
+            }
+            result.put(categoryName, tempMenus);
+            tempMenus = new ArrayList<>();
+        }
+
+        for (int i = 0; i < workflowTypeForMenu.size(); i++) {
+            typeMenu = workflowTypeForMenu.get(i);
+            idCat = typeMenu.getCategory();
+            if (idCat == 0) {
+                String menuLabel = typeMenu.getName();
+                WorkflowTypeMenu menu = new WorkflowTypeMenu(
+                        menuLabel,
+                        WorkflowTypeSpinnerAdapter.TYPE,
+                        typeMenu.getId()
+                );
+                noCategory.add(menu);
+            }
+        }
+
+
+        if (!noCategory.isEmpty()) {
+            result.put(WorkflowTypeSpinnerAdapter.NO_CATEGORY_LABEL, noCategory);
+        }
+
+        spinnerMenuArray = new ArrayList<>();
+
+        String key;
+        WorkflowTypeMenu menu;
+        for (int i = 0; i < result.size(); i++) {
+            key = result.keyAt(i);
+            menu = new WorkflowTypeMenu(
+                    key,
+                    WorkflowTypeSpinnerAdapter.CATEGORY
+            );
+            spinnerMenuArray.add(menu);
+            List<WorkflowTypeMenu> list = result.get(key);
+            for (int j = 0; j < list.size(); j++) {
+                menu = list.get(j);
+                spinnerMenuArray.add(menu);
+            }
+        }
+
+        WorkflowTypeMenu noSelection = new WorkflowTypeMenu(
+                "NO SELECTION",
+                WorkflowTypeSpinnerAdapter.NO_SELECTION
+        );
+        spinnerMenuArray.add(0, noSelection);
+    }
+
     protected void loadWorkflowsByType(int position, LifecycleOwner lifecycleOwner) {
         showLoading.postValue(true);
-        SpinnerWorkflowTypeMenu menu = spinnerMenuArray.get(position);
+        WorkflowTypeMenu menu = spinnerMenuArray.get(position);
         int typeId = menu.getWorkflowTypeId();
         if (typeId == NO_TYPE_SELECTED) {
             workflowRepository.getAllWorkflowsNoFilters(token);
@@ -223,7 +316,7 @@ public class WorkflowViewModel extends ViewModel {
             int typeIdPositionInArray,
             boolean isCheckedMyPendings,
             boolean isCheckedStatus) {
-        SpinnerWorkflowTypeMenu menu = spinnerMenuArray.get(typeIdPositionInArray);
+        WorkflowTypeMenu menu = spinnerMenuArray.get(typeIdPositionInArray);
         updateFilterBoxSettings(menu.getWorkflowTypeId(), typeIdPositionInArray, isCheckedMyPendings, isCheckedStatus);
         liveWorkflows.removeObservers(lifecycleOwner);
         applyFilters(filterBoxSettings);
@@ -359,17 +452,59 @@ public class WorkflowViewModel extends ViewModel {
         setSelectType.postValue(filterBoxSettings.getTypeIdPositionInArray());
     }
 
-    ArrayList<SpinnerWorkflowTypeMenu> spinnerMenuArray;
+
+
+    private void initRightDrawerFilterList() {
+        rightDrawerFilters = new ArrayList<>();
+
+        WorkflowTypeMenu menuItem = new WorkflowTypeMenu(
+                "Tipo De Workflow",
+                "Todos los tipos",
+                RightDrawerFiltersAdapter.TYPE,
+                0
+        );
+
+        rightDrawerFilters.add(menuItem);
+
+        menuItem = new WorkflowTypeMenu(
+                "Filtros",
+                "Todos",
+                RightDrawerFiltersAdapter.TYPE,
+                0
+        );
+        rightDrawerFilters.add(menuItem);
+
+
+        rightDrawerFilterMenus.setValue(rightDrawerFilters);
+
+    }
+
+    private static final int WORKFLOW_TYPE = 0;
+    protected void handleSelectedItemInFilters(int position) {
+
+        if (position == WORKFLOW_TYPE) {
+            rightDrawerOptionMenus.setValue(spinnerMenuArray);
+        }
+    }
+
+    protected void handleRightDrawerBackAction() {
+        if (rightDrawerFilters == null) {
+            return;
+        }
+        rightDrawerFilterMenus.setValue(rightDrawerFilters);
+    }
+
+    ArrayList<WorkflowTypeMenu> spinnerMenuArray;
     private void initWorkflowtypeMenu() {
         //init workflow type filter
         ListItem category;
         WorkflowTypeItemMenu typeMenu;
 
-        ArrayMap<String, List<SpinnerWorkflowTypeMenu>> result = new ArrayMap<>();
+        ArrayMap<String, List<WorkflowTypeMenu>> result = new ArrayMap<>();
 
         String categoryName;
-        List<SpinnerWorkflowTypeMenu> tempMenus = new ArrayList<>();
-        List<SpinnerWorkflowTypeMenu> noCategory = new ArrayList<>();
+        List<WorkflowTypeMenu> tempMenus = new ArrayList<>();
+        List<WorkflowTypeMenu> noCategory = new ArrayList<>();
         int idCat;
         int catId;
         for (int i = 0; i < categoryList.size(); i++) {
@@ -381,7 +516,7 @@ public class WorkflowViewModel extends ViewModel {
                 catId = category.getId();
                 if (idCat == catId) {
                     String menuLabel = typeMenu.getName();
-                    SpinnerWorkflowTypeMenu menu = new SpinnerWorkflowTypeMenu(
+                    WorkflowTypeMenu menu = new WorkflowTypeMenu(
                             menuLabel,
                             WorkflowTypeSpinnerAdapter.TYPE,
                             typeMenu.getId()
@@ -401,7 +536,7 @@ public class WorkflowViewModel extends ViewModel {
             idCat = typeMenu.getCategory();
             if (idCat == 0) {
                 String menuLabel = typeMenu.getName();
-                SpinnerWorkflowTypeMenu menu = new SpinnerWorkflowTypeMenu(
+                WorkflowTypeMenu menu = new WorkflowTypeMenu(
                         menuLabel,
                         WorkflowTypeSpinnerAdapter.TYPE,
                         typeMenu.getId()
@@ -418,22 +553,22 @@ public class WorkflowViewModel extends ViewModel {
         spinnerMenuArray = new ArrayList<>();
 
         String key;
-        SpinnerWorkflowTypeMenu menu;
+        WorkflowTypeMenu menu;
         for (int i = 0; i < result.size(); i++) {
             key = result.keyAt(i);
-            menu = new SpinnerWorkflowTypeMenu(
+            menu = new WorkflowTypeMenu(
                     key,
                     WorkflowTypeSpinnerAdapter.CATEGORY
             );
             spinnerMenuArray.add(menu);
-            List<SpinnerWorkflowTypeMenu> list = result.get(key);
+            List<WorkflowTypeMenu> list = result.get(key);
             for (int j = 0; j < list.size(); j++) {
                 menu = list.get(j);
                 spinnerMenuArray.add(menu);
             }
         }
 
-        SpinnerWorkflowTypeMenu noSelection = new SpinnerWorkflowTypeMenu(
+        WorkflowTypeMenu noSelection = new WorkflowTypeMenu(
                 "NO SELECTION",
                 WorkflowTypeSpinnerAdapter.NO_SELECTION
         );
@@ -670,7 +805,7 @@ public class WorkflowViewModel extends ViewModel {
         return showList;
     }
 
-    protected LiveData<List<SpinnerWorkflowTypeMenu>> getObservableTypeItemMenu() {
+    protected LiveData<List<WorkflowTypeMenu>> getObservableTypeItemMenu() {
         return workflowTypeMenuItems;
     }
 

@@ -80,7 +80,6 @@ public class FormSettings {
     public static final String VALUE_ENTITY = "entity";
     public static final String VALUE_COORD = "coords";
 
-    public static final int PA_CODE = 1;
     public static final int FIELD_CODE_ID = -999;
     public static final int FIELD_CURRENCY_ID = -998;
 

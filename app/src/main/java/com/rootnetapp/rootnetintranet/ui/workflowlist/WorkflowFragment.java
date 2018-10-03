@@ -1,5 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist;
 
+import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.arch.paging.PagedList;
@@ -18,7 +19,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RadioButton;
@@ -28,19 +28,18 @@ import android.widget.Toast;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
-import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowBinding;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowFiltersMenuBinding;
-import com.rootnetapp.rootnetintranet.models.workflowlist.SpinnerWorkflowTypeMenu;
+import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.WorkFlowCreateFragment;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
+import com.rootnetapp.rootnetintranet.ui.main.MainActivityViewModel;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowExpandableAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowTypeSpinnerAdapter;
 
 import java.util.List;
-import java.util.Observable;
 
 import javax.inject.Inject;
 
@@ -57,6 +56,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     private int[] typeIds;
     private BottomSheetBehavior bottomSheetBehavior;
 
+
+
     protected static final int SWITCH_NUMBER = 500;
     protected static final int SWITCH_CREATED_DATE = 501;
     protected static final int SWITCH_UPDATED_DATE = 502;
@@ -72,6 +73,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     protected static final int UNCHECK = 10;
     protected static final int INDEX_TYPE = 0;
     protected static final int INDEX_CHECK = 1;
+
+    MainActivityViewModel mainViewModel;
 
 
     // Used when we have a general workflow.
@@ -114,13 +117,17 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .of(this, workflowViewModelFactory)
                 .get(WorkflowViewModel.class);
 
+        mainViewModel = ViewModelProviders
+                .of(getActivity())
+                .get(MainActivityViewModel.class);
+
         setupWorkflowRecyclerView();
         setupClickListeners();
         setupSearchListener();
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         workflowViewModel.initWorkflowList(prefs, this);
         subscribe();
-        workflowViewModel.findCategories();
+        workflowViewModel.iniRightDrawerFilters();
         return view;
     }
 
@@ -163,6 +170,14 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     private void updateAdapterList(PagedList<WorkflowListItem> workflowDbList) {
         adapter.submitList(workflowDbList);
+    }
+
+    private void createFilterListRightDrawer(List<WorkflowTypeMenu> menus) {
+        mainViewModel.createRightDrawerListAdapter(menus);
+    }
+
+    private void createOptionListRightDrawer(List<WorkflowTypeMenu> menus) {
+        mainViewModel.createRightDrawerOptionListAdapter(menus);
     }
 
     PopupWindow popupwindow_obj;
@@ -280,6 +295,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             adapter.setAllCheckboxes(isChecked);
         });
 
+        // Workflow Fragment's ViewModel
         workflowViewModel.getObservableError().observe(this, errorObserver);
         workflowViewModel.getObservableShowLoading().observe(this, showLoadingObserver);
         addWorkflowsObserver();
@@ -295,10 +311,24 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.getObservableLoadMore().observe(this, this::showBottomSheetLoading);
         workflowViewModel.clearFilters.observe(this, this::clearFilters);
         subscribeToTypeMenu();
+        workflowViewModel.rightDrawerFilterMenus.observe(this, this::createFilterListRightDrawer);
+        workflowViewModel.rightDrawerOptionMenus.observe(this, this::createOptionListRightDrawer);
+
+        // MainActivity's ViewModel
+        mainViewModel.messageContainerToWorkflowList.observe(this, this::handleRightDrawerFilterClick);
+        mainViewModel.messageBackActionToWorkflowList.observe(this, this::handleBackAction);
+    }
+
+    private void handleRightDrawerFilterClick(int position) {
+        workflowViewModel.handleSelectedItemInFilters(position);
+    }
+
+    private void handleBackAction(Boolean back) {
+        workflowViewModel.handleRightDrawerBackAction();
     }
 
     private void subscribeToTypeMenu() {
-        final Observer<List<SpinnerWorkflowTypeMenu>> typeListMenuObserver = (list -> {
+        final Observer<List<WorkflowTypeMenu>> typeListMenuObserver = (list -> {
             if (list == null) {
                 return;
             }
@@ -324,7 +354,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         return popupWindow;
     }
 
-    private void setupSpinnerWorkflowType(List<SpinnerWorkflowTypeMenu> itemMenus) {
+    private void setupSpinnerWorkflowType(List<WorkflowTypeMenu> itemMenus) {
         if (this.getContext() == null) {
             return;
         }

@@ -6,6 +6,8 @@ import android.arch.lifecycle.ViewModel;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.widget.ArrayAdapter;
 
 import com.auth0.android.jwt.JWT;
 import com.rootnetapp.rootnetintranet.R;
@@ -14,10 +16,15 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
+import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOptionsAdapter;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -40,6 +47,14 @@ public class MainActivityViewModel extends ViewModel {
     private MutableLiveData<Boolean> goToDomain;
     protected MutableLiveData<Integer> setSearchMenuLayout;
     protected MutableLiveData<Integer> setUploadMenuLayout;
+    protected MutableLiveData<List<WorkflowTypeMenu>> setRightDrawerFilterList;
+    protected MutableLiveData<List<WorkflowTypeMenu>> setRightDrawerOptionList;
+
+    public MutableLiveData<Integer> messageContainerToWorkflowList;
+    public MutableLiveData<Boolean> messageBackActionToWorkflowList;
+
+    List<WorkflowTypeMenu> filtersList;
+    List<WorkflowTypeMenu> optionsList;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
@@ -51,6 +66,10 @@ public class MainActivityViewModel extends ViewModel {
     public MainActivityViewModel(MainActivityRepository repository) {
         this.repository = repository;
         this.setSearchMenuLayout = new MutableLiveData<>();
+        this.setRightDrawerFilterList = new MutableLiveData<>();
+        this.setRightDrawerOptionList = new MutableLiveData<>();
+        this.messageContainerToWorkflowList = new MutableLiveData<>();
+        this.messageBackActionToWorkflowList = new MutableLiveData<>();
     }
 
     @Override
@@ -88,6 +107,14 @@ public class MainActivityViewModel extends ViewModel {
         JWT jwt = new JWT(token);
         int id = Integer.parseInt(jwt.getClaim(PreferenceKeys.PREFERENCE_PROFILE_ID).asString());
         getUser(id);
+    }
+
+    protected void sendFilterClickToWorflowList(int position) {
+        messageContainerToWorkflowList.setValue(position);
+    }
+
+    protected void sendRightDrawerBackButtonClick() {
+        messageBackActionToWorkflowList.setValue(true);
     }
 
     public void getUser(int id) {
@@ -128,6 +155,16 @@ public class MainActivityViewModel extends ViewModel {
     protected void onCreateOptionsMenu() {
         int defaultMenu = R.menu.menu_search;
 
+    }
+
+    public void createRightDrawerListAdapter(List<WorkflowTypeMenu> menus) {
+        filtersList = menus;
+        setRightDrawerFilterList.setValue(filtersList);
+    }
+
+    public void createRightDrawerOptionListAdapter(List<WorkflowTypeMenu> menus) {
+        optionsList = menus;
+        setRightDrawerOptionList.setValue(optionsList);
     }
 
     private void onWorkflowSuccess(Workflow workflow) {

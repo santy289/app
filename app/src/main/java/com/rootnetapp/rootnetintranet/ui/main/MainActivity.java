@@ -19,11 +19,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
@@ -32,6 +37,7 @@ import com.bumptech.glide.RequestBuilder;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
+import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerService;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
@@ -41,6 +47,10 @@ import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOptionsAdapter;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -55,6 +65,11 @@ public class MainActivity extends AppCompatActivity
     private SharedPreferences sharedPref;
     private int id;
     private MenuItem mSearch = null;
+
+    RightDrawerOptionsAdapter rightDrawerOptionsAdapter;
+    RightDrawerFiltersAdapter rightDrawerFiltersAdapter;
+
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +95,43 @@ public class MainActivity extends AppCompatActivity
 
         showFragment(TimelineFragment.newInstance(this), false);
         startBackgroundWorkflowRequest();
+
+        // TODO debuging remove later
+        startRightDrawerNavigation();
     }
+
+
+
+    // TODO debugging remove later
+    String firstPage[] = {"TEST 1", "TEST 2", "TEST 3"};
+    String secondPage[] = {"TEST 4", "TEST 5", "TEST 6"};
+    ArrayAdapter<String> firstAdapter;
+    private void startRightDrawerNavigation() {
+//        firstAdapter =
+//                new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, firstPage);
+//
+//
+//        ListView listView = mainBinding.rightDrawer.rightDrawerFilters;
+//        listView.setAdapter(firstAdapter);
+//
+//
+//        listView.setOnItemClickListener((parentAdapter, view, position, id) -> {
+//            Log.d(TAG, "startRightDrawerNavigation: ");
+//
+//            ArrayAdapter<String> secondAdapter =
+//                    new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, secondPage);
+//
+//            mainBinding.rightDrawer.rightDrawerFilters.setAdapter(secondAdapter);
+//
+//        });
+//
+//        mainBinding.rightDrawer.drawerBackButton.setOnClickListener(view -> {
+//
+//            mainBinding.rightDrawer.rightDrawerFilters.setAdapter(firstAdapter);
+//        });
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -199,6 +250,9 @@ public class MainActivity extends AppCompatActivity
         mainBinding.leftDrawer.navProfile.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.buttonWorkflow.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navExit.setOnClickListener(this::drawerClicks);
+        mainBinding.rightDrawer.drawerBackButton.setOnClickListener(view -> {
+            viewModel.sendRightDrawerBackButtonClick();
+        });
     }
 
     private void startBackgroundWorkflowRequest() {
@@ -318,6 +372,46 @@ public class MainActivity extends AppCompatActivity
 //        );
     }
 
+    private void setRightDrawerFilters(List<WorkflowTypeMenu> menus) {
+        mainBinding.rightDrawer.drawerBackButton.setVisibility(View.GONE);
+        hideSortingViews(false);
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        rightDrawerFiltersAdapter = new RightDrawerFiltersAdapter(inflater, menus);
+
+        mainBinding.rightDrawer.rightDrawerFilters.setOnItemClickListener((parent, view, position, id) -> {
+                // TODO something we selected a new item on filter -> go to mainViewModel and replace adapter with new adapter.
+            viewModel.sendFilterClickToWorflowList(position);
+        });
+        mainBinding.rightDrawer.rightDrawerFilters.setAdapter(rightDrawerFiltersAdapter);
+    }
+
+    private void hideSortingViews(boolean hide) {
+        TextView sortTitle =  mainBinding.rightDrawer.rightDrawerSortBy;
+        TextView sortSubtitle = mainBinding.rightDrawer.rightDrawerSortSelection;
+
+        if (hide) {
+            sortTitle.setVisibility(View.GONE);
+            sortSubtitle.setVisibility(View.GONE);
+        } else {
+            sortTitle.setVisibility(View.VISIBLE);
+            sortSubtitle.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void setRightDrawerOptions(List<WorkflowTypeMenu> menus) {
+        hideSortingViews(true);
+        mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
+        //if (rightDrawerOptionsAdapter == null) {
+            LayoutInflater inflater = LayoutInflater.from(this);
+            rightDrawerOptionsAdapter = new RightDrawerOptionsAdapter(inflater, menus);
+            mainBinding.rightDrawer.rightDrawerFilters.setOnItemClickListener((parent, view, position, id) -> {
+                // TODO something we selected a new item on filter -> go to mainViewModel and replace adapter with new adapter.
+            });
+        //}
+        mainBinding.rightDrawer.rightDrawerFilters.setAdapter(rightDrawerOptionsAdapter);
+    }
+
     private void subscribe() {
         subscribeForLogin();
         final Observer<Integer> errorObserver = ((Integer data) -> {
@@ -337,6 +431,8 @@ public class MainActivity extends AppCompatActivity
         viewModel.getObservableCollapseMenu().observe(this, collapseMenuObserver);
         viewModel.getObservableHideKeyboard().observe(this, hideKeyboardObserver);
         viewModel.getObservableGoToWorkflowDetail().observe(this, goToWorkflowDetailObserver);
+        viewModel.setRightDrawerFilterList.observe(this, (this::setRightDrawerFilters));
+        viewModel.setRightDrawerOptionList.observe(this, (this::setRightDrawerOptions));
     }
 
     private void subscribeForLogin() {

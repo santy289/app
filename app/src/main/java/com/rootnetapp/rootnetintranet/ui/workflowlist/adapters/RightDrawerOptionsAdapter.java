@@ -11,7 +11,7 @@ import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 
 import java.util.List;
 
-public class WorkflowTypeSpinnerAdapter extends BaseAdapter {
+public class RightDrawerOptionsAdapter extends BaseAdapter {
 
     private LayoutInflater inflater;
     private List<WorkflowTypeMenu> menus;
@@ -21,7 +21,7 @@ public class WorkflowTypeSpinnerAdapter extends BaseAdapter {
     public static final int NO_CATEGORY = R.string.no_category;
     public static final String NO_CATEGORY_LABEL = "no_category";
 
-    public WorkflowTypeSpinnerAdapter(LayoutInflater inflater, List<WorkflowTypeMenu> menus) {
+    public RightDrawerOptionsAdapter(LayoutInflater inflater, List<WorkflowTypeMenu> menus) {
         this.inflater = inflater;
         this.menus = menus;
     }
@@ -56,13 +56,13 @@ public class WorkflowTypeSpinnerAdapter extends BaseAdapter {
         TextView textView;
         switch (itemRowType) {
             case TYPE:
-                convertView = inflater.inflate(R.layout.spinner_type_layout, null);
-                textView = convertView.findViewById(R.id.spinner_row_type);
+                convertView = inflater.inflate(R.layout.right_drawer_filter_item, null);
+                textView = convertView.findViewById(R.id.right_drawer_item_title);
                 textView.setText(menu.getLabel());
                 break;
             case CATEGORY:
-                convertView = inflater.inflate(R.layout.spinner_category_layout, null);
-                textView = convertView.findViewById(R.id.spinner_row_category);
+                convertView = inflater.inflate(R.layout.right_drawer_filter_item, null);
+                textView = convertView.findViewById(R.id.right_drawer_item_title);
                 String label;
                 if (menu.getLabel().equals(NO_CATEGORY_LABEL)) {
                     label = convertView.getContext().getString(NO_CATEGORY);
@@ -73,8 +73,8 @@ public class WorkflowTypeSpinnerAdapter extends BaseAdapter {
                 convertView.setEnabled(false);
                 break;
             case NO_SELECTION:
-                convertView = inflater.inflate(R.layout.spinner_type_layout, null);
-                textView = convertView.findViewById(R.id.spinner_row_type);
+                convertView = inflater.inflate(R.layout.right_drawer_filter_item, null);
+                textView = convertView.findViewById(R.id.right_drawer_item_title);
                 textView.setText(menu.getLabel());
                 break;
         }

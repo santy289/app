@@ -31,11 +31,13 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowBinding;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowFiltersMenuBinding;
+import com.rootnetapp.rootnetintranet.models.workflowlist.SpinnerWorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.WorkFlowCreateFragment;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowExpandableAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowTypeSpinnerAdapter;
 
 import java.util.List;
 import java.util.Observable;
@@ -118,6 +120,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         workflowViewModel.initWorkflowList(prefs, this);
         subscribe();
+        workflowViewModel.findCategories();
         return view;
     }
 
@@ -170,7 +173,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             popupwindow_obj = initPopMenu();
             popupwindow_obj.showAsDropDown(fragmentWorkflowBinding.btnFilters, -40, 18);
             popupwindow_obj.setOnDismissListener(() -> fragmentWorkflowBinding.btnFilters.setEnabled(true));
-            subscribeToTypeMenu();
+//            subscribeToTypeMenu();
         });
 
 
@@ -291,10 +294,11 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.showBottomSheetLoading.observe(this, this::showBottomSheetLoading);
         workflowViewModel.getObservableLoadMore().observe(this, this::showBottomSheetLoading);
         workflowViewModel.clearFilters.observe(this, this::clearFilters);
+        subscribeToTypeMenu();
     }
 
     private void subscribeToTypeMenu() {
-        final Observer<List<WorkflowTypeItemMenu>> typeListMenuObserver = (list -> {
+        final Observer<List<SpinnerWorkflowTypeMenu>> typeListMenuObserver = (list -> {
             if (list == null) {
                 return;
             }
@@ -320,7 +324,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         return popupWindow;
     }
 
-    private void setupSpinnerWorkflowType(List<WorkflowTypeItemMenu> itemMenus) {
+    private void setupSpinnerWorkflowType(List<SpinnerWorkflowTypeMenu> itemMenus) {
         if (this.getContext() == null) {
             return;
         }
@@ -328,22 +332,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             return;
         }
 
-        typeIds = new int[itemMenus.size()];
-        types = new String[itemMenus.size()];
-        typeIds[0] = WorkflowViewModel.NO_TYPE_SELECTED;
-        types[0] = getString(R.string.no_selection);
-        WorkflowTypeItemMenu menu;
-        int until = itemMenus.size();
-        for (int i = 1; i < until; i++) {
-            menu = itemMenus.get(i);
-            typeIds[i] = menu.getId();
-            types[i] = itemMenus.get(i).name;
-        }
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                getContext(),
-                android.R.layout.simple_spinner_item,
-                types
-        );
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        WorkflowTypeSpinnerAdapter adapter = new WorkflowTypeSpinnerAdapter(inflater, itemMenus);
 
         workflowFiltersMenuBinding.spnWorkflowtype.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -351,8 +341,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 if (types == null || typeIds == null) {
                     return;
                 }
-                int workflowTypeId = typeIds[position];
-                workflowViewModel.loadWorkflowsByType(workflowTypeId, WorkflowFragment.this);
+
+                workflowViewModel.loadWorkflowsByType(position, WorkflowFragment.this);
                 prepareWorkflowListWithFilters();
             }
 
@@ -369,10 +359,9 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         boolean isCheckedMyPendings = workflowFiltersMenuBinding.swchMyworkflows.isChecked();
         boolean isCheckedStatus = workflowFiltersMenuBinding.swchStatus.isChecked();
         int typeIdPositionInArray = workflowFiltersMenuBinding.spnWorkflowtype.getSelectedItemPosition();
-        int workflowTypeId = typeIds[typeIdPositionInArray];
+
         workflowViewModel.handleWorkflowTypeFilters(
                 WorkflowFragment.this,
-                workflowTypeId,
                 typeIdPositionInArray,
                 isCheckedMyPendings,
                 isCheckedStatus);

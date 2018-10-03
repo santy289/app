@@ -18,6 +18,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbD
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
 
 import org.w3c.dom.Text;
 
@@ -92,6 +93,10 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
 
     public LiveData<List<WorkflowTypeItemMenu>> getWorkflowTypeMenuItems() {
         return workflowTypeMenuItems;
+    }
+
+    public List<WorkflowTypeItemMenu> getWorkflowTypesForMenu() {
+        return workflowTypeDbDao.getTypesForMenu();
     }
 
     public LiveData<PagedList<WorkflowListItem>> getAllWorkflows() {
@@ -392,6 +397,11 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 });
 
         disposables.add(disposable);
+    }
+
+    public Observable<ListsResponse> getCategoryList(String auth, int id) {
+        return service.getListItems(auth, id).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public LiveData<Boolean> getObservableHandleRepoError() {

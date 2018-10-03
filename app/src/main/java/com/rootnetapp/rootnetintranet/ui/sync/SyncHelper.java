@@ -47,6 +47,7 @@ public class SyncHelper {
     private MutableLiveData<Boolean> attemptTokenRefresh;
     private MutableLiveData<Boolean> goToDomain;
     private MutableLiveData<String> saveToPreference;
+    protected MutableLiveData<Integer> saveIdToPreference;
 
     private ApiInterface apiInterface;
     private AppDatabase database;
@@ -67,6 +68,7 @@ public class SyncHelper {
         this.workflows = new ArrayList<>();
         this.workflowDbs = new ArrayList<>();
         this.profiles = new ArrayList<>();
+        this.saveIdToPreference = new MutableLiveData<>();
     }
 
     protected void syncData(String token) {
@@ -188,8 +190,30 @@ public class SyncHelper {
             return true;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::success, this::onWorkflowTypesDbFailure);
+                .subscribe(
+                        success -> onDatabaseSavedWorkflowTypeDb(),
+                        this::onWorkflowTypesDbFailure
+                );
         disposables.add(disposable);
+    }
+
+    private void onDatabaseSavedWorkflowTypeDb() {
+        Disposable disposable = apiInterface
+                .getCategoryListId(auth)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(categoryListResponse -> {
+                    int id = categoryListResponse.getCategoryList();
+                    saveIdToPreference.setValue(id);
+                    success(true);
+                }, throwable -> {
+                    Log.d(TAG, "onDatabaseSavedWorkflowTypeDb: Something went wrong trying to get category list id: " + throwable.getMessage());
+                });
+        disposables.add(disposable);
+    }
+
+    private void categoryIdSuccess(int categoryId) {
+
     }
 
     private void getWorkflowDbSuccess(WorkflowResponseDb workflowsResponse) {

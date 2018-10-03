@@ -32,6 +32,7 @@ import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.CategoryListResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
@@ -153,6 +154,10 @@ public interface ApiInterface {
     @GET("list/{id}/item")
     Observable<ListsResponse> getListItems(@Header("Authorization") String authorization,
                                            @Path("id") int id);
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflow/category")
+    Observable<CategoryListResponse> getCategoryListId(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
     @GET("contacts/products?all=true")

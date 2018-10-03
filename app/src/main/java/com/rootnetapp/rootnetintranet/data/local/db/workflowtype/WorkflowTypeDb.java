@@ -38,6 +38,10 @@ public class WorkflowTypeDb {
     @Json(name = "template_id")
     private int templateId;
 
+    @ColumnInfo(name = "category")
+    @Json(name = "category")
+    private int category;
+
     @Ignore
     @Json(name = "status")
     private List<Status> status = null;
@@ -60,6 +64,14 @@ public class WorkflowTypeDb {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getCategory() {
+        return category;
+    }
+
+    public void setCategory(int category) {
+        this.category = category;
     }
 
     public String getKey() {

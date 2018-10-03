@@ -9,19 +9,28 @@ import android.arch.paging.PagedList;
 import android.content.SharedPreferences;
 import android.support.annotation.IdRes;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
+import com.rootnetapp.rootnetintranet.models.workflowlist.SpinnerWorkflowTypeMenu;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowTypeSpinnerAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<Integer> mErrorLiveData;
@@ -37,7 +46,12 @@ public class WorkflowViewModel extends ViewModel {
     public MutableLiveData<Boolean> showBottomSheetLoading;
     protected MutableLiveData<Boolean> clearFilters;
     private LiveData<PagedList<WorkflowListItem>> liveWorkflows, liveUnordered;
-    private LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
+
+
+    //
+    private MutableLiveData<List<SpinnerWorkflowTypeMenu>> workflowTypeMenuItems;
+    private List<WorkflowTypeItemMenu> workflowTypeForMenu;
+//
 
     private WorkflowRepository workflowRepository;
     private List<WorkflowDb> workflows, unordered;
@@ -47,6 +61,8 @@ public class WorkflowViewModel extends ViewModel {
     private FilterBoxSettings filterBoxSettings;
     private String token;
     private String userId;
+    private int categoryId;
+    private List<ListItem> categoryList;
     private static final String TAG = "WorkflowViewModel";
 
     public static final int NO_TYPE_SELECTED = 0;
@@ -54,16 +70,31 @@ public class WorkflowViewModel extends ViewModel {
     public WorkflowViewModel(WorkflowRepository workflowRepository) {
         this.workflowRepository = workflowRepository;
         sort = new Sort();
-        workflowTypeMenuItems = this.workflowRepository.getWorkflowTypeMenuItems();
+        getWorkflowTypesFromDb();
         filterBoxSettings = new FilterBoxSettings();
         showBottomSheetLoading = new MutableLiveData<>();
         clearFilters = new MutableLiveData<>();
+        workflowTypeMenuItems = new MutableLiveData<>();
     }
 
     @Override
     protected void onCleared() {
         disposables.clear();
         workflowRepository.clearDisposables();
+    }
+
+    private void getWorkflowTypesFromDb() {
+        Disposable disposable = Observable.fromCallable(() -> {
+            workflowTypeForMenu = this.workflowRepository.getWorkflowTypesForMenu();
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> {
+
+                }, throwable -> {
+                    Log.d(TAG, "failure: Can't access to DB: " + throwable.getMessage());
+                });
+        disposables.add(disposable);
     }
 
     // First to be called
@@ -89,12 +120,37 @@ public class WorkflowViewModel extends ViewModel {
     protected void initWorkflowList(SharedPreferences sharedPreferences, LifecycleOwner lifecycleOwner) {
         token = "Bearer "+ sharedPreferences.getString("token","");
         userId = sharedPreferences.getString(PreferenceKeys.PREFERENCE_PROFILE_ID, "");
+        categoryId = sharedPreferences.getInt("category_id", 0);
         setWorkflowListNoFilters(token);
         subscribe(lifecycleOwner);
     }
 
-    protected void loadWorkflowsByType(int typeId, LifecycleOwner lifecycleOwner) {
+    protected void findCategories() {
+        getCategories(categoryId);
+    }
+
+    private void getCategories(int id) {
+        showLoading.setValue(true);
+        Disposable disposable = workflowRepository
+                .getCategoryList(token, id)
+                .subscribe( listsResponse -> {
+                    showLoading.setValue(false);
+                    List<ListItem> list = listsResponse.getItems();
+                    if (list.size() < 1) {
+                        return;
+                    }
+                    categoryList = list.get(0).getChildren();
+                }, throwable -> {
+                    showLoading.setValue(false);
+                    Log.d(TAG, "getCategories: Can't get categories for all workflows");
+                });
+        disposables.add(disposable);
+    }
+
+    protected void loadWorkflowsByType(int position, LifecycleOwner lifecycleOwner) {
         showLoading.postValue(true);
+        SpinnerWorkflowTypeMenu menu = spinnerMenuArray.get(position);
+        int typeId = menu.getWorkflowTypeId();
         if (typeId == NO_TYPE_SELECTED) {
             workflowRepository.getAllWorkflowsNoFilters(token);
         } else {
@@ -163,11 +219,12 @@ public class WorkflowViewModel extends ViewModel {
 
     protected void handleWorkflowTypeFilters(
             LifecycleOwner lifecycleOwner,
-            int workflowTypeId,
+            //int workflowTypeId,
             int typeIdPositionInArray,
             boolean isCheckedMyPendings,
             boolean isCheckedStatus) {
-        updateFilterBoxSettings(workflowTypeId, typeIdPositionInArray, isCheckedMyPendings, isCheckedStatus);
+        SpinnerWorkflowTypeMenu menu = spinnerMenuArray.get(typeIdPositionInArray);
+        updateFilterBoxSettings(menu.getWorkflowTypeId(), typeIdPositionInArray, isCheckedMyPendings, isCheckedStatus);
         liveWorkflows.removeObservers(lifecycleOwner);
         applyFilters(filterBoxSettings);
     }
@@ -286,6 +343,9 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     protected void initFilters() {
+
+        initWorkflowtypeMenu();
+
         if (filterBoxSettings.isCheckedMyPending()) {
             toggleFilterSwitch(WorkflowFragment.SWITCH_PENDING, WorkflowFragment.CHECK);
         } else {
@@ -297,6 +357,89 @@ public class WorkflowViewModel extends ViewModel {
             toggleFilterSwitch(WorkflowFragment.SWITCH_STATUS, WorkflowFragment.UNCHECK);
         }
         setSelectType.postValue(filterBoxSettings.getTypeIdPositionInArray());
+    }
+
+    ArrayList<SpinnerWorkflowTypeMenu> spinnerMenuArray;
+    private void initWorkflowtypeMenu() {
+        //init workflow type filter
+        ListItem category;
+        WorkflowTypeItemMenu typeMenu;
+
+        ArrayMap<String, List<SpinnerWorkflowTypeMenu>> result = new ArrayMap<>();
+
+        String categoryName;
+        List<SpinnerWorkflowTypeMenu> tempMenus = new ArrayList<>();
+        List<SpinnerWorkflowTypeMenu> noCategory = new ArrayList<>();
+        int idCat;
+        int catId;
+        for (int i = 0; i < categoryList.size(); i++) {
+            category = categoryList.get(i);
+            categoryName = category.getName();
+            for (int j = 0; j < workflowTypeForMenu.size(); j++) {
+                typeMenu = workflowTypeForMenu.get(j);
+                idCat = typeMenu.getCategory();
+                catId = category.getId();
+                if (idCat == catId) {
+                    String menuLabel = typeMenu.getName();
+                    SpinnerWorkflowTypeMenu menu = new SpinnerWorkflowTypeMenu(
+                            menuLabel,
+                            WorkflowTypeSpinnerAdapter.TYPE,
+                            typeMenu.getId()
+                    );
+                    tempMenus.add(menu);
+                }
+            }
+            if (tempMenus.isEmpty()) {
+                continue;
+            }
+            result.put(categoryName, tempMenus);
+            tempMenus = new ArrayList<>();
+        }
+
+        for (int i = 0; i < workflowTypeForMenu.size(); i++) {
+            typeMenu = workflowTypeForMenu.get(i);
+            idCat = typeMenu.getCategory();
+            if (idCat == 0) {
+                String menuLabel = typeMenu.getName();
+                SpinnerWorkflowTypeMenu menu = new SpinnerWorkflowTypeMenu(
+                        menuLabel,
+                        WorkflowTypeSpinnerAdapter.TYPE,
+                        typeMenu.getId()
+                );
+                noCategory.add(menu);
+            }
+        }
+
+
+        if (!noCategory.isEmpty()) {
+            result.put(WorkflowTypeSpinnerAdapter.NO_CATEGORY_LABEL, noCategory);
+        }
+
+        spinnerMenuArray = new ArrayList<>();
+
+        String key;
+        SpinnerWorkflowTypeMenu menu;
+        for (int i = 0; i < result.size(); i++) {
+            key = result.keyAt(i);
+            menu = new SpinnerWorkflowTypeMenu(
+                    key,
+                    WorkflowTypeSpinnerAdapter.CATEGORY
+            );
+            spinnerMenuArray.add(menu);
+            List<SpinnerWorkflowTypeMenu> list = result.get(key);
+            for (int j = 0; j < list.size(); j++) {
+                menu = list.get(j);
+                spinnerMenuArray.add(menu);
+            }
+        }
+
+        SpinnerWorkflowTypeMenu noSelection = new SpinnerWorkflowTypeMenu(
+                "NO SELECTION",
+                WorkflowTypeSpinnerAdapter.NO_SELECTION
+        );
+        spinnerMenuArray.add(0, noSelection);
+
+        workflowTypeMenuItems.setValue(spinnerMenuArray);
     }
 
     protected void initSortBy() {
@@ -527,7 +670,7 @@ public class WorkflowViewModel extends ViewModel {
         return showList;
     }
 
-    protected LiveData<List<WorkflowTypeItemMenu>> getObservableTypeItemMenu() {
+    protected LiveData<List<SpinnerWorkflowTypeMenu>> getObservableTypeItemMenu() {
         return workflowTypeMenuItems;
     }
 

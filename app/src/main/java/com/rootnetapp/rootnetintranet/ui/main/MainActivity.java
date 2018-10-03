@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity
         RequestBuilder builder = Glide.with(this).load(content[1]);
         switch (content[0]) {
             case MainActivityViewModel.IMG_LOGO:
-                builder.into(mainBinding.imgLogo);
+                builder.into(mainBinding.leftDrawer.imgLogo);
                 return;
             case MainActivityViewModel.IMG_BAR_LOGO:
                 builder.into(mainBinding.toolbarLogo);
@@ -193,12 +193,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initActionListeners() {
-        mainBinding.navTimeline.setOnClickListener(this::drawerClicks);
-        mainBinding.navWorkflows.setOnClickListener(this::drawerClicks);
-        mainBinding.navWorkflowmanager.setOnClickListener(this::drawerClicks);
-        mainBinding.navProfile.setOnClickListener(this::drawerClicks);
-        mainBinding.buttonWorkflow.setOnClickListener(this::drawerClicks);
-        mainBinding.navExit.setOnClickListener(this::drawerClicks);
+        mainBinding.leftDrawer.navTimeline.setOnClickListener(this::drawerClicks);
+        mainBinding.leftDrawer.navWorkflows.setOnClickListener(this::drawerClicks);
+        mainBinding.leftDrawer.navWorkflowmanager.setOnClickListener(this::drawerClicks);
+        mainBinding.leftDrawer.navProfile.setOnClickListener(this::drawerClicks);
+        mainBinding.leftDrawer.buttonWorkflow.setOnClickListener(this::drawerClicks);
+        mainBinding.leftDrawer.navExit.setOnClickListener(this::drawerClicks);
     }
 
     private void startBackgroundWorkflowRequest() {
@@ -250,12 +250,12 @@ public class MainActivity extends AppCompatActivity
                 break;
             }
             case R.id.button_workflow: {
-                if (mainBinding.expansionWorkflow.getVisibility() == View.GONE) {
-                    mainBinding.arrow1.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
-                    mainBinding.expansionWorkflow.setVisibility(View.VISIBLE);
+                if (mainBinding.leftDrawer.expansionWorkflow.getVisibility() == View.GONE) {
+                    mainBinding.leftDrawer.arrow1.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
+                    mainBinding.leftDrawer.expansionWorkflow.setVisibility(View.VISIBLE);
                 } else {
-                    mainBinding.arrow1.setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
-                    mainBinding.expansionWorkflow.setVisibility(View.GONE);
+                    mainBinding.leftDrawer.arrow1.setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
+                    mainBinding.leftDrawer.expansionWorkflow.setVisibility(View.GONE);
                 }
                 break;
             }

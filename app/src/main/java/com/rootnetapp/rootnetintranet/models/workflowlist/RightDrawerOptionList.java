@@ -1,9 +1,13 @@
 package com.rootnetapp.rootnetintranet.models.workflowlist;
 
+import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
+import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowTypeSpinnerAdapter;
+
 import java.util.ArrayList;
 import java.util.List;
-
-public class RightDrawerOptionList {
+// TODO extends ListField
+public class RightDrawerOptionList extends ListField {
     private int id;
     private String optionListTitle;
     private int optionListTitleRes;
@@ -20,6 +24,33 @@ public class RightDrawerOptionList {
         valueInt = 0;
         valueString = "";
         optionItems = new ArrayList<>();
+    }
+
+    public void updateValuesWith(ListField listField) {
+        this.children = listField.children;
+        this.customFieldId = listField.customFieldId;
+        this.id = this.customFieldId;
+        this.customLabel = listField.customLabel;
+        this.optionListTitle = listField.customLabel;
+        this.isMultipleSelection = listField.isMultipleSelection;
+        updateOptionItemsList(this.children);
+    }
+
+    public void updateOptionItemsList(ArrayList<ListFieldItemMeta> children) {
+        ListFieldItemMeta child;
+        WorkflowTypeMenu menu;
+        for (int i = 0; i < children.size(); i++) {
+            child = children.get(i);
+            menu = new WorkflowTypeMenu();
+            menu.setId(child.id);
+            menu.setLabel(child.name);
+            menu.setRowType(WorkflowTypeSpinnerAdapter.TYPE);
+            optionItems.add(menu);
+        }
+    }
+
+    public void getChildrenAsOptionItems() {
+
     }
 
     public int getId() {

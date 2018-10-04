@@ -14,16 +14,22 @@ import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
+import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
+import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListInfo;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.FieldData;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.FieldListSettings;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowTypeSpinnerAdapter;
@@ -97,6 +103,7 @@ public class WorkflowViewModel extends ViewModel {
         workflowTypeMenuItems = new MutableLiveData<>();
         rightDrawerFilterMenus = new MutableLiveData<>();
         rightDrawerOptionMenus = new MutableLiveData<>();
+        formSettings = new FormSettings();
     }
 
     @Override
@@ -153,11 +160,6 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     private void initRightDrawerFilterList() {
-
-        // TODO init FilterSettings correctly and use it to populate Right Drawer.
-
-        //rightDrawerFilters = new ArrayList<>();
-
         WorkflowTypeMenu menuItem = new WorkflowTypeMenu(
                 FilterSettings.RIGHT_DRAWER_FILTER_TYPE_ITEM_ID,
                 "Tipo De Workflow",
@@ -165,23 +167,8 @@ public class WorkflowViewModel extends ViewModel {
                 RightDrawerFiltersAdapter.TYPE,
                 0
         );
-
         filterSettings.addFilterListMenu(menuItem);
-//        rightDrawerFilters.add(menuItem);
-
-//        menuItem = new WorkflowTypeMenu(
-//                0, // TODO usar id de FIELD
-//                "Filtros",
-//                "Todos",
-//                RightDrawerFiltersAdapter.TYPE,
-//                1
-//        );
-//        filterSettings.addFilterListMenu(menuItem);
-//        rightDrawerFilters.add(menuItem);
-
-
         rightDrawerFilterMenus.setValue(filterSettings.getFilterDrawerList());
-
     }
 
     private void getCategories(int id) {
@@ -288,24 +275,34 @@ public class WorkflowViewModel extends ViewModel {
         filterSettings.saveOptionsListFor(FilterSettings.RIGHT_DRAWER_FILTER_TYPE_ITEM_ID, spinnerMenuArray);
     }
 
-    protected void handleOptionSelcted(int position, LifecycleOwner lifecycleOwner) {
-
-        // TODO update the previous list in Filter List
-        // TODO with the option selected here in this case the menu object
-
-        loadWorkflowsByType(position, lifecycleOwner);
+    @Deprecated
+    protected void loadWorkflowsByType(int position, LifecycleOwner lifecycleOwner) {
+        showLoading.postValue(true);
         WorkflowTypeMenu menu = spinnerMenuArray.get(position);
-        filterSettings.setWorkflowTypeId(menu.getWorkflowTypeId());
+        int typeId = menu.getWorkflowTypeId();
+        if (typeId == NO_TYPE_SELECTED) {
+            workflowRepository.getAllWorkflowsNoFilters(token);
+        } else {
+            workflowRepository.getWorkflowsByType(token, typeId);
+        }
         liveWorkflows.removeObservers(lifecycleOwner);
-        applyFilters(filterSettings);
+    }
 
+    protected void loadWorkflowsByType(WorkflowTypeMenu menu, LifecycleOwner lifecycleOwner) {
+        showLoading.postValue(true);
+        int typeId = menu.getWorkflowTypeId();
+        if (typeId == NO_TYPE_SELECTED) {
+            workflowRepository.getAllWorkflowsNoFilters(token);
+        } else {
+            workflowRepository.getWorkflowsByType(token, typeId);
+        }
+        liveWorkflows.removeObservers(lifecycleOwner);
     }
 
     protected void handleSelectedItemInFilters(int position) {
-            OptionsList optionsList = filterSettings
-                    .handleFilterListPositionSelected(position);
-            rightDrawerOptionMenus.setValue(optionsList);
-        // TODO send object with FULL option list data (title, list itself)
+        OptionsList optionsList = filterSettings
+                .handleFilterListPositionSelected(position);
+        rightDrawerOptionMenus.setValue(optionsList);
     }
 
     protected void handleRightDrawerBackAction() {
@@ -316,7 +313,26 @@ public class WorkflowViewModel extends ViewModel {
         rightDrawerFilterMenus.setValue(list);
     }
 
-    // TODO get dynamic fields from here. It is in the database. use findDynamicFieldsBy()
+    private final int DRAWER_FILTER_LIST_INDEX_TYPE = 0;
+    protected void handleOptionSelected(int position, LifecycleOwner lifecycleOwner) {
+        List<WorkflowTypeMenu> menuList = filterSettings.getOptionsListAtSelectedFilterIndex();
+        WorkflowTypeMenu menu = menuList.get(position);
+        loadWorkflowsByType(menu, lifecycleOwner);
+        filterSettings.updateFilterListItemSelected(menu);
+        liveWorkflows.removeObservers(lifecycleOwner);
+        applyFilters(filterSettings);
+
+        if (filterSettings.getFilterListIndexSelected() != DRAWER_FILTER_LIST_INDEX_TYPE) {
+            return;
+        }
+
+        // TODO update Filter List with dynamic fields
+        int workflowTypeId = menu.getWorkflowTypeId();
+        findDynamicFieldsBy(workflowTypeId);
+
+    }
+
+
     // TODO update filter list and option list with this information.
     // TODO save everything in our FitlerSettings.
     // TODO use createMetaData to generate the metadata to send in GET request
@@ -335,23 +351,24 @@ public class WorkflowViewModel extends ViewModel {
                 fieldConfig = jsonAdapter.fromJson(field.getFieldConfig());
                 field.setFieldConfigObject(fieldConfig);
             }
-            FormSettings dynamicFieldsSettings = new FormSettings();
-            return dynamicFieldsSettings;
-//            formSettings.setFields(fields);
-//            return formSettings;
+            formSettings.setFields(fields);
+            return formSettings;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe( dynamicFieldsSettings -> {
-//                    FormSettings settings = (FormSettings) formSettings;
-//                    showFields(settings);
+                    Log.d(TAG, "findDynamicFieldsBy: ");
+                    FormSettings settings = formSettings;
+                    showFields(settings);
                 }, throwable -> {
                     showLoading.postValue(false);
+                    Log.d(TAG, "findDynamicFieldsBy: Something went wrong getting fields" + throwable.getMessage());
                 });
         disposables.add(disposable);
     }
 
-    // TODO initiate this FormSettings
+
     FormSettings formSettings;
+    // TODO USE TO CREATE GET REQUEST FOR FILTERING
     private WorkflowMetas createMetaData(FieldData fieldData, BaseFormElement baseFormElement) {
         WorkflowMetas workflowMeta = new WorkflowMetas();
         int workflowTypeFieldId = baseFormElement.getTag();
@@ -362,23 +379,317 @@ public class WorkflowViewModel extends ViewModel {
         return workflowMeta;
     }
 
+    private void showFields(FormSettings formSettings) {
+        List<FormFieldsByWorkflowType> fields = formSettings.getFields();
+        for (int i = 0; i < fields.size(); i++) {
+            FormFieldsByWorkflowType field = fields.get(i);
+            if (!field.isShowForm()) {
+                continue;
+            }
 
+            FieldConfig fieldConfig = field.getFieldConfigObject();
+            if (fieldConfig.isPrecalculated()) {
+                continue;
+            }
 
-
-    protected void loadWorkflowsByType(int position, LifecycleOwner lifecycleOwner) {
-        showLoading.postValue(true);
-
-
-        // TODO go to Filter settings for this info
-        WorkflowTypeMenu menu = spinnerMenuArray.get(position);
-        int typeId = menu.getWorkflowTypeId();
-        if (typeId == NO_TYPE_SELECTED) {
-            workflowRepository.getAllWorkflowsNoFilters(token);
-        } else {
-            workflowRepository.getWorkflowsByType(token, typeId);
+            buildField(field);
         }
-        liveWorkflows.removeObservers(lifecycleOwner);
+
+        // TODO MAKE SURE FILTER LIST IS UPDATED
+//        buildForm.setValue(true);
     }
+
+    private void buildField(FormFieldsByWorkflowType field) {
+        TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
+        switch (typeInfo.getType()) {
+            case FormSettings.TYPE_SYSTEM_USERS:
+                //handleList(field, FormSettings.TYPE_SYSTEM_USERS);
+                break;
+            case FormSettings.TYPE_CHECKBOX:
+                //handleCheckBox(field);
+                break;
+            case FormSettings.TYPE_PROJECT:
+                //handleProject(field);
+                break;
+            case FormSettings.TYPE_ROLE:
+                //handeBuildRoles(field);
+                break;
+            case FormSettings.TYPE_LIST:
+                handleList(field, FormSettings.TYPE_LIST);
+                break;
+            case FormSettings.TYPE_PRODUCT:
+                //handleBuildProduct(field);
+                break;
+            case FormSettings.TYPE_SERVICE:
+                //handleBuildService(field);
+                break;
+//            case FormSettings.TYPE_BIRTH_DATE:
+//                handleBuildDate(field);
+//                break;
+//            case FormSettings.TYPE_PHONE:
+//                handleBuildPhone(field);
+//                break;
+//            case FormSettings.TYPE_CURRENCY:
+//                handleCurrencyType(field);
+//                break;
+//            case FormSettings.TYPE_LINK:
+//                handleBuildText(field);
+//                break;
+//            case FormSettings.TYPE_TEXT:
+//                handleBuildText(field);
+//                break;
+//            case FormSettings.TYPE_DATE:
+//                handleBuildDate(field);
+//                break;
+//            case FormSettings.TYPE_FILE:
+//                handleFile(field);
+//                break;
+//            case FormSettings.TYPE_TEXT_AREA:
+//                handleBuildTextArea(field);
+//                break;
+            default:
+                Log.d(TAG, "buildField: Not a generic type: " + typeInfo.getType() + " value: " + typeInfo.getValueType());
+                break;
+        }
+    }
+
+    private void handleList(FormFieldsByWorkflowType field, String fieldType) {
+        FieldConfig fieldConfig = field.getFieldConfigObject();
+        String valueType = fieldConfig.getTypeInfo().getValueType();
+        if (!valueType.equals(FormSettings.VALUE_LIST)) {
+            return;
+        }
+
+        boolean isMultipleSelection;
+        if (fieldType.equals(FormSettings.TYPE_SYSTEM_USERS)) {
+            isMultipleSelection = false;
+        } else {
+            isMultipleSelection = fieldConfig.getMultiple();
+        }
+
+        ListInfo listInfo = fieldConfig.getListInfo();
+        if (listInfo == null) {
+            if (fieldConfig.getTypeInfo().getType().equals(FormSettings.TYPE_SYSTEM_USERS)) {
+                setTeamList(field);
+            }
+            return;
+        }
+
+        // It is not a base list of type system user and we have other custom fields at this point.
+
+        int listId = fieldConfig.getListInfo().getId();
+        int customFieldId = field.getId();
+        String customLabel = field.getFieldName();
+        int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
+
+        if (fieldType.equals(FormSettings.TYPE_SYSTEM_USERS)) {
+            createSystemUserFieldasCustomField(field, listId, customFieldId, customLabel, associatedWorkflowTypeId);
+            return;
+        }
+
+        Disposable disposable = workflowRepository
+                .getList(token, listId)
+                .subscribe( listsResponse -> {
+                    List<ListItem> listItems = listsResponse.getItems();
+                    ListItem listItem;
+                    ListField listField = null;
+                    int id;
+                    for (int i = 0; i < listItems.size(); i++) {
+                        listItem = listItems.get(i);
+                        id = listItem.getListId();
+                        if (id != listId) {
+                            continue;
+                        }
+                        listField = formSettings.addListToForm(
+                                listItem,
+                                customLabel,
+                                customFieldId,
+                                FormSettings.TYPE_LIST
+                        );
+                        listField.isMultipleSelection = isMultipleSelection;
+                        listField.associatedWorkflowTypeId = associatedWorkflowTypeId;
+                        break;
+                    }
+
+                    if (listField == null || listField.children.size() < 1) {
+                        return;
+                    }
+                    showListField(listField, fieldConfig);
+                }, throwable -> {
+                    showLoading.setValue(false);
+                    Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
+                });
+
+        disposables.add(disposable);
+    }
+
+    private void createSystemUserFieldasCustomField(
+            FormFieldsByWorkflowType field,
+            int listId,
+            int customFieldId,
+            String customLabel,
+            int associatedWorkflowTypeId) {
+        Disposable disposable = Observable.fromCallable(() -> {
+            List<FormCreateProfile> profiles = formSettings.getProfiles();
+            if (profiles == null || profiles.size() < 1) {
+                return false;
+            }
+            ListField listField = new ListField();
+            listField.listId = listId;
+            listField.customFieldId = customFieldId;
+            listField.customLabel = customLabel;
+            listField.associatedWorkflowTypeId = associatedWorkflowTypeId;
+            listField.isMultipleSelection = false;
+            listField.listType = FormSettings.TYPE_SYSTEM_USERS;
+
+            ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
+            for (int i = 0; i < profiles.size(); i++) {
+                FormCreateProfile profile = profiles.get(i);
+                ListFieldItemMeta item = new ListFieldItemMeta(
+                        profile.getId(),
+                        profile.getUsername(),
+                        customFieldId
+                );
+                tempList.add(item);
+            }
+
+            listField.children = tempList;
+
+            return listField;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe( listField -> {
+                    ListField fieldData = (ListField) listField;
+                    showListField(fieldData, field.getFieldConfigObject());
+
+                    showLoading.setValue(false);
+
+                    // TODO update filter list with new fields
+//                    buildForm.setValue(true);
+
+
+                }, throwable -> {
+                    showLoading.setValue(false);
+                });
+        disposables.add(disposable);
+    }
+
+    private void showListField(ListField listField, FieldConfig fieldConfig) {
+        FieldData fieldData = new FieldData();
+        fieldData.label = listField.customLabel;
+        fieldData.list = listField.children;
+        fieldData.resLabel = listField.resStringId;
+        fieldData.isMultipleSelection = listField.isMultipleSelection;
+        fieldData.tag = listField.customFieldId;
+        fieldData.escape = escape(fieldConfig);
+
+        // TODO save customFieldId in order to make the GET request
+
+        // filter field info
+        int id = listField.customFieldId; // id to identify which field in the content type we are talking about.
+        String label = listField.customLabel;
+        boolean isMultiple = listField.isMultipleSelection;
+
+        // option fields info list to display in options
+        List<ListFieldItemMeta> children = listField.children;
+        int itemId = children.get(0).id; // value to send to get as value selected
+        String optionLabel = children.get(0).name;
+
+        //setListWithData.setValue(fieldData);
+        // TODO UPDATE OPTIONS LIST WITH FIELD DATA FROM THE INTERNET
+        // TODO update FILTERSETTINGS FILTER LIST WITH FIELDS
+
+        filterSettings.updateFilterListWithDynamicField(listField);
+
+
+        showLoading.setValue(false);
+        formSettings.addFieldDataItem(fieldData);
+    }
+
+    private void setTeamList(FormFieldsByWorkflowType field) {
+        Disposable disposable = Observable.fromCallable(() -> {
+            List<FormCreateProfile> profiles = workflowRepository.getProfiles();
+            if (profiles == null || profiles.size() < 1) {
+                return false;
+            }
+            for (int i = 0; i < profiles.size(); i++) {
+                formSettings.setProfile(profiles.get(i));
+            }
+            formSettings.getProfileNames();
+            ArrayList<String> stringListItems = formSettings.getProfileNames();
+            ArrayList<Integer> idList = formSettings.getProfileIds();
+            FieldListSettings fieldListSettings = new FieldListSettings();
+            fieldListSettings.items = stringListItems;
+            fieldListSettings.labelRes = R.string.owner;
+            fieldListSettings.required = true;
+            fieldListSettings.tag = field.getId();
+
+
+            FieldConfig fieldConfig = field.getFieldConfigObject();
+            boolean isMultipleSelection = fieldConfig.getMultiple();
+            String customLabel = field.getFieldName();
+            int customFieldId = field.getId();
+
+            ArrayList<ListFieldItemMeta> listData = new ArrayList<>();
+            String name;
+            int id;
+            for (int i = 0; i < stringListItems.size(); i++) {
+                name = stringListItems.get(i);
+                id = idList.get(i);
+                ListFieldItemMeta itemMeta = new ListFieldItemMeta(
+                        id,
+                        name
+                );
+                listData.add(itemMeta);
+            }
+            FieldData fieldData = new FieldData();
+            fieldData.label = customLabel;
+            fieldData.list =  listData;
+            fieldData.tag = field.getId();
+            fieldData.isMultipleSelection = isMultipleSelection;
+            fieldData.escape = escape(fieldConfig);
+            formSettings.addFieldDataItem(fieldData);
+            //setFieldList.postValue(fieldListSettings);
+            return fieldListSettings;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe( fieldListSettings -> {
+                    FieldListSettings settings = (FieldListSettings) fieldListSettings;
+
+                    // TODO update FILTERSETTINGS
+                    //setFieldList.setValue(settings);
+                    showLoading.setValue(false);
+                    //buildForm.setValue(true);
+                }, throwable -> {
+                    showLoading.setValue(false);
+                    //buildForm.setValue(true);
+                });
+        disposables.add(disposable);
+    }
+
+    private boolean escape(FieldConfig fieldConfig) {
+        TypeInfo typeInfo = fieldConfig.getTypeInfo();
+        if (typeInfo == null) {
+            return false;
+        }
+        String value = typeInfo.getValueType();
+        String type = typeInfo.getType();
+        if (value.equals(FormSettings.VALUE_STRING)
+                || value.equals(FormSettings.VALUE_TEXT)
+                || value.equals(FormSettings.VALUE_EMAIL)
+                || value.equals(FormSettings.VALUE_INTEGER)
+                || value.equals(FormSettings.VALUE_DATE)
+                || value.equals(FormSettings.VALUE_COORD)) {
+            return true;
+        }
+        if (value.equals(FormSettings.VALUE_LIST) && type.equals(FormSettings.TYPE_SYSTEM_USERS)) {
+            return true;
+        }
+        return false;
+    }
+
+    // TODO END OF DYNAMIC FILTER IMPLEMENTATION
+
 
     protected void loadMyPendingWorkflows(boolean isChecked, LifecycleOwner lifecycleOwner) {
         if (TextUtils.isEmpty(userId)) {

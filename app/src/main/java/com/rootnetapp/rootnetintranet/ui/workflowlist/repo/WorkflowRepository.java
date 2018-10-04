@@ -11,6 +11,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
+import com.rootnetapp.rootnetintranet.data.local.db.user.UserDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -55,6 +57,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     public MutableLiveData<Boolean> showLoadMore;
     private WorkflowListBoundaryCallback callback;
     private PagedList.Config pagedListConfig;
+    private UserDao profileDao;
 
     private final static String TAG = "WorkflowRepository";
     private final CompositeDisposable disposables = new CompositeDisposable();
@@ -67,6 +70,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         this.database = database;
         workflowDbDao = this.database.workflowDbDao();
         workflowTypeDbDao = this.database.workflowTypeDbDao();
+        this.profileDao = this.database.userDao();
         pagedListConfig = (new PagedList.Config.Builder())
                     .setEnablePlaceholders(false)
                     .setPageSize(LIST_PAGE_SIZE)
@@ -85,6 +89,11 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     public void handleResponse(List<WorkflowDb> workflowsResponse, int lastPage) {
         this.lastPage = lastPage;
         insertWorkflows(workflowsResponse);
+    }
+
+    public Observable<ListsResponse> getList(String auth, int id) {
+        return service.getListItems(auth, id).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override
@@ -402,6 +411,10 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 });
 
         disposables.add(disposable);
+    }
+
+    public List<FormCreateProfile> getProfiles() {
+        return profileDao.getAllProfiles();
     }
 
     public Observable<ListsResponse> getCategoryList(String auth, int id) {

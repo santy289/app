@@ -1,6 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist;
 
-import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.arch.paging.PagedList;
@@ -322,7 +321,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     }
 
     private void handleRightDrawerOptionSelectedClick(int position) {
-        workflowViewModel.handleOptionSelcted(position, WorkflowFragment.this);
+        workflowViewModel.handleOptionSelected(position, WorkflowFragment.this);
     }
 
     private void handleRightDrawerFilterClick(int position) {

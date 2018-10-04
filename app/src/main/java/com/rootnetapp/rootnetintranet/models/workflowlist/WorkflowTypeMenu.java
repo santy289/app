@@ -1,8 +1,9 @@
 package com.rootnetapp.rootnetintranet.models.workflowlist;
 
+import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
-
-public class WorkflowTypeMenu {
+// TODO extends ListFieldItemMeta
+public class WorkflowTypeMenu extends ListFieldItemMeta {
     private int id;
     private String label;
     private int resLabel;

@@ -4,9 +4,12 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerOptionList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowTypeSpinnerAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,7 +107,6 @@ public class FilterSettings {
     }
 
     public void saveOptionsListFor(int filterFieldId, ArrayList<WorkflowTypeMenu> optionsList) {
-
         switch (filterFieldId) {
             case RIGHT_DRAWER_FILTER_TYPE_ITEM_ID:
                 handleTypeOptions(filterFieldId, optionsList);
@@ -115,18 +117,20 @@ public class FilterSettings {
         }
     }
 
-    private int filterListIndexSelected;
-    protected OptionsList handleFilterListPositionSelected(int position) {
-        WorkflowTypeMenu menuSelected = filterDrawerList.get(position);
-        filterListIndexSelected = position;
-        RightDrawerOptionList optionsObj = getRightDrawerOptionList(menuSelected.getId());
-        if (optionsObj == null) {
-            return null;
+    protected void updateFilterListItemSelected(WorkflowTypeMenu withMenuItem) {
+        setWorkflowTypeId(withMenuItem.getWorkflowTypeId());
+        WorkflowTypeMenu filterItemMenu = filterDrawerList.get(filterListIndexSelected);
+        filterItemMenu.setSubTitle(withMenuItem.getLabel());
+    }
+
+
+    protected List<WorkflowTypeMenu> getOptionsListAtSelectedFilterIndex() {
+        WorkflowTypeMenu filterMenu = filterDrawerList.get(filterListIndexSelected);
+        RightDrawerOptionList drawerOptionList = getRightDrawerOptionList(filterMenu.getId());
+        if (drawerOptionList == null || drawerOptionList.getOptionItems() == null) {
+            return new ArrayList<>();
         }
-        OptionsList optionsList = new OptionsList();
-        optionsList.titleLabel = optionsObj.getOptionListTitle();
-        optionsList.optionsList = optionsObj.getOptionItems();
-        return optionsList;
+        return drawerOptionList.getOptionItems();
     }
 
     private void handleTypeOptions(int fieldId, ArrayList<WorkflowTypeMenu> optionsList) {
@@ -138,6 +142,53 @@ public class FilterSettings {
         drawerOptionList.setOptionListTitleRes(R.string.workflow_type);
         drawerOptionList.setOptionItems(optionsList);
         rightDrawerOptionsList.put(fieldId, drawerOptionList);
+    }
+
+    protected void updateFilterListWithDynamicField(ListField listField) {
+        // TODO use
+        //saveOptionsListFor(int filterFieldId, ArrayList<WorkflowTypeMenu> optionsList) {
+
+//        example
+//        WorkflowTypeMenu noSelection = new WorkflowTypeMenu(
+//                0,
+//                "NO SELECTION",
+//                WorkflowTypeSpinnerAdapter.NO_SELECTION
+//        );
+//        spinnerMenuArray.add(0, noSelection);
+//        filterSettings.saveOptionsListFor(FilterSettings.RIGHT_DRAWER_FILTER_TYPE_ITEM_ID, spinnerMenuArray);
+
+        RightDrawerOptionList drawerOptionList = new RightDrawerOptionList();
+        drawerOptionList.updateValuesWith(listField);
+        rightDrawerOptionsList.put(listField.customFieldId, drawerOptionList);
+
+        WorkflowTypeMenu filterMenuItem = new WorkflowTypeMenu(
+                listField.customFieldId,
+                listField.customLabel,
+                "Sin Elegir",
+                RightDrawerFiltersAdapter.TYPE,
+                0
+        );
+        addFilterListMenu(filterMenuItem);
+    }
+
+
+    private int filterListIndexSelected;
+
+    public int getFilterListIndexSelected() {
+        return filterListIndexSelected;
+    }
+
+    protected OptionsList handleFilterListPositionSelected(int position) {
+        WorkflowTypeMenu menuSelected = filterDrawerList.get(position);
+        filterListIndexSelected = position;
+        RightDrawerOptionList optionsObj = getRightDrawerOptionList(menuSelected.getId());
+        if (optionsObj == null) {
+            return null;
+        }
+        OptionsList optionsList = new OptionsList();
+        optionsList.titleLabel = optionsObj.getOptionListTitle();
+        optionsList.optionsList = optionsObj.getOptionItems();
+        return optionsList;
     }
 
     private String findLabelTitle(int inId) {

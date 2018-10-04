@@ -15,6 +15,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
@@ -120,6 +121,10 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
 //        DataSourceWorkflowListFactory dataSourceFactory = new DataSourceWorkflowListFactory(database);
 //        workflowListItemDataSource = dataSourceFactory.create();
 //        allWorkflows = new LivePagedListBuilder<>(dataSourceFactory, pagedListConfig).build();
+    }
+
+    public List<FormFieldsByWorkflowType> getFiedsByWorkflowType(int byId) {
+        return workflowTypeDbDao.getFields(byId);
     }
 
     public void getWorkflowsByType(String token, int typeId) {

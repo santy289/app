@@ -37,6 +37,7 @@ import com.bumptech.glide.RequestBuilder;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
+import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerService;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
@@ -374,6 +375,7 @@ public class MainActivity extends AppCompatActivity
 
     private void setRightDrawerFilters(List<WorkflowTypeMenu> menus) {
         mainBinding.rightDrawer.drawerBackButton.setVisibility(View.GONE);
+        mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.filters));
         hideSortingViews(false);
 
         LayoutInflater inflater = LayoutInflater.from(this);
@@ -386,17 +388,16 @@ public class MainActivity extends AppCompatActivity
         mainBinding.rightDrawer.rightDrawerFilters.setAdapter(rightDrawerFiltersAdapter);
     }
 
-    private void setRightDrawerOptions(List<WorkflowTypeMenu> menus) {
+    private void setRightDrawerOptions(OptionsList optionsList) {
         hideSortingViews(true);
         mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
-        //if (rightDrawerOptionsAdapter == null) {
-            LayoutInflater inflater = LayoutInflater.from(this);
-            rightDrawerOptionsAdapter = new RightDrawerOptionsAdapter(inflater, menus);
-            mainBinding.rightDrawer.rightDrawerFilters.setOnItemClickListener((parent, view, position, id) -> {
-                // TODO something we selected a new item on filter -> go to mainViewModel and replace adapter with new adapter.
-                viewModel.sendOptionSelectedToWorkflowList(position);
-            });
-        //}
+        mainBinding.rightDrawer.rightDrawerTitle.setText(optionsList.titleLabel);
+        LayoutInflater inflater = LayoutInflater.from(this);
+        rightDrawerOptionsAdapter = new RightDrawerOptionsAdapter(inflater, optionsList.optionsList);
+        mainBinding.rightDrawer.rightDrawerFilters.setOnItemClickListener((parent, view, position, id) -> {
+            // TODO something we selected a new item on filter -> go to mainViewModel and replace adapter with new adapter.
+            viewModel.sendOptionSelectedToWorkflowList(position);
+        });
         mainBinding.rightDrawer.rightDrawerFilters.setAdapter(rightDrawerOptionsAdapter);
     }
 

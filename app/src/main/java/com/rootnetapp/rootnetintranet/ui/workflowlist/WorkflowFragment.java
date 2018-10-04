@@ -30,6 +30,7 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowBinding;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowFiltersMenuBinding;
+import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.WorkFlowCreateFragment;
@@ -176,8 +177,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         mainViewModel.createRightDrawerListAdapter(menus);
     }
 
-    private void createOptionListRightDrawer(List<WorkflowTypeMenu> menus) {
-        mainViewModel.createRightDrawerOptionListAdapter(menus);
+    private void createOptionListRightDrawer(OptionsList optionsList) {
+        mainViewModel.createRightDrawerOptionListAdapter(optionsList);
     }
 
     PopupWindow popupwindow_obj;

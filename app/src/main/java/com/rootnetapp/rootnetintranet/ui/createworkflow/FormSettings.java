@@ -741,10 +741,6 @@ public class FormSettings {
 
     }
 
-
-
-
-
     private String findMachineNameBy(int id) {
         FormFieldsByWorkflowType field;
         for (int i = 0; i < fields.size(); i++) {
@@ -755,7 +751,6 @@ public class FormSettings {
         }
         return "";
     }
-
 
     public void setFieldItems(ArrayList<FieldData> fieldItems) {
         this.fieldItems = fieldItems;

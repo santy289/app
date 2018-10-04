@@ -16,6 +16,7 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
+import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOptionsAdapter;
@@ -48,7 +49,7 @@ public class MainActivityViewModel extends ViewModel {
     protected MutableLiveData<Integer> setSearchMenuLayout;
     protected MutableLiveData<Integer> setUploadMenuLayout;
     protected MutableLiveData<List<WorkflowTypeMenu>> setRightDrawerFilterList;
-    protected MutableLiveData<List<WorkflowTypeMenu>> setRightDrawerOptionList;
+    protected MutableLiveData<OptionsList> setRightDrawerOptionList;
 
     public MutableLiveData<Integer> messageContainerToWorkflowList;
     public MutableLiveData<Integer> messageOptionSelectedToWorkflowList;
@@ -168,9 +169,9 @@ public class MainActivityViewModel extends ViewModel {
         setRightDrawerFilterList.setValue(filtersList);
     }
 
-    public void createRightDrawerOptionListAdapter(List<WorkflowTypeMenu> menus) {
-        optionsList = menus;
-        setRightDrawerOptionList.setValue(optionsList);
+    public void createRightDrawerOptionListAdapter(OptionsList rightOptionsList) {
+//        optionsList = menus;
+        setRightDrawerOptionList.setValue(rightOptionsList);
     }
 
     private void onWorkflowSuccess(Workflow workflow) {

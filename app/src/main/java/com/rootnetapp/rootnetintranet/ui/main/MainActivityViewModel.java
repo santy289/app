@@ -51,6 +51,7 @@ public class MainActivityViewModel extends ViewModel {
     protected MutableLiveData<List<WorkflowTypeMenu>> setRightDrawerOptionList;
 
     public MutableLiveData<Integer> messageContainerToWorkflowList;
+    public MutableLiveData<Integer> messageOptionSelectedToWorkflowList;
     public MutableLiveData<Boolean> messageBackActionToWorkflowList;
 
     List<WorkflowTypeMenu> filtersList;
@@ -70,6 +71,7 @@ public class MainActivityViewModel extends ViewModel {
         this.setRightDrawerOptionList = new MutableLiveData<>();
         this.messageContainerToWorkflowList = new MutableLiveData<>();
         this.messageBackActionToWorkflowList = new MutableLiveData<>();
+        this.messageOptionSelectedToWorkflowList = new MutableLiveData<>();
     }
 
     @Override
@@ -111,6 +113,10 @@ public class MainActivityViewModel extends ViewModel {
 
     protected void sendFilterClickToWorflowList(int position) {
         messageContainerToWorkflowList.setValue(position);
+    }
+
+    protected void sendOptionSelectedToWorkflowList(int position) {
+        messageOptionSelectedToWorkflowList.setValue(position);
     }
 
     protected void sendRightDrawerBackButtonClick() {

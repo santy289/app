@@ -240,6 +240,18 @@ public class WorkflowViewModel extends ViewModel {
         spinnerMenuArray.add(0, noSelection);
     }
 
+    protected void handleOptionSelcted(int position, LifecycleOwner lifecycleOwner) {
+
+        // TODO update the previous list in Filter List
+        // TODO with the option selected here in this case the menu object
+
+        loadWorkflowsByType(position, lifecycleOwner);
+        WorkflowTypeMenu menu = spinnerMenuArray.get(position);
+        filterBoxSettings.setWorkflowTypeId(menu.getWorkflowTypeId());
+        liveWorkflows.removeObservers(lifecycleOwner);
+        applyFilters(filterBoxSettings);
+    }
+
     protected void loadWorkflowsByType(int position, LifecycleOwner lifecycleOwner) {
         showLoading.postValue(true);
         WorkflowTypeMenu menu = spinnerMenuArray.get(position);
@@ -470,7 +482,7 @@ public class WorkflowViewModel extends ViewModel {
                 "Filtros",
                 "Todos",
                 RightDrawerFiltersAdapter.TYPE,
-                0
+                1
         );
         rightDrawerFilters.add(menuItem);
 

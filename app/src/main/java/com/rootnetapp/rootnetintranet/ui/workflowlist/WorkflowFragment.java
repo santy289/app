@@ -317,6 +317,11 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         // MainActivity's ViewModel
         mainViewModel.messageContainerToWorkflowList.observe(this, this::handleRightDrawerFilterClick);
         mainViewModel.messageBackActionToWorkflowList.observe(this, this::handleBackAction);
+        mainViewModel.messageOptionSelectedToWorkflowList.observe(this, this::handleRightDrawerOptionSelectedClick);
+    }
+
+    private void handleRightDrawerOptionSelectedClick(int position) {
+        workflowViewModel.handleOptionSelcted(position, WorkflowFragment.this);
     }
 
     private void handleRightDrawerFilterClick(int position) {
@@ -368,10 +373,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowFiltersMenuBinding.spnWorkflowtype.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (types == null || typeIds == null) {
-                    return;
-                }
-
                 workflowViewModel.loadWorkflowsByType(position, WorkflowFragment.this);
                 prepareWorkflowListWithFilters();
             }
@@ -384,6 +385,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
         workflowFiltersMenuBinding.spnWorkflowtype.setAdapter(adapter);
     }
+
+
 
     private void prepareWorkflowListWithFilters() {
         boolean isCheckedMyPendings = workflowFiltersMenuBinding.swchMyworkflows.isChecked();

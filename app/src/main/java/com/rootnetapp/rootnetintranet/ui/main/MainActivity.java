@@ -386,6 +386,20 @@ public class MainActivity extends AppCompatActivity
         mainBinding.rightDrawer.rightDrawerFilters.setAdapter(rightDrawerFiltersAdapter);
     }
 
+    private void setRightDrawerOptions(List<WorkflowTypeMenu> menus) {
+        hideSortingViews(true);
+        mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
+        //if (rightDrawerOptionsAdapter == null) {
+            LayoutInflater inflater = LayoutInflater.from(this);
+            rightDrawerOptionsAdapter = new RightDrawerOptionsAdapter(inflater, menus);
+            mainBinding.rightDrawer.rightDrawerFilters.setOnItemClickListener((parent, view, position, id) -> {
+                // TODO something we selected a new item on filter -> go to mainViewModel and replace adapter with new adapter.
+                viewModel.sendOptionSelectedToWorkflowList(position);
+            });
+        //}
+        mainBinding.rightDrawer.rightDrawerFilters.setAdapter(rightDrawerOptionsAdapter);
+    }
+
     private void hideSortingViews(boolean hide) {
         TextView sortTitle =  mainBinding.rightDrawer.rightDrawerSortBy;
         TextView sortSubtitle = mainBinding.rightDrawer.rightDrawerSortSelection;
@@ -397,19 +411,6 @@ public class MainActivity extends AppCompatActivity
             sortTitle.setVisibility(View.VISIBLE);
             sortSubtitle.setVisibility(View.VISIBLE);
         }
-    }
-
-    private void setRightDrawerOptions(List<WorkflowTypeMenu> menus) {
-        hideSortingViews(true);
-        mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
-        //if (rightDrawerOptionsAdapter == null) {
-            LayoutInflater inflater = LayoutInflater.from(this);
-            rightDrawerOptionsAdapter = new RightDrawerOptionsAdapter(inflater, menus);
-            mainBinding.rightDrawer.rightDrawerFilters.setOnItemClickListener((parent, view, position, id) -> {
-                // TODO something we selected a new item on filter -> go to mainViewModel and replace adapter with new adapter.
-            });
-        //}
-        mainBinding.rightDrawer.rightDrawerFilters.setAdapter(rightDrawerOptionsAdapter);
     }
 
     private void subscribe() {

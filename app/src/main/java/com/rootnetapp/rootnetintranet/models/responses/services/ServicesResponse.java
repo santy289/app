@@ -4,10 +4,6 @@ import com.squareup.moshi.Json;
 
 import java.util.List;
 
-/**
- * Created by root on 26/03/18.
- */
-
 public class ServicesResponse {
 
     @Json(name = "code")

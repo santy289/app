@@ -66,7 +66,7 @@
     <string name="business_oportunities">Business Oportunities</string>
     <string name="synchronize">Sync up</string>
     <string name="synchronization">Synchronization</string>
-    <string name="workflow_list">WORKFLOWS</string>
+    <string name="workflow_list">WORKFLOWS LIST</string>
     <string name="btn_add">+ Add</string>
     <string name="description">Description</string>
     <string name="lastname">Last Name</string>
@@ -83,7 +83,7 @@
     <string name="active">Active</string>
     <string name="inactive">Inactive</string>
     <string name="filters">Filters</string>
-    <string name="my_workflows">My workflows</string>
+    <string name="my_workflows">Pending Workflows</string>
     <string name="sorting">Sort By</string>
     <string name="workflow_number">Workflow Number</string>
     <string name="updated_date">Updated Date</string>
@@ -168,4 +168,27 @@
     <string name="tracking">Tracking</string>
     <string name="sales_force">Sales Force - Status</string>
     <string name="users">Users</string>
+    <string name="no_selection">No Selection</string>
+    <string name="form_workflow_type">Workflow Type</string>
+    <string name="pick_option">Pick any item</string>
+    <string name="enter_email">Enter Email</string>
+    <string name="create_workflow">Create Workflow</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="ok">OK</string>
+    <string name="required_fields">Required Fields</string>
+    <string name="complete_form">Fill this missing fields</string>
+    <string name="warning">Warning</string>
+    <string name="form_invalid_email">Invalid email. Check your email field and try again.</string>
+    <string name="fill_country_code">Enter a phone country code to continue.</string>
+    <string name="fill_currency_code">Enter a currency type to continue.</string>
+    <string name="country_code">Country Code</string>
+    <string name="currency_type">Currency Type</string>
+    <string name="created">Created</string>
+    <string name="workflow_created">Your workflow was created.</string>
+    <string name="error">Error</string>
+    <string name="error_create_workflow">Something happened while saving your new workflow. Try again later.</string>
+    <string name="choose_a_workflow">Choose a workflow type to continue.</string>
+    <string name="loading">Loading</string>
+    <string name="file_too_big">File is too big, limit is 10MB</string>
 </resources>

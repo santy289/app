@@ -5,10 +5,6 @@ import java.util.List;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.squareup.moshi.Json;
 
-/**
- * Created by Propietario on 14/03/2018.
- */
-
 
 public class UserResponse {
 

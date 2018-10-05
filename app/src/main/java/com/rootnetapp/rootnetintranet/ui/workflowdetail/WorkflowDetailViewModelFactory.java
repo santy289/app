@@ -4,8 +4,6 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
-import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowRepository;
-
 /**
  * Created by root on 02/04/18.
  */

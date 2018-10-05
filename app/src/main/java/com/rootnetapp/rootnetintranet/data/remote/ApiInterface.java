@@ -1,19 +1,25 @@
 package com.rootnetapp.rootnetintranet.data.remote;
 
 
+import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
+import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.country.CountryDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
+import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.file.FilesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.project.ProjectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordResponse;
+import com.rootnetapp.rootnetintranet.models.responses.role.RoleResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.InteractionResponse;
@@ -21,6 +27,7 @@ import com.rootnetapp.rootnetintranet.models.responses.timeline.PostCommentRespo
 import com.rootnetapp.rootnetintranet.models.responses.timeline.PostSubCommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.SubCommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
+import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
@@ -32,13 +39,16 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTyp
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 
 import java.util.List;
+import java.util.Observer;
 
 import io.reactivex.Observable;
+import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
+import retrofit2.http.Multipart;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
@@ -84,6 +94,10 @@ public interface ApiInterface {
     Observable<UserResponse> getUsers(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
+    @GET("profiles?enabled=all")
+    Observable<ProfileResponse> getProfiles(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: api"})
     @PATCH("profiles/{id}")
     @FormUrlEncoded
     Observable<EditUserResponse> editUser(@Header("Authorization") String authorization,
@@ -106,9 +120,25 @@ public interface ApiInterface {
                                                   @Query("limit") int limit,
                                                   @Query("open") boolean open,
                                                   @Query("page") int page,
-                                                  @Query("status") boolean status,
                                                   @Query("workflow_type") boolean showTypeDetails);
 
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?")
+    Observable<WorkflowResponseDb> getMyPendingWorkflowsDb(@Header("Authorization") String authorization,
+                                                  @Query("limit") int limit,
+                                                  @Query("open") boolean open,
+                                                  @Query("page") int page,
+                                                  @Query("workflow_type") boolean showTypeDetails,
+                                                  @Query("responsible_id") int profileId);
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?")
+    Observable<WorkflowResponseDb> getWorkflowsByType(@Header("Authorization") String authorization,
+                                                           @Query("limit") int limit,
+                                                           @Query("open") boolean open,
+                                                           @Query("page") int page,
+                                                           @Query("workflow_type") boolean showTypeDetails,
+                                                           @Query("workflow_type_id") int typeId);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows/types")
@@ -116,7 +146,7 @@ public interface ApiInterface {
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows/types")
-    Observable<WorkflowTypeDbResponse> testGetWorkflowTypes(@Header("Authorization") String authorization);
+    Observable<WorkflowTypeDbResponse> getWorkflowTypesDb(@Header("Authorization") String authorization);
 
 
     @Headers({"Domain-Name: api"})
@@ -133,11 +163,25 @@ public interface ApiInterface {
     Observable<ServicesResponse> getServices(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
+    @GET("roles?all=true")
+    Observable<RoleResponse> getRoles(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/projects?all=true")
+    Observable<ProjectResponse> getProjects(@Header("Authorization") String authorization);
+
+
+
+    @Headers({"Domain-Name: api"})
     @GET("client/35/users")
     Observable<WorkflowUserResponse> getWorkflowUsers(@Header("Authorization") String authorization);
 
     @GET("check/countries")
     Observable<CountriesResponse> getCountries(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: api"})
+    @GET("check/countries")
+    Observable<CountryDbResponse> getCountriesDb(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
     @POST("intranet/workflows")
@@ -148,6 +192,22 @@ public interface ApiInterface {
                                                       @Field("workflow_metas") String workflowMetas,
                                                       @Field("start") String start,
                                                       @Field("description") String description);
+
+
+    @Headers({"Domain-Name: api", "Content-Type: application/json;charset=UTF-8"})
+    @POST("intranet/workflows")
+    Observable<CreateWorkflowResponse> createWorkflow(@Header("Authorization") String authorization,
+                                                      @Body CreateRequest body);
+
+    @Headers({"Domain-Name: api"})
+    @POST("intranet/workflows")
+    Observable<CreateWorkflowResponse> createWorkflow(@Header("Authorization") String authorization,
+                                                      @Body String body);
+
+    @Headers({"Domain-Name: api"})
+    @POST("upload/file")
+    Observable<FileUploadResponse> uploadFile(@Header("Authorization") String authorization,
+                                              @Body FilePost body);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows/types/{id}")

@@ -63,6 +63,7 @@
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:layout_margin="5dp"
+                    android:checked="true"
                     android:theme="@style/SwitchStyle" />
 
                 <TextView
@@ -115,7 +116,7 @@
                     android:layout_marginStart="5dp"
                     android:background="@android:color/transparent"
                     android:gravity="center"
-                    android:spinnerMode="dropdown" />
+                    android:spinnerMode="dialog" />
 
                 <ImageView
                     android:layout_width="wrap_content"
@@ -131,30 +132,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="@color/transparent" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="15dp"
-                android:textColor="@color/selected_filter"
-                android:textStyle="bold"
-                android:textSize="12sp"
-                android:text="@string/created_at" />
-
-            <!--<DatePicker
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:datePickerMode="spinner"/>-->
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/transparent" />
-
-            <!--<DatePicker
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:datePickerMode="spinner"/>-->
 
             <TextView
                 android:layout_width="match_parent"

@@ -9,6 +9,6 @@ import java.util.List;
 public class WorkflowTypeAndWorkflows {
     public int id;
     public String name;
-    @Relation(parentColumn = "id", entityColumn = "workflow_type_id", entity = WorkflowDb.class)
-    public List<WorkflowListItem> workflowDbs;
+//    @Relation(parentColumn = "id", entityColumn = "workflow_type_id", entity = WorkflowDb.class)
+//    public List<WorkflowListItem> workflowDbs;
 }

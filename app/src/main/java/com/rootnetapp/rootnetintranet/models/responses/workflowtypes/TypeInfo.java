@@ -2,10 +2,6 @@ package com.rootnetapp.rootnetintranet.models.responses.workflowtypes;
 
 import com.squareup.moshi.Json;
 
-/**
- * Created by root on 23/03/18.
- */
-
 public class TypeInfo {
 
     @Json(name = "id")

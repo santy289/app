@@ -2,10 +2,6 @@ package com.rootnetapp.rootnetintranet.models.responses.services;
 
 import com.squareup.moshi.Json;
 
-/**
- * Created by root on 26/03/18.
- */
-
 public class Service {
 
     @Json(name = "id")

@@ -4,13 +4,21 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.util.Log;
 
+import com.rootnetapp.rootnetintranet.BuildConfig;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
+import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDB;
+import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDBDao;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.Profile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.Field;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.models.responses.country.CountryDbResponse;
+import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
@@ -18,6 +26,7 @@ import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -28,6 +37,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
 import retrofit2.HttpException;
 
 public class SyncHelper {
@@ -42,6 +52,7 @@ public class SyncHelper {
     private AppDatabase database;
     private List<Workflow> workflows;
     private List<WorkflowDb> workflowDbs;
+    private List<Profile> profiles;
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     private int queriesDoneSoFar = 0;
@@ -55,23 +66,59 @@ public class SyncHelper {
         this.database = database;
         this.workflows = new ArrayList<>();
         this.workflowDbs = new ArrayList<>();
+        this.profiles = new ArrayList<>();
     }
 
     protected void syncData(String token) {
         this.auth = token;
         getUser(token);
-        getAllWorkflows(token, 0);
-
-        // TODO testing remove this later
+        getAllWorkflows(token, 1);
         getWorkflowTypesDb(token);
-        getWorkflowsDb(token, 0);
+
+        //getProfiles(token);
     }
 
-    /*************** *****************/
+    private void getCountryData(String token) {
+        String base = BuildConfig.BASE_URL + "v1/";
+        RetrofitUrlManager.getInstance().putDomain("api", base);
+
+        Disposable disposable = apiInterface
+                .getCountriesDb(token)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::saveCountriesToDatabase, throwable -> {
+                    Log.d(TAG, "getCountryData: " + throwable.getMessage());
+                    RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
+                });
+
+        disposables.add(disposable);
+    }
+
+    private void saveCountriesToDatabase(CountryDbResponse response) {
+        RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
+        Disposable disposable = Observable.fromCallable(() -> {
+            List<CountryDB> list = response.getCountries();
+            if (list == null) {
+                return false;
+            }
+            CountryDBDao countryDBDao = database.countryDBDao();
+            countryDBDao.deleteAllCountries();
+            countryDBDao.insertCountryList(list);
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::success, this::onWorkflowTypesDbFailure);
+        disposables.add(disposable);
+    }
 
     private void getWorkflowsDb(String token, int page) {
         Disposable disposable = apiInterface
-                .getWorkflowsDb(token, 50, true, page, true, false)
+                .getWorkflowsDb(
+                        token,
+                        WorkflowRepository.ENDPOINT_PAGE_SIZE,
+                        true,
+                        page,
+                        false)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::getWorkflowDbSuccess, throwable -> {
@@ -83,7 +130,7 @@ public class SyncHelper {
 
     private void getWorkflowTypesDb(String token) {
         Disposable disposable = apiInterface
-                .testGetWorkflowTypes(token)
+                .getWorkflowTypesDb(token)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onWorkflowTypesDbSuccess, throwable -> {
@@ -93,17 +140,51 @@ public class SyncHelper {
         disposables.add(disposable);
     }
 
+    private void getProfiles(String token) {
+//        Disposable disposable = apiInterface
+//                .getProfiles(token)
+//                .subscribeOn(Schedulers.newThread())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(this::onProfileSuccess, throwable -> {
+//                    Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
+//                    handleNetworkError(throwable);
+//                });
+//        disposables.add(disposable);
+    }
+
+    private void onProfileSuccess(ProfileResponse userResponse) {
+//        Disposable disposable = Observable.fromCallable(() -> {
+//            List<Profile> profiles = userResponse.getProfiles();
+//            if (profiles == null) {
+//                return false;
+//            }
+//            database.profileDao().deleteAllProfiles();
+//            database.profileDao().insertProfiles(profiles);
+//            return true;
+//        }).subscribeOn(Schedulers.newThread())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(this::success, this::userfailure);
+//        disposables.add(disposable);
+    }
+
     private void onWorkflowTypesDbSuccess(WorkflowTypeDbResponse response) {
         Disposable disposable = Observable.fromCallable(() -> {
             List<WorkflowTypeDb> workflowTypes = response.getList();
             if (workflowTypes == null) {
                 return false;
             }
+
             WorkflowTypeDbDao workflowTypeDbDao = database.workflowTypeDbDao();
             workflowTypeDbDao.deleteAllWorkfloyTypes();
             workflowTypeDbDao.insertWorkflowTypes(workflowTypes);
 
-            getWorkflowsDb(auth, 0);
+            workflowTypeDbDao.deleteAllFields();
+            for (int i = 0; i < workflowTypes.size(); i++) {
+                List<Field> fields = workflowTypes.get(i).getFields();
+                workflowTypeDbDao.insertAllFields(fields);
+            }
+
+            getWorkflowsDb(auth, 1);
             return true;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -113,20 +194,19 @@ public class SyncHelper {
 
     private void getWorkflowDbSuccess(WorkflowResponseDb workflowsResponse) {
         workflowDbs.addAll(workflowsResponse.getList());
-
-        if(!workflowsResponse.getPager().isIsLastPage()){
-            getWorkflowsDb(auth, workflowsResponse.getPager().getNextPage());
-        }else{
-            Disposable disposable = Observable.fromCallable(() -> {
-                WorkflowDbDao workflowDbDao = database.workflowDbDao();
-                workflowDbDao.deleteAllWorkflows();
-                workflowDbDao.insertWorkflows(workflowDbs);
-                return true;
-            }).subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::success, this::worflowDbDaoTransactionsFailure);
-            disposables.add(disposable);
-        }
+        Disposable disposable = Observable.fromCallable(() -> {
+            WorkflowDbDao workflowDbDao = database.workflowDbDao();
+            // TODO put in a transaction DAO function
+            workflowDbDao.deleteAllWorkflows();
+            workflowDbDao.insertWorkflows(workflowDbs);
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        success -> getCountryData(auth),
+                        this::worflowDbDaoTransactionsFailure
+                );
+        disposables.add(disposable);
     }
 
     private void worflowDbDaoTransactionsFailure(Throwable throwable) {
@@ -137,14 +217,11 @@ public class SyncHelper {
         mSyncLiveData.setValue(false);
     }
 
-
-    /*************** *****************/
-
-
     protected void clearDisposables() {
         disposables.clear();
     }
 
+    @Deprecated
     private void getAllWorkflows(String token, int page) {
         Disposable disposable = apiInterface
                 .getWorkflows(token, 50, true, page, true)
@@ -258,17 +335,18 @@ public class SyncHelper {
             return true;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::success, this::failure);
+                .subscribe( success -> {
+
+                }, this::failure);
         disposables.add(disposable);
     }
 
-
-
+    @Deprecated
     private void onWorkflowsSuccess(WorkflowsResponse workflowsResponse) {
         workflows.addAll(workflowsResponse.getList());
-        if(!workflowsResponse.getPager().isIsLastPage()){
-            getAllWorkflows(auth, workflowsResponse.getPager().getNextPage());
-        }else{
+//        if(!workflowsResponse.getPager().isIsLastPage()){
+//            getAllWorkflows(auth, workflowsResponse.getPager().getNextPage());
+//        }else{
             Disposable disposable = Observable.fromCallable(() -> {
                 database.workflowDao().clearWorkflows();
                 database.workflowDao().insertAll(workflows);
@@ -277,7 +355,7 @@ public class SyncHelper {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::success, this::failure);
             disposables.add(disposable);
-        }
+//        }
     }
 
     private void success(Boolean o) {

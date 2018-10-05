@@ -33,6 +33,10 @@ android {
         javaMaxHeapSize "4g"
     }
     useLibrary 'org.apache.http.legacy'
+
+    packagingOptions {
+        pickFirst 'META-INF/proguard/androidx-annotations.pro'
+    }
 }
 
 dependencies {
@@ -43,13 +47,14 @@ dependencies {
     implementation "com.android.support:appcompat-v7:$rootProject.supportLibVersion"
     implementation "com.android.support:recyclerview-v7:$rootProject.supportLibVersion"
     implementation "com.android.support:cardview-v7:$rootProject.supportLibVersion"
-    implementation "com.android.support:design:28.0.0-rc01"
+    implementation "com.android.support:design:$rootProject.supportLibVersion"
 
     //android arch components
     implementation "android.arch.lifecycle:runtime:$rootProject.archLifecycleVersion"
     implementation "android.arch.lifecycle:extensions:$rootProject.archLifecycleVersion"
     implementation "android.arch.work:work-runtime:$rootProject.workManager"
     implementation "android.arch.lifecycle:common-java8:$rootProject.archLifecycleVersion"
+    implementation "android.arch.paging:runtime:1.0.1"
 
     //room
     implementation "android.arch.persistence.room:runtime:$rootProject.roomVersion"
@@ -65,6 +70,9 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-moshi:$rootProject.retrofit"
     implementation "me.jessyan:retrofit-url-manager:$rootProject.retrofitUrlInterceptorVersion"
 
+    implementation "me.riddhimanadib.form-master:form-master:1.1.0"
+
+
     implementation "com.squareup.retrofit2:adapter-rxjava2:$rootProject.rxjavaLibraryVersion"
     implementation "io.reactivex.rxjava2:rxandroid:$rootProject.rxandroidLibraryVersion"
     implementation "io.reactivex.rxjava2:rxjava:$rootProject.rxjavaLibraryVersion"
@@ -74,6 +82,7 @@ dependencies {
     implementation "com.github.bumptech.glide:glide:$rootProject.glideVersion"
     annotationProcessor "com.github.bumptech.glide:compiler:$rootProject.glideVersion"
     implementation "com.google.firebase:firebase-messaging:$rootProject.firebaseVersion"
+    implementation "com.obsez.android.lib.filechooser:filechooser:$rootProject.fileChooser"
 
     //Test
     androidTestImplementation "com.android.support.test:runner:$rootProject.testRunner"

@@ -1,42 +1,87 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
+import android.arch.lifecycle.LiveData;
+
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
+import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDBDao;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
+import com.rootnetapp.rootnetintranet.data.local.db.user.UserDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
+import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
+import com.rootnetapp.rootnetintranet.models.createworkflow.CurrencyFieldData;
+import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PhoneFieldData;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
+import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.project.ProjectResponse;
+import com.rootnetapp.rootnetintranet.models.responses.role.RoleResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 
-import io.reactivex.Observable;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.List;
 
-/**
- * Created by root on 22/03/18.
- */
+import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 public class CreateWorkflowRepository {
 
-    ApiInterface service;
-    AppDatabase database;
+    private ApiInterface service;
+    private AppDatabase database;
+    private WorkflowTypeDbDao workflowTypeDbDao;
+    private UserDao profileDao;
+    private CountryDBDao countryDBDao;
+
+    private LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
 
     public CreateWorkflowRepository(ApiInterface service, AppDatabase database) {
         this.service = service;
         this.database = database;
+        this.workflowTypeDbDao = this.database.workflowTypeDbDao();
+        this.profileDao = this.database.userDao();
+        this.countryDBDao = this.database.countryDBDao();
+        this.workflowTypeMenuItems = workflowTypeDbDao.getObservableTypesForMenu();
+    }
+
+    public LiveData<List<WorkflowTypeItemMenu>> getWorkflowTypeMenuItems() {
+        return workflowTypeMenuItems;
+    }
+
+    public List<WorkflowTypeItemMenu> getWorklowTypeNames() {
+        return workflowTypeDbDao.getListOfWorkflowNames();
+    }
+
+    public List<FormCreateProfile> getProfiles() {
+        return profileDao.getAllProfiles();
+    }
+
+    public List<FormFieldsByWorkflowType> getFiedsByWorkflowType(int byId) {
+        return workflowTypeDbDao.getFields(byId);
     }
 
     public Observable<WorkflowTypesResponse> getWorkflowTypes(String auth) {
         return service.getWorkflowTypes(auth).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
+
+    public Single<List<PhoneFieldData>> getCountryCodes() {
+        return countryDBDao.getAllCountriesCodes().subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Single<List<CurrencyFieldData>> getCurrencyCodes() {
+        return countryDBDao.getAllCurrencyCodes().subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
 
     public Observable<ListsResponse> getList(String auth, int id) {
         return service.getListItems(auth, id).subscribeOn(Schedulers.newThread())
@@ -50,6 +95,16 @@ public class CreateWorkflowRepository {
 
     public Observable<ServicesResponse> getServices(String auth) {
         return service.getServices(auth).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<RoleResponse> getRoles(String auth) {
+        return service.getRoles(auth).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<ProjectResponse> getProjects(String auth) {
+        return service.getProjects(auth).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
@@ -67,6 +122,21 @@ public class CreateWorkflowRepository {
                                                              String title, String workflowMetas,
                                                              String start, String description) {
         return service.createWorkflow(auth, workflowTypeId, title, workflowMetas, start ,description).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<CreateWorkflowResponse> createWorkflow(String token, CreateRequest body) {
+        return service.createWorkflow(token, body).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<FileUploadResponse> uploadFile(String token, FilePost body) {
+        return service.uploadFile(token, body).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<CreateWorkflowResponse> createWorkflow(String token, String body) {
+        return service.createWorkflow(token, body).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 

@@ -6,7 +6,7 @@ import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Field;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.Field;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.squareup.moshi.Json;
 

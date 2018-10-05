@@ -18,7 +18,7 @@ public class Sort {
     private sortOrder createdSortOrder;
     private sortOrder updatedSortOrder;
 
-    public Sort() {
+    Sort() {
         this.sortingType = sortType.NONE;
         this.numberSortOrder = sortOrder.DESC;
         this.createdSortOrder = sortOrder.DESC;

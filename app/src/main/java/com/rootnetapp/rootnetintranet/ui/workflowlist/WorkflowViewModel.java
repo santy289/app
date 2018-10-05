@@ -1,47 +1,61 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.arch.paging.PagedList;
 import android.content.SharedPreferences;
 import android.support.annotation.IdRes;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 
 public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
-    private MutableLiveData<List<WorkflowListItem>> updateWithSortedList;
+    private MutableLiveData<PagedList<WorkflowListItem>> updateWithSortedList;
     private MutableLiveData<int[]> toggleRadioButton;
     private MutableLiveData<int[]> toggleSwitch;
+    private MutableLiveData<int[]> toggleFilterSwitch;
+    private MutableLiveData<Integer> setSelectType;
     private MutableLiveData<Boolean> showList;
-    private LiveData<List<WorkflowListItem>> liveWorkflows, liveUnordered;
+    private MutableLiveData<Boolean> addWorkflowObserver;
+    private MutableLiveData<Boolean> setAllCheckboxesList;
+    public MutableLiveData<Boolean> showBottomSheetLoading;
+    private LiveData<PagedList<WorkflowListItem>> liveWorkflows, liveUnordered;
+    private LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
 
     private WorkflowRepository workflowRepository;
     private List<WorkflowDb> workflows, unordered;
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     private Sort sort;
+    private FilterBoxSettings filterBoxSettings;
     private String token;
+    private String userId;
     private static final String TAG = "WorkflowViewModel";
+
+    public static final int NO_TYPE_SELECTED = 0;
 
     public WorkflowViewModel(WorkflowRepository workflowRepository) {
         this.workflowRepository = workflowRepository;
-        liveWorkflows = this.workflowRepository.getAllWorkflows();
         sort = new Sort();
+        workflowTypeMenuItems = this.workflowRepository.getWorkflowTypeMenuItems();
+        filterBoxSettings = new FilterBoxSettings();
+        showBottomSheetLoading = new MutableLiveData<>();
     }
 
     @Override
@@ -50,31 +64,235 @@ public class WorkflowViewModel extends ViewModel {
         workflowRepository.clearDisposables();
     }
 
-    protected LiveData<List<WorkflowListItem>> getAllWorkflows() {
-        return liveWorkflows;
+    // First to be called
+    private void setWorkflowListNoFilters(String token) {
+        workflowRepository.setWorkflowList(token);
+        liveWorkflows = workflowRepository.getAllWorkflows();
+    }
+
+    protected void swipeToRefresh(LifecycleOwner lifecycleOwner) {
+        int id = filterBoxSettings.getWorkflowTypeId();
+        if (id > 0) {
+            workflowRepository.getWorkflowsByType(token, id);
+        } else {
+            workflowRepository.getAllWorkflowsNoFilters(token);
+        }
+        liveWorkflows.removeObservers(lifecycleOwner);
     }
 
     protected void insert(WorkflowDb workflow) {
         workflowRepository.insertWorkflow(workflow);
     }
 
-    protected void initWorkflowList(SharedPreferences sharedPreferences) {
-        //workflowRepository.test();
-
-        //token = "Bearer "+ sharedPreferences.getString("token","");
-//        getWorkflows(token);
+    protected void initWorkflowList(SharedPreferences sharedPreferences, LifecycleOwner lifecycleOwner) {
+        token = "Bearer "+ sharedPreferences.getString("token","");
+        userId = sharedPreferences.getString(PreferenceKeys.PREFERENCE_PROFILE_ID, "");
+        setWorkflowListNoFilters(token);
+        subscribe(lifecycleOwner);
     }
 
-//    protected void getWorkflows(String auth) {
-//        this.token = auth;
-//        try {
-//            if (Utils.isConnected()) {
-//                getWorkflowsFromService(this.token, 0);
-//            }
-//        } catch (InterruptedException | IOException e) {
-//            Log.d(TAG, "getWorkflows: Problems updating workflows - " + e.getMessage());
-//        }
-//    }
+    protected void loadWorkflowsByType(int typeId, LifecycleOwner lifecycleOwner) {
+        showLoading.postValue(true);
+        if (typeId == NO_TYPE_SELECTED) {
+            workflowRepository.getAllWorkflowsNoFilters(token);
+        } else {
+            workflowRepository.getWorkflowsByType(token, typeId);
+        }
+        liveWorkflows.removeObservers(lifecycleOwner);
+    }
+
+    protected void loadMyPendingWorkflows(boolean isChecked, LifecycleOwner lifecycleOwner) {
+        if (TextUtils.isEmpty(userId)) {
+            return;
+        }
+        showLoading.postValue(true);
+        if (isChecked) {
+            filterBoxSettings.setCheckedMyPending(true);
+            int id = Integer.valueOf(userId);
+            workflowRepository.getMyPendingWorkflows(id, token);
+
+        } else {
+            filterBoxSettings.setCheckedMyPending(false);
+            workflowRepository.getAllWorkflowsNoFilters(token);
+        }
+        liveWorkflows.removeObservers(lifecycleOwner);
+        // liveWorkflows' Observer that was removed will be put back in one of the observers in subscribe.
+    }
+
+    protected void filterBySearchText(String searchText, LifecycleOwner lifecycleOwner) {
+        filterBoxSettings.setSearchText(searchText);
+        liveWorkflows.removeObservers(lifecycleOwner);
+        applyFilters(filterBoxSettings);
+    }
+
+    private void subscribe(LifecycleOwner lifecycleOwner) {
+        final Observer<Boolean> handleRepoErrorObserver = ( error -> {
+            showLoading.postValue(false);
+        });
+        final Observer<Boolean> handleRepoSuccessObserver = ( success -> {
+            showLoading.postValue(false);
+            // TODO change data source to new query pointing ONLY to my profile id.
+            applyFilters(filterBoxSettings, userId);
+        });
+        final Observer<Boolean> handleRepoSuccessNoFilterObserver = ( success -> {
+           showLoading.postValue(false);
+           applyFilters(filterBoxSettings);
+        });
+
+        workflowRepository.getObservableHandleRepoError().observe(lifecycleOwner, handleRepoErrorObserver);
+        workflowRepository.getObservableHandleRepoSuccess().observe(lifecycleOwner, handleRepoSuccessObserver);
+        workflowRepository.getObservableHandleRepoSuccessNoFilter().observe(lifecycleOwner, handleRepoSuccessNoFilterObserver);
+
+    }
+
+    protected LiveData<Boolean> getObservableLoadMore() {
+        return workflowRepository.showLoadMore;
+    }
+
+    private void updateFilterBoxSettings(int workflowTypeId, int typeIdPositionInArray, boolean isCheckedMyPendings, boolean isCheckedStatus) {
+        filterBoxSettings.setCheckedMyPending(isCheckedMyPendings);
+        filterBoxSettings.setWorkflowTypeId(workflowTypeId);
+        filterBoxSettings.setCheckedStatus(isCheckedStatus);
+        filterBoxSettings.setTypeIdPositionInArray(typeIdPositionInArray);
+    }
+
+    protected void handleWorkflowTypeFilters(
+            LifecycleOwner lifecycleOwner,
+            int workflowTypeId,
+            int typeIdPositionInArray,
+            boolean isCheckedMyPendings,
+            boolean isCheckedStatus) {
+        updateFilterBoxSettings(workflowTypeId, typeIdPositionInArray, isCheckedMyPendings, isCheckedStatus);
+        liveWorkflows.removeObservers(lifecycleOwner);
+        applyFilters(filterBoxSettings);
+    }
+
+    private void applyFilters(FilterBoxSettings filterBoxSettings) {
+        applyFilters(filterBoxSettings, "");
+    }
+
+    private void applyFilters(FilterBoxSettings filterBoxSettings, String id) {
+        switch (sort.getSortingType()) {
+            case NONE: {
+                if (filterBoxSettings.getWorkflowTypeId() == NO_TYPE_SELECTED) {
+                    workflowRepository.rawQueryWorkflowListByFilters(
+                            filterBoxSettings.isCheckedStatus(),
+                            token,
+                            id,
+                            filterBoxSettings.getSearchText());
+                } else {
+                    workflowRepository.rawQueryWorkflowListByFilters(
+                            filterBoxSettings.isCheckedStatus(),
+                            filterBoxSettings.getWorkflowTypeId(),
+                            token,
+                            id,
+                            filterBoxSettings.getSearchText());
+                }
+                reloadWorkflowsList();
+                break;
+            }
+            case BYNUMBER: {
+                if (filterBoxSettings.getWorkflowTypeId() == NO_TYPE_SELECTED) {
+                    boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
+                    workflowRepository.rawQueryWorkflowListByFilters(
+                            filterBoxSettings.isCheckedStatus(),
+                            WorkflowRepository.WORKFLOWID,
+                            isDescending,
+                            token,
+                            id,
+                            filterBoxSettings.getSearchText());
+                } else {
+                    boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
+                    workflowRepository.rawQueryWorkflowListByFilters(
+                            filterBoxSettings.isCheckedStatus(),
+                            filterBoxSettings.getWorkflowTypeId(),
+                            WorkflowRepository.WORKFLOWID,
+                            isDescending,
+                            token,
+                            id,
+                            filterBoxSettings.getSearchText());
+                }
+                reloadWorkflowsList();
+                break;
+            }
+            case BYCREATE: {
+                if (filterBoxSettings.getWorkflowTypeId() == NO_TYPE_SELECTED) {
+                    boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
+                    workflowRepository.rawQueryWorkflowListByFilters(
+                            filterBoxSettings.isCheckedStatus(),
+                            WorkflowRepository.WORKFLOW_CREATED,
+                            isDescending,
+                            token,
+                            id,
+                            filterBoxSettings.getSearchText());
+                } else {
+                    boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
+                    workflowRepository.rawQueryWorkflowListByFilters(
+                            filterBoxSettings.isCheckedStatus(),
+                            filterBoxSettings.getWorkflowTypeId(),
+                            WorkflowRepository.WORKFLOW_CREATED,
+                            isDescending,
+                            token,
+                            id,
+                            filterBoxSettings.getSearchText());
+                }
+                reloadWorkflowsList();
+                break;
+            }
+            case BYUPDATE: {
+                if (filterBoxSettings.getWorkflowTypeId() == NO_TYPE_SELECTED) {
+                    boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
+                    workflowRepository.rawQueryWorkflowListByFilters(
+                            filterBoxSettings.isCheckedStatus(),
+                            WorkflowRepository.WORKFLOW_UPDATED,
+                            isDescending,
+                            token,
+                            id,
+                            filterBoxSettings.getSearchText());
+                } else {
+                    boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
+                    workflowRepository.rawQueryWorkflowListByFilters(
+                            filterBoxSettings.isCheckedStatus(),
+                            filterBoxSettings.getWorkflowTypeId(),
+                            WorkflowRepository.WORKFLOW_UPDATED,
+                            isDescending,
+                            token,
+                            id,
+                            filterBoxSettings.getSearchText());
+                }
+                reloadWorkflowsList();
+                break;
+            }
+        }
+    }
+
+    private void reloadWorkflowsList() {
+//        liveWorkflows.removeObservers(lifecycleOwner); // TODO try putting this back and maybe it works and delete from handleWorkflowTypeFilters first line.
+        liveWorkflows = workflowRepository.getAllWorkflows();
+        addWorkflowObserver.postValue(true);
+    }
+
+    protected void handleCheckboxAllOnClick(boolean isChecked) {
+        setAllCheckboxesList.postValue(isChecked);
+    }
+
+    protected LiveData<PagedList<WorkflowListItem>> getAllWorkflows() {
+        return liveWorkflows;
+    }
+
+    protected void initFilters() {
+        if (filterBoxSettings.isCheckedMyPending()) {
+            toggleFilterSwitch(WorkflowFragment.SWITCH_PENDING, WorkflowFragment.CHECK);
+        } else {
+            toggleFilterSwitch(WorkflowFragment.SWITCH_PENDING, WorkflowFragment.UNCHECK);
+        }
+        if (filterBoxSettings.isCheckedStatus()) {
+            toggleFilterSwitch(WorkflowFragment.SWITCH_STATUS, WorkflowFragment.CHECK);
+        } else {
+            toggleFilterSwitch(WorkflowFragment.SWITCH_STATUS, WorkflowFragment.UNCHECK);
+        }
+        setSelectType.postValue(filterBoxSettings.getTypeIdPositionInArray());
+    }
 
     protected void initSortBy() {
         switch (sort.getSortingType()) {
@@ -147,7 +365,6 @@ public class WorkflowViewModel extends ViewModel {
                 break;
             }
         }
-        applyFilters(sort);
     }
 
     protected void handleSwitchOnClick(
@@ -162,12 +379,10 @@ public class WorkflowViewModel extends ViewModel {
             clearOtherSwitchesBut(sortType);
         } else {
             sort.setNumberSortOrder(Sort.sortOrder.DESC);
-
         }
-        applyFilters(sort);
     }
 
-    protected void handleUiAndIncomingList(List<WorkflowListItem> listWorkflows) {
+    protected void handleUiAndIncomingList(PagedList<WorkflowListItem> listWorkflows) {
         if (listWorkflows == null) {
             showList.setValue(false);
             return;
@@ -176,13 +391,7 @@ public class WorkflowViewModel extends ViewModel {
             showList.setValue(false);
             return;
         }
-        if (getSortingType() == Sort.sortType.NONE) {
-//            adapter.setWorkflows(listWorkflows);
-            updateWithSortedList.setValue(listWorkflows);
-
-        } else {
-            applyFilters();
-        }
+        updateWithSortedList.setValue(listWorkflows);
         showList.setValue(true);
     }
 
@@ -205,10 +414,6 @@ public class WorkflowViewModel extends ViewModel {
         }
     }
 
-    protected Sort.sortType getSortingType() {
-        return sort.getSortingType();
-    }
-
     private void clearRadioButtonGroup() {
         toggleRadioButton(WorkflowFragment.RADIO_CLEAR_ALL, WorkflowFragment.UNCHECK);
     }
@@ -227,96 +432,11 @@ public class WorkflowViewModel extends ViewModel {
         toggleSwitch.setValue(toggleRadio);
     }
 
-//    private void getWorkflowsFromService(String auth, int page) {
-//        Disposable disposable = workflowRepository
-//                .getWorkflowsFromService(auth, page)
-//                .subscribe(
-//                        this::onServiceSuccess,
-//                        throwable -> Log.d(TAG, "getWorkflowsFromService: Cant get workflows from network - " + throwable.getMessage())
-//                );
-//        disposables.add(disposable);
-//    }
-
-//    private void onServiceSuccess(WorkflowResponseDb workflowsResponse) {
-//        workflows = new ArrayList<>();
-//        workflows.addAll(workflowsResponse.getList());
-//        if (!workflowsResponse.getPager().isIsLastPage()) {
-//            // calling multiple times until we get to the last page.
-//            getWorkflowsFromService(token, workflowsResponse.getPager().getNextPage());
-//        }
-//        else {
-//            // Update database with new workflows from network.
-//            Disposable disposable = workflowRepository
-//                    .setWorkflowsLocalUpdate(workflows)
-//                    .subscribe(
-//                            this::onWorkflowSuccessUpdate,
-//                            throwable -> {
-//                                Log.d(TAG, "onServiceSuccess: problem saving to db - " + throwable.getMessage());
-//                                mErrorLiveData.setValue(R.string.failure_connect);
-//                            }
-//                    );
-//            disposables.add(disposable);
-//        }
-//    }
-
-//    private void onWorkflowSuccessUpdate(List<WorkflowDb> workflowList) {
-//        Log.d(TAG, "onWorkflowSuccessUpdate: local database workflows updated.");
-//    }
-
-    private void applyFilters() {
-        applyFilters(sort);
-    }
-
-    private void applyFilters(Sort sorting) {
-        List<WorkflowListItem> workflows = liveWorkflows.getValue();
-        if (workflows == null) {
-            return;
-        }
-
-        switch (sorting.getSortingType()) {
-            case NONE: {
-                // Apply no sorting.
-                break;
-            }
-            case BYNUMBER: {
-                Collections.sort(workflows, (s1, s2) -> {
-                    if (sorting.getNumberSortOrder().equals(Sort.sortOrder.ASC)) {
-                        /*For ascending order*/
-                        return s1.getWorkflowId() - s2.getWorkflowId();
-                    } else {
-                        /*For descending order*/
-                        return s2.getWorkflowId() - s1.getWorkflowId();
-                    }
-                });
-                break;
-            }
-            case BYCREATE: {
-                Collections.sort(workflows, (s1, s2) -> {
-                    String str1 = s1.getStart().split("T")[0];
-                    String str2 = s2.getStart().split("T")[0];
-                    DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-                    try {
-                        Date date1 = format.parse(str1);
-                        Date date2 = format.parse(str2);
-                        if (sorting.getCreatedSortOrder().equals(Sort.sortOrder.ASC)) {
-                            return date1.compareTo(date2);
-                        } else {
-                            return date2.compareTo(date1);
-                        }
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                        return 1;
-                    }
-                });
-                break;
-            }
-            case BYUPDATE: {
-                //todo falta este dato del servicio.
-                break;
-            }
-        }
-
-        updateWithSortedList.setValue(workflows);
+    private void toggleFilterSwitch(int viewSwitchType, int viewIsCheckType) {
+        int[] toggleSwitch = new int[2];
+        toggleSwitch[WorkflowFragment.INDEX_TYPE] = viewSwitchType;
+        toggleSwitch[WorkflowFragment.INDEX_CHECK] = viewIsCheckType;
+        toggleFilterSwitch.setValue(toggleSwitch);
     }
 
     protected LiveData<Integer> getObservableError() {
@@ -333,7 +453,7 @@ public class WorkflowViewModel extends ViewModel {
         return showLoading;
     }
 
-    protected LiveData<List<WorkflowListItem>> getObservableUpdateWithSortedList() {
+    protected LiveData<PagedList<WorkflowListItem>> getObservableUpdateWithSortedList() {
         if (updateWithSortedList == null) {
             updateWithSortedList = new MutableLiveData<>();
         }
@@ -354,10 +474,43 @@ public class WorkflowViewModel extends ViewModel {
         return toggleSwitch;
     }
 
+    protected LiveData<int[]> getObservableToggleFilterSwitch() {
+        if (toggleFilterSwitch == null) {
+            toggleFilterSwitch = new MutableLiveData<>();
+        }
+        return toggleFilterSwitch;
+    }
+
     public LiveData<Boolean> getObservableShowList() {
         if (showList == null) {
             showList = new MutableLiveData<>();
         }
         return showList;
     }
+
+    protected LiveData<List<WorkflowTypeItemMenu>> getObservableTypeItemMenu() {
+        return workflowTypeMenuItems;
+    }
+
+    protected LiveData<Boolean> getObservableAddWorkflowObserver() {
+        if (addWorkflowObserver == null) {
+            addWorkflowObserver = new MutableLiveData<>();
+        }
+        return addWorkflowObserver;
+    }
+
+    protected LiveData<Boolean> getObservableSetAllCheckboxesList() {
+        if (setAllCheckboxesList == null) {
+            setAllCheckboxesList = new MutableLiveData<>();
+        }
+        return setAllCheckboxesList;
+    }
+
+    protected LiveData<Integer> getObservableSetSelectType() {
+        if (setSelectType == null) {
+            setSelectType = new MutableLiveData<>();
+        }
+        return setSelectType;
+    }
+
 }

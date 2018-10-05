@@ -4,20 +4,16 @@ import com.squareup.moshi.Json;
 
 import java.util.List;
 
-/**
- * Created by root on 23/03/18.
- */
-
 public class FieldConfig {
 
-    @Json(name = "associated_workflow_field_id")
-    private String associatedWorkflowFieldId;
+    @Json(name = "associated_workflow_type_id")
+    private int associatedWorkflowTypedId;
     @Json(name = "is_associated")
     private Boolean isAssociated;
     @Json(name = "list_info")
     private ListInfo listInfo;
     @Json(name = "multiple")
-    private Boolean multiple;
+    private boolean multiple;
     @Json(name = "required")
     private Boolean required;
     @Json(name = "show_in")
@@ -32,13 +28,45 @@ public class FieldConfig {
     private Boolean formShow;
     @Json(name = "filterShow")
     private Boolean filterShow;
+    @Json(name = "base")
+    private boolean base;
+    @Json(name = "machine_name")
+    private String machineName;
+    @Json(name = "entity_base_fields")
+    private String entityBaseFields;
+    @Json(name = "precalculated")
+    private boolean precalculated;
 
-    public String getAssociatedWorkflowFieldId() {
-        return associatedWorkflowFieldId;
+    public String getEntityBaseFields() {
+        return entityBaseFields;
     }
 
-    public void setAssociatedWorkflowFieldId(String associatedWorkflowFieldId) {
-        this.associatedWorkflowFieldId = associatedWorkflowFieldId;
+    public void setEntityBaseFields(String entityBaseFields) {
+        this.entityBaseFields = entityBaseFields;
+    }
+
+    public String getMachineName() {
+        return machineName;
+    }
+
+    public void setMachineName(String machineName) {
+        this.machineName = machineName;
+    }
+
+    public boolean getBase() {
+        return base;
+    }
+
+    public void setBase(Boolean base) {
+        this.base = base;
+    }
+
+    public int getAssociatedWorkflowTypedId() {
+        return associatedWorkflowTypedId;
+    }
+
+    public void setAssociatedWorkflowTypedId(int associatedWorkflowTypedId) {
+        this.associatedWorkflowTypedId = associatedWorkflowTypedId;
     }
 
     public Boolean getIsAssociated() {
@@ -57,11 +85,11 @@ public class FieldConfig {
         this.listInfo = listInfo;
     }
 
-    public Boolean getMultiple() {
+    public boolean getMultiple() {
         return multiple;
     }
 
-    public void setMultiple(Boolean multiple) {
+    public void setMultiple(boolean multiple) {
         this.multiple = multiple;
     }
 
@@ -121,5 +149,11 @@ public class FieldConfig {
         this.filterShow = filterShow;
     }
 
+    public boolean isPrecalculated() {
+        return precalculated;
+    }
 
+    public void setPrecalculated(boolean precalculated) {
+        this.precalculated = precalculated;
+    }
 }

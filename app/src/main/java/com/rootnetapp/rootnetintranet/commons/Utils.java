@@ -18,7 +18,9 @@ import com.squareup.moshi.Moshi;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
@@ -41,6 +43,7 @@ public class Utils {
     private static final String TAG = "Utils.Rootnet";
 
     private static final String ENCODING_UTF_8 = "UTF-8";
+
 
     public static void showLoading(Context ctx) {
         progress = new ProgressDialog(ctx);
@@ -175,6 +178,47 @@ public class Utils {
             Log.d(TAG, "parseJson: error - " + e.getMessage());
         }
         return jwToken;
+    }
+
+    public static boolean checkFileSize(int limitMb, File file) {
+        long length = file.length();
+        long lengthMb = length / (1024 * 1024);
+        if (lengthMb > limitMb) {
+            return false;
+        }
+        return true;
+    }
+
+    public static String encodeFileToBase64Binary(File file)
+            throws IOException {
+        byte[] bytes = loadFile(file);
+//        byte[] bytes = fileToByte(file);
+        String encodedString = Base64.encodeToString(bytes, Base64.DEFAULT);
+        return encodedString;
+    }
+
+    private static byte[] loadFile(File file) throws IOException {
+        InputStream is = new FileInputStream(file);
+
+        long length = file.length();
+        if (length > Integer.MAX_VALUE) {
+            // File is too large
+        }
+        byte[] bytes = new byte[(int)length];
+
+        int offset = 0;
+        int numRead = 0;
+        while (offset < bytes.length
+                && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
+            offset += numRead;
+        }
+
+        if (offset < bytes.length) {
+            throw new IOException("Could not completely read file "+file.getName());
+        }
+
+        is.close();
+        return bytes;
     }
 
 }

@@ -29,6 +29,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -99,43 +100,7 @@ public class MainActivity extends AppCompatActivity
 
         showFragment(TimelineFragment.newInstance(this), false);
         startBackgroundWorkflowRequest();
-
-        // TODO debuging remove later
-        startRightDrawerNavigation();
     }
-
-
-
-    // TODO debugging remove later
-    String firstPage[] = {"TEST 1", "TEST 2", "TEST 3"};
-    String secondPage[] = {"TEST 4", "TEST 5", "TEST 6"};
-    ArrayAdapter<String> firstAdapter;
-    private void startRightDrawerNavigation() {
-//        firstAdapter =
-//                new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, firstPage);
-//
-//
-//        ListView listView = mainBinding.rightDrawer.rightDrawerFilters;
-//        listView.setAdapter(firstAdapter);
-//
-//
-//        listView.setOnItemClickListener((parentAdapter, view, position, id) -> {
-//            Log.d(TAG, "startRightDrawerNavigation: ");
-//
-//            ArrayAdapter<String> secondAdapter =
-//                    new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, secondPage);
-//
-//            mainBinding.rightDrawer.rightDrawerFilters.setAdapter(secondAdapter);
-//
-//        });
-//
-//        mainBinding.rightDrawer.drawerBackButton.setOnClickListener(view -> {
-//
-//            mainBinding.rightDrawer.rightDrawerFilters.setAdapter(firstAdapter);
-//        });
-    }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -255,9 +220,35 @@ public class MainActivity extends AppCompatActivity
         mainBinding.leftDrawer.buttonWorkflow.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navExit.setOnClickListener(this::drawerClicks);
         mainBinding.rightDrawer.drawerBackButton.setOnClickListener(view -> {
+            if (sortingActive) {
+                showSortByViews(false);
+            }
             viewModel.sendRightDrawerBackButtonClick();
         });
+        mainBinding.rightDrawer.rightDrawerSort.setOnClickListener(view -> {
+            // TODO tell WorkflowViewModel to show next List
+            showSortByViews(true);
+        });
     }
+
+    boolean sortingActive = false;
+    private void showSortByViews(boolean show) {
+        if (show) {
+            mainBinding.rightDrawer.sortOptions.sortingLayout.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.rightDrawerFilters.setVisibility(View.GONE);
+            mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.GONE);
+            mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
+            sortingActive = true;
+        } else {
+            mainBinding.rightDrawer.sortOptions.sortingLayout.setVisibility(View.GONE);
+            mainBinding.rightDrawer.rightDrawerFilters.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.drawerBackButton.setVisibility(View.GONE);
+            sortingActive = false;
+        }
+    }
+
+
 
     private void startBackgroundWorkflowRequest() {
         Intent MyIntentService = new Intent(this, WorkflowManagerService.class);
@@ -376,6 +367,7 @@ public class MainActivity extends AppCompatActivity
 //        );
     }
 
+    // Populates Filters List
     private void setRightDrawerFilters(List<WorkflowTypeMenu> menus) {
         mainBinding.rightDrawer.drawerBackButton.setVisibility(View.GONE);
         mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.filters));
@@ -391,6 +383,7 @@ public class MainActivity extends AppCompatActivity
         mainBinding.rightDrawer.rightDrawerFilters.setAdapter(rightDrawerFiltersAdapter);
     }
 
+    // Populates Options List
     private void setRightDrawerOptions(OptionsList optionsList) {
         if (optionsList == null) {
             Log.d(TAG, "setRightDrawerOptions: Not able to set Drawer Options");

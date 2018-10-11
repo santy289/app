@@ -64,7 +64,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder>{
             }
         });
         if(file!=null){
-            holder.binding.imgUploaded.setImageResource(R.drawable.ic_check_black_24dp);
+            holder.binding.imgUploaded.setImageResource(R.drawable.ic_check_accent_24dp);
             holder.binding.imgUploaded.setColorFilter(ContextCompat.getColor(context, R.color.green),
                     android.graphics.PorterDuff.Mode.SRC_IN);
             holder.binding.tvDescription.setText(file.getName());

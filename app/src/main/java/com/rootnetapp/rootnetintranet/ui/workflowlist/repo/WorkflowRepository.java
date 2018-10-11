@@ -394,6 +394,18 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         disposables.add(disposable);
     }
 
+    public Observable<WorkflowResponseDb> getWorkflowsByFieldFilters(String token, int workflowTypeId, String metaData) {
+        return service.getWorkflowsDbFilteredByDynamicFields(
+                token,
+                50,
+                true,
+                1,
+                false,
+                workflowTypeId,
+                metaData
+        );
+    }
+
     private void workflowDbSuccessNoFilter(WorkflowResponseDb workflowsResponse) {
         Disposable disposable = Observable.fromCallable(() -> {
             WorkflowDbDao workflowDbDao = database.workflowDbDao();

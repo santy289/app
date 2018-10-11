@@ -18,6 +18,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.ProductJsonValue;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.role.Role;
 import com.rootnetapp.rootnetintranet.models.responses.services.Service;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 import com.squareup.moshi.JsonAdapter;
@@ -269,6 +270,20 @@ public class FormSettings {
         format(metaData, typeInfo, fieldData);
         return metaData;
     }
+
+    public WorkflowMetas formatMetaData(WorkflowMetas metaData, FieldData fieldData, FieldConfig fieldConfig) {
+       TypeInfo typeInfo = fieldConfig.getTypeInfo();
+        if (typeInfo == null) {
+            return metaData;
+        }
+        boolean rememberRealValue = fieldData.isMultipleSelection;
+        fieldData.isMultipleSelection = true;
+        format(metaData, typeInfo, fieldData);
+        fieldData.isMultipleSelection = rememberRealValue;
+        return metaData;
+    }
+
+
 
     private void format(WorkflowMetas metaData, TypeInfo typeInfo, FieldData fieldData) {
         String value = metaData.getUnformattedValue();

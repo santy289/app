@@ -313,6 +313,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         subscribeToTypeMenu();
         workflowViewModel.rightDrawerFilterMenus.observe(this, this::createFilterListRightDrawer);
         workflowViewModel.rightDrawerOptionMenus.observe(this, this::createOptionListRightDrawer);
+        workflowViewModel.invalidateDrawerOptionsList.observe(this, this::handleInvalidateOptionsList);
 
         // MainActivity's ViewModel
         mainViewModel.messageContainerToWorkflowList.observe(this, this::handleRightDrawerFilterClick);
@@ -326,6 +327,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     private void handleRightDrawerFilterClick(int position) {
         workflowViewModel.handleSelectedItemInFilters(position);
+    }
+
+    private void handleInvalidateOptionsList(Boolean invalidate) {
+        mainViewModel.invalidateOptionListDrawer();
     }
 
     private void handleBackAction(Boolean back) {

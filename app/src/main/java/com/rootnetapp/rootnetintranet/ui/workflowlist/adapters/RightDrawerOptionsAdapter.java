@@ -1,9 +1,11 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist.adapters;
 
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -52,12 +54,22 @@ public class RightDrawerOptionsAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         WorkflowTypeMenu menu = menus.get(position);
         int itemRowType = menu.getRowType();
-
+        Resources resources = parent.getResources();
         TextView textView;
+        ImageView checkImage;
+
         switch (itemRowType) {
             case TYPE:
                 convertView = inflater.inflate(R.layout.right_drawer_filter_item, null);
                 textView = convertView.findViewById(R.id.right_drawer_item_title);
+                checkImage = convertView.findViewById(R.id.right_drawer_image_checkmark);
+                if (menu.isSelected()) {
+                    checkImage.setVisibility(View.VISIBLE);
+                    textView.setTextColor(resources.getColor(R.color.colorAccent));
+                } else {
+                    checkImage.setVisibility(View.GONE);
+                    textView.setTextColor(resources.getColor(R.color.black));
+                }
                 textView.setText(menu.getLabel());
                 break;
             case CATEGORY:
@@ -70,7 +82,7 @@ public class RightDrawerOptionsAdapter extends BaseAdapter {
                     label = menu.getLabel();
                 }
                 textView.setText(label);
-                convertView.setEnabled(false);
+//                convertView.setEnabled(false);
                 break;
             case NO_SELECTION:
                 convertView = inflater.inflate(R.layout.right_drawer_filter_item, null);

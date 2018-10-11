@@ -2,7 +2,7 @@ package com.rootnetapp.rootnetintranet.models.workflowlist;
 
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
-// TODO extends ListFieldItemMeta
+
 public class WorkflowTypeMenu extends ListFieldItemMeta {
     private int id;
     private String label;
@@ -10,12 +10,14 @@ public class WorkflowTypeMenu extends ListFieldItemMeta {
     private String subTitle;
     private int rowType;
     private int workflowTypeId;
+    private boolean selected;
 
     public WorkflowTypeMenu(int id, String label, int rowType, int workflowTypeId) {
         this.id = id;
         this.label = label;
         this.rowType = rowType;
         this.workflowTypeId = workflowTypeId;
+        this.selected = false;
     }
 
     public WorkflowTypeMenu(int id, String label, String subTitle, int rowType, int workflowTypeId) {
@@ -24,6 +26,7 @@ public class WorkflowTypeMenu extends ListFieldItemMeta {
         this.rowType = rowType;
         this.subTitle = subTitle;
         this.workflowTypeId = workflowTypeId;
+        this.selected = false;
     }
 
     public WorkflowTypeMenu(int id, String label, int rowType) {
@@ -36,6 +39,7 @@ public class WorkflowTypeMenu extends ListFieldItemMeta {
         this.subTitle = "";
         this.rowType = RightDrawerFiltersAdapter.TYPE;
         this.workflowTypeId = 0;
+        this.selected = false;
     }
 
     public int getId() {
@@ -84,5 +88,13 @@ public class WorkflowTypeMenu extends ListFieldItemMeta {
 
     public void setWorkflowTypeId(int workflowTypeId) {
         this.workflowTypeId = workflowTypeId;
+    }
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 }

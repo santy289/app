@@ -54,6 +54,7 @@ public class MainActivityViewModel extends ViewModel {
     public MutableLiveData<Integer> messageContainerToWorkflowList;
     public MutableLiveData<Integer> messageOptionSelectedToWorkflowList;
     public MutableLiveData<Boolean> messageBackActionToWorkflowList;
+    public MutableLiveData<Boolean> invalidateOptionsList;
 
     List<WorkflowTypeMenu> filtersList;
     List<WorkflowTypeMenu> optionsList;
@@ -73,6 +74,7 @@ public class MainActivityViewModel extends ViewModel {
         this.messageContainerToWorkflowList = new MutableLiveData<>();
         this.messageBackActionToWorkflowList = new MutableLiveData<>();
         this.messageOptionSelectedToWorkflowList = new MutableLiveData<>();
+        this.invalidateOptionsList = new MutableLiveData<>();
     }
 
     @Override
@@ -162,6 +164,11 @@ public class MainActivityViewModel extends ViewModel {
     protected void onCreateOptionsMenu() {
         int defaultMenu = R.menu.menu_search;
 
+    }
+
+    // Called from workflow list.
+    public void invalidateOptionListDrawer() {
+        invalidateOptionsList.setValue(true);
     }
 
     public void createRightDrawerListAdapter(List<WorkflowTypeMenu> menus) {

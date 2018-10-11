@@ -1,5 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist.adapters;
 
+import android.content.res.Resources;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,7 +9,10 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.models.responses.createworkflow.Workflow;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.FilterSettings;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel;
 
 import java.util.List;
 
@@ -52,15 +57,39 @@ public class RightDrawerFiltersAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         WorkflowTypeMenu menu = menus.get(position);
         int itemRowType = menu.getRowType();
-
+        Resources resources = parent.getResources();
         TextView textView;
         switch (itemRowType) {
             case TYPE:
                 convertView = inflater.inflate(R.layout.right_drawer_filter_item, null);
                 textView = convertView.findViewById(R.id.right_drawer_item_title);
+
+                if (menu.getId() == FilterSettings.RIGHT_DRAWER_FILTER_TYPE_ITEM_ID) {
+                    String label = resources.getString(R.string.workflow_type);
+                    textView.setText(label);
+                    menu.setLabel(label);
+                    textView = convertView.findViewById(R.id.right_drawer_item_subtitle);
+
+                    String subtitle = menu.getSubTitle();
+                    if (TextUtils.isEmpty(subtitle)) {
+                        textView.setText(resources.getString(R.string.no_selection));
+                    } else {
+                        textView.setText(subtitle);
+                    }
+                    break;
+                }
+
                 textView.setText(menu.getLabel());
                 textView = convertView.findViewById(R.id.right_drawer_item_subtitle);
-                textView.setText(menu.getSubTitle());
+                String subtitle = menu.getSubTitle();
+                if (TextUtils.isEmpty(subtitle)) {
+                    textView.setText(resources.getString(R.string.no_selection));
+                    textView.setTextColor(resources.getColor(R.color.black));
+                } else {
+                    textView.setText(menu.getSubTitle());
+                    textView.setTextColor(resources.getColor(R.color.colorAccent));
+                }
+
                 break;
             case CATEGORY:
 //                convertView = inflater.inflate(R.layout.spinner_category_layout, null);

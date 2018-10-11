@@ -27,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,6 +51,8 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOptionsAdapter;
+
+import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -382,8 +385,8 @@ public class MainActivity extends AppCompatActivity
         rightDrawerFiltersAdapter = new RightDrawerFiltersAdapter(inflater, menus);
 
         mainBinding.rightDrawer.rightDrawerFilters.setOnItemClickListener((parent, view, position, id) -> {
-                // TODO something we selected a new item on filter -> go to mainViewModel and replace adapter with new adapter.
-            viewModel.sendFilterClickToWorflowList(position);
+            // Clicks on Filter List
+             viewModel.sendFilterClickToWorflowList(position);
         });
         mainBinding.rightDrawer.rightDrawerFilters.setAdapter(rightDrawerFiltersAdapter);
     }
@@ -395,10 +398,32 @@ public class MainActivity extends AppCompatActivity
         LayoutInflater inflater = LayoutInflater.from(this);
         rightDrawerOptionsAdapter = new RightDrawerOptionsAdapter(inflater, optionsList.optionsList);
         mainBinding.rightDrawer.rightDrawerFilters.setOnItemClickListener((parent, view, position, id) -> {
-            // TODO something we selected a new item on filter -> go to mainViewModel and replace adapter with new adapter.
+            // Clicks on Option List
+            updateViewSelected(view);
             viewModel.sendOptionSelectedToWorkflowList(position);
+
         });
         mainBinding.rightDrawer.rightDrawerFilters.setAdapter(rightDrawerOptionsAdapter);
+    }
+
+    private void invalidateOptionList() {
+        if (rightDrawerOptionsAdapter == null) {
+            return;
+        }
+        rightDrawerOptionsAdapter.notifyDataSetChanged();
+    }
+
+    private void updateViewSelected(View view) {
+        ImageView checkMark = view.findViewById(R.id.right_drawer_image_checkmark);
+        TextView title = view.findViewById(R.id.right_drawer_item_title);
+        int visibility = checkMark.getVisibility();
+        if (visibility == View.VISIBLE) {
+            checkMark.setVisibility(View.GONE);
+            title.setTextColor(getResources().getColor(R.color.black));
+        } else {
+            checkMark.setVisibility(View.VISIBLE);
+            title.setTextColor(getResources().getColor(R.color.colorAccent));
+        }
     }
 
     private void hideSortingViews(boolean hide) {
@@ -435,6 +460,7 @@ public class MainActivity extends AppCompatActivity
         viewModel.getObservableGoToWorkflowDetail().observe(this, goToWorkflowDetailObserver);
         viewModel.setRightDrawerFilterList.observe(this, (this::setRightDrawerFilters));
         viewModel.setRightDrawerOptionList.observe(this, (this::setRightDrawerOptions));
+        viewModel.invalidateOptionsList.observe(this, invalidate -> invalidateOptionList());
     }
 
     private void subscribeForLogin() {

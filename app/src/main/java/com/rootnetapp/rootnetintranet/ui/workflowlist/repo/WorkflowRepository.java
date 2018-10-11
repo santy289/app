@@ -357,7 +357,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         disposables.add(disposable);
     }
 
-    private void workflowDbSuccess(WorkflowResponseDb workflowsResponse) {
+    public void workflowDbSuccess(WorkflowResponseDb workflowsResponse) {
         Disposable disposable = Observable.fromCallable(() -> {
             WorkflowDbDao workflowDbDao = database.workflowDbDao();
             workflowDbDao.deleteAllWorkflows();

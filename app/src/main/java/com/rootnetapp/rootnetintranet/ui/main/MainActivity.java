@@ -392,6 +392,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setRightDrawerOptions(OptionsList optionsList) {
+        if (optionsList == null) {
+            Log.d(TAG, "setRightDrawerOptions: Not able to set Drawer Options");
+        }
         hideSortingViews(true);
         mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
         mainBinding.rightDrawer.rightDrawerTitle.setText(optionsList.titleLabel);

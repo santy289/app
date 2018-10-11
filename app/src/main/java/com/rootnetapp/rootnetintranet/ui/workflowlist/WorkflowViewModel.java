@@ -22,6 +22,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.Wo
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListInfo;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
@@ -300,7 +301,7 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     protected void loadWorkflowsByType(WorkflowTypeMenu menu, LifecycleOwner lifecycleOwner) {
-        showLoading.postValue(true);
+//        showLoading.postValue(true);
         int typeId = menu.getWorkflowTypeId();
         if (typeId == NO_TYPE_SELECTED) {
             workflowRepository.getAllWorkflowsNoFilters(token);
@@ -326,6 +327,7 @@ public class WorkflowViewModel extends ViewModel {
 
     private final int DRAWER_FILTER_LIST_INDEX_TYPE = 0;
     protected void handleOptionSelected(int position, LifecycleOwner lifecycleOwner) {
+        showLoading.setValue(true);
         List<WorkflowTypeMenu> menuList = filterSettings.getOptionsListAtSelectedFilterIndex();
         WorkflowTypeMenu menu = menuList.get(position);
 
@@ -340,7 +342,7 @@ public class WorkflowViewModel extends ViewModel {
                 filterSettings.updateRightDrawerOptionListWithSelected(menu, false); //TEST
                 updateSelectedMenuItem(menu);
 //                filterSettings.updateFilterListItemSelected(menu);
-
+                showLoading.setValue(false);
                 return;
             }
             loadWorkflowsByType(menu, lifecycleOwner);
@@ -356,13 +358,14 @@ public class WorkflowViewModel extends ViewModel {
 //            filterSettings.updateFilterListItemSelected(menu);
 
 
+            // Allowing single selection on the UI for this list.
             invalidateDrawerOptionsList.setValue(true);
-
 
             liveWorkflows.removeObservers(lifecycleOwner);
             applyFilters(filterSettings);
             int workflowTypeId = menu.getWorkflowTypeId();
             findDynamicFieldsBy(workflowTypeId);
+
             return;
         }
 
@@ -370,13 +373,10 @@ public class WorkflowViewModel extends ViewModel {
         updateSelectedMenuItem(menu);
         filterSettings.updateFilterListItemSelected(menu);
 
-        // TODO update UI in FILTER LIST AFTER updating rightdraweroptionlist
-
         FieldData fieldData = filterSettings.getFieldDataFromSelectedOptionList();
         FieldConfig fieldConfig = filterSettings.getFieldConfigFromDrawerOptionList();
         String values = filterSettings.getAllValuesSelectedInOptionList();
 
-        // TODO get all items that were selected in all dynamically generated fields.
         String metaString = filterSettings.getAllItemIdsSelectedAsString();
         //int[] idValuesArray = filterSettings.arrayOfIdsSelected();
 
@@ -405,10 +405,9 @@ public class WorkflowViewModel extends ViewModel {
                             metaString)
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe( workflowResponseDb -> {
-                        Log.d(TAG, "handleOptionSelected: here");
-                    }, throwable -> {
-                        Log.d(TAG, "handleOptionSelected: " + throwable.getMessage());
+                    .subscribe(responseDb -> workflowRepository.workflowDbSuccess(responseDb),
+                            throwable -> {
+                                Log.d(TAG, "handleOptionSelected: " + throwable.getMessage());
                     });
 
             disposables.add(disposable);
@@ -468,16 +467,19 @@ public class WorkflowViewModel extends ViewModel {
         for (int i = 0; i < fields.size(); i++) {
             FormFieldsByWorkflowType field = fields.get(i);
             if (!field.isShowForm()) {
+                showLoading.setValue(false);
                 continue;
             }
 
             FieldConfig fieldConfig = field.getFieldConfigObject();
             if (fieldConfig.isPrecalculated()) {
+                showLoading.setValue(false);
                 continue;
             }
 
             buildField(field);
         }
+        showLoading.setValue(false);
     }
 
     private void buildField(FormFieldsByWorkflowType field) {
@@ -559,7 +561,7 @@ public class WorkflowViewModel extends ViewModel {
         // It is not a base list of type system user and we have other custom fields at this point.
 
         int listId = fieldConfig.getListInfo().getId();
-        int customFieldId = field.getId();
+        int customFieldId = field.getFieldId();
         String customLabel = field.getFieldName();
         int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
 
@@ -597,7 +599,6 @@ public class WorkflowViewModel extends ViewModel {
                     }
                     showListField(listField, fieldConfig);
                 }, throwable -> {
-                    showLoading.setValue(false);
                     Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
                 });
 
@@ -681,9 +682,6 @@ public class WorkflowViewModel extends ViewModel {
         // TODO update FILTERSETTINGS FILTER LIST WITH FIELDS
 
         filterSettings.updateFilterListWithDynamicField(listField, fieldData, fieldConfig);
-
-
-        showLoading.setValue(false);
         formSettings.addFieldDataItem(fieldData);
     }
 

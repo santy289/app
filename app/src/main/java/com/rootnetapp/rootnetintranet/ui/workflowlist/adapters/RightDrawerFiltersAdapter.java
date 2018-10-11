@@ -46,13 +46,6 @@ public class RightDrawerFiltersAdapter extends BaseAdapter {
         return 0;
     }
 
-//    @Override
-//    public boolean isEnabled(int position) {
-//        WorkflowTypeMenu menu = menus.get(position);
-//        int type =  menu.getRowType();
-//        return type == TYPE || type == NO_SELECTION;
-//    }
-
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         WorkflowTypeMenu menu = menus.get(position);
@@ -73,8 +66,10 @@ public class RightDrawerFiltersAdapter extends BaseAdapter {
                     String subtitle = menu.getSubTitle();
                     if (TextUtils.isEmpty(subtitle)) {
                         textView.setText(resources.getString(R.string.no_selection));
+                        textView.setTextColor(resources.getColor(R.color.dark_gray));
                     } else {
                         textView.setText(subtitle);
+                        textView.setTextColor(resources.getColor(R.color.colorAccent));
                     }
                     break;
                 }
@@ -84,7 +79,7 @@ public class RightDrawerFiltersAdapter extends BaseAdapter {
                 String subtitle = menu.getSubTitle();
                 if (TextUtils.isEmpty(subtitle)) {
                     textView.setText(resources.getString(R.string.no_selection));
-                    textView.setTextColor(resources.getColor(R.color.black));
+                    textView.setTextColor(resources.getColor(R.color.dark_gray));
                 } else {
                     textView.setText(menu.getSubTitle());
                     textView.setTextColor(resources.getColor(R.color.colorAccent));

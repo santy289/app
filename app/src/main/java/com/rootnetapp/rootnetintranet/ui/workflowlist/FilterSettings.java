@@ -174,10 +174,6 @@ public class FilterSettings {
 
         }
 
-        // TODO check if we need this block of code again, it was used only to comply with getMeta string
-        // from FormSettings. The idea was to generate the same input "some, some2, some3" using
-        // commas in between the values but now we are generating our own String using getAllItemSelectedasString()
-        // function. Remove this if we don't need it.
         List<WorkflowTypeMenu> optionListItems = drawerOptionList.getOptionItems();
         WorkflowTypeMenu optionMenu;
         ArrayList<String> stringOfOptionsSelected = drawerOptionList.getStringOptionsSelected();
@@ -304,6 +300,7 @@ public class FilterSettings {
                 if (i > 1) {
                     responseString.append(",");
                 }
+                // Builds single values "1":2
                 fieldId = rightDrawerOptionsList.keyAt(i);
                 responseString
                         .append("\"")
@@ -322,6 +319,7 @@ public class FilterSettings {
                     .append("\":")
                     .append("[");
             selectedSize2 = optionSelectedIds.size();
+            // Builds array [item, item2, ...]
             for (int j = 0; j < optionSelectedIds.size(); j++) {
                 idOptionSelected = optionSelectedIds.get(j);
                 responseString.append(idOptionSelected);
@@ -332,7 +330,12 @@ public class FilterSettings {
             responseString.append("]");
         }
         responseString.append("}");
-        return responseString.toString();
+
+        String result = responseString.toString();
+        if (result.equals("{}")) {
+            return "";
+        }
+        return result;
     }
 
 

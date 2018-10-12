@@ -51,9 +51,12 @@ public class MainActivityViewModel extends ViewModel {
     protected MutableLiveData<List<WorkflowTypeMenu>> setRightDrawerFilterList;
     protected MutableLiveData<OptionsList> setRightDrawerOptionList;
 
+    protected MutableLiveData<int[]> toggleRadioButton;
+
     public MutableLiveData<Integer> messageContainerToWorkflowList;
     public MutableLiveData<Integer> messageOptionSelectedToWorkflowList;
     public MutableLiveData<Boolean> messageBackActionToWorkflowList;
+    public MutableLiveData<Boolean> messageInitSortByToWorkflowList;
     public MutableLiveData<Boolean> invalidateOptionsList;
 
     List<WorkflowTypeMenu> filtersList;
@@ -75,6 +78,8 @@ public class MainActivityViewModel extends ViewModel {
         this.messageBackActionToWorkflowList = new MutableLiveData<>();
         this.messageOptionSelectedToWorkflowList = new MutableLiveData<>();
         this.invalidateOptionsList = new MutableLiveData<>();
+        this.messageInitSortByToWorkflowList = new MutableLiveData<>();
+        this.toggleRadioButton = new MutableLiveData<>();
     }
 
     @Override
@@ -164,6 +169,10 @@ public class MainActivityViewModel extends ViewModel {
     protected void onCreateOptionsMenu() {
         int defaultMenu = R.menu.menu_search;
 
+    }
+    
+    public void receiveMessageToggleRadioButton(int[] message) {
+        
     }
 
     // Called from workflow list.

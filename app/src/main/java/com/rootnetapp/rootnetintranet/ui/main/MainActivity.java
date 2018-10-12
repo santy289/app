@@ -26,13 +26,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
@@ -49,6 +49,7 @@ import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerFragment;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOptionsAdapter;
@@ -58,6 +59,19 @@ import org.w3c.dom.Text;
 import java.util.List;
 
 import javax.inject.Inject;
+
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.CHECK;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.INDEX_CHECK;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.INDEX_TYPE;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.RADIO_CLEAR_ALL;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.RADIO_CREATED_DATE;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.RADIO_NUMBER;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.RADIO_UPDATED_DATE;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_CREATED_DATE;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_NUMBER;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_PENDING;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_STATUS;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_UPDATED_DATE;
 
 public class MainActivity extends AppCompatActivity
         implements MainActivityInterface, PopupMenu.OnMenuItemClickListener {
@@ -100,6 +114,7 @@ public class MainActivity extends AppCompatActivity
 
         showFragment(TimelineFragment.newInstance(this), false);
         startBackgroundWorkflowRequest();
+        setFilterBoxListeners();
     }
 
     @Override
@@ -234,12 +249,14 @@ public class MainActivity extends AppCompatActivity
     boolean sortingActive = false;
     private void showSortByViews(boolean show) {
         if (show) {
+            mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.sorting));
             mainBinding.rightDrawer.sortOptions.sortingLayout.setVisibility(View.VISIBLE);
             mainBinding.rightDrawer.rightDrawerFilters.setVisibility(View.GONE);
             mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.GONE);
             mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
             sortingActive = true;
         } else {
+            mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.filters));
             mainBinding.rightDrawer.sortOptions.sortingLayout.setVisibility(View.GONE);
             mainBinding.rightDrawer.rightDrawerFilters.setVisibility(View.VISIBLE);
             mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.VISIBLE);
@@ -248,7 +265,93 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void toggleRadioButtonFilter(int radioType, boolean check) {
+        switch (radioType) {
+            case RADIO_NUMBER:
+                mainBinding.rightDrawer.sortOptions.chbxWorkflownumber.setChecked(check);
+                break;
+            case RADIO_CREATED_DATE:
+                mainBinding.rightDrawer.sortOptions.chbxCreatedate.setChecked(check);
+                break;
+            case RADIO_UPDATED_DATE:
+                mainBinding.rightDrawer.sortOptions.chbxUpdatedate.setChecked(check);
+                break;
+            case RADIO_CLEAR_ALL:
+                mainBinding.rightDrawer.sortOptions.radioGroupSortBy.clearCheck();
+            default:
+                Log.d(TAG, "toggleRadioButtonFilter: Trying to perform toggle on unknown radio button");
+                break;
+        }
+    }
 
+
+
+    // TODO refactor name to setDrawerSortBy
+    @Deprecated
+    private void setFilterBoxListeners() {
+        // radio button listeners
+        mainBinding.rightDrawer.sortOptions.chbxWorkflownumber.setOnClickListener(this::onRadioButtonClicked);
+        mainBinding.rightDrawer.sortOptions.chbxCreatedate.setOnClickListener(this::onRadioButtonClicked);
+        mainBinding.rightDrawer.sortOptions.chbxUpdatedate.setOnClickListener(this::onRadioButtonClicked);
+
+        // ascending / descending listeners
+
+        mainBinding.rightDrawer.sortOptions.swchWorkflownumber.setOnClickListener(view -> {
+            Switch aSwitch = ((Switch)view);
+            boolean isChecked = aSwitch.isChecked();
+//            workflowViewModel.handleSwitchOnClick(RADIO_NUMBER, Sort.sortType.BYNUMBER, isChecked);
+            setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchWorkflownumber, isChecked);
+            //prepareWorkflowListWithFilters();
+        });
+        mainBinding.rightDrawer.sortOptions.swchCreatedate.setOnClickListener(view -> {
+            Switch aSwitch = ((Switch)view);
+            boolean isChecked = aSwitch.isChecked();
+//            workflowViewModel.handleSwitchOnClick(RADIO_CREATED_DATE, Sort.sortType.BYCREATE, isChecked);
+            setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchCreatedate, isChecked);
+            //prepareWorkflowListWithFilters();
+        });
+        mainBinding.rightDrawer.sortOptions.swchUpdatedate.setOnClickListener(view -> {
+            Switch aSwitch = ((Switch)view);
+            boolean isChecked = aSwitch.isChecked();
+//            workflowViewModel.handleSwitchOnClick(RADIO_UPDATED_DATE, Sort.sortType.BYUPDATE, isChecked);
+            setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchUpdatedate, isChecked);
+            //prepareWorkflowListWithFilters();
+        });
+    }
+
+    private void toggleAscendingDescendingSwitch(int switchType, boolean check) {
+        switch (switchType) {
+            case SWITCH_NUMBER:
+                mainBinding.rightDrawer.sortOptions.swchWorkflownumber.setChecked(check);
+                setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchWorkflownumber, check);
+                break;
+            case SWITCH_CREATED_DATE:
+                mainBinding.rightDrawer.sortOptions.swchCreatedate.setChecked(check);
+                setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchCreatedate, check);
+                break;
+            case SWITCH_UPDATED_DATE:
+                mainBinding.rightDrawer.sortOptions.swchUpdatedate.setChecked(check);
+                setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchUpdatedate, check);
+                break;
+            default:
+                Log.d(TAG, "toggleAscendingDescendingSwitch: Trying to perform a toggle and there is no related Switch object");
+                break;
+        }
+    }
+
+    private void onRadioButtonClicked(View view) {
+        boolean checked = ((RadioButton) view).isChecked();
+//        workflowViewModel.handleRadioButtonClicked(checked, view.getId());
+//        prepareWorkflowListWithFilters();
+    }
+
+    private void setSwitchAscendingDescendingText(Switch switchType, boolean check) {
+        if (check) {
+            switchType.setText(getString(R.string.ascending));
+        } else {
+            switchType.setText(getString(R.string.descending));
+        }
+    }
 
     private void startBackgroundWorkflowRequest() {
         Intent MyIntentService = new Intent(this, WorkflowManagerService.class);
@@ -445,6 +548,14 @@ public class MainActivity extends AppCompatActivity
 
         });
 
+        final Observer<int[]> toggleRadioButtonObserver = (toggle -> {
+            if (toggle == null || toggle.length < 1) {
+                return;
+            }
+            boolean check = toggle[INDEX_CHECK] == CHECK;
+            toggleRadioButtonFilter(toggle[INDEX_TYPE], check);
+        });
+
         final Observer<String[]> setImgInViewObserver = (this::setImageIn);
         final Observer<Boolean> collapseMenuObserver = (this::collapseActionView);
         final Observer<Boolean> hideKeyboardObserver = (this::hideKeyboard);
@@ -457,6 +568,7 @@ public class MainActivity extends AppCompatActivity
         viewModel.setRightDrawerFilterList.observe(this, (this::setRightDrawerFilters));
         viewModel.setRightDrawerOptionList.observe(this, (this::setRightDrawerOptions));
         viewModel.invalidateOptionsList.observe(this, invalidate -> invalidateOptionList());
+        viewModel.toggleRadioButton.observe(this, toggleRadioButtonObserver);
     }
 
     private void subscribeForLogin() {

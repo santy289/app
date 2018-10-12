@@ -52,27 +52,25 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     private WorkflowFiltersMenuBinding workflowFiltersMenuBinding;
     private MainActivityInterface mainActivityInterface;
     private WorkflowExpandableAdapter adapter;
-    private String[] types;
-    private int[] typeIds;
     private BottomSheetBehavior bottomSheetBehavior;
 
 
 
-    protected static final int SWITCH_NUMBER = 500;
-    protected static final int SWITCH_CREATED_DATE = 501;
-    protected static final int SWITCH_UPDATED_DATE = 502;
-    protected static final int RADIO_NUMBER = 600;
-    protected static final int RADIO_CREATED_DATE = 601;
-    protected static final int RADIO_UPDATED_DATE = 602;
-    protected static final int RADIO_CLEAR_ALL = 603;
-    protected static final int SWITCH_PENDING = 700;
-    protected static final int SWITCH_STATUS = 701;
-    protected static final int SELECT_TYPE = 702;
+    public static final int SWITCH_NUMBER = 500;
+    public static final int SWITCH_CREATED_DATE = 501;
+    public static final int SWITCH_UPDATED_DATE = 502;
+    public static final int RADIO_NUMBER = 600;
+    public static final int RADIO_CREATED_DATE = 601;
+    public static final int RADIO_UPDATED_DATE = 602;
+    public static final int RADIO_CLEAR_ALL = 603;
+    public static final int SWITCH_PENDING = 700;
+    public static final int SWITCH_STATUS = 701;
+    public static final int SELECT_TYPE = 702;
 
-    protected static final int CHECK = 11;
-    protected static final int UNCHECK = 10;
-    protected static final int INDEX_TYPE = 0;
-    protected static final int INDEX_CHECK = 1;
+    public static final int CHECK = 11;
+    public static final int UNCHECK = 10;
+    public static final int INDEX_TYPE = 0;
+    public static final int INDEX_CHECK = 1;
 
     MainActivityViewModel mainViewModel;
 
@@ -314,11 +312,22 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.rightDrawerFilterMenus.observe(this, this::createFilterListRightDrawer);
         workflowViewModel.rightDrawerOptionMenus.observe(this, this::createOptionListRightDrawer);
         workflowViewModel.invalidateDrawerOptionsList.observe(this, this::handleInvalidateOptionsList);
+        workflowViewModel.messageMainToggleRadioButton.observe(this, this::handleMessageMainToggleRadioButton);
 
         // MainActivity's ViewModel
         mainViewModel.messageContainerToWorkflowList.observe(this, this::handleRightDrawerFilterClick);
         mainViewModel.messageBackActionToWorkflowList.observe(this, this::handleBackAction);
         mainViewModel.messageOptionSelectedToWorkflowList.observe(this, this::handleRightDrawerOptionSelectedClick);
+        mainViewModel.messageInitSortByToWorkflowList.observe(this, this::handleInitSortBy);
+
+    }
+
+    private void handleMessageMainToggleRadioButton(int[] message) {
+        mainViewModel.receiveMessageToggleRadioButton(message);
+    }
+
+    private void handleInitSortBy(Boolean init) {
+        workflowViewModel.initSortBy();
     }
 
     private void handleRightDrawerOptionSelectedClick(int position) {
@@ -357,8 +366,11 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         popupWindow.setWidth((int) getResources().getDimension(R.dimen.filters_width));
         popupWindow.setHeight((int) getResources().getDimension(R.dimen.filters_height));
         popupWindow.setContentView(workflowFiltersMenuBinding.getRoot());
-        workflowViewModel.initSortBy();
-        workflowViewModel.initFilters();
+
+
+        // TODO disabled not needed anymore only when debugging, erase after development.
+//        workflowViewModel.initSortBy();
+//        workflowViewModel.initFilters();
         setFilterBoxListeners();
 
         return popupWindow;

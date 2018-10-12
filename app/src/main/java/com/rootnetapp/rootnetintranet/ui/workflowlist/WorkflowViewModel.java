@@ -84,6 +84,7 @@ public class WorkflowViewModel extends ViewModel {
 
     // Sort By
     protected MutableLiveData<int[]> messageMainToggleRadioButton;
+    protected MutableLiveData<int[]> messageMainToggleSwitch;
 //    protected MutableLiveData<int[]>
 
     // MOVED TO FILTERSETTINGS
@@ -121,6 +122,7 @@ public class WorkflowViewModel extends ViewModel {
         invalidateDrawerOptionsList = new MutableLiveData<>();
         formSettings = new FormSettings();
         messageMainToggleRadioButton = new MutableLiveData<>();
+        messageMainToggleSwitch = new MutableLiveData<>();
     }
 
     @Override
@@ -174,7 +176,7 @@ public class WorkflowViewModel extends ViewModel {
     protected void iniRightDrawerFilters() {
         getCategories(categoryId);
         initRightDrawerFilterList();
-//        initSortBy(); // TODO put back
+        initSortBy();
     }
 
     private void initRightDrawerFilterList() {
@@ -1232,12 +1234,12 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     private void toggleSwitch(int viewSwitchType, int viewIsCheckType) {
-        int[] toggleRadio = new int[2];
-        toggleRadio[WorkflowFragment.INDEX_TYPE] = viewSwitchType;
-        toggleRadio[WorkflowFragment.INDEX_CHECK] = viewIsCheckType;
-
-
-        toggleSwitch.setValue(toggleRadio);
+        int[] toggleSwitch = new int[2];
+        toggleSwitch[WorkflowFragment.INDEX_TYPE] = viewSwitchType;
+        toggleSwitch[WorkflowFragment.INDEX_CHECK] = viewIsCheckType;
+        
+        messageMainToggleSwitch.setValue(toggleSwitch);
+//        this.toggleSwitch.setValue(toggleSwitch);
 
     }
 

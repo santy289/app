@@ -51,7 +51,9 @@ public class MainActivityViewModel extends ViewModel {
     protected MutableLiveData<List<WorkflowTypeMenu>> setRightDrawerFilterList;
     protected MutableLiveData<OptionsList> setRightDrawerOptionList;
 
-    protected MutableLiveData<int[]> toggleRadioButton;
+    // Receive message from Workflow List
+    protected MutableLiveData<int[]> receiveMessageToggleRadioButton;
+    protected MutableLiveData<int[]> receiveMessageToggleSwitch;
 
     public MutableLiveData<Integer> messageContainerToWorkflowList;
     public MutableLiveData<Integer> messageOptionSelectedToWorkflowList;
@@ -79,7 +81,8 @@ public class MainActivityViewModel extends ViewModel {
         this.messageOptionSelectedToWorkflowList = new MutableLiveData<>();
         this.invalidateOptionsList = new MutableLiveData<>();
         this.messageInitSortByToWorkflowList = new MutableLiveData<>();
-        this.toggleRadioButton = new MutableLiveData<>();
+        this.receiveMessageToggleRadioButton = new MutableLiveData<>();
+        this.receiveMessageToggleSwitch = new MutableLiveData<>();
     }
 
     @Override
@@ -172,7 +175,11 @@ public class MainActivityViewModel extends ViewModel {
     }
     
     public void receiveMessageToggleRadioButton(int[] message) {
-        
+        receiveMessageToggleRadioButton.setValue(message);
+    }
+
+    public void receiveMessageToggleSwitch(int[] message) {
+        receiveMessageToggleSwitch.setValue(message);
     }
 
     // Called from workflow list.

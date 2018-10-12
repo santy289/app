@@ -313,6 +313,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.rightDrawerOptionMenus.observe(this, this::createOptionListRightDrawer);
         workflowViewModel.invalidateDrawerOptionsList.observe(this, this::handleInvalidateOptionsList);
         workflowViewModel.messageMainToggleRadioButton.observe(this, this::handleMessageMainToggleRadioButton);
+        workflowViewModel.messageMainToggleSwitch.observe(this, this::handleMessageMainToggleSwitch);
 
         // MainActivity's ViewModel
         mainViewModel.messageContainerToWorkflowList.observe(this, this::handleRightDrawerFilterClick);
@@ -320,6 +321,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         mainViewModel.messageOptionSelectedToWorkflowList.observe(this, this::handleRightDrawerOptionSelectedClick);
         mainViewModel.messageInitSortByToWorkflowList.observe(this, this::handleInitSortBy);
 
+    }
+
+    private void handleMessageMainToggleSwitch(int[] message) {
+        mainViewModel.receiveMessageToggleSwitch(message);
     }
 
     private void handleMessageMainToggleRadioButton(int[] message) {

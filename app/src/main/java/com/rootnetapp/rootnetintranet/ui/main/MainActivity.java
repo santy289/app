@@ -241,7 +241,8 @@ public class MainActivity extends AppCompatActivity
             viewModel.sendRightDrawerBackButtonClick();
         });
         mainBinding.rightDrawer.rightDrawerSort.setOnClickListener(view -> {
-            // TODO tell WorkflowViewModel to show next List
+            // TODO tell WorkflowViewModel to show next Sort By Views
+            // right now main activity is doing it on its own, it is better that the viewModel does this.
             showSortByViews(true);
         });
     }
@@ -556,6 +557,14 @@ public class MainActivity extends AppCompatActivity
             toggleRadioButtonFilter(toggle[INDEX_TYPE], check);
         });
 
+        final Observer<int[]> toggleSwitchObserver = (toggle -> {
+            if (toggle == null || toggle.length < 1) {
+                return;
+            }
+            boolean check = toggle[INDEX_CHECK] == CHECK;
+            toggleAscendingDescendingSwitch(toggle[INDEX_TYPE], check);
+        });
+
         final Observer<String[]> setImgInViewObserver = (this::setImageIn);
         final Observer<Boolean> collapseMenuObserver = (this::collapseActionView);
         final Observer<Boolean> hideKeyboardObserver = (this::hideKeyboard);
@@ -568,7 +577,8 @@ public class MainActivity extends AppCompatActivity
         viewModel.setRightDrawerFilterList.observe(this, (this::setRightDrawerFilters));
         viewModel.setRightDrawerOptionList.observe(this, (this::setRightDrawerOptions));
         viewModel.invalidateOptionsList.observe(this, invalidate -> invalidateOptionList());
-        viewModel.toggleRadioButton.observe(this, toggleRadioButtonObserver);
+        viewModel.receiveMessageToggleRadioButton.observe(this, toggleRadioButtonObserver);
+        viewModel.receiveMessageToggleSwitch.observe(this, toggleSwitchObserver);
     }
 
     private void subscribeForLogin() {

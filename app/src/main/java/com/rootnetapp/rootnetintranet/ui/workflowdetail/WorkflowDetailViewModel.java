@@ -40,6 +40,12 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.repository = workflowDetailRepository;
     }
 
+    protected void initDetails() {
+        
+    }
+
+
+
     public void getWorkflowType(String auth, int typeId) {
         repository.getWorkflowType(auth, typeId).subscribe(this::onTypeSuccess, this::onFailure);
     }

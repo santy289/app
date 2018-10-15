@@ -37,8 +37,6 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

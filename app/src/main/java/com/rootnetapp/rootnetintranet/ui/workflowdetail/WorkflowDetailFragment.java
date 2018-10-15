@@ -106,7 +106,8 @@ public class WorkflowDetailFragment extends Fragment {
         token = "Bearer "+ prefs.getString("token","");
         //Utils.showLoading(getContext());
         binding.tvWorkflowproject.setText(item.getTitle());
-        binding.tvWorkflowid.setText(binding.tvWorkflowid.getText()+" "+item.getWorkflowTypeKey());
+//        binding.tvWorkflowid.setText(binding.tvWorkflowid.getText()+" "+item.getWorkflowTypeKey());
+        binding.detailWorkflowId.setText(item.getWorkflowTypeKey());
         binding.recSteps.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recApprovers.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recInfo.setLayoutManager(new GridLayoutManager(getContext(), 2));

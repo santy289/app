@@ -9,10 +9,8 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.models.responses.createworkflow.Workflow;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.FilterSettings;
-import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel;
 
 import java.util.List;
 

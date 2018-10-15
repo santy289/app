@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist.adapters;
 
 import android.content.res.Resources;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,7 +71,11 @@ public class RightDrawerOptionsAdapter extends BaseAdapter {
                     checkImage.setVisibility(View.GONE);
                     textView.setTextColor(resources.getColor(R.color.black));
                 }
-                textView.setText(menu.getLabel());
+                if (TextUtils.isEmpty(menu.getLabel())) {
+                    textView.setText(resources.getString(menu.getResLabel()));
+                } else {
+                    textView.setText(menu.getLabel());
+                }
                 break;
             case CATEGORY:
                 convertView = inflater.inflate(R.layout.right_drawer_filter_item, null);

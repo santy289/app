@@ -5,9 +5,12 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.annotation.IntegerRes;
+import android.support.annotation.StringRes;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -26,10 +29,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -48,15 +50,13 @@ import com.rootnetapp.rootnetintranet.ui.main.adapters.SearchAdapter;
 import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerFragment;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOptionsAdapter;
 
-import org.w3c.dom.Text;
-
 import java.util.List;
+import java.util.Observable;
 
 import javax.inject.Inject;
 
@@ -82,7 +82,6 @@ public class MainActivity extends AppCompatActivity
     private ActivityMainBinding mainBinding;
     private FragmentManager fragmentManager;
     private SharedPreferences sharedPref;
-    private int id;
     private MenuItem mSearch = null;
 
     RightDrawerOptionsAdapter rightDrawerOptionsAdapter;
@@ -240,10 +239,16 @@ public class MainActivity extends AppCompatActivity
             }
             viewModel.sendRightDrawerBackButtonClick();
         });
+
         mainBinding.rightDrawer.rightDrawerSort.setOnClickListener(view -> {
             // TODO tell WorkflowViewModel to show next Sort By Views
             // right now main activity is doing it on its own, it is better that the viewModel does this.
             showSortByViews(true);
+        });
+
+        // Using the base field filter.
+        mainBinding.rightDrawer.rightDrawerBaseFilters.setOnClickListener(view -> {
+            viewModel.sendBaseFiltersClicked();
         });
     }
 
@@ -255,6 +260,7 @@ public class MainActivity extends AppCompatActivity
             mainBinding.rightDrawer.rightDrawerFilters.setVisibility(View.GONE);
             mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.GONE);
             mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
+            hideBaseFilters(true);
             sortingActive = true;
         } else {
             mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.filters));
@@ -262,7 +268,19 @@ public class MainActivity extends AppCompatActivity
             mainBinding.rightDrawer.rightDrawerFilters.setVisibility(View.VISIBLE);
             mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.VISIBLE);
             mainBinding.rightDrawer.drawerBackButton.setVisibility(View.GONE);
+            hideBaseFilters(false);
             sortingActive = false;
+        }
+    }
+
+    private void updateSortFieldSelection(@StringRes int resLabel) {
+        TextView textView = mainBinding.rightDrawer.rightDrawerSortSelection;
+        if (resLabel == R.string.no_selection) {
+            textView.setText(getString(R.string.no_selection));
+            textView.setTextColor(getResources().getColor(R.color.dark_gray));
+        } else {
+            textView.setText(getString(resLabel));
+            textView.setTextColor(getResources().getColor(R.color.colorAccent));
         }
     }
 
@@ -300,23 +318,20 @@ public class MainActivity extends AppCompatActivity
         mainBinding.rightDrawer.sortOptions.swchWorkflownumber.setOnClickListener(view -> {
             Switch aSwitch = ((Switch)view);
             boolean isChecked = aSwitch.isChecked();
-//            workflowViewModel.handleSwitchOnClick(RADIO_NUMBER, Sort.sortType.BYNUMBER, isChecked);
+            viewModel.handleSwitchOnClick(RADIO_NUMBER, Sort.sortType.BYNUMBER, isChecked);
             setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchWorkflownumber, isChecked);
-            //prepareWorkflowListWithFilters();
         });
         mainBinding.rightDrawer.sortOptions.swchCreatedate.setOnClickListener(view -> {
             Switch aSwitch = ((Switch)view);
             boolean isChecked = aSwitch.isChecked();
-//            workflowViewModel.handleSwitchOnClick(RADIO_CREATED_DATE, Sort.sortType.BYCREATE, isChecked);
+            viewModel.handleSwitchOnClick(RADIO_CREATED_DATE, Sort.sortType.BYCREATE, isChecked);
             setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchCreatedate, isChecked);
-            //prepareWorkflowListWithFilters();
         });
         mainBinding.rightDrawer.sortOptions.swchUpdatedate.setOnClickListener(view -> {
             Switch aSwitch = ((Switch)view);
             boolean isChecked = aSwitch.isChecked();
-//            workflowViewModel.handleSwitchOnClick(RADIO_UPDATED_DATE, Sort.sortType.BYUPDATE, isChecked);
+            viewModel.handleSwitchOnClick(RADIO_UPDATED_DATE, Sort.sortType.BYUPDATE, isChecked);
             setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchUpdatedate, isChecked);
-            //prepareWorkflowListWithFilters();
         });
     }
 
@@ -342,8 +357,7 @@ public class MainActivity extends AppCompatActivity
 
     private void onRadioButtonClicked(View view) {
         boolean checked = ((RadioButton) view).isChecked();
-//        workflowViewModel.handleRadioButtonClicked(checked, view.getId());
-//        prepareWorkflowListWithFilters();
+        viewModel.handleRadioButtonClicked(checked, view.getId());
     }
 
     private void setSwitchAscendingDescendingText(Switch switchType, boolean check) {
@@ -476,7 +490,7 @@ public class MainActivity extends AppCompatActivity
         mainBinding.rightDrawer.drawerBackButton.setVisibility(View.GONE);
         mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.filters));
         hideSortingViews(false);
-
+        hideBaseFilters(false);
         LayoutInflater inflater = LayoutInflater.from(this);
         rightDrawerFiltersAdapter = new RightDrawerFiltersAdapter(inflater, menus);
 
@@ -490,21 +504,57 @@ public class MainActivity extends AppCompatActivity
     // Populates Options List
     private void setRightDrawerOptions(OptionsList optionsList) {
         if (optionsList == null) {
-            Log.d(TAG, "setRightDrawerOptions: Not able to set Drawer Options");
+            Log.d(TAG, "setRightDrawerOptions: Not able to set Drawer Options. OptionList is NULL");
+            return;
         }
-        hideSortingViews(true);
-        mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
-        mainBinding.rightDrawer.rightDrawerTitle.setText(optionsList.titleLabel);
-        LayoutInflater inflater = LayoutInflater.from(this);
-        rightDrawerOptionsAdapter = new RightDrawerOptionsAdapter(inflater, optionsList.optionsList);
-        mainBinding.rightDrawer.rightDrawerFilters.setOnItemClickListener((parent, view, position, id) -> {
-            // Clicks on Option List
-            updateViewSelected(view);
-            viewModel.sendOptionSelectedToWorkflowList(position);
 
-        });
+        prepareUIForOptionList(optionsList.titleLabel);
+        AdapterView.OnItemClickListener listener = (parent, view, position, id) -> {
+            // Clicks on Option List
+            updateViewSelected(view); // adds check mark UI.
+            viewModel.sendOptionSelectedToWorkflowList(position);
+        };
+        setRightDrawerOptionsAdapter(optionsList.optionsList, listener);
+    }
+
+    // Populates Options List for Base Filters.
+    private void setRightDrawerBaseFilters(OptionsList optionsList) {
+        if (optionsList == null) {
+            Log.d(TAG, "setRightDrawerOptions: Not able to set Drawer Options. OptionList is NULL");
+            return;
+        }
+
+        if (TextUtils.isEmpty(optionsList.titleLabel)) {
+            prepareUIForOptionList(getString(optionsList.titleLabelRes));
+        } else {
+            prepareUIForOptionList(optionsList.titleLabel);
+        }
+
+        AdapterView.OnItemClickListener listener = (parent, view, position, id) -> {
+            // Clicks on Option List
+            viewModel.sendBaseFilterPositionClicked(position);
+        };
+        setRightDrawerOptionsAdapter(optionsList.optionsList, listener);
+    }
+
+    private void setRightDrawerOptionsAdapter(List<WorkflowTypeMenu> optionsList, AdapterView.OnItemClickListener listener) {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        rightDrawerOptionsAdapter = new RightDrawerOptionsAdapter(inflater, optionsList);
+        mainBinding.rightDrawer.rightDrawerFilters.setOnItemClickListener(listener);
         mainBinding.rightDrawer.rightDrawerFilters.setAdapter(rightDrawerOptionsAdapter);
     }
+
+    private void prepareUIForOptionList(String title) {
+        hideSortingViews(true);
+        hideBaseFilters(true);
+        mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
+        mainBinding.rightDrawer.rightDrawerTitle.setText(title);
+    }
+
+    private void handleUpdateBaseFilterSelectionUpdateWith(@StringRes int resLabel) {
+        mainBinding.rightDrawer.rightDrawerBaseSubtitle.setText(resLabel);
+    }
+
 
     private void invalidateOptionList() {
         if (rightDrawerOptionsAdapter == null) {
@@ -523,6 +573,14 @@ public class MainActivity extends AppCompatActivity
         } else {
             checkMark.setVisibility(View.VISIBLE);
             title.setTextColor(getResources().getColor(R.color.colorAccent));
+        }
+    }
+
+    private void hideBaseFilters(boolean hide) {
+        if (hide) {
+            mainBinding.rightDrawer.rightDrawerBaseFilters.setVisibility(View.GONE);
+        } else {
+            mainBinding.rightDrawer.rightDrawerBaseFilters.setVisibility(View.VISIBLE);
         }
     }
 
@@ -579,6 +637,9 @@ public class MainActivity extends AppCompatActivity
         viewModel.invalidateOptionsList.observe(this, invalidate -> invalidateOptionList());
         viewModel.receiveMessageToggleRadioButton.observe(this, toggleRadioButtonObserver);
         viewModel.receiveMessageToggleSwitch.observe(this, toggleSwitchObserver);
+        viewModel.receiveMessageUpdateSortSelected.observe(this, this::updateSortFieldSelection);
+        viewModel.receiveMessageCreateBaseFiltersAdapter.observe(this, this::setRightDrawerBaseFilters);
+        viewModel.receiveMessageBaseFilterSelected.observe(this, this::handleUpdateBaseFilterSelectionUpdateWith);
     }
 
     private void subscribeForLogin() {

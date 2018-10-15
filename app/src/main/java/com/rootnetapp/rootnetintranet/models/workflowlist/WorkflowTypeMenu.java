@@ -1,5 +1,7 @@
 package com.rootnetapp.rootnetintranet.models.workflowlist;
 
+import android.support.annotation.StringRes;
+
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
 
@@ -15,6 +17,14 @@ public class WorkflowTypeMenu extends ListFieldItemMeta {
     public WorkflowTypeMenu(int id, String label, int rowType, int workflowTypeId) {
         this.id = id;
         this.label = label;
+        this.rowType = rowType;
+        this.workflowTypeId = workflowTypeId;
+        this.selected = false;
+    }
+
+    public WorkflowTypeMenu(int id, @StringRes int resString, int rowType, int workflowTypeId) {
+        this.id = id;
+        this.resLabel = resString;
         this.rowType = rowType;
         this.workflowTypeId = workflowTypeId;
         this.selected = false;

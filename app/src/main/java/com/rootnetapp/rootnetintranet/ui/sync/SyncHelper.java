@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.sync;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.BuildConfig;
@@ -31,6 +32,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -212,10 +214,6 @@ public class SyncHelper {
         disposables.add(disposable);
     }
 
-    private void categoryIdSuccess(int categoryId) {
-
-    }
-
     private void getWorkflowDbSuccess(WorkflowResponseDb workflowsResponse) {
         workflowDbs.addAll(workflowsResponse.getList());
         Disposable disposable = Observable.fromCallable(() -> {
@@ -263,18 +261,6 @@ public class SyncHelper {
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe(this::onUsersSuccess, throwable -> {
                     Log.d(TAG, "getData: error " + throwable.getMessage() );
-                    handleNetworkError(throwable);
-                });
-        disposables.add(disposable);
-    }
-
-    private void getWorkflowTypes(String token) {
-        Disposable disposable = apiInterface
-                .getWorkflowTypes(token)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onWorkflowTypesSuccess, throwable -> {
-                    Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
                     handleNetworkError(throwable);
                 });
         disposables.add(disposable);

@@ -30,6 +30,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowBinding;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowFiltersMenuBinding;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
+import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.WorkFlowCreateFragment;
@@ -314,13 +315,53 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.invalidateDrawerOptionsList.observe(this, this::handleInvalidateOptionsList);
         workflowViewModel.messageMainToggleRadioButton.observe(this, this::handleMessageMainToggleRadioButton);
         workflowViewModel.messageMainToggleSwitch.observe(this, this::handleMessageMainToggleSwitch);
+        workflowViewModel.messageMainUpdateSortSelection.observe(this, this::handleMessageMainUpdateSortSelection);
+        workflowViewModel.messageMainBaseFilters.observe(this, this::handleMessageMainBaseFilters);
+        workflowViewModel.messageMainBaseFilterSelectionToFilterList.observe(this, this::handleMessageMainBaseFilterSelected);
 
         // MainActivity's ViewModel
         mainViewModel.messageContainerToWorkflowList.observe(this, this::handleRightDrawerFilterClick);
         mainViewModel.messageBackActionToWorkflowList.observe(this, this::handleBackAction);
         mainViewModel.messageOptionSelectedToWorkflowList.observe(this, this::handleRightDrawerOptionSelectedClick);
         mainViewModel.messageInitSortByToWorkflowList.observe(this, this::handleInitSortBy);
+        mainViewModel.messageRadioButtonClickedToWorkflowList.observe(this, this::handleMessageRadioButtonClickedToWorkflowList);
+        mainViewModel.messageSortSwitchActionToWorkflowList.observe(this, this::handleMessageSortSwitchActionToWorkflowList);
+        mainViewModel.messageBaseFiltersClickedToWorkflowList.observe(this, this::handleMessageBaseFiltersClicked);
+        mainViewModel.messageBaseFilterPositionSelectedToWorkflowList.observe(this, this::handleMessageBaseFilterPositionSelected);
+    }
 
+    private void handleMessageMainBaseFilterSelected(Integer resLabel) {
+        mainViewModel.receiveMessageBaseFilterSelectedToListUi(resLabel);
+    }
+
+    private void handleMessageBaseFilterPositionSelected(Integer position) {
+        workflowViewModel.handleBaseFieldPositionSelected(position, this);
+    }
+
+    private void handleMessageMainBaseFilters(OptionsList optionsList) {
+        mainViewModel.createDrawerBaseFiltersOptionListAdapter(optionsList);
+    }
+
+    private void handleMessageBaseFiltersClicked(Boolean clicked) {
+        workflowViewModel.handleBaseFieldClick();
+    }
+
+    private void handleMessageMainUpdateSortSelection(int sortType) {
+        mainViewModel.receiveMessageUpdateSortSelection(sortType);
+    }
+
+    private void handleMessageSortSwitchActionToWorkflowList(RightDrawerSortSwitchAction actionMessage) {
+        workflowViewModel.handleSwitchOnClick(
+                actionMessage.viewRadioType,
+                actionMessage.sortType,
+                actionMessage.isChecked
+        );
+        workflowViewModel.applyFilters();
+    }
+
+    private void handleMessageRadioButtonClickedToWorkflowList(int[] message) {
+        workflowViewModel.receiveMessageRadioButtonClicked(message);
+        workflowViewModel.applyFilters();
     }
 
     private void handleMessageMainToggleSwitch(int[] message) {

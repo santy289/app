@@ -22,7 +22,6 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.Wo
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListInfo;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
@@ -35,25 +34,32 @@ import com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowTypeSpinnerAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
-import com.squareup.moshi.Json;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import me.riddhimanadib.formmaster.model.BaseFormElement;
-import okio.Utf8;
+
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.CHECK;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.INDEX_CHECK;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.INDEX_TYPE;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.RADIO_CLEAR_ALL;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.RADIO_CREATED_DATE;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.RADIO_NUMBER;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.RADIO_UPDATED_DATE;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_CREATED_DATE;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_NUMBER;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_PENDING;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_STATUS;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_UPDATED_DATE;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.UNCHECK;
 
 public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<Integer> mErrorLiveData;
@@ -68,7 +74,7 @@ public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<Boolean> setAllCheckboxesList;
     public MutableLiveData<Boolean> showBottomSheetLoading;
     protected MutableLiveData<Boolean> clearFilters;
-    private LiveData<PagedList<WorkflowListItem>> liveWorkflows, liveUnordered;
+    private LiveData<PagedList<WorkflowListItem>> liveWorkflows;
 
 
     //
@@ -85,7 +91,11 @@ public class WorkflowViewModel extends ViewModel {
     // Sort By
     protected MutableLiveData<int[]> messageMainToggleRadioButton;
     protected MutableLiveData<int[]> messageMainToggleSwitch;
-//    protected MutableLiveData<int[]>
+    protected MutableLiveData<Integer> messageMainUpdateSortSelection;
+
+    protected MutableLiveData<OptionsList> messageMainBaseFilters;
+    protected MutableLiveData<Integer> messageMainBaseFilterSelectionToFilterList;
+
 
     // MOVED TO FILTERSETTINGS
     //protected List<WorkflowTypeMenu> rightDrawerFilters;
@@ -94,7 +104,6 @@ public class WorkflowViewModel extends ViewModel {
 //
 
     private WorkflowRepository workflowRepository;
-    private List<WorkflowDb> workflows, unordered;
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     private Sort sort;
@@ -123,6 +132,9 @@ public class WorkflowViewModel extends ViewModel {
         formSettings = new FormSettings();
         messageMainToggleRadioButton = new MutableLiveData<>();
         messageMainToggleSwitch = new MutableLiveData<>();
+        messageMainUpdateSortSelection = new MutableLiveData<>();
+        messageMainBaseFilters = new MutableLiveData<>();
+        messageMainBaseFilterSelectionToFilterList = new MutableLiveData<>();
     }
 
     @Override
@@ -174,8 +186,10 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     protected void iniRightDrawerFilters() {
+        // Get categories from network & init FilterSettings with generated Workflow Types.
         getCategories(categoryId);
         initRightDrawerFilterList();
+        initBaseFilters();
         initSortBy();
     }
 
@@ -189,6 +203,60 @@ public class WorkflowViewModel extends ViewModel {
         );
         filterSettings.addFilterListMenu(menuItem);
         rightDrawerFilterMenus.setValue(filterSettings.getFilterDrawerList());
+    }
+
+    public static final int BASE_FILTER_TYPE = -78;
+    public static final int BASE_FILTER_ALL_ID = 44;
+    public static final int BASE_FILTER_OUT_OF_TIME_ID = 45;
+    public static final int BASE_FILTER_ON_TIME_ID = 46;
+    public static final int BASE_FILTER_PENDING_BY_ME_ID = 47;
+    public static final int BASE_FILTER_LATEST_ID = 48;
+
+
+    private void initBaseFilters() {
+        List<WorkflowTypeMenu> baseFilterOptionsList = new ArrayList<>();
+        WorkflowTypeMenu baseMenu = new WorkflowTypeMenu(
+                BASE_FILTER_ALL_ID,
+                R.string.all,
+                WorkflowTypeSpinnerAdapter.TYPE,
+                BASE_FILTER_TYPE
+        );
+        baseMenu.setSelected(true);
+        baseFilterOptionsList.add(baseMenu);
+
+        baseMenu = new WorkflowTypeMenu(
+                BASE_FILTER_OUT_OF_TIME_ID,
+                R.string.out_of_time,
+                WorkflowTypeSpinnerAdapter.TYPE,
+                BASE_FILTER_TYPE
+        );
+        baseFilterOptionsList.add(baseMenu);
+
+        baseMenu = new WorkflowTypeMenu(
+                BASE_FILTER_ON_TIME_ID,
+                R.string.on_time,
+                WorkflowTypeSpinnerAdapter.TYPE,
+                BASE_FILTER_TYPE
+        );
+        baseFilterOptionsList.add(baseMenu);
+
+        baseMenu = new WorkflowTypeMenu(
+                BASE_FILTER_PENDING_BY_ME_ID,
+                R.string.pending_approval,
+                WorkflowTypeSpinnerAdapter.TYPE,
+                BASE_FILTER_TYPE
+        );
+        baseFilterOptionsList.add(baseMenu);
+
+        baseMenu = new WorkflowTypeMenu(
+                BASE_FILTER_LATEST_ID,
+                R.string.latest,
+                WorkflowTypeSpinnerAdapter.TYPE,
+                BASE_FILTER_TYPE
+        );
+        baseFilterOptionsList.add(baseMenu);
+
+        filterSettings.setBaseFilterOptionsList(baseFilterOptionsList);
     }
 
     private void getCategories(int id) {
@@ -210,6 +278,9 @@ public class WorkflowViewModel extends ViewModel {
         disposables.add(disposable);
     }
 
+    /*
+    Groups workflow types in their respective categories and saves results in FilterSettings.
+     */
     private void initWorkflowTypeMenus() {
         //init workflow type filter
         ListItem category;
@@ -319,6 +390,85 @@ public class WorkflowViewModel extends ViewModel {
         liveWorkflows.removeObservers(lifecycleOwner);
     }
 
+    /**
+     * Request for filtered data to workflow repository. This function handles all the different
+     * filtering scenarios. It handles cases with base filters, meta data, workflow type filters.
+     * @param selectedBaseFilterId Id of selected base filter.
+     * @param filterSettings Instance of FilterSettings.
+     * @param lifecycleOwner Fragment with observer that we need to remove.
+     */
+    private void loadWorkflowsByBaseFilters(
+            int selectedBaseFilterId,
+            FilterSettings filterSettings,
+            LifecycleOwner lifecycleOwner) {
+        String metaDataString = filterSettings.getAllItemIdsSelectedAsString();
+        int workflowTypeSelected = filterSettings.getWorkflowTypeId();
+
+        Map<String, Object> options = new ArrayMap<>();
+        if (workflowTypeSelected != NO_TYPE_SELECTED) {
+            options.put("workflow_type_id", workflowTypeSelected);
+        }
+        if (!TextUtils.isEmpty(metaDataString)) {
+            options.put("workflow_metadata", metaDataString);
+        }
+
+        switch (selectedBaseFilterId) {
+            case BASE_FILTER_ALL_ID:
+                // Nothing to do add to options.
+                break;
+            case BASE_FILTER_OUT_OF_TIME_ID:
+                options.put("out_of_time", true);
+                break;
+            case BASE_FILTER_ON_TIME_ID:
+                options.put("out_of_time", false);
+                break;
+            case BASE_FILTER_PENDING_BY_ME_ID:
+                options.put("responsible_id", userId);
+                break;
+            case BASE_FILTER_LATEST_ID:
+                options.put("latest", true);
+                break;
+        }
+
+
+        workflowRepository.getWorkflowsByBaseFilters(token, options);
+        liveWorkflows.removeObservers(lifecycleOwner);
+    }
+
+    protected void handleBaseFieldClick() {
+        OptionsList optionsList = filterSettings.handleOptionListForBaseFilters();
+        messageMainBaseFilters.setValue(optionsList);
+    }
+
+    /**
+     * Handles a position tapped on the List of BaseFilters. This function will update FilterSettings
+     * with the latest position selected and make a network call to update the database with the selected
+     * base filter.
+     * @param position Selection done by the user on the list of base filters.
+     * @param lifecycleOwner Fragment has an observer that we need to remove and use a new one.
+     */
+    protected void handleBaseFieldPositionSelected(int position, LifecycleOwner lifecycleOwner) {
+        showLoading.setValue(true);
+        WorkflowTypeMenu filterSelected;
+        filterSelected = filterSettings.handleBaseFilterPositionSelected(position);
+        int baseFilerId = filterSelected.getId();
+        if (!filterSelected.isSelected()) {
+            // Unselected, no items selected. Filter by All.
+            filterSettings.resetBaseFilterSelectionToAll();
+            baseFilerId = BASE_FILTER_ALL_ID;
+            messageMainBaseFilterSelectionToFilterList.setValue(R.string.all);
+        } else {
+            messageMainBaseFilterSelectionToFilterList.setValue(filterSelected.getResLabel());
+        }
+        invalidateDrawerOptionsList.setValue(true);
+        loadWorkflowsByBaseFilters(baseFilerId, filterSettings, lifecycleOwner);
+    }
+
+    /**
+     * When a filter is selected use this handler to populate the options list for the selected filter.
+     *
+     * @param position Index of the position selected in the UI ListView.
+     */
     protected void handleSelectedItemInFilters(int position) {
         OptionsList optionsList = filterSettings
                 .handleFilterListPositionSelected(position);
@@ -342,38 +492,7 @@ public class WorkflowViewModel extends ViewModel {
         // Selecting workflow type no need to update other items.
         // Clear all fields if we are selecting a new workflow type.
         if (filterSettings.getFilterListIndexSelected() == DRAWER_FILTER_LIST_INDEX_TYPE) {
-
-            filterSettings.clearDynamicFields();
-
-            if (filterSettings.isTypeAlreadySelected(menu.getWorkflowTypeId())) {
-                filterSettings.updateWorkflowTypeListFilterItem(null);
-                filterSettings.updateRightDrawerOptionListWithSelected(menu, false); //TEST
-                updateSelectedMenuItem(menu);
-//                filterSettings.updateFilterListItemSelected(menu);
-                showLoading.setValue(false);
-                return;
-            }
-            loadWorkflowsByType(menu, lifecycleOwner);
-
-            // clear any selected items if any
-            filterSettings.clearworklowTypeSelection();
-
-            // Filter List Update
-            filterSettings.updateWorkflowTypeListFilterItem(menu);
-            // Update Drawer Options List
-            filterSettings.updateRightDrawerOptionListWithSelected(menu, false);
-            updateSelectedMenuItem(menu);
-//            filterSettings.updateFilterListItemSelected(menu);
-
-
-            // Allowing single selection on the UI for this list.
-            invalidateDrawerOptionsList.setValue(true);
-
-            liveWorkflows.removeObservers(lifecycleOwner);
-            applyFilters(filterSettings);
-            int workflowTypeId = menu.getWorkflowTypeId();
-            findDynamicFieldsBy(workflowTypeId);
-
+            handleFilterByWorkflowType(menu, lifecycleOwner);
             return;
         }
 
@@ -381,44 +500,52 @@ public class WorkflowViewModel extends ViewModel {
         updateSelectedMenuItem(menu);
         filterSettings.updateFilterListItemSelected(menu);
 
-        FieldData fieldData = filterSettings.getFieldDataFromSelectedOptionList();
-        FieldConfig fieldConfig = filterSettings.getFieldConfigFromDrawerOptionList();
-        String values = filterSettings.getAllValuesSelectedInOptionList();
+        int baseFilterId = filterSettings.getBaseFilterSelectedId();
+        loadWorkflowsByBaseFilters(baseFilterId, filterSettings, lifecycleOwner);
+    }
 
-        String metaString = filterSettings.getAllItemIdsSelectedAsString();
-        //int[] idValuesArray = filterSettings.arrayOfIdsSelected();
+    private void handleFilterByWorkflowType(WorkflowTypeMenu menu, LifecycleOwner lifecycleOwner) {
+        filterSettings.clearDynamicFields();
 
-        if (TextUtils.isEmpty(metaString)) {
-            loadWorkflowsByType(menu, lifecycleOwner);
-            liveWorkflows.removeObservers(lifecycleOwner);
+        if (filterSettings.isTypeAlreadySelected(menu.getWorkflowTypeId())) {
+            // Update FilterSettings and Right Drawer UI.
+            filterSettings.setWorkflowTypeId(NO_TYPE_SELECTED);
+            sendMessageUpdateSelectionToWorkflowList(Sort.sortType.NONE);
+
+            filterSettings.updateWorkflowTypeListFilterItem(null);
+            filterSettings.updateRightDrawerOptionListWithSelected(menu, false); //TEST
+            updateSelectedMenuItem(menu);
+//                filterSettings.updateFilterListItemSelected(menu);
+            showLoading.setValue(false);
             applyFilters(filterSettings);
+            return;
         }
 
-//        WorkflowMetas meta = createMetaData(
-//                fieldData,
-//                values,
-//                menu.getWorkflowTypeId(),
-//                fieldConfig);
+        // Choosing some workflow type from the filter Workflow Type.
+        // Update Filter Settings with new workflow type id.
+        filterSettings.setWorkflowTypeId(menu.getWorkflowTypeId());
+
+        loadWorkflowsByType(menu, lifecycleOwner);
+
+        // clear any selected items if any
+        filterSettings.clearworklowTypeSelection();
+
+        // Filter List Update with new selection
+        filterSettings.updateWorkflowTypeListFilterItem(menu);
+        // Update Drawer Options List
+        filterSettings.updateRightDrawerOptionListWithSelected(menu, false);
+        updateSelectedMenuItem(menu);
+//            filterSettings.updateFilterListItemSelected(menu);
 
 
-//            String test2 = "{\"254\":163}"; // works
-//            String test3 = "{\"254\":[163,164]}";
-//            String test3v = "{\"254\":164,\"255\":149}";
-//            String test4 = "{\"256\":[148,149]}";
+        // Allowing single selection on the UI for this list.
+        invalidateDrawerOptionsList.setValue(true);
 
-            Disposable disposable = workflowRepository
-                    .getWorkflowsByFieldFilters(
-                            token,
-                            menu.getWorkflowTypeId(),
-                            metaString)
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(responseDb -> workflowRepository.workflowDbSuccess(responseDb),
-                            throwable -> {
-                                Log.d(TAG, "handleOptionSelected: " + throwable.getMessage());
-                    });
+        liveWorkflows.removeObservers(lifecycleOwner);
+        applyFilters(filterSettings);
+        int workflowTypeId = menu.getWorkflowTypeId();
+        findDynamicFieldsBy(workflowTypeId);
 
-            disposables.add(disposable);
     }
 
     private FormSettings formSettings;
@@ -848,6 +975,13 @@ public class WorkflowViewModel extends ViewModel {
         applyFilters(filterSettings);
     }
 
+    protected void applyFilters() {
+        if (filterSettings == null) {
+            return;
+        }
+        applyFilters(filterSettings);
+    }
+
     private void applyFilters(FilterSettings filterSettings) {
         applyFilters(filterSettings, "");
     }
@@ -966,14 +1100,14 @@ public class WorkflowViewModel extends ViewModel {
         initWorkflowtypeMenu();
 
         if (filterSettings.isCheckedMyPending()) {
-            toggleFilterSwitch(WorkflowFragment.SWITCH_PENDING, WorkflowFragment.CHECK);
+            toggleFilterSwitch(SWITCH_PENDING, CHECK);
         } else {
-            toggleFilterSwitch(WorkflowFragment.SWITCH_PENDING, WorkflowFragment.UNCHECK);
+            toggleFilterSwitch(SWITCH_PENDING, UNCHECK);
         }
         if (filterSettings.isCheckedStatus()) {
-            toggleFilterSwitch(WorkflowFragment.SWITCH_STATUS, WorkflowFragment.CHECK);
+            toggleFilterSwitch(SWITCH_STATUS, CHECK);
         } else {
-            toggleFilterSwitch(WorkflowFragment.SWITCH_STATUS, WorkflowFragment.UNCHECK);
+            toggleFilterSwitch(SWITCH_STATUS, UNCHECK);
         }
         setSelectType.postValue(filterSettings.getTypeIdPositionInArray());
     }
@@ -1068,34 +1202,48 @@ public class WorkflowViewModel extends ViewModel {
     protected void initSortBy() {
         switch (sort.getSortingType()) {
             case BYNUMBER: {
-                toggleRadioButton(WorkflowFragment.RADIO_NUMBER, WorkflowFragment.CHECK);
+                toggleRadioButton(RADIO_NUMBER, CHECK);
                 break;
             }
             case BYCREATE: {
-                toggleRadioButton(WorkflowFragment.RADIO_CREATED_DATE, WorkflowFragment.CHECK);
+                toggleRadioButton(RADIO_CREATED_DATE, CHECK);
                 break;
             }
             case BYUPDATE: {
-                toggleRadioButton(WorkflowFragment.RADIO_UPDATED_DATE, WorkflowFragment.CHECK);
+                toggleRadioButton(RADIO_UPDATED_DATE, CHECK);
                 break;
             }
         }
         if (sort.getNumberSortOrder().equals(Sort.sortOrder.ASC)) {
-            toggleSwitch(WorkflowFragment.SWITCH_NUMBER, WorkflowFragment.CHECK);
+            toggleSwitch(SWITCH_NUMBER, CHECK);
         } else {
-            toggleSwitch(WorkflowFragment.SWITCH_NUMBER, WorkflowFragment.UNCHECK);
+            toggleSwitch(SWITCH_NUMBER, UNCHECK);
         }
         if (sort.getCreatedSortOrder().equals(Sort.sortOrder.ASC)) {
-            toggleSwitch(WorkflowFragment.SWITCH_CREATED_DATE, WorkflowFragment.CHECK);
+            toggleSwitch(SWITCH_CREATED_DATE, CHECK);
         } else {
-            toggleSwitch(WorkflowFragment.SWITCH_CREATED_DATE, WorkflowFragment.UNCHECK);
+            toggleSwitch(SWITCH_CREATED_DATE, UNCHECK);
         }
         if (sort.getUpdatedSortOrder().equals(Sort.sortOrder.ASC)) {
-            toggleSwitch(WorkflowFragment.SWITCH_UPDATED_DATE, WorkflowFragment.CHECK);
+            toggleSwitch(SWITCH_UPDATED_DATE, CHECK);
         } else {
-            toggleSwitch(WorkflowFragment.SWITCH_UPDATED_DATE, WorkflowFragment.UNCHECK);
+            toggleSwitch(SWITCH_UPDATED_DATE, UNCHECK);
         }
     }
+
+    public static final int IS_CHECKED_INDEX = 0;
+    public static final int VIEW_ID_INDEX = 1;
+
+    protected void receiveMessageRadioButtonClicked(int[] message) {
+        int checked = message[IS_CHECKED_INDEX];
+        int viewId = message[VIEW_ID_INDEX];
+        boolean isChecked = false;
+        if (checked == CHECK) {
+            isChecked = true;
+        }
+        handleRadioButtonClicked(isChecked, viewId);
+    }
+
 
     protected void handleRadioButtonClicked(boolean isChecked, @IdRes int viewId) {
         switch (viewId) {
@@ -1104,9 +1252,11 @@ public class WorkflowViewModel extends ViewModel {
                     if (sort.getSortingType().equals(Sort.sortType.BYNUMBER)) {
                         sort.setSortingType(Sort.sortType.NONE);
                         clearRadioButtonGroup();
+                        sendMessageUpdateSelectionToWorkflowList(Sort.sortType.NONE);
                     } else {
                         sort.setSortingType(Sort.sortType.BYNUMBER);
                         clearOtherSwitchesBut(Sort.sortType.BYNUMBER);
+                        sendMessageUpdateSelectionToWorkflowList(Sort.sortType.BYNUMBER);
                     }
                 }
                 break;
@@ -1116,9 +1266,11 @@ public class WorkflowViewModel extends ViewModel {
                     if (sort.getSortingType().equals(Sort.sortType.BYCREATE)) {
                         sort.setSortingType(Sort.sortType.NONE);
                         clearRadioButtonGroup();
+                        sendMessageUpdateSelectionToWorkflowList(Sort.sortType.NONE);
                     } else {
                         sort.setSortingType(Sort.sortType.BYCREATE);
                         clearOtherSwitchesBut(Sort.sortType.BYCREATE);
+                        sendMessageUpdateSelectionToWorkflowList(Sort.sortType.BYCREATE);
                     }
                 }
                 break;
@@ -1128,13 +1280,34 @@ public class WorkflowViewModel extends ViewModel {
                     if (sort.getSortingType().equals(Sort.sortType.BYUPDATE)) {
                         sort.setSortingType(Sort.sortType.NONE);
                         clearRadioButtonGroup();
+                        sendMessageUpdateSelectionToWorkflowList(Sort.sortType.NONE);
                     } else {
                         sort.setSortingType(Sort.sortType.BYUPDATE);
                         clearOtherSwitchesBut(Sort.sortType.BYUPDATE);
+                        sendMessageUpdateSelectionToWorkflowList(Sort.sortType.BYUPDATE);
                     }
                 }
                 break;
             }
+        }
+    }
+
+    private void sendMessageUpdateSelectionToWorkflowList(Sort.sortType sortType) {
+        switch (sortType) {
+            case NONE:
+                messageMainUpdateSortSelection.setValue(R.string.no_selection);
+                break;
+            case BYNUMBER:
+                messageMainUpdateSortSelection.setValue(R.string.workflow_number);
+                break;
+            case BYCREATE:
+                messageMainUpdateSortSelection.setValue(R.string.created_date);
+                break;
+            case BYUPDATE:
+                messageMainUpdateSortSelection.setValue(R.string.updated_date);
+                break;
+            default:
+                break;
         }
     }
 
@@ -1144,8 +1317,9 @@ public class WorkflowViewModel extends ViewModel {
             boolean isChecked
     ) {
         if (isChecked) {
-            toggleRadioButton(viewRadioType, WorkflowFragment.CHECK);
+            toggleRadioButton(viewRadioType, CHECK);
             sort.setSortingType(sortType);
+            sendMessageUpdateSelectionToWorkflowList(sortType);
             if (sortType == Sort.sortType.BYNUMBER) {
                 sort.setNumberSortOrder(Sort.sortOrder.ASC);
             } else if (sortType == Sort.sortType.BYCREATE) {
@@ -1203,16 +1377,16 @@ public class WorkflowViewModel extends ViewModel {
         // Update UI
         switch (ofType) {
             case BYNUMBER:
-                toggleSwitch(WorkflowFragment.SWITCH_CREATED_DATE, WorkflowFragment.UNCHECK);
-                toggleSwitch(WorkflowFragment.SWITCH_UPDATED_DATE, WorkflowFragment.UNCHECK);
+                toggleSwitch(SWITCH_CREATED_DATE, UNCHECK);
+                toggleSwitch(SWITCH_UPDATED_DATE, UNCHECK);
                 break;
             case BYCREATE:
-                toggleSwitch(WorkflowFragment.SWITCH_NUMBER, WorkflowFragment.UNCHECK);
-                toggleSwitch(WorkflowFragment.SWITCH_UPDATED_DATE, WorkflowFragment.UNCHECK);
+                toggleSwitch(SWITCH_NUMBER, UNCHECK);
+                toggleSwitch(SWITCH_UPDATED_DATE, UNCHECK);
                 break;
             case BYUPDATE:
-                toggleSwitch(WorkflowFragment.SWITCH_CREATED_DATE, WorkflowFragment.UNCHECK);
-                toggleSwitch(WorkflowFragment.SWITCH_NUMBER, WorkflowFragment.UNCHECK);
+                toggleSwitch(SWITCH_CREATED_DATE, UNCHECK);
+                toggleSwitch(SWITCH_NUMBER, UNCHECK);
                 break;
             default:
                 Log.d(TAG, "clearOtherSwitchesBut: Using wrong Sorty type which is uknown.");
@@ -1220,13 +1394,13 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     private void clearRadioButtonGroup() {
-        toggleRadioButton(WorkflowFragment.RADIO_CLEAR_ALL, WorkflowFragment.UNCHECK);
+        toggleRadioButton(RADIO_CLEAR_ALL, UNCHECK);
     }
 
     private void toggleRadioButton(int viewRadioType, int viewIsCheckType) {
         int[] toggleRadio = new int[2];
-        toggleRadio[WorkflowFragment.INDEX_TYPE] = viewRadioType;
-        toggleRadio[WorkflowFragment.INDEX_CHECK] = viewIsCheckType;
+        toggleRadio[INDEX_TYPE] = viewRadioType;
+        toggleRadio[INDEX_CHECK] = viewIsCheckType;
 
 
 //        toggleRadioButton.setValue(toggleRadio);
@@ -1235,9 +1409,9 @@ public class WorkflowViewModel extends ViewModel {
 
     private void toggleSwitch(int viewSwitchType, int viewIsCheckType) {
         int[] toggleSwitch = new int[2];
-        toggleSwitch[WorkflowFragment.INDEX_TYPE] = viewSwitchType;
-        toggleSwitch[WorkflowFragment.INDEX_CHECK] = viewIsCheckType;
-        
+        toggleSwitch[INDEX_TYPE] = viewSwitchType;
+        toggleSwitch[INDEX_CHECK] = viewIsCheckType;
+
         messageMainToggleSwitch.setValue(toggleSwitch);
 //        this.toggleSwitch.setValue(toggleSwitch);
 
@@ -1245,8 +1419,8 @@ public class WorkflowViewModel extends ViewModel {
 
     private void toggleFilterSwitch(int viewSwitchType, int viewIsCheckType) {
         int[] toggleSwitch = new int[2];
-        toggleSwitch[WorkflowFragment.INDEX_TYPE] = viewSwitchType;
-        toggleSwitch[WorkflowFragment.INDEX_CHECK] = viewIsCheckType;
+        toggleSwitch[INDEX_TYPE] = viewSwitchType;
+        toggleSwitch[INDEX_CHECK] = viewIsCheckType;
         toggleFilterSwitch.setValue(toggleSwitch);
     }
 

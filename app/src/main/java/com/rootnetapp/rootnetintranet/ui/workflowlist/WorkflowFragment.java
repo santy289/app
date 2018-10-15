@@ -19,8 +19,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
-import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -179,18 +177,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         mainViewModel.createRightDrawerOptionListAdapter(optionsList);
     }
 
-    PopupWindow popupwindow_obj;
     private void setupClickListeners() {
-
         fragmentWorkflowBinding.btnFilters.setOnClickListener(view1 -> {
-            view1.setEnabled(false);
-            popupwindow_obj = initPopMenu();
-            popupwindow_obj.showAsDropDown(fragmentWorkflowBinding.btnFilters, -40, 18);
-            popupwindow_obj.setOnDismissListener(() -> fragmentWorkflowBinding.btnFilters.setEnabled(true));
-//            subscribeToTypeMenu();
+            mainViewModel.openRightDrawer();
         });
-
-
 
         fragmentWorkflowBinding.btnAdd.setOnClickListener(view12 -> {
             mainActivityInterface.showFragment(WorkFlowCreateFragment.newInstance(
@@ -402,26 +392,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.getObservableTypeItemMenu().observe(this, typeListMenuObserver);
     }
 
-    private PopupWindow initPopMenu() {
-        final PopupWindow popupWindow = new PopupWindow(getContext());
-
-        // inflate your layout or dynamically add view
-        workflowFiltersMenuBinding =
-                DataBindingUtil.inflate(getLayoutInflater(), R.layout.workflow_filters_menu, null, false);
-        popupWindow.setFocusable(true);
-        popupWindow.setWidth((int) getResources().getDimension(R.dimen.filters_width));
-        popupWindow.setHeight((int) getResources().getDimension(R.dimen.filters_height));
-        popupWindow.setContentView(workflowFiltersMenuBinding.getRoot());
-
-
-        // TODO disabled not needed anymore only when debugging, erase after development.
-//        workflowViewModel.initSortBy();
-//        workflowViewModel.initFilters();
-        setFilterBoxListeners();
-
-        return popupWindow;
-    }
-
     private void setupSpinnerWorkflowType(List<WorkflowTypeMenu> itemMenus) {
         if (this.getContext() == null) {
             return;
@@ -463,12 +433,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 isCheckedStatus);
     }
 
-    private void onRadioButtonClicked(View view) {
-        boolean checked = ((RadioButton) view).isChecked();
-        workflowViewModel.handleRadioButtonClicked(checked, view.getId());
-        prepareWorkflowListWithFilters();
-    }
-
     private void clearFilters(Boolean clear) {
         if (workflowFiltersMenuBinding == null) {
             return;
@@ -477,51 +441,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowFiltersMenuBinding.swchStatus.setChecked(true);
         workflowFiltersMenuBinding.spnWorkflowtype.setSelection(WorkflowViewModel.NO_TYPE_SELECTED);
     }
-
-
-    private void setFilterBoxListeners() {
-        workflowFiltersMenuBinding.buttonClearFilters.setOnClickListener(view -> {
-            workflowViewModel.clearFilters();
-        });
-
-        // filter switch listeners
-        workflowFiltersMenuBinding.swchMyworkflows.setOnClickListener(view -> {
-            boolean isChecked = workflowFiltersMenuBinding.swchMyworkflows.isChecked();
-            workflowViewModel.loadMyPendingWorkflows(isChecked, this);
-        });
-
-        workflowFiltersMenuBinding.swchStatus.setOnClickListener(view -> prepareWorkflowListWithFilters());
-
-        // radio button listeners
-        workflowFiltersMenuBinding.chbxWorkflownumber.setOnClickListener(this::onRadioButtonClicked);
-        workflowFiltersMenuBinding.chbxCreatedate.setOnClickListener(this::onRadioButtonClicked);
-        workflowFiltersMenuBinding.chbxUpdatedate.setOnClickListener(this::onRadioButtonClicked);
-
-        // ascending / descending listeners
-
-        workflowFiltersMenuBinding.swchWorkflownumber.setOnClickListener(view -> {
-            Switch aSwitch = ((Switch)view);
-            boolean isChecked = aSwitch.isChecked();
-            workflowViewModel.handleSwitchOnClick(RADIO_NUMBER, Sort.sortType.BYNUMBER, isChecked);
-            setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchWorkflownumber, isChecked);
-            prepareWorkflowListWithFilters();
-        });
-        workflowFiltersMenuBinding.swchCreatedate.setOnClickListener(view -> {
-            Switch aSwitch = ((Switch)view);
-            boolean isChecked = aSwitch.isChecked();
-            workflowViewModel.handleSwitchOnClick(RADIO_CREATED_DATE, Sort.sortType.BYCREATE, isChecked);
-            setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchCreatedate, isChecked);
-            prepareWorkflowListWithFilters();
-        });
-        workflowFiltersMenuBinding.swchUpdatedate.setOnClickListener(view -> {
-            Switch aSwitch = ((Switch)view);
-            boolean isChecked = aSwitch.isChecked();
-            workflowViewModel.handleSwitchOnClick(RADIO_UPDATED_DATE, Sort.sortType.BYUPDATE, isChecked);
-            setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchUpdatedate, isChecked);
-            prepareWorkflowListWithFilters();
-        });
-    }
-
 
     private void toggleAscendingDescendingSwitch(int switchType, boolean check) {
         switch (switchType) {

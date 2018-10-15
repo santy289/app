@@ -9,9 +9,9 @@
         android:id="@+id/right_drawer_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="18dp"
         android:layout_marginTop="32dp"
-        android:layout_marginEnd="10dp"
+        android:layout_marginEnd="18dp"
         android:text="@string/filters"
         android:textSize="28sp"
         android:textStyle="bold"
@@ -76,7 +76,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:text="@string/filters"
+            android:text="@string/base_filters"
             android:textSize="16sp" />
 
         <TextView
@@ -103,6 +103,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/title_dynamic_field"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@color/selected_filter"
+        android:padding="15dp"
+        android:text="@string/dynamic_filters"
+        android:textAllCaps="true"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/right_drawer_base_filters" />
+
     <include
         android:id="@+id/sort_options"
         layout="@layout/main_right_drawer_sort"
@@ -117,7 +132,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/right_drawer_base_filters"
         app:layout_constraintVertical_bias="0.060000002"
-        tools:visibility="visible"/>
+        tools:visibility="gone"/>
 
     <ListView
         android:id="@+id/right_drawer_filters"
@@ -131,7 +146,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/right_drawer_base_filters"
-        tools:visibility="gone" />
+        app:layout_constraintTop_toBottomOf="@+id/title_dynamic_field"
+        tools:visibility="visible" />
 </android.support.constraint.ConstraintLayout>
 </layout>

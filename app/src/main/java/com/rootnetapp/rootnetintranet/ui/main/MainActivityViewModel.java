@@ -58,6 +58,7 @@ public class MainActivityViewModel extends ViewModel {
     protected MutableLiveData<Integer> setUploadMenuLayout;
     protected MutableLiveData<List<WorkflowTypeMenu>> setRightDrawerFilterList;
     protected MutableLiveData<OptionsList> setRightDrawerOptionList;
+    protected MutableLiveData<Boolean> openRightDrawer;
 
     // Receive message from Workflow List
     protected MutableLiveData<int[]> receiveMessageToggleRadioButton;
@@ -66,6 +67,7 @@ public class MainActivityViewModel extends ViewModel {
     protected MutableLiveData<OptionsList> receiveMessageCreateBaseFiltersAdapter;
     protected MutableLiveData<Integer> receiveMessageBaseFilterSelected;
 
+    // send message to WorkflowList
     public MutableLiveData<Integer> messageContainerToWorkflowList;
     public MutableLiveData<Integer> messageOptionSelectedToWorkflowList;
     public MutableLiveData<Boolean> messageBackActionToWorkflowList;
@@ -105,6 +107,7 @@ public class MainActivityViewModel extends ViewModel {
         this.receiveMessageCreateBaseFiltersAdapter = new MutableLiveData<>();
         this.messageBaseFilterPositionSelectedToWorkflowList = new MutableLiveData<>();
         this.receiveMessageBaseFilterSelected = new MutableLiveData<>();
+        this.openRightDrawer = new MutableLiveData<>();
     }
 
     @Override
@@ -185,6 +188,10 @@ public class MainActivityViewModel extends ViewModel {
         actionMessage.sortType = sortType;
         actionMessage.isChecked = isChecked;
         messageSortSwitchActionToWorkflowList.setValue(actionMessage);
+    }
+
+    public void openRightDrawer() {
+        openRightDrawer.setValue(true);
     }
 
     public void receiveMessageToggleRadioButton(int[] message) {

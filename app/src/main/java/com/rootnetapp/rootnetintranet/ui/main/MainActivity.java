@@ -23,6 +23,7 @@ import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -252,6 +253,13 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    private void openRightDrawer(boolean open) {
+        if (mainBinding.drawerLayout.isDrawerOpen(Gravity.END)) {
+            return;
+        }
+        mainBinding.drawerLayout.openDrawer(Gravity.END);
+    }
+
     boolean sortingActive = false;
     private void showSortByViews(boolean show) {
         if (show) {
@@ -261,6 +269,7 @@ public class MainActivity extends AppCompatActivity
             mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.GONE);
             mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
             hideBaseFilters(true);
+            hideTitleDynamicFilters(true);
             sortingActive = true;
         } else {
             mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.filters));
@@ -269,6 +278,7 @@ public class MainActivity extends AppCompatActivity
             mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.VISIBLE);
             mainBinding.rightDrawer.drawerBackButton.setVisibility(View.GONE);
             hideBaseFilters(false);
+            hideTitleDynamicFilters(false);
             sortingActive = false;
         }
     }
@@ -491,6 +501,7 @@ public class MainActivity extends AppCompatActivity
         mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.filters));
         hideSortingViews(false);
         hideBaseFilters(false);
+        hideTitleDynamicFilters(false);
         LayoutInflater inflater = LayoutInflater.from(this);
         rightDrawerFiltersAdapter = new RightDrawerFiltersAdapter(inflater, menus);
 
@@ -547,6 +558,7 @@ public class MainActivity extends AppCompatActivity
     private void prepareUIForOptionList(String title) {
         hideSortingViews(true);
         hideBaseFilters(true);
+        hideTitleDynamicFilters(true);
         mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
         mainBinding.rightDrawer.rightDrawerTitle.setText(title);
     }
@@ -581,6 +593,14 @@ public class MainActivity extends AppCompatActivity
             mainBinding.rightDrawer.rightDrawerBaseFilters.setVisibility(View.GONE);
         } else {
             mainBinding.rightDrawer.rightDrawerBaseFilters.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void hideTitleDynamicFilters(boolean hide) {
+        if (hide) {
+            mainBinding.rightDrawer.titleDynamicField.setVisibility(View.GONE);
+        } else {
+            mainBinding.rightDrawer.titleDynamicField.setVisibility(View.VISIBLE);
         }
     }
 
@@ -640,6 +660,7 @@ public class MainActivity extends AppCompatActivity
         viewModel.receiveMessageUpdateSortSelected.observe(this, this::updateSortFieldSelection);
         viewModel.receiveMessageCreateBaseFiltersAdapter.observe(this, this::setRightDrawerBaseFilters);
         viewModel.receiveMessageBaseFilterSelected.observe(this, this::handleUpdateBaseFilterSelectionUpdateWith);
+        viewModel.openRightDrawer.observe(this, this::openRightDrawer);
     }
 
     private void subscribeForLogin() {

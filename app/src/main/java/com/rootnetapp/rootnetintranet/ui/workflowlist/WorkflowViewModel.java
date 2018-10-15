@@ -430,7 +430,6 @@ public class WorkflowViewModel extends ViewModel {
                 break;
         }
 
-
         workflowRepository.getWorkflowsByBaseFilters(token, options);
         liveWorkflows.removeObservers(lifecycleOwner);
     }
@@ -562,10 +561,6 @@ public class WorkflowViewModel extends ViewModel {
         menu.setSelected(!menu.isSelected());
     }
 
-
-    // TODO update filter list and option list with this information.
-    // TODO save everything in our FitlerSettings.
-    // TODO use createMetaData to generate the metadata to send in GET request
     private void findDynamicFieldsBy(int workflowTypeId) {
         Disposable disposable = Observable.fromCallable(() -> {
             List<FormFieldsByWorkflowType> fields = workflowRepository.getFiedsByWorkflowType(workflowTypeId);
@@ -904,25 +899,6 @@ public class WorkflowViewModel extends ViewModel {
 
     // TODO END OF DYNAMIC FILTER IMPLEMENTATION
 
-
-    protected void loadMyPendingWorkflows(boolean isChecked, LifecycleOwner lifecycleOwner) {
-        if (TextUtils.isEmpty(userId)) {
-            return;
-        }
-        showLoading.postValue(true);
-        if (isChecked) {
-            filterSettings.setCheckedMyPending(true);
-            int id = Integer.valueOf(userId);
-            workflowRepository.getMyPendingWorkflows(id, token);
-
-        } else {
-            filterSettings.setCheckedMyPending(false);
-            workflowRepository.getAllWorkflowsNoFilters(token);
-        }
-        liveWorkflows.removeObservers(lifecycleOwner);
-        // liveWorkflows' Observer that was removed will be put back in one of the observers in subscribe.
-    }
-
     protected void filterBySearchText(String searchText, LifecycleOwner lifecycleOwner) {
         filterSettings.setSearchText(searchText);
         liveWorkflows.removeObservers(lifecycleOwner);
@@ -1093,23 +1069,6 @@ public class WorkflowViewModel extends ViewModel {
 
     protected LiveData<PagedList<WorkflowListItem>> getAllWorkflows() {
         return liveWorkflows;
-    }
-
-    protected void initFilters() {
-
-        initWorkflowtypeMenu();
-
-        if (filterSettings.isCheckedMyPending()) {
-            toggleFilterSwitch(SWITCH_PENDING, CHECK);
-        } else {
-            toggleFilterSwitch(SWITCH_PENDING, UNCHECK);
-        }
-        if (filterSettings.isCheckedStatus()) {
-            toggleFilterSwitch(SWITCH_STATUS, CHECK);
-        } else {
-            toggleFilterSwitch(SWITCH_STATUS, UNCHECK);
-        }
-        setSelectType.postValue(filterSettings.getTypeIdPositionInArray());
     }
 
     ArrayList<WorkflowTypeMenu> spinnerMenuArray;
@@ -1401,9 +1360,6 @@ public class WorkflowViewModel extends ViewModel {
         int[] toggleRadio = new int[2];
         toggleRadio[INDEX_TYPE] = viewRadioType;
         toggleRadio[INDEX_CHECK] = viewIsCheckType;
-
-
-//        toggleRadioButton.setValue(toggleRadio);
         messageMainToggleRadioButton.setValue(toggleRadio);
     }
 
@@ -1411,17 +1367,7 @@ public class WorkflowViewModel extends ViewModel {
         int[] toggleSwitch = new int[2];
         toggleSwitch[INDEX_TYPE] = viewSwitchType;
         toggleSwitch[INDEX_CHECK] = viewIsCheckType;
-
         messageMainToggleSwitch.setValue(toggleSwitch);
-//        this.toggleSwitch.setValue(toggleSwitch);
-
-    }
-
-    private void toggleFilterSwitch(int viewSwitchType, int viewIsCheckType) {
-        int[] toggleSwitch = new int[2];
-        toggleSwitch[INDEX_TYPE] = viewSwitchType;
-        toggleSwitch[INDEX_CHECK] = viewIsCheckType;
-        toggleFilterSwitch.setValue(toggleSwitch);
     }
 
     protected LiveData<Integer> getObservableError() {

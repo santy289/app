@@ -315,36 +315,6 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         disposables.add(disposable);
     }
 
-    public Observable<List<WorkflowDb>> setWorkflowsLocalUpdate(List<WorkflowDb> workflows){
-        return Observable.fromCallable(() -> {
-            database.workflowDbDao().insertWorkflows(workflows);
-            return workflows;
-        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
-    }
-
-    public void getMyPendingWorkflows(int profileId, String token) {
-        currentPage = 1;
-        Disposable disposable = service
-                .getMyPendingWorkflowsDb(
-                        token,
-                        50,
-                        true,
-                        1,
-                        false,
-                        profileId,
-                        null)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::workflowDbSuccess, throwable -> {
-                    Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
-                    handleRepoError.postValue(true);
-
-                });
-        disposables.add(disposable);
-    }
-
-
-
     public void getWorkflowsByType(String token, int typeId) {
         currentPage = 1;
         Disposable disposable = service

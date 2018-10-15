@@ -48,6 +48,10 @@ public class Utils {
     public static void showLoading(Context ctx) {
         if (progress == null) {
             progress = new ProgressDialog(ctx);
+        } else {
+            if (progress.getContext() != ctx) {
+                progress = new ProgressDialog(ctx);
+            }
         }
         progress.show();
         progress.setMessage(ctx.getString(R.string.loading_message));

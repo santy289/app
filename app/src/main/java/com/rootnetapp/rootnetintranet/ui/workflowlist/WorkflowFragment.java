@@ -110,6 +110,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         LinearLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        boolean firstLoad = false;
+        if (workflowViewModel == null) {
+            firstLoad = true;
+        }
         workflowViewModel = ViewModelProviders
                 .of(this, workflowViewModelFactory)
                 .get(WorkflowViewModel.class);
@@ -123,7 +127,9 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         setupSearchListener();
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         workflowViewModel.initWorkflowList(prefs, this);
-        subscribe();
+        if (firstLoad) {
+            subscribe();
+        }
         workflowViewModel.iniRightDrawerFilters();
         return view;
     }
@@ -135,6 +141,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     @Override
     public void showDetail(WorkflowListItem item) {
+        workflowViewModel.resetFilterSettings();
         mainActivityInterface.showFragment(WorkflowDetailFragment.newInstance(item,
                 mainActivityInterface),true);
     }

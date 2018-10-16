@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModel;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.support.annotation.IdRes;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.ArrayAdapter;
@@ -128,7 +129,10 @@ public class MainActivityViewModel extends ViewModel {
             ClientResponse domain;
             domain = jsonAdapter.fromJson(json);
             Utils.domain = "https://" + domain.getClient().getApiUrl();
-            Utils.imgDomain = "http://" + domain.getClient().getDomain() + "/";
+            if (TextUtils.isEmpty(Utils.imgDomain)) {
+                Utils.imgDomain = "http://" + domain.getClient().getApiUrl();
+                Utils.imgDomain = Utils.imgDomain.replace("v1/", "");
+            }
             String[] content = new String[2];
             content[0] = MainActivityViewModel.IMG_LOGO;
             content[1] = Utils.URL + domain.getClient().getLogoUrl();

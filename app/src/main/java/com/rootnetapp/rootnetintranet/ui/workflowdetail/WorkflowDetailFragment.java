@@ -119,9 +119,15 @@ public class WorkflowDetailFragment extends Fragment {
         binding.recApprovers.setAdapter(new ApproversAdapter());
         binding.recPeopleinvolved.setAdapter(new PeopleInvolvedAdapter());
         binding.recApprovalhistory.setAdapter(new ApprovalAdapter());
+        setClickListeners();
         //fin testing
         files = new ArrayList<>();
         subscribe();
+        workflowDetailViewModel.initDetails(token, item);
+        return view;
+    }
+
+    private void setClickListeners() {
         binding.hdrGraph.setOnClickListener(this::headerClicked);
         binding.hdrImportant.setOnClickListener(this::headerClicked);
         binding.hdrNextstep.setOnClickListener(this::headerClicked);
@@ -131,10 +137,6 @@ public class WorkflowDetailFragment extends Fragment {
         binding.btnComment.setOnClickListener(this::comment);
         binding.btnAttachment.setOnClickListener(this::showFileChooser);
         binding.btnUpload.setOnClickListener(this::uploadFiles);
-        workflowDetailViewModel.getWorkflow(token, item.getWorkflowId());
-        workflowDetailViewModel.getWorkflowType(token, item.getWorkflowTypeId());
-        workflowDetailViewModel.getComments(token, item.getWorkflowId());
-        return view;
     }
 
     private void headerClicked(View view) {

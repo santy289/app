@@ -5,10 +5,6 @@ import android.view.View;
 
 import com.rootnetapp.rootnetintranet.databinding.CommentsItemBinding;
 
-/**
- * Created by root on 04/04/18.
- */
-
 public class CommentsViewholder extends RecyclerView.ViewHolder {
 
     final CommentsItemBinding binding;

@@ -24,9 +24,11 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 public class Utils {
 
@@ -79,6 +81,50 @@ public class Utils {
         return fileFromBytes;
     }
 
+    /**
+     * Receives ISO 8601 Date format and returns a UI ready date format for comments.
+     * @param value
+     * @return
+     */
+    public static String serverFormatToLongFormat(String value) {
+        Date serverDate;
+        String uiDateString = "";
+        try {
+            SimpleDateFormat serverFormat = new SimpleDateFormat(
+                    "yyyy-MM-dd'T'HH:mm:ddZ",
+                    Locale.getDefault());
+            serverDate = serverFormat.parse(value);
+            SimpleDateFormat uiFormat = new SimpleDateFormat(
+                    "MMM d, y-h:m a",
+                    Locale.getDefault()
+            );
+            uiDateString = uiFormat.format(serverDate);
+            return uiDateString;
+        } catch (ParseException e) {
+            e.printStackTrace();
+            Log.d(TAG, "serverFormatToLongFormat: Error parsing incoming server date");
+        }
+
+
+        return uiDateString;
+
+
+
+//        SimpleDateFormat dateFormat = new SimpleDateFormat(
+//                "dd-MM-yyyy",
+//                Locale.getDefault());
+//        String metaDateString = "";
+//        try {
+//            Date convertedDate = dateFormat.parse(value);
+//            SimpleDateFormat serverFormat = new SimpleDateFormat(
+//                    "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+//                    Locale.getDefault());
+//            metaDateString = serverFormat.format(convertedDate);
+//        } catch (ParseException e) {
+//            Log.d(TAG, "StringDateToTimestamp: e = " + e.getMessage());
+//        }
+    }
+
     public static byte[] fileToByte(File file) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -104,7 +150,7 @@ public class Utils {
 
     public static String getCurrentDate(){
         Date c = Calendar.getInstance().getTime();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return df.format(c);
     }
 
@@ -113,7 +159,7 @@ public class Utils {
         calendar.add(Calendar.MONTH, month);
         calendar.set(Calendar.DAY_OF_MONTH,  day);
         Date c = calendar.getTime();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return df.format(c);
     }
 
@@ -123,7 +169,7 @@ public class Utils {
             calendar.add(Calendar.DAY_OF_YEAR, -1) ;
         }
         Date c = calendar.getTime();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return df.format(c);
     }
 
@@ -133,7 +179,7 @@ public class Utils {
             calendar.add(Calendar.DAY_OF_YEAR, 1) ;
         }
         Date c = calendar.getTime();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return df.format(c);
     }
 

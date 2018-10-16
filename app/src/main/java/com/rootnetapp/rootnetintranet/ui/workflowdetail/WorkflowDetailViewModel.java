@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModel;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
@@ -22,6 +23,9 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTyp
 
 import java.util.List;
 
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+
 public class WorkflowDetailViewModel extends ViewModel {
 
     private MutableLiveData<WorkflowType> mTypeLiveData;
@@ -33,45 +37,75 @@ public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<Boolean> mAttachLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
     private WorkflowDetailRepository repository;
-    //todo REMOVE, solo testing
-    //private String auth2 = "Bearer "+ Utils.testToken;
+
+    private final CompositeDisposable disposables = new CompositeDisposable();
+
+
 
     public WorkflowDetailViewModel(WorkflowDetailRepository workflowDetailRepository) {
         this.repository = workflowDetailRepository;
     }
 
-    protected void initDetails() {
-        
+    @Override
+    protected void onCleared() {
+        disposables.clear();
+    }
+
+    protected void initDetails(String token, WorkflowListItem workflow) {
+        getWorkflow(token, workflow.getWorkflowId());
+        getWorkflowType(token, workflow.getWorkflowTypeId());
+        getComments(token, workflow.getWorkflowId());
     }
 
 
 
-    public void getWorkflowType(String auth, int typeId) {
-        repository.getWorkflowType(auth, typeId).subscribe(this::onTypeSuccess, this::onFailure);
+    private void getWorkflowType(String auth, int typeId) {
+        Disposable disposable = repository
+                .getWorkflowType(auth, typeId)
+                .subscribe(this::onTypeSuccess, this::onFailure);
+        disposables.add(disposable);
     }
 
-    public void getWorkflow(String auth, int workflowId) {
-        repository.getWorkflow(auth, workflowId).subscribe(this::onWorkflowSuccess, this::onFailure);
+    private void getWorkflow(String auth, int workflowId) {
+        Disposable disposable = repository
+                .getWorkflow(auth, workflowId)
+                .subscribe(this::onWorkflowSuccess, this::onFailure);
+        disposables.add(disposable);
     }
 
     public void getTemplate(String auth, int templateId) {
-        repository.getTemplate(auth, templateId).subscribe(this::onTemplateSuccess, this::onFailure);
+        Disposable disposable = repository
+                .getTemplate(auth, templateId)
+                .subscribe(this::onTemplateSuccess, this::onFailure);
+        disposables.add(disposable);
     }
 
     public void getFiles(String auth, int workflowId) {
-        repository.getFiles(auth, workflowId).subscribe(this::onFilesSuccess, this::onFailure);
+        Disposable disposable = repository
+                .getFiles(auth, workflowId)
+                .subscribe(this::onFilesSuccess, this::onFailure);
+        disposables.add(disposable);
     }
 
-    public void getComments(String auth, int workflowId) {
-        repository.getComments(auth, workflowId).subscribe(this::onCommentsSuccess, this::onFailure);
+    private void getComments(String auth, int workflowId) {
+        Disposable disposable = repository
+                .getComments(auth, workflowId)
+                .subscribe(this::onCommentsSuccess, this::onFailure);
+        disposables.add(disposable);
     }
 
     public void postComment(String auth, int workflowId, String comment, List<CommentFile> files) {
-        repository.postComment(auth, workflowId, comment, files).subscribe(this::onPostCommentSuccess, this::onFailure);
+        Disposable disposable = repository
+                .postComment(auth, workflowId, comment, files)
+                .subscribe(this::onPostCommentSuccess, this::onFailure);
+        disposables.add(disposable);
     }
 
     public void attachFile(String auth, List<WorkflowPresetsRequest> request, CommentFile fileRequest) {
-        repository.attachFile(auth, request, fileRequest).subscribe(this::onAttachSuccess, this::onFailure);
+        Disposable disposable = repository
+                .attachFile(auth, request, fileRequest)
+                .subscribe(this::onAttachSuccess, this::onFailure);
+        disposables.add(disposable);
     }
 
     private void onTypeSuccess(WorkflowTypeResponse response) {

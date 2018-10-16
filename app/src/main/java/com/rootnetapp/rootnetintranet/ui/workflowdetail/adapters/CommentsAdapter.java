@@ -18,6 +18,8 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> {
 
     public List<Comment> comments;
 
+    private static final String format = "MMM d, y-h:m a";
+
     public CommentsAdapter(List<Comment> comments) {
         this.comments = comments;
     }
@@ -42,7 +44,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> {
                 .into(holder.binding.imgUser);
         holder.binding.tvName.setText(item.getUserInfo().getFullName());
 
-        String dateFormatted = Utils.serverFormatToLongFormat(item.getDate());
+        String dateFormatted = Utils.serverFormatToFormat(item.getDate(), format);
         holder.binding.tvDate.setText(dateFormatted);
         holder.binding.tvComment.setText(item.getDescription());
         holder.binding.executePendingBindings();

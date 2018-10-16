@@ -84,6 +84,8 @@ dependencies {
     implementation "com.google.firebase:firebase-messaging:$rootProject.firebaseVersion"
     implementation "com.obsez.android.lib.filechooser:filechooser:$rootProject.fileChooser"
 
+    implementation 'com.jakewharton.threetenabp:threetenabp:1.1.1'
+
     //Test
     androidTestImplementation "com.android.support.test:runner:$rootProject.testRunner"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$rootProject.espresso"

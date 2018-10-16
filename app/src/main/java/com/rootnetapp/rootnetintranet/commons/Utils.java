@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Base64;
 import android.util.Log;
@@ -15,6 +16,10 @@ import com.rootnetapp.rootnetintranet.models.responses.login.JWToken;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
+import org.threeten.bp.ZoneId;
+import org.threeten.bp.ZonedDateTime;
+import org.threeten.bp.format.DateTimeFormatter;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -24,11 +29,11 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+
 
 public class Utils {
 
@@ -83,46 +88,39 @@ public class Utils {
 
     /**
      * Receives ISO 8601 Date format and returns a UI ready date format for comments.
-     * @param value
-     * @return
+     * @param isoStringDate Iso String from server.
+     * @return returns formatted Date
      */
-    public static String serverFormatToLongFormat(String value) {
-        Date serverDate;
-        String uiDateString = "";
-        try {
-            SimpleDateFormat serverFormat = new SimpleDateFormat(
-                    "yyyy-MM-dd'T'HH:mm:ddZ",
-                    Locale.getDefault());
-            serverDate = serverFormat.parse(value);
-            SimpleDateFormat uiFormat = new SimpleDateFormat(
-                    "MMM d, y-h:m a",
-                    Locale.getDefault()
-            );
-            uiDateString = uiFormat.format(serverDate);
-            return uiDateString;
-        } catch (ParseException e) {
-            e.printStackTrace();
-            Log.d(TAG, "serverFormatToLongFormat: Error parsing incoming server date");
+    public static String serverFormatToFormat(String isoStringDate, String format) {
+        String uiDateString;
+        int semicolonPosition = isoStringDate.length() - 3;
+        if (isoStringDate.charAt(semicolonPosition) != ':') {
+            // Adjust semicolon position to string without semicolon.
+            semicolonPosition = isoStringDate.length() - 2;
+            String first = isoStringDate.substring(0, semicolonPosition);
+            String second = isoStringDate.substring(semicolonPosition, semicolonPosition+2);
+            StringBuilder stringBuilder = new StringBuilder();
+            isoStringDate = stringBuilder.append(first).append(":").append(second).toString();
         }
 
+        uiDateString = DateTimeFormatter
+                .ofPattern(format)
+                .format(getDate(isoStringDate));
 
         return uiDateString;
+    }
 
+    private static ZoneId getZoneId() {
+        // We could expand to have here real time Zones.
+//        return ZoneId.systemDefault();
+        return ZoneId.of("UTC");
+    }
 
-
-//        SimpleDateFormat dateFormat = new SimpleDateFormat(
-//                "dd-MM-yyyy",
-//                Locale.getDefault());
-//        String metaDateString = "";
-//        try {
-//            Date convertedDate = dateFormat.parse(value);
-//            SimpleDateFormat serverFormat = new SimpleDateFormat(
-//                    "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
-//                    Locale.getDefault());
-//            metaDateString = serverFormat.format(convertedDate);
-//        } catch (ParseException e) {
-//            Log.d(TAG, "StringDateToTimestamp: e = " + e.getMessage());
-//        }
+    public static ZonedDateTime getDate(@NonNull String isoDateString) {
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+        return ZonedDateTime
+                .parse(isoDateString, formatter)
+                .withZoneSameInstant(getZoneId());
     }
 
     public static byte[] fileToByte(File file) throws IOException {

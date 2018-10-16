@@ -32,6 +32,7 @@ import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.CategoryListResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
@@ -39,6 +40,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTyp
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Observer;
 
 import io.reactivex.Observable;
@@ -53,6 +55,7 @@ import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import retrofit2.http.QueryMap;
 
 
 public interface ApiInterface {
@@ -108,6 +111,7 @@ public interface ApiInterface {
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?")
+    @Deprecated
     Observable<WorkflowsResponse> getWorkflows(@Header("Authorization") String authorization,
                                                @Query("limit") int limit,
                                                @Query("open") boolean open,
@@ -122,6 +126,28 @@ public interface ApiInterface {
                                                   @Query("page") int page,
                                                   @Query("workflow_type") boolean showTypeDetails);
 
+
+
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?")
+    Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(@Header("Authorization") String authorization,
+                                                           @Query("limit") int limit,
+                                                           @Query("open") boolean open,
+                                                           @Query("page") int page,
+                                                           @Query("workflow_type") boolean showTypeDetails,
+                                                           @QueryMap Map<String, Object> options);
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?")
+    Observable<WorkflowResponseDb> getWorkflowsDbFilteredByDynamicFields(@Header("Authorization") String authorization,
+                                                                         @Query("limit") int limit,
+                                                                         @Query("open") boolean open,
+                                                                         @Query("page") int page,
+                                                                         @Query("workflow_type") boolean showTypeDetails,
+                                                                         @Query("workflow_type_id") int workflowTypeId,
+                                                                         @Query("workflow_metadata") String metaData);
+
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?")
     Observable<WorkflowResponseDb> getMyPendingWorkflowsDb(@Header("Authorization") String authorization,
@@ -129,7 +155,19 @@ public interface ApiInterface {
                                                   @Query("open") boolean open,
                                                   @Query("page") int page,
                                                   @Query("workflow_type") boolean showTypeDetails,
-                                                  @Query("responsible_id") int profileId);
+                                                  @Query("responsible_id") int profileId,
+                                                  @Query("workflow_metadata") String metaData);
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?")
+    Observable<WorkflowResponseDb> getMyPendingWorkflowsDbByWorkflowType(@Header("Authorization") String authorization,
+                                                           @Query("limit") int limit,
+                                                           @Query("open") boolean open,
+                                                           @Query("page") int page,
+                                                           @Query("workflow_type") boolean showTypeDetails,
+                                                           @Query("responsible_id") int profileId,
+                                                           @Query("workflow_metadata") String metaData,
+                                                           @Query("workflow_type_id") int workflowTypeId);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?")
@@ -153,6 +191,10 @@ public interface ApiInterface {
     @GET("list/{id}/item")
     Observable<ListsResponse> getListItems(@Header("Authorization") String authorization,
                                            @Path("id") int id);
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflow/category")
+    Observable<CategoryListResponse> getCategoryListId(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
     @GET("contacts/products?all=true")

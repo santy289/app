@@ -5,6 +5,12 @@ public class ListFieldItemMeta {
     public String name;
     public int listId;
 
+    public ListFieldItemMeta() {
+        this.id = 0;
+        this.name = name;
+        this.listId = 0;
+    }
+
     public ListFieldItemMeta(int id, String name, int listId) {
         this.id = id;
         this.name = name;

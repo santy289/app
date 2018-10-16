@@ -5,7 +5,10 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.support.annotation.IdRes;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.widget.ArrayAdapter;
 
 import com.auth0.android.jwt.JWT;
 import com.rootnetapp.rootnetintranet.R;
@@ -14,16 +17,29 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
+import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
+import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
+import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOptionsAdapter;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
+
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.CHECK;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.UNCHECK;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.IS_CHECKED_INDEX;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.VIEW_ID_INDEX;
 
 public class MainActivityViewModel extends ViewModel {
 
@@ -40,6 +56,30 @@ public class MainActivityViewModel extends ViewModel {
     private MutableLiveData<Boolean> goToDomain;
     protected MutableLiveData<Integer> setSearchMenuLayout;
     protected MutableLiveData<Integer> setUploadMenuLayout;
+    protected MutableLiveData<List<WorkflowTypeMenu>> setRightDrawerFilterList;
+    protected MutableLiveData<OptionsList> setRightDrawerOptionList;
+    protected MutableLiveData<Boolean> openRightDrawer;
+
+    // Receive message from Workflow List
+    protected MutableLiveData<int[]> receiveMessageToggleRadioButton;
+    protected MutableLiveData<int[]> receiveMessageToggleSwitch;
+    protected MutableLiveData<Integer> receiveMessageUpdateSortSelected;
+    protected MutableLiveData<OptionsList> receiveMessageCreateBaseFiltersAdapter;
+    protected MutableLiveData<Integer> receiveMessageBaseFilterSelected;
+
+    // send message to WorkflowList
+    public MutableLiveData<Integer> messageContainerToWorkflowList;
+    public MutableLiveData<Integer> messageOptionSelectedToWorkflowList;
+    public MutableLiveData<Boolean> messageBackActionToWorkflowList;
+    public MutableLiveData<Boolean> messageInitSortByToWorkflowList;
+    public MutableLiveData<int[]> messageRadioButtonClickedToWorkflowList;
+    public MutableLiveData<RightDrawerSortSwitchAction> messageSortSwitchActionToWorkflowList;
+    public MutableLiveData<Boolean> messageBaseFiltersClickedToWorkflowList;
+    public MutableLiveData<Integer> messageBaseFilterPositionSelectedToWorkflowList;
+    public MutableLiveData<Boolean> invalidateOptionsList;
+
+    List<WorkflowTypeMenu> filtersList;
+    List<WorkflowTypeMenu> optionsList;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
@@ -51,6 +91,23 @@ public class MainActivityViewModel extends ViewModel {
     public MainActivityViewModel(MainActivityRepository repository) {
         this.repository = repository;
         this.setSearchMenuLayout = new MutableLiveData<>();
+        this.setRightDrawerFilterList = new MutableLiveData<>();
+        this.setRightDrawerOptionList = new MutableLiveData<>();
+        this.messageContainerToWorkflowList = new MutableLiveData<>();
+        this.messageBackActionToWorkflowList = new MutableLiveData<>();
+        this.messageOptionSelectedToWorkflowList = new MutableLiveData<>();
+        this.invalidateOptionsList = new MutableLiveData<>();
+        this.messageInitSortByToWorkflowList = new MutableLiveData<>();
+        this.receiveMessageToggleRadioButton = new MutableLiveData<>();
+        this.receiveMessageToggleSwitch = new MutableLiveData<>();
+        this.receiveMessageUpdateSortSelected = new MutableLiveData<>();
+        this.messageRadioButtonClickedToWorkflowList = new MutableLiveData<>();
+        this.messageSortSwitchActionToWorkflowList = new MutableLiveData<>();
+        this.messageBaseFiltersClickedToWorkflowList = new MutableLiveData<>();
+        this.receiveMessageCreateBaseFiltersAdapter = new MutableLiveData<>();
+        this.messageBaseFilterPositionSelectedToWorkflowList = new MutableLiveData<>();
+        this.receiveMessageBaseFilterSelected = new MutableLiveData<>();
+        this.openRightDrawer = new MutableLiveData<>();
     }
 
     @Override
@@ -88,6 +145,69 @@ public class MainActivityViewModel extends ViewModel {
         JWT jwt = new JWT(token);
         int id = Integer.parseInt(jwt.getClaim(PreferenceKeys.PREFERENCE_PROFILE_ID).asString());
         getUser(id);
+    }
+
+    protected void sendFilterClickToWorflowList(int position) {
+        messageContainerToWorkflowList.setValue(position);
+    }
+
+    protected void sendOptionSelectedToWorkflowList(int position) {
+        messageOptionSelectedToWorkflowList.setValue(position);
+    }
+
+    protected void sendRightDrawerBackButtonClick() {
+        messageBackActionToWorkflowList.setValue(true);
+    }
+
+    protected void sendBaseFiltersClicked() {
+        messageBaseFiltersClickedToWorkflowList.setValue(true);
+    }
+
+    protected void sendBaseFilterPositionClicked(int position) {
+        messageBaseFilterPositionSelectedToWorkflowList.setValue(position);
+    }
+
+    protected void handleRadioButtonClicked(boolean isChecked, @IdRes int viewId) {
+        int[] message = new int[2];
+        int checked = UNCHECK;
+        if (isChecked) {
+            checked = CHECK;
+        }
+        message[IS_CHECKED_INDEX] = checked;
+        message[VIEW_ID_INDEX] = viewId;
+        messageRadioButtonClickedToWorkflowList.setValue(message);
+    }
+
+    protected void handleSwitchOnClick(
+            int viewRadioType,
+            Sort.sortType sortType,
+            boolean isChecked
+    ) {
+        RightDrawerSortSwitchAction actionMessage = new RightDrawerSortSwitchAction();
+        actionMessage.viewRadioType = viewRadioType;
+        actionMessage.sortType = sortType;
+        actionMessage.isChecked = isChecked;
+        messageSortSwitchActionToWorkflowList.setValue(actionMessage);
+    }
+
+    public void openRightDrawer() {
+        openRightDrawer.setValue(true);
+    }
+
+    public void receiveMessageToggleRadioButton(int[] message) {
+        receiveMessageToggleRadioButton.setValue(message);
+    }
+
+    public void receiveMessageToggleSwitch(int[] message) {
+        receiveMessageToggleSwitch.setValue(message);
+    }
+
+    public void receiveMessageUpdateSortSelection(int sorType) {
+        receiveMessageUpdateSortSelected.setValue(sorType);
+    }
+
+    public void receiveMessageBaseFilterSelectedToListUi(int resLabel) {
+        receiveMessageBaseFilterSelected.setValue(resLabel);
     }
 
     public void getUser(int id) {
@@ -128,6 +248,25 @@ public class MainActivityViewModel extends ViewModel {
     protected void onCreateOptionsMenu() {
         int defaultMenu = R.menu.menu_search;
 
+    }
+
+    // Called from workflow list.
+    public void invalidateOptionListDrawer() {
+        invalidateOptionsList.setValue(true);
+    }
+
+    public void createRightDrawerListAdapter(List<WorkflowTypeMenu> menus) {
+        filtersList = menus;
+        setRightDrawerFilterList.setValue(filtersList);
+    }
+
+    public void createRightDrawerOptionListAdapter(OptionsList rightOptionsList) {
+//        optionsList = menus;
+        setRightDrawerOptionList.setValue(rightOptionsList);
+    }
+
+    public void createDrawerBaseFiltersOptionListAdapter(OptionsList optionsList) {
+        receiveMessageCreateBaseFiltersAdapter.setValue(optionsList);
     }
 
     private void onWorkflowSuccess(Workflow workflow) {

@@ -18,24 +18,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
-import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
-import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowBinding;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowFiltersMenuBinding;
+import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
+import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
+import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.WorkFlowCreateFragment;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
+import com.rootnetapp.rootnetintranet.ui.main.MainActivityViewModel;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowExpandableAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowTypeSpinnerAdapter;
 
 import java.util.List;
 
@@ -50,25 +51,27 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     private WorkflowFiltersMenuBinding workflowFiltersMenuBinding;
     private MainActivityInterface mainActivityInterface;
     private WorkflowExpandableAdapter adapter;
-    private String[] types;
-    private int[] typeIds;
     private BottomSheetBehavior bottomSheetBehavior;
 
-    protected static final int SWITCH_NUMBER = 500;
-    protected static final int SWITCH_CREATED_DATE = 501;
-    protected static final int SWITCH_UPDATED_DATE = 502;
-    protected static final int RADIO_NUMBER = 600;
-    protected static final int RADIO_CREATED_DATE = 601;
-    protected static final int RADIO_UPDATED_DATE = 602;
-    protected static final int RADIO_CLEAR_ALL = 603;
-    protected static final int SWITCH_PENDING = 700;
-    protected static final int SWITCH_STATUS = 701;
-    protected static final int SELECT_TYPE = 702;
 
-    protected static final int CHECK = 11;
-    protected static final int UNCHECK = 10;
-    protected static final int INDEX_TYPE = 0;
-    protected static final int INDEX_CHECK = 1;
+
+    public static final int SWITCH_NUMBER = 500;
+    public static final int SWITCH_CREATED_DATE = 501;
+    public static final int SWITCH_UPDATED_DATE = 502;
+    public static final int RADIO_NUMBER = 600;
+    public static final int RADIO_CREATED_DATE = 601;
+    public static final int RADIO_UPDATED_DATE = 602;
+    public static final int RADIO_CLEAR_ALL = 603;
+    public static final int SWITCH_PENDING = 700;
+    public static final int SWITCH_STATUS = 701;
+    public static final int SELECT_TYPE = 702;
+
+    public static final int CHECK = 11;
+    public static final int UNCHECK = 10;
+    public static final int INDEX_TYPE = 0;
+    public static final int INDEX_CHECK = 1;
+
+    MainActivityViewModel mainViewModel;
 
 
     // Used when we have a general workflow.
@@ -111,12 +114,17 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .of(this, workflowViewModelFactory)
                 .get(WorkflowViewModel.class);
 
+        mainViewModel = ViewModelProviders
+                .of(getActivity())
+                .get(MainActivityViewModel.class);
+
         setupWorkflowRecyclerView();
         setupClickListeners();
         setupSearchListener();
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         workflowViewModel.initWorkflowList(prefs, this);
         subscribe();
+        workflowViewModel.iniRightDrawerFilters();
         return view;
     }
 
@@ -161,11 +169,17 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         adapter.submitList(workflowDbList);
     }
 
+    private void createFilterListRightDrawer(List<WorkflowTypeMenu> menus) {
+        mainViewModel.createRightDrawerListAdapter(menus);
+    }
+
+    private void createOptionListRightDrawer(OptionsList optionsList) {
+        mainViewModel.createRightDrawerOptionListAdapter(optionsList);
+    }
+
     private void setupClickListeners() {
         fragmentWorkflowBinding.btnFilters.setOnClickListener(view1 -> {
-            PopupWindow popupwindow_obj = initPopMenu();
-            popupwindow_obj.showAsDropDown(fragmentWorkflowBinding.btnFilters, -40, 18);
-            subscribeToTypeMenu();
+            mainViewModel.openRightDrawer();
         });
 
         fragmentWorkflowBinding.btnAdd.setOnClickListener(view12 -> {
@@ -214,6 +228,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     }
 
     private void subscribe() {
+
         final Observer<Integer> errorObserver = ((Integer data) -> {
             //Utils.hideLoading();
             if (null != data) {
@@ -269,6 +284,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             adapter.setAllCheckboxes(isChecked);
         });
 
+        // Workflow Fragment's ViewModel
         workflowViewModel.getObservableError().observe(this, errorObserver);
         workflowViewModel.getObservableShowLoading().observe(this, showLoadingObserver);
         addWorkflowsObserver();
@@ -282,10 +298,92 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.getObservableSetSelectType().observe(this, setSelectTypeObserver);
         workflowViewModel.showBottomSheetLoading.observe(this, this::showBottomSheetLoading);
         workflowViewModel.getObservableLoadMore().observe(this, this::showBottomSheetLoading);
+        workflowViewModel.clearFilters.observe(this, this::clearFilters);
+        subscribeToTypeMenu();
+        workflowViewModel.rightDrawerFilterMenus.observe(this, this::createFilterListRightDrawer);
+        workflowViewModel.rightDrawerOptionMenus.observe(this, this::createOptionListRightDrawer);
+        workflowViewModel.invalidateDrawerOptionsList.observe(this, this::handleInvalidateOptionsList);
+        workflowViewModel.messageMainToggleRadioButton.observe(this, this::handleMessageMainToggleRadioButton);
+        workflowViewModel.messageMainToggleSwitch.observe(this, this::handleMessageMainToggleSwitch);
+        workflowViewModel.messageMainUpdateSortSelection.observe(this, this::handleMessageMainUpdateSortSelection);
+        workflowViewModel.messageMainBaseFilters.observe(this, this::handleMessageMainBaseFilters);
+        workflowViewModel.messageMainBaseFilterSelectionToFilterList.observe(this, this::handleMessageMainBaseFilterSelected);
+
+        // MainActivity's ViewModel
+        mainViewModel.messageContainerToWorkflowList.observe(this, this::handleRightDrawerFilterClick);
+        mainViewModel.messageBackActionToWorkflowList.observe(this, this::handleBackAction);
+        mainViewModel.messageOptionSelectedToWorkflowList.observe(this, this::handleRightDrawerOptionSelectedClick);
+        mainViewModel.messageInitSortByToWorkflowList.observe(this, this::handleInitSortBy);
+        mainViewModel.messageRadioButtonClickedToWorkflowList.observe(this, this::handleMessageRadioButtonClickedToWorkflowList);
+        mainViewModel.messageSortSwitchActionToWorkflowList.observe(this, this::handleMessageSortSwitchActionToWorkflowList);
+        mainViewModel.messageBaseFiltersClickedToWorkflowList.observe(this, this::handleMessageBaseFiltersClicked);
+        mainViewModel.messageBaseFilterPositionSelectedToWorkflowList.observe(this, this::handleMessageBaseFilterPositionSelected);
+    }
+
+    private void handleMessageMainBaseFilterSelected(Integer resLabel) {
+        mainViewModel.receiveMessageBaseFilterSelectedToListUi(resLabel);
+    }
+
+    private void handleMessageBaseFilterPositionSelected(Integer position) {
+        workflowViewModel.handleBaseFieldPositionSelected(position, this);
+    }
+
+    private void handleMessageMainBaseFilters(OptionsList optionsList) {
+        mainViewModel.createDrawerBaseFiltersOptionListAdapter(optionsList);
+    }
+
+    private void handleMessageBaseFiltersClicked(Boolean clicked) {
+        workflowViewModel.handleBaseFieldClick();
+    }
+
+    private void handleMessageMainUpdateSortSelection(int sortType) {
+        mainViewModel.receiveMessageUpdateSortSelection(sortType);
+    }
+
+    private void handleMessageSortSwitchActionToWorkflowList(RightDrawerSortSwitchAction actionMessage) {
+        workflowViewModel.handleSwitchOnClick(
+                actionMessage.viewRadioType,
+                actionMessage.sortType,
+                actionMessage.isChecked
+        );
+        workflowViewModel.applyFilters();
+    }
+
+    private void handleMessageRadioButtonClickedToWorkflowList(int[] message) {
+        workflowViewModel.receiveMessageRadioButtonClicked(message);
+        workflowViewModel.applyFilters();
+    }
+
+    private void handleMessageMainToggleSwitch(int[] message) {
+        mainViewModel.receiveMessageToggleSwitch(message);
+    }
+
+    private void handleMessageMainToggleRadioButton(int[] message) {
+        mainViewModel.receiveMessageToggleRadioButton(message);
+    }
+
+    private void handleInitSortBy(Boolean init) {
+        workflowViewModel.initSortBy();
+    }
+
+    private void handleRightDrawerOptionSelectedClick(int position) {
+        workflowViewModel.handleOptionSelected(position, WorkflowFragment.this);
+    }
+
+    private void handleRightDrawerFilterClick(int position) {
+        workflowViewModel.handleSelectedItemInFilters(position);
+    }
+
+    private void handleInvalidateOptionsList(Boolean invalidate) {
+        mainViewModel.invalidateOptionListDrawer();
+    }
+
+    private void handleBackAction(Boolean back) {
+        workflowViewModel.handleRightDrawerBackAction();
     }
 
     private void subscribeToTypeMenu() {
-        final Observer<List<WorkflowTypeItemMenu>> typeListMenuObserver = (list -> {
+        final Observer<List<WorkflowTypeMenu>> typeListMenuObserver = (list -> {
             if (list == null) {
                 return;
             }
@@ -294,23 +392,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.getObservableTypeItemMenu().observe(this, typeListMenuObserver);
     }
 
-    private PopupWindow initPopMenu() {
-        final PopupWindow popupWindow = new PopupWindow(getContext());
-
-        // inflate your layout or dynamically add view
-        workflowFiltersMenuBinding =
-                DataBindingUtil.inflate(getLayoutInflater(), R.layout.workflow_filters_menu, null, false);
-        popupWindow.setFocusable(true);
-        popupWindow.setWidth((int) getResources().getDimension(R.dimen.filters_width));
-        popupWindow.setHeight((int) getResources().getDimension(R.dimen.filters_height));
-        popupWindow.setContentView(workflowFiltersMenuBinding.getRoot());
-        workflowViewModel.initSortBy();
-        workflowViewModel.initFilters();
-        setFilterBoxListeners();
-        return popupWindow;
-    }
-
-    private void setupSpinnerWorkflowType(List<WorkflowTypeItemMenu> itemMenus) {
+    private void setupSpinnerWorkflowType(List<WorkflowTypeMenu> itemMenus) {
         if (this.getContext() == null) {
             return;
         }
@@ -318,31 +400,13 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             return;
         }
 
-        typeIds = new int[itemMenus.size()];
-        types = new String[itemMenus.size()];
-        typeIds[0] = WorkflowViewModel.NO_TYPE_SELECTED;
-        types[0] = getString(R.string.no_selection);
-        WorkflowTypeItemMenu menu;
-        int until = itemMenus.size();
-        for (int i = 1; i < until; i++) {
-            menu = itemMenus.get(i);
-            typeIds[i] = menu.getId();
-            types[i] = itemMenus.get(i).name;
-        }
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                getContext(),
-                android.R.layout.simple_spinner_item,
-                types
-        );
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        WorkflowTypeSpinnerAdapter adapter = new WorkflowTypeSpinnerAdapter(inflater, itemMenus);
 
         workflowFiltersMenuBinding.spnWorkflowtype.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (types == null || typeIds == null) {
-                    return;
-                }
-                int workflowTypeId = typeIds[position];
-                workflowViewModel.loadWorkflowsByType(workflowTypeId, WorkflowFragment.this);
+                workflowViewModel.loadWorkflowsByType(position, WorkflowFragment.this);
                 prepareWorkflowListWithFilters();
             }
 
@@ -355,65 +419,28 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowFiltersMenuBinding.spnWorkflowtype.setAdapter(adapter);
     }
 
+
+
     private void prepareWorkflowListWithFilters() {
         boolean isCheckedMyPendings = workflowFiltersMenuBinding.swchMyworkflows.isChecked();
         boolean isCheckedStatus = workflowFiltersMenuBinding.swchStatus.isChecked();
         int typeIdPositionInArray = workflowFiltersMenuBinding.spnWorkflowtype.getSelectedItemPosition();
-        int workflowTypeId = typeIds[typeIdPositionInArray];
+
         workflowViewModel.handleWorkflowTypeFilters(
                 WorkflowFragment.this,
-                workflowTypeId,
                 typeIdPositionInArray,
                 isCheckedMyPendings,
                 isCheckedStatus);
     }
 
-    private void onRadioButtonClicked(View view) {
-        boolean checked = ((RadioButton) view).isChecked();
-        workflowViewModel.handleRadioButtonClicked(checked, view.getId());
-        prepareWorkflowListWithFilters();
+    private void clearFilters(Boolean clear) {
+        if (workflowFiltersMenuBinding == null) {
+            return;
+        }
+        workflowFiltersMenuBinding.swchMyworkflows.setChecked(false);
+        workflowFiltersMenuBinding.swchStatus.setChecked(true);
+        workflowFiltersMenuBinding.spnWorkflowtype.setSelection(WorkflowViewModel.NO_TYPE_SELECTED);
     }
-
-
-    private void setFilterBoxListeners() {
-        // filter switch listeners
-        workflowFiltersMenuBinding.swchMyworkflows.setOnClickListener(view -> {
-            boolean isChecked = workflowFiltersMenuBinding.swchMyworkflows.isChecked();
-            workflowViewModel.loadMyPendingWorkflows(isChecked, this);
-        });
-
-        workflowFiltersMenuBinding.swchStatus.setOnClickListener(view -> prepareWorkflowListWithFilters());
-
-        // radio button listeners
-        workflowFiltersMenuBinding.chbxWorkflownumber.setOnClickListener(this::onRadioButtonClicked);
-        workflowFiltersMenuBinding.chbxCreatedate.setOnClickListener(this::onRadioButtonClicked);
-        workflowFiltersMenuBinding.chbxUpdatedate.setOnClickListener(this::onRadioButtonClicked);
-
-        // ascending / descending listeners
-
-        workflowFiltersMenuBinding.swchWorkflownumber.setOnClickListener(view -> {
-            Switch aSwitch = ((Switch)view);
-            boolean isChecked = aSwitch.isChecked();
-            workflowViewModel.handleSwitchOnClick(RADIO_NUMBER, Sort.sortType.BYNUMBER, isChecked);
-            setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchWorkflownumber, isChecked);
-            prepareWorkflowListWithFilters();
-        });
-        workflowFiltersMenuBinding.swchCreatedate.setOnClickListener(view -> {
-            Switch aSwitch = ((Switch)view);
-            boolean isChecked = aSwitch.isChecked();
-            workflowViewModel.handleSwitchOnClick(RADIO_CREATED_DATE, Sort.sortType.BYCREATE, isChecked);
-            setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchCreatedate, isChecked);
-            prepareWorkflowListWithFilters();
-        });
-        workflowFiltersMenuBinding.swchUpdatedate.setOnClickListener(view -> {
-            Switch aSwitch = ((Switch)view);
-            boolean isChecked = aSwitch.isChecked();
-            workflowViewModel.handleSwitchOnClick(RADIO_UPDATED_DATE, Sort.sortType.BYUPDATE, isChecked);
-            setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchUpdatedate, isChecked);
-            prepareWorkflowListWithFilters();
-        });
-    }
-
 
     private void toggleAscendingDescendingSwitch(int switchType, boolean check) {
         switch (switchType) {

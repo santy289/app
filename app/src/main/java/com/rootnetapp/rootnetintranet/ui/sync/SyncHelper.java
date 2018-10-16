@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.sync;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.BuildConfig;
@@ -31,6 +32,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -47,6 +49,7 @@ public class SyncHelper {
     private MutableLiveData<Boolean> attemptTokenRefresh;
     private MutableLiveData<Boolean> goToDomain;
     private MutableLiveData<String> saveToPreference;
+    protected MutableLiveData<Integer> saveIdToPreference;
 
     private ApiInterface apiInterface;
     private AppDatabase database;
@@ -67,6 +70,7 @@ public class SyncHelper {
         this.workflows = new ArrayList<>();
         this.workflowDbs = new ArrayList<>();
         this.profiles = new ArrayList<>();
+        this.saveIdToPreference = new MutableLiveData<>();
     }
 
     protected void syncData(String token) {
@@ -188,7 +192,25 @@ public class SyncHelper {
             return true;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::success, this::onWorkflowTypesDbFailure);
+                .subscribe(
+                        success -> onDatabaseSavedWorkflowTypeDb(),
+                        this::onWorkflowTypesDbFailure
+                );
+        disposables.add(disposable);
+    }
+
+    private void onDatabaseSavedWorkflowTypeDb() {
+        Disposable disposable = apiInterface
+                .getCategoryListId(auth)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(categoryListResponse -> {
+                    int id = categoryListResponse.getCategoryList();
+                    saveIdToPreference.setValue(id);
+                    success(true);
+                }, throwable -> {
+                    Log.d(TAG, "onDatabaseSavedWorkflowTypeDb: Something went wrong trying to get category list id: " + throwable.getMessage());
+                });
         disposables.add(disposable);
     }
 
@@ -239,18 +261,6 @@ public class SyncHelper {
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe(this::onUsersSuccess, throwable -> {
                     Log.d(TAG, "getData: error " + throwable.getMessage() );
-                    handleNetworkError(throwable);
-                });
-        disposables.add(disposable);
-    }
-
-    private void getWorkflowTypes(String token) {
-        Disposable disposable = apiInterface
-                .getWorkflowTypes(token)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onWorkflowTypesSuccess, throwable -> {
-                    Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
                     handleNetworkError(throwable);
                 });
         disposables.add(disposable);

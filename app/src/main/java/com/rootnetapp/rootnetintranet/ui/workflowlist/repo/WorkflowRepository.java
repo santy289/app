@@ -8,20 +8,26 @@ import android.arch.paging.PagedList;
 import android.arch.persistence.db.SimpleSQLiteQuery;
 import android.arch.persistence.db.SupportSQLiteQuery;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
+import com.rootnetapp.rootnetintranet.data.local.db.user.UserDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
 
 import org.w3c.dom.Text;
 
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
@@ -30,10 +36,12 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.NO_TYPE_SELECTED;
+
 public class WorkflowRepository implements IncomingWorkflowsCallback {
 
-    public static int ENDPOINT_PAGE_SIZE = 5;
-    private static int LIST_PAGE_SIZE = 5;
+    public static int ENDPOINT_PAGE_SIZE = 20;
+    private static int LIST_PAGE_SIZE = 20;
     public final static String WORKFLOWID = "workflowdb.id";
     public final static String WORKFLOW_CREATED = "workflowdb.created_at";
     public final static String WORKFLOW_UPDATED = "workflowdb.updated_at";
@@ -53,6 +61,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     public MutableLiveData<Boolean> showLoadMore;
     private WorkflowListBoundaryCallback callback;
     private PagedList.Config pagedListConfig;
+    private UserDao profileDao;
 
     private final static String TAG = "WorkflowRepository";
     private final CompositeDisposable disposables = new CompositeDisposable();
@@ -65,6 +74,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         this.database = database;
         workflowDbDao = this.database.workflowDbDao();
         workflowTypeDbDao = this.database.workflowTypeDbDao();
+        this.profileDao = this.database.userDao();
         pagedListConfig = (new PagedList.Config.Builder())
                     .setEnablePlaceholders(false)
                     .setPageSize(LIST_PAGE_SIZE)
@@ -85,6 +95,11 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         insertWorkflows(workflowsResponse);
     }
 
+    public Observable<ListsResponse> getList(String auth, int id) {
+        return service.getListItems(auth, id).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     @Override
     public void showLoadingMore(boolean show) {
         showLoadMore.setValue(show);
@@ -92,6 +107,10 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
 
     public LiveData<List<WorkflowTypeItemMenu>> getWorkflowTypeMenuItems() {
         return workflowTypeMenuItems;
+    }
+
+    public List<WorkflowTypeItemMenu> getWorkflowTypesForMenu() {
+        return workflowTypeDbDao.getTypesForMenu();
     }
 
     public LiveData<PagedList<WorkflowListItem>> getAllWorkflows() {
@@ -117,23 +136,8 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
 //        allWorkflows = new LivePagedListBuilder<>(dataSourceFactory, pagedListConfig).build();
     }
 
-    public void getWorkflowsByType(String token, int typeId) {
-        currentPage = 1;
-        Disposable disposable = service
-                .getWorkflowsByType(
-                        token,
-                        50,
-                        true,
-                        1,
-                        false,
-                        typeId)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::workflowDbSuccessNoFilter, throwable -> {
-                    Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
-                    handleRepoError.postValue(true);
-                });
-        disposables.add(disposable);
+    public List<FormFieldsByWorkflowType> getFiedsByWorkflowType(int byId) {
+        return workflowTypeDbDao.getFields(byId);
     }
 
     public void setWorkflowListByType(String token, int typeId) {
@@ -327,7 +331,8 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                         true,
                         1,
                         false,
-                        profileId)
+                        profileId,
+                        null)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::workflowDbSuccess, throwable -> {
@@ -338,22 +343,44 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         disposables.add(disposable);
     }
 
-    private void workflowDbSuccess(WorkflowResponseDb workflowsResponse) {
-        Disposable disposable = Observable.fromCallable(() -> {
-            WorkflowDbDao workflowDbDao = database.workflowDbDao();
-            workflowDbDao.deleteAllWorkflows();
-            workflowDbDao.insertWorkflows(workflowsResponse.getList());
-            return true;
-        }).subscribeOn(Schedulers.newThread())
+
+
+    public void getWorkflowsByType(String token, int typeId) {
+        currentPage = 1;
+        Disposable disposable = service
+                .getWorkflowsByType(
+                        token,
+                        50,
+                        true,
+                        1,
+                        false,
+                        typeId)
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(success -> {
-                    Log.d(TAG, "workflowDbSuccess: ");
-                    handleRepoSuccess.postValue(true);
-                }, throwable -> {
-                    Log.d(TAG, "getWorkflowDbSuccess: error " + throwable.getMessage());
+                .subscribe(this::workflowDbSuccessNoFilter, throwable -> {
+                    Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
                     handleRepoError.postValue(true);
                 });
+        disposables.add(disposable);
+    }
 
+
+
+    public void getWorkflowsByBaseFilters(String token, Map<String, Object> options) {
+        Disposable disposable = service
+                .getWorkflowsByBaseFilters(
+                        token,
+                        50,
+                        true,
+                        1,
+                        false,
+                        options)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::workflowDbSuccessNoFilter, throwable -> {
+                    Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
+                    handleRepoError.postValue(true);
+                });
         disposables.add(disposable);
     }
 
@@ -375,6 +402,37 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         disposables.add(disposable);
     }
 
+    public Observable<WorkflowResponseDb> getWorkflowsByFieldFilters(String token, int workflowTypeId, String metaData) {
+        return service.getWorkflowsDbFilteredByDynamicFields(
+                token,
+                50,
+                true,
+                1,
+                false,
+                workflowTypeId,
+                metaData
+        );
+    }
+
+    public void workflowDbSuccess(WorkflowResponseDb workflowsResponse) {
+        Disposable disposable = Observable.fromCallable(() -> {
+            WorkflowDbDao workflowDbDao = database.workflowDbDao();
+            workflowDbDao.deleteAllWorkflows();
+            workflowDbDao.insertWorkflows(workflowsResponse.getList());
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(success -> {
+                    Log.d(TAG, "workflowDbSuccess: ");
+                    handleRepoSuccess.postValue(true);
+                }, throwable -> {
+                    Log.d(TAG, "getWorkflowDbSuccess: error " + throwable.getMessage());
+                    handleRepoError.postValue(true);
+                });
+
+        disposables.add(disposable);
+    }
+
     private void workflowDbSuccessNoFilter(WorkflowResponseDb workflowsResponse) {
         Disposable disposable = Observable.fromCallable(() -> {
             WorkflowDbDao workflowDbDao = database.workflowDbDao();
@@ -392,6 +450,15 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 });
 
         disposables.add(disposable);
+    }
+
+    public List<FormCreateProfile> getProfiles() {
+        return profileDao.getAllProfiles();
+    }
+
+    public Observable<ListsResponse> getCategoryList(String auth, int id) {
+        return service.getListItems(auth, id).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public LiveData<Boolean> getObservableHandleRepoError() {

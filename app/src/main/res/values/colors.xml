@@ -24,6 +24,8 @@
     <color name="unselected_filter_text">#c6cedc</color>
     <color name="grey_bg">#f6f6f6</color>
 
+    <color name="dark_gray">#808080</color>
+
     <color name="text_orange">#d2b04f</color>
     <color name="text_yellow">#bdc372</color>
     <color name="text_red">#ab2328</color>

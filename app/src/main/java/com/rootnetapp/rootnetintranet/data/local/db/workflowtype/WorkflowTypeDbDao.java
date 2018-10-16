@@ -42,10 +42,13 @@ public interface WorkflowTypeDbDao {
     @Query("SELECT * FROM workflowtypedb")
     public LiveData<List<WorkflowTypeDb>> getObservableWorkflowTypes();
 
-    @Query("SELECT id, name FROM workflowtypedb")
+    @Query("SELECT id, name, category FROM workflowtypedb")
     public LiveData<List<WorkflowTypeItemMenu>> getObservableTypesForMenu();
 
-    @Query("SELECT id, name FROM workflowtypedb")
+    @Query("SELECT id, name, category FROM workflowtypedb")
+    public List<WorkflowTypeItemMenu> getTypesForMenu();
+
+    @Query("SELECT id, name, category FROM workflowtypedb")
     public List<WorkflowTypeItemMenu> getListOfWorkflowNames();
 
     @Query("SELECT field.id AS id, field.field_id AS fieldId, workflowtypedb.id AS workflowTypeId, " +

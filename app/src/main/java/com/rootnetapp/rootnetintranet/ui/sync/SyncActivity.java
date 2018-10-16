@@ -67,6 +67,11 @@ public class SyncActivity extends AppCompatActivity {
         sharedPref.edit().putString(key, content).apply();
     }
 
+    private void saveIntegerInPreference(String key, Integer id) {
+        SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        sharedPref.edit().putInt(key, id).apply();
+    }
+
     private void subscribe() {
         subscribeForLogin();
         final Observer<Boolean> syncObserver = ((Boolean data) -> {
@@ -96,6 +101,7 @@ public class SyncActivity extends AppCompatActivity {
         syncHelper.getObservableAttemptTokenRefresh().observe(this, attemptTokenRefreshObserver);
         syncHelper.getObservableSavetoPreference().observe(this, saveToPreferenceObserver);
         syncHelper.getObservableGoToDomain().observe(this, goToDomainObserver);
+        syncHelper.saveIdToPreference.observe(this, integer -> saveIntegerInPreference("category_id", integer));
     }
 
 }

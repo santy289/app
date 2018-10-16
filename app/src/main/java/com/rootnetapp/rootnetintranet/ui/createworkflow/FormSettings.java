@@ -18,6 +18,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.ProductJsonValue;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.role.Role;
 import com.rootnetapp.rootnetintranet.models.responses.services.Service;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 import com.squareup.moshi.JsonAdapter;
@@ -80,7 +81,6 @@ public class FormSettings {
     public static final String VALUE_ENTITY = "entity";
     public static final String VALUE_COORD = "coords";
 
-    public static final int PA_CODE = 1;
     public static final int FIELD_CODE_ID = -999;
     public static final int FIELD_CURRENCY_ID = -998;
 
@@ -270,6 +270,20 @@ public class FormSettings {
         format(metaData, typeInfo, fieldData);
         return metaData;
     }
+
+    public WorkflowMetas formatMetaData(WorkflowMetas metaData, FieldData fieldData, FieldConfig fieldConfig) {
+       TypeInfo typeInfo = fieldConfig.getTypeInfo();
+        if (typeInfo == null) {
+            return metaData;
+        }
+        boolean rememberRealValue = fieldData.isMultipleSelection;
+        fieldData.isMultipleSelection = true;
+        format(metaData, typeInfo, fieldData);
+        fieldData.isMultipleSelection = rememberRealValue;
+        return metaData;
+    }
+
+
 
     private void format(WorkflowMetas metaData, TypeInfo typeInfo, FieldData fieldData) {
         String value = metaData.getUnformattedValue();
@@ -742,10 +756,6 @@ public class FormSettings {
 
     }
 
-
-
-
-
     private String findMachineNameBy(int id) {
         FormFieldsByWorkflowType field;
         for (int i = 0; i < fields.size(); i++) {
@@ -756,7 +766,6 @@ public class FormSettings {
         }
         return "";
     }
-
 
     public void setFieldItems(ArrayList<FieldData> fieldItems) {
         this.fieldItems = fieldItems;
@@ -778,4 +787,8 @@ public class FormSettings {
         }
         fields.subList(1, fields.size()).clear();
     }
+
+
+
+
 }

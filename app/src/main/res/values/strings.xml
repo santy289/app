@@ -86,8 +86,8 @@
     <string name="my_workflows">Pending Workflows</string>
     <string name="sorting">Sort By</string>
     <string name="workflow_number">Workflow Number</string>
-    <string name="updated_date">Updated Date</string>
-    <string name="created_date">Created Date</string>
+    <string name="updated_date">Date Updated</string>
+    <string name="created_date">Date Created</string>
     <string name="descending">Descending</string>
     <string name="ascending">Ascending</string>
     <string name="workflow_name">Workflow Name</string>
@@ -191,4 +191,11 @@
     <string name="choose_a_workflow">Choose a workflow type to continue.</string>
     <string name="loading">Loading</string>
     <string name="file_too_big">File is too big, limit is 10MB</string>
+    <string name="clear_filters">Clear Filters</string>
+    <string name="no_category">No Category</string>
+    <string name="base_filters">Base Filters</string>
+    <string name="all">All</string>
+    <string name="on_time">On Time</string>
+    <string name="latest">Latest</string>
+    <string name="dynamic_filters">Dynamic Filters</string>
 </resources>

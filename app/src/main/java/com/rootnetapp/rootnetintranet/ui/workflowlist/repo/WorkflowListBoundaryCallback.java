@@ -91,7 +91,8 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
                             true,
                             nextPage,
                             false,
-                            userId)
+                            userId,
+                            null)
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(

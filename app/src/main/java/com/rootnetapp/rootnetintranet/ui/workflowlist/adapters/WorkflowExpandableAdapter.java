@@ -63,6 +63,7 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
 
     @Override
     public WorkflowViewholder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        // TODO specify the layout in here, it is taking the entire binding list.
         Context context = viewGroup.getContext();
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         WorkflowItemBinding itemBinding =

@@ -645,7 +645,7 @@
                     <Button
                         android:id="@+id/btn_upload"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:backgroundTint="@color/green"
                         android:text="@string/upload"
                         android:textColor="@color/white" />
@@ -683,42 +683,62 @@
 
                 </LinearLayout>
 
-                <RelativeLayout
+                <android.support.constraint.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-                    <Button
-                        android:id="@+id/btn_comment"
-                        android:layout_width="120dp"
+                    <Switch
+                        android:id="@+id/switch_private_public"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginBottom="10dp"
-                        android:backgroundTint="@color/green"
-                        android:text="@string/add_comment"
-                        android:textColor="@color/white" />
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/public_comment"
+                        android:switchPadding="8dp"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <android.support.v7.widget.AppCompatEditText
                         android:id="@+id/input_comment"
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
+                        android:layout_width="0dp"
+                        android:layout_height="45dp"
                         android:layout_centerVertical="true"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginEnd="8dp"
                         android:layout_toStartOf="@id/btn_comment"
                         android:background="@drawable/spinner_bg"
-                        android:paddingBottom="5dp"
-                        android:paddingEnd="10dp"
                         android:paddingStart="10dp"
                         android:paddingTop="5dp"
-                        android:textSize="15sp" />
+                        android:paddingEnd="10dp"
+                        android:paddingBottom="5dp"
+                        android:textSize="15sp"
+                        app:layout_constraintEnd_toStartOf="@+id/btn_comment"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/switch_private_public" />
 
-                </RelativeLayout>
+                    <Button
+                        android:id="@+id/btn_comment"
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:backgroundTint="@color/green"
+                        android:text="@string/comment"
+                        android:textColor="@color/white"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/switch_private_public" />
 
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/rec_comments"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="40dp" />
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/rec_comments"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/input_comment" />
+
+                </android.support.constraint.ConstraintLayout>
 
             </LinearLayout>
 

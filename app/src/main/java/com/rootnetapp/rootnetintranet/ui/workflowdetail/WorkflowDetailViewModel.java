@@ -41,7 +41,7 @@ public class WorkflowDetailViewModel extends ViewModel {
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
-
+    private boolean isPrivateComment = false;
 
     public WorkflowDetailViewModel(WorkflowDetailRepository workflowDetailRepository) {
         this.repository = workflowDetailRepository;
@@ -56,6 +56,10 @@ public class WorkflowDetailViewModel extends ViewModel {
         getWorkflow(token, workflow.getWorkflowId());
         getWorkflowType(token, workflow.getWorkflowTypeId());
         getComments(token, workflow.getWorkflowId());
+    }
+
+    protected void commentIsPrivate(boolean isPrivate) {
+        this.isPrivateComment = isPrivate;
     }
 
 

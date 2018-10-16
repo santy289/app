@@ -126,6 +126,8 @@ public class WorkflowDetailFragment extends Fragment {
         return view;
     }
 
+
+
     private void setClickListeners() {
         binding.hdrGraph.setOnClickListener(this::headerClicked);
         binding.hdrImportant.setOnClickListener(this::headerClicked);
@@ -136,6 +138,11 @@ public class WorkflowDetailFragment extends Fragment {
         binding.btnComment.setOnClickListener(this::comment);
         binding.btnAttachment.setOnClickListener(this::showFileChooser);
         binding.btnUpload.setOnClickListener(this::uploadFiles);
+        binding.switchPrivatePublic.setOnCheckedChangeListener(((buttonView, isChecked) -> {
+            String state = isChecked ? getString(R.string.private_comment) : getString(R.string.public_comment);
+            binding.switchPrivatePublic.setText(state);
+            workflowDetailViewModel.commentIsPrivate(isChecked);
+        }));
     }
 
     private void headerClicked(View view) {

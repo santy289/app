@@ -198,4 +198,6 @@
     <string name="on_time">On Time</string>
     <string name="latest">Latest</string>
     <string name="dynamic_filters">Dynamic Filters</string>
+    <string name="public_comment">Public</string>
+    <string name="private_comment">Private</string>
 </resources>

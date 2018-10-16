@@ -123,7 +123,7 @@
     <string name="upload">SUBIR</string>
     <string name="versions">Versiones</string>
     <string name="comments">COMENTARIOS</string>
-    <string name="comment">Comentario</string>
+    <string name="comment">Comentar</string>
     <string name="empty_comment">El comentario no puede estar vacío</string>
     <string name="error_comment">Error en subir el comentario</string>
     <string name="uploaded_file">Archivo para subir: </string>
@@ -197,4 +197,6 @@
     <string name="on_time">A Tiempo</string>
     <string name="latest">Latest</string>
     <string name="dynamic_filters">Filtros Dinámicos</string>
+    <string name="public_comment">Público</string>
+    <string name="private_comment">Privado</string>
 </resources>

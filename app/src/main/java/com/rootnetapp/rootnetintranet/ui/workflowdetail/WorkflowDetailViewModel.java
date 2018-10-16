@@ -3,6 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
@@ -62,14 +63,18 @@ public class WorkflowDetailViewModel extends ViewModel {
     private void getWorkflowType(String auth, int typeId) {
         Disposable disposable = repository
                 .getWorkflowType(auth, typeId)
-                .subscribe(this::onTypeSuccess, this::onFailure);
+                .subscribe(this::onTypeSuccess, throwable -> {
+                    onFailure(throwable);
+                });
         disposables.add(disposable);
     }
 
     private void getWorkflow(String auth, int workflowId) {
         Disposable disposable = repository
                 .getWorkflow(auth, workflowId)
-                .subscribe(this::onWorkflowSuccess, this::onFailure);
+                .subscribe(this::onWorkflowSuccess, throwable -> {
+                    onFailure(throwable);
+                });
         disposables.add(disposable);
     }
 
@@ -90,7 +95,9 @@ public class WorkflowDetailViewModel extends ViewModel {
     private void getComments(String auth, int workflowId) {
         Disposable disposable = repository
                 .getComments(auth, workflowId)
-                .subscribe(this::onCommentsSuccess, this::onFailure);
+                .subscribe(this::onCommentsSuccess, throwable -> {
+                    onFailure(throwable);
+                });
         disposables.add(disposable);
     }
 
@@ -125,6 +132,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     }
 
     private void onCommentsSuccess(CommentsResponse commentsResponse) {
+        Log.d("TEST", "onCommentsSuccess: maybe");
         mCommentsLiveData.setValue(commentsResponse.getResponse());
     }
 

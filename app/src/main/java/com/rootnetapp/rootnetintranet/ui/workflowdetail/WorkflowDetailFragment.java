@@ -104,9 +104,7 @@ public class WorkflowDetailFragment extends Fragment {
         //TODO preferences inyectadas con Dagger
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         token = "Bearer "+ prefs.getString("token","");
-        //Utils.showLoading(getContext());
         binding.tvWorkflowproject.setText(item.getTitle());
-//        binding.tvWorkflowid.setText(binding.tvWorkflowid.getText()+" "+item.getWorkflowTypeKey());
         binding.detailWorkflowId.setText(item.getWorkflowTypeKey());
         binding.recSteps.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recApprovers.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -123,6 +121,7 @@ public class WorkflowDetailFragment extends Fragment {
         //fin testing
         files = new ArrayList<>();
         subscribe();
+        showLoading(true);
         workflowDetailViewModel.initDetails(token, item);
         return view;
     }
@@ -228,14 +227,22 @@ public class WorkflowDetailFragment extends Fragment {
         }
     }
 
-    private void comment(View view) {
+    private void showLoading(boolean show) {
+        if (show) {
+            Utils.showLoading(getContext());
+        } else {
+            Utils.hideLoading();
+        }
+    }
 
+    private void comment(View view) {
+        showLoading(true);
         String comment = binding.inputComment.getText().toString();
         binding.inputComment.setError(null);
         if (TextUtils.isEmpty(comment)) {
             binding.inputComment.setError(getString(R.string.empty_comment));
+            showLoading(false);
         } else {
-            Utils.showLoading(getContext());
             workflowDetailViewModel.postComment(token, item.getWorkflowId(), comment, files);
         }
     }
@@ -391,7 +398,12 @@ public class WorkflowDetailFragment extends Fragment {
         });
 
         final Observer<List<Comment>> commentsObserver = ((List<Comment> data) -> {
+            showLoading(false);
             if (null != data) {
+                int counter = data.size();
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("(").append(String.valueOf(counter)).append(")");
+                binding.detailMessageText.setText(stringBuilder.toString());
                 commentsAdapter = new CommentsAdapter(data);
                 binding.recComments.setAdapter(commentsAdapter);
             }else{
@@ -401,13 +413,14 @@ public class WorkflowDetailFragment extends Fragment {
         });
 
         final Observer<Comment> commentObserver = ((Comment data) -> {
-            Utils.hideLoading();
+            showLoading(false);
             if ((null != data) && (null != commentsAdapter)) {
                 commentsAdapter.comments.add(0, data);
-                commentsAdapter.notifyDataSetChanged();
+                commentsAdapter.notifyItemChanged(0);
             } else {
                 Toast.makeText(getContext(), getString(R.string.error_comment), Toast.LENGTH_LONG).show();
             }
+            binding.inputComment.setText("");
         });
 
         final Observer<Boolean> attachObserver = ((Boolean data) -> {
@@ -420,9 +433,8 @@ public class WorkflowDetailFragment extends Fragment {
         });
 
         final Observer<Integer> errorObserver = ((Integer data) -> {
+            showLoading(false);
             if (null != data) {
-                //TODO mejorar toast
-                Utils.hideLoading();
                 Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
             }
         });

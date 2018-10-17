@@ -285,6 +285,7 @@ public interface ApiInterface {
     Observable<CommentResponse> postComment(@Header("Authorization") String authorization,
                                             @Path("id") int workflowId,
                                             @Field("description") String description,
+                                            @Field("is_private") boolean isPrivate,
                                             @Field("files") List<CommentFile> files);
 
     @Headers({"Domain-Name: api"})

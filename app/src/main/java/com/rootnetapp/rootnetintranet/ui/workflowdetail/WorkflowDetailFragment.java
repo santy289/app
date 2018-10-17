@@ -126,7 +126,29 @@ public class WorkflowDetailFragment extends Fragment {
         return view;
     }
 
-
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case FILE_SELECT_CODE:
+                if (resultCode == RESULT_OK) {
+                    try {
+                        File file = new File(data.getData().toString());
+                        byte[] bytes = Utils.fileToByte(file);
+                        String filename = file.getName();
+                        //todo funcion actualizar texto
+                        binding.tvFileuploaded.setText(binding.tvFileuploaded.getText() + " " + filename);
+                        binding.btnAttachment.setText(R.string.remove_file);
+                        String encodedFile = Base64.encodeToString(bytes, Base64.DEFAULT);
+                        String fileType = Utils.getMimeType(data.getData(),getContext());
+                        fileRequest = new CommentFile(encodedFile, fileType, filename, (int)file.length());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 
     private void setClickListeners() {
         binding.hdrGraph.setOnClickListener(this::headerClicked);
@@ -139,10 +161,21 @@ public class WorkflowDetailFragment extends Fragment {
         binding.btnAttachment.setOnClickListener(this::showFileChooser);
         binding.btnUpload.setOnClickListener(this::uploadFiles);
         binding.switchPrivatePublic.setOnCheckedChangeListener(((buttonView, isChecked) -> {
-            String state = isChecked ? getString(R.string.private_comment) : getString(R.string.public_comment);
-            binding.switchPrivatePublic.setText(state);
+            updateSwitchUi(isChecked);
             workflowDetailViewModel.commentIsPrivate(isChecked);
         }));
+    }
+
+    private void updateSwitchUi(boolean isChecked) {
+        String state;
+        if (isChecked) {
+            state = getString(R.string.private_comment);
+            binding.switchPrivatePublic.setTextColor(getResources().getColor(R.color.colorAccent));
+        } else {
+            state = getString(R.string.public_comment);
+            binding.switchPrivatePublic.setTextColor(getResources().getColor(R.color.dark_gray));
+        }
+        binding.switchPrivatePublic.setText(state);
     }
 
     private void headerClicked(View view) {
@@ -243,15 +276,13 @@ public class WorkflowDetailFragment extends Fragment {
     }
 
     private void comment(View view) {
-        showLoading(true);
         String comment = binding.inputComment.getText().toString();
         binding.inputComment.setError(null);
         if (TextUtils.isEmpty(comment)) {
             binding.inputComment.setError(getString(R.string.empty_comment));
-            showLoading(false);
-        } else {
-            workflowDetailViewModel.postComment(token, item.getWorkflowId(), comment, files);
+            return;
         }
+        workflowDetailViewModel.postComment(comment, files);
     }
 
     private void uploadFiles(View view) {
@@ -304,29 +335,7 @@ public class WorkflowDetailFragment extends Fragment {
 
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case FILE_SELECT_CODE:
-                if (resultCode == RESULT_OK) {
-                    try {
-                        File file = new File(data.getData().toString());
-                        byte[] bytes = Utils.fileToByte(file);
-                        String filename = file.getName();
-                        //todo funcion actualizar texto
-                        binding.tvFileuploaded.setText(binding.tvFileuploaded.getText() + " " + filename);
-                        binding.btnAttachment.setText(R.string.remove_file);
-                        String encodedFile = Base64.encodeToString(bytes, Base64.DEFAULT);
-                        String fileType = Utils.getMimeType(data.getData(),getContext());
-                        fileRequest = new CommentFile(encodedFile, fileType, filename, (int)file.length());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                break;
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
+
 
     private void subscribe() {
         final Observer<Workflow> workflowObserver = ((Workflow data) -> {
@@ -407,10 +416,6 @@ public class WorkflowDetailFragment extends Fragment {
         final Observer<List<Comment>> commentsObserver = ((List<Comment> data) -> {
             showLoading(false);
             if (null != data) {
-                int counter = data.size();
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("(").append(String.valueOf(counter)).append(")");
-                binding.detailMessageText.setText(stringBuilder.toString());
                 commentsAdapter = new CommentsAdapter(data);
                 binding.recComments.setAdapter(commentsAdapter);
             }else{
@@ -420,7 +425,6 @@ public class WorkflowDetailFragment extends Fragment {
         });
 
         final Observer<Comment> commentObserver = ((Comment data) -> {
-            showLoading(false);
             if ((null != data) && (null != commentsAdapter)) {
                 commentsAdapter.comments.add(0, data);
                 commentsAdapter.notifyItemChanged(0);
@@ -454,6 +458,13 @@ public class WorkflowDetailFragment extends Fragment {
         workflowDetailViewModel.getObservableComment().observe(this, commentObserver);
         workflowDetailViewModel.getObservableAttach().observe(this, attachObserver);
         workflowDetailViewModel.getObservableError().observe(this, errorObserver);
+
+        workflowDetailViewModel.showLoading.observe(this, this::showLoading);
+        workflowDetailViewModel.setCommentHeaderCounter.observe(this, this::updateHeaderCommentCounter);
+    }
+
+    private void updateHeaderCommentCounter(String count) {
+        binding.detailMessageText.setText(count);
     }
 
 }

@@ -54,8 +54,14 @@ public class WorkflowDetailRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<CommentResponse> postComment(String auth, int workflowId, String comment, List<CommentFile> files) {
-        return service.postComment(auth, workflowId, comment, files).subscribeOn(Schedulers.newThread())
+    public Observable<CommentResponse> postComment(String auth, int workflowId, String comment, boolean isPrivate, List<CommentFile> files) {
+        return service.postComment(
+                auth,
+                workflowId,
+                comment,
+                isPrivate,
+                files)
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 

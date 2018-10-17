@@ -39,12 +39,19 @@ public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<Integer> mErrorLiveData;
     private WorkflowDetailRepository repository;
 
+    protected MutableLiveData<Boolean> showLoading;
+    protected MutableLiveData<String> setCommentHeaderCounter;
+
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     private boolean isPrivateComment = false;
+    private String token;
+    private WorkflowListItem workflow;
 
     public WorkflowDetailViewModel(WorkflowDetailRepository workflowDetailRepository) {
         this.repository = workflowDetailRepository;
+        this.showLoading = new MutableLiveData<>();
+        this.setCommentHeaderCounter = new MutableLiveData<>();
     }
 
     @Override
@@ -53,9 +60,11 @@ public class WorkflowDetailViewModel extends ViewModel {
     }
 
     protected void initDetails(String token, WorkflowListItem workflow) {
-        getWorkflow(token, workflow.getWorkflowId());
-        getWorkflowType(token, workflow.getWorkflowTypeId());
-        getComments(token, workflow.getWorkflowId());
+        this.token = token;
+        this.workflow = workflow;
+        getWorkflow(this.token, this.workflow.getWorkflowId());
+        getWorkflowType(this.token, this.workflow.getWorkflowTypeId());
+        getComments(this.token, this.workflow.getWorkflowId());
     }
 
     protected void commentIsPrivate(boolean isPrivate) {
@@ -105,9 +114,15 @@ public class WorkflowDetailViewModel extends ViewModel {
         disposables.add(disposable);
     }
 
-    public void postComment(String auth, int workflowId, String comment, List<CommentFile> files) {
+    public void postComment(String comment, List<CommentFile> files) {
+        showLoading.setValue(true);
         Disposable disposable = repository
-                .postComment(auth, workflowId, comment, files)
+                .postComment(
+                        token,
+                        workflow.getWorkflowId(),
+                        comment,
+                        isPrivateComment,
+                        files)
                 .subscribe(this::onPostCommentSuccess, this::onFailure);
         disposables.add(disposable);
     }
@@ -117,6 +132,12 @@ public class WorkflowDetailViewModel extends ViewModel {
                 .attachFile(auth, request, fileRequest)
                 .subscribe(this::onAttachSuccess, this::onFailure);
         disposables.add(disposable);
+    }
+
+    private void updateCommentCounterHeader(int counter) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("(").append(String.valueOf(counter)).append(")");
+        setCommentHeaderCounter.setValue(stringBuilder.toString());
     }
 
     private void onTypeSuccess(WorkflowTypeResponse response) {
@@ -135,12 +156,24 @@ public class WorkflowDetailViewModel extends ViewModel {
         mFilesLiveData.setValue(filesResponse.getList());
     }
 
+    // TODO Remove when we finally have comments List in ViewModel and NOT in Fragment.
+    private int commentsCounter = 0;
+
     private void onCommentsSuccess(CommentsResponse commentsResponse) {
-        Log.d("TEST", "onCommentsSuccess: maybe");
+        List<Comment> comments = commentsResponse.getResponse();
+
+        if (comments == null) {
+            return;
+        }
+        commentsCounter = comments.size();
+        updateCommentCounterHeader(comments.size());
         mCommentsLiveData.setValue(commentsResponse.getResponse());
     }
 
     private void onPostCommentSuccess(CommentResponse commentResponse) {
+        showLoading.setValue(false);
+        commentsCounter += 1;
+        updateCommentCounterHeader(commentsCounter);
         mCommentLiveData.setValue(commentResponse.getResponse());
     }
 
@@ -149,6 +182,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     }
 
     private void onFailure(Throwable throwable) {
+        showLoading.setValue(false);
         mErrorLiveData.setValue(R.string.failure_connect);
     }
 

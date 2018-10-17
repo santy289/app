@@ -18,7 +18,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> {
 
     public List<Comment> comments;
 
-    private static final String format = "MMM d, y-h:m a";
+    private static final String format = "MMM d, y - h:m a";
 
     public CommentsAdapter(List<Comment> comments) {
         this.comments = comments;

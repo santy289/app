@@ -2,10 +2,6 @@ package com.rootnetapp.rootnetintranet.models.responses.comments;
 
 import com.squareup.moshi.Json;
 
-/**
- * Created by root on 05/04/18.
- */
-
 public class CommentResponse {
 
     @Json(name = "comment_info")

@@ -110,7 +110,7 @@
     <string name="step">Paso </string>
     <string name="next_step_approver">PRÓXIMO PASO APROBAR</string>
     <string name="next_approver">Próximo paso aprobar:</string>
-    <string name="mass_approval">Aprovación en masa</string>
+    <string name="mass_approval">Aprovación masiva</string>
     <string name="required_approval">(requiere aprobación)</string>
     <string name="start_date">Fecha de Inicio</string>
     <string name="campaign">Campaña</string>
@@ -200,4 +200,5 @@
     <string name="public_comment">Público</string>
     <string name="private_comment">Privado</string>
     <string name="no_more_status">Sin mas estatus</string>
+    <string name="status_approvers">Aprobadores del estatus</string>
 </resources>

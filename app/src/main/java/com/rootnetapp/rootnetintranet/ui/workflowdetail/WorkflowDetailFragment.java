@@ -300,7 +300,7 @@ public class WorkflowDetailFragment extends Fragment {
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 context,
-                android.R.layout.simple_spinner_item,
+                android.R.layout.simple_selectable_list_item,
                 nextStatuses
         );
         binding.detailApproveSpinner.setAdapter(adapter);

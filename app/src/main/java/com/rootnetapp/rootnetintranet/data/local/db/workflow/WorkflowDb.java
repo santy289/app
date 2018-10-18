@@ -128,6 +128,18 @@ public class WorkflowDb {
     @Json(name = "current_specific_approvers")
     private SpecificApprovers currentSpecificApprovers;
 
+    @Ignore
+    @Json(name = "logged_is_approver")
+    private boolean loggedIsApprover;
+
+    public boolean isLoggedIsApprover() {
+        return loggedIsApprover;
+    }
+
+    public void setLoggedIsApprover(boolean loggedIsApprover) {
+        this.loggedIsApprover = loggedIsApprover;
+    }
+
     public SpecificApprovers getCurrentSpecificApprovers() {
         return currentSpecificApprovers;
     }

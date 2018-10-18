@@ -1,18 +1,17 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 
-import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModel;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.data.local.db.profile.Profile;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
+import com.rootnetapp.rootnetintranet.models.createworkflow.SpecificApprovers;
+import com.rootnetapp.rootnetintranet.models.createworkflow.StatusSpecific;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
@@ -59,6 +58,8 @@ public class WorkflowDetailViewModel extends ViewModel {
     protected MutableLiveData<List<String>> updateApproveSpinner;
     protected MutableLiveData<Boolean> hideApproveSpinnerOnEmptyData;
     protected MutableLiveData<Boolean> hideApproverListOnEmptyData;
+    protected MutableLiveData<List<ProfileInvolved>> updateProfilesInvolved;
+    protected MutableLiveData<Boolean> hideProfilesInvolvedList;
 
 
     private final CompositeDisposable disposables = new CompositeDisposable();
@@ -83,6 +84,8 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.updateApproveSpinner = new MutableLiveData<>();
         this.hideApproveSpinnerOnEmptyData = new MutableLiveData<>();
         this.hideApproverListOnEmptyData = new MutableLiveData<>();
+        this.updateProfilesInvolved = new MutableLiveData<>();
+        this.hideProfilesInvolvedList = new MutableLiveData<>();
     }
 
     @Override
@@ -250,35 +253,132 @@ public class WorkflowDetailViewModel extends ViewModel {
 
 
         // Update current approvers list on UI.
-        List<Approver> currentApprovers = currentStatus.getApproversList();
-        updateCurrentApproverUi(currentApprovers);
+        List<Approver> typeConfigurationApprovers = currentStatus.getApproversList();
+        SpecificApprovers specificApprovers = workflow.getCurrentSpecificApprovers();
+
+        updateCurrentApproverUi(typeConfigurationApprovers, specificApprovers);
 
         // Update approval spinner.
-        List<Integer> nextStatuIds = workflow.getCurrentStatusRelations();
-        updateApproveSpinnerUi(nextStatuIds);
-
+        List<Integer> nextStatusIds = workflow.getCurrentStatusRelations();
+        updateApproveSpinnerUi(workflow, nextStatusIds);
     }
 
     /**
      * Updates UI section for current approvers. If this list is empty it will hide its recycler view.
      *
-     * @param currentApprovers List of current approvers.
+     * @param typeConfigurationApprovers
+     * @param specificApprovers
      */
-    private void updateCurrentApproverUi(List<Approver> currentApprovers) {
-        if (currentApprovers.size() < 1) {
-            hideApproverListOnEmptyData.setValue(true);
+    private void updateCurrentApproverUi(List<Approver> typeConfigurationApprovers, SpecificApprovers specificApprovers) {
+        List<Approver> result = new ArrayList<>();
+
+        if (typeConfigurationApprovers.size() > 0) {
+            result = typeConfigurationApprovers;
+        }
+
+        List<Integer> globalList = specificApprovers.global;
+        List<StatusSpecific> statusSpecificList = specificApprovers.statusSpecific;
+
+        // TODO look for RxJava chaining instead of calling multiple functions.
+        generateApproverListForProfileIds(globalList, statusSpecificList, result);
+
+
+        // TODO important to add this later.
+        //updateCurrentApproversList.setValue(result);
+    }
+
+    private void generateApproverListForProfileIds(List<Integer> globalList,  List<StatusSpecific> statusSpecificList, List<Approver> approverList) {
+        if (globalList == null || globalList.size() < 1) {
+            generateApproverListForStatusSpecificIds(statusSpecificList, approverList);
             return;
         }
-        updateCurrentApproversList.setValue(currentApprovers);
+
+        Disposable disposable = Observable.fromCallable(() -> {
+            Approver approver;
+            ProfileInvolved profileInvolved;
+            for (int i = 0; i < globalList.size(); i++) {
+                profileInvolved = repository.getProfileBy(globalList.get(i));
+                if (profileInvolved == null) {
+                    continue;
+                }
+                approver = new Approver();
+                approver.isRequire = false;
+                approver.entityAvatar = profileInvolved.picture;
+                approver.canChangeMind = false;
+                approver.entityName = profileInvolved.fullName;
+                approverList.add(approver);
+            }
+            return approverList;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(approverListResult -> {
+                    generateApproverListForStatusSpecificIds(statusSpecificList, approverListResult);
+                }, throwable -> {
+                    generateApproverListForStatusSpecificIds(statusSpecificList, approverList);
+                    Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable.getMessage());
+                });
+
+        disposables.add(disposable);
+    }
+
+    private void generateApproverListForStatusSpecificIds(List<StatusSpecific> statusSpecificList, List<Approver> approverList) {
+        if (statusSpecificList == null || statusSpecificList.size() < 1) {
+            if (approverList.size() < 1) {
+                hideApproverListOnEmptyData.setValue(true);
+            } else {
+                updateCurrentApproversList.setValue(approverList);
+            }
+            return;
+        }
+
+        Disposable disposable = Observable.fromCallable(() -> {
+            Approver approver;
+            ProfileInvolved profileInvolved;
+            for (int i = 0; i < statusSpecificList.size(); i++) {
+                profileInvolved = repository.getProfileBy(statusSpecificList.get(i).user);
+                if (profileInvolved == null) {
+                    continue;
+                }
+                approver = new Approver();
+                approver.isRequire = false;
+                approver.entityAvatar = profileInvolved.picture;
+                approver.canChangeMind = false;
+                approver.entityName = profileInvolved.fullName;
+                approverList.add(approver);
+            }
+            return approverList;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(approverListResult -> {
+                    if (approverListResult.size() < 1) {
+                        hideApproverListOnEmptyData.setValue(true);
+                    } else {
+                        updateCurrentApproversList.setValue(approverListResult);
+                    }
+                }, throwable -> {
+                    if (approverList.size() < 1) {
+                        hideApproverListOnEmptyData.setValue(true);
+                    } else {
+                        updateCurrentApproversList.setValue(approverList);
+                    }
+                    Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable.getMessage());
+                });
+
+        disposables.add(disposable);
     }
 
     /**
      * Update the spinner in the Next Approvers section. This spinner is used to approve or reject
      * a status. It may send an empty list or all the necessary names for the spinner.
      *
+     * @param workflow Current workflow.
      * @param nextStatusIds List of ids specified by a Workflow in order to look in a WorkflowType.
      */
-    private void updateApproveSpinnerUi(List<Integer> nextStatusIds) {
+    private void updateApproveSpinnerUi(WorkflowDb workflow, List<Integer> nextStatusIds) {
+        if (!workflow.isLoggedIsApprover()) {
+            hideApproveSpinnerOnEmptyData.setValue(true);
+            return;
+        }
         List<String> nextStatusList = new ArrayList<>();
         if (nextStatusIds.size() < 1) {
             hideApproveSpinnerOnEmptyData.setValue(true);
@@ -309,28 +409,22 @@ public class WorkflowDetailViewModel extends ViewModel {
      * @param workflowResponse Network response with workflow data.
      */
     private void onWorkflowSuccess(WorkflowResponse workflowResponse) {
-
         getWorkflowType(this.token, this.workflowListItem.getWorkflowTypeId());
-
-
         workflow = workflowResponse.getWorkflow();
         mWorkflowLiveData.setValue(workflowResponse.getWorkflow());
-
-        //List<Integer> nextStatuses = workflow.getCurrentStatusRelations();
-
         updateProfilesInvolvedUi(workflow.getProfilesInvolved());
-
-
     }
 
     /**
      * Given some profile ids it will look in the profiles tables in the local database for matching
      * Profiles, and return a ProfileInvolved object with limited profile information for the UI.
+     * It will look for those profiles in the background thread.
      *
      * @param profilesId List of profiles to look in the database.
      */
     private void updateProfilesInvolvedUi(List<Integer> profilesId) {
         if (profilesId == null || profilesId.size() < 1) {
+            hideProfilesInvolvedList.setValue(true);
             return;
         }
 
@@ -347,12 +441,23 @@ public class WorkflowDetailViewModel extends ViewModel {
             return profilesList;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(profileInvolvedList -> {
-                    int test = 1;
-                }, throwable -> {
+                .subscribe(this::setProfilesInvovledOnUi, throwable -> {
                     Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable.getMessage());
                 });
         disposables.add(disposable);
+    }
+
+    /**
+     * Sends back to the View a list of profiles that are involved to the current workflow.
+     *
+     * @param profiles Profiles to be used for UI list.
+     */
+    private void setProfilesInvovledOnUi(List<ProfileInvolved> profiles) {
+        if (profiles == null || profiles.size() < 1) {
+            hideProfilesInvolvedList.setValue(true);
+            return;
+        }
+        updateProfilesInvolved.setValue(profiles);
     }
 
     private void onTemplateSuccess(TemplatesResponse templatesResponse) {

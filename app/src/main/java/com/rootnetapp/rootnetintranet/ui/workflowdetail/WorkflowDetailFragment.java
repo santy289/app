@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailBinding;
@@ -104,12 +105,12 @@ public class WorkflowDetailFragment extends Fragment {
         binding.detailWorkflowId.setText(item.getWorkflowTypeKey());
         binding.recSteps.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recInfo.setLayoutManager(new GridLayoutManager(getContext(), 2));
-        binding.recPeopleinvolved.setLayoutManager(new LinearLayoutManager(getContext()));
+
         binding.recApprovalhistory.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recDocuments.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recComments.setLayoutManager(new LinearLayoutManager(getContext()));
         //todo SOLO testing hasta tener el backend live
-        binding.recPeopleinvolved.setAdapter(new PeopleInvolvedAdapter());
+
         binding.recApprovalhistory.setAdapter(new ApprovalAdapter());
         setClickListeners();
         //fin testing
@@ -277,6 +278,33 @@ public class WorkflowDetailFragment extends Fragment {
     private void updateCurrentApproversList(List<Approver> currentApprovers) {
         binding.recApprovers.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recApprovers.setAdapter(new ApproversAdapter(currentApprovers));
+    }
+
+    /**
+     * Updates the profile involve section. Profiles will include the ones coming from the workflow type
+     * configuration, and also profiles coming from specific status configuration that are coming
+     * from the current workflow configurations.
+     *
+     * @param profiles List of profiles to display in People Involved recyclerView.
+     */
+    private void updateProfilesInvolved(List<ProfileInvolved> profiles) {
+        binding.recPeopleinvolved.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recPeopleinvolved.setAdapter(new PeopleInvolvedAdapter(profiles));
+    }
+
+    /**
+     * Hides list of people involved and shows a text message instead.
+     *
+     * @param hide Action to take.
+     */
+    private void hideProfilesInvolvedList(boolean hide) {
+        if (hide) {
+            binding.lytPeopleinvolved.setVisibility(View.GONE);
+            binding.noPeopleInvolved.setVisibility(View.VISIBLE);
+        } else {
+            binding.lytPeopleinvolved.setVisibility(View.VISIBLE);
+            binding.noPeopleInvolved.setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -517,6 +545,8 @@ public class WorkflowDetailFragment extends Fragment {
         workflowDetailViewModel.updateApproveSpinner.observe(this, this::updateApproveSpinner);
         workflowDetailViewModel.hideApproverListOnEmptyData.observe(this, this::hideApproverListOnEmptyData);
         workflowDetailViewModel.hideApproveSpinnerOnEmptyData.observe(this, this::hideApproveSpinnerOnEmptyData);
+        workflowDetailViewModel.updateProfilesInvolved.observe(this, this::updateProfilesInvolved);
+        workflowDetailViewModel.hideProfilesInvolvedList.observe(this, this::hideProfilesInvolvedList);
     }
 
     private void updateHeaderCommentCounter(String count) {

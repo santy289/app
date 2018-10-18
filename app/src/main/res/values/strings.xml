@@ -202,4 +202,6 @@
     <string name="private_comment">Private</string>
     <string name="no_more_status">No more status</string>
     <string name="status_approvers">STATUS APPROVERS</string>
+    <string name="no_people_involved">No people involved</string>
+    <string name="approvers">Approvers:</string>
 </resources>

@@ -289,7 +289,7 @@
                         android:background="@color/workflowListBg"
                         android:padding="5dp"
                         android:visibility="gone"
-                        tools:visibility="visible">
+                        tools:visibility="gone">
 
                         <RelativeLayout
                             android:id="@+id/lyt_spinner"
@@ -313,6 +313,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="@string/no_more_status"
                                 android:layout_centerVertical="true"
+                                android:layout_centerHorizontal="true"
                                 android:layout_gravity="center"
                                 android:layout_marginStart="5dp"
                                 android:gravity="center"
@@ -362,7 +363,7 @@
                             android:layout_below="@+id/lyt_spinner"
                             android:paddingBottom="5dp"
                             android:paddingTop="10dp"
-                            android:text="@string/next_approver"
+                            android:text="@string/approvers"
                             android:textStyle="bold" />
 
                         <android.support.v7.widget.RecyclerView
@@ -480,7 +481,7 @@
                     <RelativeLayout
                         android:id="@+id/lyt_peopleinvolved"
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/workflow_detail_standard_height"
+                        android:layout_height="wrap_content"
                         android:background="@color/workflowListBg"
                         android:padding="10dp"
                         android:visibility="gone"
@@ -490,32 +491,21 @@
                             android:id="@+id/rec_peopleinvolved"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_above="@+id/lyt_dpt" />
+                            tools:visibility="visible"/>
 
-                        <LinearLayout
-                            android:id="@+id/lyt_dpt"
-                            android:layout_width="match_parent"
+                        <TextView
+                            android:id="@+id/no_people_involved"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentBottom="true"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <de.hdodenhof.circleimageview.CircleImageView
-                                android:id="@+id/img_department"
-                                android:layout_width="30dp"
-                                android:layout_height="30dp"
-                                android:layout_margin="10dp"
-                                android:src="@drawable/ic_perm_identity_black_24dp" />
-
-                            <TextView
-                                android:id="@+id/tv_department"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:padding="10dp"
-                                android:text="Department"
-                                android:textColor="@color/colorPrimaryDark" />
-
-                        </LinearLayout>
+                            android:text="@string/no_people_involved"
+                            android:layout_centerVertical="true"
+                            android:layout_centerHorizontal="true"
+                            android:layout_gravity="center"
+                            android:layout_marginStart="5dp"
+                            android:gravity="center"
+                            android:visibility="gone"
+                            android:textAppearance="@android:style/TextAppearance.Material.Title"
+                            tools:visibility="gone" />
 
                     </RelativeLayout>
 

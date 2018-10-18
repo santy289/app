@@ -6,6 +6,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -42,6 +43,17 @@ public class Utils {
     public static final String remainderOfDomain = ".rootnetapp.com";
 
     public static String domain;
+
+    public static String getImgDomain() {
+        return imgDomain;
+    }
+
+    public static void setImgDomain(String newImgDomain) {
+        if (TextUtils.isEmpty(Utils.imgDomain)) {
+            Utils.imgDomain = "http://" + newImgDomain;
+            Utils.imgDomain = Utils.imgDomain.replace("v1/", "");
+        }
+    }
 
     public static String imgDomain;
 

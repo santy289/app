@@ -20,7 +20,6 @@ import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailBinding;
@@ -28,12 +27,9 @@ import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
 import com.rootnetapp.rootnetintranet.models.responses.file.DocumentsFile;
-import com.rootnetapp.rootnetintranet.models.responses.templates.Templates;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Step;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.ApprovalAdapter;
@@ -50,7 +46,6 @@ import com.squareup.moshi.Moshi;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -65,7 +60,6 @@ public class WorkflowDetailFragment extends Fragment {
     private FragmentWorkflowDetailBinding binding;
     private MainActivityInterface mainActivityInterface;
     private WorkflowListItem item;
-    private List<Preset> presets;
     private CommentsAdapter commentsAdapter = null;
     private static final int FILE_SELECT_CODE = 555;
     //private String encodedFile = null;
@@ -275,9 +269,54 @@ public class WorkflowDetailFragment extends Fragment {
         }
     }
 
+    private void showImportantInfoSection(boolean show) {
+        if (show) {
+            binding.hdrImportant.setVisibility(View.VISIBLE);
+        } else {
+            binding.hdrImportant.setVisibility(View.GONE);
+        }
+    }
+
+    private void loadImportantInfoSection(List<Step> steps) {
+        binding.recSteps.setAdapter(
+                new StepsAdapter(steps)
+        );
+    }
+
+    private void showTemplateDocumentsUi(boolean show) {
+        if (show) {
+            binding.lytAttach.setVisibility(View.VISIBLE);
+            binding.recDocuments.setVisibility(View.VISIBLE);
+            binding.tvFileuploaded.setVisibility(View.VISIBLE);
+            binding.lytDocumentsheader.setVisibility(View.VISIBLE);
+            binding.lytDocumentstitle.setVisibility(View.VISIBLE);
+        } else {
+            binding.lytAttach.setVisibility(View.GONE);
+            binding.recDocuments.setVisibility(View.GONE);
+            binding.tvFileuploaded.setVisibility(View.GONE);
+            binding.lytDocumentsheader.setVisibility(View.GONE);
+            binding.lytDocumentstitle.setVisibility(View.GONE);
+        }
+    }
+
+    private void setTemplateTitleWith(String name) {
+        String title = getString(R.string.template) +
+                " " +
+                name;
+        binding.tvTemplatetitle.setText(title);
+    }
+
+    private void setDocumentsView(List<DocumentsFile> documents) {
+        DocumentsAdapter documentsAdapter = new DocumentsAdapter(
+                workflowDetailViewModel.getPresets(),
+                documents
+        );
+        binding.recDocuments.setAdapter(documentsAdapter);
+    }
+
     private void comment(View view) {
-        String comment = binding.inputComment.getText().toString();
         binding.inputComment.setError(null);
+        String comment = binding.inputComment.getText().toString();
         if (TextUtils.isEmpty(comment)) {
             binding.inputComment.setError(getString(R.string.empty_comment));
             return;
@@ -336,9 +375,8 @@ public class WorkflowDetailFragment extends Fragment {
     }
 
 
-
     private void subscribe() {
-        final Observer<Workflow> workflowObserver = ((Workflow data) -> {
+        final Observer<WorkflowDb> workflowObserver = ((WorkflowDb data) -> {
             if (null != data) {
                 List<Information> infoList = new ArrayList<>();
                 infoList.add(new Information(getString(R.string.description),
@@ -364,52 +402,6 @@ public class WorkflowDetailFragment extends Fragment {
                     }
                 }
                 binding.recInfo.setAdapter(new InformationAdapter(infoList));
-            }
-        });
-
-        final Observer<WorkflowType> typeObserver = ((WorkflowType data) -> {
-            if (null != data) {
-                Status currentStatus = null;
-                for (Status status : data.getStatus()) {
-                    if (status.getId() == item.getCurrentStatus()) {
-                        currentStatus = status;
-                        break;
-                    }
-                }
-                if ((currentStatus != null) && (currentStatus.getSteps() != null)) {
-                    Collections.sort(currentStatus.getSteps(), (s1, s2) -> {
-                        /*For ascending order*/
-                        return s1.getOrder() - s2.getOrder();
-                    });
-                    binding.recSteps.setAdapter(new StepsAdapter(currentStatus.getSteps()));
-                } else {
-                    binding.hdrImportant.setVisibility(View.GONE);
-                }
-                if(data.getTemplateId()!= 0){
-                    workflowDetailViewModel.getTemplate(token, data.getTemplateId());
-                }else{
-                    // lyt_documentstitle
-                    binding.lytAttach.setVisibility(View.GONE);
-                    binding.recDocuments.setVisibility(View.GONE);
-                    binding.tvFileuploaded.setVisibility(View.GONE);
-                    binding.lytDocumentsheader.setVisibility(View.GONE);
-                    binding.lytDocumentstitle.setVisibility(View.GONE);
-                }
-                presets = data.getPresets();
-            }
-        });
-
-        final Observer<Templates> templateObserver = ((Templates data) -> {
-            if (null != data) {
-                binding.tvTemplatetitle.setText(getString(R.string.template) + " " + data.getName());
-                workflowDetailViewModel.getFiles(token, item.getWorkflowId());
-            }
-        });
-
-        final Observer<List<DocumentsFile>> filesObserver = ((List<DocumentsFile> data) -> {
-            if (null != data) {
-                documentsAdapter = new DocumentsAdapter(presets, data);
-                binding.recDocuments.setAdapter(documentsAdapter);
             }
         });
 
@@ -451,9 +443,6 @@ public class WorkflowDetailFragment extends Fragment {
         });
 
         workflowDetailViewModel.getObservableWorkflow().observe(this, workflowObserver);
-        workflowDetailViewModel.getObservableType().observe(this, typeObserver);
-        workflowDetailViewModel.getObservableTemplate().observe(this, templateObserver);
-        workflowDetailViewModel.getObservableFiles().observe(this, filesObserver);
         workflowDetailViewModel.getObservableComments().observe(this, commentsObserver);
         workflowDetailViewModel.getObservableComment().observe(this, commentObserver);
         workflowDetailViewModel.getObservableAttach().observe(this, attachObserver);
@@ -461,6 +450,11 @@ public class WorkflowDetailFragment extends Fragment {
 
         workflowDetailViewModel.showLoading.observe(this, this::showLoading);
         workflowDetailViewModel.setCommentHeaderCounter.observe(this, this::updateHeaderCommentCounter);
+        workflowDetailViewModel.showImportantInfoSection.observe(this, this::showImportantInfoSection);
+        workflowDetailViewModel.loadImportantInfoSection.observe(this, this::loadImportantInfoSection);
+        workflowDetailViewModel.showTemplateDocumentsUi.observe(this, this::showTemplateDocumentsUi);
+        workflowDetailViewModel.setTemplateTitleWith.observe(this, this::setTemplateTitleWith);
+        workflowDetailViewModel.setDocumentsView.observe(this, this::setDocumentsView);
     }
 
     private void updateHeaderCommentCounter(String count) {

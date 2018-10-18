@@ -1,10 +1,7 @@
 package com.rootnetapp.rootnetintranet.models.responses.workflowtypes;
 
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.squareup.moshi.Json;
-
-/**
- * Created by root on 02/04/18.
- */
 
 public class WorkflowTypeResponse {
 

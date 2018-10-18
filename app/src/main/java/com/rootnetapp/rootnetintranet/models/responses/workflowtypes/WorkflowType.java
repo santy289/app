@@ -5,16 +5,9 @@ import com.squareup.moshi.Json;
 
 import java.util.List;
 
-/**
- * Created by root on 23/03/18.
- */
-
 public class WorkflowType {
 
-
-    public void setPresets(List<Preset> presets) {
-        this.presets = presets;
-    }@Json(name = "id")
+    @Json(name = "id")
     private int id;
     @Json(name = "name")
     private String name;
@@ -111,5 +104,8 @@ public class WorkflowType {
         return presets;
     }
 
+    public void setPresets(List<Preset> presets) {
+        this.presets = presets;
+    }
 
 }

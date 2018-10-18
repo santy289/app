@@ -11,6 +11,7 @@ import android.arch.persistence.room.TypeConverters;
 
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.converters.StringDateConverter;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
 import com.squareup.moshi.Json;
 
@@ -105,6 +106,30 @@ public class WorkflowDb {
     @Ignore
     @Json(name = "presets")
     private List<Preset> presets = null;
+
+    @Ignore
+    @Json(name = "current_status_relations")
+    private List<Integer> currentStatusRelations;
+
+    @Ignore
+    @Json(name = "metas")
+    private List<Meta> metas = null;
+
+    public List<Meta> getMetas() {
+        return metas;
+    }
+
+    public void setMetas(List<Meta> metas) {
+        this.metas = metas;
+    }
+
+    public List<Integer> getCurrentStatusRelations() {
+        return currentStatusRelations;
+    }
+
+    public void setCurrentStatusRelations(List<Integer> currentStatusRelations) {
+        this.currentStatusRelations = currentStatusRelations;
+    }
 
     public int getId() {
         return id;

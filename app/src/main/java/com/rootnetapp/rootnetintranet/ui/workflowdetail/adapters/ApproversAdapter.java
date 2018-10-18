@@ -1,6 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters;
 
-import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -9,10 +8,6 @@ import com.rootnetapp.rootnetintranet.databinding.ApproversItemBinding;
 
 import java.util.ArrayList;
 import java.util.List;
-
-/**
- * Created by root on 02/04/18.
- */
 
 public class ApproversAdapter extends RecyclerView.Adapter<ApproversViewholder>{
 

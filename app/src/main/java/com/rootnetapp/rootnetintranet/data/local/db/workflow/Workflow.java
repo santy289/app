@@ -106,6 +106,19 @@ public class Workflow {
     @Json(name = "presets")
     private List<Preset> presets = null;
 
+    @Ignore
+    @Json(name = "current_status_relations")
+    private List<Integer> currentStatusRelations;
+
+
+    public List<Integer> getCurrentStatusRelations() {
+        return currentStatusRelations;
+    }
+
+    public void setCurrentStatusRelations(List<Integer> currentStatusRelations) {
+        this.currentStatusRelations = currentStatusRelations;
+    }
+
     public int getId() {
         return id;
     }

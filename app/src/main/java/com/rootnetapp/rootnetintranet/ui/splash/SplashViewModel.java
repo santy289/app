@@ -61,8 +61,7 @@ public class SplashViewModel extends ViewModel {
                 return;
             }
             Utils.domain = "https://" + domain.getClient().getApiUrl();
-            Utils.imgDomain = "http://" + domain.getClient().getApiUrl();
-            Utils.imgDomain = Utils.imgDomain.replace("v1/", "");
+            Utils.setImgDomain(domain.getClient().getApiUrl());
             RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
         } catch (IOException e) {
             e.printStackTrace();

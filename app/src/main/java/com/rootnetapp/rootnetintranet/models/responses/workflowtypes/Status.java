@@ -4,10 +4,6 @@ import com.squareup.moshi.Json;
 
 import java.util.List;
 
-/**
- * Created by root on 23/03/18.
- */
-
 public class Status {
 
     @Json(name = "id")
@@ -22,12 +18,16 @@ public class Status {
     private boolean configuration;
     @Json(name = "isActive")
     private boolean isActive;
+    @Json(name = "isRequired")
+    private boolean isRequired;
     @Json(name = "machine_name")
     private String machineName;
     @Json(name = "parentId")
     private Integer parentId;
     @Json(name = "steps")
     private List<Step> steps = null;
+    @Json(name = "approvers")
+    private List<Approver> approversList;
 
     public int getId() {
         return id;
@@ -39,6 +39,22 @@ public class Status {
 
     public String getName() {
         return name;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    public boolean isRequired() {
+        return isRequired;
+    }
+
+    public void setRequired(boolean required) {
+        isRequired = required;
     }
 
     public void setName(String name) {
@@ -101,4 +117,11 @@ public class Status {
         this.steps = steps;
     }
 
+    public List<Approver> getApproversList() {
+        return approversList;
+    }
+
+    public void setApproversList(List<Approver> approversList) {
+        this.approversList = approversList;
+    }
 }

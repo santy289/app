@@ -7,6 +7,7 @@ import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.Field;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.squareup.moshi.Json;
 
@@ -49,6 +50,10 @@ public class WorkflowTypeDb {
     @Ignore
     @Json(name = "fields")
     private List<Field> fields = null;
+
+    @Ignore
+    @Json(name = "presets")
+    private List<Preset> presets = null;
 
     public int getId() {
         return id;
@@ -130,4 +135,11 @@ public class WorkflowTypeDb {
         this.templateId = templateId;
     }
 
+    public List<Preset> getPresets() {
+        return presets;
+    }
+
+    public void setPresets(List<Preset> presets) {
+        this.presets = presets;
+    }
 }

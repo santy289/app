@@ -200,4 +200,5 @@
     <string name="dynamic_filters">Dynamic Filters</string>
     <string name="public_comment">Public</string>
     <string name="private_comment">Private</string>
+    <string name="no_more_status">No more status</string>
 </resources>

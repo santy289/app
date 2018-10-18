@@ -5,7 +5,6 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
@@ -21,11 +20,12 @@ import com.rootnetapp.rootnetintranet.models.responses.templates.Templates;
 import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Step;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -47,6 +47,9 @@ public class WorkflowDetailViewModel extends ViewModel {
     protected MutableLiveData<Boolean> showTemplateDocumentsUi;
     protected MutableLiveData<String> setTemplateTitleWith;
     protected MutableLiveData<List<DocumentsFile>> setDocumentsView;
+    protected MutableLiveData<List<Approver>> updateCurrentApproversList;
+    protected MutableLiveData<List<String>> updateApproveSpinner;
+
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
@@ -64,6 +67,8 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.showTemplateDocumentsUi = new MutableLiveData<>();
         this.setTemplateTitleWith = new MutableLiveData<>();
         this.setDocumentsView = new MutableLiveData<>();
+        this.updateCurrentApproversList = new MutableLiveData<>();
+        this.updateApproveSpinner = new MutableLiveData<>();
     }
 
     @Override
@@ -75,7 +80,7 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.token = token;
         this.workflowListItem = workflow;
         getWorkflow(this.token, this.workflowListItem.getWorkflowId());
-        getWorkflowType(this.token, this.workflowListItem.getWorkflowTypeId());
+
         getComments(this.token, this.workflowListItem.getWorkflowId());
     }
 
@@ -154,7 +159,14 @@ public class WorkflowDetailViewModel extends ViewModel {
         setCommentHeaderCounter.setValue("(" + String.valueOf(counter) + ")");
     }
 
+    /**
+     * Finds the a Status from the Status List in the current WorkflowType object.
+     *
+     * @param statusId Status id to find.
+     * @return Returns a Status object or null if it doesn't find anything.
+     */
     private Status findStatusInListBy(int statusId) {
+        List<Status> statusList = currentWorkflowType.getStatus();
         if (statusList == null || statusList.size() < 1) {
             return null;
         }
@@ -170,9 +182,13 @@ public class WorkflowDetailViewModel extends ViewModel {
         return null;
     }
 
+    /**
+     * Populates section regarding important information about a workflow.
+     *
+     * @param currentStatus Status used to populate the information on the UI.
+     */
     private void setImportantInfoSection(Status currentStatus) {
         if (currentStatus == null || currentStatus.getSteps() == null) {
-            // TODO make important info section gone
             showImportantInfoSection.setValue(false);
             return;
         }
@@ -196,40 +212,76 @@ public class WorkflowDetailViewModel extends ViewModel {
         getTemplate(token, templateId);
     }
 
-    private void populateNextApprovalSection() {
-        if (workflow == null || workflowType == null) {
+    private void setNextApprovalSection() {
+        if (workflow == null || currentWorkflowType == null) {
             return;
         }
 
 
     }
 
-    private List<Status> statusList;
-    WorkflowType workflowType;
+    private WorkflowTypeDb currentWorkflowType;
+    private Status currentStatus;
+
     private void onTypeSuccess(WorkflowTypeResponse response) {
-        workflowType = response.getWorkflowType();
-        if (workflowType == null) {
+        currentWorkflowType = response.getWorkflowType();
+        if (currentWorkflowType == null) {
             return;
         }
 
-        this.statusList = workflowType.getStatus();
-        Status currentStatus = findStatusInListBy(workflowListItem.getCurrentStatus());
+        currentStatus = findStatusInListBy(workflowListItem.getCurrentStatus());
         setImportantInfoSection(currentStatus);
-        getTemplateBy(workflowType.getTemplateId());
-        this.presets = workflowType.getPresets();
-
-        // TODO now we have type and workflow so we can populate those people there.
+        getTemplateBy(currentWorkflowType.getTemplateId());
+        this.presets = currentWorkflowType.getPresets();
 
 
+        // Update current approvers list on UI.
+        List<Approver> currentApprovers = currentStatus.getApproversList();
+        updateCurrentApproversList.setValue(currentApprovers);
 
 
+        // Update approval spinner.
+        List<Integer> nextStatuIds = workflow.getCurrentStatusRelations();
+        updateApproveSpinnerUi(nextStatuIds);
+    }
+
+    /**
+     * Update the spinner in the Next Approvers section. This spinner is used to approve or reject
+     * a status. It may send an empty list or all the necessary names for the spinner.
+     *
+     * @param nextStatusIds List of ids specified by a Workflow in order to look in a WorkflowType.
+     */
+    private void updateApproveSpinnerUi(List<Integer> nextStatusIds) {
+        List<String> nextStatusList = new ArrayList<>();
+        if (nextStatusIds.size() < 1) {
+            updateApproveSpinner.setValue(nextStatusList);
+            return;
+        }
 
 
+        Status status;
+        String name;
+        for (int i = 0; i < nextStatusIds.size(); i++) {
+            status = findStatusInListBy(nextStatusIds.get(i));
+            if (status == null) {
+                continue;
+            }
+            name = status.getName();
+            if (name == null) {
+                continue;
+            }
+            nextStatusList.add(name);
+        }
 
+        updateApproveSpinner.setValue(nextStatusList);
     }
 
 
     private void onWorkflowSuccess(WorkflowResponse workflowResponse) {
+
+        getWorkflowType(this.token, this.workflowListItem.getWorkflowTypeId());
+
+
         workflow = workflowResponse.getWorkflow();
         mWorkflowLiveData.setValue(workflowResponse.getWorkflow());
 
@@ -279,18 +331,20 @@ public class WorkflowDetailViewModel extends ViewModel {
         List<Comment> comments = commentsResponse.getResponse();
 
         if (comments == null) {
+            showLoading.setValue(false);
             return;
         }
         commentsCounter = comments.size();
         updateCommentCounterHeader(comments.size());
         mCommentsLiveData.setValue(commentsResponse.getResponse());
+        showLoading.setValue(false);
     }
 
     private void onPostCommentSuccess(CommentResponse commentResponse) {
-        showLoading.setValue(false);
         commentsCounter += 1;
         updateCommentCounterHeader(commentsCounter);
         mCommentLiveData.setValue(commentResponse.getResponse());
+        showLoading.setValue(false);
     }
 
     private void onAttachSuccess(AttachResponse attachResponse) {

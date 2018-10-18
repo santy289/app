@@ -27,4 +27,7 @@ public class Approver {
     @Json(name = "entity_name")
     public String entityName;
 
+    @Json(name = "entity_avatar")
+    public String entityAvatar;
+
 }

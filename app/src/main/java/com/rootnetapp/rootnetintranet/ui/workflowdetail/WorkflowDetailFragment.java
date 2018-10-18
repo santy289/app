@@ -16,6 +16,7 @@ import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -28,6 +29,7 @@ import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsReque
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
 import com.rootnetapp.rootnetintranet.models.responses.file.DocumentsFile;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Step;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
@@ -101,14 +103,12 @@ public class WorkflowDetailFragment extends Fragment {
         binding.tvWorkflowproject.setText(item.getTitle());
         binding.detailWorkflowId.setText(item.getWorkflowTypeKey());
         binding.recSteps.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recApprovers.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recInfo.setLayoutManager(new GridLayoutManager(getContext(), 2));
         binding.recPeopleinvolved.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recApprovalhistory.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recDocuments.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recComments.setLayoutManager(new LinearLayoutManager(getContext()));
         //todo SOLO testing hasta tener el backend live
-        binding.recApprovers.setAdapter(new ApproversAdapter());
         binding.recPeopleinvolved.setAdapter(new PeopleInvolvedAdapter());
         binding.recApprovalhistory.setAdapter(new ApprovalAdapter());
         setClickListeners();
@@ -269,6 +269,43 @@ public class WorkflowDetailFragment extends Fragment {
         }
     }
 
+    private void updateCurrentApproversList(List<Approver> currentApprovers) {
+        if (currentApprovers.size() < 1) {
+            hideApproverListOnEmptyData();
+        }
+        binding.recApprovers.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recApprovers.setAdapter(new ApproversAdapter(currentApprovers));
+    }
+
+    private void hideApproveSpinnerOnEmptyData() {
+        binding.detailNoMoreStatus.setVisibility(View.VISIBLE);
+        binding.detailApproveSpinnerBackground.setVisibility(View.GONE);
+        binding.btnApprove.setVisibility(View.GONE);
+    }
+
+    private void hideApproverListOnEmptyData() {
+        binding.txtApprovers.setVisibility(View.GONE);
+        binding.recApprovers.setVisibility(View.GONE);
+        binding.detailMassApproval.setVisibility(View.GONE);
+    }
+
+    private void updateApproveSpinner(List<String> nextStatuses) {
+        Context context = getContext();
+        if (context == null) {
+            return;
+        }
+        if (nextStatuses.size() < 1) {
+            hideApproveSpinnerOnEmptyData();
+            return;
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                context,
+                android.R.layout.simple_spinner_item,
+                nextStatuses
+        );
+        binding.detailApproveSpinner.setAdapter(adapter);
+    }
+
     private void showImportantInfoSection(boolean show) {
         if (show) {
             binding.hdrImportant.setVisibility(View.VISIBLE);
@@ -313,6 +350,8 @@ public class WorkflowDetailFragment extends Fragment {
         );
         binding.recDocuments.setAdapter(documentsAdapter);
     }
+
+
 
     private void comment(View view) {
         binding.inputComment.setError(null);
@@ -389,7 +428,7 @@ public class WorkflowDetailFragment extends Fragment {
                     FieldConfig config = null;
                     try {
                         config = jsonAdapter.fromJson(item.getWorkflowTypeFieldConfig());
-                        if (config.getShow()) {
+                        if (config.getShow() != null && config.getShow()) {
                             try {
                                 String value = (String) item.getDisplayValue();
                                 infoList.add(new Information(item.getWorkflowTypeFieldName(), value));
@@ -455,6 +494,8 @@ public class WorkflowDetailFragment extends Fragment {
         workflowDetailViewModel.showTemplateDocumentsUi.observe(this, this::showTemplateDocumentsUi);
         workflowDetailViewModel.setTemplateTitleWith.observe(this, this::setTemplateTitleWith);
         workflowDetailViewModel.setDocumentsView.observe(this, this::setDocumentsView);
+        workflowDetailViewModel.updateCurrentApproversList.observe(this, this::updateCurrentApproversList);
+        workflowDetailViewModel.updateApproveSpinner.observe(this, this::updateApproveSpinner);
     }
 
     private void updateHeaderCommentCounter(String count) {

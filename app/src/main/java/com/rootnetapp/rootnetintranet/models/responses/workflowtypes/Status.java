@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.models.responses.workflowtypes;
 
 import com.squareup.moshi.Json;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Status {
@@ -27,7 +28,7 @@ public class Status {
     @Json(name = "steps")
     private List<Step> steps = null;
     @Json(name = "approvers")
-    private List<Approver> approversList;
+    private List<Approver> approversList = new ArrayList<>();
 
     public int getId() {
         return id;

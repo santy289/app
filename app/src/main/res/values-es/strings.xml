@@ -203,4 +203,6 @@
     <string name="status_approvers">APROBADORES DEL ESTATUS</string>
     <string name="no_people_involved">Sin personas involucradas</string>
     <string name="approvers">Aprobadores:</string>
+    <string name="global_approvers">Aprovadores globales</string>
+    <string name="specific_approvers">Aprovadores de status específico</string>
 </resources>

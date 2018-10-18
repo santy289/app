@@ -60,6 +60,8 @@ public class WorkflowDetailViewModel extends ViewModel {
     protected MutableLiveData<Boolean> hideApproverListOnEmptyData;
     protected MutableLiveData<List<ProfileInvolved>> updateProfilesInvolved;
     protected MutableLiveData<Boolean> hideProfilesInvolvedList;
+    protected MutableLiveData<Boolean> hideGlobalApprovers;
+    protected MutableLiveData<Boolean> hideSpecificApprovers;
 
 
     private final CompositeDisposable disposables = new CompositeDisposable();
@@ -86,6 +88,8 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.hideApproverListOnEmptyData = new MutableLiveData<>();
         this.updateProfilesInvolved = new MutableLiveData<>();
         this.hideProfilesInvolvedList = new MutableLiveData<>();
+        this.hideGlobalApprovers = new MutableLiveData<>();
+        this.hideSpecificApprovers = new MutableLiveData<>();
     }
 
     @Override

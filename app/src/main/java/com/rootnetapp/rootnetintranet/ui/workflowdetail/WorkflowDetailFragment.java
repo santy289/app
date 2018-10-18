@@ -232,16 +232,16 @@ public class WorkflowDetailFragment extends Fragment {
                 break;
             }
             case R.id.hdr_peopleinvolved: {
-                if (binding.lytPeopleinvolved.getVisibility() == View.GONE) {
+                if (binding.peopleinvolvedLayout.lytPeopleinvolved.getVisibility() == View.GONE) {
                     binding.btnArrow5.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
                     binding.btnArrow5.setColorFilter(ContextCompat.getColor(getContext(), R.color.arrow),
                             android.graphics.PorterDuff.Mode.SRC_IN);
-                    binding.lytPeopleinvolved.setVisibility(View.VISIBLE);
+                    binding.peopleinvolvedLayout.lytPeopleinvolved.setVisibility(View.VISIBLE);
                 } else {
                     binding.btnArrow5.setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
                     binding.btnArrow5.setColorFilter(ContextCompat.getColor(getContext(), R.color.transparentArrow),
                             android.graphics.PorterDuff.Mode.SRC_IN);
-                    binding.lytPeopleinvolved.setVisibility(View.GONE);
+                    binding.peopleinvolvedLayout.lytPeopleinvolved.setVisibility(View.GONE);
                 }
                 break;
             }
@@ -288,8 +288,8 @@ public class WorkflowDetailFragment extends Fragment {
      * @param profiles List of profiles to display in People Involved recyclerView.
      */
     private void updateProfilesInvolved(List<ProfileInvolved> profiles) {
-        binding.recPeopleinvolved.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recPeopleinvolved.setAdapter(new PeopleInvolvedAdapter(profiles));
+        binding.peopleinvolvedLayout.recPeopleinvolved.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.peopleinvolvedLayout.recPeopleinvolved.setAdapter(new PeopleInvolvedAdapter(profiles));
     }
 
     /**
@@ -299,13 +299,45 @@ public class WorkflowDetailFragment extends Fragment {
      */
     private void hideProfilesInvolvedList(boolean hide) {
         if (hide) {
-            binding.lytPeopleinvolved.setVisibility(View.GONE);
-            binding.noPeopleInvolved.setVisibility(View.VISIBLE);
+            binding.peopleinvolvedLayout.lytPeopleinvolved.setVisibility(View.GONE);
+            binding.peopleinvolvedLayout.noPeopleInvolved.setVisibility(View.VISIBLE);
         } else {
-            binding.lytPeopleinvolved.setVisibility(View.VISIBLE);
-            binding.noPeopleInvolved.setVisibility(View.GONE);
+            binding.peopleinvolvedLayout.lytPeopleinvolved.setVisibility(View.VISIBLE);
+            binding.peopleinvolvedLayout.noPeopleInvolved.setVisibility(View.GONE);
         }
     }
+
+    /**
+     * Hides global text title and global recycler view.
+     *
+     * @param hide
+     */
+    private void hideGlobalApprovers(boolean hide) {
+        if (hide) {
+            binding.peopleinvolvedLayout.recGlobalApprovers.setVisibility(View.GONE);
+            binding.peopleinvolvedLayout.txtGlobalApprovers.setVisibility(View.GONE);
+        } else {
+            binding.peopleinvolvedLayout.recGlobalApprovers.setVisibility(View.VISIBLE);
+            binding.peopleinvolvedLayout.txtGlobalApprovers.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Hides specific approvers title and recycler view.
+     *
+     * @param hide
+     */
+    private void hideSpecificApprovers(boolean hide) {
+        if (hide) {
+            binding.peopleinvolvedLayout.recSpecificApprovers.setVisibility(View.GONE);
+            binding.peopleinvolvedLayout.txtSpecificApprovers.setVisibility(View.GONE);
+        } else {
+            binding.peopleinvolvedLayout.recSpecificApprovers.setVisibility(View.VISIBLE);
+            binding.peopleinvolvedLayout.txtSpecificApprovers.setVisibility(View.VISIBLE);
+        }
+    }
+
+
 
     /**
      * Hides the spinner in the case that we don't have any next status. When the spinner is hidden.
@@ -547,6 +579,8 @@ public class WorkflowDetailFragment extends Fragment {
         workflowDetailViewModel.hideApproveSpinnerOnEmptyData.observe(this, this::hideApproveSpinnerOnEmptyData);
         workflowDetailViewModel.updateProfilesInvolved.observe(this, this::updateProfilesInvolved);
         workflowDetailViewModel.hideProfilesInvolvedList.observe(this, this::hideProfilesInvolvedList);
+        workflowDetailViewModel.hideGlobalApprovers.observe(this, this::hideGlobalApprovers);
+        workflowDetailViewModel.hideSpecificApprovers.observe(this, this::hideSpecificApprovers);
     }
 
     private void updateHeaderCommentCounter(String count) {

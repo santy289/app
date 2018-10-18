@@ -478,36 +478,42 @@
                         android:layout_height="0.5dp"
                         android:background="@color/detailsColor" />
 
-                    <RelativeLayout
-                        android:id="@+id/lyt_peopleinvolved"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@color/workflowListBg"
-                        android:padding="10dp"
+                    <include
+                        android:id="@+id/peopleinvolved_layout"
+                        layout="@layout/fragment_workflow_detail_people_involved"
                         android:visibility="gone"
-                        tools:visibility="visible">
+                        tools:visibility="visible"/>
 
-                        <android.support.v7.widget.RecyclerView
-                            android:id="@+id/rec_peopleinvolved"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            tools:visibility="visible"/>
+                    <!--<RelativeLayout-->
+                        <!--android:id="@+id/lyt_peopleinvolved"-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:background="@color/workflowListBg"-->
+                        <!--android:padding="10dp"-->
+                        <!--android:visibility="gone"-->
+                        <!--tools:visibility="visible">-->
 
-                        <TextView
-                            android:id="@+id/no_people_involved"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/no_people_involved"
-                            android:layout_centerVertical="true"
-                            android:layout_centerHorizontal="true"
-                            android:layout_gravity="center"
-                            android:layout_marginStart="5dp"
-                            android:gravity="center"
-                            android:visibility="gone"
-                            android:textAppearance="@android:style/TextAppearance.Material.Title"
-                            tools:visibility="gone" />
+                        <!--<android.support.v7.widget.RecyclerView-->
+                            <!--android:id="@+id/rec_peopleinvolved"-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="match_parent"-->
+                            <!--tools:visibility="visible"/>-->
 
-                    </RelativeLayout>
+                        <!--<TextView-->
+                            <!--android:id="@+id/no_people_involved"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:text="@string/no_people_involved"-->
+                            <!--android:layout_centerVertical="true"-->
+                            <!--android:layout_centerHorizontal="true"-->
+                            <!--android:layout_gravity="center"-->
+                            <!--android:layout_marginStart="5dp"-->
+                            <!--android:gravity="center"-->
+                            <!--android:visibility="gone"-->
+                            <!--android:textAppearance="@android:style/TextAppearance.Material.Title"-->
+                            <!--tools:visibility="gone" />-->
+
+                    <!--</RelativeLayout>-->
 
                     <View
                         android:layout_width="match_parent"

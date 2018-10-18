@@ -204,4 +204,6 @@
     <string name="status_approvers">STATUS APPROVERS</string>
     <string name="no_people_involved">No people involved</string>
     <string name="approvers">Approvers:</string>
+    <string name="global_approvers">Global Approvers</string>
+    <string name="specific_approvers">Specific Approvers</string>
 </resources>

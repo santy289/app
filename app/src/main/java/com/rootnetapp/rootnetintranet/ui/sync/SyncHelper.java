@@ -257,7 +257,7 @@ public class SyncHelper {
     }
 
     private void getUser(String token) {
-        Disposable disposable = apiInterface.getUsers(token).subscribeOn(Schedulers.newThread()).
+        Disposable disposable = apiInterface.getProfiles(token).subscribeOn(Schedulers.newThread()).
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe(this::onUsersSuccess, throwable -> {
                     Log.d(TAG, "getData: error " + throwable.getMessage() );
@@ -311,14 +311,14 @@ public class SyncHelper {
         disposables.add(disposable);
     }
 
-    private void onUsersSuccess(UserResponse userResponse) {
+    private void onUsersSuccess(ProfileResponse profileResponse) {
         Disposable disposable = Observable.fromCallable(() -> {
-            List<User> users = userResponse.getProfiles();
-            if (users == null) {
+            List<Profile> profiles = profileResponse.getProfiles();
+            if (profiles == null) {
                 return false;
             }
-            database.userDao().clearUser();
-            database.userDao().insertAll(users);
+            database.profileDao().deleteAllProfiles();
+            database.profileDao().insertProfiles(profiles);
             return true;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())

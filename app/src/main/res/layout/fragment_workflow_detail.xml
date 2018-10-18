@@ -483,7 +483,8 @@
                         android:layout_height="@dimen/workflow_detail_standard_height"
                         android:background="@color/workflowListBg"
                         android:padding="10dp"
-                        android:visibility="gone">
+                        android:visibility="gone"
+                        tools:visibility="visible">
 
                         <android.support.v7.widget.RecyclerView
                             android:id="@+id/rec_peopleinvolved"

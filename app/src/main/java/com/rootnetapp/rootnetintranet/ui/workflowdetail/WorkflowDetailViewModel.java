@@ -1,10 +1,15 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 
+import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModel;
+import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.Profile;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
@@ -29,8 +34,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<WorkflowDb> mWorkflowLiveData;
@@ -49,9 +57,13 @@ public class WorkflowDetailViewModel extends ViewModel {
     protected MutableLiveData<List<DocumentsFile>> setDocumentsView;
     protected MutableLiveData<List<Approver>> updateCurrentApproversList;
     protected MutableLiveData<List<String>> updateApproveSpinner;
+    protected MutableLiveData<Boolean> hideApproveSpinnerOnEmptyData;
+    protected MutableLiveData<Boolean> hideApproverListOnEmptyData;
 
 
     private final CompositeDisposable disposables = new CompositeDisposable();
+
+    private static final String TAG = "DetailViewModel";
 
     private boolean isPrivateComment = false;
     private String token;
@@ -69,6 +81,8 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.setDocumentsView = new MutableLiveData<>();
         this.updateCurrentApproversList = new MutableLiveData<>();
         this.updateApproveSpinner = new MutableLiveData<>();
+        this.hideApproveSpinnerOnEmptyData = new MutableLiveData<>();
+        this.hideApproverListOnEmptyData = new MutableLiveData<>();
     }
 
     @Override
@@ -237,12 +251,25 @@ public class WorkflowDetailViewModel extends ViewModel {
 
         // Update current approvers list on UI.
         List<Approver> currentApprovers = currentStatus.getApproversList();
-        updateCurrentApproversList.setValue(currentApprovers);
-
+        updateCurrentApproverUi(currentApprovers);
 
         // Update approval spinner.
         List<Integer> nextStatuIds = workflow.getCurrentStatusRelations();
         updateApproveSpinnerUi(nextStatuIds);
+
+    }
+
+    /**
+     * Updates UI section for current approvers. If this list is empty it will hide its recycler view.
+     *
+     * @param currentApprovers List of current approvers.
+     */
+    private void updateCurrentApproverUi(List<Approver> currentApprovers) {
+        if (currentApprovers.size() < 1) {
+            hideApproverListOnEmptyData.setValue(true);
+            return;
+        }
+        updateCurrentApproversList.setValue(currentApprovers);
     }
 
     /**
@@ -254,10 +281,9 @@ public class WorkflowDetailViewModel extends ViewModel {
     private void updateApproveSpinnerUi(List<Integer> nextStatusIds) {
         List<String> nextStatusList = new ArrayList<>();
         if (nextStatusIds.size() < 1) {
-            updateApproveSpinner.setValue(nextStatusList);
+            hideApproveSpinnerOnEmptyData.setValue(true);
             return;
         }
-
 
         Status status;
         String name;
@@ -277,6 +303,11 @@ public class WorkflowDetailViewModel extends ViewModel {
     }
 
 
+    /**
+     * Handles success when requesting for a workflow by id to the endpoint.
+     *
+     * @param workflowResponse Network response with workflow data.
+     */
     private void onWorkflowSuccess(WorkflowResponse workflowResponse) {
 
         getWorkflowType(this.token, this.workflowListItem.getWorkflowTypeId());
@@ -285,25 +316,43 @@ public class WorkflowDetailViewModel extends ViewModel {
         workflow = workflowResponse.getWorkflow();
         mWorkflowLiveData.setValue(workflowResponse.getWorkflow());
 
-        List<Integer> nextStatuses = workflow.getCurrentStatusRelations();
-        // TODO populate Next status Section with select box to choose the next status based on the info in nextStatuses.
-        // TODO look into WorkflowType and into the list of Status and find this ID and then populate with name this select box.
+        //List<Integer> nextStatuses = workflow.getCurrentStatusRelations();
+
+        updateProfilesInvolvedUi(workflow.getProfilesInvolved());
 
 
+    }
 
+    /**
+     * Given some profile ids it will look in the profiles tables in the local database for matching
+     * Profiles, and return a ProfileInvolved object with limited profile information for the UI.
+     *
+     * @param profilesId List of profiles to look in the database.
+     */
+    private void updateProfilesInvolvedUi(List<Integer> profilesId) {
+        if (profilesId == null || profilesId.size() < 1) {
+            return;
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
+        Disposable disposable = Observable.fromCallable(() -> {
+            List<ProfileInvolved> profilesList = new ArrayList<>();
+            ProfileInvolved profileInvolved;
+            for (int i = 0; i < profilesId.size(); i++) {
+                profileInvolved = repository.getProfileBy(profilesId.get(i));
+                if (profileInvolved == null) {
+                    continue;
+                }
+                profilesList.add(profileInvolved);
+            }
+            return profilesList;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(profileInvolvedList -> {
+                    int test = 1;
+                }, throwable -> {
+                    Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable.getMessage());
+                });
+        disposables.add(disposable);
     }
 
     private void onTemplateSuccess(TemplatesResponse templatesResponse) {

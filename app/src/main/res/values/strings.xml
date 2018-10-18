@@ -115,7 +115,7 @@
     <string name="campaign">Campaign</string>
     <string name="origin">Origin</string>
     <string name="axe">Axe</string>
-    <string name="people_involved">PEOPLE INVOLVED IN ALL WORKFLOWS</string>
+    <string name="people_involved">PEOPLE INVOLVED</string>
     <string name="approval_history">WORKFLOW APPROVAL HISTORY</string>
     <string name="approved">Approved:</string>
     <string name="template">TEMPLATE:</string>
@@ -201,5 +201,5 @@
     <string name="public_comment">Public</string>
     <string name="private_comment">Private</string>
     <string name="no_more_status">No more status</string>
-    <string name="status_approvers">Status Approvers</string>
+    <string name="status_approvers">STATUS APPROVERS</string>
 </resources>

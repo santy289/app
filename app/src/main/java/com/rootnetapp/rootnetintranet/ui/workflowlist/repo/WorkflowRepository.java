@@ -285,7 +285,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
 
     public void insertWorkflows(List<WorkflowDb> worflows) {
         Disposable disposable = Observable.fromCallable(() -> {
-            WorkflowDbDao workflowDbDao = database.workflowDbDao();
+//            WorkflowDbDao workflowDbDao = database.workflowDbDao();
             workflowDbDao.insertWorkflows(worflows);
             callback.updateIsLoading(false);
             return true;
@@ -307,7 +307,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
 
     public void insertWorkflow(WorkflowDb workflow) {
         Disposable disposable = Completable.fromCallable(() -> {
-            database.workflowDbDao().insertWorkflow(workflow);
+            workflowDbDao.insertWorkflow(workflow);
             return true;
         }).subscribeOn(Schedulers.newThread())
           .observeOn(AndroidSchedulers.mainThread())
@@ -386,7 +386,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
 
     public void workflowDbSuccess(WorkflowResponseDb workflowsResponse) {
         Disposable disposable = Observable.fromCallable(() -> {
-            WorkflowDbDao workflowDbDao = database.workflowDbDao();
+//            WorkflowDbDao workflowDbDao = database.workflowDbDao();
             workflowDbDao.deleteAllWorkflows();
             workflowDbDao.insertWorkflows(workflowsResponse.getList());
             return true;
@@ -405,7 +405,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
 
     private void workflowDbSuccessNoFilter(WorkflowResponseDb workflowsResponse) {
         Disposable disposable = Observable.fromCallable(() -> {
-            WorkflowDbDao workflowDbDao = database.workflowDbDao();
+//            WorkflowDbDao workflowDbDao = database.workflowDbDao();
             workflowDbDao.deleteAllWorkflows();
             workflowDbDao.insertWorkflows(workflowsResponse.getList());
             return true;

@@ -269,24 +269,46 @@ public class WorkflowDetailFragment extends Fragment {
         }
     }
 
+    /**
+     * Sets the UI for the list of current approvers.
+     *
+     * @param currentApprovers List of current approvers to be displayed.
+     */
     private void updateCurrentApproversList(List<Approver> currentApprovers) {
-        if (currentApprovers.size() < 1) {
-            hideApproverListOnEmptyData();
-        }
         binding.recApprovers.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recApprovers.setAdapter(new ApproversAdapter(currentApprovers));
     }
 
-    private void hideApproveSpinnerOnEmptyData() {
-        binding.detailNoMoreStatus.setVisibility(View.VISIBLE);
-        binding.detailApproveSpinnerBackground.setVisibility(View.GONE);
-        binding.btnApprove.setVisibility(View.GONE);
+    /**
+     * Hides the spinner in the case that we don't have any next status. When the spinner is hidden.
+     * It will replaced it with a message text view.
+     *
+     * @param hide Hides or shows the spinner view.
+     */
+    private void hideApproveSpinnerOnEmptyData(boolean hide) {
+        if (hide) {
+            binding.detailNoMoreStatus.setVisibility(View.VISIBLE);
+            binding.detailApproveSpinnerBackground.setVisibility(View.GONE);
+            binding.btnApprove.setVisibility(View.GONE);
+        } else {
+            binding.detailNoMoreStatus.setVisibility(View.GONE);
+            binding.detailApproveSpinnerBackground.setVisibility(View.VISIBLE);
+            binding.btnApprove.setVisibility(View.VISIBLE);
+        }
+
     }
 
-    private void hideApproverListOnEmptyData() {
-        binding.txtApprovers.setVisibility(View.GONE);
-        binding.recApprovers.setVisibility(View.GONE);
-        binding.detailMassApproval.setVisibility(View.GONE);
+    private void hideApproverListOnEmptyData(boolean hide) {
+        if (hide) {
+            binding.txtApprovers.setVisibility(View.GONE);
+            binding.recApprovers.setVisibility(View.GONE);
+            binding.detailMassApproval.setVisibility(View.GONE);
+        } else {
+            binding.txtApprovers.setVisibility(View.VISIBLE);
+            binding.recApprovers.setVisibility(View.VISIBLE);
+            binding.detailMassApproval.setVisibility(View.VISIBLE);
+        }
+
     }
 
     private void updateApproveSpinner(List<String> nextStatuses) {
@@ -294,10 +316,7 @@ public class WorkflowDetailFragment extends Fragment {
         if (context == null) {
             return;
         }
-        if (nextStatuses.size() < 1) {
-            hideApproveSpinnerOnEmptyData();
-            return;
-        }
+
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 context,
                 android.R.layout.simple_selectable_list_item,
@@ -496,6 +515,8 @@ public class WorkflowDetailFragment extends Fragment {
         workflowDetailViewModel.setDocumentsView.observe(this, this::setDocumentsView);
         workflowDetailViewModel.updateCurrentApproversList.observe(this, this::updateCurrentApproversList);
         workflowDetailViewModel.updateApproveSpinner.observe(this, this::updateApproveSpinner);
+        workflowDetailViewModel.hideApproverListOnEmptyData.observe(this, this::hideApproverListOnEmptyData);
+        workflowDetailViewModel.hideApproveSpinnerOnEmptyData.observe(this, this::hideApproveSpinnerOnEmptyData);
     }
 
     private void updateHeaderCommentCounter(String count) {

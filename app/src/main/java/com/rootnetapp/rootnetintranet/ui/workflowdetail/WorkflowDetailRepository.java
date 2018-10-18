@@ -1,6 +1,9 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 
+
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.ProfileDao;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
@@ -11,7 +14,6 @@ import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesRespon
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
-import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.CustomSpinner;
 
 import java.util.List;
 
@@ -20,13 +22,23 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 public class WorkflowDetailRepository {
-
-    private AppDatabase database;
     private ApiInterface service;
+    private ProfileDao profileDao;
 
     public WorkflowDetailRepository(ApiInterface service, AppDatabase database) {
         this.service = service;
-        this.database = database;
+        this.profileDao = database.profileDao();
+    }
+
+    /**
+     * Gets a profile that is involved to a workflow. Calls ProfileDao object and it is necessary
+     * to call in the background. Otherwise will throw and error if it is run on the foreground.
+     *
+     * @param id Id from Workflow listed as profile involved.
+     * @return Returns a ProfileInvolved object with the necessary data.
+     */
+    public ProfileInvolved getProfileBy(int id) {
+        return profileDao.getProfilesInvolved(id);
     }
 
     public Observable<WorkflowTypeResponse> getWorkflowType(String auth, int typeId) {

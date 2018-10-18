@@ -11,6 +11,7 @@ import android.arch.persistence.room.TypeConverters;
 
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.converters.StringDateConverter;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
+import com.rootnetapp.rootnetintranet.models.createworkflow.SpecificApprovers;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
 import com.squareup.moshi.Json;
@@ -115,12 +116,48 @@ public class WorkflowDb {
     @Json(name = "metas")
     private List<Meta> metas = null;
 
+    @Ignore
+    @Json(name = "profilesInvolved")
+    private List<Integer> profilesInvolved;
+
+    @Ignore
+    @Json(name = "specific_approvers")
+    private SpecificApprovers specificApprovers;
+
+    @Ignore
+    @Json(name = "current_specific_approvers")
+    private SpecificApprovers currentSpecificApprovers;
+
+    public SpecificApprovers getCurrentSpecificApprovers() {
+        return currentSpecificApprovers;
+    }
+
+    public void setCurrentSpecificApprovers(SpecificApprovers currentSpecificApprovers) {
+        this.currentSpecificApprovers = currentSpecificApprovers;
+    }
+
+    public SpecificApprovers getSpecificApprovers() {
+        return specificApprovers;
+    }
+
+    public void setSpecificApprovers(SpecificApprovers specificApprovers) {
+        this.specificApprovers = specificApprovers;
+    }
+
     public List<Meta> getMetas() {
         return metas;
     }
 
     public void setMetas(List<Meta> metas) {
         this.metas = metas;
+    }
+
+    public List<Integer> getProfilesInvolved() {
+        return profilesInvolved;
+    }
+
+    public void setProfilesInvolved(List<Integer> profilesInvolved) {
+        this.profilesInvolved = profilesInvolved;
     }
 
     public List<Integer> getCurrentStatusRelations() {

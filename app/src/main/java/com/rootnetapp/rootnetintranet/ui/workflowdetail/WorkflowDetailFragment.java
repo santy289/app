@@ -31,11 +31,12 @@ import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
 import com.rootnetapp.rootnetintranet.models.responses.file.DocumentsFile;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Step;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.ApprovalAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.ApprovalHistoryAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.ApproversAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.CommentsAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.DocumentsAdapter;
@@ -106,12 +107,11 @@ public class WorkflowDetailFragment extends Fragment {
         binding.recSteps.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recInfo.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
-        binding.recApprovalhistory.setLayoutManager(new LinearLayoutManager(getContext()));
+
         binding.recDocuments.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recComments.setLayoutManager(new LinearLayoutManager(getContext()));
         //todo SOLO testing hasta tener el backend live
 
-        binding.recApprovalhistory.setAdapter(new ApprovalAdapter());
         setClickListeners();
         //fin testing
         files = new ArrayList<>();
@@ -246,16 +246,16 @@ public class WorkflowDetailFragment extends Fragment {
                 break;
             }
             case R.id.hdr_approvalhistory: {
-                if (binding.recApprovalhistory.getVisibility() == View.GONE) {
+                if (binding.lytHistory.getVisibility() == View.GONE) {
                     binding.btnArrow6.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
                     binding.btnArrow6.setColorFilter(ContextCompat.getColor(getContext(), R.color.arrow),
                             android.graphics.PorterDuff.Mode.SRC_IN);
-                    binding.recApprovalhistory.setVisibility(View.VISIBLE);
+                    binding.lytHistory.setVisibility(View.VISIBLE);
                 } else {
                     binding.btnArrow6.setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
                     binding.btnArrow6.setColorFilter(ContextCompat.getColor(getContext(), R.color.transparentArrow),
                             android.graphics.PorterDuff.Mode.SRC_IN);
-                    binding.recApprovalhistory.setVisibility(View.GONE);
+                    binding.lytHistory.setVisibility(View.GONE);
                 }
                 break;
             }
@@ -267,6 +267,21 @@ public class WorkflowDetailFragment extends Fragment {
             Utils.showLoading(getContext());
         } else {
             Utils.hideLoading();
+        }
+    }
+
+    private void updateApprovalHistoryList(List<ApproverHistory> approverHistoryList) {
+        binding.recApprovalhistory.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recApprovalhistory.setAdapter(new ApprovalHistoryAdapter(approverHistoryList));
+    }
+
+    private void hideHistoryApprovalList(boolean hide) {
+        if (hide) {
+            binding.recApprovalhistory.setVisibility(View.GONE);
+            binding.noHistory.setVisibility(View.VISIBLE);
+        } else {
+            binding.recApprovalhistory.setVisibility(View.VISIBLE);
+            binding.noHistory.setVisibility(View.GONE);
         }
     }
 
@@ -605,7 +620,8 @@ public class WorkflowDetailFragment extends Fragment {
         workflowDetailViewModel.hideSpecificApprovers.observe(this, this::hideSpecificApprovers);
         workflowDetailViewModel.updateGlobalApproverList.observe(this, this::updateGlobalApproverList);
         workflowDetailViewModel.updateSpecificApproverList.observe(this, this::updateSpecificApproverList);
-
+        workflowDetailViewModel.updateApprovalHistoryList.observe(this, this::updateApprovalHistoryList);
+        workflowDetailViewModel.hideHistoryApprovalList.observe(this, this::hideHistoryApprovalList);
     }
 
     private void updateHeaderCommentCounter(String count) {

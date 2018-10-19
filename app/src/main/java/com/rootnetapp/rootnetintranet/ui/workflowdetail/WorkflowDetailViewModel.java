@@ -25,6 +25,7 @@ import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesRespon
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Step;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
@@ -64,6 +65,8 @@ public class WorkflowDetailViewModel extends ViewModel {
     protected MutableLiveData<Boolean> hideSpecificApprovers;
     protected MutableLiveData<List<ProfileInvolved>> updateGlobalApproverList;
     protected MutableLiveData<List<ProfileInvolved>> updateSpecificApproverList;
+    protected MutableLiveData<List<ApproverHistory>> updateApprovalHistoryList;
+    protected MutableLiveData<Boolean> hideHistoryApprovalList;
 
 
     private final CompositeDisposable disposables = new CompositeDisposable();
@@ -94,6 +97,8 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.hideSpecificApprovers = new MutableLiveData<>();
         this.updateGlobalApproverList = new MutableLiveData<>();
         this.updateSpecificApproverList = new MutableLiveData<>();
+        this.updateApprovalHistoryList = new MutableLiveData<>();
+        this.hideHistoryApprovalList = new MutableLiveData<>();
     }
 
     @Override
@@ -434,8 +439,43 @@ public class WorkflowDetailViewModel extends ViewModel {
         for (int i = 0; i < approvers.statusSpecific.size(); i++) {
             statusSpecific.add(approvers.statusSpecific.get(i).user);
         }
+
         updateApproverSpecificListUi(statusSpecific, STATUS_SPECIFIC_APPROVER_TYPE);
+        updateApproverHistoryListUi(workflow.getWorkflowApprovalHistory());
     }
+
+    private void updateApproverHistoryListUi(List<ApproverHistory> approverHistoryList) {
+        if (approverHistoryList == null || approverHistoryList.size() < 1) {
+            hideHistoryApprovalList.setValue(true);
+            return;
+        }
+
+        Disposable disposable = Observable.fromCallable(() -> {
+            ApproverHistory approverHistory;
+            ProfileInvolved profileInvolved;
+
+            for (int i = 0; i < approverHistoryList.size(); i++) {
+                approverHistory = approverHistoryList.get(i);
+                profileInvolved = repository.getProfileBy(approverHistory.approverId);
+                if (profileInvolved == null) {
+                    continue;
+                }
+                approverHistory.avatarPicture = profileInvolved.picture;
+                return  approverHistoryList;
+            }
+            return approverHistoryList;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(approverHistories -> {
+                    updateApprovalHistoryList.setValue(approverHistories);
+                }, throwable -> {
+                    hideHistoryApprovalList.setValue(true);
+                    Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable.getMessage());
+                });
+
+        disposables.add(disposable);
+    }
+
 
     public static final int GLOBAL_APPROVER_TYPE = 0;
     public static final int STATUS_SPECIFIC_APPROVER_TYPE = 1;

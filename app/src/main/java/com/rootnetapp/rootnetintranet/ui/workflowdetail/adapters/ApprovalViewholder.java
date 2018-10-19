@@ -5,13 +5,9 @@ import android.view.View;
 
 import com.rootnetapp.rootnetintranet.databinding.ApprovalHistoryItemBinding;
 
-/**
- * Created by root on 03/04/18.
- */
-
 public class ApprovalViewholder extends RecyclerView.ViewHolder {
 
-    private final ApprovalHistoryItemBinding binding;
+    public final ApprovalHistoryItemBinding binding;
 
     public ApprovalViewholder(ApprovalHistoryItemBinding binding) {
         super(binding.getRoot());

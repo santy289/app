@@ -110,15 +110,15 @@
     <string name="step">Paso </string>
     <string name="next_step_approver">PRÓXIMO PASO APROBAR</string>
     <string name="next_approver">Próximo paso aprobar:</string>
-    <string name="mass_approval">Aprovación masiva</string>
+    <string name="mass_approval">Aprobación masiva</string>
     <string name="required_approval">(requiere aprobación)</string>
     <string name="start_date">Fecha de Inicio</string>
     <string name="campaign">Campaña</string>
     <string name="origin">Origen</string>
     <string name="axe">Axe</string>
     <string name="people_involved">PERSONAS INVOLUCRADAS</string>
-    <string name="approval_history">HISTORIAL DE APROVACIONES DE WORKFLOW</string>
-    <string name="approved">Aprovado:</string>
+    <string name="approval_history">HISTORIAL DE APROBACIONES DE WORKFLOW</string>
+    <string name="approved">Aprobado:</string>
     <string name="template">TEMPLATE:</string>
     <string name="upload">SUBIR</string>
     <string name="versions">Versiones</string>
@@ -203,6 +203,9 @@
     <string name="status_approvers">APROBADORES DEL ESTATUS</string>
     <string name="no_people_involved">Sin personas involucradas</string>
     <string name="approvers">Aprobadores:</string>
-    <string name="global_approvers">Aprovadores globales</string>
-    <string name="specific_approvers">Aprovadores de status específico</string>
+    <string name="global_approvers">Aprobadores globales</string>
+    <string name="specific_approvers">Aprobadores de status específico</string>
+    <string name="rejected">Rechazado</string>
+    <string name="status_was_modified">(Estatus fue cambiado)</string>
+    <string name="no_history_to_show">Sin historial para mostrar</string>
 </resources>

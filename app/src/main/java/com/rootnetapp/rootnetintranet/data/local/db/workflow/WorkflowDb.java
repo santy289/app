@@ -14,6 +14,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.models.createworkflow.SpecificApprovers;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
 import com.squareup.moshi.Json;
 
 import java.util.List;
@@ -131,6 +132,18 @@ public class WorkflowDb {
     @Ignore
     @Json(name = "logged_is_approver")
     private boolean loggedIsApprover;
+
+    @Ignore
+    @Json(name = "workflow_approval_history")
+    private List<ApproverHistory> workflowApprovalHistory;
+
+    public List<ApproverHistory> getWorkflowApprovalHistory() {
+        return workflowApprovalHistory;
+    }
+
+    public void setWorkflowApprovalHistory(List<ApproverHistory> workflowApprovalHistory) {
+        this.workflowApprovalHistory = workflowApprovalHistory;
+    }
 
     public boolean isLoggedIsApprover() {
         return loggedIsApprover;

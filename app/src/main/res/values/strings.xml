@@ -206,4 +206,7 @@
     <string name="approvers">Approvers:</string>
     <string name="global_approvers">Global Approvers</string>
     <string name="specific_approvers">Specific Approvers</string>
+    <string name="rejected">Rejected</string>
+    <string name="status_was_modified">(Status was modified)</string>
+    <string name="no_history_to_show">No approval history available</string>
 </resources>

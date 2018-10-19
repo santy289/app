@@ -67,6 +67,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     protected MutableLiveData<List<ProfileInvolved>> updateSpecificApproverList;
     protected MutableLiveData<List<ApproverHistory>> updateApprovalHistoryList;
     protected MutableLiveData<Boolean> hideHistoryApprovalList;
+    protected MutableLiveData<Boolean> setWorkflowIsOpen;
 
 
     private final CompositeDisposable disposables = new CompositeDisposable();
@@ -99,6 +100,7 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.updateSpecificApproverList = new MutableLiveData<>();
         this.updateApprovalHistoryList = new MutableLiveData<>();
         this.hideHistoryApprovalList = new MutableLiveData<>();
+        this.setWorkflowIsOpen = new MutableLiveData<>();
     }
 
     @Override
@@ -429,6 +431,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     private void onWorkflowSuccess(WorkflowResponse workflowResponse) {
         getWorkflowType(this.token, this.workflowListItem.getWorkflowTypeId());
         workflow = workflowResponse.getWorkflow();
+        setWorkflowIsOpen.setValue(workflow.isOpen());
         mWorkflowLiveData.setValue(workflowResponse.getWorkflow());
         updateProfilesInvolvedUi(workflow.getProfilesInvolved());
 
@@ -442,6 +445,7 @@ public class WorkflowDetailViewModel extends ViewModel {
 
         updateApproverSpecificListUi(statusSpecific, STATUS_SPECIFIC_APPROVER_TYPE);
         updateApproverHistoryListUi(workflow.getWorkflowApprovalHistory());
+
     }
 
     private void updateApproverHistoryListUi(List<ApproverHistory> approverHistoryList) {

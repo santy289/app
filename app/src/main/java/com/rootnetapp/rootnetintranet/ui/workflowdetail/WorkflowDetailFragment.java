@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -267,6 +268,17 @@ public class WorkflowDetailFragment extends Fragment {
             Utils.showLoading(getContext());
         } else {
             Utils.hideLoading();
+        }
+    }
+
+    private void setWorkflowIsOpen(boolean open) {
+        if (open) {
+            binding.txtOpenClosed.setText(getString(R.string.open));
+            binding.txtOpenClosed.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.green)));
+        } else {
+            binding.txtOpenClosed.setText(getString(R.string.closed));
+            binding.txtOpenClosed.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.red)));
+
         }
     }
 
@@ -622,6 +634,7 @@ public class WorkflowDetailFragment extends Fragment {
         workflowDetailViewModel.updateSpecificApproverList.observe(this, this::updateSpecificApproverList);
         workflowDetailViewModel.updateApprovalHistoryList.observe(this, this::updateApprovalHistoryList);
         workflowDetailViewModel.hideHistoryApprovalList.observe(this, this::hideHistoryApprovalList);
+        workflowDetailViewModel.setWorkflowIsOpen.observe(this, this::setWorkflowIsOpen);
     }
 
     private void updateHeaderCommentCounter(String count) {

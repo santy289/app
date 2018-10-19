@@ -123,8 +123,7 @@ public class Utils {
     }
 
     private static ZoneId getZoneId() {
-        // We could expand to have here real time Zones.
-//        return ZoneId.systemDefault();
+        // TODO we need the time zone of the server were the backend is hosted at.
         return ZoneId.of("UTC");
     }
 

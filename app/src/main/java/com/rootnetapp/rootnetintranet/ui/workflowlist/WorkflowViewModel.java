@@ -181,9 +181,9 @@ public class WorkflowViewModel extends ViewModel {
 
     protected void initWorkflowList(SharedPreferences sharedPreferences, LifecycleOwner lifecycleOwner) {
         if (!TextUtils.isEmpty(token)) {
+            showLoading.setValue(true);
             int baseFilterId = filterSettings.getBaseFilterSelectedId();
             loadWorkflowsByBaseFilters(baseFilterId, filterSettings, lifecycleOwner);
-//            liveWorkflows = workflowRepository.getAllWorkflows();
             return;
         }
         token = "Bearer "+ sharedPreferences.getString("token","");

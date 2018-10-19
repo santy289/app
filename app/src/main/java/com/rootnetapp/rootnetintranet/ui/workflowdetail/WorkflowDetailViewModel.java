@@ -297,10 +297,6 @@ public class WorkflowDetailViewModel extends ViewModel {
 
         // TODO look for RxJava chaining instead of calling multiple functions.
         generateApproverListForProfileIds(globalList, statusSpecificList, result);
-
-
-        // TODO important to add this later.
-        //updateCurrentApproversList.setValue(result);
     }
 
     private void generateApproverListForProfileIds(List<Integer> globalList,  List<StatusSpecific> statusSpecificList, List<Approver> approverList) {

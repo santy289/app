@@ -370,10 +370,12 @@ public class WorkflowDetailFragment extends Fragment {
             binding.detailNoMoreStatus.setVisibility(View.VISIBLE);
             binding.detailApproveSpinnerBackground.setVisibility(View.GONE);
             binding.btnApprove.setVisibility(View.GONE);
+            binding.btnReject.setVisibility(View.GONE);
         } else {
             binding.detailNoMoreStatus.setVisibility(View.GONE);
             binding.detailApproveSpinnerBackground.setVisibility(View.VISIBLE);
             binding.btnApprove.setVisibility(View.VISIBLE);
+            binding.btnReject.setVisibility(View.VISIBLE);
         }
 
     }

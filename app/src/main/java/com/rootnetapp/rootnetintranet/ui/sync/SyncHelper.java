@@ -279,6 +279,11 @@ public class SyncHelper {
         HttpException networkError = (HttpException) throwable;
         mSyncLiveData.setValue(false);
 
+        if (networkError.code() == 500) {
+            failure(throwable);
+            return;
+        }
+
         if (networkError.code() != 401) {
             proceedWithUnhandledException();
             return;

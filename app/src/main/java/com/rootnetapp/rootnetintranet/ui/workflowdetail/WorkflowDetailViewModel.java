@@ -62,6 +62,8 @@ public class WorkflowDetailViewModel extends ViewModel {
     protected MutableLiveData<Boolean> hideProfilesInvolvedList;
     protected MutableLiveData<Boolean> hideGlobalApprovers;
     protected MutableLiveData<Boolean> hideSpecificApprovers;
+    protected MutableLiveData<List<ProfileInvolved>> updateGlobalApproverList;
+    protected MutableLiveData<List<ProfileInvolved>> updateSpecificApproverList;
 
 
     private final CompositeDisposable disposables = new CompositeDisposable();
@@ -90,6 +92,8 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.hideProfilesInvolvedList = new MutableLiveData<>();
         this.hideGlobalApprovers = new MutableLiveData<>();
         this.hideSpecificApprovers = new MutableLiveData<>();
+        this.updateGlobalApproverList = new MutableLiveData<>();
+        this.updateSpecificApproverList = new MutableLiveData<>();
     }
 
     @Override
@@ -135,14 +139,20 @@ public class WorkflowDetailViewModel extends ViewModel {
     private void getTemplate(String auth, int templateId) {
         Disposable disposable = repository
                 .getTemplate(auth, templateId)
-                .subscribe(this::onTemplateSuccess, this::onFailure);
+                .subscribe(this::onTemplateSuccess,
+                        throwable -> {
+                            onFailure(throwable);
+                        });
+
         disposables.add(disposable);
     }
 
     protected void getFiles(String auth, int workflowId) {
         Disposable disposable = repository
                 .getFiles(auth, workflowId)
-                .subscribe(this::onFilesSuccess, this::onFailure);
+                .subscribe(this::onFilesSuccess, throwable -> {
+                    onFailure(throwable);
+                });
         disposables.add(disposable);
     }
 
@@ -172,7 +182,9 @@ public class WorkflowDetailViewModel extends ViewModel {
     public void attachFile(String auth, List<WorkflowPresetsRequest> request, CommentFile fileRequest) {
         Disposable disposable = repository
                 .attachFile(auth, request, fileRequest)
-                .subscribe(this::onAttachSuccess, this::onFailure);
+                .subscribe(this::onAttachSuccess, throwable-> {
+                    onFailure(throwable);
+                });
         disposables.add(disposable);
     }
 
@@ -258,9 +270,9 @@ public class WorkflowDetailViewModel extends ViewModel {
 
         // Update current approvers list on UI.
         List<Approver> typeConfigurationApprovers = currentStatus.getApproversList();
-        SpecificApprovers specificApprovers = workflow.getCurrentSpecificApprovers();
+        SpecificApprovers currentSpecificApprovers = workflow.getCurrentSpecificApprovers();
 
-        updateCurrentApproverUi(typeConfigurationApprovers, specificApprovers);
+        updateCurrentApproverUi(typeConfigurationApprovers, currentSpecificApprovers);
 
         // Update approval spinner.
         List<Integer> nextStatusIds = workflow.getCurrentStatusRelations();
@@ -271,17 +283,17 @@ public class WorkflowDetailViewModel extends ViewModel {
      * Updates UI section for current approvers. If this list is empty it will hide its recycler view.
      *
      * @param typeConfigurationApprovers
-     * @param specificApprovers
+     * @param currentSpecificApprovers
      */
-    private void updateCurrentApproverUi(List<Approver> typeConfigurationApprovers, SpecificApprovers specificApprovers) {
+    private void updateCurrentApproverUi(List<Approver> typeConfigurationApprovers, SpecificApprovers currentSpecificApprovers) {
         List<Approver> result = new ArrayList<>();
 
         if (typeConfigurationApprovers.size() > 0) {
             result = typeConfigurationApprovers;
         }
 
-        List<Integer> globalList = specificApprovers.global;
-        List<StatusSpecific> statusSpecificList = specificApprovers.statusSpecific;
+        List<Integer> globalList = currentSpecificApprovers.global;
+        List<StatusSpecific> statusSpecificList = currentSpecificApprovers.statusSpecific;
 
         // TODO look for RxJava chaining instead of calling multiple functions.
         generateApproverListForProfileIds(globalList, statusSpecificList, result);
@@ -305,11 +317,7 @@ public class WorkflowDetailViewModel extends ViewModel {
                 if (profileInvolved == null) {
                     continue;
                 }
-                approver = new Approver();
-                approver.isRequire = false;
-                approver.entityAvatar = profileInvolved.picture;
-                approver.canChangeMind = false;
-                approver.entityName = profileInvolved.fullName;
+                approver = generateApproverWith(profileInvolved);
                 approverList.add(approver);
             }
             return approverList;
@@ -323,6 +331,15 @@ public class WorkflowDetailViewModel extends ViewModel {
                 });
 
         disposables.add(disposable);
+    }
+
+    public Approver generateApproverWith(ProfileInvolved profileInvolved) {
+        Approver approver = new Approver();
+        approver.isRequire = false;
+        approver.entityAvatar = profileInvolved.picture;
+        approver.canChangeMind = false;
+        approver.entityName = profileInvolved.fullName;
+        return approver;
     }
 
     private void generateApproverListForStatusSpecificIds(List<StatusSpecific> statusSpecificList, List<Approver> approverList) {
@@ -343,11 +360,7 @@ public class WorkflowDetailViewModel extends ViewModel {
                 if (profileInvolved == null) {
                     continue;
                 }
-                approver = new Approver();
-                approver.isRequire = false;
-                approver.entityAvatar = profileInvolved.picture;
-                approver.canChangeMind = false;
-                approver.entityName = profileInvolved.fullName;
+                approver = generateApproverWith(profileInvolved);
                 approverList.add(approver);
             }
             return approverList;
@@ -417,6 +430,59 @@ public class WorkflowDetailViewModel extends ViewModel {
         workflow = workflowResponse.getWorkflow();
         mWorkflowLiveData.setValue(workflowResponse.getWorkflow());
         updateProfilesInvolvedUi(workflow.getProfilesInvolved());
+
+        SpecificApprovers approvers = workflow.getSpecificApprovers();
+        updateApproverSpecificListUi(approvers.global, GLOBAL_APPROVER_TYPE);
+
+        List<Integer> statusSpecific = new ArrayList<>();
+        for (int i = 0; i < approvers.statusSpecific.size(); i++) {
+            statusSpecific.add(approvers.statusSpecific.get(i).user);
+        }
+        updateApproverSpecificListUi(statusSpecific, STATUS_SPECIFIC_APPROVER_TYPE);
+    }
+
+    public static final int GLOBAL_APPROVER_TYPE = 0;
+    public static final int STATUS_SPECIFIC_APPROVER_TYPE = 1;
+
+    private void updateApproverSpecificListUi(List<Integer> approverList, int approverType) {
+        if (approverList == null || approverList.size() < 1) {
+            if (approverType == GLOBAL_APPROVER_TYPE) {
+                hideGlobalApprovers.setValue(true);
+            } else if (approverType == STATUS_SPECIFIC_APPROVER_TYPE) {
+                hideSpecificApprovers.setValue(true);
+            }
+            return;
+        }
+
+        Disposable disposable = Observable.fromCallable(() -> {
+            ProfileInvolved profileInvolved;
+            List<ProfileInvolved> profileInvolvedList = new ArrayList<>();
+            for (int i = 0; i < approverList.size(); i++) {
+                profileInvolved = repository.getProfileBy(approverList.get(i));
+                if (profileInvolved == null) {
+                    continue;
+                }
+                profileInvolvedList.add(profileInvolved);
+            }
+            return profileInvolvedList;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(profileInvolvedList -> {
+                    if (approverType == STATUS_SPECIFIC_APPROVER_TYPE) {
+                        updateSpecificApproverList.setValue(profileInvolvedList);
+                    } else if (approverType == GLOBAL_APPROVER_TYPE) {
+                        updateGlobalApproverList.setValue(profileInvolvedList);
+                    }
+                }, throwable -> {
+                    if (approverType == GLOBAL_APPROVER_TYPE) {
+                        hideGlobalApprovers.setValue(true);
+                    } else if (approverType == STATUS_SPECIFIC_APPROVER_TYPE) {
+                        hideSpecificApprovers.setValue(true);
+                    }
+                    Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable.getMessage());
+                });
+
+        disposables.add(disposable);
     }
 
     /**

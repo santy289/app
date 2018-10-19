@@ -271,7 +271,9 @@ public class WorkflowDetailFragment extends Fragment {
     }
 
     /**
-     * Sets the UI for the list of current approvers.
+     * Updates the profile involve section. Profiles will include the ones coming from the workflow type
+     * configuration, and also profiles coming from specific status configuration that are coming
+     * from the current workflow configurations.
      *
      * @param currentApprovers List of current approvers to be displayed.
      */
@@ -281,15 +283,33 @@ public class WorkflowDetailFragment extends Fragment {
     }
 
     /**
-     * Updates the profile involve section. Profiles will include the ones coming from the workflow type
-     * configuration, and also profiles coming from specific status configuration that are coming
-     * from the current workflow configurations.
+     * Updates the profiles involved.
      *
      * @param profiles List of profiles to display in People Involved recyclerView.
      */
     private void updateProfilesInvolved(List<ProfileInvolved> profiles) {
         binding.peopleinvolvedLayout.recPeopleinvolved.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.peopleinvolvedLayout.recPeopleinvolved.setAdapter(new PeopleInvolvedAdapter(profiles));
+    }
+
+    /**
+     * Updates the global approver list. Profiles will include the ones coming from a workflow
+     * object in the View Model.
+     *
+     * @param profiles List of profiles to display in People Involved recyclerView.
+     */
+    private void updateGlobalApproverList(List<ProfileInvolved> profiles) {
+        binding.peopleinvolvedLayout.recGlobalApprovers.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.peopleinvolvedLayout.recGlobalApprovers.setAdapter(new PeopleInvolvedAdapter(profiles));
+    }
+
+    /**
+     * Updates specific approver list. This is coming from the Worklow object in the View Model.
+     * @param profiles
+     */
+    private void updateSpecificApproverList(List<ProfileInvolved> profiles) {
+        binding.peopleinvolvedLayout.recSpecificApprovers.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.peopleinvolvedLayout.recSpecificApprovers.setAdapter(new PeopleInvolvedAdapter(profiles));
     }
 
     /**
@@ -581,6 +601,9 @@ public class WorkflowDetailFragment extends Fragment {
         workflowDetailViewModel.hideProfilesInvolvedList.observe(this, this::hideProfilesInvolvedList);
         workflowDetailViewModel.hideGlobalApprovers.observe(this, this::hideGlobalApprovers);
         workflowDetailViewModel.hideSpecificApprovers.observe(this, this::hideSpecificApprovers);
+        workflowDetailViewModel.updateGlobalApproverList.observe(this, this::updateGlobalApproverList);
+        workflowDetailViewModel.updateSpecificApproverList.observe(this, this::updateSpecificApproverList);
+
     }
 
     private void updateHeaderCommentCounter(String count) {

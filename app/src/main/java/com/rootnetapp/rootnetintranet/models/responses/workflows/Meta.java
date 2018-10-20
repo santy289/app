@@ -2,9 +2,6 @@ package com.rootnetapp.rootnetintranet.models.responses.workflows;
 
 import com.squareup.moshi.Json;
 
-/**
- * Created by root on 03/04/18.
- */
 
 public class Meta {
 

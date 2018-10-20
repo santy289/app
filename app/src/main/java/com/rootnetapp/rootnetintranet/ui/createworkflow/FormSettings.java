@@ -1,12 +1,15 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
+import android.support.annotation.NonNull;
 import android.support.v4.util.ArrayMap;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
+import com.rootnetapp.rootnetintranet.models.createworkflow.CurrencyFieldData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
@@ -18,15 +21,18 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.ProductJsonValue;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.role.Role;
 import com.rootnetapp.rootnetintranet.models.responses.services.Service;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.Information;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
 import org.w3c.dom.Text;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -282,8 +288,6 @@ public class FormSettings {
         fieldData.isMultipleSelection = rememberRealValue;
         return metaData;
     }
-
-
 
     private void format(WorkflowMetas metaData, TypeInfo typeInfo, FieldData fieldData) {
         String value = metaData.getUnformattedValue();
@@ -544,6 +548,237 @@ public class FormSettings {
             return typeInfo;
         }
         return null;
+    }
+
+    public interface FormSettingsViewModelDelegate {
+        public void findInNetwork(Object value, Information information, FieldConfig fieldConfig);
+    }
+
+    public Information formatStringToObject(Meta meta, FieldConfig fieldConfig, FormSettingsViewModelDelegate delegate) {
+        if (TextUtils.isEmpty(meta.getValue())) {
+            return null;
+        }
+
+        Information information = new Information();
+        information.setTitle(meta.getWorkflowTypeFieldName());
+        TypeInfo typeInfo = fieldConfig.getTypeInfo();
+
+        /*
+        if multiple is true then value will be an array and probably ids, so we need to go back to the
+        view model and request to an endpoint the name of the ids given in value.
+        */
+        switch (typeInfo.getValueType()) {
+            case FormSettings.VALUE_BOOLEAN:
+
+                if (!fieldConfig.getMultiple()) {
+
+
+                    Boolean value = (Boolean) meta.getDisplayValue();
+
+                    if (value) {
+                        information.setResDisplayValue(R.string.yes);
+                    } else {
+                        information.setResDisplayValue(R.string.no);
+                    }
+                    return information;
+                }
+
+                information.setMultiple(true);
+                Boolean[] listOfBoolean = (Boolean[]) meta.getDisplayValue();
+                for (int i = 0; i < listOfBoolean.length; i++) {
+                    Boolean value = listOfBoolean[i];
+                    if (value) {
+                        information.addResStringToResList(R.string.yes);
+                    } else {
+                        information.addResStringToResList(R.string.no);
+                    }
+                }
+                return information;
+            case FormSettings.VALUE_DATE:
+                // TODO handle formats
+
+                if (!fieldConfig.getMultiple()) {
+                    String date = (String) meta.getDisplayValue();
+                    information.setDisplayValue(date);
+                    return information;
+                }
+
+                information.setMultiple(true);
+
+                // TODO handle multiple dates
+                information.setDisplayValue("");
+
+
+//                SimpleDateFormat dateFormat = new SimpleDateFormat(
+//                        "dd-MM-yyyy",
+//                        Locale.getDefault());
+//                String metaDateString = "";
+//                try {
+//                    Date convertedDate = dateFormat.parse(value);
+//                    SimpleDateFormat serverFormat = new SimpleDateFormat(
+//                            "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+//                            Locale.getDefault());
+//                    metaDateString = serverFormat.format(convertedDate);
+//                } catch (ParseException e) {
+//                    Log.d(TAG, "StringDateToTimestamp: e = " + e.getMessage());
+//                }
+//                metaData.setValue(metaDateString);
+
+                return information;
+
+            case FormSettings.VALUE_EMAIL:
+
+                if (!fieldConfig.getMultiple()) {
+                    if (!(meta.getDisplayValue() instanceof String)) {
+                        information.setDisplayValue("");
+                        return information;
+                    }
+                    information.setDisplayValue((String) meta.getDisplayValue());
+                    return information;
+                }
+
+                // TODO handle multiple
+
+                information.setMultiple(true);
+                information.setDisplayValue("");
+                return information;
+
+            case FormSettings.VALUE_INTEGER:
+
+                if (!fieldConfig.getMultiple()) {
+                    if (typeInfo.getType().equals(TYPE_TEXT)) {
+
+                        if (!(meta.getDisplayValue() instanceof String)) {
+                            information.setDisplayValue("");
+                            return information;
+                        }
+
+                        information.setDisplayValue((String) meta.getDisplayValue());
+
+                        return information;
+                    }
+                    if (typeInfo.getType().equals(TYPE_CURRENCY)) {
+
+                        PostCountryCodeAndValue currency;
+
+                        JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi.adapter(PostCountryCodeAndValue.class);
+                        try {
+                            currency = jsonAdapter.fromJson(meta.getValue());
+                            information.setDisplayValue(String.valueOf(currency.value));
+                            return information;
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            information.setDisplayValue("");
+                            return information;
+                        }
+                    }
+
+                    if (typeInfo.getType().equals(TYPE_FILE)) {
+                        return null;
+                    }
+
+                    return null;
+                }
+
+                information.setMultiple(true);
+
+
+                // TODO handle multiple
+                information.setDisplayValue("");
+
+                return information;
+            case FormSettings.VALUE_ENTITY:
+
+                if (!fieldConfig.getMultiple()) {
+
+                    if (typeInfo.getType().equals(TYPE_ROLE)) {
+                        // TODO send back to view model to find the name of the id given.
+
+                        delegate.findInNetwork(meta.getDisplayValue(), information, fieldConfig);
+                        return null;
+                    }
+                }
+
+                information.setMultiple(true);
+
+                information.setDisplayValue("");
+                return information;
+
+            case FormSettings.VALUE_LIST:
+                if (!fieldConfig.getMultiple()) {
+                    if (typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
+
+                        Moshi moshi = new Moshi.Builder().build();
+                        JsonAdapter<PostSystemUser> jsonAdapter = moshi.adapter(PostSystemUser.class);
+                        try {
+                            PostSystemUser systemUser = jsonAdapter.fromJson(meta.getValue());
+
+                            information.setDisplayValue(systemUser.username);
+                            return information;
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            information.setDisplayValue("");
+                            return information;
+                        }
+                    }
+                    information.setDisplayValue("");
+                    return information;
+                }
+
+                // for info we always call the network thus the delegate (view model) can handle multiple
+                // on its own.
+                if (typeInfo.getType().equals(TYPE_PRODUCT)) {
+                    delegate.findInNetwork(meta.getDisplayValue(), information, fieldConfig);
+                    return null;
+                }
+
+                information.setMultiple(true);
+
+
+                // TODO handle multiple
+                information.setDisplayValue("");
+
+
+
+
+                return information;
+            case FormSettings.VALUE_STRING:
+                // Until now phone type can only be single and not multiple
+                if (typeInfo.getType().equals(TYPE_PHONE)) {
+                    PostCountryCodeAndValue phone;
+                    JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi.adapter(PostCountryCodeAndValue.class);
+                    try {
+                        phone = jsonAdapter.fromJson(meta.getValue());
+                        information.setDisplayValue(String.valueOf(phone.value));
+                        return information;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        information.setDisplayValue("");
+                        return information;
+                    }
+                }
+
+
+                information.setDisplayValue((String) meta.getDisplayValue());
+
+                return information;
+
+            case FormSettings.VALUE_TEXT:
+
+                if (!(meta.getDisplayValue() instanceof String)) {
+                    information.setDisplayValue("");
+                    return information;
+                }
+
+                information.setDisplayValue((String) meta.getDisplayValue());
+
+                return information;
+            default:
+                Log.d(TAG, "format: invalid type. Not Known.");
+                information.setDisplayValue("");
+                return information;
+        }
     }
 
 

@@ -3,9 +3,11 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.icu.text.IDNA;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -13,6 +15,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.models.createworkflow.SpecificApprovers;
 import com.rootnetapp.rootnetintranet.models.createworkflow.StatusSpecific;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
+import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
@@ -22,14 +25,23 @@ import com.rootnetapp.rootnetintranet.models.responses.file.DocumentsFile;
 import com.rootnetapp.rootnetintranet.models.responses.file.FilesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.templates.Templates;
 import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Step;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.Information;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.InformationAdapter;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,8 +52,10 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class WorkflowDetailViewModel extends ViewModel {
-    private MutableLiveData<WorkflowDb> mWorkflowLiveData;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_PRODUCT;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_ROLE;
+
+public class WorkflowDetailViewModel extends ViewModel implements  FormSettings.FormSettingsViewModelDelegate{
     private MutableLiveData<List<Comment>> mCommentsLiveData;
     private MutableLiveData<Comment> mCommentLiveData;
     private MutableLiveData<Boolean> mAttachLiveData;
@@ -68,16 +82,19 @@ public class WorkflowDetailViewModel extends ViewModel {
     protected MutableLiveData<List<ApproverHistory>> updateApprovalHistoryList;
     protected MutableLiveData<Boolean> hideHistoryApprovalList;
     protected MutableLiveData<Boolean> setWorkflowIsOpen;
-
+    protected MutableLiveData<List<Information>> updateInformationListUi;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
-
-    private static final String TAG = "DetailViewModel";
 
     private boolean isPrivateComment = false;
     private String token;
     private WorkflowListItem workflowListItem; // in DB but has limited data about the workflow.
     private WorkflowDb workflow; // Not in DB and more complete response from network.
+
+    private static final String TAG = "DetailViewModel";
+    private static final String format = "MMM d, y - h:m a";
+
+    FormSettings formSettings;
 
     public WorkflowDetailViewModel(WorkflowDetailRepository workflowDetailRepository) {
         this.repository = workflowDetailRepository;
@@ -101,6 +118,8 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.updateApprovalHistoryList = new MutableLiveData<>();
         this.hideHistoryApprovalList = new MutableLiveData<>();
         this.setWorkflowIsOpen = new MutableLiveData<>();
+        this.updateInformationListUi = new MutableLiveData<>();
+        this.formSettings = new FormSettings();
     }
 
     @Override
@@ -263,6 +282,11 @@ public class WorkflowDetailViewModel extends ViewModel {
     private WorkflowTypeDb currentWorkflowType;
     private Status currentStatus;
 
+    /**
+     * Handles success response from endpoint when looking for a workflow type.
+     *
+     * @param response Incoming response from server.
+     */
     private void onTypeSuccess(WorkflowTypeResponse response) {
         currentWorkflowType = response.getWorkflowType();
         if (currentWorkflowType == null) {
@@ -274,6 +298,8 @@ public class WorkflowDetailViewModel extends ViewModel {
         getTemplateBy(currentWorkflowType.getTemplateId());
         this.presets = currentWorkflowType.getPresets();
 
+        updateWorkflowInformation(workflow, currentWorkflowType);
+
 
         // Update current approvers list on UI.
         List<Approver> typeConfigurationApprovers = currentStatus.getApproversList();
@@ -284,6 +310,131 @@ public class WorkflowDetailViewModel extends ViewModel {
         // Update approval spinner.
         List<Integer> nextStatusIds = workflow.getCurrentStatusRelations();
         updateApproveSpinnerUi(workflow, nextStatusIds);
+    }
+
+
+
+    /**
+     * Updates the info section UI for this workflow.
+     * @param workflow Workflow with info to display on the UI.
+     */
+    private void updateWorkflowInformation(WorkflowDb workflow, WorkflowTypeDb workflowTypeDb) {
+        List<Information> informationList = new ArrayList<>();
+
+        String startDate = Utils.serverFormatToFormat(workflow.getStart(), format);
+        String endDate = Utils.serverFormatToFormat(workflow.getEnd(), format);
+
+        Information info = new Information(R.string.title, workflow.getTitle());
+        informationList.add(info);
+        info = new Information(R.string.description, workflow.getDescription());
+        informationList.add(info);
+        info = new Information(R.string.start_date, startDate);
+        informationList.add(info);
+        info = new Information(R.string.end_date, endDate);
+        informationList.add(info);
+
+        if (workflow.getMetas().isEmpty()) {
+            updateInformationListUi.setValue(informationList);
+            return;
+        }
+
+        List<Meta> metaList = workflow.getMetas();
+        Meta meta;
+        WorkflowMetas metaData;
+        Moshi moshi = new Moshi.Builder().build();
+        FieldConfig config;
+        TypeInfo typeInfo;
+        String value;
+        JsonAdapter<FieldConfig> jsonAdapter = moshi.adapter(FieldConfig.class);
+        for (int i = 0; i < metaList.size(); i++) {
+            meta = metaList.get(i);
+            try {
+                config = jsonAdapter.fromJson(meta.getWorkflowTypeFieldConfig());
+                typeInfo = config.getTypeInfo();
+                if (typeInfo == null) {
+                    continue;
+                }
+
+
+                info = formSettings.formatStringToObject(meta, config, this);
+
+                if (info == null) {
+                    continue;
+                }
+
+
+                informationList.add(info);
+
+
+
+
+
+
+
+
+
+
+//                value = (String) meta.getDisplayValue();
+//
+//                infoList.add(new Information(item.getWorkflowTypeFieldName(), value));
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.d(TAG, "updateWorkflowInformation: " + e.getMessage());
+            }
+
+
+
+
+
+
+
+        }
+
+        updateInformationListUi.setValue(informationList);
+    }
+
+    @Override
+    public void findInNetwork(Object value, Information information, FieldConfig fieldConfig){
+
+
+        switch (fieldConfig.getTypeInfo().getType()) {
+            case TYPE_ROLE:
+                // TODO request to the network the names for those ids in value object.
+                // TODO check if it is multiple or not, value can be an int or array of int.
+
+
+
+
+
+                break;
+            case TYPE_PRODUCT:
+                // TODO request to the network the names for those ids in value object.
+                // TODO check if it is multiple or not, value can be an int or array of int.
+
+
+
+
+
+                break;
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
     /**
@@ -432,7 +583,7 @@ public class WorkflowDetailViewModel extends ViewModel {
         getWorkflowType(this.token, this.workflowListItem.getWorkflowTypeId());
         workflow = workflowResponse.getWorkflow();
         setWorkflowIsOpen.setValue(workflow.isOpen());
-        mWorkflowLiveData.setValue(workflowResponse.getWorkflow());
+
         updateProfilesInvolvedUi(workflow.getProfilesInvolved());
 
         SpecificApprovers approvers = workflow.getSpecificApprovers();
@@ -447,6 +598,7 @@ public class WorkflowDetailViewModel extends ViewModel {
         updateApproverHistoryListUi(workflow.getWorkflowApprovalHistory());
 
     }
+
 
     private void updateApproverHistoryListUi(List<ApproverHistory> approverHistoryList) {
         if (approverHistoryList == null || approverHistoryList.size() < 1) {
@@ -618,13 +770,6 @@ public class WorkflowDetailViewModel extends ViewModel {
     private void onFailure(Throwable throwable) {
         showLoading.setValue(false);
         mErrorLiveData.setValue(R.string.failure_connect);
-    }
-
-    protected LiveData<WorkflowDb> getObservableWorkflow() {
-        if (mWorkflowLiveData == null) {
-            mWorkflowLiveData = new MutableLiveData<>();
-        }
-        return mWorkflowLiveData;
     }
 
     public LiveData<List<Comment>> getObservableComments() {

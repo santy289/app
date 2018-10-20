@@ -3,7 +3,7 @@ package com.rootnetapp.rootnetintranet.models.createworkflow;
 import com.squareup.moshi.Json;
 
 public class PostCountryCodeAndValue {
-    public int value;
+    public long value;
 
     @Json(name = "country_id")
     public int countryId;

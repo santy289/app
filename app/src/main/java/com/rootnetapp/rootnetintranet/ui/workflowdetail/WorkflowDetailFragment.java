@@ -105,8 +105,8 @@ public class WorkflowDetailFragment extends Fragment {
         token = "Bearer "+ prefs.getString("token","");
         binding.tvWorkflowproject.setText(item.getTitle());
         binding.detailWorkflowId.setText(item.getWorkflowTypeKey());
-        binding.recSteps.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recInfo.setLayoutManager(new GridLayoutManager(getContext(), 2));
+
+
 
 
         binding.recDocuments.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -443,6 +443,7 @@ public class WorkflowDetailFragment extends Fragment {
     }
 
     private void loadImportantInfoSection(List<Step> steps) {
+        binding.recSteps.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recSteps.setAdapter(
                 new StepsAdapter(steps)
         );
@@ -541,37 +542,13 @@ public class WorkflowDetailFragment extends Fragment {
 
     }
 
+    private void updateInformationListUi(List<Information> informationList) {
+        binding.recInfo.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recInfo.setAdapter(new InformationAdapter(informationList));
+    }
+
 
     private void subscribe() {
-        final Observer<WorkflowDb> workflowObserver = ((WorkflowDb data) -> {
-            if (null != data) {
-                List<Information> infoList = new ArrayList<>();
-                infoList.add(new Information(getString(R.string.description),
-                        data.getDescription()));
-                infoList.add(new Information(getString(R.string.start_date),
-                        data.getStart()));
-                Moshi moshi = new Moshi.Builder().build();
-                JsonAdapter<FieldConfig> jsonAdapter = moshi.adapter(FieldConfig.class);
-                for (Meta item : data.getMetas()) {
-                    FieldConfig config = null;
-                    try {
-                        config = jsonAdapter.fromJson(item.getWorkflowTypeFieldConfig());
-                        if (config.getShow() != null && config.getShow()) {
-                            try {
-                                String value = (String) item.getDisplayValue();
-                                infoList.add(new Information(item.getWorkflowTypeFieldName(), value));
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
-                            }
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                binding.recInfo.setAdapter(new InformationAdapter(infoList));
-            }
-        });
-
         final Observer<List<Comment>> commentsObserver = ((List<Comment> data) -> {
             showLoading(false);
             if (null != data) {
@@ -609,7 +586,6 @@ public class WorkflowDetailFragment extends Fragment {
             }
         });
 
-        workflowDetailViewModel.getObservableWorkflow().observe(this, workflowObserver);
         workflowDetailViewModel.getObservableComments().observe(this, commentsObserver);
         workflowDetailViewModel.getObservableComment().observe(this, commentObserver);
         workflowDetailViewModel.getObservableAttach().observe(this, attachObserver);
@@ -635,6 +611,7 @@ public class WorkflowDetailFragment extends Fragment {
         workflowDetailViewModel.updateApprovalHistoryList.observe(this, this::updateApprovalHistoryList);
         workflowDetailViewModel.hideHistoryApprovalList.observe(this, this::hideHistoryApprovalList);
         workflowDetailViewModel.setWorkflowIsOpen.observe(this, this::setWorkflowIsOpen);
+        workflowDetailViewModel.updateInformationListUi.observe(this, this::updateInformationListUi);
     }
 
     private void updateHeaderCommentCounter(String count) {

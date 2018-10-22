@@ -52,8 +52,10 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_LIST;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_PRODUCT;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_ROLE;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_SERVICE;
 
 public class WorkflowDetailViewModel extends ViewModel implements  FormSettings.FormSettingsViewModelDelegate{
     private MutableLiveData<List<Comment>> mCommentsLiveData;
@@ -391,6 +393,8 @@ public class WorkflowDetailViewModel extends ViewModel implements  FormSettings.
     @Override
     public void findInNetwork(Object value, Information information, FieldConfig fieldConfig){
 
+        // TODO make new observers for receiving new items to ADD to the informatino list recycler view.
+        // we need to tell what change in the set basically the new items added during the first run
 
         switch (fieldConfig.getTypeInfo().getType()) {
             case TYPE_ROLE:
@@ -411,6 +415,19 @@ public class WorkflowDetailViewModel extends ViewModel implements  FormSettings.
 
 
                 break;
+
+            case TYPE_LIST:
+
+
+
+
+
+
+                break;
+
+            case TYPE_SERVICE:
+                break;
+
 
 
 

@@ -594,11 +594,10 @@ public class FormSettings {
                 }
 
                 String date = (String) meta.getDisplayValue();
-
-
                 SimpleDateFormat serverFormat = new SimpleDateFormat(
                         "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
                         Locale.getDefault());
+
                 try {
                     Date dateFromServer = serverFormat.parse(date);
                     SimpleDateFormat dateFormat = new SimpleDateFormat(
@@ -610,28 +609,11 @@ public class FormSettings {
                 } catch (ParseException e) {
                     e.printStackTrace();
                     information.setDisplayValue("");
-
-
-
-
-
                     String format = "MMM d, y - h:m a";
-                    String test = Utils.standardServerFormatTo(date, format);
-
-                    information.setDisplayValue(test);
-//                    return information;
-
-
-
-
-
-
-
+                    String formattedDate = Utils.standardServerFormatTo(date, format);
+                    information.setDisplayValue(formattedDate);
                     return information;
                 }
-
-
-
             case FormSettings.VALUE_EMAIL:
                 if (fieldConfig.getMultiple()) {
                     return null;
@@ -713,23 +695,13 @@ public class FormSettings {
                     return information;
                 }
 
-                // for info we always call the network thus the delegate (view model) can handle multiple
-                // on its own.
-                if (typeInfo.getType().equals(TYPE_PRODUCT)) {
-                    delegate.findInNetwork(meta.getDisplayValue(), information, fieldConfig);
-                    return null;
-                }
-
                 information.setMultiple(true);
 
+                // for info we always call the network thus the delegate (view model) can handle multiple
+                // on its own.
+                delegate.findInNetwork(meta.getDisplayValue(), information, fieldConfig);
 
-                // TODO handle multiple
-                information.setDisplayValue("");
-
-
-
-
-                return information;
+                return null;
             case FormSettings.VALUE_STRING:
                 // Until now phone type can only be single and not multiple
                 if (typeInfo.getType().equals(TYPE_PHONE)) {

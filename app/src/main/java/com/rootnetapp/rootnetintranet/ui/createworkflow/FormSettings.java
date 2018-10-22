@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.models.createworkflow.CurrencyFieldData;
@@ -347,11 +348,18 @@ public class FormSettings {
                     metaData.setValue(json);
                     break;
                 }
+
                 if (typeInfo.getType().equals(TYPE_PRODUCT)) {
                     String json = getProductJson(value, fieldData, metaData);
                     metaData.setValue(json);
                     break;
                 }
+
+                if (typeInfo.getType().equals(TYPE_SERVICE)) {
+                    // TODO handle service.
+
+                }
+
                 handleList(fieldData, metaData, value);
                 break;
             case FormSettings.VALUE_STRING:
@@ -569,66 +577,79 @@ public class FormSettings {
         */
         switch (typeInfo.getValueType()) {
             case FormSettings.VALUE_BOOLEAN:
-
-                if (!fieldConfig.getMultiple()) {
-
-
-                    Boolean value = (Boolean) meta.getDisplayValue();
-
-                    if (value) {
-                        information.setResDisplayValue(R.string.yes);
-                    } else {
-                        information.setResDisplayValue(R.string.no);
-                    }
-                    return information;
+                if (fieldConfig.getMultiple()) {
+                    return null;
                 }
 
-                information.setMultiple(true);
-                Boolean[] listOfBoolean = (Boolean[]) meta.getDisplayValue();
-                for (int i = 0; i < listOfBoolean.length; i++) {
-                    Boolean value = listOfBoolean[i];
-                    if (value) {
-                        information.addResStringToResList(R.string.yes);
-                    } else {
-                        information.addResStringToResList(R.string.no);
-                    }
+                Boolean value = (Boolean) meta.getDisplayValue();
+                if (value) {
+                    information.setResDisplayValue(R.string.yes);
+                } else {
+                    information.setResDisplayValue(R.string.no);
                 }
                 return information;
             case FormSettings.VALUE_DATE:
-                // TODO handle formats
+                if (fieldConfig.getMultiple()) {
+                    return null;
+                }
 
-                if (!fieldConfig.getMultiple()) {
-                    String date = (String) meta.getDisplayValue();
-                    information.setDisplayValue(date);
+                String date = (String) meta.getDisplayValue();
+
+
+                SimpleDateFormat serverFormat = new SimpleDateFormat(
+                        "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+                        Locale.getDefault());
+                try {
+                    Date dateFromServer = serverFormat.parse(date);
+                    SimpleDateFormat dateFormat = new SimpleDateFormat(
+                            "dd-MM-yyyy",
+                            Locale.getDefault());
+                    String formattedDate = dateFormat.format(dateFromServer);
+                    information.setDisplayValue(formattedDate);
+                    return information;
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    information.setDisplayValue("");
+
+
+
+
+
+                    String format = "MMM d, y - h:m a";
+                    String test = Utils.standardServerFormatTo(date, format);
+
+                    information.setDisplayValue(test);
+//                    return information;
+
+
+
+
+
+
+
                     return information;
                 }
 
-                information.setMultiple(true);
 
-                // TODO handle multiple dates
-                information.setDisplayValue("");
-
-
-//                SimpleDateFormat dateFormat = new SimpleDateFormat(
-//                        "dd-MM-yyyy",
-//                        Locale.getDefault());
-//                String metaDateString = "";
-//                try {
-//                    Date convertedDate = dateFormat.parse(value);
-//                    SimpleDateFormat serverFormat = new SimpleDateFormat(
-//                            "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
-//                            Locale.getDefault());
-//                    metaDateString = serverFormat.format(convertedDate);
-//                } catch (ParseException e) {
-//                    Log.d(TAG, "StringDateToTimestamp: e = " + e.getMessage());
-//                }
-//                metaData.setValue(metaDateString);
-
-                return information;
 
             case FormSettings.VALUE_EMAIL:
+                if (fieldConfig.getMultiple()) {
+                    return null;
+                }
+                if (!(meta.getDisplayValue() instanceof String)) {
+                    information.setDisplayValue("");
+                    return information;
+                }
+
+                information.setDisplayValue((String) meta.getDisplayValue());
+                return information;
+            case FormSettings.VALUE_INTEGER:
 
                 if (!fieldConfig.getMultiple()) {
+                    return null;
+                }
+
+                if (typeInfo.getType().equals(TYPE_TEXT)) {
                     if (!(meta.getDisplayValue() instanceof String)) {
                         information.setDisplayValue("");
                         return information;
@@ -637,77 +658,43 @@ public class FormSettings {
                     return information;
                 }
 
-                // TODO handle multiple
-
-                information.setMultiple(true);
-                information.setDisplayValue("");
-                return information;
-
-            case FormSettings.VALUE_INTEGER:
-
-                if (!fieldConfig.getMultiple()) {
-                    if (typeInfo.getType().equals(TYPE_TEXT)) {
-
-                        if (!(meta.getDisplayValue() instanceof String)) {
-                            information.setDisplayValue("");
-                            return information;
-                        }
-
-                        information.setDisplayValue((String) meta.getDisplayValue());
-
+                if (typeInfo.getType().equals(TYPE_CURRENCY)) {
+                    PostCountryCodeAndValue currency;
+                    JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi.adapter(PostCountryCodeAndValue.class);
+                    try {
+                        currency = jsonAdapter.fromJson(meta.getValue());
+                        information.setDisplayValue(String.valueOf(currency.value));
+                        return information;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        information.setDisplayValue("");
                         return information;
                     }
-                    if (typeInfo.getType().equals(TYPE_CURRENCY)) {
+                }
 
-                        PostCountryCodeAndValue currency;
-
-                        JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi.adapter(PostCountryCodeAndValue.class);
-                        try {
-                            currency = jsonAdapter.fromJson(meta.getValue());
-                            information.setDisplayValue(String.valueOf(currency.value));
-                            return information;
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            information.setDisplayValue("");
-                            return information;
-                        }
-                    }
-
-                    if (typeInfo.getType().equals(TYPE_FILE)) {
-                        return null;
-                    }
-
+                if (typeInfo.getType().equals(TYPE_FILE)) {
+                    // TODO handle file.
                     return null;
                 }
 
-                information.setMultiple(true);
-
-
-                // TODO handle multiple
-                information.setDisplayValue("");
-
-                return information;
+                return null;
             case FormSettings.VALUE_ENTITY:
 
                 if (!fieldConfig.getMultiple()) {
-
-                    if (typeInfo.getType().equals(TYPE_ROLE)) {
-                        // TODO send back to view model to find the name of the id given.
-
-                        delegate.findInNetwork(meta.getDisplayValue(), information, fieldConfig);
-                        return null;
-                    }
+                    return null;
                 }
 
-                information.setMultiple(true);
+                if (typeInfo.getType().equals(TYPE_ROLE)) {
+                    // TODO send back to view model to find the name of the id given.
+                    delegate.findInNetwork(meta.getDisplayValue(), information, fieldConfig);
+                    return null;
+                }
 
-                information.setDisplayValue("");
-                return information;
-
+                return null;
             case FormSettings.VALUE_LIST:
                 if (!fieldConfig.getMultiple()) {
+                    // Only type in value_type that can't be multiple choices.
                     if (typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
-
                         Moshi moshi = new Moshi.Builder().build();
                         JsonAdapter<PostSystemUser> jsonAdapter = moshi.adapter(PostSystemUser.class);
                         try {
@@ -715,13 +702,13 @@ public class FormSettings {
 
                             information.setDisplayValue(systemUser.username);
                             return information;
-
                         } catch (IOException e) {
                             e.printStackTrace();
                             information.setDisplayValue("");
                             return information;
                         }
                     }
+                    // Not a system_users type, and not supported.
                     information.setDisplayValue("");
                     return information;
                 }
@@ -759,20 +746,20 @@ public class FormSettings {
                     }
                 }
 
-
-                information.setDisplayValue((String) meta.getDisplayValue());
-
-                return information;
-
-            case FormSettings.VALUE_TEXT:
-
                 if (!(meta.getDisplayValue() instanceof String)) {
                     information.setDisplayValue("");
                     return information;
                 }
 
                 information.setDisplayValue((String) meta.getDisplayValue());
+                return information;
+            case FormSettings.VALUE_TEXT:
+                if (!(meta.getDisplayValue() instanceof String)) {
+                    information.setDisplayValue("");
+                    return information;
+                }
 
+                information.setDisplayValue((String) meta.getDisplayValue());
                 return information;
             default:
                 Log.d(TAG, "format: invalid type. Not Known.");
@@ -780,7 +767,6 @@ public class FormSettings {
                 return information;
         }
     }
-
 
     public String getTitle() {
         return title;

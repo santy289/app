@@ -43,8 +43,18 @@ public class InformationAdapter extends RecyclerView.Adapter<InformationViewhold
 //        if (item.isMultiple()) {
 //            return;
 //        }
+        if (!TextUtils.isEmpty(item.getDisplayValue())) {
+            holder.binding.tvContent.setText(item.getDisplayValue());
+            return;
+        }
 
-        holder.binding.tvContent.setText(item.getDisplayValue());
+        if (item.getResDisplayValue() < 1) {
+            holder.binding.tvContent.setText("");
+            return;
+        }
+
+        Context context = holder.binding.tvContent.getContext();
+        holder.binding.tvContent.setText(context.getString(item.getResDisplayValue()));
     }
 
     @Override

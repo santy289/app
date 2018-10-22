@@ -367,13 +367,6 @@ public class WorkflowDetailViewModel extends ViewModel implements  FormSettings.
 
 
 
-
-
-
-
-
-
-
 //                value = (String) meta.getDisplayValue();
 //
 //                infoList.add(new Information(item.getWorkflowTypeFieldName(), value));

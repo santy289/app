@@ -104,6 +104,9 @@ public class Utils {
      * @return returns formatted Date
      */
     public static String serverFormatToFormat(String isoStringDate, String format) {
+        if (isoStringDate == null) {
+            return "";
+        }
         String uiDateString;
         int semicolonPosition = isoStringDate.length() - 3;
         if (isoStringDate.charAt(semicolonPosition) != ':') {
@@ -117,8 +120,16 @@ public class Utils {
 
         uiDateString = DateTimeFormatter
                 .ofPattern(format)
-                .format(getDate(isoStringDate));
+                .format(getDate(isoStringDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
 
+        return uiDateString;
+    }
+
+    public static String standardServerFormatTo(String isoStringDate, String format) {
+        String uiDateString;
+        uiDateString = DateTimeFormatter
+                .ofPattern(format)
+                .format(getDate(isoStringDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
         return uiDateString;
     }
 
@@ -127,10 +138,9 @@ public class Utils {
         return ZoneId.of("UTC");
     }
 
-    public static ZonedDateTime getDate(@NonNull String isoDateString) {
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+    public static ZonedDateTime getDate(@NonNull String isoDateString, DateTimeFormatter dateTimeFormatter) {
         return ZonedDateTime
-                .parse(isoDateString, formatter)
+                .parse(isoDateString, dateTimeFormatter)
                 .withZoneSameInstant(getZoneId());
     }
 

@@ -3,7 +3,6 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
-import android.icu.text.IDNA;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -12,6 +11,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.Profi
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
 import com.rootnetapp.rootnetintranet.models.createworkflow.SpecificApprovers;
 import com.rootnetapp.rootnetintranet.models.createworkflow.StatusSpecific;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
@@ -37,7 +37,6 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.Information;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.InformationAdapter;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
@@ -56,6 +55,7 @@ import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_PRODUCT;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_ROLE;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_SERVICE;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_SYSTEM_USERS;
 
 public class WorkflowDetailViewModel extends ViewModel implements  FormSettings.FormSettingsViewModelDelegate{
     private MutableLiveData<List<Comment>> mCommentsLiveData;
@@ -94,7 +94,8 @@ public class WorkflowDetailViewModel extends ViewModel implements  FormSettings.
     private WorkflowDb workflow; // Not in DB and more complete response from network.
 
     private static final String TAG = "DetailViewModel";
-    private static final String format = "MMM d, y - h:m a";
+//    public static final String FORMAT = "MMM d, y - h:mm a";
+    public static final String FORMAT = "MMM d, y";
 
     FormSettings formSettings;
 
@@ -281,6 +282,29 @@ public class WorkflowDetailViewModel extends ViewModel implements  FormSettings.
 
     }
 
+    /**
+     * Calls /approve endpoint and does a Post request to either approve or reject a workflow.
+     * @param viewId
+     */
+    protected void handleApproveRejectAction(int viewId) {
+        switch (viewId) {
+            case R.id.btn_approve:
+
+
+
+
+                break;
+            case R.id.btn_reject:
+
+
+
+
+
+                break;
+        }
+
+    }
+
     private WorkflowTypeDb currentWorkflowType;
     private Status currentStatus;
 
@@ -323,8 +347,8 @@ public class WorkflowDetailViewModel extends ViewModel implements  FormSettings.
     private void updateWorkflowInformation(WorkflowDb workflow, WorkflowTypeDb workflowTypeDb) {
         List<Information> informationList = new ArrayList<>();
 
-        String startDate = Utils.serverFormatToFormat(workflow.getStart(), format);
-        String endDate = Utils.serverFormatToFormat(workflow.getEnd(), format);
+        String startDate = Utils.serverFormatToFormat(workflow.getStart(), FORMAT);
+        String endDate = Utils.serverFormatToFormat(workflow.getEnd(), FORMAT);
 
         Information info = new Information(R.string.title, workflow.getTitle());
         informationList.add(info);
@@ -429,7 +453,29 @@ public class WorkflowDetailViewModel extends ViewModel implements  FormSettings.
                 break;
 
 
+            case TYPE_SYSTEM_USERS:
+                // WHEN we have on user this is an example.
+//                if (typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
+//                    Moshi moshi = new Moshi.Builder().build();
+//                    JsonAdapter<PostSystemUser> jsonAdapter = moshi.adapter(PostSystemUser.class);
+//                    try {
+//                        PostSystemUser systemUser = jsonAdapter.fromJson(meta.getValue());
+//
+//                        information.setDisplayValue(systemUser.username);
+//                        return information;
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                        information.setDisplayValue("");
+//                        return information;
+//                    }
+//                }
 
+
+
+                break;
+
+            default:
+                break;
 
         }
 
@@ -451,7 +497,9 @@ public class WorkflowDetailViewModel extends ViewModel implements  FormSettings.
      * Updates UI section for current approvers. If this list is empty it will hide its recycler view.
      *
      * @param typeConfigurationApprovers
+     *  List of approvers.
      * @param currentSpecificApprovers
+     *  List of current approvers.
      */
     private void updateCurrentApproverUi(List<Approver> typeConfigurationApprovers, SpecificApprovers currentSpecificApprovers) {
         List<Approver> result = new ArrayList<>();

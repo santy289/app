@@ -29,6 +29,7 @@ import com.rootnetapp.rootnetintranet.models.responses.timeline.SubCommentsRespo
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.WorkflowApproveRejectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
@@ -41,7 +42,6 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser
 
 import java.util.List;
 import java.util.Map;
-import java.util.Observer;
 
 import io.reactivex.Observable;
 import retrofit2.http.Body;
@@ -50,7 +50,6 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
-import retrofit2.http.Multipart;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
@@ -287,6 +286,13 @@ public interface ApiInterface {
                                             @Field("description") String description,
                                             @Field("is_private") boolean isPrivate,
                                             @Field("files") List<CommentFile> files);
+    @Headers({"Domain-Name: api"})
+    @POST("intranet/workflow/{id}/approval")
+    @FormUrlEncoded
+    Observable<WorkflowApproveRejectResponse> postApproveReject(@Header("Authorization") String authorization,
+                                                                @Path("id") int workflowId,
+                                                                @Field("approve") boolean isApproved,
+                                                                @Field("next_status") int nextStatus);
 
     @Headers({"Domain-Name: api"})
     @POST("intranet/workflows/records/file")

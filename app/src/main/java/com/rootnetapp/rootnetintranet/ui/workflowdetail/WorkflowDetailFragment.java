@@ -100,21 +100,16 @@ public class WorkflowDetailFragment extends Fragment {
         workflowDetailViewModel = ViewModelProviders
                 .of(this, workflowViewModelFactory)
                 .get(WorkflowDetailViewModel.class);
-        //TODO preferences inyectadas con Dagger
+
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         token = "Bearer "+ prefs.getString("token","");
         binding.tvWorkflowproject.setText(item.getTitle());
         binding.detailWorkflowId.setText(item.getWorkflowTypeKey());
 
-
-
-
         binding.recDocuments.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recComments.setLayoutManager(new LinearLayoutManager(getContext()));
-        //todo SOLO testing hasta tener el backend live
 
         setClickListeners();
-        //fin testing
         files = new ArrayList<>();
         subscribe();
         showLoading(true);
@@ -160,6 +155,16 @@ public class WorkflowDetailFragment extends Fragment {
             updateSwitchUi(isChecked);
             workflowDetailViewModel.commentIsPrivate(isChecked);
         }));
+        binding.btnApprove.setOnClickListener(this::approveRejectedAction);
+    }
+
+    /**
+     * Click listener function that listens to clicks in the approve and reject buttons.
+     *
+     * @param view Button on the layout. This is either approve or reject buttons.
+     */
+    private void approveRejectedAction(View view) {
+        workflowDetailViewModel.handleApproveRejectAction(view.getId());
     }
 
     private void updateSwitchUi(boolean isChecked) {

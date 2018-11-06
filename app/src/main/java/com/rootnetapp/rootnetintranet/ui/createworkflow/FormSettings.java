@@ -1,16 +1,13 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
-import android.support.annotation.NonNull;
 import android.support.v4.util.ArrayMap;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
-import com.rootnetapp.rootnetintranet.models.createworkflow.CurrencyFieldData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
@@ -28,11 +25,9 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.Information;
 import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
 
-import org.w3c.dom.Text;
-
-import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -558,6 +553,11 @@ public class FormSettings {
         return null;
     }
 
+    /**
+     * Interface for a ViewModel that we help FormSettings in completed an Information object by
+     * requesting to a Repository for data in the network. Eventually this function will also continue
+     * updating the Workflow information section.
+     */
     public interface FormSettingsViewModelDelegate {
         public void findInNetwork(Object value, Information information, FieldConfig fieldConfig);
     }
@@ -581,8 +581,9 @@ public class FormSettings {
                     return null;
                 }
 
-                Boolean value = (Boolean) meta.getDisplayValue();
-                if (value) {
+                String value = meta.getValue();
+
+                if (Boolean.valueOf(value)) {
                     information.setResDisplayValue(R.string.yes);
                 } else {
                     information.setResDisplayValue(R.string.no);
@@ -593,27 +594,35 @@ public class FormSettings {
                     return null;
                 }
 
-                String date = (String) meta.getDisplayValue();
-                SimpleDateFormat serverFormat = new SimpleDateFormat(
-                        "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
-                        Locale.getDefault());
+                String date = (String) meta.getDisplayValue(); // now returns 10 / 25 / 2018
+                // String date = (String) meta.getValue(); // Maybe try this but it returns a double quotes.
 
-                try {
-                    Date dateFromServer = serverFormat.parse(date);
-                    SimpleDateFormat dateFormat = new SimpleDateFormat(
-                            "dd-MM-yyyy",
-                            Locale.getDefault());
-                    String formattedDate = dateFormat.format(dateFromServer);
-                    information.setDisplayValue(formattedDate);
-                    return information;
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    information.setDisplayValue("");
-                    String format = "MMM d, y - h:m a";
-                    String formattedDate = Utils.standardServerFormatTo(date, format);
-                    information.setDisplayValue(formattedDate);
-                    return information;
-                }
+                // TODO for now use displayValue directly. Verify that his will not change anymore.
+                // TODO Get rid of the unnecessary spaces in the date itself between the numbers.
+                information.setDisplayValue((String) meta.getDisplayValue());
+                return information;
+
+                // TODO commenting out this block for now. Make sure we don't need this anymore.
+//                SimpleDateFormat serverFormat = new SimpleDateFormat(
+//                        "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+//                        Locale.getDefault());
+//
+//                try {
+//                    Date dateFromServer = serverFormat.parse(date);
+//                    SimpleDateFormat dateFormat = new SimpleDateFormat(
+//                            "dd-MM-yyyy",
+//                            Locale.getDefault());
+//                    String formattedDate = dateFormat.format(dateFromServer);
+//                    information.setDisplayValue(formattedDate);
+//                    return information;
+//                } catch (ParseException e) {
+//                    e.printStackTrace();
+//                    information.setDisplayValue("");
+//                    String format = WorkflowDetailViewModel.FORMAT;
+//                    String formattedDate = Utils.standardServerFormatTo(date, format);
+//                    information.setDisplayValue(formattedDate);
+//                    return information;
+//                }
             case FormSettings.VALUE_EMAIL:
                 if (fieldConfig.getMultiple()) {
                     return null;
@@ -627,7 +636,7 @@ public class FormSettings {
                 return information;
             case FormSettings.VALUE_INTEGER:
 
-                if (!fieldConfig.getMultiple()) {
+                if (fieldConfig.getMultiple()) {
                     return null;
                 }
 
@@ -675,32 +684,13 @@ public class FormSettings {
                 return null;
             case FormSettings.VALUE_LIST:
                 if (!fieldConfig.getMultiple()) {
-                    // Only type in value_type that can't be multiple choices.
-                    if (typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
-                        Moshi moshi = new Moshi.Builder().build();
-                        JsonAdapter<PostSystemUser> jsonAdapter = moshi.adapter(PostSystemUser.class);
-                        try {
-                            PostSystemUser systemUser = jsonAdapter.fromJson(meta.getValue());
-
-                            information.setDisplayValue(systemUser.username);
-                            return information;
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            information.setDisplayValue("");
-                            return information;
-                        }
-                    }
-                    // Not a system_users type, and not supported.
-                    information.setDisplayValue("");
-                    return information;
+                    delegate.findInNetwork(meta.getDisplayValue(), information, fieldConfig);
+                    return null;
                 }
-
                 information.setMultiple(true);
-
                 // for info we always call the network thus the delegate (view model) can handle multiple
                 // on its own.
                 delegate.findInNetwork(meta.getDisplayValue(), information, fieldConfig);
-
                 return null;
             case FormSettings.VALUE_STRING:
                 // Until now phone type can only be single and not multiple
@@ -712,6 +702,10 @@ public class FormSettings {
                         information.setDisplayValue(String.valueOf(phone.value));
                         return information;
                     } catch (IOException e) {
+                        e.printStackTrace();
+                        information.setDisplayValue("");
+                        return information;
+                    } catch (JsonDataException e) {
                         e.printStackTrace();
                         information.setDisplayValue("");
                         return information;

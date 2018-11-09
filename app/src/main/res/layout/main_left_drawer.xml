@@ -111,7 +111,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/workflow_manager"
+                        android:text="@string/dashboard"
                         android:textColor="@color/selected_filter" />
 
                 </RelativeLayout>
@@ -129,7 +129,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/workflows"
+                        android:text="@string/nav_workflow_list"
                         android:textColor="@color/selected_filter" />
 
                 </RelativeLayout>

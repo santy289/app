@@ -92,9 +92,16 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
         // Title
         String mainTitle = item.getTitle() + " - " + item.getWorkflowTypeKey();
         holder.binding.tvTitle.setText(mainTitle);
-        holder.binding.tvWorkflowtype.setText(item.getWorkflowTypeName());
+        holder.binding.tvTitle.setOnClickListener(v -> {
+            int position = holder.getAdapterPosition();
+            WorkflowListItem selectedItem = getItem(position);
+            anInterface.showDetail(selectedItem);
+        });
+
 
         //Details
+        holder.binding.tvWorkflowtype.setText(item.getWorkflowTypeName());
+
         String fullName = item.getFullName();
         if (!TextUtils.isEmpty(fullName)) {
             holder.binding.tvOwner.setText(fullName);
@@ -150,7 +157,6 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
         });
 
         holder.binding.btnDetail.setOnClickListener(view -> {
-            // TODO put back because interface was removed
             int position = holder.getAdapterPosition();
             WorkflowListItem selectedItem = getItem(position);
             anInterface.showDetail(selectedItem);

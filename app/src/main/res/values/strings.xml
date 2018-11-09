@@ -210,4 +210,6 @@
     <string name="status_was_modified">(Status was modified)</string>
     <string name="no_history_to_show">No approval history available</string>
     <string name="something_went_wrong">Something went wrong, try again later.</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="nav_workflow_list">Workflow List</string>
 </resources>

@@ -50,13 +50,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_LIST;
-import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_PRODUCT;
-import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_ROLE;
-import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_SERVICE;
-import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_SYSTEM_USERS;
-
-public class WorkflowDetailViewModel extends ViewModel implements  FormSettings.FormSettingsViewModelDelegate{
+public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<List<Comment>> mCommentsLiveData;
     private MutableLiveData<Comment> mCommentLiveData;
     private MutableLiveData<Boolean> mAttachLiveData;
@@ -286,26 +280,34 @@ public class WorkflowDetailViewModel extends ViewModel implements  FormSettings.
      * @param viewId
      */
     protected void handleApproveRejectAction(int viewId, int selectedItemIndex) {
+        showLoading.setValue(true);
         List<Integer> nextStatusIds = workflow.getCurrentStatusRelations();
         int nextStatusId = nextStatusIds.get(selectedItemIndex);
-
+        boolean approve;
         switch (viewId) {
             case R.id.btn_approve:
-                // TODO call this in the background thread
-                repository.approveWorkflow(token, workflow.getId(), true, nextStatusId);
+                approve = true;
                 break;
             case R.id.btn_reject:
-                // TODO call this in the background thread
-                repository.approveWorkflow(token, workflow.getId(), false, nextStatusId);
+                approve = false;
                 break;
+            default:
+                Log.d(TAG, "handleApproveRejectAction: Action unknown, skipping network request.");
+                return;
         }
+        Disposable disposable = repository
+                .approveWorkflow(token, workflow.getId(), approve, nextStatusId)
+                .subscribe(success -> {
+                    // TODO update UI with next upcoming status.
+
+                    showLoading.setValue(false);
+                }, throwable -> {
+                    Log.d(TAG, "handleApproveRejectAction: error - " + throwable.getMessage());
+                    showLoading.setValue(false);
+                    mErrorLiveData.setValue(R.string.something_went_wrong);
+                });
+        disposables.add(disposable);
     }
-
-
-    // TODO function to handles requests to the network and in the background.
-
-
-
 
 
 
@@ -396,7 +398,7 @@ public class WorkflowDetailViewModel extends ViewModel implements  FormSettings.
                 }
 
 
-                info = formSettings.formatStringToObject(meta, config, this);
+                info = formSettings.formatStringToObject(meta, config);
 
                 if (info == null) {
                     continue;
@@ -404,8 +406,6 @@ public class WorkflowDetailViewModel extends ViewModel implements  FormSettings.
 
 
                 informationList.add(info);
-
-
 
 //                value = (String) meta.getDisplayValue();
 //
@@ -416,95 +416,9 @@ public class WorkflowDetailViewModel extends ViewModel implements  FormSettings.
                 e.printStackTrace();
                 Log.d(TAG, "updateWorkflowInformation: " + e.getMessage());
             }
-
-
-
-
-
-
-
         }
 
         updateInformationListUi.setValue(informationList);
-    }
-
-    @Override
-    public void findInNetwork(Object value, Information information, FieldConfig fieldConfig){
-
-        // TODO make new observers for receiving new items to ADD to the informatino list recycler view.
-        // we need to tell what change in the set basically the new items added during the first run
-
-        switch (fieldConfig.getTypeInfo().getType()) {
-            case TYPE_ROLE:
-                // TODO request to the network the names for those ids in value object.
-                // TODO check if it is multiple or not, value can be an int or array of int.
-
-
-
-
-
-                break;
-            case TYPE_PRODUCT:
-                // TODO request to the network the names for those ids in value object.
-                // TODO check if it is multiple or not, value can be an int or array of int.
-
-
-
-
-
-                break;
-
-            case TYPE_LIST:
-
-
-
-
-
-
-                break;
-
-            case TYPE_SERVICE:
-                break;
-
-
-            case TYPE_SYSTEM_USERS:
-                // WHEN we have on user this is an example.
-//                if (typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
-//                    Moshi moshi = new Moshi.Builder().build();
-//                    JsonAdapter<PostSystemUser> jsonAdapter = moshi.adapter(PostSystemUser.class);
-//                    try {
-//                        PostSystemUser systemUser = jsonAdapter.fromJson(meta.getValue());
-//
-//                        information.setDisplayValue(systemUser.username);
-//                        return information;
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                        information.setDisplayValue("");
-//                        return information;
-//                    }
-//                }
-
-
-
-                break;
-
-            default:
-                break;
-
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
     /**

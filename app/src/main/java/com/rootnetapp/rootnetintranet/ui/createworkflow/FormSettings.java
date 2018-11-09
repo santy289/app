@@ -562,7 +562,7 @@ public class FormSettings {
         public void findInNetwork(Object value, Information information, FieldConfig fieldConfig);
     }
 
-    public Information formatStringToObject(Meta meta, FieldConfig fieldConfig, FormSettingsViewModelDelegate delegate) {
+    public Information formatStringToObject(Meta meta, FieldConfig fieldConfig) {
         if (TextUtils.isEmpty(meta.getValue())) {
             return null;
         }
@@ -682,15 +682,25 @@ public class FormSettings {
 
                 return null;
             case FormSettings.VALUE_LIST:
-                if (typeInfo.getType().equals("system_users")) {
+                if (typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
                     // TODO implement system user field
-                    if (fieldConfig.getMultiple()) {
-                        // {"id":50,"username":"jhonny Garzon","status":true,"email":"jgarzon600@gmail.com"}
-                    } else {
+//                    if (fieldConfig.getMultiple()) {
+//                        // {"id":50,"username":"jhonny Garzon","status":true,"email":"jgarzon600@gmail.com"}
+//                    } else {
+//
+//                    }
 
+                    Moshi moshi = new Moshi.Builder().build();
+                    JsonAdapter<PostSystemUser> jsonAdapter = moshi.adapter(PostSystemUser.class);
+                    try {
+                        PostSystemUser systemUser = jsonAdapter.fromJson(meta.getValue());
+                        information.setDisplayValue(systemUser.username);
+                        return information;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        information.setDisplayValue("");
+                        return information;
                     }
-                    information.setDisplayValue("");
-                    return information;
                 }
 
                 String displayValue = getLabelFrom(meta);

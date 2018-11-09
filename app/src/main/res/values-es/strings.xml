@@ -208,4 +208,5 @@
     <string name="rejected">Rechazado</string>
     <string name="status_was_modified">(Estatus fue cambiado)</string>
     <string name="no_history_to_show">Sin historial para mostrar</string>
+    <string name="something_went_wrong">Algo falló, por favor intente mas tarde.</string>
 </resources>

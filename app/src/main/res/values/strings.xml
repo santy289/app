@@ -209,4 +209,5 @@
     <string name="rejected">Rejected</string>
     <string name="status_was_modified">(Status was modified)</string>
     <string name="no_history_to_show">No approval history available</string>
+    <string name="something_went_wrong">Something went wrong, try again later.</string>
 </resources>

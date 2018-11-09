@@ -11,7 +11,6 @@ import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.Profi
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
-import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
 import com.rootnetapp.rootnetintranet.models.createworkflow.SpecificApprovers;
 import com.rootnetapp.rootnetintranet.models.createworkflow.StatusSpecific;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
@@ -286,24 +285,39 @@ public class WorkflowDetailViewModel extends ViewModel implements  FormSettings.
      * Calls /approve endpoint and does a Post request to either approve or reject a workflow.
      * @param viewId
      */
-    protected void handleApproveRejectAction(int viewId) {
+    protected void handleApproveRejectAction(int viewId, int selectedItemIndex) {
+        List<Integer> nextStatusIds = workflow.getCurrentStatusRelations();
+        int nextStatusId = nextStatusIds.get(selectedItemIndex);
+
         switch (viewId) {
             case R.id.btn_approve:
-
-
-
-
+                // TODO call this in the background thread
+                repository.approveWorkflow(token, workflow.getId(), true, nextStatusId);
                 break;
             case R.id.btn_reject:
-
-
-
-
-
+                // TODO call this in the background thread
+                repository.approveWorkflow(token, workflow.getId(), false, nextStatusId);
                 break;
         }
-
     }
+
+
+    // TODO function to handles requests to the network and in the background.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     private WorkflowTypeDb currentWorkflowType;
     private Status currentStatus;

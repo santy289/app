@@ -17,13 +17,13 @@ import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailBinding;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
@@ -45,8 +45,6 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.Information;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.InformationAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.PeopleInvolvedAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.StepsAdapter;
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
 
 import java.io.File;
 import java.io.IOException;
@@ -164,7 +162,7 @@ public class WorkflowDetailFragment extends Fragment {
      * @param view Button on the layout. This is either approve or reject buttons.
      */
     private void approveRejectedAction(View view) {
-        workflowDetailViewModel.handleApproveRejectAction(view.getId());
+        workflowDetailViewModel.handleApproveRejectAction(view.getId(), approveSpinnerItemSelection);
     }
 
     private void updateSwitchUi(boolean isChecked) {
@@ -425,6 +423,7 @@ public class WorkflowDetailFragment extends Fragment {
 
     }
 
+    private int approveSpinnerItemSelection;
     private void updateApproveSpinner(List<String> nextStatuses) {
         Context context = getContext();
         if (context == null) {
@@ -437,6 +436,18 @@ public class WorkflowDetailFragment extends Fragment {
                 nextStatuses
         );
         binding.detailApproveSpinner.setAdapter(adapter);
+
+        binding.detailApproveSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                approveSpinnerItemSelection = position;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
 
     private void showImportantInfoSection(boolean show) {

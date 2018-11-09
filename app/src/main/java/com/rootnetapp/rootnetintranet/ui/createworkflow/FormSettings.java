@@ -599,7 +599,7 @@ public class FormSettings {
 
                 // TODO for now use displayValue directly. Verify that his will not change anymore.
                 // TODO Get rid of the unnecessary spaces in the date itself between the numbers.
-                information.setDisplayValue((String) meta.getDisplayValue());
+                information.setDisplayValue(date);
                 return information;
 
                 // TODO commenting out this block for now. Make sure we don't need this anymore.
@@ -660,6 +660,10 @@ public class FormSettings {
                         e.printStackTrace();
                         information.setDisplayValue("");
                         return information;
+                    } catch (JsonDataException e) {
+                        e.printStackTrace();
+                        information.setDisplayValue("");
+                        return information;
                     }
                 }
 
@@ -670,28 +674,28 @@ public class FormSettings {
 
                 return null;
             case FormSettings.VALUE_ENTITY:
-
-                if (!fieldConfig.getMultiple()) {
-                    return null;
-                }
-
                 if (typeInfo.getType().equals(TYPE_ROLE)) {
-                    // TODO send back to view model to find the name of the id given.
-                    delegate.findInNetwork(meta.getDisplayValue(), information, fieldConfig);
-                    return null;
+                    String displayValue = getLabelFrom(meta);
+                    information.setDisplayValue(displayValue);
+                    return information;
                 }
 
                 return null;
             case FormSettings.VALUE_LIST:
-                if (!fieldConfig.getMultiple()) {
-                    delegate.findInNetwork(meta.getDisplayValue(), information, fieldConfig);
-                    return null;
+                if (typeInfo.getType().equals("system_users")) {
+                    // TODO implement system user field
+                    if (fieldConfig.getMultiple()) {
+                        // {"id":50,"username":"jhonny Garzon","status":true,"email":"jgarzon600@gmail.com"}
+                    } else {
+
+                    }
+                    information.setDisplayValue("");
+                    return information;
                 }
-                information.setMultiple(true);
-                // for info we always call the network thus the delegate (view model) can handle multiple
-                // on its own.
-                delegate.findInNetwork(meta.getDisplayValue(), information, fieldConfig);
-                return null;
+
+                String displayValue = getLabelFrom(meta);
+                information.setDisplayValue(displayValue);
+                return information;
             case FormSettings.VALUE_STRING:
                 // Until now phone type can only be single and not multiple
                 if (typeInfo.getType().equals(TYPE_PHONE)) {
@@ -732,6 +736,37 @@ public class FormSettings {
                 information.setDisplayValue("");
                 return information;
         }
+    }
+
+    private String getLabelFrom(Meta meta) {
+        ArrayList<String> displayValue;
+        try {
+            displayValue = (ArrayList<String>)meta.getDisplayValue();
+        } catch (ClassCastException e) {
+            Log.d(TAG, "formatStringToObject: Value List casting problems");
+            e.printStackTrace();
+            return "";
+        }
+
+        if (displayValue.size() == 0) {
+            return "";
+        }
+
+        if (displayValue.size() == 1) {
+            return displayValue.get(0);
+        }
+
+        String label;
+        StringBuilder sb = new StringBuilder();
+        int size = displayValue.size();
+        for (int i = 0; i < size; i++) {
+            label = displayValue.get(i);
+            sb.append(label);
+            if (i < size - 1) {
+                sb.append(", ");
+            }
+        }
+        return sb.toString();
     }
 
     public String getTitle() {

@@ -1,11 +1,9 @@
 package com.rootnetapp.rootnetintranet.models.requests.createworkflow;
 
-import android.arch.persistence.room.Ignore;
+import androidx.room.Ignore;
 
 import com.google.gson.Gson;
 import com.squareup.moshi.Json;
-
-import org.json.JSONObject;
 
 public class WorkflowMetas {
 

@@ -1,7 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist.repo;
 
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.paging.DataSource;
+import androidx.lifecycle.MutableLiveData;
+import androidx.paging.DataSource;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;

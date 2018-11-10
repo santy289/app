@@ -217,7 +217,7 @@
 
             </RelativeLayout>
 
-            <android.support.v7.widget.RecyclerView
+            <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rec_pendingworkflows"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -299,7 +299,7 @@
                     android:orientation="horizontal"
                     android:weightSum="2">
 
-                    <android.support.v7.widget.CardView
+                    <androidx.cardview.widget.CardView
                         android:id="@+id/btn_pendingapproval"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
@@ -353,9 +353,9 @@
 
                         </LinearLayout>
 
-                    </android.support.v7.widget.CardView>
+                    </androidx.cardview.widget.CardView>
 
-                    <android.support.v7.widget.CardView
+                    <androidx.cardview.widget.CardView
                         android:id="@+id/btn_workflows"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
@@ -408,7 +408,7 @@
 
                         </LinearLayout>
 
-                    </android.support.v7.widget.CardView>
+                    </androidx.cardview.widget.CardView>
 
                 </LinearLayout>
 
@@ -419,7 +419,7 @@
                     android:orientation="horizontal"
                     android:weightSum="2">
 
-                    <android.support.v7.widget.CardView
+                    <androidx.cardview.widget.CardView
                         android:id="@+id/btn_outoftime"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
@@ -472,9 +472,9 @@
 
                         </LinearLayout>
 
-                    </android.support.v7.widget.CardView>
+                    </androidx.cardview.widget.CardView>
 
-                    <android.support.v7.widget.CardView
+                    <androidx.cardview.widget.CardView
                         android:id="@+id/btn_updated"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
@@ -527,7 +527,7 @@
 
                         </LinearLayout>
 
-                    </android.support.v7.widget.CardView>
+                    </androidx.cardview.widget.CardView>
 
                 </LinearLayout>
 
@@ -609,7 +609,7 @@
 
         </LinearLayout>
 
-            <android.support.v7.widget.CardView
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="15dp"
@@ -749,7 +749,7 @@
 
                 </LinearLayout>
 
-            </android.support.v7.widget.CardView>
+            </androidx.cardview.widget.CardView>
 
         </LinearLayout>
 

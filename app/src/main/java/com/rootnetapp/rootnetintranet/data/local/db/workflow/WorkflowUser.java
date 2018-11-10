@@ -1,6 +1,6 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflow;
 
-import android.arch.persistence.room.ColumnInfo;
+import androidx.room.ColumnInfo;
 
 import com.squareup.moshi.Json;
 

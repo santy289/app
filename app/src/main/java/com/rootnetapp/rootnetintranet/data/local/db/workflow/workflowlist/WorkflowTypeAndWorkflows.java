@@ -1,10 +1,6 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist;
 
-import android.arch.persistence.room.Relation;
-
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
-
-import java.util.List;
+import androidx.room.Relation;
 
 public class WorkflowTypeAndWorkflows {
     public int id;

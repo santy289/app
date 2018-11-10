@@ -1,6 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters;
 
-import android.support.annotation.StringRes;
+import androidx.annotation.StringRes;
 
 import java.util.ArrayList;
 import java.util.List;

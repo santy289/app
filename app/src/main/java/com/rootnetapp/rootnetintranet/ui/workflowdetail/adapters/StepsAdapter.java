@@ -1,11 +1,10 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.databinding.StepsItemBinding;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Step;
 

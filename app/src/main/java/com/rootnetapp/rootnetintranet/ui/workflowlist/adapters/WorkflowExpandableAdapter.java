@@ -1,17 +1,16 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist.adapters;
 
-import android.arch.paging.PagedList;
-import android.arch.paging.PagedListAdapter;
+import androidx.paging.PagedList;
+import androidx.paging.PagedListAdapter;
 import android.content.Context;
-import android.support.annotation.ColorRes;
-import android.support.annotation.IntegerRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.util.DiffUtil;
+import androidx.annotation.ColorRes;
+import androidx.annotation.IntegerRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.DiffUtil;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,14 +19,6 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowItemBinding;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragmentInterface;
-import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowListBoundaryCallback;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
 
 public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem, WorkflowViewholder> {
     private ArrayMap<Integer, Boolean> expandedItems;

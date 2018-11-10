@@ -1,6 +1,6 @@
 package com.rootnetapp.rootnetintranet.di;
 
-import android.arch.persistence.room.Room;
+import androidx.room.Room;
 import android.content.Context;
 
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;

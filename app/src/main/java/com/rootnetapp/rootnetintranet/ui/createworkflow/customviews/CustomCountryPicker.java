@@ -1,14 +1,13 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow.customviews;
 
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.widget.AppCompatEditText;
-import android.util.Log;
+import androidx.fragment.app.FragmentActivity;
+import androidx.appcompat.widget.AppCompatEditText;
+
 import android.view.LayoutInflater;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.Spinner;
 import android.widget.TextView;

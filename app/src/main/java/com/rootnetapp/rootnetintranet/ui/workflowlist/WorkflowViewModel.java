@@ -1,13 +1,13 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist;
 
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.ViewModel;
-import android.arch.paging.PagedList;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+import androidx.paging.PagedList;
 import android.content.SharedPreferences;
-import android.support.annotation.IdRes;
+import androidx.annotation.IdRes;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -56,8 +56,6 @@ import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.RA
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.RADIO_UPDATED_DATE;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_CREATED_DATE;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_NUMBER;
-import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_PENDING;
-import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_STATUS;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_UPDATED_DATE;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.UNCHECK;
 

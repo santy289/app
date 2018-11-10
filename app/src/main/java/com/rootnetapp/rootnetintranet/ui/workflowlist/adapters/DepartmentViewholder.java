@@ -1,6 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist.adapters;
 
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.rootnetapp.rootnetintranet.databinding.DepartmentItemBinding;
 

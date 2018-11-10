@@ -1,15 +1,13 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.ViewModel;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.support.annotation.IdRes;
-import android.text.TextUtils;
+import androidx.annotation.IdRes;
+
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.widget.ArrayAdapter;
 
 import com.auth0.android.jwt.JWT;
 import com.rootnetapp.rootnetintranet.R;
@@ -22,13 +20,10 @@ import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
-import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
-import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOptionsAdapter;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;

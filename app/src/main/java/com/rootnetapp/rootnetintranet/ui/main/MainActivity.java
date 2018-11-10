@@ -1,26 +1,25 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.database.Cursor;
-import android.databinding.DataBindingUtil;
+import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.annotation.IntegerRes;
-import android.support.annotation.StringRes;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.PopupMenu;
-import android.support.v7.widget.SearchView;
+import androidx.annotation.IntegerRes;
+import androidx.annotation.StringRes;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
+import androidx.appcompat.widget.SearchView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -57,7 +56,6 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFilter
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOptionsAdapter;
 
 import java.util.List;
-import java.util.Observable;
 
 import javax.inject.Inject;
 
@@ -70,8 +68,6 @@ import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.RA
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.RADIO_UPDATED_DATE;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_CREATED_DATE;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_NUMBER;
-import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_PENDING;
-import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_STATUS;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_UPDATED_DATE;
 
 public class MainActivity extends AppCompatActivity

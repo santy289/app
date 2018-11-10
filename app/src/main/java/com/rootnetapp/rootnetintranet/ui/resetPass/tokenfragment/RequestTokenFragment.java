@@ -1,9 +1,9 @@
 package com.rootnetapp.rootnetintranet.ui.resetPass.tokenfragment;
 
-import android.arch.lifecycle.ViewModelProviders;
-import android.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +17,7 @@ import com.rootnetapp.rootnetintranet.ui.resetPass.resetpassdialog.ResetPassword
 
 import javax.inject.Inject;
 
-import android.arch.lifecycle.Observer;
+import androidx.lifecycle.Observer;
 import android.widget.Toast;
 
 public class RequestTokenFragment extends Fragment {

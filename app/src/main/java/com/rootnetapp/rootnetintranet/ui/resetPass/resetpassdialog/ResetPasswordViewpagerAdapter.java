@@ -1,13 +1,11 @@
 package com.rootnetapp.rootnetintranet.ui.resetPass.resetpassdialog;
 
-import android.content.Context;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment.ResetPasswordFragment;
-import com.rootnetapp.rootnetintranet.ui.resetPass.resetpassdialog.ResetPasswordDialog;
 import com.rootnetapp.rootnetintranet.ui.resetPass.tokenfragment.RequestTokenFragment;
 
 /**

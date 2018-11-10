@@ -1,14 +1,13 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist.repo;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.paging.DataSource;
-import android.arch.paging.LivePagedListBuilder;
-import android.arch.paging.PagedList;
-import android.arch.persistence.db.SimpleSQLiteQuery;
-import android.arch.persistence.db.SupportSQLiteQuery;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.paging.DataSource;
+import androidx.paging.LivePagedListBuilder;
+import androidx.paging.PagedList;
+import androidx.sqlite.db.SimpleSQLiteQuery;
+import androidx.sqlite.db.SupportSQLiteQuery;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
@@ -24,8 +23,6 @@ import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
 
-import org.w3c.dom.Text;
-
 import java.util.List;
 import java.util.Map;
 
@@ -35,8 +32,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-
-import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.NO_TYPE_SELECTED;
 
 public class WorkflowRepository implements IncomingWorkflowsCallback {
 

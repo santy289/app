@@ -1,7 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist.repo;
 
-import android.arch.paging.PagedList;
-import android.support.annotation.NonNull;
+import androidx.paging.PagedList;
+import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 

@@ -1,21 +1,20 @@
 package com.rootnetapp.rootnetintranet.ui.manager;
 
 
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.databinding.DataBindingUtil;
+import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.PendingWorkflows;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowManagerBinding;
@@ -24,7 +23,6 @@ import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.manager.adapters.PendingWorkflowsAdapter;
 import com.rootnetapp.rootnetintranet.ui.timeline.SelectDateDialog;
-import com.rootnetapp.rootnetintranet.ui.timeline.TimelineInterface;
 
 import java.util.ArrayList;
 import java.util.List;

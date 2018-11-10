@@ -1,12 +1,12 @@
 package com.rootnetapp.rootnetintranet.ui.domain;
 
-import android.arch.lifecycle.ViewModelProviders;
-import android.arch.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.databinding.DataBindingUtil;
-import android.support.v7.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;

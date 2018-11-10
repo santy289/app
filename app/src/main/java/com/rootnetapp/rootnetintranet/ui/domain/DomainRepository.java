@@ -1,8 +1,8 @@
 package com.rootnetapp.rootnetintranet.ui.domain;
 
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.LiveData;
-import android.content.Context;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
+
 import android.util.Log;
 
 import androidx.work.OneTimeWorkRequest;
@@ -37,13 +37,13 @@ public class DomainRepository {
         OneTimeWorkRequest domainCheck = new OneTimeWorkRequest.Builder(DomainCheckWorker.class).build();
 
         UUID id = domainCheck.getId();
-        WorkManager workManager = WorkManager.getInstance();
-        workManager.enqueue(domainCheck);
-
-        workManager.getStatusById(id).observe(lifecycleOwner, workStatus -> {
-            String test = "test";
-            Log.d(TAG, "checkDomain: here");
-        });
+//        WorkManager workManager = WorkManager.getInstance();
+//        workManager.enqueue(domainCheck);
+//
+//        workManager.getStatusById(id).observe(lifecycleOwner, workStatus -> {
+//            String test = "test";
+//            Log.d(TAG, "checkDomain: here");
+//        });
     }
 
 }

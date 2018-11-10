@@ -1,14 +1,11 @@
 package com.rootnetapp.rootnetintranet.ui.manager;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.ViewModel;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
-
-import java.util.List;
 
 /**
  * Created by root on 27/04/18.

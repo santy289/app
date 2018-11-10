@@ -1,9 +1,9 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow.customviews;
 
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
-import android.support.v4.app.FragmentActivity;
-import android.util.Log;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.fragment.app.FragmentActivity;
+
 import android.widget.ArrayAdapter;
 
 import com.rootnetapp.rootnetintranet.R;

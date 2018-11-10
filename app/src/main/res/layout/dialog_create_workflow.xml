@@ -119,7 +119,7 @@
                             android:textColor="@color/colorPrimaryDark"
                             android:text="@string/number" />
 
-                        <android.support.v7.widget.AppCompatEditText
+                        <androidx.appcompat.widget.AppCompatEditText
                             android:id="@+id/input_workflownumber"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -159,7 +159,7 @@
 
                 </RelativeLayout>
 
-                <android.support.v7.widget.AppCompatEditText
+                <androidx.appcompat.widget.AppCompatEditText
                     android:id="@+id/input_workflowname"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -187,7 +187,7 @@
                         android:textColor="@color/colorPrimaryDark"
                         android:text="@string/description" />
 
-                    <android.support.v7.widget.AppCompatEditText
+                    <androidx.appcompat.widget.AppCompatEditText
                         android:id="@+id/input_workflowdescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -383,7 +383,7 @@
 
                 </RelativeLayout>
 
-                <android.support.v7.widget.RecyclerView
+                <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rec_department"
                     android:layout_width="match_parent"
                     android:layout_height="100dp"

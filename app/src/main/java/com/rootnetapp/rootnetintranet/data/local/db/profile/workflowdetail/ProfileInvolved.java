@@ -1,6 +1,6 @@
 package com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail;
 
-import android.arch.persistence.room.ColumnInfo;
+import androidx.room.ColumnInfo;
 
 public class ProfileInvolved {
     @ColumnInfo(name = "full_name")

@@ -1,12 +1,10 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform;
 
-import android.arch.persistence.room.ColumnInfo;
-import android.arch.persistence.room.Ignore;
-import android.arch.persistence.room.Insert;
+import androidx.room.ColumnInfo;
+import androidx.room.Ignore;
+import androidx.room.Insert;
 
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
-
-import java.util.ArrayList;
 
 public class FormFieldsByWorkflowType {
 

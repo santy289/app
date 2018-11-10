@@ -1,20 +1,22 @@
 package com.rootnetapp.rootnetintranet.ui.domain;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
-import com.rootnetapp.rootnetintranet.di.NetModule;
-
-import javax.inject.Inject;
 
 import androidx.work.Worker;
+import androidx.work.WorkerParameters;
 
 public class DomainCheckWorker extends Worker {
 
     private ApiInterface apiInterface;
     private static final String TAG = "DomainCheckWorker";
+
+    public DomainCheckWorker(Context context, WorkerParameters workerParams) {
+        super(context, workerParams);
+    }
 
 
     @NonNull

@@ -1,6 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.timeline.adapters;
 
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.rootnetapp.rootnetintranet.databinding.TimelineCommentItemBinding;
 

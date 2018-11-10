@@ -189,6 +189,10 @@
                         android:paddingTop="10dp"
                         android:visibility="gone">
 
+                        <include
+                            android:id="@+id/detail_status_workflow"
+                            layout="@layout/workflow_detail_statuses" />
+
                     </RelativeLayout>
 
                     <View

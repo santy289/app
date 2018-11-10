@@ -290,6 +290,11 @@ public class WorkflowDetailFragment extends Fragment {
         binding.recApprovalhistory.setAdapter(new ApprovalHistoryAdapter(approverHistoryList));
     }
 
+    /**
+     * Shows the approval history list.
+     * @param hide
+     *  Boolean that decides if we are showing this list or not.
+     */
     private void hideHistoryApprovalList(boolean hide) {
         if (hide) {
             binding.recApprovalhistory.setVisibility(View.GONE);

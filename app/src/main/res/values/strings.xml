@@ -212,4 +212,7 @@
     <string name="something_went_wrong">Something went wrong, try again later.</string>
     <string name="dashboard">Dashboard</string>
     <string name="nav_workflow_list">Workflow List</string>
+    <string name="current_status">Current Status</string>
+    <string name="last_status">Last Status</string>
+    <string name="next_status">Next Status</string>
 </resources>

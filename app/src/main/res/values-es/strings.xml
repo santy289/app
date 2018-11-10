@@ -210,4 +210,7 @@
     <string name="no_history_to_show">Sin historial para mostrar</string>
     <string name="something_went_wrong">Algo falló, por favor intente mas tarde.</string>
     <string name="nav_workflow_list">Listado de Workflow</string>
+    <string name="current_status">Estatus Actual</string>
+    <string name="last_status">Estatus Pasado</string>
+    <string name="next_status">Próximo Estatus</string>
 </resources>

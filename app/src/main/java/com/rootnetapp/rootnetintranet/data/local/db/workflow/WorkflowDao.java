@@ -25,7 +25,7 @@ public abstract class WorkflowDao {
     @Query("SELECT * FROM workflow WHERE id = :id")
     public abstract Workflow getWorkflow(int id);
 
-    @Query("SELECT id as _id, * FROM workflow WHERE title LIKE :name")
+    @Query("SELECT id as _id, * FROM workflow WHERE title LIKE '%' || :name || '%'")
     public abstract Cursor getWorkflowsLike(String name);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

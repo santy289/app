@@ -4,6 +4,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
+
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -162,10 +164,17 @@ public class WorkflowDetailViewModel extends ViewModel {
                     showLoading.setValue(false);
                     // transform WorkflowApproveRejectResponse to String[]
                     WorkflowDb incomingWorkflow = approvalResponse.getWorkflow();
-                    String[] statuses = new String[3];
-                    statuses[INDEX_CURRENT_STATUS] = incomingWorkflow.getCurrentStatusName();
-                    statuses[INDEX_LAST_STATUS] = "Test last status";
-                    statuses[INDEX_NEXT_STATUS] = "Test next status";
+                    String[] statuses = buildArrayForStatusUpdate(incomingWorkflow);
+
+                    // TODO update the rest of the Workflow (history, status, people involved, and more)
+
+
+
+
+
+
+
+
                     return statuses;
                 }
         );
@@ -173,10 +182,60 @@ public class WorkflowDetailViewModel extends ViewModel {
         // Transformation used in case that a workflow approval or rejection fails.
         handleShowLoadingByRepo = Transformations.map(
                 repository.getShowLoading(),
-                show -> {
-                    return show;
-                }
+                show -> show
         );
+    }
+
+    private String[] buildArrayForStatusUpdate(WorkflowDb incomingWorkflow) {
+        String[] statuses = new String[3];
+        String currentStatus = incomingWorkflow.getCurrentStatusName();
+        if (TextUtils.isEmpty(currentStatus)) {
+            currentStatus = "";
+        }
+        String nextStatuses = getNextStatuses(incomingWorkflow, currentWorkflowType);
+
+        statuses[INDEX_LAST_STATUS] = "Test last status";
+        statuses[INDEX_CURRENT_STATUS] = currentStatus;
+        statuses[INDEX_NEXT_STATUS] = nextStatuses;
+        return statuses;
+    }
+
+    private String getNextStatuses(WorkflowDb workflow, WorkflowTypeDb workflowTypeDb) {
+        if (workflowTypeDb == null || workflow == null) {
+            return "";
+        }
+
+        List<Integer> nextStatusIds = workflow.getCurrentStatusRelations();
+        List<Status> allStatuses = workflowTypeDb.getStatus();
+        return getNextStatusLabel(nextStatusIds, allStatuses);
+    }
+
+    private String getNextStatusLabel(List<Integer> nextStatusIds, List<Status> allStatuses) {
+        if (nextStatusIds == null || nextStatusIds.size() == 0) {
+            return "";
+        }
+
+        Status status;
+        StringBuilder nextStatusLabel = new StringBuilder();
+        int nextStatusId;
+        boolean firstTry = true;
+        for (int i = 0; i < nextStatusIds.size(); i++) {
+            nextStatusId = nextStatusIds.get(i);
+            for (int j = 0; j < allStatuses.size(); j++) {
+                status = allStatuses.get(j);
+                if (status.getId() == nextStatusId) {
+                    if (!firstTry) {
+                        nextStatusLabel.append(", ");
+                    }
+                    nextStatusLabel.append(status.getName());
+                    firstTry = false;
+                    break;
+                }
+            }
+        }
+
+        String label = nextStatusLabel.toString();
+        return label;
     }
 
     private void getWorkflowType(String auth, int typeId) {
@@ -353,6 +412,9 @@ public class WorkflowDetailViewModel extends ViewModel {
 
         currentStatus = findStatusInListBy(workflowListItem.getCurrentStatus());
         setImportantInfoSection(currentStatus);
+
+        updateStatusUi.setValue(buildArrayForStatusUpdate(workflow));
+
         getTemplateBy(currentWorkflowType.getTemplateId());
         this.presets = currentWorkflowType.getPresets();
 
@@ -368,6 +430,11 @@ public class WorkflowDetailViewModel extends ViewModel {
         // Update approval spinner.
         List<Integer> nextStatusIds = workflow.getCurrentStatusRelations();
         updateApproveSpinnerUi(workflow, nextStatusIds);
+    }
+
+    private void updateWorkflowStatusUi(WorkflowDb workflow) {
+        String[] statusArray = buildArrayForStatusUpdate(workflow);
+        updateStatusUi.setValue(statusArray);
     }
 
 
@@ -586,7 +653,7 @@ public class WorkflowDetailViewModel extends ViewModel {
         workflow = workflowResponse.getWorkflow();
         setWorkflowIsOpen.setValue(workflow.isOpen());
 
-        updateWorkflowStatusUi(workflow);
+//        updateWorkflowStatusUi(workflow);
         updateProfilesInvolvedUi(workflow.getProfilesInvolved());
 
         SpecificApprovers approvers = workflow.getSpecificApprovers();
@@ -601,15 +668,6 @@ public class WorkflowDetailViewModel extends ViewModel {
         updateApproverHistoryListUi(workflow.getWorkflowApprovalHistory());
 
     }
-
-    private void updateWorkflowStatusUi(WorkflowDb workflow) {
-        String[] statuses = new String[3];
-        statuses[INDEX_CURRENT_STATUS] = workflow.getCurrentStatusName();
-        statuses[INDEX_LAST_STATUS] = "Test last status";
-        statuses[INDEX_NEXT_STATUS] = "Test next status";
-        updateStatusUi.setValue(statuses);
-    }
-
 
     private void updateApproverHistoryListUi(List<ApproverHistory> approverHistoryList) {
         if (approverHistoryList == null || approverHistoryList.size() < 1) {

@@ -291,7 +291,7 @@ public interface ApiInterface {
     @FormUrlEncoded
     Observable<WorkflowApproveRejectResponse> postApproveReject(@Header("Authorization") String authorization,
                                                                 @Path("id") int workflowId,
-                                                                @Field("approve") boolean isApproved,
+                                                                @Field("approved") boolean isApproved,
                                                                 @Field("next_status") int nextStatus);
 
     @Headers({"Domain-Name: api"})

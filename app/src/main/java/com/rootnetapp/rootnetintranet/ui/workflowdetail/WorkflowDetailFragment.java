@@ -68,6 +68,11 @@ public class WorkflowDetailFragment extends Fragment {
     private DocumentsAdapter documentsAdapter = null;
     private String token;
 
+    // Used for updating Status info.
+    protected static final int INDEX_LAST_STATUS = 0;
+    protected static final int INDEX_CURRENT_STATUS = 1;
+    protected static final int INDEX_NEXT_STATUS = 2;
+
     public WorkflowDetailFragment() {
         // Required empty public constructor
     }
@@ -285,6 +290,12 @@ public class WorkflowDetailFragment extends Fragment {
     private void updateApprovalHistoryList(List<ApproverHistory> approverHistoryList) {
         binding.recApprovalhistory.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recApprovalhistory.setAdapter(new ApprovalHistoryAdapter(approverHistoryList));
+    }
+
+    private void updateStatusDetails(String[] statusNames) {
+        binding.detailStatusWorkflow.detailLastStatusName.setText(statusNames[INDEX_LAST_STATUS]);
+        binding.detailStatusWorkflow.detailCurrentStatusName.setText(statusNames[INDEX_CURRENT_STATUS]);
+        binding.detailStatusWorkflow.detailNextStatusName.setText(statusNames[INDEX_NEXT_STATUS]);
     }
 
     /**
@@ -630,6 +641,9 @@ public class WorkflowDetailFragment extends Fragment {
         workflowDetailViewModel.hideHistoryApprovalList.observe(this, this::hideHistoryApprovalList);
         workflowDetailViewModel.setWorkflowIsOpen.observe(this, this::setWorkflowIsOpen);
         workflowDetailViewModel.updateInformationListUi.observe(this, this::updateInformationListUi);
+        workflowDetailViewModel.updateStatusUiFromUserAction.observe(this, this::updateStatusDetails);
+        workflowDetailViewModel.updateStatusUi.observe(this, this::updateStatusDetails);
+        workflowDetailViewModel.handleShowLoadingByRepo.observe(this, this::showLoading);
     }
 
     private void updateHeaderCommentCounter(String count) {

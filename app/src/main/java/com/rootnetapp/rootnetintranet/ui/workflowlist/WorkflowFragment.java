@@ -53,8 +53,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     private WorkflowExpandableAdapter adapter;
     private BottomSheetBehavior bottomSheetBehavior;
 
-
-
     public static final int SWITCH_NUMBER = 500;
     public static final int SWITCH_CREATED_DATE = 501;
     public static final int SWITCH_UPDATED_DATE = 502;

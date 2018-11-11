@@ -182,7 +182,7 @@
                     <RelativeLayout
                         android:id="@+id/lyt_graph"
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/workflow_detail_standard_height"
+                        android:layout_height="250dp"
                         android:paddingBottom="10dp"
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"

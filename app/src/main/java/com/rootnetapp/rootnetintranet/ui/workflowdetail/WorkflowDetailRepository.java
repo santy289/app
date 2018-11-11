@@ -1,6 +1,8 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 
 
+import android.util.Log;
+
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.ProfileDao;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
@@ -18,13 +20,24 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTyp
 
 import java.util.List;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class WorkflowDetailRepository {
     private ApiInterface service;
     private ProfileDao profileDao;
+
+    private MutableLiveData<WorkflowApproveRejectResponse> responseApproveRejection;
+    private MutableLiveData<Boolean> showLoading;
+
+    private final CompositeDisposable disposables = new CompositeDisposable();
+
+    private static final String TAG = "DetailRepository";
 
     public WorkflowDetailRepository(ApiInterface service, AppDatabase database) {
         this.service = service;
@@ -83,14 +96,40 @@ public class WorkflowDetailRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<WorkflowApproveRejectResponse> approveWorkflow(String token, int workflowId, boolean isApproved, int nextStatus) {
-        return service.postApproveReject(
+    public void approveWorkflow(String token, int workflowId, boolean isApproved, int nextStatus) {
+        Disposable disposable = service.postApproveReject(
                 token,
                 workflowId,
                 isApproved,
                 nextStatus
         )
                 .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread());
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(success -> {
+                    responseApproveRejection.postValue(success);
+                }, throwable -> {
+                    Log.d(TAG, "approveWorkflow: ");
+                    showLoading.setValue(false);
+                });
+        disposables.add(disposable);
     }
+
+    protected void clearDisposables() {
+        disposables.clear();
+    }
+
+    protected LiveData<WorkflowApproveRejectResponse> getApproveRejectResponse() {
+        if (responseApproveRejection == null) {
+            responseApproveRejection = new MutableLiveData<>();
+        }
+        return responseApproveRejection;
+    }
+
+    protected LiveData<Boolean> getShowLoading() {
+        if (showLoading == null) {
+            showLoading = new MutableLiveData<>();
+        }
+        return showLoading;
+    }
+
 }

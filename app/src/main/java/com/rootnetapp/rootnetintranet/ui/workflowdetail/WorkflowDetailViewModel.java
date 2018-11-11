@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 import android.util.Log;
 
@@ -50,6 +51,10 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment.INDEX_CURRENT_STATUS;
+import static com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment.INDEX_LAST_STATUS;
+import static com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment.INDEX_NEXT_STATUS;
+
 public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<List<Comment>> mCommentsLiveData;
     private MutableLiveData<Comment> mCommentLiveData;
@@ -78,6 +83,9 @@ public class WorkflowDetailViewModel extends ViewModel {
     protected MutableLiveData<Boolean> hideHistoryApprovalList;
     protected MutableLiveData<Boolean> setWorkflowIsOpen;
     protected MutableLiveData<List<Information>> updateInformationListUi;
+    protected MutableLiveData<String[]> updateStatusUi;
+    protected LiveData<String[]> updateStatusUiFromUserAction;
+    protected LiveData<Boolean> handleShowLoadingByRepo;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
@@ -116,11 +124,14 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.setWorkflowIsOpen = new MutableLiveData<>();
         this.updateInformationListUi = new MutableLiveData<>();
         this.formSettings = new FormSettings();
+        this.updateStatusUi = new MutableLiveData<>();
+        subscribe();
     }
 
     @Override
     protected void onCleared() {
         disposables.clear();
+        repository.clearDisposables();
     }
 
     protected void initDetails(String token, WorkflowListItem workflow) {
@@ -139,6 +150,34 @@ public class WorkflowDetailViewModel extends ViewModel {
         return presets;
     }
 
+    /**
+     * This subscribe function will make map transformations to observe LiveData objects in
+     * the repository. Here we will handle all incoming data from the repo.
+     */
+    private void subscribe() {
+        // Transformation for observing approval and rejection of workflows.
+        updateStatusUiFromUserAction = Transformations.map(
+                repository.getApproveRejectResponse(),
+                approvalResponse -> {
+                    showLoading.setValue(false);
+                    // transform WorkflowApproveRejectResponse to String[]
+                    WorkflowDb incomingWorkflow = approvalResponse.getWorkflow();
+                    String[] statuses = new String[3];
+                    statuses[INDEX_CURRENT_STATUS] = incomingWorkflow.getCurrentStatusName();
+                    statuses[INDEX_LAST_STATUS] = "Test last status";
+                    statuses[INDEX_NEXT_STATUS] = "Test next status";
+                    return statuses;
+                }
+        );
+
+        // Transformation used in case that a workflow approval or rejection fails.
+        handleShowLoadingByRepo = Transformations.map(
+                repository.getShowLoading(),
+                show -> {
+                    return show;
+                }
+        );
+    }
 
     private void getWorkflowType(String auth, int typeId) {
         Disposable disposable = repository
@@ -295,31 +334,8 @@ public class WorkflowDetailViewModel extends ViewModel {
                 Log.d(TAG, "handleApproveRejectAction: Action unknown, skipping network request.");
                 return;
         }
-        Disposable disposable = repository
-                .approveWorkflow(token, workflow.getId(), approve, nextStatusId)
-                .subscribe(success -> {
-                    // TODO update UI with next upcoming status.
-
-                    showLoading.setValue(false);
-                }, throwable -> {
-                    Log.d(TAG, "handleApproveRejectAction: error - " + throwable.getMessage());
-                    showLoading.setValue(false);
-                    mErrorLiveData.setValue(R.string.something_went_wrong);
-                });
-        disposables.add(disposable);
+        repository.approveWorkflow(token, workflow.getId(), approve, nextStatusId);
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
     private WorkflowTypeDb currentWorkflowType;
     private Status currentStatus;
@@ -570,6 +586,7 @@ public class WorkflowDetailViewModel extends ViewModel {
         workflow = workflowResponse.getWorkflow();
         setWorkflowIsOpen.setValue(workflow.isOpen());
 
+        updateWorkflowStatusUi(workflow);
         updateProfilesInvolvedUi(workflow.getProfilesInvolved());
 
         SpecificApprovers approvers = workflow.getSpecificApprovers();
@@ -583,6 +600,14 @@ public class WorkflowDetailViewModel extends ViewModel {
         updateApproverSpecificListUi(statusSpecific, STATUS_SPECIFIC_APPROVER_TYPE);
         updateApproverHistoryListUi(workflow.getWorkflowApprovalHistory());
 
+    }
+
+    private void updateWorkflowStatusUi(WorkflowDb workflow) {
+        String[] statuses = new String[3];
+        statuses[INDEX_CURRENT_STATUS] = workflow.getCurrentStatusName();
+        statuses[INDEX_LAST_STATUS] = "Test last status";
+        statuses[INDEX_NEXT_STATUS] = "Test next status";
+        updateStatusUi.setValue(statuses);
     }
 
 

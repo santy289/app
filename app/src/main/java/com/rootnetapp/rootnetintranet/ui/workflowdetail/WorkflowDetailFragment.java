@@ -1,5 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 
+import androidx.annotation.UiThread;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -167,6 +168,7 @@ public class WorkflowDetailFragment extends Fragment {
         workflowDetailViewModel.handleApproveRejectAction(view.getId(), approveSpinnerItemSelection);
     }
 
+    @UiThread
     private void updateSwitchUi(boolean isChecked) {
         String state;
         if (isChecked) {
@@ -179,6 +181,7 @@ public class WorkflowDetailFragment extends Fragment {
         binding.switchPrivatePublic.setText(state);
     }
 
+    @UiThread
     private void headerClicked(View view) {
         switch (view.getId()) {
             case R.id.hdr_graph: {
@@ -268,6 +271,7 @@ public class WorkflowDetailFragment extends Fragment {
         }
     }
 
+    @UiThread
     private void showLoading(boolean show) {
         if (show) {
             Utils.showLoading(getContext());
@@ -276,6 +280,7 @@ public class WorkflowDetailFragment extends Fragment {
         }
     }
 
+    @UiThread
     private void setWorkflowIsOpen(boolean open) {
         if (open) {
             binding.txtOpenClosed.setText(getString(R.string.open));
@@ -287,11 +292,13 @@ public class WorkflowDetailFragment extends Fragment {
         }
     }
 
+    @UiThread
     private void updateApprovalHistoryList(List<ApproverHistory> approverHistoryList) {
         binding.recApprovalhistory.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recApprovalhistory.setAdapter(new ApprovalHistoryAdapter(approverHistoryList));
     }
 
+    @UiThread
     private void updateStatusDetails(String[] statusNames) {
         binding.detailStatusWorkflow.detailLastStatusName.setText(statusNames[INDEX_LAST_STATUS]);
         binding.detailStatusWorkflow.detailCurrentStatusName.setText(statusNames[INDEX_CURRENT_STATUS]);
@@ -303,6 +310,7 @@ public class WorkflowDetailFragment extends Fragment {
      * @param hide
      *  Boolean that decides if we are showing this list or not.
      */
+    @UiThread
     private void hideHistoryApprovalList(boolean hide) {
         if (hide) {
             binding.recApprovalhistory.setVisibility(View.GONE);
@@ -320,6 +328,7 @@ public class WorkflowDetailFragment extends Fragment {
      *
      * @param currentApprovers List of current approvers to be displayed.
      */
+    @UiThread
     private void updateCurrentApproversList(List<Approver> currentApprovers) {
         binding.recApprovers.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recApprovers.setAdapter(new ApproversAdapter(currentApprovers));
@@ -330,6 +339,7 @@ public class WorkflowDetailFragment extends Fragment {
      *
      * @param profiles List of profiles to display in People Involved recyclerView.
      */
+    @UiThread
     private void updateProfilesInvolved(List<ProfileInvolved> profiles) {
         binding.peopleinvolvedLayout.recPeopleinvolved.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.peopleinvolvedLayout.recPeopleinvolved.setAdapter(new PeopleInvolvedAdapter(profiles));
@@ -341,6 +351,7 @@ public class WorkflowDetailFragment extends Fragment {
      *
      * @param profiles List of profiles to display in People Involved recyclerView.
      */
+    @UiThread
     private void updateGlobalApproverList(List<ProfileInvolved> profiles) {
         binding.peopleinvolvedLayout.recGlobalApprovers.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.peopleinvolvedLayout.recGlobalApprovers.setAdapter(new PeopleInvolvedAdapter(profiles));
@@ -350,6 +361,7 @@ public class WorkflowDetailFragment extends Fragment {
      * Updates specific approver list. This is coming from the Worklow object in the View Model.
      * @param profiles
      */
+    @UiThread
     private void updateSpecificApproverList(List<ProfileInvolved> profiles) {
         binding.peopleinvolvedLayout.recSpecificApprovers.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.peopleinvolvedLayout.recSpecificApprovers.setAdapter(new PeopleInvolvedAdapter(profiles));
@@ -360,6 +372,7 @@ public class WorkflowDetailFragment extends Fragment {
      *
      * @param hide Action to take.
      */
+    @UiThread
     private void hideProfilesInvolvedList(boolean hide) {
         if (hide) {
             binding.peopleinvolvedLayout.lytPeopleinvolved.setVisibility(View.GONE);
@@ -375,6 +388,7 @@ public class WorkflowDetailFragment extends Fragment {
      *
      * @param hide
      */
+    @UiThread
     private void hideGlobalApprovers(boolean hide) {
         if (hide) {
             binding.peopleinvolvedLayout.recGlobalApprovers.setVisibility(View.GONE);
@@ -390,6 +404,7 @@ public class WorkflowDetailFragment extends Fragment {
      *
      * @param hide
      */
+    @UiThread
     private void hideSpecificApprovers(boolean hide) {
         if (hide) {
             binding.peopleinvolvedLayout.recSpecificApprovers.setVisibility(View.GONE);
@@ -408,6 +423,7 @@ public class WorkflowDetailFragment extends Fragment {
      *
      * @param hide Hides or shows the spinner view.
      */
+    @UiThread
     private void hideApproveSpinnerOnEmptyData(boolean hide) {
         if (hide) {
             binding.detailNoMoreStatus.setVisibility(View.VISIBLE);
@@ -423,6 +439,7 @@ public class WorkflowDetailFragment extends Fragment {
 
     }
 
+    @UiThread
     private void hideApproverListOnEmptyData(boolean hide) {
         if (hide) {
             binding.txtApprovers.setVisibility(View.GONE);
@@ -437,6 +454,7 @@ public class WorkflowDetailFragment extends Fragment {
     }
 
     private int approveSpinnerItemSelection;
+    @UiThread
     private void updateApproveSpinner(List<String> nextStatuses) {
         Context context = getContext();
         if (context == null) {
@@ -463,6 +481,7 @@ public class WorkflowDetailFragment extends Fragment {
         });
     }
 
+    @UiThread
     private void showImportantInfoSection(boolean show) {
         if (show) {
             binding.hdrImportant.setVisibility(View.VISIBLE);
@@ -471,6 +490,7 @@ public class WorkflowDetailFragment extends Fragment {
         }
     }
 
+    @UiThread
     private void loadImportantInfoSection(List<Step> steps) {
         binding.recSteps.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recSteps.setAdapter(
@@ -478,6 +498,7 @@ public class WorkflowDetailFragment extends Fragment {
         );
     }
 
+    @UiThread
     private void showTemplateDocumentsUi(boolean show) {
         if (show) {
             binding.lytAttach.setVisibility(View.VISIBLE);
@@ -494,6 +515,7 @@ public class WorkflowDetailFragment extends Fragment {
         }
     }
 
+    @UiThread
     private void setTemplateTitleWith(String name) {
         String title = getString(R.string.template) +
                 " " +
@@ -501,6 +523,7 @@ public class WorkflowDetailFragment extends Fragment {
         binding.tvTemplatetitle.setText(title);
     }
 
+    @UiThread
     private void setDocumentsView(List<DocumentsFile> documents) {
         DocumentsAdapter documentsAdapter = new DocumentsAdapter(
                 workflowDetailViewModel.getPresets(),
@@ -508,8 +531,6 @@ public class WorkflowDetailFragment extends Fragment {
         );
         binding.recDocuments.setAdapter(documentsAdapter);
     }
-
-
 
     private void comment(View view) {
         binding.inputComment.setError(null);
@@ -548,6 +569,7 @@ public class WorkflowDetailFragment extends Fragment {
 
     }
 
+    @UiThread
     private void showFileChooser(View view) {
 
         if (fileRequest == null) {
@@ -571,6 +593,7 @@ public class WorkflowDetailFragment extends Fragment {
 
     }
 
+    @UiThread
     private void updateInformationListUi(List<Information> informationList) {
         binding.recInfo.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recInfo.setAdapter(new InformationAdapter(informationList));
@@ -646,6 +669,7 @@ public class WorkflowDetailFragment extends Fragment {
         workflowDetailViewModel.handleShowLoadingByRepo.observe(this, this::showLoading);
     }
 
+    @UiThread
     private void updateHeaderCommentCounter(String count) {
         binding.detailMessageText.setText(count);
     }

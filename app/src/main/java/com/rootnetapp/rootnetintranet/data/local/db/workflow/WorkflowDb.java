@@ -91,7 +91,7 @@ public class WorkflowDb {
     private WorkflowUser author;
 
 
-    @ColumnInfo(name = "workflow_type_id") //TODO save id from WorkflowType
+    @ColumnInfo(name = "workflow_type_id")
     @Json(name = "workflow_type_id")
     private int workflowTypeId;
 

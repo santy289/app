@@ -172,9 +172,6 @@ public class WorkflowDetailViewModel extends ViewModel {
 
 
 
-
-
-
                     return statuses;
                 }
         );

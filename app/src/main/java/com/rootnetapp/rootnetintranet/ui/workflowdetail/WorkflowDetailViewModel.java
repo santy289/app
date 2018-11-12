@@ -1,5 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
@@ -11,6 +12,7 @@ import android.util.Log;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
@@ -183,20 +185,39 @@ public class WorkflowDetailViewModel extends ViewModel {
         );
     }
 
+    /**
+     * It generates an array of strings that hold values for last, current, next status labels. This
+     * array is eventually sent to the UI for updating the respective Views.
+     *
+     * @param incomingWorkflow
+     *  WorkflowDB object that holds info that we need.
+     * @return
+     *  returns a String[] array with all the labels that we need to update the UI.
+     */
     private String[] buildArrayForStatusUpdate(WorkflowDb incomingWorkflow) {
         String[] statuses = new String[3];
         String currentStatus = incomingWorkflow.getCurrentStatusName();
         if (TextUtils.isEmpty(currentStatus)) {
             currentStatus = "";
         }
-        String nextStatuses = getNextStatuses(incomingWorkflow, currentWorkflowType);
 
-        statuses[INDEX_LAST_STATUS] = "Test last status";
+        statuses[INDEX_LAST_STATUS] = getLastStatusLabel(incomingWorkflow, currentWorkflowType.getStatus());
         statuses[INDEX_CURRENT_STATUS] = currentStatus;
-        statuses[INDEX_NEXT_STATUS] = nextStatuses;
+        statuses[INDEX_NEXT_STATUS] = getNextStatuses(incomingWorkflow, currentWorkflowType);
         return statuses;
     }
 
+    /**
+     * It calls getNextStatusLabel to get a string. This is a setup function to prepare and validate
+     * all the variables before we call getNextStatusLabel().
+     *
+     * @param workflow
+     *  WorkflowDb object that we need to check and get status ids from.
+     * @param workflowTypeDb
+     *  WorkflowTypeDb object to validate and get status ids from.
+     * @return
+     *  Returns a label to use to update the Next Status view on the UI.
+     */
     private String getNextStatuses(WorkflowDb workflow, WorkflowTypeDb workflowTypeDb) {
         if (workflowTypeDb == null || workflow == null) {
             return "";
@@ -205,6 +226,49 @@ public class WorkflowDetailViewModel extends ViewModel {
         List<Integer> nextStatusIds = workflow.getCurrentStatusRelations();
         List<Status> allStatuses = workflowTypeDb.getStatus();
         return getNextStatusLabel(nextStatusIds, allStatuses);
+    }
+
+    /**
+     * Get the last status label from by checking all statuses in AllStatuses list and comparing it
+     * to the current status in workflow to get any related statuses.
+     *
+     * @param workflow
+     *  WorkflowDb object that has the current status.
+     * @param allStatuses
+     *  List with all the statuses to check and find related Status to the current status.
+     * @return
+     *  Returns the last status label to use on the UI.
+     */
+    private String getLastStatusLabel(@NonNull WorkflowDb workflow, List<Status> allStatuses) {
+        if (allStatuses == null || allStatuses.size() < 1) {
+            return "";
+        }
+
+        int currentStatusId = workflow.getCurrentStatus();
+        Status status;
+        List<Integer> relations;
+        Integer relatedId;
+        boolean firstTry = true;
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < allStatuses.size(); i++) {
+            status = allStatuses.get(i);
+            relations = status.getRelations();
+            if (relations == null) {
+                continue;
+            }
+            for (int j = 0; j < relations.size(); j++) {
+                relatedId = relations.get(j);
+                if (relatedId == currentStatusId) {
+                    if (!firstTry) {
+                        stringBuilder.append(", ");
+                    }
+                    stringBuilder.append(status.getName());
+                    firstTry = false;
+                    break;
+                }
+            }
+        }
+        return stringBuilder.toString();
     }
 
     private String getNextStatusLabel(List<Integer> nextStatusIds, List<Status> allStatuses) {
@@ -230,9 +294,7 @@ public class WorkflowDetailViewModel extends ViewModel {
                 }
             }
         }
-
-        String label = nextStatusLabel.toString();
-        return label;
+        return nextStatusLabel.toString();
     }
 
     private void getWorkflowType(String auth, int typeId) {
@@ -428,13 +490,6 @@ public class WorkflowDetailViewModel extends ViewModel {
         List<Integer> nextStatusIds = workflow.getCurrentStatusRelations();
         updateApproveSpinnerUi(workflow, nextStatusIds);
     }
-
-    private void updateWorkflowStatusUi(WorkflowDb workflow) {
-        String[] statusArray = buildArrayForStatusUpdate(workflow);
-        updateStatusUi.setValue(statusArray);
-    }
-
-
 
     /**
      * Updates the info section UI for this workflow.

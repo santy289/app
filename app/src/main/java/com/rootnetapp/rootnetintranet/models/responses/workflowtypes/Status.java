@@ -29,9 +29,19 @@ public class Status {
     private List<Step> steps = null;
     @Json(name = "approvers")
     private List<Approver> approversList = new ArrayList<>();
+    @Json(name = "relations")
+    private List<Integer> relations;
 
     public int getId() {
         return id;
+    }
+
+    public List<Integer> getRelations() {
+        return relations;
+    }
+
+    public void setRelations(List<Integer> relations) {
+        this.relations = relations;
     }
 
     public void setId(int id) {

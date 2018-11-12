@@ -178,7 +178,6 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                     "ORDER BY workflowdb.created_at DESC";
             objects = new Object[]{status, workflowTypeId};
         } else {
-            searchText = "%" + searchText + "%";
             queryString = baseWorkflowListQuery +
                     "WHERE workflowdb.status = ? " +
                     "AND workflowdb.workflow_type_id = ? " +
@@ -199,7 +198,6 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                     "AND workflowdb.workflow_type_id = ? ";
             objects = new Object[]{status, workflowTypeId};
         } else {
-            searchText = "%" + searchText + "%";
             queryString = baseWorkflowListQuery +
                     "WHERE workflowdb.status = ? " +
                     "AND workflowdb.workflow_type_id = ? " +
@@ -224,7 +222,6 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                     "WHERE workflowdb.status = ? ";
             objects = new Object[]{status};
         } else {
-            searchText = "%" + searchText + "%";
             queryString = baseWorkflowListQuery +
                     "WHERE workflowdb.status = ? " +
                     "AND workflowdb.title LIKE '%' || ? || '%'";

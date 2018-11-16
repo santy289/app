@@ -1,22 +1,18 @@
 package com.rootnetapp.rootnetintranet.models.responses.workflows;
 
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.squareup.moshi.Json;
-
-/**
- * Created by root on 03/04/18.
- */
 
 public class WorkflowResponse {
 
     @Json(name = "workflow")
-    private Workflow workflow = null;
+    private WorkflowDb workflow = null;
 
-    public Workflow getWorkflow() {
+    public WorkflowDb getWorkflow() {
         return workflow;
     }
 
-    public void setWorkflow(Workflow workflow) {
+    public void setWorkflow(WorkflowDb workflow) {
         this.workflow = workflow;
     }
 

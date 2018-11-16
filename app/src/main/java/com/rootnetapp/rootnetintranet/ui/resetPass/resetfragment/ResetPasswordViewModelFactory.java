@@ -1,8 +1,8 @@
 package com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment;
 
-import android.arch.lifecycle.ViewModel;
-import android.arch.lifecycle.ViewModelProvider;
-import android.support.annotation.NonNull;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.annotation.NonNull;
 
 /**
  * Created by Propietario on 12/03/2018.

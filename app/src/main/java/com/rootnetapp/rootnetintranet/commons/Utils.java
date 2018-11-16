@@ -4,7 +4,9 @@ import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -14,6 +16,10 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.models.responses.login.JWToken;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
+
+import org.threeten.bp.ZoneId;
+import org.threeten.bp.ZonedDateTime;
+import org.threeten.bp.format.DateTimeFormatter;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,6 +33,8 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
+
 
 public class Utils {
 
@@ -35,6 +43,17 @@ public class Utils {
     public static final String remainderOfDomain = ".rootnetapp.com";
 
     public static String domain;
+
+    public static String getImgDomain() {
+        return imgDomain;
+    }
+
+    public static void setImgDomain(String newImgDomain) {
+        if (TextUtils.isEmpty(Utils.imgDomain)) {
+            Utils.imgDomain = "http://" + newImgDomain;
+            Utils.imgDomain = Utils.imgDomain.replace("v1/", "");
+        }
+    }
 
     public static String imgDomain;
 
@@ -48,6 +67,10 @@ public class Utils {
     public static void showLoading(Context ctx) {
         if (progress == null) {
             progress = new ProgressDialog(ctx);
+        } else {
+            if (progress.getContext() != ctx) {
+                progress = new ProgressDialog(ctx);
+            }
         }
         progress.show();
         progress.setMessage(ctx.getString(R.string.loading_message));
@@ -75,6 +98,52 @@ public class Utils {
         return fileFromBytes;
     }
 
+    /**
+     * Receives ISO 8601 Date format and returns a UI ready date format for comments.
+     * @param isoStringDate Iso String from server.
+     * @return returns formatted Date
+     */
+    public static String serverFormatToFormat(String isoStringDate, String format) {
+        if (isoStringDate == null) {
+            return "";
+        }
+        String uiDateString;
+        int semicolonPosition = isoStringDate.length() - 3;
+        if (isoStringDate.charAt(semicolonPosition) != ':') {
+            // Adjust semicolon position to string without semicolon.
+            semicolonPosition = isoStringDate.length() - 2;
+            String first = isoStringDate.substring(0, semicolonPosition);
+            String second = isoStringDate.substring(semicolonPosition, semicolonPosition+2);
+            StringBuilder stringBuilder = new StringBuilder();
+            isoStringDate = stringBuilder.append(first).append(":").append(second).toString();
+        }
+
+        uiDateString = DateTimeFormatter
+                .ofPattern(format)
+                .format(getDate(isoStringDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+
+        return uiDateString;
+    }
+
+    public static String standardServerFormatTo(String isoStringDate, String format) {
+        String uiDateString;
+        uiDateString = DateTimeFormatter
+                .ofPattern(format)
+                .format(getDate(isoStringDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+        return uiDateString;
+    }
+
+    private static ZoneId getZoneId() {
+        // TODO we need the time zone of the server were the backend is hosted at.
+        return ZoneId.of("UTC");
+    }
+
+    public static ZonedDateTime getDate(@NonNull String isoDateString, DateTimeFormatter dateTimeFormatter) {
+        return ZonedDateTime
+                .parse(isoDateString, dateTimeFormatter)
+                .withZoneSameInstant(getZoneId());
+    }
+
     public static byte[] fileToByte(File file) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -100,7 +169,7 @@ public class Utils {
 
     public static String getCurrentDate(){
         Date c = Calendar.getInstance().getTime();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return df.format(c);
     }
 
@@ -109,7 +178,7 @@ public class Utils {
         calendar.add(Calendar.MONTH, month);
         calendar.set(Calendar.DAY_OF_MONTH,  day);
         Date c = calendar.getTime();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return df.format(c);
     }
 
@@ -119,7 +188,7 @@ public class Utils {
             calendar.add(Calendar.DAY_OF_YEAR, -1) ;
         }
         Date c = calendar.getTime();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return df.format(c);
     }
 
@@ -129,7 +198,7 @@ public class Utils {
             calendar.add(Calendar.DAY_OF_YEAR, 1) ;
         }
         Date c = calendar.getTime();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return df.format(c);
     }
 

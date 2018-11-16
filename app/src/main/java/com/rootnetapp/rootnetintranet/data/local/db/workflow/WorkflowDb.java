@@ -1,17 +1,21 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflow;
 
-import android.arch.persistence.room.ColumnInfo;
-import android.arch.persistence.room.Embedded;
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.ForeignKey;
-import android.arch.persistence.room.Ignore;
-import android.arch.persistence.room.Index;
-import android.arch.persistence.room.PrimaryKey;
-import android.arch.persistence.room.TypeConverters;
+import androidx.room.ColumnInfo;
+import androidx.room.Embedded;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Ignore;
+import androidx.room.Index;
+import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
 
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.converters.StringDateConverter;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
+import com.rootnetapp.rootnetintranet.models.createworkflow.SpecificApprovers;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
 import com.squareup.moshi.Json;
 
 import java.util.List;
@@ -88,11 +92,15 @@ public class WorkflowDb {
     private WorkflowUser author;
 
 
-    @ColumnInfo(name = "workflow_type_id") //TODO save id from WorkflowType
+    @ColumnInfo(name = "workflow_type_id")
     @Json(name = "workflow_type_id")
     private int workflowTypeId;
 
 //-----------------
+
+    @Ignore
+    @Json(name = "workflow_type")
+    private WorkflowTypeDb workflowType;
 
     @Ignore
     @Json(name = "assignees")
@@ -105,6 +113,110 @@ public class WorkflowDb {
     @Ignore
     @Json(name = "presets")
     private List<Preset> presets = null;
+
+    @Ignore
+    @Json(name = "current_status_relations")
+    private List<Integer> currentStatusRelations;
+
+    @Ignore
+    @Json(name = "metas")
+    private List<Meta> metas = null;
+
+    @Ignore
+    @Json(name = "profilesInvolved")
+    private List<Integer> profilesInvolved;
+
+    @Ignore
+    @Json(name = "specific_approvers")
+    private SpecificApprovers specificApprovers;
+
+    @Ignore
+    @Json(name = "current_specific_approvers")
+    private SpecificApprovers currentSpecificApprovers;
+
+    @Ignore
+    @Json(name = "logged_is_approver")
+    private boolean loggedIsApprover;
+
+    @Ignore
+    @Json(name = "workflow_approval_history")
+    private List<ApproverHistory> workflowApprovalHistory;
+
+    @Ignore
+    @Json(name = "pending_approval")
+    private List<Integer> pendingApproval;
+
+    public WorkflowTypeDb getWorkflowType() {
+        return workflowType;
+    }
+
+    public void setWorkflowType(WorkflowTypeDb workflowType) {
+        this.workflowType = workflowType;
+    }
+
+    public List<Integer> getPendingApproval() {
+        return pendingApproval;
+    }
+
+    public void setPendingApproval(List<Integer> pendingApproval) {
+        this.pendingApproval = pendingApproval;
+    }
+
+    public List<ApproverHistory> getWorkflowApprovalHistory() {
+        return workflowApprovalHistory;
+    }
+
+    public void setWorkflowApprovalHistory(List<ApproverHistory> workflowApprovalHistory) {
+        this.workflowApprovalHistory = workflowApprovalHistory;
+    }
+
+    public boolean isLoggedIsApprover() {
+        return loggedIsApprover;
+    }
+
+    public void setLoggedIsApprover(boolean loggedIsApprover) {
+        this.loggedIsApprover = loggedIsApprover;
+    }
+
+    public SpecificApprovers getCurrentSpecificApprovers() {
+        return currentSpecificApprovers;
+    }
+
+    public void setCurrentSpecificApprovers(SpecificApprovers currentSpecificApprovers) {
+        this.currentSpecificApprovers = currentSpecificApprovers;
+    }
+
+    public SpecificApprovers getSpecificApprovers() {
+        return specificApprovers;
+    }
+
+    public void setSpecificApprovers(SpecificApprovers specificApprovers) {
+        this.specificApprovers = specificApprovers;
+    }
+
+    public List<Meta> getMetas() {
+        return metas;
+    }
+
+    public void setMetas(List<Meta> metas) {
+        this.metas = metas;
+    }
+
+    public List<Integer> getProfilesInvolved() {
+        return profilesInvolved;
+    }
+
+    public void setProfilesInvolved(List<Integer> profilesInvolved) {
+        this.profilesInvolved = profilesInvolved;
+    }
+
+    public List<Integer> getCurrentStatusRelations() {
+        return currentStatusRelations;
+    }
+
+    public void setCurrentStatusRelations(List<Integer> currentStatusRelations) {
+        this.currentStatusRelations = currentStatusRelations;
+    }
 
     public int getId() {
         return id;

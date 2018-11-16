@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
@@ -8,26 +8,32 @@
         android:gravity="center_vertical">
 
         <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/detail_approver_avatar"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
-            android:src="@drawable/ic_perm_identity_black_24dp"/>
+            android:layout_marginStart="8dp"
+            android:src="@drawable/default_profile_avatar"/>
 
         <TextView
+            android:id="@+id/detail_approver_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:text="Jon Doe"/>
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            tools:text="Jon Doe"/>
 
         <TextView
+            android:id="@+id/detail_approver_required"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="8dp"
             android:layout_marginEnd="10dp"
             android:textStyle="bold"
-            android:text="@string/required_approval"/>
+            android:text="@string/required_approval"
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
     </LinearLayout>
 </layout>

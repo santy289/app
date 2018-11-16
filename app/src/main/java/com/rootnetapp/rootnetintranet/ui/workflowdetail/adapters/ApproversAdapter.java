@@ -1,35 +1,34 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters;
 
-import android.support.v7.widget.AppCompatEditText;
-import android.support.v7.widget.RecyclerView;
+import android.content.Context;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.request.RequestOptions;
+import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ApproversItemBinding;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
 
-import java.util.ArrayList;
 import java.util.List;
-
-/**
- * Created by root on 02/04/18.
- */
 
 public class ApproversAdapter extends RecyclerView.Adapter<ApproversViewholder>{
 
-    //todo SOLO TESTING mientras no hay backend
-    private List<Integer> Approvers;
+    private List<Approver> currentApprovers;
 
-    public ApproversAdapter() {
-        Approvers = new ArrayList<>();
-        int i=0;
-        while(i<5){
-            Approvers.add(1);
-            i++;
-        }
+    public ApproversAdapter(List<Approver> currentApprovers) {
+        this.currentApprovers = currentApprovers;
     }
 
+    @NonNull
     @Override
-    public ApproversViewholder onCreateViewHolder(ViewGroup viewGroup, int i) {
+    public ApproversViewholder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         LayoutInflater layoutInflater =
                 LayoutInflater.from(viewGroup.getContext());
         ApproversItemBinding itemBinding =
@@ -38,12 +37,40 @@ public class ApproversAdapter extends RecyclerView.Adapter<ApproversViewholder>{
     }
 
     @Override
-    public void onBindViewHolder(ApproversViewholder approversViewholder, int i) {
+    public void onBindViewHolder(@NonNull ApproversViewholder viewholder, int i) {
+        if (getItemCount() < 1) {
+            return;
+        }
+        Approver currentApprover = currentApprovers.get(i);
 
+        if (!TextUtils.isEmpty(currentApprover.entityAvatar)) {
+            Context context = viewholder.binding.detailApproverAvatar.getContext();
+            String path = Utils.imgDomain + currentApprover.entityAvatar;
+            GlideUrl url = new GlideUrl(path);
+            Glide.with(context)
+                    .load(url.toStringUrl())
+                    .apply(
+                            new RequestOptions()
+                                    .placeholder(R.drawable.default_profile_avatar)
+                                    .error(R.drawable.default_profile_avatar)
+                    )
+                    .into(viewholder.binding.detailApproverAvatar);
+        }
+
+        if (currentApprover.isRequire) {
+            viewholder.binding.detailApproverRequired.setVisibility(View.VISIBLE);
+        } else {
+            viewholder.binding.detailApproverRequired.setVisibility(View.GONE);
+        }
+
+        viewholder.binding.detailApproverName.setText(currentApprover.entityName);
+        viewholder.binding.executePendingBindings();
     }
 
     @Override
     public int getItemCount() {
-        return Approvers.size();
+        return currentApprovers.size();
     }
+
+
 }

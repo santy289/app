@@ -1,10 +1,11 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
-import android.support.v4.util.ArrayMap;
+import androidx.collection.ArrayMap;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
@@ -18,15 +19,16 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.ProductJsonValue;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.role.Role;
 import com.rootnetapp.rootnetintranet.models.responses.services.Service;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.Information;
 import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
 
-import org.w3c.dom.Text;
-
-import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -283,8 +285,6 @@ public class FormSettings {
         return metaData;
     }
 
-
-
     private void format(WorkflowMetas metaData, TypeInfo typeInfo, FieldData fieldData) {
         String value = metaData.getUnformattedValue();
         if (TextUtils.isEmpty(value)) {
@@ -343,11 +343,18 @@ public class FormSettings {
                     metaData.setValue(json);
                     break;
                 }
+
                 if (typeInfo.getType().equals(TYPE_PRODUCT)) {
                     String json = getProductJson(value, fieldData, metaData);
                     metaData.setValue(json);
                     break;
                 }
+
+                if (typeInfo.getType().equals(TYPE_SERVICE)) {
+                    // TODO handle service.
+
+                }
+
                 handleList(fieldData, metaData, value);
                 break;
             case FormSettings.VALUE_STRING:
@@ -546,6 +553,231 @@ public class FormSettings {
         return null;
     }
 
+    /**
+     * Interface for a ViewModel that we help FormSettings in completed an Information object by
+     * requesting to a Repository for data in the network. Eventually this function will also continue
+     * updating the Workflow information section.
+     */
+    public interface FormSettingsViewModelDelegate {
+        public void findInNetwork(Object value, Information information, FieldConfig fieldConfig);
+    }
+
+    public Information formatStringToObject(Meta meta, FieldConfig fieldConfig) {
+        if (TextUtils.isEmpty(meta.getValue())) {
+            return null;
+        }
+
+        Information information = new Information();
+        information.setTitle(meta.getWorkflowTypeFieldName());
+        TypeInfo typeInfo = fieldConfig.getTypeInfo();
+
+        /*
+        if multiple is true then value will be an array and probably ids, so we need to go back to the
+        view model and request to an endpoint the name of the ids given in value.
+        */
+        switch (typeInfo.getValueType()) {
+            case FormSettings.VALUE_BOOLEAN:
+                if (fieldConfig.getMultiple()) {
+                    return null;
+                }
+
+                String value = meta.getValue();
+
+                if (Boolean.valueOf(value)) {
+                    information.setResDisplayValue(R.string.yes);
+                } else {
+                    information.setResDisplayValue(R.string.no);
+                }
+                return information;
+            case FormSettings.VALUE_DATE:
+                if (fieldConfig.getMultiple()) {
+                    return null;
+                }
+
+                String date = (String) meta.getDisplayValue(); // now returns 10 / 25 / 2018
+                // String date = (String) meta.getValue(); // Maybe try this but it returns a double quotes.
+
+                // TODO for now use displayValue directly. Verify that his will not change anymore.
+                // TODO Get rid of the unnecessary spaces in the date itself between the numbers.
+                information.setDisplayValue(date);
+                return information;
+
+                // TODO commenting out this block for now. Make sure we don't need this anymore.
+//                SimpleDateFormat serverFormat = new SimpleDateFormat(
+//                        "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+//                        Locale.getDefault());
+//
+//                try {
+//                    Date dateFromServer = serverFormat.parse(date);
+//                    SimpleDateFormat dateFormat = new SimpleDateFormat(
+//                            "dd-MM-yyyy",
+//                            Locale.getDefault());
+//                    String formattedDate = dateFormat.format(dateFromServer);
+//                    information.setDisplayValue(formattedDate);
+//                    return information;
+//                } catch (ParseException e) {
+//                    e.printStackTrace();
+//                    information.setDisplayValue("");
+//                    String format = WorkflowDetailViewModel.FORMAT;
+//                    String formattedDate = Utils.standardServerFormatTo(date, format);
+//                    information.setDisplayValue(formattedDate);
+//                    return information;
+//                }
+            case FormSettings.VALUE_EMAIL:
+                if (fieldConfig.getMultiple()) {
+                    return null;
+                }
+                if (!(meta.getDisplayValue() instanceof String)) {
+                    information.setDisplayValue("");
+                    return information;
+                }
+
+                information.setDisplayValue((String) meta.getDisplayValue());
+                return information;
+            case FormSettings.VALUE_INTEGER:
+
+                if (fieldConfig.getMultiple()) {
+                    return null;
+                }
+
+                if (typeInfo.getType().equals(TYPE_TEXT)) {
+                    if (!(meta.getDisplayValue() instanceof String)) {
+                        information.setDisplayValue("");
+                        return information;
+                    }
+                    information.setDisplayValue((String) meta.getDisplayValue());
+                    return information;
+                }
+
+                if (typeInfo.getType().equals(TYPE_CURRENCY)) {
+                    PostCountryCodeAndValue currency;
+                    JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi.adapter(PostCountryCodeAndValue.class);
+                    try {
+                        currency = jsonAdapter.fromJson(meta.getValue());
+                        information.setDisplayValue(String.valueOf(currency.value));
+                        return information;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        information.setDisplayValue("");
+                        return information;
+                    } catch (JsonDataException e) {
+                        e.printStackTrace();
+                        information.setDisplayValue("");
+                        return information;
+                    }
+                }
+
+                if (typeInfo.getType().equals(TYPE_FILE)) {
+                    // TODO handle file.
+                    return null;
+                }
+
+                return null;
+            case FormSettings.VALUE_ENTITY:
+                if (typeInfo.getType().equals(TYPE_ROLE)) {
+                    String displayValue = getLabelFrom(meta);
+                    information.setDisplayValue(displayValue);
+                    return information;
+                }
+
+                return null;
+            case FormSettings.VALUE_LIST:
+                if (typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
+                    // TODO implement system user field
+//                    if (fieldConfig.getMultiple()) {
+//                        // {"id":50,"username":"jhonny Garzon","status":true,"email":"jgarzon600@gmail.com"}
+//                    } else {
+//
+//                    }
+
+                    Moshi moshi = new Moshi.Builder().build();
+                    JsonAdapter<PostSystemUser> jsonAdapter = moshi.adapter(PostSystemUser.class);
+                    try {
+                        PostSystemUser systemUser = jsonAdapter.fromJson(meta.getValue());
+                        information.setDisplayValue(systemUser.username);
+                        return information;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        information.setDisplayValue("");
+                        return information;
+                    }
+                }
+
+                String displayValue = getLabelFrom(meta);
+                information.setDisplayValue(displayValue);
+                return information;
+            case FormSettings.VALUE_STRING:
+                // Until now phone type can only be single and not multiple
+                if (typeInfo.getType().equals(TYPE_PHONE)) {
+                    PostCountryCodeAndValue phone;
+                    JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi.adapter(PostCountryCodeAndValue.class);
+                    try {
+                        phone = jsonAdapter.fromJson(meta.getValue());
+                        information.setDisplayValue(String.valueOf(phone.value));
+                        return information;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        information.setDisplayValue("");
+                        return information;
+                    } catch (JsonDataException e) {
+                        e.printStackTrace();
+                        information.setDisplayValue("");
+                        return information;
+                    }
+                }
+
+                if (!(meta.getDisplayValue() instanceof String)) {
+                    information.setDisplayValue("");
+                    return information;
+                }
+
+                information.setDisplayValue((String) meta.getDisplayValue());
+                return information;
+            case FormSettings.VALUE_TEXT:
+                if (!(meta.getDisplayValue() instanceof String)) {
+                    information.setDisplayValue("");
+                    return information;
+                }
+
+                information.setDisplayValue((String) meta.getDisplayValue());
+                return information;
+            default:
+                Log.d(TAG, "format: invalid type. Not Known.");
+                information.setDisplayValue("");
+                return information;
+        }
+    }
+
+    private String getLabelFrom(Meta meta) {
+        ArrayList<String> displayValue;
+        try {
+            displayValue = (ArrayList<String>)meta.getDisplayValue();
+        } catch (ClassCastException e) {
+            Log.d(TAG, "formatStringToObject: Value List casting problems");
+            e.printStackTrace();
+            return "";
+        }
+
+        if (displayValue.size() == 0) {
+            return "";
+        }
+
+        if (displayValue.size() == 1) {
+            return displayValue.get(0);
+        }
+
+        String label;
+        StringBuilder sb = new StringBuilder();
+        int size = displayValue.size();
+        for (int i = 0; i < size; i++) {
+            label = displayValue.get(i);
+            sb.append(label);
+            if (i < size - 1) {
+                sb.append(", ");
+            }
+        }
+        return sb.toString();
+    }
 
     public String getTitle() {
         return title;

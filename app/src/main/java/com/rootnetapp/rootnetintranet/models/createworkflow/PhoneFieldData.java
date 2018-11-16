@@ -1,6 +1,6 @@
 package com.rootnetapp.rootnetintranet.models.createworkflow;
 
-import android.arch.persistence.room.ColumnInfo;
+import androidx.room.ColumnInfo;
 
 public class PhoneFieldData {
     @ColumnInfo(name = "country_id")

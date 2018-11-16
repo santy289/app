@@ -20,25 +20,31 @@
         <activity
             android:name=".ui.main.MainActivity"
             android:label="@string/title_activity_main"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.domain.DomainActivity"
-            android:theme="@style/LoginStyle">
+            android:theme="@style/LoginStyle"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".ui.login.LoginActivity"
-            android:theme="@style/LoginStyle" />
+            android:theme="@style/LoginStyle"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".ui.sync.SyncActivity"
             android:label="@string/title_activity_sync"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".ui.editprofile.EditProfileActivity"
             android:label="@string/title_activity_edit_profile"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".ui.splash.SplashActivity"
-            android:theme="@style/SplashTheme">
+            android:theme="@style/SplashTheme"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

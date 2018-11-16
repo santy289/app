@@ -2,15 +2,15 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 28
-    buildToolsVersion "28.0.2"
+    buildToolsVersion "28.0.3"
     defaultConfig {
         applicationId "com.rootnetapp.rootnetintranet"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 1
+        versionCode 2
         versionName "1.0"
         vectorDrawables.useSupportLibrary = true
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         debug {
@@ -41,25 +41,25 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "com.android.support.constraint:constraint-layout:$rootProject.constraintLayoutVersion"
-    implementation "com.android.support:support-v4:$rootProject.supportLibVersion"
-    implementation "com.android.support:support-annotations:$rootProject.supportLibVersion"
-    implementation "com.android.support:appcompat-v7:$rootProject.supportLibVersion"
-    implementation "com.android.support:recyclerview-v7:$rootProject.supportLibVersion"
-    implementation "com.android.support:cardview-v7:$rootProject.supportLibVersion"
-    implementation "com.android.support:design:$rootProject.supportLibVersion"
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha2'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.annotation:annotation:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'com.google.android.material:material:1.1.0-alpha01'
 
     //android arch components
-    implementation "android.arch.lifecycle:runtime:$rootProject.archLifecycleVersion"
-    implementation "android.arch.lifecycle:extensions:$rootProject.archLifecycleVersion"
+    implementation 'androidx.lifecycle:lifecycle-runtime:2.0.0'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
     implementation "android.arch.work:work-runtime:$rootProject.workManager"
-    implementation "android.arch.lifecycle:common-java8:$rootProject.archLifecycleVersion"
-    implementation "android.arch.paging:runtime:1.0.1"
+    implementation 'androidx.lifecycle:lifecycle-common-java8:2.0.0'
+    implementation "androidx.paging:paging-runtime:2.1.0-beta01"
 
     //room
-    implementation "android.arch.persistence.room:runtime:$rootProject.roomVersion"
-    annotationProcessor "android.arch.persistence.room:compiler:$rootProject.roomVersion"
-    implementation "android.arch.persistence.room:rxjava2:$rootProject.roomVersion"
+    implementation 'androidx.room:room-runtime:2.1.0-alpha02'
+    annotationProcessor 'androidx.room:room-compiler:2.1.0-alpha02'
+    implementation 'androidx.room:room-rxjava2:2.1.0-alpha02'
 
     //google
     annotationProcessor "com.google.dagger:dagger-compiler:$rootProject.daggerLibraryVersion"
@@ -84,9 +84,11 @@ dependencies {
     implementation "com.google.firebase:firebase-messaging:$rootProject.firebaseVersion"
     implementation "com.obsez.android.lib.filechooser:filechooser:$rootProject.fileChooser"
 
+    implementation 'com.jakewharton.threetenabp:threetenabp:1.1.1'
+
     //Test
-    androidTestImplementation "com.android.support.test:runner:$rootProject.testRunner"
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:$rootProject.espresso"
+    androidTestImplementation 'androidx.test:runner:1.1.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
     testImplementation "junit:junit:$rootProject.jUnit"
     implementation 'com.auth0.android:jwtdecode:1.1.1'
     implementation "de.hdodenhof:circleimageview:$rootProject.circleImageViewVersion"

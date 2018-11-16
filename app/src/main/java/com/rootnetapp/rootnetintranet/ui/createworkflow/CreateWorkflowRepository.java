@@ -1,6 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
-import android.arch.lifecycle.LiveData;
+import androidx.lifecycle.LiveData;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDBDao;

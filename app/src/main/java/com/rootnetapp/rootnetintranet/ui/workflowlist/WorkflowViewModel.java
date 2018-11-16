@@ -1,13 +1,13 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist;
 
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.ViewModel;
-import android.arch.paging.PagedList;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+import androidx.paging.PagedList;
 import android.content.SharedPreferences;
-import android.support.annotation.IdRes;
+import androidx.annotation.IdRes;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -56,8 +56,6 @@ import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.RA
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.RADIO_UPDATED_DATE;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_CREATED_DATE;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_NUMBER;
-import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_PENDING;
-import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_STATUS;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_UPDATED_DATE;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.UNCHECK;
 
@@ -163,6 +161,8 @@ public class WorkflowViewModel extends ViewModel {
         liveWorkflows = workflowRepository.getAllWorkflows();
     }
 
+
+
     protected void swipeToRefresh(LifecycleOwner lifecycleOwner) {
         int id = filterSettings.getWorkflowTypeId();
         if (id > 0) {
@@ -178,6 +178,12 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     protected void initWorkflowList(SharedPreferences sharedPreferences, LifecycleOwner lifecycleOwner) {
+        if (!TextUtils.isEmpty(token)) {
+            showLoading.setValue(true);
+            int baseFilterId = filterSettings.getBaseFilterSelectedId();
+            loadWorkflowsByBaseFilters(baseFilterId, filterSettings, lifecycleOwner);
+            return;
+        }
         token = "Bearer "+ sharedPreferences.getString("token","");
         userId = sharedPreferences.getString(PreferenceKeys.PREFERENCE_PROFILE_ID, "");
         categoryId = sharedPreferences.getInt("category_id", 0);
@@ -186,6 +192,10 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     protected void iniRightDrawerFilters() {
+        if (filterSettings.getSizeOfRightDrawerOptionsListMap() > 0) {
+            return;
+        }
+
         // Get categories from network & init FilterSettings with generated Workflow Types.
         getCategories(categoryId);
         initRightDrawerFilterList();
@@ -193,7 +203,18 @@ public class WorkflowViewModel extends ViewModel {
         initSortBy();
     }
 
+    /**
+     * This function will check if we already have a Filter List populated, and if not it will
+     * go to create a new Workflow Type Menu item for the filter list and send a message back to
+     * the Main Activity to render the content on the UI.
+     */
     private void initRightDrawerFilterList() {
+        if (filterSettings.hasIdinFilterDrawerList(FilterSettings.RIGHT_DRAWER_FILTER_TYPE_ITEM_ID)) {
+            // Update UI
+            rightDrawerFilterMenus.setValue(filterSettings.getFilterDrawerList());
+            invalidateDrawerOptionsList.setValue(true);
+            return;
+        }
         WorkflowTypeMenu menuItem = new WorkflowTypeMenu(
                 FilterSettings.RIGHT_DRAWER_FILTER_TYPE_ITEM_ID,
                 "",
@@ -202,7 +223,9 @@ public class WorkflowViewModel extends ViewModel {
                 WORKFLOW_TYPE_FIELD
         );
         filterSettings.addFilterListMenu(menuItem);
+        // Update UI
         rightDrawerFilterMenus.setValue(filterSettings.getFilterDrawerList());
+        invalidateDrawerOptionsList.setValue(true);
     }
 
     public static final int BASE_FILTER_TYPE = -78;
@@ -213,7 +236,16 @@ public class WorkflowViewModel extends ViewModel {
     public static final int BASE_FILTER_LATEST_ID = 48;
 
 
+    /**
+     * Creates a new list of base filter options only if FilterSettings.baseFilterOptionsList
+     * is empty.
+     */
     private void initBaseFilters() {
+        if (filterSettings.getSizeBseFilterOptionList() > 0) {
+            // It already exists.
+            return;
+        }
+
         List<WorkflowTypeMenu> baseFilterOptionsList = new ArrayList<>();
         WorkflowTypeMenu baseMenu = new WorkflowTypeMenu(
                 BASE_FILTER_ALL_ID,
@@ -278,8 +310,12 @@ public class WorkflowViewModel extends ViewModel {
         disposables.add(disposable);
     }
 
-    /*
-    Groups workflow types in their respective categories and saves results in FilterSettings.
+    protected void resetFilterSettings() {
+        filterSettings.resetFilterSettings();
+    }
+
+    /**
+     * Groups workflow types in their respective categories and saves results in FilterSettings.
      */
     private void initWorkflowTypeMenus() {
         //init workflow type filter
@@ -450,17 +486,17 @@ public class WorkflowViewModel extends ViewModel {
         showLoading.setValue(true);
         WorkflowTypeMenu filterSelected;
         filterSelected = filterSettings.handleBaseFilterPositionSelected(position);
-        int baseFilerId = filterSelected.getId();
+        int baseFilterId = filterSelected.getId();
         if (!filterSelected.isSelected()) {
             // Unselected, no items selected. Filter by All.
             filterSettings.resetBaseFilterSelectionToAll();
-            baseFilerId = BASE_FILTER_ALL_ID;
+            baseFilterId = BASE_FILTER_ALL_ID;
             messageMainBaseFilterSelectionToFilterList.setValue(R.string.all);
         } else {
             messageMainBaseFilterSelectionToFilterList.setValue(filterSelected.getResLabel());
         }
         invalidateDrawerOptionsList.setValue(true);
-        loadWorkflowsByBaseFilters(baseFilerId, filterSettings, lifecycleOwner);
+        loadWorkflowsByBaseFilters(baseFilterId, filterSettings, lifecycleOwner);
     }
 
     /**

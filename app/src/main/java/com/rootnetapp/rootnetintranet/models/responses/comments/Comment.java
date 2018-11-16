@@ -4,10 +4,6 @@ import com.squareup.moshi.Json;
 
 import java.util.List;
 
-/**
- * Created by root on 04/04/18.
- */
-
 public class Comment {
 
     @Json(name = "id")
@@ -20,6 +16,8 @@ public class Comment {
     private List<Object> files = null;
     @Json(name = "date")
     private String date;
+    @Json(name = "is_private")
+    private boolean isPrivate;
 
     public int getId() {
         return id;
@@ -61,4 +59,11 @@ public class Comment {
         this.date = date;
     }
 
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+
+    public void setPrivate(boolean aPrivate) {
+        isPrivate = aPrivate;
+    }
 }

@@ -28,7 +28,7 @@
                 android:background="@color/detailsColor" />
         </RelativeLayout>
 
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rec_create_workflow"
             android:layout_width="match_parent"
             android:layout_height="0dp"

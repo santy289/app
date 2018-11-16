@@ -1,17 +1,17 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist;
 
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
-import android.arch.paging.PagedList;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.paging.PagedList;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.databinding.DataBindingUtil;
+import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.design.widget.BottomSheetBehavior;
-import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -52,8 +52,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     private MainActivityInterface mainActivityInterface;
     private WorkflowExpandableAdapter adapter;
     private BottomSheetBehavior bottomSheetBehavior;
-
-
 
     public static final int SWITCH_NUMBER = 500;
     public static final int SWITCH_CREATED_DATE = 501;
@@ -105,11 +103,15 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                              Bundle savedInstanceState) {
         fragmentWorkflowBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_workflow, container, false);
-        View view = fragmentWorkflowBinding.getRoot();
+        View view = (View) fragmentWorkflowBinding.getRoot();
         ((RootnetApp) getActivity().getApplication()).getAppComponent().inject(this);
         LinearLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        boolean firstLoad = false;
+        if (workflowViewModel == null) {
+            firstLoad = true;
+        }
         workflowViewModel = ViewModelProviders
                 .of(this, workflowViewModelFactory)
                 .get(WorkflowViewModel.class);
@@ -123,7 +125,9 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         setupSearchListener();
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         workflowViewModel.initWorkflowList(prefs, this);
-        subscribe();
+        if (firstLoad) {
+            subscribe();
+        }
         workflowViewModel.iniRightDrawerFilters();
         return view;
     }
@@ -135,6 +139,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     @Override
     public void showDetail(WorkflowListItem item) {
+        workflowViewModel.resetFilterSettings();
         mainActivityInterface.showFragment(WorkflowDetailFragment.newInstance(item,
                 mainActivityInterface),true);
     }

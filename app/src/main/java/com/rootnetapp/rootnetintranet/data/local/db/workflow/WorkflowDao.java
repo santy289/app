@@ -1,10 +1,10 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflow;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.persistence.room.Dao;
-import android.arch.persistence.room.Insert;
-import android.arch.persistence.room.OnConflictStrategy;
-import android.arch.persistence.room.Query;
+import androidx.lifecycle.LiveData;
+import androidx.room.Dao;
+import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
+import androidx.room.Query;
 import android.database.Cursor;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public abstract class WorkflowDao {
     @Query("SELECT * FROM workflow WHERE id = :id")
     public abstract Workflow getWorkflow(int id);
 
-    @Query("SELECT id as _id, * FROM workflow WHERE title LIKE :name")
+    @Query("SELECT id as _id, * FROM workflow WHERE title LIKE '%' || :name || '%'")
     public abstract Cursor getWorkflowsLike(String name);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

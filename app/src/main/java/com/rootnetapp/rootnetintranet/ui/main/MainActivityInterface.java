@@ -1,7 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
 
 public interface MainActivityInterface {
 

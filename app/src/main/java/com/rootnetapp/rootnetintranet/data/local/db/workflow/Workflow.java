@@ -1,10 +1,10 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflow;
 
-import android.arch.persistence.room.ColumnInfo;
-import android.arch.persistence.room.Embedded;
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.Ignore;
-import android.arch.persistence.room.PrimaryKey;
+import androidx.room.ColumnInfo;
+import androidx.room.Embedded;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
 
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowType;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.CalculatedField;
@@ -105,6 +105,19 @@ public class Workflow {
     @Ignore
     @Json(name = "presets")
     private List<Preset> presets = null;
+
+    @Ignore
+    @Json(name = "current_status_relations")
+    private List<Integer> currentStatusRelations;
+
+
+    public List<Integer> getCurrentStatusRelations() {
+        return currentStatusRelations;
+    }
+
+    public void setCurrentStatusRelations(List<Integer> currentStatusRelations) {
+        this.currentStatusRelations = currentStatusRelations;
+    }
 
     public int getId() {
         return id;

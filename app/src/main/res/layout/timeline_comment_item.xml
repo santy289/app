@@ -83,7 +83,7 @@
             android:layout_alignBottom="@+id/lyt_comments"
             android:visibility="gone"/>
 
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rec_comments"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -106,7 +106,7 @@
                 android:layout_height="30dp"
                 android:layout_centerVertical="true"/>
 
-            <android.support.v7.widget.AppCompatEditText
+            <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/input_comment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

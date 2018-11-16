@@ -1,35 +1,32 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters;
 
-import android.support.v7.widget.RecyclerView;
+import android.content.Context;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.request.RequestOptions;
+import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
 import com.rootnetapp.rootnetintranet.databinding.PeopleInvolvedItemBinding;
 
-import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by root on 03/04/18.
- */
-
 public class PeopleInvolvedAdapter extends RecyclerView.Adapter<PeopleInvolvedViewholder>{
+    private List<ProfileInvolved> profiles;
 
-    //todo SOLO TESTING mientras no hay backend
-    private List<Integer> People;
-
-    public PeopleInvolvedAdapter() {
-        People = new ArrayList<>();
-        int i=0;
-        while(i<3){
-            People.add(1);
-            i++;
-        }
+    public PeopleInvolvedAdapter(List<ProfileInvolved> profiles) {
+        this.profiles = profiles;
     }
 
+    @NonNull
     @Override
-    public PeopleInvolvedViewholder onCreateViewHolder(ViewGroup viewGroup, int i) {
-
+    public PeopleInvolvedViewholder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         LayoutInflater layoutInflater =
                 LayoutInflater.from(viewGroup.getContext());
         PeopleInvolvedItemBinding itemBinding =
@@ -38,12 +35,33 @@ public class PeopleInvolvedAdapter extends RecyclerView.Adapter<PeopleInvolvedVi
     }
 
     @Override
-    public void onBindViewHolder(PeopleInvolvedViewholder peopleInvolvedViewholder, int i) {
+    public void onBindViewHolder(@NonNull PeopleInvolvedViewholder viewHolder, int i) {
+        if (getItemCount() < 1) {
+            return;
+        }
 
+        ProfileInvolved profileInvolved = profiles.get(i);
+
+        if (!TextUtils.isEmpty(profileInvolved.picture)) {
+            Context context = viewHolder.binding.imgInvolvedAvatar.getContext();
+            String path = Utils.imgDomain + profileInvolved.picture;
+            GlideUrl url = new GlideUrl(path);
+            Glide.with(context)
+                    .load(url.toStringUrl())
+                    .apply(
+                            new RequestOptions()
+                                    .placeholder(R.drawable.default_profile_avatar)
+                                    .error(R.drawable.default_profile_avatar)
+                    )
+                    .into(viewHolder.binding.imgInvolvedAvatar);
+        }
+
+        viewHolder.binding.tvInvolvedName.setText(profileInvolved.fullName);
+        viewHolder.binding.executePendingBindings();
     }
 
     @Override
     public int getItemCount() {
-        return People.size();
+        return profiles.size();
     }
 }

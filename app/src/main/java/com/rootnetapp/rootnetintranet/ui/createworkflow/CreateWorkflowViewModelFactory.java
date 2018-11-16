@@ -1,8 +1,8 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
-import android.arch.lifecycle.ViewModel;
-import android.arch.lifecycle.ViewModelProvider;
-import android.support.annotation.NonNull;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.annotation.NonNull;
 
 /**
  * Created by root on 22/03/18.

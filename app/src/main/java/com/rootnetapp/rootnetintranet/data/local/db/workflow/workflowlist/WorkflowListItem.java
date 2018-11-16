@@ -1,11 +1,9 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist;
 
-import android.arch.persistence.room.ColumnInfo;
-import android.arch.persistence.room.Ignore;
+import androidx.room.ColumnInfo;
+import androidx.room.Ignore;
 import android.text.TextUtils;
 import android.util.Log;
-
-import com.squareup.moshi.Json;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

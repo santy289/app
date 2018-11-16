@@ -1,6 +1,6 @@
 package com.rootnetapp.rootnetintranet.models.workflowlist;
 
-import android.support.annotation.StringRes;
+import androidx.annotation.StringRes;
 
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;

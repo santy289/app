@@ -1,6 +1,6 @@
 package com.rootnetapp.rootnetintranet.data.local.db.profile.forms;
 
-import android.arch.persistence.room.ColumnInfo;
+import androidx.room.ColumnInfo;
 
 public class FormCreateProfile {
     @ColumnInfo(name = "id")

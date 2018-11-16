@@ -52,6 +52,14 @@ public class FilterSettings {
         this.baseFilterIndexSelected = 0;
     }
 
+    public void resetFilterSettings() {
+        int test = 0;
+    }
+
+    public int getSizeOfRightDrawerOptionsListMap() {
+        return rightDrawerOptionsList.size();
+    }
+
     public boolean isCheckedMyPending() {
         return isCheckedMyPending;
     }
@@ -78,6 +86,10 @@ public class FilterSettings {
 
     public List<WorkflowTypeMenu> getBaseFilterOptionsList() {
         return baseFilterOptionsList;
+    }
+
+    public int getSizeBseFilterOptionList() {
+        return baseFilterOptionsList.size();
     }
 
     public void setBaseFilterOptionsList(List<WorkflowTypeMenu> baseFilterOptionsList) {
@@ -122,6 +134,17 @@ public class FilterSettings {
 
     public void addFilterListMenu(WorkflowTypeMenu menu) {
         filterDrawerList.add(menu);
+    }
+
+    protected boolean hasIdinFilterDrawerList(int id) {
+        WorkflowTypeMenu filter;
+        for (int i = 0; i < filterDrawerList.size(); i++) {
+            filter = filterDrawerList.get(i);
+            if (filter.getId() == id) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public WorkflowTypeMenu getFilterListItem(int atPosition) {

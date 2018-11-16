@@ -1,17 +1,15 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters;
 
-import android.icu.text.IDNA;
-import android.support.v7.widget.RecyclerView;
+import android.content.Context;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.rootnetapp.rootnetintranet.databinding.InformationItemBinding;
 
 import java.util.List;
-
-/**
- * Created by root on 03/04/18.
- */
 
 public class InformationAdapter extends RecyclerView.Adapter<InformationViewholder>{
 
@@ -21,8 +19,9 @@ public class InformationAdapter extends RecyclerView.Adapter<InformationViewhold
         this.contents = contents;
     }
 
+    @NonNull
     @Override
-    public InformationViewholder onCreateViewHolder(ViewGroup viewGroup, int i) {
+    public InformationViewholder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         LayoutInflater layoutInflater =
                 LayoutInflater.from(viewGroup.getContext());
         InformationItemBinding itemBinding =
@@ -31,10 +30,28 @@ public class InformationAdapter extends RecyclerView.Adapter<InformationViewhold
     }
 
     @Override
-    public void onBindViewHolder(InformationViewholder holder, int i) {
+    public void onBindViewHolder(@NonNull InformationViewholder holder, int i) {
         Information item = contents.get(i);
-        holder.binding.tvTitle.setText(item.getTitle());
-        holder.binding.tvContent.setText(item.getContent());
+
+        if (TextUtils.isEmpty(item.getTitle())) {
+            Context context = holder.binding.tvTitle.getContext();
+            holder.binding.tvTitle.setText(context.getString(item.getResTitle()));
+        } else {
+            holder.binding.tvTitle.setText(item.getTitle());
+        }
+
+        if (!TextUtils.isEmpty(item.getDisplayValue())) {
+            holder.binding.tvContent.setText(item.getDisplayValue());
+            return;
+        }
+
+        if (item.getResDisplayValue() < 1) {
+            holder.binding.tvContent.setText("");
+            return;
+        }
+
+        Context context = holder.binding.tvContent.getContext();
+        holder.binding.tvContent.setText(context.getString(item.getResDisplayValue()));
     }
 
     @Override

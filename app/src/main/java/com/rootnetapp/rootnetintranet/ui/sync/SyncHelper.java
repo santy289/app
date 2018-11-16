@@ -1,8 +1,8 @@
 package com.rootnetapp.rootnetintranet.ui.sync;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.util.ArrayMap;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.BuildConfig;
@@ -16,7 +16,6 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.Field;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
-import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountryDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
@@ -24,7 +23,6 @@ import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowRespons
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
-import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
@@ -32,7 +30,6 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -257,7 +254,7 @@ public class SyncHelper {
     }
 
     private void getUser(String token) {
-        Disposable disposable = apiInterface.getUsers(token).subscribeOn(Schedulers.newThread()).
+        Disposable disposable = apiInterface.getProfiles(token).subscribeOn(Schedulers.newThread()).
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe(this::onUsersSuccess, throwable -> {
                     Log.d(TAG, "getData: error " + throwable.getMessage() );
@@ -278,6 +275,11 @@ public class SyncHelper {
 
         HttpException networkError = (HttpException) throwable;
         mSyncLiveData.setValue(false);
+
+        if (networkError.code() == 500) {
+            failure(throwable);
+            return;
+        }
 
         if (networkError.code() != 401) {
             proceedWithUnhandledException();
@@ -311,14 +313,14 @@ public class SyncHelper {
         disposables.add(disposable);
     }
 
-    private void onUsersSuccess(UserResponse userResponse) {
+    private void onUsersSuccess(ProfileResponse profileResponse) {
         Disposable disposable = Observable.fromCallable(() -> {
-            List<User> users = userResponse.getProfiles();
-            if (users == null) {
+            List<Profile> profiles = profileResponse.getProfiles();
+            if (profiles == null) {
                 return false;
             }
-            database.userDao().clearUser();
-            database.userDao().insertAll(users);
+            database.profileDao().deleteAllProfiles();
+            database.profileDao().insertProfiles(profiles);
             return true;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())

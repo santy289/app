@@ -1,5 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 
+import androidx.annotation.IdRes;
+import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -532,6 +534,14 @@ public class WorkflowDetailFragment extends Fragment {
         binding.recDocuments.setAdapter(documentsAdapter);
     }
 
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                getContext(),
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
+    }
+
     private void comment(View view) {
         binding.inputComment.setError(null);
         String comment = binding.inputComment.getText().toString();
@@ -642,6 +652,7 @@ public class WorkflowDetailFragment extends Fragment {
         workflowDetailViewModel.getObservableComment().observe(this, commentObserver);
         workflowDetailViewModel.getObservableAttach().observe(this, attachObserver);
         workflowDetailViewModel.getObservableError().observe(this, errorObserver);
+        workflowDetailViewModel.getObservableShowToasteMessage().observe(this, this::showToastMessage);
 
         workflowDetailViewModel.showLoading.observe(this, this::showLoading);
         workflowDetailViewModel.setCommentHeaderCounter.observe(this, this::updateHeaderCommentCounter);

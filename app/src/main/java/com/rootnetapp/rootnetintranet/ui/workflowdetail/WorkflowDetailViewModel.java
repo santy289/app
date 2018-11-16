@@ -12,7 +12,6 @@ import android.util.Log;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
@@ -88,6 +87,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     protected MutableLiveData<Boolean> setWorkflowIsOpen;
     protected MutableLiveData<List<Information>> updateInformationListUi;
     protected MutableLiveData<String[]> updateStatusUi;
+    protected MutableLiveData<Integer> showToastMessage;
     protected LiveData<String[]> updateStatusUiFromUserAction;
     protected LiveData<Boolean> handleShowLoadingByRepo;
 
@@ -142,7 +142,6 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.token = token;
         this.workflowListItem = workflow;
         getWorkflow(this.token, this.workflowListItem.getWorkflowId());
-
         getComments(this.token, this.workflowListItem.getWorkflowId());
     }
 
@@ -163,25 +162,30 @@ public class WorkflowDetailViewModel extends ViewModel {
         updateStatusUiFromUserAction = Transformations.map(
                 repository.getApproveRejectResponse(),
                 approvalResponse -> {
-                    showLoading.setValue(false);
                     // transform WorkflowApproveRejectResponse to String[]
-                    WorkflowDb incomingWorkflow = approvalResponse.getWorkflow();
-                    String[] statuses = buildArrayForStatusUpdate(incomingWorkflow);
+                    //WorkflowDb incomingWorkflow = approvalResponse.getWorkflow();
+                    workflow = approvalResponse.getWorkflow();
+                    String[] statuses = buildArrayForStatusUpdate(workflow);
 
                     // TODO update the rest of the Workflow (history, status, people involved, and more)
+                    updateUIWithWorkflow(workflow);
+                    currentWorkflowType = workflow.getWorkflowType();
 
+                    updateUIWithWorkflowType(currentWorkflowType, workflow.getCurrentStatus());
 
-
-
-
+                    showLoading.setValue(false);
+                    showToastMessage.setValue(R.string.request_successfully);
                     return statuses;
                 }
         );
 
         // Transformation used in case that a workflow approval or rejection fails.
         handleShowLoadingByRepo = Transformations.map(
-                repository.getShowLoading(),
-                show -> show
+                repository.getErrorShowLoading(),
+                show -> {
+                    showToastMessage.setValue(R.string.error);
+                    return show;
+                }
         );
     }
 
@@ -297,6 +301,13 @@ public class WorkflowDetailViewModel extends ViewModel {
         return nextStatusLabel.toString();
     }
 
+    /**
+     * Calls the repository for obtaining a new Workflow Type by a type id.
+     * @param auth
+     *  Access token to use for endpoint request.
+     * @param typeId
+     *  Id that will be passed on to the endpoint.
+     */
     private void getWorkflowType(String auth, int typeId) {
         Disposable disposable = repository
                 .getWorkflowType(auth, typeId)
@@ -456,7 +467,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     }
 
     private WorkflowTypeDb currentWorkflowType;
-    private Status currentStatus;
+    //private Status currentStatus; //TODO make sure we are not using this variable in functions and in here updateUIWithWorkflowType().
 
     /**
      * Handles success response from endpoint when looking for a workflow type.
@@ -468,8 +479,40 @@ public class WorkflowDetailViewModel extends ViewModel {
         if (currentWorkflowType == null) {
             return;
         }
+        updateUIWithWorkflowType(currentWorkflowType, workflowListItem.getCurrentStatus());
+    }
 
-        currentStatus = findStatusInListBy(workflowListItem.getCurrentStatus());
+    /**
+     * Handles success when requesting for a workflow by id to the endpoint.
+     *
+     * @param workflowResponse Network response with workflow data.
+     */
+    private void onWorkflowSuccess(WorkflowResponse workflowResponse) {
+        workflow = workflowResponse.getWorkflow();
+        getWorkflowType(this.token, this.workflowListItem.getWorkflowTypeId());
+        updateUIWithWorkflow(workflow);
+    }
+
+
+    private void updateUIWithWorkflow(WorkflowDb workflow) {
+        setWorkflowIsOpen.setValue(workflow.isOpen());
+//        updateWorkflowStatusUi(workflow);
+        updateProfilesInvolvedUi(workflow.getProfilesInvolved());
+
+        SpecificApprovers approvers = workflow.getSpecificApprovers();
+        updateApproverSpecificListUi(approvers.global, GLOBAL_APPROVER_TYPE);
+
+        List<Integer> statusSpecific = new ArrayList<>();
+        for (int i = 0; i < approvers.statusSpecific.size(); i++) {
+            statusSpecific.add(approvers.statusSpecific.get(i).user);
+        }
+
+        updateApproverSpecificListUi(statusSpecific, STATUS_SPECIFIC_APPROVER_TYPE);
+        updateApproverHistoryListUi(workflow.getWorkflowApprovalHistory());
+    }
+
+    private void updateUIWithWorkflowType(WorkflowTypeDb currentWorkflowType, int statusId) {
+        Status currentStatus = findStatusInListBy(statusId);
         setImportantInfoSection(currentStatus);
 
         updateStatusUi.setValue(buildArrayForStatusUpdate(workflow));
@@ -694,33 +737,6 @@ public class WorkflowDetailViewModel extends ViewModel {
         updateApproveSpinner.setValue(nextStatusList);
     }
 
-
-    /**
-     * Handles success when requesting for a workflow by id to the endpoint.
-     *
-     * @param workflowResponse Network response with workflow data.
-     */
-    private void onWorkflowSuccess(WorkflowResponse workflowResponse) {
-        getWorkflowType(this.token, this.workflowListItem.getWorkflowTypeId());
-        workflow = workflowResponse.getWorkflow();
-        setWorkflowIsOpen.setValue(workflow.isOpen());
-
-//        updateWorkflowStatusUi(workflow);
-        updateProfilesInvolvedUi(workflow.getProfilesInvolved());
-
-        SpecificApprovers approvers = workflow.getSpecificApprovers();
-        updateApproverSpecificListUi(approvers.global, GLOBAL_APPROVER_TYPE);
-
-        List<Integer> statusSpecific = new ArrayList<>();
-        for (int i = 0; i < approvers.statusSpecific.size(); i++) {
-            statusSpecific.add(approvers.statusSpecific.get(i).user);
-        }
-
-        updateApproverSpecificListUi(statusSpecific, STATUS_SPECIFIC_APPROVER_TYPE);
-        updateApproverHistoryListUi(workflow.getWorkflowApprovalHistory());
-
-    }
-
     private void updateApproverHistoryListUi(List<ApproverHistory> approverHistoryList) {
         if (approverHistoryList == null || approverHistoryList.size() < 1) {
             hideHistoryApprovalList.setValue(true);
@@ -919,6 +935,13 @@ public class WorkflowDetailViewModel extends ViewModel {
             mErrorLiveData = new MutableLiveData<>();
         }
         return mErrorLiveData;
+    }
+
+    protected LiveData<Integer> getObservableShowToasteMessage() {
+        if (showToastMessage == null) {
+            showToastMessage = new MutableLiveData<>();
+        }
+        return showToastMessage;
     }
 
 }

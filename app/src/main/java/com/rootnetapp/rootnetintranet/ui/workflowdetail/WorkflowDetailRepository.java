@@ -6,6 +6,7 @@ import android.util.Log;
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.ProfileDao;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
@@ -31,6 +32,7 @@ import io.reactivex.schedulers.Schedulers;
 public class WorkflowDetailRepository {
     private ApiInterface service;
     private ProfileDao profileDao;
+    private WorkflowTypeDbDao workflowTypeDbDao;
 
     private MutableLiveData<WorkflowApproveRejectResponse> responseApproveRejection;
     private MutableLiveData<Boolean> showLoading;
@@ -42,6 +44,7 @@ public class WorkflowDetailRepository {
     public WorkflowDetailRepository(ApiInterface service, AppDatabase database) {
         this.service = service;
         this.profileDao = database.profileDao();
+        this.workflowTypeDbDao = database.workflowTypeDbDao();
     }
 
     /**
@@ -96,7 +99,7 @@ public class WorkflowDetailRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public void approveWorkflow(String token, int workflowId, boolean isApproved, int nextStatus) {
+    void approveWorkflow(String token, int workflowId, boolean isApproved, int nextStatus) {
         Disposable disposable = service.postApproveReject(
                 token,
                 workflowId,
@@ -108,11 +111,26 @@ public class WorkflowDetailRepository {
                 .subscribe(success -> {
                     responseApproveRejection.postValue(success);
                 }, throwable -> {
-                    Log.d(TAG, "approveWorkflow: ");
+                    Log.d(TAG, "approveWorkflow: " + throwable.getMessage());
                     showLoading.setValue(false);
                 });
         disposables.add(disposable);
     }
+
+    void getWorkflowTypeFromDb(int workflowTypeId) {
+        Disposable disposable = workflowTypeDbDao.getWorkflowTypeBy(workflowTypeId)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(workflowTypeDb -> {
+                    // TODO call back to calling ViewModel using a LiveData.
+                }, throwable -> {
+                    Log.d(TAG, "approveWorkflow: " + throwable.getMessage());
+                    showLoading.setValue(false);
+                });
+        disposables.add(disposable);
+    }
+
+
 
     protected void clearDisposables() {
         disposables.clear();
@@ -125,7 +143,7 @@ public class WorkflowDetailRepository {
         return responseApproveRejection;
     }
 
-    protected LiveData<Boolean> getShowLoading() {
+    protected LiveData<Boolean> getErrorShowLoading() {
         if (showLoading == null) {
             showLoading = new MutableLiveData<>();
         }

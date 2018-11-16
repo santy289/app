@@ -64,7 +64,7 @@ public class ApprovalHistoryAdapter extends RecyclerView.Adapter<ApprovalViewhol
         if (approverHistory.changedStatus) {
             viewholder.binding.tvApprovalHistoryIsEdited.setVisibility(View.VISIBLE);
         } else {
-            viewholder.binding.tvApprovalHistoryIsEdited.setVisibility(View.GONE);
+            viewholder.binding.tvApprovalHistoryIsEdited.setVisibility(View.INVISIBLE);
         }
 
         if (approverHistory.approved) {
@@ -77,6 +77,7 @@ public class ApprovalHistoryAdapter extends RecyclerView.Adapter<ApprovalViewhol
 
         String dateFormatted = Utils.serverFormatToFormat(approverHistory.createdAt, format);
         viewholder.binding.tvApprovalHistoryDate.setText(dateFormatted);
+
 
         viewholder.binding.tvStatus.setText(approverHistory.status.getName());
 

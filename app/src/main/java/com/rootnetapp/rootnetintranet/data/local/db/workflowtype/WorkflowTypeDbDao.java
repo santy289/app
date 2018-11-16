@@ -7,6 +7,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
+import io.reactivex.Single;
 
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
@@ -59,4 +60,6 @@ public interface WorkflowTypeDbDao {
             "WHERE field.workflow_type_id = :byId")
     public List<FormFieldsByWorkflowType> getFields(int byId);
 
+    @Query("SELECT * FROM workflowtypedb WHERE id = :workflowTypeId")
+    public Single<WorkflowTypeDb> getWorkflowTypeBy(int workflowTypeId);
 }

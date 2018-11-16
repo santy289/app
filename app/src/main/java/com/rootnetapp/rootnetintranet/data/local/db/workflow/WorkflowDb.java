@@ -15,6 +15,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.SpecificApprovers;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
 import com.squareup.moshi.Json;
 
 import java.util.List;
@@ -98,6 +99,10 @@ public class WorkflowDb {
 //-----------------
 
     @Ignore
+    @Json(name = "workflow_type")
+    private WorkflowTypeDb workflowType;
+
+    @Ignore
     @Json(name = "assignees")
     private List<Person> assignees = null;
 
@@ -136,6 +141,26 @@ public class WorkflowDb {
     @Ignore
     @Json(name = "workflow_approval_history")
     private List<ApproverHistory> workflowApprovalHistory;
+
+    @Ignore
+    @Json(name = "pending_approval")
+    private List<Integer> pendingApproval;
+
+    public WorkflowTypeDb getWorkflowType() {
+        return workflowType;
+    }
+
+    public void setWorkflowType(WorkflowTypeDb workflowType) {
+        this.workflowType = workflowType;
+    }
+
+    public List<Integer> getPendingApproval() {
+        return pendingApproval;
+    }
+
+    public void setPendingApproval(List<Integer> pendingApproval) {
+        this.pendingApproval = pendingApproval;
+    }
 
     public List<ApproverHistory> getWorkflowApprovalHistory() {
         return workflowApprovalHistory;

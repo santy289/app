@@ -213,4 +213,5 @@
     <string name="current_status">Estatus Actual</string>
     <string name="last_status">Estatus Pasado</string>
     <string name="next_status">Próximo Estatus</string>
+    <string name="request_successfully">Pedido realizado exitosamente.</string>
 </resources>

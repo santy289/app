@@ -217,5 +217,7 @@
 
     <!--WorkflowDetailFragment-->
     <!--StatusFragment-->
-    <string name="workflow_detail_status_fragment_title">Estatus</string>
+    <string name="workflow_detail_status_fragment_tab_title">Estatus</string>
+    <string name="workflow_detail_status_fragment_title">Estatus del Workflow</string>
+
 </resources>

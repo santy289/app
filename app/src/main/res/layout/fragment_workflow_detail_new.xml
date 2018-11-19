@@ -17,8 +17,6 @@
                 android:id="@+id/tv_workflow_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
-                android:text="@string/workflow_id"
                 android:textColor="@color/workflow_details_section_title"
                 android:textSize="16sp"
                 android:textStyle="bold"

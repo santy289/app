@@ -12,7 +12,8 @@
     <color name="transparent">#a1000000</color>
     <color name="transparentArrow">#d1d7e8</color>
     <color name="arrow">#8197cc</color>
-    <color name="workflow_details_section_title">#273d51</color>
+    <color name="workflow_details_section_title">#273D51</color>
+    <color name="workflow_details_section_title_bar">#DBE3F2</color>
 
     <color name="text_blue">#3063A5</color>
 
@@ -28,6 +29,7 @@
     <color name="grey_bg">#f6f6f6</color>
 
     <color name="dark_gray">#808080</color>
+    <color name="low_gray">#CCCCCC</color>
 
     <color name="text_orange">#d2b04f</color>
     <color name="text_yellow">#bdc372</color>

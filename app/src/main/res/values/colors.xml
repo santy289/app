@@ -12,6 +12,7 @@
     <color name="transparent">#a1000000</color>
     <color name="transparentArrow">#d1d7e8</color>
     <color name="arrow">#8197cc</color>
+    <color name="workflow_details_section_title">#273d51</color>
 
     <color name="text_blue">#3063A5</color>
 

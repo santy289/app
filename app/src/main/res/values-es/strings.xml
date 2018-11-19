@@ -222,5 +222,6 @@
     <string name="workflow_detail_status_fragment_next_step">Elija el Siguiente Paso</string>
     <string name="workflow_detail_status_fragment_next_step_approvers">Aprobadores del siguiente paso:</string>
     <string name="workflow_detail_status_fragment_next_step_mass_approval">Aprobación masiva</string>
+    <string name="workflow_detail_status_fragment_all_people_involved">Personas Involucradas en los Estatus</string>
 
 </resources>

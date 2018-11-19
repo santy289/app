@@ -214,4 +214,8 @@
     <string name="last_status">Estatus Pasado</string>
     <string name="next_status">Próximo Estatus</string>
     <string name="request_successfully">Pedido realizado exitosamente.</string>
+
+    <!--WorkflowDetailFragment-->
+    <!--StatusFragment-->
+    <string name="workflow_detail_status_fragment_title">Estatus</string>
 </resources>

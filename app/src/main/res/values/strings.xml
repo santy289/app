@@ -216,4 +216,8 @@
     <string name="last_status">Last Status</string>
     <string name="next_status">Next Status</string>
     <string name="request_successfully">Request done successfully.</string>
+
+    <!--WorkflowDetailFragment-->
+    <!--StatusFragment-->
+    <string name="workflow_detail_status_fragment_title">Status</string>
 </resources>

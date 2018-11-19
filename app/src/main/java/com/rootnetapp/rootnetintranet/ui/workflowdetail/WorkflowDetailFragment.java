@@ -1,19 +1,10 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 
-import androidx.annotation.IdRes;
-import androidx.annotation.StringRes;
-import androidx.annotation.UiThread;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
-import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.view.LayoutInflater;
@@ -27,7 +18,7 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
-import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailBinding;
+import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailNewBinding;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
@@ -45,6 +36,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.Information;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.InformationAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.PeopleInvolvedAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.StepsAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.WorkflowDetailViewPagerAdapter;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,6 +45,16 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import androidx.annotation.StringRes;
+import androidx.annotation.UiThread;
+import androidx.core.content.ContextCompat;
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.viewpager.widget.ViewPager;
+
 import static android.app.Activity.RESULT_OK;
 
 public class WorkflowDetailFragment extends Fragment {
@@ -60,7 +62,7 @@ public class WorkflowDetailFragment extends Fragment {
     @Inject
     WorkflowDetailViewModelFactory workflowViewModelFactory;
     WorkflowDetailViewModel workflowDetailViewModel;
-    private FragmentWorkflowDetailBinding binding;
+    private FragmentWorkflowDetailNewBinding binding;
     private MainActivityInterface mainActivityInterface;
     private WorkflowListItem item;
     private CommentsAdapter commentsAdapter = null;
@@ -97,7 +99,7 @@ public class WorkflowDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater,
-                R.layout.fragment_workflow_detail, container, false);
+                R.layout.fragment_workflow_detail_new, container, false);
         View view = binding.getRoot();
         ((RootnetApp) getActivity().getApplication()).getAppComponent().inject(this);
         workflowDetailViewModel = ViewModelProviders
@@ -106,12 +108,17 @@ public class WorkflowDetailFragment extends Fragment {
 
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         token = "Bearer "+ prefs.getString("token","");
-        binding.tvWorkflowproject.setText(item.getTitle());
-        binding.detailWorkflowId.setText(item.getWorkflowTypeKey());
+//        binding.tvWorkflowproject.setText(item.getTitle()); //todo check
+        binding.tvWorkflowId.setText(item.getWorkflowTypeName()); //todo verify text
+        binding.tvWorkflowName.setText(item.getTitle());
 
+        //todo move the recyclers to each pager fragment
         binding.recDocuments.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recComments.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        setupViewPager();
+
+        //todo remove click listeners (now the functions are in each view pager fragment)
         setClickListeners();
         files = new ArrayList<>();
         subscribe();
@@ -142,6 +149,14 @@ public class WorkflowDetailFragment extends Fragment {
                 break;
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    /**
+     * Initializes and set the {@link WorkflowDetailViewPagerAdapter} for the {@link ViewPager}.
+     */
+    private void setupViewPager() {
+        WorkflowDetailViewPagerAdapter adapter = new WorkflowDetailViewPagerAdapter(getContext(), item, getChildFragmentManager());
+        binding.viewPager.setAdapter(adapter);
     }
 
     private void setClickListeners() {
@@ -682,7 +697,8 @@ public class WorkflowDetailFragment extends Fragment {
 
     @UiThread
     private void updateHeaderCommentCounter(String count) {
-        binding.detailMessageText.setText(count);
+        //todo check
+//        binding.detailMessageText.setText(count);
     }
 
 }

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/lyt_status_summary"
+        android:id="@+id/lyt_status_next_step"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/border_bg_workflow_detail"

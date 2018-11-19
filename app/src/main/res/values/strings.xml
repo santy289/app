@@ -219,6 +219,9 @@
 
     <!--WorkflowDetailFragment-->
     <!--StatusFragment-->
-    <string name="workflow_detail_status_fragment_tab_title">Status</string>
-    <string name="workflow_detail_status_fragment_title">Workflow Status</string>
+    <string name="workflow_detail_status_fragment_title">Status</string>
+    <string name="workflow_detail_status_fragment_status_summary">Workflow Status</string>
+    <string name="workflow_detail_status_fragment_next_step">Choose Next Step</string>
+    <string name="workflow_detail_status_fragment_next_step_approvers">Next step approvers:</string>
+    <string name="workflow_detail_status_fragment_next_step_mass_approval">Mass approval</string>
 </resources>

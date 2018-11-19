@@ -70,7 +70,7 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
      */
     @Override
     public CharSequence getPageTitle(int position) {
-        return mContext.getString(R.string.workflow_detail_status_fragment_tab_title);
+        return mContext.getString(R.string.workflow_detail_status_fragment_title);
 
         //todo set title for each tab
         /*// Generate title based on item position

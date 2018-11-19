@@ -217,7 +217,10 @@
 
     <!--WorkflowDetailFragment-->
     <!--StatusFragment-->
-    <string name="workflow_detail_status_fragment_tab_title">Estatus</string>
-    <string name="workflow_detail_status_fragment_title">Estatus del Workflow</string>
+    <string name="workflow_detail_status_fragment_title">Estatus</string>
+    <string name="workflow_detail_status_fragment_status_summary">Estatus del Workflow</string>
+    <string name="workflow_detail_status_fragment_next_step">Elija el Siguiente Paso</string>
+    <string name="workflow_detail_status_fragment_next_step_approvers">Aprobadores del siguiente paso:</string>
+    <string name="workflow_detail_status_fragment_next_step_mass_approval">Aprobación masiva</string>
 
 </resources>

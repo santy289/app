@@ -6,19 +6,30 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailStatusBinding;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.ApproversAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.PeopleInvolvedAdapter;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
 import androidx.annotation.UiThread;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 public class StatusFragment extends Fragment {
 
@@ -26,7 +37,7 @@ public class StatusFragment extends Fragment {
     StatusViewModelFactory statusViewModelFactory;
     StatusViewModel statusViewModel;
     private FragmentWorkflowDetailStatusBinding mBinding;
-    private WorkflowListItem mWorkflowItem;
+    private WorkflowListItem mWorkflowListItem;
     private String mToken;
 
     // Used for updating Status info.
@@ -40,7 +51,7 @@ public class StatusFragment extends Fragment {
 
     public static StatusFragment newInstance(WorkflowListItem item) {
         StatusFragment fragment = new StatusFragment();
-        fragment.mWorkflowItem = item;
+        fragment.mWorkflowListItem = item;
         return fragment;
     }
 
@@ -61,14 +72,32 @@ public class StatusFragment extends Fragment {
                 .of(this, statusViewModelFactory)
                 .get(StatusViewModel.class);
 
-        SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        mToken = "Bearer "+ prefs.getString("token","");
+        SharedPreferences prefs = getContext()
+                .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        mToken = "Bearer " + prefs.getString("token", "");
 
-        //todo add methods and implementations
+        subscribe();
+        statusViewModel.initDetails(mToken, mWorkflowListItem);
 
         return view;
     }
 
+    private void subscribe() {
+        final Observer<Integer> errorObserver = ((Integer data) -> {
+            showLoading(false);
+            if (null != data) {
+                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
+            }
+        });
+
+        statusViewModel.getObservableError().observe(this, errorObserver);
+
+        statusViewModel.showLoading.observe(this, this::showLoading);
+        statusViewModel.updateStatusUi.observe(this, this::updateStatusDetails);
+        statusViewModel.updateCurrentApproversList.observe(this, this::updateCurrentApproversList);
+        statusViewModel.updateProfilesInvolved.observe(this, this::updateProfilesInvolved);
+        statusViewModel.updateApproveSpinner.observe(this, this::updateApproveSpinner);
+    }
 
     @UiThread
     private void showLoading(boolean show) {
@@ -77,5 +106,67 @@ public class StatusFragment extends Fragment {
         } else {
             Utils.hideLoading();
         }
+    }
+
+    @UiThread
+    private void updateStatusDetails(String[] statusNames) {
+        mBinding.includeStatusSummary.tvLastStatus.setText(statusNames[INDEX_LAST_STATUS]);
+        mBinding.includeStatusSummary.tvCurrentStatus.setText(statusNames[INDEX_CURRENT_STATUS]);
+        mBinding.includeStatusSummary.tvNextStatuses.setText(statusNames[INDEX_NEXT_STATUS]);
+    }
+
+    private int mApproveSpinnerItemSelection;
+    @UiThread
+    private void updateApproveSpinner(List<String> nextStatuses) {
+        Context context = getContext();
+        if (context == null) {
+            return;
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                context,
+                android.R.layout.simple_selectable_list_item,
+                nextStatuses
+        );
+        mBinding.includeNextStep.spSteps.setAdapter(adapter);
+
+        mBinding.includeNextStep.spSteps.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mApproveSpinnerItemSelection = position;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
+    /**
+     * Updates the profile involve section. Profiles will include the ones coming from the workflow
+     * type configuration, and also profiles coming from specific status configuration that are
+     * coming from the current workflow configurations.
+     *
+     * @param currentApprovers List of current approvers to be displayed.
+     */
+    @UiThread
+    private void updateCurrentApproversList(List<Approver> currentApprovers) {
+        mBinding.includeNextStep.rvApprovers
+                .setLayoutManager(new LinearLayoutManager(getContext()));
+        mBinding.includeNextStep.rvApprovers.setAdapter(new ApproversAdapter(currentApprovers));
+    }
+
+    /**
+     * Updates the profiles involved.
+     *
+     * @param profiles List of profiles to display in People Involved recyclerView.
+     */
+    @UiThread
+    private void updateProfilesInvolved(List<ProfileInvolved> profiles) {
+        mBinding.includeAllPeopleInvolved.rvAllPeopleInvolved
+                .setLayoutManager(new LinearLayoutManager(getContext()));
+        mBinding.includeAllPeopleInvolved.rvAllPeopleInvolved
+                .setAdapter(new PeopleInvolvedAdapter(profiles));
     }
 }

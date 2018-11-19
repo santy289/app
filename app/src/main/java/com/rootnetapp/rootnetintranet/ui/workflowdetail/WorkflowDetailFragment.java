@@ -116,6 +116,8 @@ public class WorkflowDetailFragment extends Fragment {
         binding.recDocuments.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recComments.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        //todo refactor this fragment and the helper classes (remove every method that is only used by the pager fragments)
+
         setupViewPager();
 
         //todo remove click listeners (now the functions are in each view pager fragment)

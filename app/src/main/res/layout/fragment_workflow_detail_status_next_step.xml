@@ -11,7 +11,7 @@
         android:padding="10dp">
 
         <Spinner
-            android:id="@+id/spinner"
+            android:id="@+id/sp_steps"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -31,11 +31,11 @@
             app:backgroundTint="@color/green"
             app:icon="@drawable/ic_check_accent_24dp"
             app:iconPadding="0dp"
-            app:layout_constraintBottom_toBottomOf="@+id/spinner"
+            app:layout_constraintBottom_toBottomOf="@+id/sp_steps"
             app:layout_constraintEnd_toStartOf="@+id/btn_reject"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/spinner"
-            app:layout_constraintTop_toTopOf="@+id/spinner" />
+            app:layout_constraintStart_toEndOf="@+id/sp_steps"
+            app:layout_constraintTop_toTopOf="@+id/sp_steps" />
 
         <Button
             android:id="@+id/btn_reject"
@@ -46,21 +46,21 @@
             app:backgroundTint="@color/red"
             app:icon="@drawable/ic_close_black_24dp"
             app:iconPadding="0dp"
-            app:layout_constraintBottom_toBottomOf="@+id/spinner"
+            app:layout_constraintBottom_toBottomOf="@+id/sp_steps"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/btn_approve"
-            app:layout_constraintTop_toTopOf="@+id/spinner" />
+            app:layout_constraintTop_toTopOf="@+id/sp_steps" />
 
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/barrier"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:barrierDirection="bottom"
-            app:constraint_referenced_ids="spinner,btn_approve,btn_reject"
+            app:constraint_referenced_ids="sp_steps,btn_approve,btn_reject"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/spinner" />
+            app:layout_constraintTop_toBottomOf="@id/sp_steps" />
 
         <TextView
             android:id="@+id/tv_title_approvers"
@@ -75,7 +75,7 @@
             app:layout_constraintTop_toTopOf="@+id/barrier" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view"
+            android:id="@+id/rv_approvers"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -91,11 +91,11 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
-            android:textColor="@color/text_blue"
-            android:textAllCaps="false"
             android:text="@string/workflow_detail_status_fragment_next_step_mass_approval"
+            android:textAllCaps="false"
+            android:textColor="@color/text_blue"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/recycler_view" />
+            app:layout_constraintTop_toBottomOf="@+id/rv_approvers" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

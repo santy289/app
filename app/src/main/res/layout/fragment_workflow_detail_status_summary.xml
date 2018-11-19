@@ -16,11 +16,11 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
+            android:text="@string/workflow_detail_status_fragment_status_summary_last_status"
             android:textColor="@color/black"
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="Last Status" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tv_last_status"
@@ -40,10 +40,10 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:textColor="@color/black"
+            android:text="@string/workflow_detail_status_fragment_status_summary_current_status"
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="@+id/tv_last_status"
-            app:layout_constraintTop_toBottomOf="@+id/tv_last_status"
-            tools:text="Current Status" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_last_status" />
 
         <View
             android:id="@+id/view_circle"
@@ -71,11 +71,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:text="@string/workflow_detail_status_fragment_status_summary_next_status"
             android:textColor="@color/black"
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="@+id/tv_title_last_status"
-            app:layout_constraintTop_toBottomOf="@+id/tv_current_status"
-            tools:text="Next Statuses" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_current_status" />
 
         <TextView
             android:id="@+id/tv_next_statuses"

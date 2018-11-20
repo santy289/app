@@ -16,41 +16,38 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:maxWidth="100dp"
-            app:layout_constraintEnd_toStartOf="@+id/btn_approve"
-            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/btn_approve"
-            android:layout_width="60dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:minHeight="40dp"
-            app:backgroundTint="@color/green"
-            app:icon="@drawable/ic_check_accent_24dp"
-            app:iconPadding="0dp"
-            app:layout_constraintBottom_toBottomOf="@+id/sp_steps"
-            app:layout_constraintEnd_toStartOf="@+id/btn_reject"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/sp_steps"
-            app:layout_constraintTop_toTopOf="@+id/sp_steps" />
-
-        <Button
             android:id="@+id/btn_reject"
-            android:layout_width="60dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:minHeight="40dp"
+            android:layout_marginEnd="8dp"
             app:backgroundTint="@color/red"
             app:icon="@drawable/ic_close_black_24dp"
             app:iconPadding="0dp"
-            app:layout_constraintBottom_toBottomOf="@+id/sp_steps"
+            android:text="@string/workflow_detail_status_fragment_reject"
+            app:layout_constraintEnd_toStartOf="@+id/btn_approve"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/sp_steps" />
+
+        <Button
+            android:id="@+id/btn_approve"
+            android:layout_width="0dp"
+
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            app:backgroundTint="@color/green"
+            android:text="@string/workflow_detail_status_fragment_approve"
+            app:icon="@drawable/ic_check_accent_24dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/btn_approve"
-            app:layout_constraintTop_toTopOf="@+id/sp_steps" />
+            app:layout_constraintStart_toEndOf="@id/btn_reject"
+            app:layout_constraintTop_toTopOf="@id/btn_reject" />
+
 
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/barrier"
@@ -68,8 +65,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:textColor="@color/black"
             android:text="@string/workflow_detail_status_fragment_next_step_approvers"
+            android:textColor="@color/black"
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/barrier" />
@@ -89,7 +86,6 @@
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:text="@string/workflow_detail_status_fragment_next_step_mass_approval"
             android:textAllCaps="false"

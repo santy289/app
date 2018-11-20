@@ -105,8 +105,8 @@ public class StatusViewModel extends ViewModel {
     }
 
     /**
-     * This subscribe function will make map transformations to observe LiveData objects in
-     * the repository. Here we will handle all incoming data from the repo.
+     * This subscribe function will make map transformations to observe LiveData objects in the
+     * repository. Here we will handle all incoming data from the repo.
      */
     private void subscribe() {
         // Transformation for observing approval and rejection of workflows.
@@ -115,6 +115,7 @@ public class StatusViewModel extends ViewModel {
                 approvalResponse -> {
                     // transform WorkflowApproveRejectResponse to String[]
                     //WorkflowDb incomingWorkflow = approvalResponse.getWorkflow();
+                    //todo verify why this is not called after WS response
                     mWorkflow = approvalResponse.getWorkflow();
                     String[] statuses = buildArrayForStatusUpdate(mWorkflow);
 
@@ -143,10 +144,9 @@ public class StatusViewModel extends ViewModel {
      * It generates an array of strings that hold values for last, current, next status labels. This
      * array is eventually sent to the UI for updating the respective Views.
      *
-     * @param incomingWorkflow
-     *  WorkflowDB object that holds info that we need.
-     * @return
-     *  returns a String[] array with all the labels that we need to update the UI.
+     * @param incomingWorkflow WorkflowDB object that holds info that we need.
+     *
+     * @return returns a String[] array with all the labels that we need to update the UI.
      */
     private String[] buildArrayForStatusUpdate(WorkflowDb incomingWorkflow) {
         String[] statuses = new String[3];
@@ -155,7 +155,8 @@ public class StatusViewModel extends ViewModel {
             currentStatus = "";
         }
 
-        statuses[INDEX_LAST_STATUS] = getLastStatusLabel(incomingWorkflow, currentWorkflowType.getStatus());
+        statuses[INDEX_LAST_STATUS] = getLastStatusLabel(incomingWorkflow,
+                currentWorkflowType.getStatus());
         statuses[INDEX_CURRENT_STATUS] = currentStatus;
         statuses[INDEX_NEXT_STATUS] = getNextStatuses(incomingWorkflow, currentWorkflowType);
         return statuses;
@@ -165,12 +166,10 @@ public class StatusViewModel extends ViewModel {
      * It calls getNextStatusLabel to get a string. This is a setup function to prepare and validate
      * all the variables before we call getNextStatusLabel().
      *
-     * @param workflow
-     *  WorkflowDb object that we need to check and get status ids from.
-     * @param workflowTypeDb
-     *  WorkflowTypeDb object to validate and get status ids from.
-     * @return
-     *  Returns a label to use to update the Next Status view on the UI.
+     * @param workflow       WorkflowDb object that we need to check and get status ids from.
+     * @param workflowTypeDb WorkflowTypeDb object to validate and get status ids from.
+     *
+     * @return Returns a label to use to update the Next Status view on the UI.
      */
     private String getNextStatuses(WorkflowDb workflow, WorkflowTypeDb workflowTypeDb) {
         if (workflowTypeDb == null || workflow == null) {
@@ -186,12 +185,11 @@ public class StatusViewModel extends ViewModel {
      * Get the last status label from by checking all statuses in AllStatuses list and comparing it
      * to the current status in workflow to get any related statuses.
      *
-     * @param workflow
-     *  WorkflowDb object that has the current status.
-     * @param allStatuses
-     *  List with all the statuses to check and find related Status to the current status.
-     * @return
-     *  Returns the last status label to use on the UI.
+     * @param workflow    WorkflowDb object that has the current status.
+     * @param allStatuses List with all the statuses to check and find related Status to the current
+     *                    status.
+     *
+     * @return Returns the last status label to use on the UI.
      */
     private String getLastStatusLabel(@NonNull WorkflowDb workflow, List<Status> allStatuses) {
         if (allStatuses == null || allStatuses.size() < 1) {
@@ -253,10 +251,9 @@ public class StatusViewModel extends ViewModel {
 
     /**
      * Calls the repository for obtaining a new Workflow Type by a type id.
-     * @param auth
-     *  Access token to use for endpoint request.
-     * @param typeId
-     *  Id that will be passed on to the endpoint.
+     *
+     * @param auth   Access token to use for endpoint request.
+     * @param typeId Id that will be passed on to the endpoint.
      */
     private void getWorkflowType(String auth, int typeId) {
         Disposable disposable = mRepository
@@ -280,6 +277,7 @@ public class StatusViewModel extends ViewModel {
      * Finds the a Status from the Status List in the current WorkflowType object.
      *
      * @param statusId Status id to find.
+     *
      * @return Returns a Status object or null if it doesn't find anything.
      */
     private Status findStatusInListBy(int statusId) {
@@ -301,25 +299,20 @@ public class StatusViewModel extends ViewModel {
 
     /**
      * Calls /approve endpoint and does a Post request to either approve or reject a workflow.
-     * @param viewId
      */
-    protected void handleApproveRejectAction(int viewId, int selectedItemIndex) {
+    private void handleApproveOrRejectAction(int selectedItemIndex, boolean approve) {
         showLoading.setValue(true);
         List<Integer> nextStatusIds = mWorkflow.getCurrentStatusRelations();
         int nextStatusId = nextStatusIds.get(selectedItemIndex);
-        boolean approve;
-        switch (viewId) {
-            case R.id.btn_approve:
-                approve = true;
-                break;
-            case R.id.btn_reject:
-                approve = false;
-                break;
-            default:
-                Log.d(TAG, "handleApproveRejectAction: Action unknown, skipping network request.");
-                return;
-        }
         mRepository.approveWorkflow(mToken, mWorkflow.getId(), approve, nextStatusId);
+    }
+
+    protected void handleApproveAction(int selectedItemIndex) {
+        handleApproveOrRejectAction(selectedItemIndex, true);
+    }
+
+    protected void handleRejectAction(int selectedItemIndex) {
+        handleApproveOrRejectAction(selectedItemIndex, false);
     }
 
     private WorkflowTypeDb currentWorkflowType;
@@ -348,7 +341,6 @@ public class StatusViewModel extends ViewModel {
         getWorkflowType(mToken, mWorkflowListItem.getWorkflowTypeId());
         updateUIWithWorkflow(mWorkflow);
     }
-
 
     private void updateUIWithWorkflow(WorkflowDb workflow) {
         setWorkflowIsOpen.setValue(workflow.isOpen());
@@ -384,14 +376,14 @@ public class StatusViewModel extends ViewModel {
     }
 
     /**
-     * Updates UI section for current approvers. If this list is empty it will hide its recycler view.
+     * Updates UI section for current approvers. If this list is empty it will hide its recycler
+     * view.
      *
-     * @param typeConfigurationApprovers
-     *  List of approvers.
-     * @param currentSpecificApprovers
-     *  List of current approvers.
+     * @param typeConfigurationApprovers List of approvers.
+     * @param currentSpecificApprovers   List of current approvers.
      */
-    private void updateCurrentApproverUi(List<Approver> typeConfigurationApprovers, SpecificApprovers currentSpecificApprovers) {
+    private void updateCurrentApproverUi(List<Approver> typeConfigurationApprovers,
+                                         SpecificApprovers currentSpecificApprovers) {
         List<Approver> result = new ArrayList<>();
 
         if (typeConfigurationApprovers.size() > 0) {
@@ -405,7 +397,9 @@ public class StatusViewModel extends ViewModel {
         generateApproverListForProfileIds(globalList, statusSpecificList, result);
     }
 
-    private void generateApproverListForProfileIds(List<Integer> globalList,  List<StatusSpecific> statusSpecificList, List<Approver> approverList) {
+    private void generateApproverListForProfileIds(List<Integer> globalList,
+                                                   List<StatusSpecific> statusSpecificList,
+                                                   List<Approver> approverList) {
         if (globalList == null || globalList.size() < 1) {
             generateApproverListForStatusSpecificIds(statusSpecificList, approverList);
             return;
@@ -426,10 +420,12 @@ public class StatusViewModel extends ViewModel {
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(approverListResult -> {
-                    generateApproverListForStatusSpecificIds(statusSpecificList, approverListResult);
+                    generateApproverListForStatusSpecificIds(statusSpecificList,
+                            approverListResult);
                 }, throwable -> {
                     generateApproverListForStatusSpecificIds(statusSpecificList, approverList);
-                    Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable.getMessage());
+                    Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable
+                            .getMessage());
                 });
 
         mDisposables.add(disposable);
@@ -444,7 +440,8 @@ public class StatusViewModel extends ViewModel {
         return approver;
     }
 
-    private void generateApproverListForStatusSpecificIds(List<StatusSpecific> statusSpecificList, List<Approver> approverList) {
+    private void generateApproverListForStatusSpecificIds(List<StatusSpecific> statusSpecificList,
+                                                          List<Approver> approverList) {
         if (statusSpecificList == null || statusSpecificList.size() < 1) {
             if (approverList.size() < 1) {
                 hideApproverListOnEmptyData.setValue(true);
@@ -480,17 +477,18 @@ public class StatusViewModel extends ViewModel {
                     } else {
                         updateCurrentApproversList.setValue(approverList);
                     }
-                    Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable.getMessage());
+                    Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable
+                            .getMessage());
                 });
 
         mDisposables.add(disposable);
     }
 
     /**
-     * Update the spinner in the Next Approvers section. This spinner is used to approve or reject
-     * a status. It may send an empty list or all the necessary names for the spinner.
+     * Update the spinner in the Next Approvers section. This spinner is used to approve or reject a
+     * status. It may send an empty list or all the necessary names for the spinner.
      *
-     * @param workflow Current workflow.
+     * @param workflow      Current workflow.
      * @param nextStatusIds List of ids specified by a Workflow in order to look in a WorkflowType.
      */
     private void updateApproveSpinnerUi(WorkflowDb workflow, List<Integer> nextStatusIds) {
@@ -538,7 +536,7 @@ public class StatusViewModel extends ViewModel {
                     continue;
                 }
                 approverHistory.avatarPicture = profileInvolved.picture;
-                return  approverHistoryList;
+                return approverHistoryList;
             }
             return approverHistoryList;
         }).subscribeOn(Schedulers.newThread())
@@ -547,12 +545,12 @@ public class StatusViewModel extends ViewModel {
                     updateApprovalHistoryList.setValue(approverHistories);
                 }, throwable -> {
                     hideHistoryApprovalList.setValue(true);
-                    Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable.getMessage());
+                    Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable
+                            .getMessage());
                 });
 
         mDisposables.add(disposable);
     }
-
 
     public static final int GLOBAL_APPROVER_TYPE = 0;
     public static final int STATUS_SPECIFIC_APPROVER_TYPE = 1;
@@ -592,7 +590,8 @@ public class StatusViewModel extends ViewModel {
                     } else if (approverType == STATUS_SPECIFIC_APPROVER_TYPE) {
                         hideSpecificApprovers.setValue(true);
                     }
-                    Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable.getMessage());
+                    Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable
+                            .getMessage());
                 });
 
         mDisposables.add(disposable);
@@ -600,8 +599,8 @@ public class StatusViewModel extends ViewModel {
 
     /**
      * Given some profile ids it will look in the profiles tables in the local database for matching
-     * Profiles, and return a ProfileInvolved object with limited profile information for the UI.
-     * It will look for those profiles in the background thread.
+     * Profiles, and return a ProfileInvolved object with limited profile information for the UI. It
+     * will look for those profiles in the background thread.
      *
      * @param profilesId List of profiles to look in the database.
      */
@@ -625,7 +624,8 @@ public class StatusViewModel extends ViewModel {
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::setProfilesInvovledOnUi, throwable -> {
-                    Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable.getMessage());
+                    Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable
+                            .getMessage());
                 });
         mDisposables.add(disposable);
     }
@@ -642,7 +642,7 @@ public class StatusViewModel extends ViewModel {
         }
         updateProfilesInvolved.setValue(profiles);
     }
-    
+
     private void onFailure(Throwable throwable) {
         showLoading.setValue(false);
         mErrorLiveData.setValue(R.string.failure_connect);

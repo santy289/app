@@ -76,7 +76,9 @@ public class StatusFragment extends Fragment {
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         mToken = "Bearer " + prefs.getString("token", "");
 
+        setOnClickListeners();
         subscribe();
+
         statusViewModel.initDetails(mToken, mWorkflowListItem);
 
         return view;
@@ -97,8 +99,29 @@ public class StatusFragment extends Fragment {
         statusViewModel.updateCurrentApproversList.observe(this, this::updateCurrentApproversList);
         statusViewModel.updateProfilesInvolved.observe(this, this::updateProfilesInvolved);
         statusViewModel.updateApproveSpinner.observe(this, this::updateApproveSpinner);
-        statusViewModel.hideApproverListOnEmptyData.observe(this, this::hideApproverListOnEmptyData);
+        statusViewModel.hideApproverListOnEmptyData
+                .observe(this, this::hideApproverListOnEmptyData);
         statusViewModel.hideProfilesInvolvedList.observe(this, this::hideProfilesInvolvedList);
+    }
+
+    private void setOnClickListeners() {
+        mBinding.includeNextStep.btnApprove.setOnClickListener(v -> approveAction());
+        mBinding.includeNextStep.btnReject.setOnClickListener(v -> rejectAction());
+        //todo verify action for "Mass Approval"
+    }
+
+    /**
+     * Click listener function that listens to clicks in the approve button.
+     */
+    private void approveAction() {
+        statusViewModel.handleApproveAction(mApproveSpinnerItemSelection);
+    }
+
+    /**
+     * Click listener function that listens to clicks in the reject button.
+     */
+    private void rejectAction() {
+        statusViewModel.handleRejectAction(mApproveSpinnerItemSelection);
     }
 
     @UiThread
@@ -118,6 +141,7 @@ public class StatusFragment extends Fragment {
     }
 
     private int mApproveSpinnerItemSelection;
+
     @UiThread
     private void updateApproveSpinner(List<String> nextStatuses) {
         Context context = getContext();
@@ -132,17 +156,19 @@ public class StatusFragment extends Fragment {
         );
         mBinding.includeNextStep.spSteps.setAdapter(adapter);
 
-        mBinding.includeNextStep.spSteps.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mApproveSpinnerItemSelection = position;
-            }
+        mBinding.includeNextStep.spSteps
+                .setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position,
+                                               long id) {
+                        mApproveSpinnerItemSelection = position;
+                    }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
 
-            }
-        });
+                    }
+                });
     }
 
     /**

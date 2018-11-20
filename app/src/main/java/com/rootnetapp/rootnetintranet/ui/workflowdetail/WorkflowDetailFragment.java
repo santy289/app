@@ -302,11 +302,11 @@ public class WorkflowDetailFragment extends Fragment {
     @UiThread
     private void setWorkflowIsOpen(boolean open) {
         if (open) {
-            binding.txtOpenClosed.setText(getString(R.string.open));
-            binding.txtOpenClosed.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.green)));
+            binding.tvOpenClosed.setText(getString(R.string.open));
+            binding.tvOpenClosed.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.green)));
         } else {
-            binding.txtOpenClosed.setText(getString(R.string.closed));
-            binding.txtOpenClosed.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.red)));
+            binding.tvOpenClosed.setText(getString(R.string.closed));
+            binding.tvOpenClosed.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.red)));
 
         }
     }

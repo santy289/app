@@ -15,14 +15,39 @@
 
             <TextView
                 android:id="@+id/tv_workflow_id"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:textColor="@color/workflow_details_section_title"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="SEM002" />
+                app:layout_constraintEnd_toStartOf="@+id/tv_open_closed"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_open_closed"
+                tools:text="SEM-002" />
+
+            <TextView
+                android:id="@+id/tv_open_closed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/round_corner"
+                android:paddingStart="10dp"
+                android:paddingTop="5dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="5dp"
+                android:text="@string/open"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:backgroundTint="@color/green" />
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="tv_workflow_id,tv_open_closed"/>
 
             <TextView
                 android:id="@+id/tv_workflow_name"
@@ -32,8 +57,8 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/tv_workflow_id"
-                app:layout_constraintTop_toBottomOf="@+id/tv_workflow_id"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier_title"
                 tools:text="Ejecución de proyecto de software" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

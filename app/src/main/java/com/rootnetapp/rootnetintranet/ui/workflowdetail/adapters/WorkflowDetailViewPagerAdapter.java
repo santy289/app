@@ -8,6 +8,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusFragment;
 
@@ -42,7 +43,6 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
     @Override
     public Fragment getItem(int position) {
 
-
         switch (position){
             case 0:
                 return StatusFragment.newInstance(mWorkflowItem);
@@ -52,9 +52,10 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
                 return ApprovalHistoryFragment.newInstance(mWorkflowItem);
             case 3:
                 return CommentsFragment.newInstance(mWorkflowItem);
+            case 4:
+                return FilesFragment.newInstance(mWorkflowItem);
             default:
-//                return null; //todo set null
-                return StatusFragment.newInstance(mWorkflowItem);
+                return null;
         }
     }
 

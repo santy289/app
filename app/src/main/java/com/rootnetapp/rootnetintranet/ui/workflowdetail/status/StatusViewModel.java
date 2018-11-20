@@ -344,7 +344,7 @@ public class StatusViewModel extends ViewModel {
 
     private void updateUIWithWorkflow(WorkflowDb workflow) {
         setWorkflowIsOpen.setValue(workflow.isOpen());
-//        updateWorkflowStatusUi(workflow);
+//        updateWorkflowStatusUi(workflow); //todo check
         updateProfilesInvolvedUi(workflow.getProfilesInvolved());
 
         SpecificApprovers approvers = workflow.getSpecificApprovers();

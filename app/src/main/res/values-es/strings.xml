@@ -251,5 +251,7 @@
     <string name="workflow_detail_comments_fragment_button_comment">Comentar</string>
     <string name="workflow_detail_comments_fragment_no_comments">No hay comentarios para mostrar</string>
     <!--FilesFragment-->
-    <string name="workflow_detail_files_fragment_title">Documentos</string>
+    <string name="workflow_detail_files_fragment_title">@string/workflow_detail_files_fragment_documents</string>
+    <string name="workflow_detail_files_fragment_documents">Documentos</string>
+    <string name="workflow_detail_files_fragment_no_files">Ningún archivo a mostrar</string>
 </resources>

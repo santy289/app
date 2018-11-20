@@ -19,7 +19,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> {
 
     public List<Comment> comments;
 
-    private static final String format = "MMM d, y - h:m a";
+    private static final String format = "MMM d, y - hh:mm a";
 
     public CommentsAdapter(List<Comment> comments) {
         this.comments = comments;
@@ -36,7 +36,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> {
 
     @Override
     public void onBindViewHolder(@NonNull CommentsViewholder holder, int i) {
-        //todo new design
         Comment item = comments.get(i);
         String path = Utils.imgDomain + item.getUserInfo().getPicture();
         Context context = holder.itemView.getContext();

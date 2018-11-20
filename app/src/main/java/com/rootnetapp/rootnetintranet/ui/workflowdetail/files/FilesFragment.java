@@ -1,8 +1,10 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.files;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +14,15 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailFilesBinding;
+import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
+import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.responses.file.DocumentsFile;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.DocumentsAdapter;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -27,7 +34,11 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import static android.app.Activity.RESULT_OK;
+
 public class FilesFragment extends Fragment {
+
+    private static final int FILE_SELECT_CODE = 555;
 
     @Inject
     FilesViewModelFactory filesViewModelFactory;
@@ -35,6 +46,9 @@ public class FilesFragment extends Fragment {
     private FragmentWorkflowDetailFilesBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
     private String mToken;
+
+    private CommentFile fileRequest = null;
+    private DocumentsAdapter mDocumentsAdapter = null;
 
     public FilesFragment() {
         // Required empty public constructor
@@ -67,10 +81,11 @@ public class FilesFragment extends Fragment {
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         mToken = "Bearer " + prefs.getString("token", "");
 
+        setOnClickListeners();
         subscribe();
         filesViewModel.initDetails(mToken, mWorkflowListItem);
 
-        //todo user actions
+        //todo download the files
 
         return view;
     }
@@ -83,12 +98,105 @@ public class FilesFragment extends Fragment {
             }
         });
 
+        final Observer<Boolean> attachObserver = ((Boolean data) -> {
+            showLoading(false);
+            if (data != null && data) {
+                filesViewModel.getFiles(mToken, mWorkflowListItem.getWorkflowId());
+            } else {
+                Toast.makeText(getContext(), "error", Toast.LENGTH_LONG).show();
+            }
+        });
+
         filesViewModel.getObservableError().observe(this, errorObserver);
+        filesViewModel.getObservableAttach().observe(this, attachObserver);
 
         filesViewModel.showLoading.observe(this, this::showLoading);
         filesViewModel.setDocumentsView.observe(this, this::setDocumentsView);
         filesViewModel.setTemplateTitleWith.observe(this, this::setTemplateTitleWith);
         filesViewModel.showTemplateDocumentsUi.observe(this, this::showTemplateDocumentsUi);
+    }
+
+    private void setOnClickListeners() {
+        mBinding.btnAttachment.setOnClickListener(v -> showFileChooser());
+        mBinding.btnUpload.setOnClickListener(v -> uploadFiles());
+    }
+
+    private void uploadFiles() {
+
+        if (fileRequest != null && mDocumentsAdapter != null) {
+            List<WorkflowPresetsRequest> request = new ArrayList<>();
+            List<Integer> presets = new ArrayList<>();
+            int i = 0;
+            for (Boolean isSelected : mDocumentsAdapter.isSelected) {
+                if (isSelected) {
+                    presets.add(mDocumentsAdapter.totalDocuments.get(i).getId());
+                }
+                i++;
+            }
+            if (presets.isEmpty()) {
+                Toast.makeText(getContext(), getString(R.string.select_preset),
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                request.add(new WorkflowPresetsRequest(mWorkflowListItem.getWorkflowId(), presets));
+                showLoading(true);
+                filesViewModel.attachFile(mToken, request, fileRequest); //todo does not upload
+            }
+        } else {
+            Toast.makeText(getContext(), getString(R.string.select_file),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @UiThread
+    private void showFileChooser() {
+
+        if (fileRequest == null) {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("*/*");
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            try {
+                startActivityForResult(
+                        Intent.createChooser(intent, "Select a File to Upload"),
+                        FILE_SELECT_CODE);
+            } catch (android.content.ActivityNotFoundException ex) {
+                // Potentially direct the user to the Market with a Dialog
+                Toast.makeText(getContext(), "Please install a File Manager.",
+                        Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            fileRequest = null;
+            setButtonAttachmentText(getString(R.string.attach));
+            setFileUploadedText(getString(R.string.uploaded_file));
+            mBinding.tvFileUploaded.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case FILE_SELECT_CODE:
+                if (resultCode == RESULT_OK) {
+                    try {
+                        File file = new File(data.getData().toString());
+                        byte[] bytes = Utils.fileToByte(file);
+                        String fileName = file.getName();
+
+                        mBinding.tvFileUploaded.setVisibility(View.VISIBLE);
+                        setFileUploadedText(mBinding.tvFileUploaded.getText() + " " + fileName);
+                        setButtonAttachmentText(getString(R.string.remove_file));
+
+                        String encodedFile = Base64.encodeToString(bytes, Base64.DEFAULT);
+                        String fileType = Utils.getMimeType(data.getData(), getContext());
+
+                        fileRequest = new CommentFile(encodedFile, fileType, fileName,
+                                (int) file.length());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @UiThread
@@ -106,7 +214,7 @@ public class FilesFragment extends Fragment {
             mBinding.rvFiles.setVisibility(View.VISIBLE);
             mBinding.btnAttachment.setVisibility(View.VISIBLE);
             mBinding.btnUpload.setVisibility(View.VISIBLE);
-//            mBinding.tvFileUploaded.setVisibility(View.VISIBLE); //todo only show when a file was uploaded
+//            mBinding.tvFileUploaded.setVisibility(View.VISIBLE); //only show when a file was attached
             mBinding.tvNoFiles.setVisibility(View.GONE);
         } else {
             mBinding.rvFiles.setVisibility(View.GONE);
@@ -124,12 +232,22 @@ public class FilesFragment extends Fragment {
     }
 
     @UiThread
+    private void setFileUploadedText(String text) {
+        mBinding.tvFileUploaded.setText(text);
+    }
+
+    @UiThread
+    private void setButtonAttachmentText(String text) {
+        mBinding.btnAttachment.setText(text);
+    }
+
+    @UiThread
     private void setDocumentsView(List<DocumentsFile> documents) {
-        DocumentsAdapter documentsAdapter = new DocumentsAdapter(
+        mDocumentsAdapter = new DocumentsAdapter(
                 filesViewModel.getPresets(),
                 documents
         );
         mBinding.rvFiles.setLayoutManager(new LinearLayoutManager(getContext()));
-        mBinding.rvFiles.setAdapter(documentsAdapter);
+        mBinding.rvFiles.setAdapter(mDocumentsAdapter);
     }
 }

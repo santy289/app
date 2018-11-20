@@ -3,6 +3,9 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.files;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
+import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
+import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
+import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
 import com.rootnetapp.rootnetintranet.models.responses.file.DocumentsFile;
 import com.rootnetapp.rootnetintranet.models.responses.file.FilesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.templates.Templates;
@@ -26,6 +29,7 @@ public class FilesViewModel extends ViewModel {
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
     private MutableLiveData<Integer> mErrorLiveData;
+    private MutableLiveData<Boolean> mAttachLiveData;
 
     protected MutableLiveData<Boolean> showLoading;
     protected MutableLiveData<Integer> showToastMessage;
@@ -74,9 +78,7 @@ public class FilesViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .getTemplate(auth, templateId)
                 .subscribe(this::onTemplateSuccess,
-                        throwable -> {
-                            onFailure(throwable);
-                        });
+                        this::onFailure);
 
         mDisposables.add(disposable);
     }
@@ -84,9 +86,7 @@ public class FilesViewModel extends ViewModel {
     protected void getFiles(String auth, int workflowId) {
         Disposable disposable = mRepository
                 .getFiles(auth, workflowId)
-                .subscribe(this::onFilesSuccess, throwable -> {
-                    onFailure(throwable);
-                });
+                .subscribe(this::onFilesSuccess, this::onFailure);
         mDisposables.add(disposable);
     }
 
@@ -108,6 +108,17 @@ public class FilesViewModel extends ViewModel {
         setDocumentsView.setValue(documents);
     }
 
+    public void attachFile(String auth, List<WorkflowPresetsRequest> request, CommentFile fileRequest) {
+        Disposable disposable = mRepository
+                .attachFile(auth, request, fileRequest)
+                .subscribe(this::onAttachSuccess, this::onFailure);
+        mDisposables.add(disposable);
+    }
+
+    private void onAttachSuccess(AttachResponse attachResponse) {
+        mAttachLiveData.setValue(true);
+    }
+
     /**
      * Calls the repository for obtaining a new Workflow Type by a type id.
      * @param auth
@@ -118,9 +129,7 @@ public class FilesViewModel extends ViewModel {
     private void getWorkflowType(String auth, int typeId) {
         Disposable disposable = mRepository
                 .getWorkflowType(auth, typeId)
-                .subscribe(this::onTypeSuccess, throwable -> {
-                    onFailure(throwable);
-                });
+                .subscribe(this::onTypeSuccess, this::onFailure);
         mDisposables.add(disposable);
     }
 
@@ -161,5 +170,12 @@ public class FilesViewModel extends ViewModel {
             showToastMessage = new MutableLiveData<>();
         }
         return showToastMessage;
+    }
+
+    public LiveData<Boolean> getObservableAttach() {
+        if (mAttachLiveData == null) {
+            mAttachLiveData = new MutableLiveData<>();
+        }
+        return mAttachLiveData;
     }
 }

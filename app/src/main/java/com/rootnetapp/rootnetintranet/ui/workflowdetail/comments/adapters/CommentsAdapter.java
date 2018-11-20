@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters;
+package com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;

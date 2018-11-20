@@ -17,8 +17,8 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailStatusBinding;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.ApproversAdapter;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.PeopleInvolvedAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters.ApproversAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters.PeopleInvolvedAdapter;
 
 import java.util.List;
 

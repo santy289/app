@@ -15,7 +15,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.Information;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.Information;
 
 import java.util.ArrayList;
 import java.util.List;

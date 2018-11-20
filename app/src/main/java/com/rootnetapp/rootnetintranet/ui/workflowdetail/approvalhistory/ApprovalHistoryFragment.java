@@ -14,7 +14,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailApprovalHistoryBinding;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.ApprovalHistoryAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.adapters.ApprovalHistoryAdapter;
 
 import java.util.List;
 

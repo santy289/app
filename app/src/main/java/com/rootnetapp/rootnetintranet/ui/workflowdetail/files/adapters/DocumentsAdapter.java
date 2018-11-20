@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters;
+package com.rootnetapp.rootnetintranet.ui.workflowdetail.files.adapters;
 
 import android.content.Context;
 import androidx.core.content.ContextCompat;

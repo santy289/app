@@ -14,9 +14,9 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailInformationBinding;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Step;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.Information;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.InformationAdapter;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.StepsAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.Information;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.InformationAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters.StepsAdapter;
 
 import java.util.List;
 

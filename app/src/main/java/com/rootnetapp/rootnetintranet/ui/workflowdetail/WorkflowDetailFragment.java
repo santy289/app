@@ -28,14 +28,14 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHis
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Step;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.ApprovalHistoryAdapter;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.ApproversAdapter;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.CommentsAdapter;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.DocumentsAdapter;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.Information;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.InformationAdapter;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.PeopleInvolvedAdapter;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.StepsAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.adapters.ApprovalHistoryAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters.ApproversAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.adapters.CommentsAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.adapters.DocumentsAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.Information;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.InformationAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters.PeopleInvolvedAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters.StepsAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.WorkflowDetailViewPagerAdapter;
 
 import java.io.File;

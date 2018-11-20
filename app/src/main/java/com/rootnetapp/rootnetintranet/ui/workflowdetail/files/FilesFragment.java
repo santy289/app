@@ -18,7 +18,7 @@ import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.responses.file.DocumentsFile;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.DocumentsAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.adapters.DocumentsAdapter;
 
 import java.io.File;
 import java.io.IOException;

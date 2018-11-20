@@ -16,7 +16,7 @@ import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailComments
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.CommentsAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.adapters.CommentsAdapter;
 
 import java.util.ArrayList;
 import java.util.List;

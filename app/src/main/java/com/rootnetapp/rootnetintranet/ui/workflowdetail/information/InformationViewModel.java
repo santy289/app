@@ -16,7 +16,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Step;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.Information;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.Information;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 

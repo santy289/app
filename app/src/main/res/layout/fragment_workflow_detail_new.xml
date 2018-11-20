@@ -20,10 +20,10 @@
                 android:textColor="@color/workflow_details_section_title"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_open_closed"
+                app:layout_constraintEnd_toStartOf="@+id/tv_open_closed"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/tv_open_closed"
-                app:layout_constraintBottom_toBottomOf="@+id/tv_open_closed"
                 tools:text="SEM-002" />
 
             <TextView
@@ -35,19 +35,19 @@
                 android:paddingTop="5dp"
                 android:paddingEnd="10dp"
                 android:paddingBottom="5dp"
-                android:text="@string/open"
                 android:textAllCaps="true"
                 android:textColor="@color/white"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:backgroundTint="@color/green" />
+                tools:backgroundTint="@color/green"
+                tools:text="@string/open" />
 
             <androidx.constraintlayout.widget.Barrier
                 android:id="@+id/barrier_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
-                app:constraint_referenced_ids="tv_workflow_id,tv_open_closed"/>
+                app:constraint_referenced_ids="tv_workflow_id,tv_open_closed" />
 
             <TextView
                 android:id="@+id/tv_workflow_name"
@@ -77,9 +77,9 @@
                 android:id="@+id/tab_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="top"
                 app:tabIndicatorColor="@color/colorAccent"
-                app:tabMode="scrollable"
-                android:layout_gravity="top" />
+                app:tabMode="scrollable" />
         </androidx.viewpager.widget.ViewPager>
 
         <ScrollView

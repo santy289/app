@@ -230,6 +230,15 @@
     <string name="workflow_detail_status_fragment_all_people_involved">People Involved In All Statuses</string>
     <!--InformationFragment-->
     <string name="workflow_detail_information_fragment_title">Information</string>
+    <string name="workflow_detail_information_fragment_important_things">Important Things About This Step</string>
+    <string name="workflow_detail_information_fragment_information">Information</string>
+    <string name="workflow_detail_information_fragment_client">Client</string>
+    <string name="workflow_detail_information_fragment_project">Project</string>
+    <string name="workflow_detail_information_fragment_type">Type</string>
+    <string name="workflow_detail_information_fragment_start_date">Start Date</string>
+    <string name="workflow_detail_information_fragment_end_date">End Date</string>
+    <string name="workflow_detail_information_fragment_project_time">Project Time (months)</string>
+    <string name="workflow_detail_information_fragment_owner">Owner</string>
     <!--ApprovalHistoryFragment-->
     <string name="workflow_detail_approval_history_fragment_title">Approval History</string>
     <!--CommentsFragment-->

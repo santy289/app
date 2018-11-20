@@ -6,6 +6,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusFragment;
 
 import androidx.fragment.app.Fragment;
@@ -39,16 +40,16 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
     @Override
     public Fragment getItem(int position) {
 
-        return StatusFragment.newInstance(mWorkflowItem);
 
-        //todo set fragment for each tab
-        /*switch (position){
+        switch (position){
             case 0:
                 return StatusFragment.newInstance(mWorkflowItem);
+            case 1:
+                return InformationFragment.newInstance(mWorkflowItem);
             default:
-                return null;
+//                return null; //todo set null
+                return StatusFragment.newInstance(mWorkflowItem);
         }
-*/
     }
 
     /**

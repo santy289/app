@@ -228,6 +228,15 @@
     <string name="workflow_detail_status_fragment_all_people_involved">Personas Involucradas en los Estatus</string>
     <!--InformationFragment-->
     <string name="workflow_detail_information_fragment_title">Información</string>
+    <string name="workflow_detail_information_fragment_important_things">Datos Importantes Sobre Este Estatus</string>
+    <string name="workflow_detail_information_fragment_information">Información</string>
+    <string name="workflow_detail_information_fragment_client">Cliente</string>
+    <string name="workflow_detail_information_fragment_project">Proyecto</string>
+    <string name="workflow_detail_information_fragment_type">Tipo</string>
+    <string name="workflow_detail_information_fragment_start_date">Fecha de Inicio</string>
+    <string name="workflow_detail_information_fragment_end_date">Fecha de Fin</string>
+    <string name="workflow_detail_information_fragment_project_time">Tiempo de Projecto (meses)</string>
+    <string name="workflow_detail_information_fragment_owner">Dueño</string>
     <!--ApprovalHistoryFragment-->
     <string name="workflow_detail_approval_history_fragment_title">Historial de Aprobaciones</string>
     <!--CommentsFragment-->

@@ -18,7 +18,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class CommentsRepository {
 
-    private static final String TAG = "InformationRepository";
+    private static final String TAG = "CommentsRepository";
 
     private MutableLiveData<Boolean> showLoading;
 

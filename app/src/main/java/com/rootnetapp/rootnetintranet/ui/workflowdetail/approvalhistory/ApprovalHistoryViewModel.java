@@ -22,7 +22,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class ApprovalHistoryViewModel extends ViewModel {
 
-    private static final String TAG = "StatusViewModel";
+    private static final String TAG = "ApprovalHistoryVM";
 
     private ApprovalHistoryRepository mRepository;
     private final CompositeDisposable mDisposables = new CompositeDisposable();

@@ -33,7 +33,7 @@ import io.reactivex.disposables.Disposable;
 
 public class InformationViewModel extends ViewModel {
 
-    private static final String TAG = "StatusViewModel";
+    private static final String TAG = "InformationViewModel";
 
     private InformationRepository mRepository;
     private final CompositeDisposable mDisposables = new CompositeDisposable();

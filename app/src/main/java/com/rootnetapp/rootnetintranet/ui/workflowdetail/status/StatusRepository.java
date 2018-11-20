@@ -28,16 +28,12 @@ public class StatusRepository {
 
     private ApiInterface service;
     private ProfileDao profileDao;
-    private WorkflowTypeDbDao workflowTypeDbDao;
-
-    //todo add methods and implementations
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     public StatusRepository(ApiInterface service, AppDatabase database) {
         this.service = service;
         this.profileDao = database.profileDao();
-        this.workflowTypeDbDao = database.workflowTypeDbDao();
     }
 
     protected void clearDisposables() {

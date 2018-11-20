@@ -3,9 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory;
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.ProfileDao;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
-import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
-import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.WorkflowApproveRejectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 
@@ -18,21 +16,18 @@ import io.reactivex.schedulers.Schedulers;
 
 public class ApprovalHistoryRepository {
 
-    private static final String TAG = "StatusRepository";
+    private static final String TAG = "ApprovalHistoryRepository";
 
-    private MutableLiveData<WorkflowApproveRejectResponse> responseApproveRejection;
     private MutableLiveData<Boolean> showLoading;
 
     private ApiInterface service;
     private ProfileDao profileDao;
-    private WorkflowTypeDbDao workflowTypeDbDao;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     public ApprovalHistoryRepository(ApiInterface service, AppDatabase database) {
         this.service = service;
         this.profileDao = database.profileDao();
-        this.workflowTypeDbDao = database.workflowTypeDbDao();
     }
 
     protected void clearDisposables() {

@@ -89,6 +89,12 @@ public class CommentsFragment extends Fragment {
         commentsViewModel.showLoading.observe(this, this::showLoading);
     }
 
+    private void setupSwitch(){
+        mBinding.switchPrivatePublic.setOnCheckedChangeListener(((buttonView, isChecked) -> {
+            commentsViewModel.setPrivateComment(!isChecked);
+        }));
+    }
+
     @UiThread
     private void showLoading(boolean show) {
         if (show) {

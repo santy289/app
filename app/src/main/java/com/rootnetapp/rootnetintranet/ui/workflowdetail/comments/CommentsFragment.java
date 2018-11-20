@@ -67,6 +67,7 @@ public class CommentsFragment extends Fragment {
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         mToken = "Bearer " + prefs.getString("token", "");
 
+        setupSwitch();
         subscribe();
         commentsViewModel.initDetails(mToken, mWorkflowListItem);
 

@@ -39,7 +39,6 @@
                 android:id="@+id/rv_approval_history"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="5dp"
                 app:layout_constraintStart_toStartOf="@id/tv_title_approval_history"
                 app:layout_constraintTop_toBottomOf="@id/tv_title_approval_history" />
 

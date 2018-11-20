@@ -58,7 +58,7 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
      */
     @Override
     public int getCount() {
-        return 7; //todo proper count
+        return 5;
     }
 
     /**
@@ -70,16 +70,22 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
      */
     @Override
     public CharSequence getPageTitle(int position) {
-        return mContext.getString(R.string.workflow_detail_status_fragment_title);
 
-        //todo set title for each tab
-        /*// Generate title based on item position
+        // Generate title based on item position
         switch (position) {
             case 0:
                 return mContext.getString(R.string.workflow_detail_status_fragment_title);
+            case 1:
+                return mContext.getString(R.string.workflow_detail_information_fragment_title);
+            case 2:
+                return mContext.getString(R.string.workflow_detail_approval_history_fragment_title);
+            case 3:
+                return mContext.getString(R.string.workflow_detail_comments_fragment_title);
+            case 4:
+                return mContext.getString(R.string.workflow_detail_files_fragment_title);
             default:
                 return null;
-        }*/
+        }
     }
 
 }

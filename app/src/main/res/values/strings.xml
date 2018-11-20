@@ -228,4 +228,12 @@
     <string name="workflow_detail_status_fragment_next_step_approvers">Next step approvers:</string>
     <string name="workflow_detail_status_fragment_next_step_mass_approval">Mass approval</string>
     <string name="workflow_detail_status_fragment_all_people_involved">People Involved In All Statuses</string>
+    <!--InformationFragment-->
+    <string name="workflow_detail_information_fragment_title">Information</string>
+    <!--ApprovalHistoryFragment-->
+    <string name="workflow_detail_approval_history_fragment_title">Approval History</string>
+    <!--CommentsFragment-->
+    <string name="workflow_detail_comments_fragment_title">Comments</string>
+    <!--FilesFragment-->
+    <string name="workflow_detail_files_fragment_title">Documents</string>
 </resources>

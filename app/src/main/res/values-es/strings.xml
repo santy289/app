@@ -226,5 +226,12 @@
     <string name="workflow_detail_status_fragment_next_step_approvers">Aprobadores del siguiente paso:</string>
     <string name="workflow_detail_status_fragment_next_step_mass_approval">Aprobación masiva</string>
     <string name="workflow_detail_status_fragment_all_people_involved">Personas Involucradas en los Estatus</string>
-
+    <!--InformationFragment-->
+    <string name="workflow_detail_information_fragment_title">Información</string>
+    <!--ApprovalHistoryFragment-->
+    <string name="workflow_detail_approval_history_fragment_title">Historial de Aprobaciones</string>
+    <!--CommentsFragment-->
+    <string name="workflow_detail_comments_fragment_title">Comentarios</string>
+    <!--FilesFragment-->
+    <string name="workflow_detail_files_fragment_title">Documentos</string>
 </resources>

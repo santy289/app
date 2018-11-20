@@ -97,6 +97,8 @@ public class StatusFragment extends Fragment {
         statusViewModel.updateCurrentApproversList.observe(this, this::updateCurrentApproversList);
         statusViewModel.updateProfilesInvolved.observe(this, this::updateProfilesInvolved);
         statusViewModel.updateApproveSpinner.observe(this, this::updateApproveSpinner);
+        statusViewModel.hideApproverListOnEmptyData.observe(this, this::hideApproverListOnEmptyData);
+        statusViewModel.hideProfilesInvolvedList.observe(this, this::hideProfilesInvolvedList);
     }
 
     @UiThread
@@ -168,5 +170,34 @@ public class StatusFragment extends Fragment {
                 .setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.includeAllPeopleInvolved.rvAllPeopleInvolved
                 .setAdapter(new PeopleInvolvedAdapter(profiles));
+    }
+
+    @UiThread
+    private void hideApproverListOnEmptyData(boolean hide) {
+        if (hide) {
+            mBinding.includeNextStep.tvTitleApprovers.setVisibility(View.GONE);
+            mBinding.includeNextStep.rvApprovers.setVisibility(View.GONE);
+            mBinding.includeNextStep.btnMassApproval.setVisibility(View.GONE);
+        } else {
+            mBinding.includeNextStep.tvTitleApprovers.setVisibility(View.GONE);
+            mBinding.includeNextStep.rvApprovers.setVisibility(View.GONE);
+            mBinding.includeNextStep.btnMassApproval.setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * Hides list of people involved and shows a text message instead.
+     *
+     * @param hide Action to take.
+     */
+    @UiThread
+    private void hideProfilesInvolvedList(boolean hide) {
+        if (hide) {
+            mBinding.includeAllPeopleInvolved.rvAllPeopleInvolved.setVisibility(View.GONE);
+            mBinding.includeAllPeopleInvolved.noPeopleInvolved.setVisibility(View.VISIBLE);
+        } else {
+            mBinding.includeAllPeopleInvolved.rvAllPeopleInvolved.setVisibility(View.VISIBLE);
+            mBinding.includeAllPeopleInvolved.noPeopleInvolved.setVisibility(View.GONE);
+        }
     }
 }

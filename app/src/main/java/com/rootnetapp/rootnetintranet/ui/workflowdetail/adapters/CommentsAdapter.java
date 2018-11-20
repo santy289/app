@@ -1,8 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -13,6 +11,9 @@ import com.rootnetapp.rootnetintranet.databinding.CommentsItemBinding;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
 
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> {
 
@@ -35,6 +36,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> {
 
     @Override
     public void onBindViewHolder(@NonNull CommentsViewholder holder, int i) {
+        //todo new design
         Comment item = comments.get(i);
         String path = Utils.imgDomain + item.getUserInfo().getPicture();
         Context context = holder.itemView.getContext();

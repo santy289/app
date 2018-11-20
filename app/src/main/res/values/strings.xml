@@ -243,7 +243,13 @@
     <string name="workflow_detail_approval_history_fragment_title">@string/workflow_detail_approval_history_fragment_approval_history</string>
     <string name="workflow_detail_approval_history_fragment_approval_history">Approval History</string>
     <!--CommentsFragment-->
-    <string name="workflow_detail_comments_fragment_title">Comments</string>
+    <string name="workflow_detail_comments_fragment_title">@string/workflow_detail_comments_fragment_comments</string>
+    <string name="workflow_detail_comments_fragment_comments">Comments</string>
+    <string name="workflow_detail_comments_fragment_public">Public</string>
+    <string name="workflow_detail_comments_fragment_private">Private</string>
+    <string name="workflow_detail_comments_fragment_input_comment_hint">Type your comment here…</string>
+    <string name="workflow_detail_comments_fragment_button_comment">Comment</string>
+    <string name="workflow_detail_comments_fragment_no_comments">There are no comments to show</string>
     <!--FilesFragment-->
     <string name="workflow_detail_files_fragment_title">Documents</string>
 </resources>

@@ -36,6 +36,8 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryModule;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusFragment;
@@ -69,7 +71,8 @@ import dagger.Component;
                 SplashModule.class,
                 StatusModule.class,
                 InformationModule.class,
-                ApprovalHistoryModule.class
+                ApprovalHistoryModule.class,
+                CommentsModule.class
         }
 )
 
@@ -124,4 +127,6 @@ public interface AppComponent {
     void inject(InformationFragment statusFragment);
 
     void inject(ApprovalHistoryFragment statusFragment);
+
+    void inject(CommentsFragment statusFragment);
 }

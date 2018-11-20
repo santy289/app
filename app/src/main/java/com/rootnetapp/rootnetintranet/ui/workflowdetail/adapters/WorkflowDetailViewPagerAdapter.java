@@ -7,6 +7,7 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusFragment;
 
@@ -49,6 +50,8 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
                 return InformationFragment.newInstance(mWorkflowItem);
             case 2:
                 return ApprovalHistoryFragment.newInstance(mWorkflowItem);
+            case 3:
+                return CommentsFragment.newInstance(mWorkflowItem);
             default:
 //                return null; //todo set null
                 return StatusFragment.newInstance(mWorkflowItem);

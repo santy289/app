@@ -174,8 +174,8 @@
     <string name="enter_email">Enter Email</string>
     <string name="create_workflow">Create Workflow</string>
     <string name="yes">Yes</string>
-    <string name="no">No</string>
-    <string name="ok">OK</string>
+    <string name="no" translatable="false">No</string>
+    <string name="ok" translatable="false">OK</string>
     <string name="required_fields">Required Fields</string>
     <string name="complete_form">Fill this missing fields</string>
     <string name="warning">Warning</string>
@@ -210,7 +210,7 @@
     <string name="status_was_modified">(Status was modified)</string>
     <string name="no_history_to_show">No approval history available</string>
     <string name="something_went_wrong">Something went wrong, try again later.</string>
-    <string name="dashboard">Dashboard</string>
+    <string name="dashboard" translatable="false">Dashboard</string>
     <string name="nav_workflow_list">Workflow List</string>
     <string name="current_status">Current Status</string>
     <string name="last_status">Last Status</string>

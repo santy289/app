@@ -6,6 +6,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusFragment;
 
@@ -46,6 +47,8 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
                 return StatusFragment.newInstance(mWorkflowItem);
             case 1:
                 return InformationFragment.newInstance(mWorkflowItem);
+            case 2:
+                return ApprovalHistoryFragment.newInstance(mWorkflowItem);
             default:
 //                return null; //todo set null
                 return StatusFragment.newInstance(mWorkflowItem);

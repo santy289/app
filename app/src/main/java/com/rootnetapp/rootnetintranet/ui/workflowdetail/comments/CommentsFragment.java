@@ -3,6 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.comments;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +13,12 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailCommentsBinding;
+import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.CommentsAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -35,6 +38,8 @@ public class CommentsFragment extends Fragment {
     private FragmentWorkflowDetailCommentsBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
     private String mToken;
+
+    private List<CommentFile> mCommentFiles;
 
     public CommentsFragment() {
         // Required empty public constructor
@@ -67,7 +72,10 @@ public class CommentsFragment extends Fragment {
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         mToken = "Bearer " + prefs.getString("token", "");
 
+        mCommentFiles = new ArrayList<>();
+
         setupSwitch();
+        setOnClickListeners();
         subscribe();
         commentsViewModel.initDetails(mToken, mWorkflowListItem);
 
@@ -86,14 +94,29 @@ public class CommentsFragment extends Fragment {
         commentsViewModel.getObservableComments().observe(this, this::updateCommentsList);
         commentsViewModel.getObservableHideComments().observe(this, this::hideCommentsList);
         commentsViewModel.getObservableCommentHeaderCounter().observe(this, this::updateTabCounter);
-//
+
         commentsViewModel.showLoading.observe(this, this::showLoading);
     }
 
-    private void setupSwitch(){
-        mBinding.switchPrivatePublic.setOnCheckedChangeListener(((buttonView, isChecked) -> {
-            commentsViewModel.setPrivateComment(!isChecked);
-        }));
+    private void setupSwitch() {
+        mBinding.switchPrivatePublic.setOnCheckedChangeListener(
+                ((buttonView, isChecked) -> commentsViewModel.setPrivateComment(isChecked)));
+    }
+
+    private void setOnClickListeners() {
+        mBinding.btnComment.setOnClickListener(v -> sendComment());
+    }
+
+    private void sendComment() {
+        mBinding.etComment.setError(null);
+        String comment = mBinding.etComment.getText().toString();
+
+        if (TextUtils.isEmpty(comment)) {
+            mBinding.etComment.setError(getString(R.string.empty_comment));
+            return;
+        }
+
+        commentsViewModel.postComment(comment, mCommentFiles);
     }
 
     @UiThread

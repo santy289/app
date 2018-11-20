@@ -86,8 +86,6 @@ public class CommentsViewModel extends ViewModel {
     }
 
     public void postComment(String comment, List<CommentFile> files) {
-        //todo consume this method
-
         showLoading.setValue(true);
         Disposable disposable = mRepository
                 .postComment(

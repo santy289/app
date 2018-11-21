@@ -26,7 +26,7 @@ public class CommentsViewModel extends ViewModel {
     private MutableLiveData<List<Comment>> mCommentsLiveData;
     private MutableLiveData<Comment> mCommentLiveData;
     private MutableLiveData<Boolean> mHideComments;
-    private MutableLiveData<String> mCommentHeaderCounter;
+    private MutableLiveData<Integer> mCommentsTabCounter;
 
     protected MutableLiveData<Boolean> showLoading;
 
@@ -63,14 +63,14 @@ public class CommentsViewModel extends ViewModel {
             return;
         }
         commentsCounter = comments.size();
-        updateCommentCounterHeader(comments.size());
+        setCommentsTabCounter(comments.size());
         mCommentsLiveData.setValue(commentsResponse.getResponse());
         showLoading.setValue(false);
     }
 
     private void onPostCommentSuccess(CommentResponse commentResponse) {
         commentsCounter += 1;
-        updateCommentCounterHeader(commentsCounter);
+        setCommentsTabCounter(commentsCounter);
         mCommentLiveData.setValue(commentResponse.getResponse());
         showLoading.setValue(false);
     }
@@ -102,8 +102,8 @@ public class CommentsViewModel extends ViewModel {
         this.isPrivateComment = isPrivate;
     }
 
-    private void updateCommentCounterHeader(int counter) {
-        mCommentHeaderCounter.setValue("(" + String.valueOf(counter) + ")");
+    private void setCommentsTabCounter(int counter) {
+        mCommentsTabCounter.setValue(counter);
     }
 
     private void onFailure(Throwable throwable) {
@@ -139,10 +139,10 @@ public class CommentsViewModel extends ViewModel {
         return mHideComments;
     }
 
-    public LiveData<String> getObservableCommentHeaderCounter() {
-        if (mCommentHeaderCounter == null) {
-            mCommentHeaderCounter = new MutableLiveData<>();
+    public LiveData<Integer> getObservableCommentsTabCounter() {
+        if (mCommentsTabCounter == null) {
+            mCommentsTabCounter = new MutableLiveData<>();
         }
-        return mCommentHeaderCounter;
+        return mCommentsTabCounter;
     }
 }

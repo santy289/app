@@ -36,6 +36,7 @@ public class WorkflowDetailFragment extends Fragment {
     private MainActivityInterface mMainActivityInterface;
     private WorkflowListItem mWorkflowListItem;
     private String mToken;
+    private WorkflowDetailViewPagerAdapter mViewPagerAdapter;
 
     public WorkflowDetailFragment() {
         // Required empty public constructor
@@ -83,8 +84,8 @@ public class WorkflowDetailFragment extends Fragment {
      * Initializes and set the {@link WorkflowDetailViewPagerAdapter} for the {@link ViewPager}.
      */
     private void setupViewPager() {
-        WorkflowDetailViewPagerAdapter adapter = new WorkflowDetailViewPagerAdapter(getContext(), mWorkflowListItem, getChildFragmentManager());
-        mBinding.viewPager.setAdapter(adapter);
+       mViewPagerAdapter = new WorkflowDetailViewPagerAdapter(getContext(), mWorkflowListItem, getChildFragmentManager());
+        mBinding.viewPager.setAdapter(mViewPagerAdapter);
     }
 
     @UiThread
@@ -126,14 +127,22 @@ public class WorkflowDetailFragment extends Fragment {
 
         workflowDetailViewModel.getObservableError().observe(this, errorObserver);
         workflowDetailViewModel.getObservableShowToastMessage().observe(this, this::showToastMessage);
+        workflowDetailViewModel.getObservableCommentsTabCounter().observe(this, this::updateCommentsTabCounter);
+        workflowDetailViewModel.getObservableFilesTabCounter().observe(this, this::updateFilesTabCounter);
 
         workflowDetailViewModel.showLoading.observe(this, this::showLoading);
         workflowDetailViewModel.setWorkflowIsOpen.observe(this, this::setWorkflowIsOpen);
     }
 
     @UiThread
-    private void updateHeaderCommentCounter(String count) {
-        //todo check interaction with CommentsFragment (the count must come from there)
-//        mBinding.detailMessageText.setText(count);
+    private void updateCommentsTabCounter(Integer count) {
+        mViewPagerAdapter.setCommentsCounter(count);
+        mViewPagerAdapter.notifyDataSetChanged();
+    }
+
+    @UiThread
+    private void updateFilesTabCounter(Integer count) {
+        mViewPagerAdapter.setFilesCounter(count);
+        mViewPagerAdapter.notifyDataSetChanged();
     }
 }

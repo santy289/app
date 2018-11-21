@@ -18,6 +18,7 @@ import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.responses.file.DocumentsFile;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailViewModel;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.adapters.DocumentsAdapter;
 
 import java.io.File;
@@ -50,6 +51,8 @@ public class FilesFragment extends Fragment {
     private CommentFile fileRequest = null;
     private DocumentsAdapter mDocumentsAdapter = null;
 
+    private WorkflowDetailViewModel workflowDetailViewModel;
+
     public FilesFragment() {
         // Required empty public constructor
     }
@@ -76,6 +79,12 @@ public class FilesFragment extends Fragment {
         filesViewModel = ViewModelProviders
                 .of(this, filesViewModelFactory)
                 .get(FilesViewModel.class);
+
+        if (getParentFragment() != null) {
+            workflowDetailViewModel = ViewModelProviders
+                    .of(getParentFragment())
+                    .get(WorkflowDetailViewModel.class);
+        }
 
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
@@ -109,6 +118,7 @@ public class FilesFragment extends Fragment {
 
         filesViewModel.getObservableError().observe(this, errorObserver);
         filesViewModel.getObservableAttach().observe(this, attachObserver);
+        filesViewModel.getObservableFilesTabCounter().observe(this, this::updateTabCounter);
 
         filesViewModel.showLoading.observe(this, this::showLoading);
         filesViewModel.setDocumentsView.observe(this, this::setDocumentsView);
@@ -249,5 +259,12 @@ public class FilesFragment extends Fragment {
         );
         mBinding.rvFiles.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvFiles.setAdapter(mDocumentsAdapter);
+    }
+
+    @UiThread
+    private void updateTabCounter(Integer counter) {
+        if (workflowDetailViewModel != null) {
+            workflowDetailViewModel.setFilesCounter(counter);
+        }
     }
 }

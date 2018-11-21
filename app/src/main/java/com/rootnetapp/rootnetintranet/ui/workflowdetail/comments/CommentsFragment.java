@@ -16,6 +16,7 @@ import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailComments
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailViewModel;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.adapters.CommentsAdapter;
 
 import java.util.ArrayList;
@@ -41,6 +42,8 @@ public class CommentsFragment extends Fragment {
 
     private List<CommentFile> mCommentFiles;
     private CommentsAdapter mCommentsAdapter;
+
+    WorkflowDetailViewModel workflowDetailViewModel;
 
     public CommentsFragment() {
         // Required empty public constructor
@@ -69,6 +72,12 @@ public class CommentsFragment extends Fragment {
                 .of(this, commentsViewModelFactory)
                 .get(CommentsViewModel.class);
 
+        if (getParentFragment() != null) {
+            workflowDetailViewModel = ViewModelProviders
+                    .of(getParentFragment())
+                    .get(WorkflowDetailViewModel.class);
+        }
+
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         mToken = "Bearer " + prefs.getString("token", "");
@@ -95,7 +104,7 @@ public class CommentsFragment extends Fragment {
         commentsViewModel.getObservableComments().observe(this, this::updateCommentsList);
         commentsViewModel.getObservableHideComments().observe(this, this::hideCommentsList);
         commentsViewModel.getObservableComment().observe(this, this::addNewComment);
-        commentsViewModel.getObservableCommentHeaderCounter().observe(this, this::updateTabCounter);
+        commentsViewModel.getObservableCommentsTabCounter().observe(this, this::updateTabCounter);
 
         commentsViewModel.showLoading.observe(this, this::showLoading);
     }
@@ -143,7 +152,8 @@ public class CommentsFragment extends Fragment {
             mCommentsAdapter.comments.add(0, comment);
             mCommentsAdapter.notifyItemChanged(0);
         } else {
-            Toast.makeText(getContext(), getString(R.string.error_comment), Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), getString(R.string.error_comment), Toast.LENGTH_LONG)
+                    .show();
         }
         mBinding.etComment.setText(null);
     }
@@ -165,9 +175,9 @@ public class CommentsFragment extends Fragment {
     }
 
     @UiThread
-    private void updateTabCounter(String counter) {
-        String title = getString(R.string.workflow_detail_comments_fragment_title);
-        title += " " + counter;
-        //todo update TabLayout tab title
+    private void updateTabCounter(Integer counter) {
+        if (workflowDetailViewModel != null) {
+            workflowDetailViewModel.setCommentsTabCounter(counter);
+        }
     }
 }

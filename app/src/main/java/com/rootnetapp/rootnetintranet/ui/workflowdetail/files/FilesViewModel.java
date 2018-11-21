@@ -30,6 +30,7 @@ public class FilesViewModel extends ViewModel {
 
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> mAttachLiveData;
+    private MutableLiveData<Integer> mFilesTabCounter;
 
     protected MutableLiveData<Boolean> showLoading;
     protected MutableLiveData<Boolean> showTemplateDocumentsUi;
@@ -105,6 +106,7 @@ public class FilesViewModel extends ViewModel {
             return;
         }
         setDocumentsView.setValue(documents);
+        setFilesTabCounter(documents.size());
     }
 
     public void attachFile(String auth, List<WorkflowPresetsRequest> request, CommentFile fileRequest) {
@@ -152,6 +154,10 @@ public class FilesViewModel extends ViewModel {
         this.presets = currentWorkflowType.getPresets();
     }
 
+    private void setFilesTabCounter(int counter) {
+        mFilesTabCounter.setValue(counter);
+    }
+
     private void onFailure(Throwable throwable) {
         showLoading.setValue(false);
         mErrorLiveData.setValue(R.string.failure_connect);
@@ -169,5 +175,12 @@ public class FilesViewModel extends ViewModel {
             mAttachLiveData = new MutableLiveData<>();
         }
         return mAttachLiveData;
+    }
+
+    public LiveData<Integer> getObservableFilesTabCounter() {
+        if (mFilesTabCounter == null) {
+            mFilesTabCounter = new MutableLiveData<>();
+        }
+        return mFilesTabCounter;
     }
 }

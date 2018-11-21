@@ -4,19 +4,24 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import androidx.viewpager.widget.ViewPager;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 public class WorkflowDetailViewModel extends ViewModel {
-    private MutableLiveData<Integer> mErrorLiveData;
+
     private WorkflowDetailRepository mRepository;
+    private MutableLiveData<Integer> mErrorLiveData;
+    private MutableLiveData<Integer> mCommentsTabCounter;
+    private MutableLiveData<Integer> mFilesTabCounter;
 
     protected MutableLiveData<Boolean> showLoading;
-    protected MutableLiveData<String> setCommentHeaderCounter;
     protected MutableLiveData<Boolean> setWorkflowIsOpen;
     protected MutableLiveData<Integer> showToastMessage;
 
@@ -31,7 +36,6 @@ public class WorkflowDetailViewModel extends ViewModel {
     public WorkflowDetailViewModel(WorkflowDetailRepository workflowDetailRepository) {
         this.mRepository = workflowDetailRepository;
         this.showLoading = new MutableLiveData<>();
-        this.setCommentHeaderCounter = new MutableLiveData<>();
         this.setWorkflowIsOpen = new MutableLiveData<>();
     }
 
@@ -65,11 +69,27 @@ public class WorkflowDetailViewModel extends ViewModel {
         updateUIWithWorkflow(mWorkflow);
     }
 
-
     private void updateUIWithWorkflow(WorkflowDb workflow) {
         setWorkflowIsOpen.setValue(workflow.isOpen());
     }
 
+    /**
+     * Defines the {@link ViewPager} Comments tab counter, called by {@link CommentsFragment}.
+     *
+     * @param count comments count
+     */
+    public void setCommentsTabCounter(int count) {
+        mCommentsTabCounter.setValue(count);
+    }
+
+    /**
+     * Defines the {@link ViewPager} Files tab counter, called by {@link FilesFragment}.
+     *
+     * @param count comments count
+     */
+    public void setFilesCounter(int count) {
+        mFilesTabCounter.setValue(count);
+    }
 
     private void onFailure(Throwable throwable) {
         showLoading.setValue(false);
@@ -88,5 +108,19 @@ public class WorkflowDetailViewModel extends ViewModel {
             showToastMessage = new MutableLiveData<>();
         }
         return showToastMessage;
+    }
+
+    protected LiveData<Integer> getObservableCommentsTabCounter() {
+        if (mCommentsTabCounter == null) {
+            mCommentsTabCounter = new MutableLiveData<>();
+        }
+        return mCommentsTabCounter;
+    }
+
+    protected LiveData<Integer> getObservableFilesTabCounter() {
+        if (mFilesTabCounter == null) {
+            mFilesTabCounter = new MutableLiveData<>();
+        }
+        return mFilesTabCounter;
     }
 }

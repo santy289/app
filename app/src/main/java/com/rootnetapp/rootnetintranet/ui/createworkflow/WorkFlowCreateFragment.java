@@ -1,16 +1,8 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.SharedPreferences;
-import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,6 +26,14 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.RecyclerView;
 import me.riddhimanadib.formmaster.FormBuilder;
 import me.riddhimanadib.formmaster.listener.OnFormElementValueChangedListener;
 import me.riddhimanadib.formmaster.model.BaseFormElement;
@@ -55,7 +55,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
     CreateWorkflowViewModelFactory createWorkflowViewModelFactory;
     CreateWorkflowViewModel viewModel;
     private MainActivityInterface mainActivityInterface;
-    private FragmentCreateWorkflowBinding fragmentCreateWorkflowBinding;
+    private FragmentCreateWorkflowBinding mBinding;
 
     private FormBuilder formBuilder;
     private List<BaseFormElement> formItems = new ArrayList<>();
@@ -82,13 +82,13 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        fragmentCreateWorkflowBinding = DataBindingUtil.inflate(
+        mBinding = DataBindingUtil.inflate(
                 inflater,
                 R.layout.fragment_create_workflow,
                 container,
                 false
         );
-        View view = fragmentCreateWorkflowBinding.getRoot();
+        View view = mBinding.getRoot();
 
         ((RootnetApp) getActivity().getApplication()).getAppComponent().
                 inject(this);
@@ -100,7 +100,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer "+ prefs.getString("token","");
 
-        fragmentCreateWorkflowBinding.btnCreate.setOnClickListener(v -> {
+        mBinding.btnCreate.setOnClickListener(v -> {
             postFormData();
         });
 
@@ -151,7 +151,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
     private void startBuilder() {
         formBuilder = new FormBuilder(
                 getContext(),
-                fragmentCreateWorkflowBinding.recCreateWorkflow,
+                mBinding.rvFields,
                 this);
     }
 
@@ -391,7 +391,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
 
     private void refreshForm() {
         RecyclerView.Adapter adapter =
-                fragmentCreateWorkflowBinding.recCreateWorkflow.getAdapter();
+                mBinding.rvFields.getAdapter();
         if (adapter == null) {
             return;
         }

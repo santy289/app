@@ -154,7 +154,7 @@ public class StatusFragment extends Fragment {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 context,
-                android.R.layout.simple_selectable_list_item,
+                android.R.layout.simple_spinner_dropdown_item,
                 nextStatuses
         );
         mBinding.includeNextStep.spSteps.setAdapter(adapter);

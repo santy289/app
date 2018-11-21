@@ -67,9 +67,8 @@ public class WorkflowDetailFragment extends Fragment {
 
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         mToken = "Bearer "+ prefs.getString("token","");
-        //todo separate methods for setText
-        mBinding.tvWorkflowId.setText(mWorkflowListItem.getWorkflowTypeName()); //todo verify field
-        mBinding.tvWorkflowName.setText(mWorkflowListItem.getTitle()); //todo verify field
+        mBinding.tvWorkflowId.setText(mWorkflowListItem.getTitle());
+        mBinding.tvWorkflowName.setText(mWorkflowListItem.getWorkflowTypeKey());
 
         setupViewPager();
         subscribe();

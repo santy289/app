@@ -127,10 +127,6 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private void setTextInputParams(AppCompatEditText etInput, @FormItemType int type) {
         switch (type) {
 
-            case FormItemType.TEXT:
-                etInput.setInputType(InputType.TYPE_CLASS_TEXT);
-                break;
-
             case FormItemType.TEXT_AREA:
                 etInput.setInputType(
                         InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
@@ -146,6 +142,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 break;
 
             case FormItemType.DEFAULT:
+            case FormItemType.TEXT:
+                etInput.setInputType(InputType.TYPE_CLASS_TEXT);
             default:
                 break;
         }
@@ -155,6 +153,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         FieldData fieldData = getItem(position);
 
         holder.getBinding().tvTitle.setText(fieldData.label); //todo whether to use label/resLabel
+        holder.getBinding().spSteps.setAdapter(
+                new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
+                        fieldData.options));
     }
 
     private void populateBooleanView(BooleanViewHolder holder, int position) {
@@ -173,5 +174,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         FieldData fieldData = getItem(position);
 
         holder.getBinding().tvTitle.setText(fieldData.label); //todo whether to use label/resLabel
+        holder.getBinding().spCurrency.setAdapter(
+                new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
+                        fieldData.options));
     }
 }

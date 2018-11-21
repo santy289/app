@@ -16,6 +16,7 @@ public class FieldData {
     public boolean escape;
     public ArrayList<ListFieldItemMeta> list;
 
+    public ArrayList<String> options;
     public @FormItemViewType int viewType;
     public @FormItemType int type;
 

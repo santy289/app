@@ -11,7 +11,6 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTyp
 
 import java.util.List;
 
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -59,12 +58,5 @@ public class FilesRepository {
     public Observable<AttachResponse> attachFile(String auth, List<WorkflowPresetsRequest> request, CommentFile fileRequest) {
         return service.attachFile(auth, request, fileRequest).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
-    }
-
-    protected LiveData<Boolean> getErrorShowLoading() {
-        if (showLoading == null) {
-            showLoading = new MutableLiveData<>();
-        }
-        return showLoading;
     }
 }

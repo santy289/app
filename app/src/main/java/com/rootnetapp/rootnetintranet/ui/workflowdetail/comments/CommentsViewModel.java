@@ -29,7 +29,6 @@ public class CommentsViewModel extends ViewModel {
     private MutableLiveData<String> mCommentHeaderCounter;
 
     protected MutableLiveData<Boolean> showLoading;
-    protected MutableLiveData<Integer> showToastMessage;
 
     private boolean isPrivateComment = false;
 
@@ -117,13 +116,6 @@ public class CommentsViewModel extends ViewModel {
             mErrorLiveData = new MutableLiveData<>();
         }
         return mErrorLiveData;
-    }
-
-    protected LiveData<Integer> getObservableShowToastMessage() {
-        if (showToastMessage == null) {
-            showToastMessage = new MutableLiveData<>();
-        }
-        return showToastMessage;
     }
 
     public LiveData<List<Comment>> getObservableComments() {

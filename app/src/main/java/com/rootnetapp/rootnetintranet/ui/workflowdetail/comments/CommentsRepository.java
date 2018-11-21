@@ -9,7 +9,6 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTyp
 
 import java.util.List;
 
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -58,12 +57,5 @@ public class CommentsRepository {
                 files)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
-    }
-
-    protected LiveData<Boolean> getErrorShowLoading() {
-        if (showLoading == null) {
-            showLoading = new MutableLiveData<>();
-        }
-        return showLoading;
     }
 }

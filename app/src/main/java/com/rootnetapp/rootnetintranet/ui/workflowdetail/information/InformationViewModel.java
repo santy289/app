@@ -44,7 +44,6 @@ public class InformationViewModel extends ViewModel {
     protected MutableLiveData<List<Information>> updateInformationListUi;
     protected MutableLiveData<Boolean> showImportantInfoSection;
     protected MutableLiveData<List<Step>> loadImportantInfoSection;
-    protected MutableLiveData<Integer> showToastMessage;
 
     private String mToken;
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the workflow.
@@ -249,12 +248,5 @@ public class InformationViewModel extends ViewModel {
             mErrorLiveData = new MutableLiveData<>();
         }
         return mErrorLiveData;
-    }
-
-    protected LiveData<Integer> getObservableShowToastMessage() {
-        if (showToastMessage == null) {
-            showToastMessage = new MutableLiveData<>();
-        }
-        return showToastMessage;
     }
 }

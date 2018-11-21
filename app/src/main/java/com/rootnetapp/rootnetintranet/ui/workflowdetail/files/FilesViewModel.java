@@ -32,7 +32,6 @@ public class FilesViewModel extends ViewModel {
     private MutableLiveData<Boolean> mAttachLiveData;
 
     protected MutableLiveData<Boolean> showLoading;
-    protected MutableLiveData<Integer> showToastMessage;
     protected MutableLiveData<Boolean> showTemplateDocumentsUi;
     protected MutableLiveData<String> setTemplateTitleWith;
     protected MutableLiveData<List<DocumentsFile>> setDocumentsView;
@@ -163,13 +162,6 @@ public class FilesViewModel extends ViewModel {
             mErrorLiveData = new MutableLiveData<>();
         }
         return mErrorLiveData;
-    }
-
-    protected LiveData<Integer> getObservableShowToastMessage() {
-        if (showToastMessage == null) {
-            showToastMessage = new MutableLiveData<>();
-        }
-        return showToastMessage;
     }
 
     public LiveData<Boolean> getObservableAttach() {

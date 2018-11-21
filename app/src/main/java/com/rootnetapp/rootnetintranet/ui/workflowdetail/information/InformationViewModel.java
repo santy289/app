@@ -49,11 +49,11 @@ public class InformationViewModel extends ViewModel {
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the workflow.
     private WorkflowDb mWorkflow; // Not in DB and more complete response from network.
 
-    public static final String FORMAT = "MMM d, y";
+    private static final String FORMAT = "MMM d, y";
 
     private FormSettings formSettings;
 
-    public InformationViewModel(InformationRepository informationRepository) {
+    protected InformationViewModel(InformationRepository informationRepository) {
         this.mRepository = informationRepository;
         this.showLoading = new MutableLiveData<>();
         this.updateInformationListUi = new MutableLiveData<>();
@@ -167,18 +167,14 @@ public class InformationViewModel extends ViewModel {
     private void getWorkflowType(String auth, int typeId) {
         Disposable disposable = mRepository
                 .getWorkflowType(auth, typeId)
-                .subscribe(this::onTypeSuccess, throwable -> {
-                    onFailure(throwable);
-                });
+                .subscribe(this::onTypeSuccess, this::onFailure);
         mDisposables.add(disposable);
     }
 
     private void getWorkflow(String auth, int workflowId) {
         Disposable disposable = mRepository
                 .getWorkflow(auth, workflowId)
-                .subscribe(this::onWorkflowSuccess, throwable -> {
-                    onFailure(throwable);
-                });
+                .subscribe(this::onWorkflowSuccess, this::onFailure);
         mDisposables.add(disposable);
     }
 

@@ -25,7 +25,7 @@ public class CommentsRepository {
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
-    public CommentsRepository(ApiInterface service) {
+    protected CommentsRepository(ApiInterface service) {
         this.service = service;
     }
 
@@ -33,22 +33,22 @@ public class CommentsRepository {
         disposables.clear();
     }
 
-    public Observable<WorkflowTypeResponse> getWorkflowType(String auth, int typeId) {
+    protected Observable<WorkflowTypeResponse> getWorkflowType(String auth, int typeId) {
         return service.getWorkflowType(auth, typeId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {
+    protected Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {
         return service.getWorkflow(auth, workflowId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<CommentsResponse> getComments(String auth, int workflowId) {
+    protected Observable<CommentsResponse> getComments(String auth, int workflowId) {
         return service.getComments(auth, workflowId, 10, 1).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<CommentResponse> postComment(String auth, int workflowId, String comment, boolean isPrivate, List<CommentFile> files) {
+    protected Observable<CommentResponse> postComment(String auth, int workflowId, String comment, boolean isPrivate, List<CommentFile> files) {
         return service.postComment(
                 auth,
                 workflowId,

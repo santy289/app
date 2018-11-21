@@ -43,7 +43,7 @@ public class FilesFragment extends Fragment {
 
     @Inject
     FilesViewModelFactory filesViewModelFactory;
-    FilesViewModel filesViewModel;
+    private FilesViewModel filesViewModel;
     private FragmentWorkflowDetailFilesBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
     private String mToken;

@@ -1,12 +1,9 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.files.adapters;
 
 import android.content.Context;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.databinding.DocumentsItemBinding;
@@ -15,6 +12,9 @@ import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Created by root on 04/04/18.
@@ -57,12 +57,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder>{
             }
         }
         holder.binding.tvName.setText(item.getName());
-        holder.binding.chbxItem.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                isSelected.set(i, b);
-            }
-        });
+        holder.binding.chbxItem.setOnCheckedChangeListener(
+                (compoundButton, b) -> isSelected.set(i, b));
         if(file!=null){
             holder.binding.imgUploaded.setImageResource(R.drawable.ic_check_accent_24dp);
             holder.binding.imgUploaded.setColorFilter(ContextCompat.getColor(context, R.color.green),

@@ -31,7 +31,7 @@ public class ApprovalHistoryFragment extends Fragment {
 
     @Inject
     ApprovalHistoryViewModelFactory approvalHistoryViewModelFactory;
-    ApprovalHistoryViewModel approvalHistoryViewModel;
+    private ApprovalHistoryViewModel approvalHistoryViewModel;
     private FragmentWorkflowDetailApprovalHistoryBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
     private String mToken;

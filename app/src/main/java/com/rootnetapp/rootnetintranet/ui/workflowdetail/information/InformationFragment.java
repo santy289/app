@@ -33,7 +33,7 @@ public class InformationFragment extends Fragment {
 
     @Inject
     InformationViewModelFactory informationViewModelFactory;
-    InformationViewModel informationViewModel;
+    private InformationViewModel informationViewModel;
     private FragmentWorkflowDetailInformationBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
     private String mToken;

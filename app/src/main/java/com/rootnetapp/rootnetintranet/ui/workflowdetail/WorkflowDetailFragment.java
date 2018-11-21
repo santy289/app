@@ -31,7 +31,7 @@ public class WorkflowDetailFragment extends Fragment {
 
     @Inject
     WorkflowDetailViewModelFactory workflowViewModelFactory;
-    WorkflowDetailViewModel workflowDetailViewModel;
+    private WorkflowDetailViewModel workflowDetailViewModel;
     private FragmentWorkflowDetailBinding mBinding;
     private MainActivityInterface mMainActivityInterface;
     private WorkflowListItem mWorkflowListItem;

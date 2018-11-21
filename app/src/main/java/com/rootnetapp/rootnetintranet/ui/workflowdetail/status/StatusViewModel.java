@@ -68,9 +68,7 @@ public class StatusViewModel extends ViewModel {
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the workflow.
     private WorkflowDb mWorkflow; // Not in DB and more complete response from network.
 
-    public static final String FORMAT = "MMM d, y";
-
-    public StatusViewModel(StatusRepository statusRepository) {
+    protected StatusViewModel(StatusRepository statusRepository) {
         this.mRepository = statusRepository;
         this.showLoading = new MutableLiveData<>();
         this.updateCurrentApproversList = new MutableLiveData<>();
@@ -258,18 +256,14 @@ public class StatusViewModel extends ViewModel {
     private void getWorkflowType(String auth, int typeId) {
         Disposable disposable = mRepository
                 .getWorkflowType(auth, typeId)
-                .subscribe(this::onTypeSuccess, throwable -> {
-                    onFailure(throwable);
-                });
+                .subscribe(this::onTypeSuccess, this::onFailure);
         mDisposables.add(disposable);
     }
 
     private void getWorkflow(String auth, int workflowId) {
         Disposable disposable = mRepository
                 .getWorkflow(auth, workflowId)
-                .subscribe(this::onWorkflowSuccess, throwable -> {
-                    onFailure(throwable);
-                });
+                .subscribe(this::onWorkflowSuccess, this::onFailure);
         mDisposables.add(disposable);
     }
 
@@ -419,10 +413,8 @@ public class StatusViewModel extends ViewModel {
             return approverList;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(approverListResult -> {
-                    generateApproverListForStatusSpecificIds(statusSpecificList,
-                            approverListResult);
-                }, throwable -> {
+                .subscribe(approverListResult -> generateApproverListForStatusSpecificIds(statusSpecificList,
+                        approverListResult), throwable -> {
                     generateApproverListForStatusSpecificIds(statusSpecificList, approverList);
                     Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable
                             .getMessage());
@@ -431,7 +423,7 @@ public class StatusViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
-    public Approver generateApproverWith(ProfileInvolved profileInvolved) {
+    protected Approver generateApproverWith(ProfileInvolved profileInvolved) {
         Approver approver = new Approver();
         approver.isRequire = false;
         approver.entityAvatar = profileInvolved.picture;
@@ -552,8 +544,8 @@ public class StatusViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
-    public static final int GLOBAL_APPROVER_TYPE = 0;
-    public static final int STATUS_SPECIFIC_APPROVER_TYPE = 1;
+    private static final int GLOBAL_APPROVER_TYPE = 0;
+    private static final int STATUS_SPECIFIC_APPROVER_TYPE = 1;
 
     private void updateApproverSpecificListUi(List<Integer> approverList, int approverType) {
         if (approverList == null || approverList.size() < 1) {

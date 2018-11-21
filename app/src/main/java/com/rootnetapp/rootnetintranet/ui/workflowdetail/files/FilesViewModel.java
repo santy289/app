@@ -40,7 +40,7 @@ public class FilesViewModel extends ViewModel {
     private String mToken;
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the workflow.
 
-    public FilesViewModel(FilesRepository filesRepository) {
+    protected FilesViewModel(FilesRepository filesRepository) {
         this.mRepository = filesRepository;
         this.showLoading = new MutableLiveData<>();
         this.showTemplateDocumentsUi = new MutableLiveData<>();
@@ -109,7 +109,7 @@ public class FilesViewModel extends ViewModel {
         setFilesTabCounter(documents.size());
     }
 
-    public void attachFile(String auth, List<WorkflowPresetsRequest> request, CommentFile fileRequest) {
+    protected void attachFile(String auth, List<WorkflowPresetsRequest> request, CommentFile fileRequest) {
         Disposable disposable = mRepository
                 .attachFile(auth, request, fileRequest)
                 .subscribe(this::onAttachSuccess, this::onFailure);
@@ -170,14 +170,14 @@ public class FilesViewModel extends ViewModel {
         return mErrorLiveData;
     }
 
-    public LiveData<Boolean> getObservableAttach() {
+    protected LiveData<Boolean> getObservableAttach() {
         if (mAttachLiveData == null) {
             mAttachLiveData = new MutableLiveData<>();
         }
         return mAttachLiveData;
     }
 
-    public LiveData<Integer> getObservableFilesTabCounter() {
+    protected LiveData<Integer> getObservableFilesTabCounter() {
         if (mFilesTabCounter == null) {
             mFilesTabCounter = new MutableLiveData<>();
         }

@@ -27,7 +27,7 @@ public class FilesRepository {
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
-    public FilesRepository(ApiInterface service) {
+    protected FilesRepository(ApiInterface service) {
         this.service = service;
     }
 
@@ -35,27 +35,27 @@ public class FilesRepository {
         disposables.clear();
     }
 
-    public Observable<WorkflowTypeResponse> getWorkflowType(String auth, int typeId) {
+    protected Observable<WorkflowTypeResponse> getWorkflowType(String auth, int typeId) {
         return service.getWorkflowType(auth, typeId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {
+    protected Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {
         return service.getWorkflow(auth, workflowId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<TemplatesResponse> getTemplate(String auth, int templateId) {
+    protected Observable<TemplatesResponse> getTemplate(String auth, int templateId) {
         return service.getTemplate(auth, templateId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<FilesResponse> getFiles(String auth, int workflowId) {
+    protected Observable<FilesResponse> getFiles(String auth, int workflowId) {
         return service.getFiles(auth, workflowId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<AttachResponse> attachFile(String auth, List<WorkflowPresetsRequest> request, CommentFile fileRequest) {
+    protected Observable<AttachResponse> attachFile(String auth, List<WorkflowPresetsRequest> request, CommentFile fileRequest) {
         return service.attachFile(auth, request, fileRequest).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }

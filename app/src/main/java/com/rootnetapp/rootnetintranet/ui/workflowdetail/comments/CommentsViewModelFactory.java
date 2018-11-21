@@ -1,7 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.comments;
 
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationRepository;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;

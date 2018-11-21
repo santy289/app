@@ -5,7 +5,6 @@ import android.util.Log;
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.ProfileDao;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
-import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.WorkflowApproveRejectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
@@ -31,7 +30,7 @@ public class StatusRepository {
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
-    public StatusRepository(ApiInterface service, AppDatabase database) {
+    protected StatusRepository(ApiInterface service, AppDatabase database) {
         this.service = service;
         this.profileDao = database.profileDao();
     }
@@ -47,21 +46,21 @@ public class StatusRepository {
      * @param id Id from Workflow listed as profile involved.
      * @return Returns a ProfileInvolved object with the necessary data.
      */
-    public ProfileInvolved getProfileBy(int id) {
+    protected ProfileInvolved getProfileBy(int id) {
         return profileDao.getProfilesInvolved(id);
     }
 
-    public Observable<WorkflowTypeResponse> getWorkflowType(String auth, int typeId) {
+    protected Observable<WorkflowTypeResponse> getWorkflowType(String auth, int typeId) {
         return service.getWorkflowType(auth, typeId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {
+    protected Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {
         return service.getWorkflow(auth, workflowId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    void approveWorkflow(String token, int workflowId, boolean isApproved, int nextStatus) {
+    protected void approveWorkflow(String token, int workflowId, boolean isApproved, int nextStatus) {
         Disposable disposable = service.postApproveReject(
                 token,
                 workflowId,
@@ -70,9 +69,7 @@ public class StatusRepository {
         )
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(success -> {
-                    responseApproveRejection.postValue(success);
-                }, throwable -> {
+                .subscribe(success -> responseApproveRejection.postValue(success), throwable -> {
                     Log.d(TAG, "approveWorkflow: " + throwable.getMessage());
                     showLoading.setValue(false);
                 });

@@ -21,7 +21,7 @@ public class InformationRepository {
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
-    public InformationRepository(ApiInterface service) {
+    protected InformationRepository(ApiInterface service) {
         this.service = service;
     }
 
@@ -29,12 +29,12 @@ public class InformationRepository {
         disposables.clear();
     }
 
-    public Observable<WorkflowTypeResponse> getWorkflowType(String auth, int typeId) {
+    protected Observable<WorkflowTypeResponse> getWorkflowType(String auth, int typeId) {
         return service.getWorkflowType(auth, typeId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {
+    protected Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {
         return service.getWorkflow(auth, workflowId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }

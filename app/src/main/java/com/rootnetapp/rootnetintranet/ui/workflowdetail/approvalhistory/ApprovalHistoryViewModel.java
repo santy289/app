@@ -37,7 +37,7 @@ public class ApprovalHistoryViewModel extends ViewModel {
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the workflow.
     private WorkflowDb mWorkflow; // Not in DB and more complete response from network.
 
-    public ApprovalHistoryViewModel(ApprovalHistoryRepository approvalHistoryRepository) {
+    protected ApprovalHistoryViewModel(ApprovalHistoryRepository approvalHistoryRepository) {
         this.mRepository = approvalHistoryRepository;
         this.showLoading = new MutableLiveData<>();
         this.updateApprovalHistoryList = new MutableLiveData<>();
@@ -78,9 +78,7 @@ public class ApprovalHistoryViewModel extends ViewModel {
             return approverHistoryList;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(approverHistories -> {
-                    updateApprovalHistoryList.setValue(approverHistories);
-                }, throwable -> {
+                .subscribe(approverHistories -> updateApprovalHistoryList.setValue(approverHistories), throwable -> {
                     hideHistoryApprovalList.setValue(true);
                     Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable.getMessage());
                 });
@@ -91,9 +89,7 @@ public class ApprovalHistoryViewModel extends ViewModel {
     private void getWorkflow(String auth, int workflowId) {
         Disposable disposable = mRepository
                 .getWorkflow(auth, workflowId)
-                .subscribe(this::onWorkflowSuccess, throwable -> {
-                    onFailure(throwable);
-                });
+                .subscribe(this::onWorkflowSuccess, this::onFailure);
         mDisposables.add(disposable);
     }
 

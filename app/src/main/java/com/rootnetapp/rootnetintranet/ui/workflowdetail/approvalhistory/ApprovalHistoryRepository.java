@@ -24,7 +24,7 @@ public class ApprovalHistoryRepository {
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
-    public ApprovalHistoryRepository(ApiInterface service, AppDatabase database) {
+    protected ApprovalHistoryRepository(ApiInterface service, AppDatabase database) {
         this.service = service;
         this.profileDao = database.profileDao();
     }
@@ -40,16 +40,16 @@ public class ApprovalHistoryRepository {
      * @param id Id from Workflow listed as profile involved.
      * @return Returns a ProfileInvolved object with the necessary data.
      */
-    public ProfileInvolved getProfileBy(int id) {
+    protected ProfileInvolved getProfileBy(int id) {
         return profileDao.getProfilesInvolved(id);
     }
 
-    public Observable<WorkflowTypeResponse> getWorkflowType(String auth, int typeId) {
+    protected Observable<WorkflowTypeResponse> getWorkflowType(String auth, int typeId) {
         return service.getWorkflowType(auth, typeId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {
+    protected Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {
         return service.getWorkflow(auth, workflowId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }

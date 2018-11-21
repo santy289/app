@@ -35,7 +35,7 @@ public class CommentsFragment extends Fragment {
 
     @Inject
     CommentsViewModelFactory commentsViewModelFactory;
-    CommentsViewModel commentsViewModel;
+    private CommentsViewModel commentsViewModel;
     private FragmentWorkflowDetailCommentsBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
     private String mToken;
@@ -43,7 +43,7 @@ public class CommentsFragment extends Fragment {
     private List<CommentFile> mCommentFiles;
     private CommentsAdapter mCommentsAdapter;
 
-    WorkflowDetailViewModel workflowDetailViewModel;
+    private WorkflowDetailViewModel workflowDetailViewModel;
 
     public CommentsFragment() {
         // Required empty public constructor

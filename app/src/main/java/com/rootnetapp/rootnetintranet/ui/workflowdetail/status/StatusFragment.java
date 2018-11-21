@@ -29,7 +29,6 @@ import androidx.annotation.UiThread;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -37,7 +36,7 @@ public class StatusFragment extends Fragment {
 
     @Inject
     StatusViewModelFactory statusViewModelFactory;
-    StatusViewModel statusViewModel;
+    private StatusViewModel statusViewModel;
     private FragmentWorkflowDetailStatusBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
     private String mToken;

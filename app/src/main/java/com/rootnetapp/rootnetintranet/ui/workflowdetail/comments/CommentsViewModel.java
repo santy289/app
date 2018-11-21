@@ -35,7 +35,7 @@ public class CommentsViewModel extends ViewModel {
     private String mToken;
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the workflow.
 
-    public CommentsViewModel(CommentsRepository commentsRepository) {
+    protected CommentsViewModel(CommentsRepository commentsRepository) {
         this.mRepository = commentsRepository;
         this.showLoading = new MutableLiveData<>();
     }
@@ -78,13 +78,11 @@ public class CommentsViewModel extends ViewModel {
     private void getComments(String auth, int workflowId) {
         Disposable disposable = mRepository
                 .getComments(auth, workflowId)
-                .subscribe(this::onCommentsSuccess, throwable -> {
-                    onFailure(throwable);
-                });
+                .subscribe(this::onCommentsSuccess, this::onFailure);
         mDisposables.add(disposable);
     }
 
-    public void postComment(String comment, List<CommentFile> files) {
+    protected void postComment(String comment, List<CommentFile> files) {
         showLoading.setValue(true);
         Disposable disposable = mRepository
                 .postComment(
@@ -118,28 +116,28 @@ public class CommentsViewModel extends ViewModel {
         return mErrorLiveData;
     }
 
-    public LiveData<List<Comment>> getObservableComments() {
+    protected LiveData<List<Comment>> getObservableComments() {
         if (mCommentsLiveData == null) {
             mCommentsLiveData = new MutableLiveData<>();
         }
         return mCommentsLiveData;
     }
 
-    public LiveData<Comment> getObservableComment() {
+    protected LiveData<Comment> getObservableComment() {
         if (mCommentLiveData == null) {
             mCommentLiveData = new MutableLiveData<>();
         }
         return mCommentLiveData;
     }
 
-    public LiveData<Boolean> getObservableHideComments() {
+    protected LiveData<Boolean> getObservableHideComments() {
         if (mHideComments == null) {
             mHideComments = new MutableLiveData<>();
         }
         return mHideComments;
     }
 
-    public LiveData<Integer> getObservableCommentsTabCounter() {
+    protected LiveData<Integer> getObservableCommentsTabCounter() {
         if (mCommentsTabCounter == null) {
             mCommentsTabCounter = new MutableLiveData<>();
         }

@@ -1,8 +1,10 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow.adapters;
 
 import android.content.Context;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 
 import com.rootnetapp.rootnetintranet.databinding.FormItemBooleanBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemCurrencyBinding;
@@ -10,11 +12,13 @@ import com.rootnetapp.rootnetintranet.databinding.FormItemDateBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemSingleChoiceBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemTextInputBinding;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.FieldData;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.enums.FormItemType;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.enums.FormItemViewType;
 
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatEditText;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -71,24 +75,25 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         //todo populate the corresponding views
 
         switch (getItemViewType(position)) {
+
             case FormItemViewType.TEXT_INPUT:
-                TextInputViewHolder textInputViewHolder = (TextInputViewHolder) holder;
+                populateTextInputView((TextInputViewHolder) holder, position);
                 break;
 
             case FormItemViewType.SINGLE_CHOICE:
-                SingleChoiceViewHolder singleChoiceViewHolder = (SingleChoiceViewHolder) holder;
+                populateSingleChoiceView((SingleChoiceViewHolder) holder, position);
                 break;
 
             case FormItemViewType.BOOLEAN:
-                BooleanViewHolder booleanViewHolder = (BooleanViewHolder) holder;
+                populateBooleanView((BooleanViewHolder) holder, position);
                 break;
 
             case FormItemViewType.DATE:
-                DateViewHolder dateViewHolder = (DateViewHolder) holder;
+                populateDateView((DateViewHolder) holder, position);
                 break;
 
             case FormItemViewType.CURRENCY:
-                CurrencyViewHolder currencyViewHolder = (CurrencyViewHolder) holder;
+                populateCurrencyView((CurrencyViewHolder) holder, position);
                 break;
 
             default:
@@ -109,5 +114,64 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     @Override
     public int getItemCount() {
         return mDataset.size();
+    }
+
+    private void populateTextInputView(TextInputViewHolder holder, int position) {
+        FieldData fieldData = getItem(position);
+
+        holder.getBinding().tvTitle.setText(fieldData.label); //todo whether to use label/resLabel
+
+        setTextInputParams(holder.getBinding().etInput, fieldData.type);
+    }
+
+    private void setTextInputParams(AppCompatEditText etInput, @FormItemType int type) {
+        switch (type) {
+
+            case FormItemType.TEXT:
+                etInput.setInputType(InputType.TYPE_CLASS_TEXT);
+                break;
+
+            case FormItemType.TEXT_AREA:
+                etInput.setInputType(
+                        InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+                break;
+
+            case FormItemType.PHONE:
+                etInput.setInputType(InputType.TYPE_CLASS_PHONE);
+                break;
+
+            case FormItemType.EMAIL:
+                etInput.setInputType(
+                        InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+                break;
+
+            case FormItemType.DEFAULT:
+            default:
+                break;
+        }
+    }
+
+    private void populateSingleChoiceView(SingleChoiceViewHolder holder, int position) {
+        FieldData fieldData = getItem(position);
+
+        holder.getBinding().tvTitle.setText(fieldData.label); //todo whether to use label/resLabel
+    }
+
+    private void populateBooleanView(BooleanViewHolder holder, int position) {
+        FieldData fieldData = getItem(position);
+
+        holder.getBinding().tvTitle.setText(fieldData.label); //todo whether to use label/resLabel
+    }
+
+    private void populateDateView(DateViewHolder holder, int position) {
+        FieldData fieldData = getItem(position);
+
+        holder.getBinding().tvTitle.setText(fieldData.label); //todo whether to use label/resLabel
+    }
+
+    private void populateCurrencyView(CurrencyViewHolder holder, int position) {
+        FieldData fieldData = getItem(position);
+
+        holder.getBinding().tvTitle.setText(fieldData.label); //todo whether to use label/resLabel
     }
 }

@@ -6,11 +6,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class CurrencyViewHolder extends RecyclerView.ViewHolder {
 
-    private FormItemCurrencyBinding mBinding;
+    private final FormItemCurrencyBinding mBinding;
 
     public CurrencyViewHolder(FormItemCurrencyBinding binding) {
         super(binding.getRoot());
 
         mBinding = binding;
+    }
+
+    protected FormItemCurrencyBinding getBinding(){
+        return mBinding;
     }
 }

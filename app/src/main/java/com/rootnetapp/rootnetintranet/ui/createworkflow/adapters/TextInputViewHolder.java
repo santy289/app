@@ -6,11 +6,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class TextInputViewHolder extends RecyclerView.ViewHolder {
 
-    private FormItemTextInputBinding mBinding;
+    private final FormItemTextInputBinding mBinding;
 
     public TextInputViewHolder(FormItemTextInputBinding binding) {
         super(binding.getRoot());
 
         mBinding = binding;
+    }
+
+    protected FormItemTextInputBinding getBinding() {
+        return mBinding;
     }
 }

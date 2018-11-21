@@ -6,11 +6,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class DateViewHolder extends RecyclerView.ViewHolder {
 
-    private FormItemDateBinding mBinding;
+    private final FormItemDateBinding mBinding;
 
     public DateViewHolder(FormItemDateBinding binding) {
         super(binding.getRoot());
 
         mBinding = binding;
+    }
+
+    protected FormItemDateBinding getBinding(){
+        return mBinding;
     }
 }

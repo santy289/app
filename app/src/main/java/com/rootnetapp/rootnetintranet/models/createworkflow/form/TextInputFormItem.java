@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 
 public class TextInputFormItem extends BaseFormItem {
 
+    private @Nullable String value;
     private @Nullable String hint;
     private @Nullable String regex;
     private @Nullable String regexErrorMessage;
@@ -19,7 +20,17 @@ public class TextInputFormItem extends BaseFormItem {
 
     @Override
     public boolean isValid() {
+        //todo add validation
         return false;
+    }
+
+    @Nullable
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(@Nullable String value) {
+        this.value = value;
     }
 
     @Nullable
@@ -62,6 +73,7 @@ public class TextInputFormItem extends BaseFormItem {
         private String title;
         private int tag;
         private boolean isRequired;
+        private String value;
         private String hint;
         private String regex;
         private String regexErrorMessage;
@@ -81,6 +93,12 @@ public class TextInputFormItem extends BaseFormItem {
 
         public Builder setRequired(boolean isRequired) {
             this.isRequired = isRequired;
+
+            return this;
+        }
+
+        public Builder setValue(String value) {
+            this.value = value;
 
             return this;
         }
@@ -115,6 +133,7 @@ public class TextInputFormItem extends BaseFormItem {
             item.setTitle(title);
             item.setTag(tag);
             item.setRequired(isRequired);
+            item.setValue(value);
             item.setHint(hint);
             item.setRegex(regex);
             item.setRegexErrorMessage(regexErrorMessage);

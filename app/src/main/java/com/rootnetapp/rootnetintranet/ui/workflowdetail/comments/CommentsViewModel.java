@@ -133,6 +133,13 @@ public class CommentsViewModel extends ViewModel {
         return mCommentsLiveData;
     }
 
+    public LiveData<Comment> getObservableComment() {
+        if (mCommentLiveData == null) {
+            mCommentLiveData = new MutableLiveData<>();
+        }
+        return mCommentLiveData;
+    }
+
     public LiveData<Boolean> getObservableHideComments() {
         if (mHideComments == null) {
             mHideComments = new MutableLiveData<>();

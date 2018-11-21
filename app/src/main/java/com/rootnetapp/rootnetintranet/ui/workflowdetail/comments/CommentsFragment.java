@@ -40,6 +40,7 @@ public class CommentsFragment extends Fragment {
     private String mToken;
 
     private List<CommentFile> mCommentFiles;
+    private CommentsAdapter mCommentsAdapter;
 
     public CommentsFragment() {
         // Required empty public constructor
@@ -93,6 +94,7 @@ public class CommentsFragment extends Fragment {
         commentsViewModel.getObservableError().observe(this, errorObserver);
         commentsViewModel.getObservableComments().observe(this, this::updateCommentsList);
         commentsViewModel.getObservableHideComments().observe(this, this::hideCommentsList);
+        commentsViewModel.getObservableComment().observe(this, this::addNewComment);
         commentsViewModel.getObservableCommentHeaderCounter().observe(this, this::updateTabCounter);
 
         commentsViewModel.showLoading.observe(this, this::showLoading);
@@ -130,8 +132,20 @@ public class CommentsFragment extends Fragment {
 
     @UiThread
     private void updateCommentsList(List<Comment> commentList) {
+        mCommentsAdapter = new CommentsAdapter(commentList);
         mBinding.rvComments.setLayoutManager(new LinearLayoutManager(getContext()));
-        mBinding.rvComments.setAdapter(new CommentsAdapter(commentList));
+        mBinding.rvComments.setAdapter(mCommentsAdapter);
+    }
+
+    @UiThread
+    private void addNewComment(Comment comment) {
+        if (comment != null && (null != mCommentsAdapter)) {
+            mCommentsAdapter.comments.add(0, comment);
+            mCommentsAdapter.notifyItemChanged(0);
+        } else {
+            Toast.makeText(getContext(), getString(R.string.error_comment), Toast.LENGTH_LONG).show();
+        }
+        mBinding.etComment.setText(null);
     }
 
     /**

@@ -24,10 +24,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -93,6 +95,7 @@ public class StatusFragment extends Fragment {
         });
 
         statusViewModel.getObservableError().observe(this, errorObserver);
+        statusViewModel.getObservableShowToastMessage().observe(this, this::showToastMessage);
 
         statusViewModel.showLoading.observe(this, this::showLoading);
         statusViewModel.updateStatusUi.observe(this, this::updateStatusDetails);
@@ -102,6 +105,7 @@ public class StatusFragment extends Fragment {
         statusViewModel.hideApproverListOnEmptyData
                 .observe(this, this::hideApproverListOnEmptyData);
         statusViewModel.hideProfilesInvolvedList.observe(this, this::hideProfilesInvolvedList);
+        statusViewModel.updateStatusUiFromUserAction.observe(this, this::updateStatusDetails);
     }
 
     private void setOnClickListeners() {
@@ -225,5 +229,13 @@ public class StatusFragment extends Fragment {
             mBinding.includeAllPeopleInvolved.rvAllPeopleInvolved.setVisibility(View.VISIBLE);
             mBinding.includeAllPeopleInvolved.noPeopleInvolved.setVisibility(View.GONE);
         }
+    }
+
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                getContext(),
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
     }
 }

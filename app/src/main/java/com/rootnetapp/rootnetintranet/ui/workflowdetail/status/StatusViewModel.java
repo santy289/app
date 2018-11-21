@@ -114,8 +114,8 @@ public class StatusViewModel extends ViewModel {
                 mRepository.getApproveRejectResponse(),
                 approvalResponse -> {
                     // transform WorkflowApproveRejectResponse to String[]
+
                     //WorkflowDb incomingWorkflow = approvalResponse.getWorkflow();
-                    //todo verify why this is not called after WS response
                     mWorkflow = approvalResponse.getWorkflow();
                     String[] statuses = buildArrayForStatusUpdate(mWorkflow);
 

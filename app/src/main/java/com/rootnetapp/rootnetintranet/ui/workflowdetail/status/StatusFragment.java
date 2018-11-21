@@ -99,12 +99,12 @@ public class StatusFragment extends Fragment {
         statusViewModel.showLoading.observe(this, this::showLoading);
         statusViewModel.updateStatusUi.observe(this, this::updateStatusDetails);
         statusViewModel.updateCurrentApproversList.observe(this, this::updateCurrentApproversList);
-        statusViewModel.updateProfilesInvolved.observe(this, this::updateProfilesInvolved);
-        statusViewModel.updateApproveSpinner.observe(this, this::updateApproveSpinner);
         statusViewModel.hideApproverListOnEmptyData
                 .observe(this, this::hideApproverListOnEmptyData);
-        statusViewModel.hideApproveSpinnerOnEmptyData.observe(this, this::hideApproveSpinnerOnEmptyData);
+        statusViewModel.updateProfilesInvolved.observe(this, this::updateProfilesInvolved);
         statusViewModel.hideProfilesInvolvedList.observe(this, this::hideProfilesInvolvedList);
+        statusViewModel.updateApproveSpinner.observe(this, this::updateApproveSpinner);
+        statusViewModel.hideApproveSpinnerOnEmptyData.observe(this, this::hideApproveSpinnerOnEmptyData);
         statusViewModel.updateStatusUiFromUserAction.observe(this, this::updateStatusDetails);
     }
 

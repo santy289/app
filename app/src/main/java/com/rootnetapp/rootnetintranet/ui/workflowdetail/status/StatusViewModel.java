@@ -12,10 +12,8 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.SpecificApprovers;
 import com.rootnetapp.rootnetintranet.models.createworkflow.StatusSpecific;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.Information;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +41,7 @@ public class StatusViewModel extends ViewModel {
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
     private MutableLiveData<Integer> mErrorLiveData;
+    private MutableLiveData<Integer> showToastMessage;
 
     protected MutableLiveData<Boolean> showLoading;
     protected MutableLiveData<List<Approver>> updateCurrentApproversList;
@@ -51,16 +50,8 @@ public class StatusViewModel extends ViewModel {
     protected MutableLiveData<Boolean> hideApproverListOnEmptyData;
     protected MutableLiveData<List<ProfileInvolved>> updateProfilesInvolved;
     protected MutableLiveData<Boolean> hideProfilesInvolvedList;
-    protected MutableLiveData<Boolean> hideGlobalApprovers;
-    protected MutableLiveData<Boolean> hideSpecificApprovers;
-    protected MutableLiveData<List<ProfileInvolved>> updateGlobalApproverList;
-    protected MutableLiveData<List<ProfileInvolved>> updateSpecificApproverList;
-    protected MutableLiveData<List<ApproverHistory>> updateApprovalHistoryList;
-    protected MutableLiveData<Boolean> hideHistoryApprovalList;
     protected MutableLiveData<Boolean> setWorkflowIsOpen;
-    protected MutableLiveData<List<Information>> updateInformationListUi;
     protected MutableLiveData<String[]> updateStatusUi;
-    protected MutableLiveData<Integer> showToastMessage;
     protected LiveData<String[]> updateStatusUiFromUserAction;
     protected LiveData<Boolean> handleShowLoadingByRepo;
 
@@ -77,14 +68,7 @@ public class StatusViewModel extends ViewModel {
         this.hideApproverListOnEmptyData = new MutableLiveData<>();
         this.updateProfilesInvolved = new MutableLiveData<>();
         this.hideProfilesInvolvedList = new MutableLiveData<>();
-        this.hideGlobalApprovers = new MutableLiveData<>();
-        this.hideSpecificApprovers = new MutableLiveData<>();
-        this.updateGlobalApproverList = new MutableLiveData<>();
-        this.updateSpecificApproverList = new MutableLiveData<>();
-        this.updateApprovalHistoryList = new MutableLiveData<>();
-        this.hideHistoryApprovalList = new MutableLiveData<>();
         this.setWorkflowIsOpen = new MutableLiveData<>();
-        this.updateInformationListUi = new MutableLiveData<>();
         this.updateStatusUi = new MutableLiveData<>();
 
         subscribe();
@@ -338,19 +322,7 @@ public class StatusViewModel extends ViewModel {
 
     private void updateUIWithWorkflow(WorkflowDb workflow) {
         setWorkflowIsOpen.setValue(workflow.isOpen());
-//        updateWorkflowStatusUi(workflow); //todo check
         updateProfilesInvolvedUi(workflow.getProfilesInvolved());
-
-        SpecificApprovers approvers = workflow.getSpecificApprovers();
-        updateApproverSpecificListUi(approvers.global, GLOBAL_APPROVER_TYPE);
-
-        List<Integer> statusSpecific = new ArrayList<>();
-        for (int i = 0; i < approvers.statusSpecific.size(); i++) {
-            statusSpecific.add(approvers.statusSpecific.get(i).user);
-        }
-
-        updateApproverSpecificListUi(statusSpecific, STATUS_SPECIFIC_APPROVER_TYPE);
-        updateApproverHistoryListUi(workflow.getWorkflowApprovalHistory());
     }
 
     private void updateUIWithWorkflowType(WorkflowTypeDb currentWorkflowType, int statusId) {
@@ -509,84 +481,6 @@ public class StatusViewModel extends ViewModel {
         }
 
         updateApproveSpinner.setValue(nextStatusList);
-    }
-
-    private void updateApproverHistoryListUi(List<ApproverHistory> approverHistoryList) {
-        if (approverHistoryList == null || approverHistoryList.size() < 1) {
-            hideHistoryApprovalList.setValue(true);
-            return;
-        }
-
-        Disposable disposable = Observable.fromCallable(() -> {
-            ApproverHistory approverHistory;
-            ProfileInvolved profileInvolved;
-
-            for (int i = 0; i < approverHistoryList.size(); i++) {
-                approverHistory = approverHistoryList.get(i);
-                profileInvolved = mRepository.getProfileBy(approverHistory.approverId);
-                if (profileInvolved == null) {
-                    continue;
-                }
-                approverHistory.avatarPicture = profileInvolved.picture;
-                return approverHistoryList;
-            }
-            return approverHistoryList;
-        }).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(approverHistories -> {
-                    updateApprovalHistoryList.setValue(approverHistories);
-                }, throwable -> {
-                    hideHistoryApprovalList.setValue(true);
-                    Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable
-                            .getMessage());
-                });
-
-        mDisposables.add(disposable);
-    }
-
-    private static final int GLOBAL_APPROVER_TYPE = 0;
-    private static final int STATUS_SPECIFIC_APPROVER_TYPE = 1;
-
-    private void updateApproverSpecificListUi(List<Integer> approverList, int approverType) {
-        if (approverList == null || approverList.size() < 1) {
-            if (approverType == GLOBAL_APPROVER_TYPE) {
-                hideGlobalApprovers.setValue(true);
-            } else if (approverType == STATUS_SPECIFIC_APPROVER_TYPE) {
-                hideSpecificApprovers.setValue(true);
-            }
-            return;
-        }
-
-        Disposable disposable = Observable.fromCallable(() -> {
-            ProfileInvolved profileInvolved;
-            List<ProfileInvolved> profileInvolvedList = new ArrayList<>();
-            for (int i = 0; i < approverList.size(); i++) {
-                profileInvolved = mRepository.getProfileBy(approverList.get(i));
-                if (profileInvolved == null) {
-                    continue;
-                }
-                profileInvolvedList.add(profileInvolved);
-            }
-            return profileInvolvedList;
-        }).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(profileInvolvedList -> {
-                    if (approverType == STATUS_SPECIFIC_APPROVER_TYPE) {
-                        updateSpecificApproverList.setValue(profileInvolvedList);
-                    } else if (approverType == GLOBAL_APPROVER_TYPE) {
-                        updateGlobalApproverList.setValue(profileInvolvedList);
-                    }
-                }, throwable -> {
-                    if (approverType == GLOBAL_APPROVER_TYPE) {
-                        hideGlobalApprovers.setValue(true);
-                    } else if (approverType == STATUS_SPECIFIC_APPROVER_TYPE) {
-                        hideSpecificApprovers.setValue(true);
-                    }
-                    Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable
-                            .getMessage());
-                });
-
-        mDisposables.add(disposable);
     }
 
     /**

@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.ui.createworkflow.enums;
+package com.rootnetapp.rootnetintranet.models.createworkflow.form;
 
 import android.view.View;
 
@@ -7,11 +7,11 @@ import java.lang.annotation.RetentionPolicy;
 
 import androidx.annotation.IntDef;
 
-import static com.rootnetapp.rootnetintranet.ui.createworkflow.enums.FormItemViewType.BOOLEAN;
-import static com.rootnetapp.rootnetintranet.ui.createworkflow.enums.FormItemViewType.CURRENCY;
-import static com.rootnetapp.rootnetintranet.ui.createworkflow.enums.FormItemViewType.DATE;
-import static com.rootnetapp.rootnetintranet.ui.createworkflow.enums.FormItemViewType.SINGLE_CHOICE;
-import static com.rootnetapp.rootnetintranet.ui.createworkflow.enums.FormItemViewType.TEXT_INPUT;
+import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.BOOLEAN;
+import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.CURRENCY;
+import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.DATE;
+import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.SINGLE_CHOICE;
+import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.TEXT_INPUT;
 
 /**
  * Defines the {@link View} layout for the form item. Every form item should have defined a {@link

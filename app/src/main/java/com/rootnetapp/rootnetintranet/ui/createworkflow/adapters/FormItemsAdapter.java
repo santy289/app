@@ -4,16 +4,15 @@ import android.content.Context;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 
 import com.rootnetapp.rootnetintranet.databinding.FormItemBooleanBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemCurrencyBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemDateBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemSingleChoiceBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemTextInputBinding;
-import com.rootnetapp.rootnetintranet.ui.createworkflow.FieldData;
-import com.rootnetapp.rootnetintranet.ui.createworkflow.enums.FormItemType;
-import com.rootnetapp.rootnetintranet.ui.createworkflow.enums.FormItemViewType;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
 
 import java.util.List;
 
@@ -24,9 +23,9 @@ import androidx.recyclerview.widget.RecyclerView;
 public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final Context mContext;
-    private List<FieldData> mDataset;
+    private List<BaseFormItem> mDataset;
 
-    public FormItemsAdapter(Context context, List<FieldData> dataset) {
+    public FormItemsAdapter(Context context, List<BaseFormItem> dataset) {
         this.mContext = context;
         this.mDataset = dataset;
     }
@@ -70,10 +69,6 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             return;
         }
 
-        FieldData fieldData = getItem(position);
-
-        //todo populate the corresponding views
-
         switch (getItemViewType(position)) {
 
             case FormItemViewType.TEXT_INPUT:
@@ -104,10 +99,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     @Override
     public @FormItemViewType
     int getItemViewType(int position) {
-        return getItem(position).viewType;
+        return getItem(position).getViewType();
     }
 
-    protected FieldData getItem(int position) {
+    protected BaseFormItem getItem(int position) {
         return mDataset.get(position);
     }
 
@@ -117,65 +112,64 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     private void populateTextInputView(TextInputViewHolder holder, int position) {
-        FieldData fieldData = getItem(position);
+        TextInputFormItem item = (TextInputFormItem) getItem(position);
 
-        holder.getBinding().tvTitle.setText(fieldData.label); //todo whether to use label/resLabel
+        holder.getBinding().tvTitle.setText(item.getTitle());
 
-        setTextInputParams(holder.getBinding().etInput, fieldData.type);
+        setTextInputParams(holder.getBinding().etInput, item.getInputType());
     }
 
-    private void setTextInputParams(AppCompatEditText etInput, @FormItemType int type) {
+    private void setTextInputParams(AppCompatEditText etInput, int type) {
         switch (type) {
 
-            case FormItemType.TEXT_AREA:
+            case TextInputFormItem.InputType.TEXT_AREA:
                 etInput.setInputType(
                         InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
                 break;
 
-            case FormItemType.PHONE:
+            case TextInputFormItem.InputType.PHONE:
                 etInput.setInputType(InputType.TYPE_CLASS_PHONE);
                 break;
 
-            case FormItemType.EMAIL:
+            case TextInputFormItem.InputType.EMAIL:
                 etInput.setInputType(
                         InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
                 break;
 
-            case FormItemType.DEFAULT:
-            case FormItemType.TEXT:
-                etInput.setInputType(InputType.TYPE_CLASS_TEXT);
+            case TextInputFormItem.InputType.TEXT:
             default:
+                etInput.setInputType(InputType.TYPE_CLASS_TEXT);
                 break;
         }
     }
 
     private void populateSingleChoiceView(SingleChoiceViewHolder holder, int position) {
-        FieldData fieldData = getItem(position);
-
-        holder.getBinding().tvTitle.setText(fieldData.label); //todo whether to use label/resLabel
-        holder.getBinding().spSteps.setAdapter(
-                new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
-                        fieldData.options));
+//        FieldData fieldData = getItem(position);
+//
+//        holder.getBinding().tvTitle.setText(fieldData.label);
+//        holder.getBinding().spSteps.setAdapter(
+//                new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
+//                        fieldData.options));
     }
 
     private void populateBooleanView(BooleanViewHolder holder, int position) {
-        FieldData fieldData = getItem(position);
-
-        holder.getBinding().tvTitle.setText(fieldData.label); //todo whether to use label/resLabel
+//        FieldData fieldData = getItem(position);
+//
+//        holder.getBinding().tvTitle.setText(fieldData.label);
     }
 
     private void populateDateView(DateViewHolder holder, int position) {
-        FieldData fieldData = getItem(position);
-
-        holder.getBinding().tvTitle.setText(fieldData.label); //todo whether to use label/resLabel
+//        FieldData fieldData = getItem(position);
+//
+//        holder.getBinding().tvTitle.setText(fieldData.label);
     }
 
     private void populateCurrencyView(CurrencyViewHolder holder, int position) {
-        FieldData fieldData = getItem(position);
-
-        holder.getBinding().tvTitle.setText(fieldData.label); //todo whether to use label/resLabel
-        holder.getBinding().spCurrency.setAdapter(
-                new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
-                        fieldData.options));
+//        FieldData fieldData = getItem(position);
+//
+//        holder.getBinding().tvTitle.setText(fieldData.label);
+//        holder.getBinding().spCurrency.setAdapter(
+//                new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
+//                        fieldData.options));
     }
 }

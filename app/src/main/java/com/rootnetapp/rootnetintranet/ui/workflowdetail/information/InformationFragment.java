@@ -104,6 +104,7 @@ public class InformationFragment extends Fragment {
     private void updateInformationListUi(List<Information> informationList) {
         mBinding.rvInformation.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvInformation.setAdapter(new InformationAdapter(informationList));
+        mBinding.rvInformation.setNestedScrollingEnabled(false);
     }
 
     @UiThread
@@ -112,10 +113,14 @@ public class InformationFragment extends Fragment {
             mBinding.tvTitleImportantSteps.setVisibility(View.VISIBLE);
             mBinding.viewImportantSteps.setVisibility(View.VISIBLE);
             mBinding.rvSteps.setVisibility(View.VISIBLE);
+            mBinding.tvTitleInformation.setVisibility(View.VISIBLE);
+            mBinding.viewInformation.setVisibility(View.VISIBLE);
         } else {
             mBinding.tvTitleImportantSteps.setVisibility(View.GONE);
             mBinding.viewImportantSteps.setVisibility(View.GONE);
             mBinding.rvSteps.setVisibility(View.GONE);
+            mBinding.tvTitleInformation.setVisibility(View.GONE);
+            mBinding.viewInformation.setVisibility(View.GONE);
         }
     }
 
@@ -123,5 +128,6 @@ public class InformationFragment extends Fragment {
     private void loadImportantInfoSection(List<Step> steps) {
         mBinding.rvSteps.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvSteps.setAdapter(new StepsAdapter(steps));
+        mBinding.rvSteps.setNestedScrollingEnabled(false);
     }
 }

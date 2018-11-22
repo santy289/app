@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -19,7 +19,6 @@
                 android:id="@+id/tv_title_important_steps"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
                 android:text="@string/workflow_detail_information_fragment_important_things"
                 android:textAllCaps="true"
                 android:textColor="@color/workflow_details_section_title"
@@ -62,6 +61,7 @@
                 app:layout_constraintTop_toBottomOf="@id/rv_steps" />
 
             <View
+                android:id="@+id/view_information"
                 android:layout_width="0dp"
                 android:layout_height="2dp"
                 android:layout_marginStart="16dp"
@@ -83,5 +83,5 @@
             <!--android:layout_height="@dimen/workflow_detail_standard_height-->
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 </layout>

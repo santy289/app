@@ -15,10 +15,10 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="@drawable/spinner_bg_white"
-            app:layout_constraintStart_toStartOf="@+id/sp_steps"
-            app:layout_constraintEnd_toEndOf="@+id/sp_steps"
             app:layout_constraintBottom_toBottomOf="@+id/sp_steps"
-            app:layout_constraintTop_toTopOf="@+id/sp_steps"/>
+            app:layout_constraintEnd_toEndOf="@+id/sp_steps"
+            app:layout_constraintStart_toStartOf="@+id/sp_steps"
+            app:layout_constraintTop_toTopOf="@+id/sp_steps" />
 
         <Spinner
             android:id="@+id/sp_steps"
@@ -36,11 +36,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
             android:layout_marginTop="8dp"
-            android:text="@string/workflow_detail_status_fragment_reject"
+            android:layout_marginEnd="8dp"
             app:backgroundTint="@color/red"
             app:icon="@drawable/ic_close_black_24dp"
+            app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:layout_constraintEnd_toStartOf="@+id/btn_approve"
             app:layout_constraintStart_toStartOf="parent"
@@ -52,9 +52,10 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:text="@string/workflow_detail_status_fragment_approve"
             app:backgroundTint="@color/green"
             app:icon="@drawable/ic_check_accent_24dp"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/btn_reject"
             app:layout_constraintTop_toTopOf="@id/btn_reject" />

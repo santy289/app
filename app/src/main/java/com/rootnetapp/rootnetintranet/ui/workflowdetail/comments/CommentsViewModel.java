@@ -61,12 +61,14 @@ public class CommentsViewModel extends ViewModel {
 
         if (comments == null) {
             showLoading.setValue(false);
+            mHideComments.setValue(true);
             return;
         }
         commentsCounter = comments.size();
         setCommentsTabCounter(comments.size());
         mCommentsLiveData.setValue(commentsResponse.getResponse());
         showLoading.setValue(false);
+        mHideComments.setValue(false);
     }
 
     private void onPostCommentSuccess(CommentResponse commentResponse) {

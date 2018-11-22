@@ -230,6 +230,8 @@
     <string name="workflow_detail_status_fragment_all_people_involved">People Involved In All Statuses</string>
     <string name="workflow_detail_status_fragment_approve">Approve</string>
     <string name="workflow_detail_status_fragment_reject">Reject</string>
+    <string name="workflow_detail_status_fragment_spinner_title">- Select Step -</string>
+    <string name="workflow_detail_status_fragment_must_select_step">You must select a step first</string>
     <!--InformationFragment-->
     <string name="workflow_detail_information_fragment_title">@string/workflow_detail_information_fragment_information</string>
     <string name="workflow_detail_information_fragment_important_things">Important Things About This Step</string>

@@ -228,6 +228,8 @@
     <string name="workflow_detail_status_fragment_all_people_involved">Personas Involucradas en los Estatus</string>
     <string name="workflow_detail_status_fragment_approve">Aprobar</string>
     <string name="workflow_detail_status_fragment_reject">Rechazar</string>
+    <string name="workflow_detail_status_fragment_spinner_title">- Elija un Estatus -</string>
+    <string name="workflow_detail_status_fragment_must_select_step">Debes seleccionar un estatus</string>
     <!--InformationFragment-->
     <string name="workflow_detail_information_fragment_title">@string/workflow_detail_information_fragment_information</string>
     <string name="workflow_detail_information_fragment_important_things">Datos Importantes Sobre Este Estatus</string>

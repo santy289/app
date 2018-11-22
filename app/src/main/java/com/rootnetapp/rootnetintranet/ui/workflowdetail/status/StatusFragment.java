@@ -103,7 +103,8 @@ public class StatusFragment extends Fragment {
         statusViewModel.updateProfilesInvolved.observe(this, this::updateProfilesInvolved);
         statusViewModel.hideProfilesInvolvedList.observe(this, this::hideProfilesInvolvedList);
         statusViewModel.updateApproveSpinner.observe(this, this::updateApproveSpinner);
-        statusViewModel.hideApproveSpinnerOnEmptyData.observe(this, this::hideApproveSpinnerOnEmptyData);
+        statusViewModel.hideApproveSpinnerOnEmptyData
+                .observe(this, this::hideApproveSpinnerOnEmptyData);
         statusViewModel.updateStatusUiFromUserAction.observe(this, this::updateStatusDetails);
     }
 
@@ -150,19 +151,36 @@ public class StatusFragment extends Fragment {
             return;
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+        if (nextStatuses == null || nextStatuses.size() == 0) return;
+
+        String hint = getString(R.string.workflow_detail_status_fragment_spinner_title);
+        // check whether the hint has already been added
+        if (!nextStatuses.get(0).equals(hint)) {
+            // add hint as first item
+            nextStatuses.add(0, hint);
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 context,
                 android.R.layout.simple_spinner_dropdown_item,
                 nextStatuses
         );
         mBinding.includeNextStep.spSteps.setAdapter(adapter);
 
+        // listener to keep track of selected item
         mBinding.includeNextStep.spSteps
                 .setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position,
                                                long id) {
-                        statusViewModel.setApproveSpinnerItemSelection(position);
+
+                        Integer stepIndex;
+
+                        //account for hint as the first item
+                        if (position == 0) stepIndex = null; //null gets ignored by API call
+                        else stepIndex = position - 1;
+
+                        statusViewModel.setApproveSpinnerItemSelection(stepIndex);
                     }
 
                     @Override

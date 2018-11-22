@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
@@ -55,7 +56,7 @@ public class StatusViewModel extends ViewModel {
     protected LiveData<String[]> updateStatusUiFromUserAction;
     protected LiveData<Boolean> handleShowLoadingByRepo;
 
-    private int mApproveSpinnerItemSelection;
+    private @Nullable Integer mApproveSpinnerItemSelection;
 
     private String mToken;
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the workflow.
@@ -288,10 +289,20 @@ public class StatusViewModel extends ViewModel {
     }
 
     protected void handleApproveAction() {
+        if (mApproveSpinnerItemSelection == null) {
+            showToastMessage.setValue(R.string.workflow_detail_status_fragment_must_select_step);
+            return;
+        }
+
         handleApproveOrRejectAction(mApproveSpinnerItemSelection, true);
     }
 
     protected void handleRejectAction() {
+        if (mApproveSpinnerItemSelection == null) {
+            showToastMessage.setValue(R.string.workflow_detail_status_fragment_must_select_step);
+            return;
+        }
+
         handleApproveOrRejectAction(mApproveSpinnerItemSelection, false);
     }
 
@@ -387,7 +398,8 @@ public class StatusViewModel extends ViewModel {
             return approverList;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(approverListResult -> generateApproverListForStatusSpecificIds(statusSpecificList,
+                .subscribe(approverListResult -> generateApproverListForStatusSpecificIds(
+                        statusSpecificList,
                         approverListResult), throwable -> {
                     generateApproverListForStatusSpecificIds(statusSpecificList, approverList);
                     Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable
@@ -531,7 +543,7 @@ public class StatusViewModel extends ViewModel {
         updateProfilesInvolved.setValue(profiles);
     }
 
-    protected void setApproveSpinnerItemSelection(int approveSpinnerItemSelection){
+    protected void setApproveSpinnerItemSelection(@Nullable Integer approveSpinnerItemSelection) {
         this.mApproveSpinnerItemSelection = approveSpinnerItemSelection;
     }
 

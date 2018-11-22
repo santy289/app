@@ -38,7 +38,6 @@ public class CommentsFragment extends Fragment {
     private CommentsViewModel commentsViewModel;
     private FragmentWorkflowDetailCommentsBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
-    private String mToken;
 
     private List<CommentFile> mCommentFiles;
     private CommentsAdapter mCommentsAdapter;
@@ -80,14 +79,14 @@ public class CommentsFragment extends Fragment {
 
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        mToken = "Bearer " + prefs.getString("token", "");
+        String token = "Bearer " + prefs.getString("token", "");
 
         mCommentFiles = new ArrayList<>();
 
         setupSwitch();
         setOnClickListeners();
         subscribe();
-        commentsViewModel.initDetails(mToken, mWorkflowListItem);
+        commentsViewModel.initDetails(token, mWorkflowListItem);
 
         return view;
     }

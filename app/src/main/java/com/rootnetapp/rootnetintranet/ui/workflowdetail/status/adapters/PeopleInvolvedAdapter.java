@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters;
+package com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters;
 
 import android.content.Context;
 import androidx.annotation.NonNull;

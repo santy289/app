@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters;
+package com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters;
 
 import androidx.annotation.StringRes;
 

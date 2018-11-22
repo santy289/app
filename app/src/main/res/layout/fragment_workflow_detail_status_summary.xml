@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/lyt_status_summary"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/border_workflow_detail"
+        android:padding="10dp"
+        android:visibility="visible">
+
+        <TextView
+            android:id="@+id/tv_title_last_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/workflow_detail_status_fragment_status_summary_last_status"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_last_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/low_gray_text"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="@+id/tv_title_last_status"
+            app:layout_constraintTop_toBottomOf="@+id/tv_title_last_status"
+            tools:text="Planeación de Estatus" />
+
+        <TextView
+            android:id="@+id/tv_title_current_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/black"
+            android:text="@string/workflow_detail_status_fragment_status_summary_current_status"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="@+id/tv_last_status"
+            app:layout_constraintTop_toBottomOf="@+id/tv_last_status" />
+
+        <View
+            android:id="@+id/view_circle"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/circle"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_title_current_status"
+            app:layout_constraintStart_toEndOf="@+id/tv_title_current_status"
+            app:layout_constraintTop_toTopOf="@+id/tv_title_current_status" />
+
+        <TextView
+            android:id="@+id/tv_current_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/dark_gray"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="@+id/tv_title_current_status"
+            app:layout_constraintTop_toBottomOf="@+id/tv_title_current_status"
+            tools:text="Consultoría de Software" />
+
+        <TextView
+            android:id="@+id/tv_title_next_statuses"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/workflow_detail_status_fragment_status_summary_next_status"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="@+id/tv_title_last_status"
+            app:layout_constraintTop_toBottomOf="@+id/tv_current_status" />
+
+        <TextView
+            android:id="@+id/tv_next_statuses"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/low_gray_text"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="@+id/tv_title_next_statuses"
+            app:layout_constraintTop_toBottomOf="@+id/tv_title_next_statuses"
+            tools:text="Desarrollo de Software, Más Consultas" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

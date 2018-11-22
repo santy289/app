@@ -1,6 +1,8 @@
-package com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters;
+package com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters;
 
 import android.content.Context;
+
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -24,8 +26,9 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsViewholder>{
         this.steps = steps;
     }
 
+    @NonNull
     @Override
-    public StepsViewholder onCreateViewHolder(ViewGroup viewGroup, int i) {
+    public StepsViewholder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         LayoutInflater layoutInflater =
                 LayoutInflater.from(viewGroup.getContext());
         StepsItemBinding itemBinding =
@@ -35,7 +38,7 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsViewholder>{
     }
 
     @Override
-    public void onBindViewHolder(StepsViewholder holder, int i) {
+    public void onBindViewHolder(@NonNull StepsViewholder holder, int i) {
         Step step = steps.get(i);
         holder.binding.tvSteptitle.setText(step.getTitle());
         holder.binding.tvStepcontent.setText(step.getText());

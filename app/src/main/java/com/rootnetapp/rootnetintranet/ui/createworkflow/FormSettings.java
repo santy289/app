@@ -1,6 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
-import androidx.collection.ArrayMap;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -23,7 +22,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.Information;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.Information;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
@@ -37,6 +36,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import androidx.collection.ArrayMap;
 import me.riddhimanadib.formmaster.FormBuilder;
 
 public class FormSettings {

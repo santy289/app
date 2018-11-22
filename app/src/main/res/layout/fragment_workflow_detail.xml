@@ -1,801 +1,92 @@
-<layout
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/white"
-        android:orientation="vertical"
         tools:context="com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/tv_workflow_id"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/workflow_details_section_title"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_open_closed"
+            app:layout_constraintEnd_toStartOf="@+id/tv_open_closed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="SEM-002" />
 
-            <TextView
-                android:id="@+id/tv_workflowid"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:background="@color/white"
-                android:paddingStart="8dp"
-                android:paddingTop="10dp"
-                android:paddingEnd="5dp"
-                android:paddingBottom="10dp"
-                android:text="@string/workflow_id"
-                android:textColor="@color/colorPrimaryDark"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/tv_open_closed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/round_corner"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:backgroundTint="@color/green"
+            tools:text="@string/open" />
 
-            <TextView
-                android:id="@+id/detail_workflow_id"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="5dp"
-                android:paddingTop="10dp"
-                android:paddingEnd="5dp"
-                android:paddingBottom="10dp"
-                android:textColor="@color/colorPrimaryDark"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:layout_constraintBaseline_toBaselineOf="@+id/tv_workflowid"
-                app:layout_constraintStart_toEndOf="@+id/tv_workflowid"
-                tools:text="TEST" />
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="tv_workflow_id,tv_open_closed" />
 
-            <ImageView
-                android:id="@+id/detail_message_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/detail_message_text"
-                app:layout_constraintHorizontal_bias="0.85"
-                app:layout_constraintHorizontal_chainStyle="packed"
-                app:layout_constraintStart_toEndOf="@+id/detail_workflow_id"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.29000002"
-                app:srcCompat="@drawable/ic_forum_primary_dark_24dp" />
-
-            <TextView
-                android:id="@+id/detail_message_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="(0)"
-                app:layout_constraintBaseline_toBaselineOf="@+id/detail_workflow_id"
-                app:layout_constraintEnd_toStartOf="@+id/detail_clipboard_icon"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/detail_message_icon"
-                tools:text="(20)" />
-
-            <ImageView
-                android:id="@+id/detail_clipboard_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/detail_clipboard_text"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/detail_message_text"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.29000002"
-                app:srcCompat="@drawable/ic_assignment_primary_dark_24dp" />
-
-            <TextView
-                android:id="@+id/detail_clipboard_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="(0)"
-                app:layout_constraintBaseline_toBaselineOf="@+id/detail_message_text"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/detail_clipboard_icon"
-                tools:text="(20)" />
-
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-
+        <TextView
+            android:id="@+id/tv_workflow_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/tv_workflow_id"
+            app:layout_constraintTop_toBottomOf="@+id/barrier_title"
+            tools:text="Ejecución de proyecto de software" />
 
         <View
+            android:id="@+id/view_separator"
             android:layout_width="match_parent"
-            android:layout_height="0.5dp"
-            android:background="@color/detailsColor" />
+            android:layout_height="1dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/detailsColor"
+            app:layout_constraintTop_toBottomOf="@id/tv_workflow_name" />
 
-        <ScrollView
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/view_pager"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/view_separator">
 
-            <LinearLayout
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tab_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingEnd="15dp"
-                android:paddingStart="15dp">
+                android:layout_gravity="top"
+                app:tabIndicatorColor="@color/colorAccent"
+                app:tabMode="scrollable" />
+        </androidx.viewpager.widget.ViewPager>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/border"
-                    android:orientation="vertical">
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-
-                    <RelativeLayout
-                        android:id="@+id/hdr_graph"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingBottom="5dp"
-                        android:paddingEnd="10dp"
-                        android:paddingStart="10dp"
-                        android:paddingTop="5dp">
-
-                        <TextView
-                            android:id="@+id/tv_workflowproject"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
-                            android:layout_centerVertical="true"
-                            android:layout_marginEnd="10dp"
-                            android:layout_marginStart="10dp"
-                            android:text="@string/workflow_project"
-                            android:textColor="@color/colorPrimaryDark" />
-
-                        <TextView
-                            android:id="@+id/txt_open_closed"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_toEndOf="@id/tv_workflowproject"
-                            android:paddingTop="5dp"
-                            android:paddingBottom="5dp"
-                            android:paddingEnd="10dp"
-                            android:paddingStart="10dp"
-                            android:textColor="@color/white"
-                            android:textStyle="bold"
-                            android:textAllCaps="true"
-                            android:background="@drawable/round_corner"
-                            android:text="@string/open"
-                            tools:backgroundTint="@color/green" />
-
-                        <ImageView
-                            android:id="@+id/btn_arrow"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:padding="10dp"
-                            android:src="@drawable/ic_keyboard_arrow_down_black_24dp"
-                            android:tint="@color/transparentArrow" />
-
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:id="@+id/lyt_graph"
-                        android:layout_width="match_parent"
-                        android:layout_height="250dp"
-                        android:paddingBottom="10dp"
-                        android:paddingEnd="10dp"
-                        android:paddingStart="10dp"
-                        android:paddingTop="10dp"
-                        android:visibility="gone">
-
-                        <include
-                            android:id="@+id/detail_status_workflow"
-                            layout="@layout/workflow_detail_statuses" />
-
-                    </RelativeLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="0.5dp"
-                        android:background="@color/detailsColor" />
-
-                    <RelativeLayout
-                        android:id="@+id/hdr_important"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingBottom="5dp"
-                        android:paddingEnd="10dp"
-                        android:paddingStart="10dp"
-                        android:paddingTop="5dp">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
-                            android:layout_centerVertical="true"
-                            android:layout_marginEnd="10dp"
-                            android:layout_marginStart="10dp"
-                            android:layout_toStartOf="@+id/btn_arrow_2"
-                            android:text="@string/important_things"
-                            android:textColor="@color/colorPrimaryDark" />
-
-
-                        <ImageView
-                            android:id="@+id/btn_arrow_2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:padding="10dp"
-                            android:src="@drawable/ic_keyboard_arrow_down_black_24dp"
-                            android:tint="@color/transparentArrow" />
-
-                    </RelativeLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="0.5dp"
-                        android:background="@color/detailsColor" />
-
-                    <FrameLayout
-                        android:id="@+id/lyt_important"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/workflow_detail_standard_height"
-                        android:background="@color/workflowListBg"
-                        android:padding="5dp"
-                        android:visibility="gone">
-
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/rec_steps"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
-
-                    </FrameLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="0.5dp"
-                        android:background="@color/detailsColor" />
-
-                    <RelativeLayout
-                        android:id="@+id/hdr_nextstep"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingBottom="5dp"
-                        android:paddingEnd="10dp"
-                        android:paddingStart="10dp"
-                        android:paddingTop="5dp">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
-                            android:layout_centerVertical="true"
-                            android:layout_marginEnd="10dp"
-                            android:layout_marginStart="10dp"
-                            android:layout_toStartOf="@+id/btn_arrow_3"
-                            android:text="@string/status_approvers"
-                            android:textColor="@color/colorPrimaryDark" />
-
-
-                        <ImageView
-                            android:id="@+id/btn_arrow_3"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:padding="10dp"
-                            android:src="@drawable/ic_keyboard_arrow_down_black_24dp"
-                            android:tint="@color/transparentArrow" />
-
-                    </RelativeLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="0.5dp"
-                        android:background="@color/detailsColor" />
-
-                    <RelativeLayout
-                        android:id="@+id/lyt_nextstep"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@color/workflowListBg"
-                        android:padding="5dp"
-                        android:visibility="gone"
-                        tools:visibility="gone">
-
-                        <RelativeLayout
-                            android:id="@+id/lyt_spinner"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
-
-
-                            <TextView
-                                android:id="@+id/detail_no_more_status"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/no_more_status"
-                                android:layout_centerVertical="true"
-                                android:layout_centerHorizontal="true"
-                                android:layout_gravity="center"
-                                android:layout_marginStart="5dp"
-                                android:gravity="center"
-                                android:visibility="gone"
-                                android:textAppearance="@android:style/TextAppearance.Material.Title"
-                                tools:visibility="visible" />
-
-                            <RelativeLayout
-                                android:id="@+id/detail_approve_spinner_background"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_centerVertical="true"
-                                android:layout_alignParentEnd="true"
-                                android:background="@drawable/spinner_bg"
-                                android:paddingBottom="10dp"
-                                android:paddingEnd="10dp"
-                                android:paddingStart="10dp"
-                                android:paddingTop="10dp">
-
-                                <Spinner
-                                    android:id="@+id/detail_approve_spinner"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="28dp"
-                                    android:layout_centerVertical="true"
-                                    android:layout_gravity="center"
-                                    android:layout_marginStart="5dp"
-                                    android:background="@android:color/transparent"
-                                    android:gravity="center"
-                                    android:spinnerMode="dialog"
-                                    android:textSize="12sp" />
-
-                                <ImageView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_alignParentEnd="true"
-                                    android:layout_centerVertical="true"
-                                    android:layout_gravity="center"
-                                    android:src="@drawable/ic_keyboard_arrow_down_black_24dp" />
-                            </RelativeLayout>
-                        </RelativeLayout>
-
-                        <androidx.constraintlayout.widget.ConstraintLayout
-                            android:id="@+id/detail_approve_buttons"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@+id/lyt_spinner">
-
-                            <Button
-                                android:id="@+id/btn_reject"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_centerVertical="true"
-                                android:layout_marginTop="8dp"
-                                android:layout_marginEnd="8dp"
-                                android:layout_marginBottom="8dp"
-                                android:backgroundTint="@color/red"
-                                android:text="x"
-                                android:textColor="@color/white"
-                                app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintEnd_toEndOf="parent"
-                                app:layout_constraintHorizontal_bias="0.5"
-                                app:layout_constraintStart_toEndOf="@+id/btn_approve"
-                                app:layout_constraintTop_toTopOf="parent"
-                                tools:visibility="visible" />
-
-                            <Button
-                                android:id="@+id/btn_approve"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_centerVertical="true"
-                                android:layout_margin="0dp"
-                                android:layout_marginStart="8dp"
-                                android:layout_marginTop="8dp"
-                                android:layout_marginBottom="8dp"
-                                android:backgroundTint="@color/green"
-                                android:text=">"
-                                android:textColor="@color/white"
-                                app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintEnd_toStartOf="@+id/btn_reject"
-                                app:layout_constraintHorizontal_chainStyle="spread"
-                                app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintTop_toTopOf="parent"
-                                tools:visibility="visible" />
-
-                        </androidx.constraintlayout.widget.ConstraintLayout>
-
-                        <TextView
-                            android:id="@+id/txt_approvers"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@+id/detail_approve_buttons"
-                            android:paddingBottom="5dp"
-                            android:paddingTop="10dp"
-                            android:text="@string/approvers"
-                            android:textStyle="bold" />
-
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/rec_approvers"
-                            android:layout_width="match_parent"
-                            android:layout_height="150dp"
-                            android:layout_below="@+id/txt_approvers" />
-
-                        <Button
-                            android:id="@+id/detail_mass_approval"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/mass_approval"
-                            android:textColor="@color/text_blue"
-                            android:layout_alignParentEnd="true"
-                            android:layout_below="@+id/rec_approvers"
-                            style="?android:attr/borderlessButtonStyle"/>
-
-                    </RelativeLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="0.5dp"
-                        android:background="@color/detailsColor" />
-
-                    <RelativeLayout
-                        android:id="@+id/hdr_info"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingBottom="5dp"
-                        android:paddingEnd="10dp"
-                        android:paddingStart="10dp"
-                        android:paddingTop="5dp">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
-                            android:layout_centerVertical="true"
-                            android:layout_marginEnd="10dp"
-                            android:layout_marginStart="10dp"
-                            android:layout_toStartOf="@+id/btn_arrow_4"
-                            android:text="@string/workflow_info"
-                            android:textColor="@color/colorPrimaryDark" />
-
-
-                        <ImageView
-                            android:id="@+id/btn_arrow_4"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:padding="10dp"
-                            android:src="@drawable/ic_keyboard_arrow_down_black_24dp"
-                            android:tint="@color/transparentArrow" />
-
-                    </RelativeLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="0.5dp"
-                        android:background="@color/detailsColor" />
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rec_info"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/workflow_detail_standard_height"
-                        android:background="@color/workflowListBg"
-                        android:padding="5dp"
-                        android:visibility="gone" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="0.5dp"
-                        android:background="@color/detailsColor" />
-
-                    <RelativeLayout
-                        android:id="@+id/hdr_peopleinvolved"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingBottom="5dp"
-                        android:paddingEnd="10dp"
-                        android:paddingStart="10dp"
-                        android:paddingTop="5dp">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
-                            android:layout_centerVertical="true"
-                            android:layout_marginEnd="10dp"
-                            android:layout_marginStart="10dp"
-                            android:layout_toStartOf="@+id/btn_arrow_5"
-                            android:text="@string/people_involved"
-                            android:textColor="@color/colorPrimaryDark" />
-
-
-                        <ImageView
-                            android:id="@+id/btn_arrow_5"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:padding="10dp"
-                            android:src="@drawable/ic_keyboard_arrow_down_black_24dp"
-                            android:tint="@color/transparentArrow" />
-
-                    </RelativeLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="0.5dp"
-                        android:background="@color/detailsColor" />
-
-                    <include
-                        android:id="@+id/peopleinvolved_layout"
-                        layout="@layout/fragment_workflow_detail_people_involved"
-                        android:visibility="gone"
-                        tools:visibility="gone"/>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="0.5dp"
-                        android:background="@color/detailsColor" />
-
-                    <RelativeLayout
-                        android:id="@+id/hdr_approvalhistory"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingBottom="5dp"
-                        android:paddingEnd="10dp"
-                        android:paddingStart="10dp"
-                        android:paddingTop="5dp">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
-                            android:layout_centerVertical="true"
-                            android:layout_marginEnd="10dp"
-                            android:layout_marginStart="10dp"
-                            android:layout_toStartOf="@+id/btn_arrow_6"
-                            android:text="@string/approval_history"
-                            android:textColor="@color/colorPrimaryDark" />
-
-                        <ImageView
-                            android:id="@+id/btn_arrow_6"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:padding="10dp"
-                            android:src="@drawable/ic_keyboard_arrow_down_black_24dp"
-                            android:tint="@color/transparentArrow" />
-
-                    </RelativeLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="0.5dp"
-                        android:background="@color/detailsColor" />
-                    <LinearLayout
-                        android:id="@+id/lyt_history"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:visibility="gone"
-                        tools:visibility="gone">
-                        <TextView
-                            android:id="@+id/no_history"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:padding="8dp"
-                            android:textAppearance="@android:style/TextAppearance.Material.Title"
-                            android:text="@string/no_history_to_show"
-                            android:visibility="gone"/>
-
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/rec_approvalhistory"
-                            android:layout_width="match_parent"
-                            android:layout_height="@dimen/workflow_detail_standard_height"
-                            android:padding="2dp" />
-
-                    </LinearLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/lyt_documentstitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/tv_templatetitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingBottom="20dp"
-                        android:paddingTop="20dp"
-                        android:text="@string/template"
-                        android:textColor="@color/colorPrimaryDark" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="0.5dp"
-                        android:layout_marginStart="10dp"
-                        android:background="@color/detailsColor" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/lyt_documentsheader"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:weightSum="11">
-
-                    <CheckBox
-                        android:id="@+id/chbx_header"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:buttonTint="@color/colorPrimary"
-                        android:padding="10dp" />
-
-                    <ImageView
-                        android:id="@+id/img_header"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="10dp"
-                        android:layout_weight="1"
-                        android:src="@drawable/ic_more_vert_black_24dp"
-                        android:tint="@color/colorPrimary" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="4"
-                        android:padding="10dp"
-                        android:text="@string/description"
-                        android:textColor="@color/colorPrimaryDark" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="4"
-                        android:padding="10dp"
-                        android:text="@string/name"
-                        android:textColor="@color/colorPrimaryDark" />
-
-                </LinearLayout>
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rec_documents"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginTop="10dp"
-                    android:background="@drawable/border" />
-
-                <LinearLayout
-                    android:id="@+id/lyt_attach"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginTop="10dp">
-
-                    <Button
-                        android:id="@+id/btn_attachment"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/colorPrimary"
-                        android:textColor="@color/white"
-                        android:text="@string/attach"/>
-
-                    <Button
-                        android:id="@+id/btn_upload"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:backgroundTint="@color/green"
-                        android:text="@string/upload"
-                        android:textColor="@color/white" />
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/tv_fileuploaded"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"
-                    android:layout_gravity="end"
-                    android:textColor="@color/colorPrimary"
-                    android:text="@string/uploaded_file"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingBottom="20dp"
-                        android:paddingTop="20dp"
-                        android:text="@string/comments"
-                        android:textColor="@color/colorPrimaryDark" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="0.5dp"
-                        android:layout_marginStart="10dp"
-                        android:background="@color/detailsColor" />
-
-                </LinearLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <Switch
-                        android:id="@+id/switch_private_public"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/public_comment"
-                        android:textColor="@color/dark_gray"
-                        android:switchPadding="8dp"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <androidx.appcompat.widget.AppCompatEditText
-                        android:id="@+id/input_comment"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginTop="12dp"
-                        android:layout_marginEnd="8dp"
-                        android:layout_toStartOf="@id/btn_comment"
-                        android:background="@drawable/spinner_bg"
-                        android:paddingStart="10dp"
-                        android:paddingTop="5dp"
-                        android:paddingEnd="10dp"
-                        android:paddingBottom="5dp"
-                        android:textSize="18sp"
-                        android:maxLines="5"
-                        android:gravity="top|start"
-                        android:inputType="textMultiLine"
-                        android:scrollbars="vertical"
-                        app:layout_constraintEnd_toStartOf="@+id/btn_comment"
-                        app:layout_constraintHorizontal_bias="0.0"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/switch_private_public" />
-
-                    <Button
-                        android:id="@+id/btn_comment"
-                        android:layout_width="105dp"
-                        android:layout_height="53dp"
-                        android:layout_marginTop="6dp"
-                        android:backgroundTint="@color/green"
-                        android:text="@string/comment"
-                        android:textColor="@color/white"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/switch_private_public" />
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rec_comments"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/input_comment" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-            </LinearLayout>
-
-        </ScrollView>
-
-    </LinearLayout>
 
 </layout>
 

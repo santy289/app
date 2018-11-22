@@ -39,7 +39,6 @@ public class StatusFragment extends Fragment {
     private StatusViewModel statusViewModel;
     private FragmentWorkflowDetailStatusBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
-    private String mToken;
 
     // Used for updating Status info.
     protected static final int INDEX_LAST_STATUS = 0;
@@ -75,12 +74,12 @@ public class StatusFragment extends Fragment {
 
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        mToken = "Bearer " + prefs.getString("token", "");
+        String token = "Bearer " + prefs.getString("token", "");
 
         setOnClickListeners();
         subscribe();
 
-        statusViewModel.initDetails(mToken, mWorkflowListItem);
+        statusViewModel.initDetails(token, mWorkflowListItem);
 
         return view;
     }

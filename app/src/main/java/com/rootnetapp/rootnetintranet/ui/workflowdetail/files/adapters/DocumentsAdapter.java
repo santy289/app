@@ -13,6 +13,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,7 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder> {
 
     public List<Preset> totalDocuments;
-    List<DocumentsFile> files;
+    private List<DocumentsFile> files;
     private Context context;
     public List<Boolean> isSelected;
 
@@ -36,8 +37,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder> 
         }
     }
 
+    @NonNull
     @Override
-    public DocumentsViewholder onCreateViewHolder(ViewGroup viewGroup, int i) {
+    public DocumentsViewholder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         LayoutInflater layoutInflater =
                 LayoutInflater.from(viewGroup.getContext());
         context = viewGroup.getContext();
@@ -47,7 +49,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder> 
     }
 
     @Override
-    public void onBindViewHolder(DocumentsViewholder holder, int i) {
+    public void onBindViewHolder(@NonNull DocumentsViewholder holder, int i) {
         Preset item = totalDocuments.get(i);
         DocumentsFile file = null;
         for (DocumentsFile aux : files) {

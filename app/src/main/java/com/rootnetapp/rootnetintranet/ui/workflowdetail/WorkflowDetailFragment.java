@@ -19,6 +19,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.WorkflowDetailV
 
 import javax.inject.Inject;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.databinding.DataBindingUtil;
@@ -35,7 +36,6 @@ public class WorkflowDetailFragment extends Fragment {
     private FragmentWorkflowDetailBinding mBinding;
     private MainActivityInterface mMainActivityInterface;
     private WorkflowListItem mWorkflowListItem;
-    private String mToken;
     private WorkflowDetailViewPagerAdapter mViewPagerAdapter;
 
     public WorkflowDetailFragment() {
@@ -50,12 +50,7 @@ public class WorkflowDetailFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         mBinding = DataBindingUtil.inflate(inflater,
@@ -67,7 +62,7 @@ public class WorkflowDetailFragment extends Fragment {
                 .get(WorkflowDetailViewModel.class);
 
         SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        mToken = "Bearer "+ prefs.getString("token","");
+        String token = "Bearer " + prefs.getString("token", "");
         mBinding.tvWorkflowId.setText(mWorkflowListItem.getTitle());
         mBinding.tvWorkflowName.setText(mWorkflowListItem.getWorkflowTypeKey());
 
@@ -75,7 +70,7 @@ public class WorkflowDetailFragment extends Fragment {
         subscribe();
 
         showLoading(true);
-        workflowDetailViewModel.initDetails(mToken, mWorkflowListItem);
+        workflowDetailViewModel.initDetails(token, mWorkflowListItem);
 
         return view;
     }

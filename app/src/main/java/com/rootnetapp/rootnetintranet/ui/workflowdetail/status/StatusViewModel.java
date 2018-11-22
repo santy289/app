@@ -523,10 +523,8 @@ public class StatusViewModel extends ViewModel {
             return profilesList;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::setProfilesInvovledOnUi, throwable -> {
-                    Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable
-                            .getMessage());
-                });
+                .subscribe(this::setProfilesInvovledOnUi, throwable -> Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable
+                        .getMessage()));
         mDisposables.add(disposable);
     }
 

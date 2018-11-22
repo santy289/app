@@ -25,6 +25,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> {
         this.comments = comments;
     }
 
+    @NonNull
     @Override
     public CommentsViewholder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         LayoutInflater layoutInflater =

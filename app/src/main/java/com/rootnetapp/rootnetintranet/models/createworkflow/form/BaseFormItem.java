@@ -1,8 +1,12 @@
 package com.rootnetapp.rootnetintranet.models.createworkflow.form;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+
 public abstract class BaseFormItem {
 
-    private String title;
+    private @Nullable String title; //this has priority, if null, must set a titleRes
+    private @StringRes int titleRes;
     private int tag;
     private boolean isRequired;
     private boolean isEscaped;
@@ -10,12 +14,21 @@ public abstract class BaseFormItem {
 
     public abstract boolean isValid();
 
-    public String getTitle() {
+    public @Nullable
+    String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(@Nullable String title) {
         this.title = title;
+    }
+
+    public int getTitleRes() {
+        return titleRes;
+    }
+
+    public void setTitleRes(int titleRes) {
+        this.titleRes = titleRes;
     }
 
     public int getTag() {
@@ -34,19 +47,19 @@ public abstract class BaseFormItem {
         this.isRequired = isRequired;
     }
 
-    public int getViewType() {
-        return viewType;
-    }
-
-    public void setViewType(int viewType) {
-        this.viewType = viewType;
-    }
-
     public boolean isEscaped() {
         return isEscaped;
     }
 
     public void setEscaped(boolean escaped) {
         isEscaped = escaped;
+    }
+
+    public int getViewType() {
+        return viewType;
+    }
+
+    public void setViewType(int viewType) {
+        this.viewType = viewType;
     }
 }

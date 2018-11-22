@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 
 import com.rootnetapp.rootnetintranet.databinding.FormItemBooleanBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemCurrencyBinding;
@@ -11,7 +12,11 @@ import com.rootnetapp.rootnetintranet.databinding.FormItemDateBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemSingleChoiceBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemTextInputBinding;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
 
 import java.util.List;
@@ -153,32 +158,38 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     private void populateSingleChoiceView(SingleChoiceViewHolder holder, int position) {
-//        FieldData fieldData = getItem(position);
-//
-//        holder.getBinding().tvTitle.setText(fieldData.label);
-//        holder.getBinding().spSteps.setAdapter(
-//                new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
-//                        fieldData.options));
+        SingleChoiceFormItem item = (SingleChoiceFormItem) getItem(position);
+
+        holder.getBinding().tvTitle.setText(item.getTitle());
+        holder.getBinding().spSteps.setAdapter(
+                new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
+                        item.getOptions()));
     }
 
     private void populateBooleanView(BooleanViewHolder holder, int position) {
-//        FieldData fieldData = getItem(position);
-//
-//        holder.getBinding().tvTitle.setText(fieldData.label);
+        BooleanFormItem item = (BooleanFormItem) getItem(position);
+
+        holder.getBinding().tvTitle.setText(item.getTitle());
     }
 
     private void populateDateView(DateViewHolder holder, int position) {
-//        FieldData fieldData = getItem(position);
-//
-//        holder.getBinding().tvTitle.setText(fieldData.label);
+        DateFormItem item = (DateFormItem) getItem(position);
+
+        holder.getBinding().tvTitle.setText(item.getTitle());
+        if (item.getMinDate() != null) {
+            holder.getBinding().dpInput.setMinDate(item.getMinDate().getTime());
+        }
+        if (item.getMaxDate() != null) {
+            holder.getBinding().dpInput.setMaxDate(item.getMaxDate().getTime());
+        }
     }
 
     private void populateCurrencyView(CurrencyViewHolder holder, int position) {
-//        FieldData fieldData = getItem(position);
-//
-//        holder.getBinding().tvTitle.setText(fieldData.label);
-//        holder.getBinding().spCurrency.setAdapter(
-//                new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
-//                        fieldData.options));
+        CurrencyFormItem item = (CurrencyFormItem) getItem(position);
+
+        holder.getBinding().tvTitle.setText(item.getTitle());
+        holder.getBinding().spCurrency.setAdapter(
+                new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
+                        item.getOptions()));
     }
 }

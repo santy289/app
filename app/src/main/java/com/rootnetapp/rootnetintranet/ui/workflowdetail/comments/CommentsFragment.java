@@ -105,14 +105,18 @@ public class CommentsFragment extends Fragment {
         commentsViewModel.getObservableHideComments().observe(this, this::hideCommentsList);
         commentsViewModel.getObservableComment().observe(this, this::addNewComment);
         commentsViewModel.getObservableCommentsTabCounter().observe(this, this::updateTabCounter);
-        commentsViewModel.getObservableEnableCommentButton().observe(this, this::enableCommentButton);
+        commentsViewModel.getObservableEnableCommentButton()
+                .observe(this, this::enableCommentButton);
 
         commentsViewModel.showLoading.observe(this, this::showLoading);
     }
 
     private void setupSwitch() {
         mBinding.switchPrivatePublic.setOnCheckedChangeListener(
-                ((buttonView, isChecked) -> commentsViewModel.setPrivateComment(isChecked)));
+                (buttonView, isChecked) -> {
+                    updateSwitchUi(isChecked);
+                    commentsViewModel.setPrivateComment(isChecked);
+                });
     }
 
     private void setOnClickListeners() {
@@ -186,5 +190,18 @@ public class CommentsFragment extends Fragment {
     @UiThread
     private void enableCommentButton(boolean enable) {
         mBinding.btnComment.setEnabled(enable);
+    }
+
+    @UiThread
+    private void updateSwitchUi(boolean isChecked) {
+        String state;
+        if (isChecked) {
+            state = getString(R.string.private_comment);
+            mBinding.switchPrivatePublic.setTextColor(getResources().getColor(R.color.colorAccent));
+        } else {
+            state = getString(R.string.public_comment);
+            mBinding.switchPrivatePublic.setTextColor(getResources().getColor(R.color.dark_gray));
+        }
+        mBinding.switchPrivatePublic.setText(state);
     }
 }

@@ -1,8 +1,8 @@
-package com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters;
-
-import androidx.recyclerview.widget.RecyclerView;
+package com.rootnetapp.rootnetintranet.ui.workflowdetail.files.adapters;
 
 import com.rootnetapp.rootnetintranet.databinding.DocumentsItemBinding;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Created by root on 04/04/18.

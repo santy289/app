@@ -1,8 +1,8 @@
-package com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters;
-
-import androidx.recyclerview.widget.RecyclerView;
+package com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.adapters;
 
 import com.rootnetapp.rootnetintranet.databinding.ApprovalHistoryItemBinding;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 public class ApprovalViewholder extends RecyclerView.ViewHolder {
 

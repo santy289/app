@@ -1,15 +1,10 @@
 package com.rootnetapp.rootnetintranet.di;
 
-import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerServiceModule;
 import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerService;
-import com.rootnetapp.rootnetintranet.ui.createworkflow.WorkFlowCreateFragment;
-import com.rootnetapp.rootnetintranet.ui.main.MainActivityModule;
-import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerFragment;
-import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerModule;
-import com.rootnetapp.rootnetintranet.ui.splash.SplashModule;
-import com.rootnetapp.rootnetintranet.ui.sync.SyncActivity;
+import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerServiceModule;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowDialog;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowModule;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.WorkFlowCreateFragment;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.CustomCountryPicker;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.CustomSpinner;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.ListSpinner;
@@ -23,6 +18,9 @@ import com.rootnetapp.rootnetintranet.ui.editprofile.EditProfileModule;
 import com.rootnetapp.rootnetintranet.ui.login.LoginActivity;
 import com.rootnetapp.rootnetintranet.ui.login.LoginModule;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
+import com.rootnetapp.rootnetintranet.ui.main.MainActivityModule;
+import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerFragment;
+import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerModule;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileModule;
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment.ResetPasswordFragment;
@@ -30,10 +28,22 @@ import com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment.ResetPasswordMo
 import com.rootnetapp.rootnetintranet.ui.resetPass.tokenfragment.RequestTokenFragment;
 import com.rootnetapp.rootnetintranet.ui.resetPass.tokenfragment.RequestTokenModule;
 import com.rootnetapp.rootnetintranet.ui.splash.SplashActivity;
+import com.rootnetapp.rootnetintranet.ui.splash.SplashModule;
+import com.rootnetapp.rootnetintranet.ui.sync.SyncActivity;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailModule;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryModule;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsModule;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesModule;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationModule;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusModule;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowModule;
 
@@ -60,7 +70,12 @@ import dagger.Component;
                 TimelineModule.class,
                 WorkflowManagerServiceModule.class,
                 WorkflowManagerModule.class,
-                SplashModule.class
+                SplashModule.class,
+                StatusModule.class,
+                InformationModule.class,
+                ApprovalHistoryModule.class,
+                CommentsModule.class,
+                FilesModule.class
         }
 )
 
@@ -110,4 +125,13 @@ public interface AppComponent {
 
     void inject(WorkflowManagerFragment workflowManagerFragment);
 
+    void inject(StatusFragment statusFragment);
+
+    void inject(InformationFragment informationFragment);
+
+    void inject(ApprovalHistoryFragment approvalHistoryFragment);
+
+    void inject(CommentsFragment commentsFragment);
+
+    void inject(FilesFragment filesFragment);
 }

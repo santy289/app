@@ -199,7 +199,7 @@
     <string name="dynamic_filters">Filtros Dinámicos</string>
     <string name="public_comment">Público</string>
     <string name="private_comment">Privado</string>
-    <string name="no_more_status">Sin mas estatus</string>
+    <string name="no_more_status">Sin más estatus</string>
     <string name="status_approvers">APROBADORES DEL ESTATUS</string>
     <string name="no_people_involved">Sin personas involucradas</string>
     <string name="approvers">Aprobadores:</string>
@@ -214,4 +214,47 @@
     <string name="last_status">Estatus Pasado</string>
     <string name="next_status">Próximo Estatus</string>
     <string name="request_successfully">Pedido realizado exitosamente.</string>
+
+    <!--WorkflowDetailFragment-->
+    <!--StatusFragment-->
+    <string name="workflow_detail_status_fragment_title">Estatus</string>
+    <string name="workflow_detail_status_fragment_status_summary">Estatus del Workflow</string>
+    <string name="workflow_detail_status_fragment_status_summary_last_status">Último Estatus</string>
+    <string name="workflow_detail_status_fragment_status_summary_current_status">Estatus Actual</string>
+    <string name="workflow_detail_status_fragment_status_summary_next_status">Próximo Estatus</string>
+    <string name="workflow_detail_status_fragment_next_step">Elija el Siguiente Paso</string>
+    <string name="workflow_detail_status_fragment_next_step_approvers">Aprobadores del siguiente paso:</string>
+    <string name="workflow_detail_status_fragment_next_step_mass_approval">Aprobación masiva</string>
+    <string name="workflow_detail_status_fragment_all_people_involved">Personas Involucradas en los Estatus</string>
+    <string name="workflow_detail_status_fragment_approve">Aprobar</string>
+    <string name="workflow_detail_status_fragment_reject">Rechazar</string>
+    <string name="workflow_detail_status_fragment_spinner_title">- Elija un Estatus -</string>
+    <string name="workflow_detail_status_fragment_must_select_step">Debes seleccionar un estatus</string>
+    <!--InformationFragment-->
+    <string name="workflow_detail_information_fragment_title">@string/workflow_detail_information_fragment_information</string>
+    <string name="workflow_detail_information_fragment_important_things">Datos Importantes Sobre Este Estatus</string>
+    <string name="workflow_detail_information_fragment_information">Información</string>
+    <string name="workflow_detail_information_fragment_client">Cliente</string>
+    <string name="workflow_detail_information_fragment_project">Proyecto</string>
+    <string name="workflow_detail_information_fragment_type">Tipo</string>
+    <string name="workflow_detail_information_fragment_start_date">Fecha de Inicio</string>
+    <string name="workflow_detail_information_fragment_end_date">Fecha de Fin</string>
+    <string name="workflow_detail_information_fragment_project_time">Tiempo de Projecto (meses)</string>
+    <string name="workflow_detail_information_fragment_owner">Dueño</string>
+    <!--ApprovalHistoryFragment-->
+    <string name="workflow_detail_approval_history_fragment_title">@string/workflow_detail_approval_history_fragment_approval_history</string>
+    <string name="workflow_detail_approval_history_fragment_approval_history">Historial de Aprobaciones</string>
+    <!--CommentsFragment-->
+    <string name="workflow_detail_comments_fragment_title">@string/workflow_detail_comments_fragment_comments</string>
+    <string name="workflow_detail_comments_fragment_comments">Comentarios</string>
+    <string name="workflow_detail_comments_fragment_public">Público</string>
+    <string name="workflow_detail_comments_fragment_private">Privado</string>
+    <string name="workflow_detail_comments_fragment_input_comment_hint">Escriba su comentario aquí…</string>
+    <string name="workflow_detail_comments_fragment_button_comment">Comentar</string>
+    <string name="workflow_detail_comments_fragment_no_comments">No hay comentarios para mostrar</string>
+    <!--FilesFragment-->
+    <string name="workflow_detail_files_fragment_title">@string/workflow_detail_files_fragment_documents</string>
+    <string name="workflow_detail_files_fragment_documents">Documentos</string>
+    <string name="workflow_detail_files_fragment_no_files">Ningún archivo a mostrar</string>
+    <string name="workflow_detail_files_fragment_file_name">Nombre del archivo</string>
 </resources>

@@ -1,8 +1,8 @@
-package com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters;
-
-import androidx.recyclerview.widget.RecyclerView;
+package com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.adapters;
 
 import com.rootnetapp.rootnetintranet.databinding.CommentsItemBinding;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 public class CommentsViewholder extends RecyclerView.ViewHolder {
 

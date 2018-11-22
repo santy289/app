@@ -1,17 +1,19 @@
-package com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters;
+package com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.rootnetapp.rootnetintranet.databinding.InformationItemBinding;
 
 import java.util.List;
 
-public class InformationAdapter extends RecyclerView.Adapter<InformationViewholder>{
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+public class InformationAdapter extends RecyclerView.Adapter<InformationViewholder> {
 
     private List<Information> contents;
 
@@ -42,21 +44,30 @@ public class InformationAdapter extends RecyclerView.Adapter<InformationViewhold
 
         if (!TextUtils.isEmpty(item.getDisplayValue())) {
             holder.binding.tvContent.setText(item.getDisplayValue());
+            hideItemIfEmpty(holder);
             return;
         }
 
         if (item.getResDisplayValue() < 1) {
             holder.binding.tvContent.setText("");
+            hideItemIfEmpty(holder);
             return;
         }
 
         Context context = holder.binding.tvContent.getContext();
         holder.binding.tvContent.setText(context.getString(item.getResDisplayValue()));
+        hideItemIfEmpty(holder);
+    }
+
+    private void hideItemIfEmpty(InformationViewholder holder){
+        //hide item if there is no description (content)
+        boolean isVisible = holder.binding.tvContent.getText().length() > 0;
+        holder.binding.tvTitle.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+        holder.binding.tvContent.setVisibility(isVisible ? View.VISIBLE : View.GONE);
     }
 
     @Override
     public int getItemCount() {
         return contents.size();
     }
-
 }

@@ -1,8 +1,6 @@
-package com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters;
+package com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.adapters;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +15,9 @@ import com.rootnetapp.rootnetintranet.databinding.ApprovalHistoryItemBinding;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
 
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class ApprovalHistoryAdapter extends RecyclerView.Adapter<ApprovalViewholder>{
 

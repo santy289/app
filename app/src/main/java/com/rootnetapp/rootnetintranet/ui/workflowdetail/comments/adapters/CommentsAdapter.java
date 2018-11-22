@@ -1,8 +1,6 @@
-package com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters;
+package com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.adapters;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -14,16 +12,20 @@ import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
 
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> {
 
     public List<Comment> comments;
 
-    private static final String format = "MMM d, y - h:m a";
+    private static final String format = "MMM d, y - hh:mm a";
 
     public CommentsAdapter(List<Comment> comments) {
         this.comments = comments;
     }
 
+    @NonNull
     @Override
     public CommentsViewholder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         LayoutInflater layoutInflater =

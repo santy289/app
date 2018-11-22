@@ -46,7 +46,6 @@ public class FilesFragment extends Fragment {
     private FilesViewModel filesViewModel;
     private FragmentWorkflowDetailFilesBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
-    private String mToken;
 
     private CommentFile fileRequest = null;
     private DocumentsAdapter mDocumentsAdapter = null;
@@ -88,11 +87,11 @@ public class FilesFragment extends Fragment {
 
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        mToken = "Bearer " + prefs.getString("token", "");
+        String token = "Bearer " + prefs.getString("token", "");
 
         setOnClickListeners();
         subscribe();
-        filesViewModel.initDetails(mToken, mWorkflowListItem);
+        filesViewModel.initDetails(token, mWorkflowListItem);
 
         //todo download the files
 
@@ -110,7 +109,7 @@ public class FilesFragment extends Fragment {
         final Observer<Boolean> attachObserver = ((Boolean data) -> {
             showLoading(false);
             if (data != null && data) {
-                filesViewModel.getFiles(mToken, mWorkflowListItem.getWorkflowId());
+                filesViewModel.getFiles(mWorkflowListItem.getWorkflowId());
             } else {
                 Toast.makeText(getContext(), "error", Toast.LENGTH_LONG).show();
             }
@@ -149,7 +148,7 @@ public class FilesFragment extends Fragment {
             } else {
                 request.add(new WorkflowPresetsRequest(mWorkflowListItem.getWorkflowId(), presets));
                 showLoading(true);
-                filesViewModel.attachFile(mToken, request, fileRequest); //todo does not upload
+                filesViewModel.attachFile(request, fileRequest); //todo does not upload
             }
         } else {
             Toast.makeText(getContext(), getString(R.string.select_file),

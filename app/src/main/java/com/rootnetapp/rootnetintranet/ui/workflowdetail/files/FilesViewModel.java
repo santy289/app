@@ -83,9 +83,9 @@ public class FilesViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
-    protected void getFiles(String auth, int workflowId) {
+    protected void getFiles(int workflowId) {
         Disposable disposable = mRepository
-                .getFiles(auth, workflowId)
+                .getFiles(mToken, workflowId)
                 .subscribe(this::onFilesSuccess, this::onFailure);
         mDisposables.add(disposable);
     }
@@ -97,7 +97,7 @@ public class FilesViewModel extends ViewModel {
         }
 
         setTemplateTitleWith.setValue(templates.getName());
-        getFiles(mToken, this.mWorkflowListItem.getWorkflowId());
+        getFiles(this.mWorkflowListItem.getWorkflowId());
     }
 
     private void onFilesSuccess(FilesResponse filesResponse) {
@@ -109,9 +109,9 @@ public class FilesViewModel extends ViewModel {
         setFilesTabCounter(documents.size());
     }
 
-    protected void attachFile(String auth, List<WorkflowPresetsRequest> request, CommentFile fileRequest) {
+    protected void attachFile(List<WorkflowPresetsRequest> request, CommentFile fileRequest) {
         Disposable disposable = mRepository
-                .attachFile(auth, request, fileRequest)
+                .attachFile(mToken, request, fileRequest)
                 .subscribe(this::onAttachSuccess, this::onFailure);
         mDisposables.add(disposable);
     }

@@ -41,6 +41,7 @@ public class SingleChoiceFormItem extends BaseFormItem {
         private String title;
         private int tag;
         private boolean isRequired;
+        private boolean isEscaped;
         private String value;
         private List<String> options;
 
@@ -58,6 +59,12 @@ public class SingleChoiceFormItem extends BaseFormItem {
 
         public Builder setRequired(boolean isRequired) {
             this.isRequired = isRequired;
+
+            return this;
+        }
+
+        public Builder setEscaped(boolean isEscaped) {
+            this.isEscaped = isEscaped;
 
             return this;
         }
@@ -80,6 +87,7 @@ public class SingleChoiceFormItem extends BaseFormItem {
             item.setTitle(title);
             item.setTag(tag);
             item.setRequired(isRequired);
+            item.setEscaped(isEscaped);
             item.setValue(value);
             item.setOptions(options);
             item.setViewType(FormItemViewType.SINGLE_CHOICE);

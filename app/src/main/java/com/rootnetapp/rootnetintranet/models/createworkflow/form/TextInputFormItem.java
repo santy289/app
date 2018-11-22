@@ -73,6 +73,7 @@ public class TextInputFormItem extends BaseFormItem {
         private String title;
         private int tag;
         private boolean isRequired;
+        private boolean isEscaped;
         private String value;
         private String hint;
         private String regex;
@@ -93,6 +94,12 @@ public class TextInputFormItem extends BaseFormItem {
 
         public Builder setRequired(boolean isRequired) {
             this.isRequired = isRequired;
+
+            return this;
+        }
+
+        public Builder setEscaped(boolean isEscaped) {
+            this.isEscaped = isEscaped;
 
             return this;
         }
@@ -133,6 +140,7 @@ public class TextInputFormItem extends BaseFormItem {
             item.setTitle(title);
             item.setTag(tag);
             item.setRequired(isRequired);
+            item.setEscaped(isEscaped);
             item.setValue(value);
             item.setHint(hint);
             item.setRegex(regex);

@@ -5,6 +5,7 @@ public abstract class BaseFormItem {
     private String title;
     private int tag;
     private boolean isRequired;
+    private boolean isEscaped;
     private @FormItemViewType int viewType;
 
     public abstract boolean isValid();
@@ -39,5 +40,13 @@ public abstract class BaseFormItem {
 
     public void setViewType(int viewType) {
         this.viewType = viewType;
+    }
+
+    public boolean isEscaped() {
+        return isEscaped;
+    }
+
+    public void setEscaped(boolean escaped) {
+        isEscaped = escaped;
     }
 }

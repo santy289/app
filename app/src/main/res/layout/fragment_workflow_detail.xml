@@ -1,77 +1,80 @@
 <layout xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/white"
-        android:orientation="vertical"
         tools:context="com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tv_workflow_id"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp">
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/workflow_details_section_title"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_open_closed"
+            app:layout_constraintEnd_toStartOf="@+id/tv_open_closed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="SEM-002" />
 
-            <TextView
-                android:id="@+id/tv_workflow_id"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textColor="@color/workflow_details_section_title"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="@+id/tv_open_closed"
-                app:layout_constraintEnd_toStartOf="@+id/tv_open_closed"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="SEM-002" />
+        <TextView
+            android:id="@+id/tv_open_closed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/round_corner"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:backgroundTint="@color/green"
+            tools:text="@string/open" />
 
-            <TextView
-                android:id="@+id/tv_open_closed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/round_corner"
-                android:paddingStart="10dp"
-                android:paddingTop="5dp"
-                android:paddingEnd="10dp"
-                android:paddingBottom="5dp"
-                android:textAllCaps="true"
-                android:textColor="@color/white"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                tools:backgroundTint="@color/green"
-                tools:text="@string/open" />
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="tv_workflow_id,tv_open_closed" />
 
-            <androidx.constraintlayout.widget.Barrier
-                android:id="@+id/barrier_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:barrierDirection="bottom"
-                app:constraint_referenced_ids="tv_workflow_id,tv_open_closed" />
-
-            <TextView
-                android:id="@+id/tv_workflow_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/colorPrimaryDark"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/barrier_title"
-                tools:text="Ejecución de proyecto de software" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/tv_workflow_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/tv_workflow_id"
+            app:layout_constraintTop_toBottomOf="@+id/barrier_title"
+            tools:text="Ejecución de proyecto de software" />
 
         <View
+            android:id="@+id/view_separator"
             android:layout_width="match_parent"
-            android:layout_height="0.5dp"
-            android:background="@color/detailsColor" />
+            android:layout_height="1dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/detailsColor"
+            app:layout_constraintTop_toBottomOf="@id/tv_workflow_name" />
 
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/view_pager"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/view_separator">
 
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tab_layout"
@@ -81,6 +84,9 @@
                 app:tabIndicatorColor="@color/colorAccent"
                 app:tabMode="scrollable" />
         </androidx.viewpager.widget.ViewPager>
-    </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 </layout>
 

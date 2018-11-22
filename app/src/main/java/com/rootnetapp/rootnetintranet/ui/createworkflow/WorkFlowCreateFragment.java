@@ -9,6 +9,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Toast;
 
 import com.obsez.android.lib.filechooser.ChooserDialog;
@@ -68,6 +69,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
 
     private MenuItem uploadMenu;
     private FormItemsAdapter mAdapter;
+    private AdapterView.OnItemClickListener mOnSingleChoiceItemClickListener;
 
     public WorkFlowCreateFragment() { }
 
@@ -423,9 +425,15 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         mAdapter.addItem(item);
     }
 
+    @UiThread
+    private void addItemListToForm(List<BaseFormItem> list) {
+        mAdapter.addList(list); //todo check lag when adding many
+    }
+
     private void subscribe() {
 
         viewModel.getObservableAddFormItem().observe(this, this::addItemToForm);
+        viewModel.getObservableAddFormItemList().observe(this, this::addItemListToForm);
 
         viewModel.setFieldTextWithData.observe(this, this::addTexFieldData);
 

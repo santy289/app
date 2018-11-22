@@ -3,7 +3,9 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow.adapters;
 import android.content.Context;
 import android.text.InputType;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
 import com.rootnetapp.rootnetintranet.databinding.FormItemBooleanBinding;
@@ -37,6 +39,11 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     public void addItem(BaseFormItem item) {
         mDataset.add(item);
+        notifyItemInserted(getItemCount() - 1);
+    }
+
+    public void addList(List<BaseFormItem> list) {
+        mDataset.addAll(list);
         notifyDataSetChanged();
     }
 
@@ -171,6 +178,26 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         holder.getBinding().spSteps.setAdapter(
                 new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
                         item.getOptions()));
+        if (holder.getBinding().spSteps.getOnItemSelectedListener() == null) {
+            holder.getBinding().spSteps
+                    .setSelection(0, false); //workaround so the listener won't be called on init
+            holder.getBinding().spSteps.setOnItemSelectedListener(
+                    new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position,
+                                                   long id) {
+                            item.setValue(item.getOptions().get(position));
+                            item.getOnSelectedListener().onSelected(item);
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+
+                        }
+                    });
+        } else {
+            holder.getBinding().spSteps.setSelection(item.getOptions().indexOf(item.getValue()));
+        }
     }
 
     private void populateBooleanView(BooleanViewHolder holder, int position) {

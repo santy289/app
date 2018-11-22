@@ -73,6 +73,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<Integer> mCreateErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<BaseFormItem> mAddFormItemLiveData;
+    private MutableLiveData<List<BaseFormItem>> mAddFormItemListLiveData;
     private List<WorkflowTypeItemMenu> workflowTypeMenuItems;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
@@ -461,6 +462,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(formSettings -> {
+                    showLoading.setValue(false);
                     FormSettings settings = (FormSettings) formSettings;
                     showFields(settings);
                 }, throwable -> {
@@ -477,6 +479,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void showFields(FormSettings formSettings) {
+        //todo check this, the method is called several times
         List<FormFieldsByWorkflowType> fields = formSettings.getFields();
         for (int i = 0; i < fields.size(); i++) {
             FormFieldsByWorkflowType field = fields.get(i);
@@ -491,7 +494,9 @@ public class CreateWorkflowViewModel extends ViewModel {
 
             buildField(field);
         }
-        buildForm.setValue(true);
+
+        mAddFormItemListLiveData.setValue(formSettings.getFormItems());
+//        buildForm.setValue(true);
     }
 
     private void buildField(FormFieldsByWorkflowType field) {
@@ -501,7 +506,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 //                handleBuildText(field);
                 createTextInputFormItem(field); //todo check
                 break;
-            case FormSettings.TYPE_DATE:
+            /*case FormSettings.TYPE_DATE:
                 handleBuildDate(field);
                 break;
             case FormSettings.TYPE_SYSTEM_USERS:
@@ -542,7 +547,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                 break;
             case FormSettings.TYPE_FILE:
                 handleFile(field);
-                break;
+                break;*/
             default:
                 Log.d(TAG, "buildField: Not a generic type: " + typeInfo
                         .getType() + " value: " + typeInfo.getValueType());
@@ -766,7 +771,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                 .setInputType(valueType)
                 .build();
 
-        mAddFormItemLiveData.setValue(item);
+        formSettings.getFormItems().add(item);
     }
 
     private void createWorkflowTypeItem() {
@@ -786,12 +791,19 @@ public class CreateWorkflowViewModel extends ViewModel {
                 formSettings.setName(name);
             }
 
-            return new SingleChoiceFormItem.Builder()
+            SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
                     .setTitleRes(R.string.type)
                     .setRequired(true)
                     .setTag(TAG_WORKFLOW_TYPE)
                     .setOptions(formSettings.getNames())
                     .build();
+
+            singleChoiceFormItem.setOnSelectedListener(item -> {
+                String selection = item.getValue();
+                this.generateFieldsByType(selection);
+            });
+
+            return singleChoiceFormItem;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(singleChoiceFormItem -> {
@@ -1511,5 +1523,12 @@ public class CreateWorkflowViewModel extends ViewModel {
             mAddFormItemLiveData = new MutableLiveData<>();
         }
         return mAddFormItemLiveData;
+    }
+
+    protected LiveData<List<BaseFormItem>> getObservableAddFormItemList() {
+        if (mAddFormItemListLiveData == null) {
+            mAddFormItemListLiveData = new MutableLiveData<>();
+        }
+        return mAddFormItemListLiveData;
     }
 }

@@ -1,6 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
-import androidx.collection.ArrayMap;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -16,6 +15,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.PostCountryCodeAndVa
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductJsonValue;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.role.Role;
 import com.rootnetapp.rootnetintranet.models.responses.services.Service;
@@ -37,9 +37,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import androidx.collection.ArrayMap;
 import me.riddhimanadib.formmaster.FormBuilder;
 
 public class FormSettings {
+
     private ArrayList<String> names;
     private ArrayList<Integer> ids;
     private int indexWorkflowTypeSelected;
@@ -56,6 +58,7 @@ public class FormSettings {
     private String uploadFileExtension;
     private PendingFileUpload pendingFileUpload;
     private FormBuilder formBuilder;
+    private List<BaseFormItem> formItems; //new
 
     public static final String TYPE_TEXT = "text";
     public static final String TYPE_TEXT_AREA = "textarea";
@@ -183,6 +186,7 @@ public class FormSettings {
     }
 
     public int countryCode;
+
     public boolean hasValidCountryCode() {
         if (countryCode > 0) {
             return true;
@@ -191,6 +195,7 @@ public class FormSettings {
     }
 
     public int countryCurrency;
+
     public boolean hasValidCountryCurrency() {
         if (countryCurrency > 0) {
             return true;
@@ -212,7 +217,7 @@ public class FormSettings {
             }
             countryCode = codeMeta.id;
         }
-     }
+    }
 
     public void setCurrencyType(String fieldValue, FieldData fieldData) {
         if (TextUtils.isEmpty(fieldValue)) {
@@ -273,8 +278,9 @@ public class FormSettings {
         return metaData;
     }
 
-    public WorkflowMetas formatMetaData(WorkflowMetas metaData, FieldData fieldData, FieldConfig fieldConfig) {
-       TypeInfo typeInfo = fieldConfig.getTypeInfo();
+    public WorkflowMetas formatMetaData(WorkflowMetas metaData, FieldData fieldData,
+                                        FieldConfig fieldConfig) {
+        TypeInfo typeInfo = fieldConfig.getTypeInfo();
         if (typeInfo == null) {
             return metaData;
         }
@@ -290,7 +296,6 @@ public class FormSettings {
         if (TextUtils.isEmpty(value)) {
             return;
         }
-
 
         switch (typeInfo.getValueType()) {
             case FormSettings.VALUE_BOOLEAN:
@@ -399,8 +404,8 @@ public class FormSettings {
         for (int i = 0; i < list.size(); i++) {
             item = list.get(i);
             if (item.name.equals(value)) {
-               id = item.id;
-               break;
+                id = item.id;
+                break;
             }
         }
 
@@ -443,7 +448,8 @@ public class FormSettings {
         postCountryCodeAndValue.countryId = countryCurrency;
         postCountryCodeAndValue.value = Integer.valueOf(currencyNumber);
 
-        JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi.adapter(PostCountryCodeAndValue.class);
+        JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi
+                .adapter(PostCountryCodeAndValue.class);
         String jsonString = jsonAdapter.toJson(postCountryCodeAndValue);
         return jsonString;
     }
@@ -457,7 +463,8 @@ public class FormSettings {
         postCountryCodeAndValue.countryId = countryCode;
         postCountryCodeAndValue.value = Integer.valueOf(phoneNumber);
 
-        JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi.adapter(PostCountryCodeAndValue.class);
+        JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi
+                .adapter(PostCountryCodeAndValue.class);
         String jsonString = jsonAdapter.toJson(postCountryCodeAndValue);
         return jsonString;
     }
@@ -553,12 +560,24 @@ public class FormSettings {
         return null;
     }
 
+    public List<BaseFormItem> getFormItems() {
+        if (formItems == null) {
+            formItems = new ArrayList<>();
+        }
+        return formItems;
+    }
+
+    public void setFormItems(List<BaseFormItem> formItems) {
+        this.formItems = formItems;
+    }
+
     /**
      * Interface for a ViewModel that we help FormSettings in completed an Information object by
-     * requesting to a Repository for data in the network. Eventually this function will also continue
-     * updating the Workflow information section.
+     * requesting to a Repository for data in the network. Eventually this function will also
+     * continue updating the Workflow information section.
      */
     public interface FormSettingsViewModelDelegate {
+
         public void findInNetwork(Object value, Information information, FieldConfig fieldConfig);
     }
 
@@ -602,7 +621,7 @@ public class FormSettings {
                 information.setDisplayValue(date);
                 return information;
 
-                // TODO commenting out this block for now. Make sure we don't need this anymore.
+            // TODO commenting out this block for now. Make sure we don't need this anymore.
 //                SimpleDateFormat serverFormat = new SimpleDateFormat(
 //                        "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
 //                        Locale.getDefault());
@@ -651,7 +670,8 @@ public class FormSettings {
 
                 if (typeInfo.getType().equals(TYPE_CURRENCY)) {
                     PostCountryCodeAndValue currency;
-                    JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi.adapter(PostCountryCodeAndValue.class);
+                    JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi
+                            .adapter(PostCountryCodeAndValue.class);
                     try {
                         currency = jsonAdapter.fromJson(meta.getValue());
                         information.setDisplayValue(String.valueOf(currency.value));
@@ -710,7 +730,8 @@ public class FormSettings {
                 // Until now phone type can only be single and not multiple
                 if (typeInfo.getType().equals(TYPE_PHONE)) {
                     PostCountryCodeAndValue phone;
-                    JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi.adapter(PostCountryCodeAndValue.class);
+                    JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi
+                            .adapter(PostCountryCodeAndValue.class);
                     try {
                         phone = jsonAdapter.fromJson(meta.getValue());
                         information.setDisplayValue(String.valueOf(phone.value));
@@ -751,7 +772,7 @@ public class FormSettings {
     private String getLabelFrom(Meta meta) {
         ArrayList<String> displayValue;
         try {
-            displayValue = (ArrayList<String>)meta.getDisplayValue();
+            displayValue = (ArrayList<String>) meta.getDisplayValue();
         } catch (ClassCastException e) {
             Log.d(TAG, "formatStringToObject: Value List casting problems");
             e.printStackTrace();
@@ -819,7 +840,8 @@ public class FormSettings {
         this.formLists = formLists;
     }
 
-    public ListField addListToForm(ListItem newList, String customLabel, int customFieldId, String type) {
+    public ListField addListToForm(ListItem newList, String customLabel, int customFieldId,
+                                   String type) {
         ListField listField = new ListField();
         listField.id = newList.getId();
         listField.listId = newList.getListId();
@@ -845,7 +867,8 @@ public class FormSettings {
         return listField;
     }
 
-    public ListField addServiceListToForm(List<Service> incomingList, String customLabel, int customFieldId, String type) {
+    public ListField addServiceListToForm(List<Service> incomingList, String customLabel,
+                                          int customFieldId, String type) {
         ListField listField = new ListField();
         listField.customFieldId = customFieldId;
         listField.listType = type;
@@ -865,7 +888,8 @@ public class FormSettings {
         return listField;
     }
 
-    public ListField addRolesLisToForm(List<Role> incomingList, String customLabel, int customFieldId, String type) {
+    public ListField addRolesLisToForm(List<Role> incomingList, String customLabel,
+                                       int customFieldId, String type) {
         ListField listField = new ListField();
         listField.customFieldId = customFieldId;
         listField.listType = type;
@@ -884,7 +908,8 @@ public class FormSettings {
         return listField;
     }
 
-    public ListField addProductLisToForm(List<ProductFormList> incomingList, String customLabel, int customFieldId, String type) {
+    public ListField addProductLisToForm(List<ProductFormList> incomingList, String customLabel,
+                                         int customFieldId, String type) {
         ListField listField = new ListField();
         listField.customFieldId = customFieldId;
         listField.listType = type;
@@ -976,11 +1001,11 @@ public class FormSettings {
         for (int i = 0; i < toRemove.size(); i++) {
             removeTag = toRemove.get(i);
             for (int j = 0; j < postFieldData.size(); j++) {
-               id = postFieldData.get(j).tag;
-               if (removeTag == id) {
-                   postFieldData.remove(j);
-                   break;
-               }
+                id = postFieldData.get(j).tag;
+                if (removeTag == id) {
+                    postFieldData.remove(j);
+                    break;
+                }
             }
         }
 
@@ -1009,7 +1034,7 @@ public class FormSettings {
 
     public void clearFormFieldData() {
         pendingFileUpload = null;
-        if(1 >= fieldItems.size()){
+        if (1 >= fieldItems.size()) {
             return;
         }
         fieldItems.subList(1, fieldItems.size()).clear();
@@ -1019,8 +1044,5 @@ public class FormSettings {
         }
         fields.subList(1, fields.size()).clear();
     }
-
-
-
 
 }

@@ -8,6 +8,7 @@ public class SingleChoiceFormItem extends BaseFormItem {
 
     private @Nullable String value;
     private List<String> options;
+    private OnSelectedListener onSelectedListener;
 
     private SingleChoiceFormItem() {
         //Constructor is private for Builder pattern
@@ -34,6 +35,15 @@ public class SingleChoiceFormItem extends BaseFormItem {
 
     public void setOptions(List<String> options) {
         this.options = options;
+    }
+
+    public OnSelectedListener getOnSelectedListener() {
+        return onSelectedListener;
+    }
+
+    public void setOnSelectedListener(
+            OnSelectedListener onSelectedListener) {
+        this.onSelectedListener = onSelectedListener;
     }
 
     public static class Builder {
@@ -102,5 +112,10 @@ public class SingleChoiceFormItem extends BaseFormItem {
 
             return item;
         }
+    }
+
+    public interface OnSelectedListener {
+
+        void onSelected(SingleChoiceFormItem item);
     }
 }

@@ -12,6 +12,7 @@
             android:id="@+id/tv_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:textAllCaps="true"
             android:textColor="@color/colorPrimaryDark"
             app:layout_constraintEnd_toStartOf="@+id/switch_input"
             app:layout_constraintStart_toStartOf="parent"

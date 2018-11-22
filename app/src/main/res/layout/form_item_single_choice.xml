@@ -16,6 +16,7 @@
             android:textColor="@color/colorPrimaryDark"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            android:textAllCaps="true"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="placeholder title" />
 

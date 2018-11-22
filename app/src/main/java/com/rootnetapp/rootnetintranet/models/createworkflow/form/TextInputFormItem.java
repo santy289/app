@@ -149,7 +149,9 @@ public class TextInputFormItem extends BaseFormItem {
             InputType.TEXT,
             InputType.TEXT_AREA,
             InputType.PHONE,
-            InputType.EMAIL
+            InputType.EMAIL,
+            InputType.NUMBER,
+            InputType.DECIMAL
     })
     public @interface InputType {
 
@@ -157,5 +159,7 @@ public class TextInputFormItem extends BaseFormItem {
         int TEXT_AREA = 2;
         int PHONE = 3;
         int EMAIL = 4;
+        int NUMBER = 5;
+        int DECIMAL = 6;
     }
 }

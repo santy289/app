@@ -36,7 +36,6 @@ public class InformationFragment extends Fragment {
     private InformationViewModel informationViewModel;
     private FragmentWorkflowDetailInformationBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
-    private String mToken;
 
     public InformationFragment() {
         // Required empty public constructor
@@ -67,10 +66,10 @@ public class InformationFragment extends Fragment {
 
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        mToken = "Bearer " + prefs.getString("token", "");
+        String token = "Bearer " + prefs.getString("token", "");
 
         subscribe();
-        informationViewModel.initDetails(mToken, mWorkflowListItem);
+        informationViewModel.initDetails(token, mWorkflowListItem);
 
         return view;
     }

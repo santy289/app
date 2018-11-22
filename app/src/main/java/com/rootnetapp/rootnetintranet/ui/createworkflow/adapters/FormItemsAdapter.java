@@ -27,12 +27,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private final Context mContext;
+    private Context mContext;
     private List<BaseFormItem> mDataset;
 
     public FormItemsAdapter(Context context, List<BaseFormItem> dataset) {
         this.mContext = context;
         this.mDataset = dataset;
+    }
+
+    public void addItem(BaseFormItem item) {
+        mDataset.add(item);
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -124,7 +129,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         setTextInputParams(holder.getBinding().etInput, item.getInputType());
     }
 
-    private void setTextInputParams(AppCompatEditText etInput, int type) {
+    private void setTextInputParams(AppCompatEditText etInput, String type) {
         switch (type) {
 
             case TextInputFormItem.InputType.TEXT_AREA:
@@ -160,7 +165,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private void populateSingleChoiceView(SingleChoiceViewHolder holder, int position) {
         SingleChoiceFormItem item = (SingleChoiceFormItem) getItem(position);
 
-        holder.getBinding().tvTitle.setText(item.getTitle());
+        String title = item.getTitle();
+        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        holder.getBinding().tvTitle.setText(title);
         holder.getBinding().spSteps.setAdapter(
                 new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
                         item.getOptions()));

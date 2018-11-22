@@ -13,7 +13,6 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailCommentsBinding;
-import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailViewModel;
@@ -39,7 +38,6 @@ public class CommentsFragment extends Fragment {
     private FragmentWorkflowDetailCommentsBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
 
-    private List<CommentFile> mCommentFiles;
     private CommentsAdapter mCommentsAdapter;
 
     private WorkflowDetailViewModel workflowDetailViewModel;
@@ -80,8 +78,6 @@ public class CommentsFragment extends Fragment {
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
-
-        mCommentFiles = new ArrayList<>();
 
         setupSwitch();
         setOnClickListeners();
@@ -131,7 +127,8 @@ public class CommentsFragment extends Fragment {
             return;
         }
 
-        commentsViewModel.postComment(comment, mCommentFiles);
+        //todo allow to upload files to a comment
+        commentsViewModel.postComment(comment, new ArrayList<>());
     }
 
     @UiThread

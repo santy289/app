@@ -34,7 +34,6 @@ public class ApprovalHistoryFragment extends Fragment {
     private ApprovalHistoryViewModel approvalHistoryViewModel;
     private FragmentWorkflowDetailApprovalHistoryBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
-    private String mToken;
 
     public ApprovalHistoryFragment() {
         // Required empty public constructor
@@ -65,10 +64,10 @@ public class ApprovalHistoryFragment extends Fragment {
 
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        mToken = "Bearer " + prefs.getString("token", "");
+        String token = "Bearer " + prefs.getString("token", "");
 
         subscribe();
-        approvalHistoryViewModel.initDetails(mToken, mWorkflowListItem);
+        approvalHistoryViewModel.initDetails(token, mWorkflowListItem);
 
         return view;
     }

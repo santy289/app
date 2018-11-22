@@ -254,4 +254,5 @@
     <string name="workflow_detail_files_fragment_title">@string/workflow_detail_files_fragment_documents</string>
     <string name="workflow_detail_files_fragment_documents">Documentos</string>
     <string name="workflow_detail_files_fragment_no_files">Ningún archivo a mostrar</string>
+    <string name="workflow_detail_files_fragment_file_name">Nombre del archivo</string>
 </resources>

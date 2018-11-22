@@ -259,6 +259,7 @@ public class FilesFragment extends Fragment {
         );
         mBinding.rvFiles.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvFiles.setAdapter(mDocumentsAdapter);
+        mBinding.rvFiles.setNestedScrollingEnabled(false);
     }
 
     @UiThread

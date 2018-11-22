@@ -3,154 +3,108 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/lyt_files"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white"
-        android:padding="16dp"
-        android:visibility="visible">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/tv_title_files"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/workflow_detail_files_fragment_title"
-            android:textAllCaps="true"
-            android:textColor="@color/workflow_details_section_title"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="2dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:background="@color/workflow_details_section_title_bar"
-            app:layout_constraintBottom_toBottomOf="@id/tv_title_files"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/tv_title_files"
-            app:layout_constraintTop_toTopOf="@id/tv_title_files" />
-
-        <CheckBox
-            android:id="@+id/cb_header"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:buttonTint="@color/colorPrimary"
-            android:padding="10dp"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_header_description"
-            app:layout_constraintEnd_toStartOf="@+id/iv_header"
-            app:layout_constraintHorizontal_weight="1"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/tv_header_description" />
-
-        <ImageView
-            android:id="@+id/iv_header"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:layout_weight="1"
-            android:src="@drawable/ic_more_vert_black_24dp"
-            android:tint="@color/colorPrimary"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_header_description"
-            app:layout_constraintEnd_toStartOf="@+id/tv_header_description"
-            app:layout_constraintHorizontal_weight="1"
-            app:layout_constraintStart_toEndOf="@id/cb_header"
-            app:layout_constraintTop_toTopOf="@id/tv_header_description" />
-
-        <TextView
-            android:id="@+id/tv_header_description"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_weight="4"
-            android:padding="10dp"
-            android:text="@string/description"
-            android:textColor="@color/colorPrimaryDark"
-            app:layout_constraintEnd_toStartOf="@+id/tv_header_name"
-            app:layout_constraintHorizontal_weight="4"
-            app:layout_constraintStart_toEndOf="@id/iv_header"
-            app:layout_constraintTop_toBottomOf="@id/tv_title_files" />
-
-        <TextView
-            android:id="@+id/tv_header_name"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="4"
-            android:padding="10dp"
-            android:text="@string/name"
-            android:textColor="@color/colorPrimaryDark"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_weight="4"
-            app:layout_constraintStart_toEndOf="@id/tv_header_description"
-            app:layout_constraintTop_toTopOf="@id/tv_header_description" />
-
-        <androidx.constraintlayout.widget.Barrier
-            android:id="@+id/barrier_header"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:barrierDirection="bottom"
-            app:constraint_referenced_ids="cb_header,iv_header,tv_header_description,tv_header_name" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_files"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/lyt_files"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/barrier_header" />
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:padding="16dp"
+            android:visibility="visible">
 
-        <TextView
-            android:id="@+id/tv_no_files"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:padding="8dp"
-            android:text="@string/workflow_detail_files_fragment_no_files"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/barrier_header"
-            tools:visibility="visible" />
+            <TextView
+                android:id="@+id/tv_title_files"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/workflow_detail_files_fragment_title"
+                android:textAllCaps="true"
+                android:textColor="@color/workflow_details_section_title"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
-            android:id="@+id/btn_attachment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:backgroundTint="@color/colorPrimary"
-            android:text="@string/attach"
-            android:textColor="@color/white"
-            app:layout_constraintEnd_toStartOf="@+id/btn_upload"
-            app:layout_constraintTop_toTopOf="@+id/btn_upload" />
+            <View
+                android:layout_width="0dp"
+                android:layout_height="2dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:background="@color/workflow_details_section_title_bar"
+                app:layout_constraintBottom_toBottomOf="@id/tv_title_files"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tv_title_files"
+                app:layout_constraintTop_toTopOf="@id/tv_title_files" />
 
-        <Button
-            android:id="@+id/btn_upload"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/green"
-            android:text="@string/upload"
-            android:textColor="@color/white"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/rv_files" />
+            <CheckBox
+                android:id="@+id/cb_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:buttonTint="@color/colorPrimary"
+                app:layout_constraintHorizontal_weight="1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_title_files" />
 
-        <TextView
-            android:id="@+id/tv_file_uploaded"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:text="@string/uploaded_file"
-            android:textColor="@color/colorPrimary"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btn_upload" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_files"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/cb_header" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/tv_no_files"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="8dp"
+                android:text="@string/workflow_detail_files_fragment_no_files"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/cb_header"
+                tools:visibility="visible" />
+
+            <Button
+                android:id="@+id/btn_attachment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:backgroundTint="@color/colorPrimary"
+                android:text="@string/attach"
+                android:textColor="@color/white"
+                app:layout_constraintEnd_toStartOf="@+id/btn_upload"
+                app:layout_constraintTop_toTopOf="@+id/btn_upload" />
+
+            <Button
+                android:id="@+id/btn_upload"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/green"
+                android:text="@string/upload"
+                android:textColor="@color/white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/rv_files" />
+
+            <TextView
+                android:id="@+id/tv_file_uploaded"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:text="@string/uploaded_file"
+                android:textColor="@color/colorPrimary"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btn_upload" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
 </layout>

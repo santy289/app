@@ -144,6 +144,7 @@ public class CommentsFragment extends Fragment {
         mCommentsAdapter = new CommentsAdapter(commentList);
         mBinding.rvComments.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvComments.setAdapter(mCommentsAdapter);
+        mBinding.rvComments.setNestedScrollingEnabled(false);
     }
 
     @UiThread

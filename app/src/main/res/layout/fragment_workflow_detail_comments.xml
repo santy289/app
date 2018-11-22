@@ -3,117 +3,97 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/lyt_comments"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white"
-        android:visibility="visible">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/tv_title_comments"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/workflow_detail_comments_fragment_title"
-            android:textAllCaps="true"
-            android:textColor="@color/workflow_details_section_title"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="2dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:background="@color/workflow_details_section_title_bar"
-            app:layout_constraintBottom_toBottomOf="@id/tv_title_comments"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/tv_title_comments"
-            app:layout_constraintTop_toTopOf="@id/tv_title_comments" />
-
-        <Switch
-            android:id="@+id/switch_private_public"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
-            android:switchPadding="8dp"
-            android:text="@string/public_comment"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/dark_gray"
-            android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="@id/tv_title_comments"
-            app:layout_constraintTop_toBottomOf="@id/tv_title_comments" />
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/et_comment"
-            style="@style/Widget.MaterialComponents.TextInputEditText.OutlinedBox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/spinner_bg"
-            android:hint="@string/workflow_detail_comments_fragment_input_comment_hint"
-            android:inputType="textMultiLine"
-            android:maxLines="5"
-            android:layout_marginTop="8dp"
-            android:paddingStart="10dp"
-            android:paddingTop="5dp"
-            android:paddingEnd="10dp"
-            android:paddingBottom="5dp"
-            android:scrollbars="vertical"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toStartOf="@+id/btn_comment"
-            app:layout_constraintStart_toStartOf="@id/tv_title_comments"
-            app:layout_constraintTop_toBottomOf="@+id/switch_private_public" />
-
-        <Button
-            android:id="@+id/btn_comment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="16dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="@string/workflow_detail_comments_fragment_button_comment"
-            app:backgroundTint="@color/green"
-            app:layout_constraintBottom_toBottomOf="@+id/et_comment"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/et_comment"
-            app:layout_constraintTop_toTopOf="@+id/et_comment" />
-
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_comments"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/lyt_comments"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:clipToPadding="false"
-            android:paddingBottom="16dp"
-            android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/et_comment" />
-
-        <TextView
-            android:id="@+id/tv_no_comments"
-            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:padding="8dp"
-            android:text="@string/workflow_detail_comments_fragment_no_comments"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="@id/rv_comments"
-            app:layout_constraintStart_toStartOf="@id/rv_comments"
-            app:layout_constraintTop_toBottomOf="@id/et_comment"
-            tools:visibility="visible" />
+            android:background="@color/white"
+            android:visibility="visible">
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <Switch
+                android:id="@+id/switch_private_public"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:switchPadding="8dp"
+                android:text="@string/public_comment"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/dark_gray"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_comment"
+                style="@style/Widget.MaterialComponents.TextInputEditText.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/spinner_bg"
+                android:hint="@string/workflow_detail_comments_fragment_input_comment_hint"
+                android:inputType="textMultiLine"
+                android:maxLines="5"
+                android:paddingStart="10dp"
+                android:paddingTop="5dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="5dp"
+                android:scrollbars="vertical"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toStartOf="@+id/btn_comment"
+                app:layout_constraintStart_toStartOf="@id/switch_private_public"
+                app:layout_constraintTop_toBottomOf="@+id/switch_private_public" />
+
+            <Button
+                android:id="@+id/btn_comment"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="16dp"
+                app:backgroundTint="@color/green"
+                app:cornerRadius="100dp"
+                app:icon="@drawable/ic_message_black_24dp"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="20dp"
+                app:layout_constraintBottom_toBottomOf="@+id/et_comment"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/et_comment"
+                app:layout_constraintTop_toTopOf="@+id/et_comment" />
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_comments"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:clipToPadding="false"
+                android:paddingBottom="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/et_comment" />
+
+            <TextView
+                android:id="@+id/tv_no_comments"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="8dp"
+                android:text="@string/workflow_detail_comments_fragment_no_comments"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="@id/rv_comments"
+                app:layout_constraintStart_toStartOf="@id/rv_comments"
+                app:layout_constraintTop_toBottomOf="@id/et_comment"
+                tools:visibility="visible" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
 </layout>

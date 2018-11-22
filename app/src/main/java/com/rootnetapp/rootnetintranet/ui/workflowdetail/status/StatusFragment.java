@@ -117,14 +117,14 @@ public class StatusFragment extends Fragment {
      * Click listener function that listens to clicks in the approve button.
      */
     private void approveAction() {
-        statusViewModel.handleApproveAction(mApproveSpinnerItemSelection);
+        statusViewModel.handleApproveAction();
     }
 
     /**
      * Click listener function that listens to clicks in the reject button.
      */
     private void rejectAction() {
-        statusViewModel.handleRejectAction(mApproveSpinnerItemSelection);
+        statusViewModel.handleRejectAction();
     }
 
     @UiThread
@@ -142,8 +142,6 @@ public class StatusFragment extends Fragment {
         mBinding.includeStatusSummary.tvCurrentStatus.setText(statusNames[INDEX_CURRENT_STATUS]);
         mBinding.includeStatusSummary.tvNextStatuses.setText(statusNames[INDEX_NEXT_STATUS]);
     }
-
-    private int mApproveSpinnerItemSelection;
 
     @UiThread
     private void updateApproveSpinner(List<String> nextStatuses) {
@@ -164,7 +162,7 @@ public class StatusFragment extends Fragment {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position,
                                                long id) {
-                        mApproveSpinnerItemSelection = position;
+                        statusViewModel.setApproveSpinnerItemSelection(position);
                     }
 
                     @Override

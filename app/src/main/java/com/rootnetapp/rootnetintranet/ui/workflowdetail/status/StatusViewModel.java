@@ -55,6 +55,8 @@ public class StatusViewModel extends ViewModel {
     protected LiveData<String[]> updateStatusUiFromUserAction;
     protected LiveData<Boolean> handleShowLoadingByRepo;
 
+    private int mApproveSpinnerItemSelection;
+
     private String mToken;
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the workflow.
     private WorkflowDb mWorkflow; // Not in DB and more complete response from network.
@@ -285,12 +287,12 @@ public class StatusViewModel extends ViewModel {
         mRepository.approveWorkflow(mToken, mWorkflow.getId(), approve, nextStatusId);
     }
 
-    protected void handleApproveAction(int selectedItemIndex) {
-        handleApproveOrRejectAction(selectedItemIndex, true);
+    protected void handleApproveAction() {
+        handleApproveOrRejectAction(mApproveSpinnerItemSelection, true);
     }
 
-    protected void handleRejectAction(int selectedItemIndex) {
-        handleApproveOrRejectAction(selectedItemIndex, false);
+    protected void handleRejectAction() {
+        handleApproveOrRejectAction(mApproveSpinnerItemSelection, false);
     }
 
     private WorkflowTypeDb currentWorkflowType;
@@ -527,6 +529,10 @@ public class StatusViewModel extends ViewModel {
             return;
         }
         updateProfilesInvolved.setValue(profiles);
+    }
+
+    protected void setApproveSpinnerItemSelection(int approveSpinnerItemSelection){
+        this.mApproveSpinnerItemSelection = approveSpinnerItemSelection;
     }
 
     private void onFailure(Throwable throwable) {

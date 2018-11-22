@@ -27,6 +27,7 @@ public class CommentsViewModel extends ViewModel {
     private MutableLiveData<Comment> mCommentLiveData;
     private MutableLiveData<Boolean> mHideComments;
     private MutableLiveData<Integer> mCommentsTabCounter;
+    private MutableLiveData<Boolean> mEnableCommentButton;
 
     protected MutableLiveData<Boolean> showLoading;
 
@@ -73,6 +74,7 @@ public class CommentsViewModel extends ViewModel {
         setCommentsTabCounter(commentsCounter);
         mCommentLiveData.setValue(commentResponse.getResponse());
         showLoading.setValue(false);
+        mEnableCommentButton.setValue(true);
     }
 
     private void getComments(String auth, int workflowId) {
@@ -83,6 +85,7 @@ public class CommentsViewModel extends ViewModel {
     }
 
     protected void postComment(String comment, List<CommentFile> files) {
+        mEnableCommentButton.setValue(false);
         showLoading.setValue(true);
         Disposable disposable = mRepository
                 .postComment(
@@ -142,5 +145,12 @@ public class CommentsViewModel extends ViewModel {
             mCommentsTabCounter = new MutableLiveData<>();
         }
         return mCommentsTabCounter;
+    }
+
+    protected LiveData<Boolean> getObservableEnableCommentButton() {
+        if (mEnableCommentButton == null) {
+            mEnableCommentButton = new MutableLiveData<>();
+        }
+        return mEnableCommentButton;
     }
 }

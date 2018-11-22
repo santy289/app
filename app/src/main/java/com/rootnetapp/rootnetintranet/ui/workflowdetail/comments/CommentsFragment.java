@@ -105,6 +105,7 @@ public class CommentsFragment extends Fragment {
         commentsViewModel.getObservableHideComments().observe(this, this::hideCommentsList);
         commentsViewModel.getObservableComment().observe(this, this::addNewComment);
         commentsViewModel.getObservableCommentsTabCounter().observe(this, this::updateTabCounter);
+        commentsViewModel.getObservableEnableCommentButton().observe(this, this::enableCommentButton);
 
         commentsViewModel.showLoading.observe(this, this::showLoading);
     }
@@ -180,5 +181,10 @@ public class CommentsFragment extends Fragment {
         if (workflowDetailViewModel != null) {
             workflowDetailViewModel.setCommentsTabCounter(counter);
         }
+    }
+
+    @UiThread
+    private void enableCommentButton(boolean enable) {
+        mBinding.btnComment.setEnabled(enable);
     }
 }

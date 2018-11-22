@@ -3,8 +3,8 @@ package com.rootnetapp.rootnetintranet.models.createworkflow.form;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringDef;
 
 public class TextInputFormItem extends BaseFormItem {
 
@@ -12,7 +12,7 @@ public class TextInputFormItem extends BaseFormItem {
     private @Nullable String hint;
     private @Nullable String regex;
     private @Nullable String regexErrorMessage;
-    private @InputType int inputType;
+    private @InputType String inputType;
 
     private TextInputFormItem() {
         //Constructor is private for Builder pattern
@@ -60,11 +60,11 @@ public class TextInputFormItem extends BaseFormItem {
         this.regexErrorMessage = regexErrorMessage;
     }
 
-    public int getInputType() {
+    public String getInputType() {
         return inputType;
     }
 
-    public void setInputType(int inputType) {
+    public void setInputType(String inputType) {
         this.inputType = inputType;
     }
 
@@ -78,7 +78,7 @@ public class TextInputFormItem extends BaseFormItem {
         private String hint;
         private String regex;
         private String regexErrorMessage;
-        private @InputType int inputType;
+        private @InputType String inputType;
 
         public Builder setTitle(String title) {
             this.title = title;
@@ -128,7 +128,7 @@ public class TextInputFormItem extends BaseFormItem {
             return this;
         }
 
-        public Builder setInputType(@InputType int inputType) {
+        public Builder setInputType(@InputType String inputType) {
             this.inputType = inputType;
 
             return this;
@@ -153,7 +153,7 @@ public class TextInputFormItem extends BaseFormItem {
     }
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
+    @StringDef({
             InputType.TEXT,
             InputType.TEXT_AREA,
             InputType.PHONE,
@@ -163,11 +163,11 @@ public class TextInputFormItem extends BaseFormItem {
     })
     public @interface InputType {
 
-        int TEXT = 1;
-        int TEXT_AREA = 2;
-        int PHONE = 3;
-        int EMAIL = 4;
-        int NUMBER = 5;
-        int DECIMAL = 6;
+        String TEXT = "text";
+        String TEXT_AREA = "text_area";
+        String PHONE = "phone";
+        String EMAIL = "email";
+        String NUMBER = "integer";
+        String DECIMAL = "decimal";
     }
 }

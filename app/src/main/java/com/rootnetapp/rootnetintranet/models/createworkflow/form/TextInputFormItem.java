@@ -164,7 +164,7 @@ public class TextInputFormItem extends BaseFormItem {
     public @interface InputType {
 
         String TEXT = "text";
-        String TEXT_AREA = "text_area";
+        String TEXT_AREA = "string";
         String PHONE = "phone";
         String EMAIL = "email";
         String NUMBER = "integer";

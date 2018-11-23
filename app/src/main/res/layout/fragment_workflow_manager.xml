@@ -209,7 +209,7 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
+                    android:layout_height="1dp"
                     android:layout_centerVertical="true"
                     android:layout_marginStart="10dp"
                     android:layout_toStartOf="@id/img_analytics"
@@ -498,7 +498,7 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
+                    android:layout_height="1dp"
                     android:layout_centerVertical="true"
                     android:layout_marginStart="10dp"
                     android:layout_toStartOf="@id/img_overview"
@@ -715,7 +715,7 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
+                    android:layout_height="1dp"
                     android:layout_centerVertical="true"
                     android:layout_marginStart="10dp"
                     android:layout_toStartOf="@id/img_pendingmore"

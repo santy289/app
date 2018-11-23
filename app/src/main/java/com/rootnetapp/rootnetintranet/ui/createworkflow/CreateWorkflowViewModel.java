@@ -495,6 +495,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 
             buildField(field);
         }
+        showLoading.setValue(false);
         buildForm.setValue(true);
         mSelectedWorkflowTypeLiveData.setValue(mSelectedType);
     }

@@ -72,7 +72,7 @@
                             android:layout_marginEnd="8dp"
                             android:text="Selected dates: "
                             android:textColor="@color/colorPrimary"
-                            android:textSize="10sp" />
+                            android:textSize="12sp" />
 
                         <TextView
                             android:id="@+id/tv_selecteddates"
@@ -82,7 +82,7 @@
                             android:layout_marginEnd="8dp"
                             android:text="(Dec 1 2017 - Dec 31 2017)"
                             android:textColor="@color/colorPrimary"
-                            android:textSize="10sp" />
+                            android:textSize="12sp" />
 
                     </LinearLayout>
 
@@ -95,34 +95,44 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginStart="20dp">
+                    android:orientation="vertical"
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="10dp">
 
                     <Button
                         android:id="@+id/btn_day"
-                        android:layout_width="45dp"
-                        android:layout_height="35dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="40dp"
                         android:background="@drawable/unselectedfilter_bg"
                         android:text="@string/day"
-                        android:textColor="@color/unselected_filter_text"
-                        android:textSize="9sp" />
+                        android:minWidth="40dp"
+                        android:maxLines="1"
+                        app:backgroundTint="@color/unselected_filter"
+                        android:textSize="12sp"
+                        android:textColor="@color/unselected_filter_text" />
 
                     <Button
                         android:id="@+id/btn_week"
-                        android:layout_width="45dp"
-                        android:layout_height="35dp"
-                        android:background="@drawable/unselectedfilter_bg"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:backgroundTint="@color/unselected_filter"
                         android:text="@string/week"
-                        android:textColor="@color/unselected_filter_text"
-                        android:textSize="9sp" />
+                        android:minHeight="40dp"
+                        android:maxLines="1"
+                        android:textSize="12sp"
+                        android:textColor="@color/unselected_filter_text" />
 
                     <Button
                         android:id="@+id/btn_month"
-                        android:layout_width="45dp"
-                        android:layout_height="35dp"
-                        android:background="@drawable/selectedfilter_bg"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:backgroundTint="@color/selected_filter"
                         android:text="@string/month"
-                        android:textColor="@color/white"
-                        android:textSize="9sp" />
+                        android:minHeight="40dp"
+                        android:maxLines="1"
+                        android:textSize="12sp"
+                        android:textColor="@color/white" />
 
                 </LinearLayout>
 

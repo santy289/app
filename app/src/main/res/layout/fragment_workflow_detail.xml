@@ -16,48 +16,64 @@
             android:textColor="@color/workflow_details_section_title"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_open_closed"
-            app:layout_constraintEnd_toStartOf="@+id/tv_open_closed"
+            app:layout_constraintEnd_toStartOf="@+id/sp_status"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="SEM-002" />
 
         <TextView
-            android:id="@+id/tv_open_closed"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:background="@drawable/round_corner"
-            android:paddingStart="10dp"
-            android:paddingTop="5dp"
-            android:paddingEnd="10dp"
-            android:paddingBottom="5dp"
-            android:textAllCaps="true"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:backgroundTint="@color/green"
-            tools:text="@string/open" />
-
-        <androidx.constraintlayout.widget.Barrier
-            android:id="@+id/barrier_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:barrierDirection="bottom"
-            app:constraint_referenced_ids="tv_workflow_id,tv_open_closed" />
-
-        <TextView
             android:id="@+id/tv_workflow_name"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:textColor="@color/colorPrimaryDark"
             android:textSize="14sp"
             android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/sp_status"
             app:layout_constraintStart_toStartOf="@+id/tv_workflow_id"
-            app:layout_constraintTop_toBottomOf="@+id/barrier_title"
-            tools:text="Ejecución de proyecto de software" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_workflow_id"
+            tools:text="Ejecución de proyecto de softwareadsdsadasd" />
+
+        <View
+            android:id="@+id/view_spinner_background"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/round_corner"
+            android:backgroundTint="@color/green"
+            app:layout_constraintBottom_toBottomOf="@+id/sp_status"
+            app:layout_constraintEnd_toEndOf="@+id/sp_status"
+            app:layout_constraintStart_toStartOf="@+id/sp_status"
+            app:layout_constraintTop_toTopOf="@+id/sp_status" />
+
+        <Spinner
+            android:id="@+id/sp_status"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:backgroundTint="@color/white"
+            android:spinnerMode="dropdown"
+            app:layout_constraintBottom_toBottomOf="@+id/view_separator"
+            app:layout_constraintEnd_toStartOf="@+id/btn_options"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btn_options"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+            android:layout_width="35dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_more_vert_black_24dp"
+            app:backgroundTint="@color/white"
+            app:icon="@drawable/ic_more_vert_black_24dp"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconTint="@color/black"
+            app:layout_constraintBottom_toBottomOf="@id/sp_status"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/sp_status"
+            app:rippleColor="@color/colorAccent" />
 
         <View
             android:id="@+id/view_separator"

@@ -7,6 +7,9 @@ import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowRespons
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -16,13 +19,17 @@ import io.reactivex.disposables.Disposable;
 
 public class WorkflowDetailViewModel extends ViewModel {
 
+    private static final int INDEX_STATUS_OPEN = 0;
+    private static final int INDEX_STATUS_CLOSED = 1;
+
     private WorkflowDetailRepository mRepository;
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Integer> mCommentsTabCounter;
     private MutableLiveData<Integer> mFilesTabCounter;
+    private MutableLiveData<StatusUiData> mStatusSpinnerLiveData;
 
     protected MutableLiveData<Boolean> showLoading;
-    protected MutableLiveData<Boolean> setWorkflowIsOpen;
+    protected MutableLiveData<StatusUiData> setWorkflowIsOpen;
     protected MutableLiveData<Integer> showToastMessage;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
@@ -30,6 +37,8 @@ public class WorkflowDetailViewModel extends ViewModel {
     private String mToken;
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the mWorkflow.
     private WorkflowDb mWorkflow; // Not in DB and more complete response from network.
+
+    private StatusUiData mStatusUiData;
 
     private static final String TAG = "WorkflowDetailViewModel";
 
@@ -49,6 +58,25 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.mToken = token;
         this.mWorkflowListItem = workflow;
         getWorkflow(this.mToken, this.mWorkflowListItem.getWorkflowId());
+        getStatusList();
+    }
+
+    private void getStatusList() {
+        List<Integer> stringResList = new ArrayList<>();
+        stringResList.add(INDEX_STATUS_OPEN, R.string.open);
+        stringResList.add(INDEX_STATUS_CLOSED, R.string.closed);
+
+        List<Integer> colorResList = new ArrayList<>();
+        colorResList.add(INDEX_STATUS_OPEN, R.color.green);
+        colorResList.add(INDEX_STATUS_CLOSED, R.color.red);
+
+        mStatusUiData = new StatusUiData(stringResList, colorResList);
+        mStatusSpinnerLiveData.setValue(mStatusUiData);
+    }
+
+    protected void setStatusSelection(int selectedIndex) {
+        mStatusUiData.setSelectedIndex(selectedIndex);
+        setWorkflowIsOpen.setValue(mStatusUiData);
     }
 
     private void getWorkflow(String auth, int workflowId) {
@@ -70,7 +98,8 @@ public class WorkflowDetailViewModel extends ViewModel {
     }
 
     private void updateUIWithWorkflow(WorkflowDb workflow) {
-        setWorkflowIsOpen.setValue(workflow.isOpen());
+        mStatusUiData.setSelectedIndex(workflow.isOpen() ? INDEX_STATUS_OPEN : INDEX_STATUS_CLOSED);
+        setWorkflowIsOpen.setValue(mStatusUiData);
     }
 
     /**
@@ -122,5 +151,12 @@ public class WorkflowDetailViewModel extends ViewModel {
             mFilesTabCounter = new MutableLiveData<>();
         }
         return mFilesTabCounter;
+    }
+
+    protected LiveData<StatusUiData> getObservableStatusSpinner() {
+        if (mStatusSpinnerLiveData == null) {
+            mStatusSpinnerLiveData = new MutableLiveData<>();
+        }
+        return mStatusSpinnerLiveData;
     }
 }

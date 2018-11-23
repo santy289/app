@@ -1,11 +1,8 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 import android.text.TextUtils;
-import androidx.collection.ArrayMap;
 import android.util.Log;
+
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
@@ -48,6 +45,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import androidx.collection.ArrayMap;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -68,6 +69,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Integer> mCreateErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
+    private MutableLiveData<String> mSelectedWorkflowTypeLiveData; //workaround to solve the bug that caused the selected workflow type to disappear
     private List<WorkflowTypeItemMenu> workflowTypeMenuItems;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
@@ -112,6 +114,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     protected static final int TAG_WORKFLOW_TYPE = 80;
 
     private final int UPLOAD_FILE_SIZE_LIMIT = 10;
+    private String mSelectedType;
 
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.createWorkflowRepository = createWorkflowRepository;
@@ -155,7 +158,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     protected void onCleared() {
         disposables.clear();
     }
-    
+
     private void handleInvalidEmail() {
         DialogMessage dialog = new DialogMessage();
         dialog.title = R.string.warning;
@@ -208,6 +211,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 
         setFileUploadField.setValue(pendingFileUpload.fieldData);
         buildForm.setValue(true);
+        mSelectedWorkflowTypeLiveData.setValue(mSelectedType);
 
         formSettings.addFieldDataItem(pendingFileUpload.fieldData);
     }
@@ -226,7 +230,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 
         showLoading.setValue(true);
         Disposable disposable = createWorkflowRepository.uploadFile(token, filePost)
-                .subscribe( fileUploadResponse -> {
+                .subscribe(fileUploadResponse -> {
                     showLoading.setValue(false);
                     successUpload(fileUploadResponse);
 
@@ -251,7 +255,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     protected void postWorkflow(FormBuilder formBuilder) {
         ArrayList<FieldData> fieldItems = formSettings.getFieldItemsForPost();
         ArrayMap<String, Integer> baseInfo = formSettings.getBaseMachineNamesAndIds();
-        
+
         if (baseInfo.isEmpty()) {
             Log.d(TAG, "postWorkflow: Need to initalize baseInfo");
             DialogMessage dialogMessage = new DialogMessage();
@@ -264,7 +268,8 @@ public class CreateWorkflowViewModel extends ViewModel {
         showLoading.setValue(true);
 
         // TODO check if we have a file to upload first and then continue with the rest.
-        if (formSettings.getPendingFileUpload() == null || formSettings.getPendingFileUpload().file == null) {
+        if (formSettings.getPendingFileUpload() == null || formSettings
+                .getPendingFileUpload().file == null) {
             startPostCreateWorkflow(baseInfo, formBuilder, fieldItems);
             return;
         }
@@ -273,13 +278,12 @@ public class CreateWorkflowViewModel extends ViewModel {
         formSettings.setFormBuilder(formBuilder);
         PendingFileUpload pendingFileUpload = formSettings.getPendingFileUpload();
 
-
         Disposable disposable = Observable.fromCallable(() -> {
             String fileString = Utils.encodeFileToBase64Binary(pendingFileUpload.file);
             return fileString;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe( encodedFileString -> {
+                .subscribe(encodedFileString -> {
                     showLoading.setValue(false);
                     postFileRequest(pendingFileUpload.path, encodedFileString);
                 }, throwable -> {
@@ -288,11 +292,10 @@ public class CreateWorkflowViewModel extends ViewModel {
                 });
         disposables.add(disposable);
 
-
-
     }
 
-    private void startPostCreateWorkflow(ArrayMap<String, Integer> baseInfo, FormBuilder formBuilder, ArrayList<FieldData> fieldItems) {
+    private void startPostCreateWorkflow(ArrayMap<String, Integer> baseInfo,
+                                         FormBuilder formBuilder, ArrayList<FieldData> fieldItems) {
         int titleTag = baseInfo.get(FormSettings.MACHINE_NAME_TITLE);
         int descriptionTag = baseInfo.get(FormSettings.MACHINE_NAME_DESCRIPTION);
         int startTag = baseInfo.get(FormSettings.MACHINE_NAME_START_DATE);
@@ -308,7 +311,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         List<WorkflowMetas> metas = new ArrayList<>();
         WorkflowMetas workflowMetas;
         String value;
-
 
         for (int i = 0; i < fieldItems.size(); i++) {
             fieldData = fieldItems.get(i);
@@ -347,7 +349,8 @@ public class CreateWorkflowViewModel extends ViewModel {
         WorkflowMetas testMeta;
         for (int i = 0; i < metas.size(); i++) {
             testMeta = metas.get(i);
-            if (TextUtils.isEmpty(testMeta.getValue()) || testMeta.getValue().equals("0") || testMeta.getValue().equals("[]")) {
+            if (TextUtils.isEmpty(testMeta.getValue()) || testMeta.getValue()
+                    .equals("0") || testMeta.getValue().equals("[]")) {
                 removeIndex.add(testMeta.getWorkflowTypeFieldId());
             }
         }
@@ -394,7 +397,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         if (typeInfo != null
                 && typeInfo.getValueType().equals(FormSettings.VALUE_EMAIL)) {
             // TODO put back this value after debugging
-            if(!TextUtils.isEmpty(value)
+            if (!TextUtils.isEmpty(value)
                     && !isValidEmail(value)) {
                 handleInvalidEmail();
                 return false;
@@ -404,7 +407,8 @@ public class CreateWorkflowViewModel extends ViewModel {
         return true;
     }
 
-    private void postToServer(List<WorkflowMetas> metas, int workflowTypeId, String title, String start, String description) {
+    private void postToServer(List<WorkflowMetas> metas, int workflowTypeId, String title,
+                              String start, String description) {
         CreateRequest createRequest = new CreateRequest();
         createRequest.workflowTypeId = workflowTypeId;
         createRequest.title = title;
@@ -425,8 +429,14 @@ public class CreateWorkflowViewModel extends ViewModel {
         disposables.add(disposable);
     }
 
-    protected void generateFieldsByType(String typeName) {
-        int id = formSettings.findIdByTypeName(typeName);
+    protected void setSelectedType(String typeName) {
+        mSelectedType = typeName;
+    }
+
+    protected void generateFieldsByType() {
+        if (mSelectedType == null || mSelectedType.isEmpty()) return;
+
+        int id = formSettings.findIdByTypeName(mSelectedType);
         if (id == 0) {
             showLoading.setValue(false);
             return;
@@ -436,7 +446,8 @@ public class CreateWorkflowViewModel extends ViewModel {
         clearForm();
         formSettings.setWorkflowTypeIdSelected(id);
         Disposable disposable = Observable.fromCallable(() -> {
-            List<FormFieldsByWorkflowType> fields = createWorkflowRepository.getFiedsByWorkflowType(id);
+            List<FormFieldsByWorkflowType> fields = createWorkflowRepository
+                    .getFiedsByWorkflowType(id);
             if (fields == null || fields.size() < 1) {
                 return false;
             }
@@ -453,7 +464,7 @@ public class CreateWorkflowViewModel extends ViewModel {
             return formSettings;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe( formSettings -> {
+                .subscribe(formSettings -> {
                     FormSettings settings = (FormSettings) formSettings;
                     showFields(settings);
                 }, throwable -> {
@@ -485,6 +496,7 @@ public class CreateWorkflowViewModel extends ViewModel {
             buildField(field);
         }
         buildForm.setValue(true);
+        mSelectedWorkflowTypeLiveData.setValue(mSelectedType);
     }
 
     private void buildField(FormFieldsByWorkflowType field) {
@@ -536,7 +548,8 @@ public class CreateWorkflowViewModel extends ViewModel {
                 handleFile(field);
                 break;
             default:
-                Log.d(TAG, "buildField: Not a generic type: " + typeInfo.getType() + " value: " + typeInfo.getValueType());
+                Log.d(TAG, "buildField: Not a generic type: " + typeInfo
+                        .getType() + " value: " + typeInfo.getValueType());
                 break;
         }
     }
@@ -550,14 +563,12 @@ public class CreateWorkflowViewModel extends ViewModel {
         String customLabel = field.getFieldName();
         int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
 
-
         ListField listField = new ListField();
 //        listField.listId = listId;
         listField.customFieldId = customFieldId;
         listField.customLabel = customLabel;
         listField.associatedWorkflowTypeId = associatedWorkflowTypeId;
         listField.isMultipleSelection = false;
-
 
         FieldData fieldData = new FieldData();
         fieldData.label = customLabel;
@@ -570,13 +581,9 @@ public class CreateWorkflowViewModel extends ViewModel {
 
         formSettings.setPendingFileUpload(pendingFileUpload);
 
-
 //        setListWithData.setValue(fieldData);
 //        buildForm.setValue(true);
 //        showLoading.setValue(false);
-
-
-
 
     }
 
@@ -618,8 +625,9 @@ public class CreateWorkflowViewModel extends ViewModel {
     }
 
     private final static boolean isValidEmail(CharSequence target) {
-        if (target == null)
+        if (target == null) {
             return false;
+        }
         return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 
@@ -627,7 +635,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         FieldConfig fieldConfig = field.getFieldConfigObject();
         Disposable disposable = createWorkflowRepository
                 .getCurrencyCodes()
-                .subscribe( currencyFieldData -> {
+                .subscribe(currencyFieldData -> {
                     //list
                     ListField listField = new ListField();
                     listField.customFieldId = FormSettings.FIELD_CURRENCY_ID;
@@ -638,7 +646,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                     String currencyLabel;
                     for (int i = 0; i < currencyFieldData.size(); i++) {
                         currencyData = currencyFieldData.get(i);
-                        currencyLabel = currencyData.description + " - "+ currencyData.currency;
+                        currencyLabel = currencyData.description + " - " + currencyData.currency;
                         ListFieldItemMeta item = new ListFieldItemMeta(
                                 currencyData.countryId,
                                 currencyLabel
@@ -674,7 +682,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         FieldConfig fieldConfig = field.getFieldConfigObject();
         Disposable disposable = createWorkflowRepository
                 .getCountryCodes()
-                .subscribe( phoneFieldData -> {
+                .subscribe(phoneFieldData -> {
                     //list
                     ListField listField = new ListField();
                     listField.customFieldId = FormSettings.FIELD_CODE_ID;
@@ -685,7 +693,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                     String codeLabel;
                     for (int i = 0; i < phoneFieldData.size(); i++) {
                         phoneCode = phoneFieldData.get(i);
-                        codeLabel = phoneCode.phoneCode + " - "+ phoneCode.description;
+                        codeLabel = phoneCode.phoneCode + " - " + phoneCode.description;
                         ListFieldItemMeta item = new ListFieldItemMeta(
                                 phoneCode.countryId,
                                 codeLabel
@@ -757,7 +765,8 @@ public class CreateWorkflowViewModel extends ViewModel {
         fieldData.required = field.isRequired();
         fieldData.tag = field.getId();
         fieldData.escape = escape(field.fieldConfigObject);
-        if (FormSettings.VALUE_STRING.equals(valueType) || FormSettings.VALUE_TEXT.equals(valueType)) {
+        if (FormSettings.VALUE_STRING.equals(valueType) || FormSettings.VALUE_TEXT
+                .equals(valueType)) {
             formSettings.addFieldDataItem(fieldData);
             setFieldTextWithData.setValue(fieldData);
             return;
@@ -842,7 +851,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 
         Disposable disposable = createWorkflowRepository
                 .getProducts(token)
-                .subscribe( productsResponse -> {
+                .subscribe(productsResponse -> {
                     if (productsResponse.getCode() != 200) {
                         showLoading.setValue(false);
                         return;
@@ -917,7 +926,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 
         Disposable disposable = createWorkflowRepository
                 .getRoles(token)
-                .subscribe( roleResponse -> {
+                .subscribe(roleResponse -> {
                     if (roleResponse.getCode() != 200) {
                         showLoading.setValue(false);
                         return;
@@ -953,7 +962,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 
         Disposable disposable = createWorkflowRepository
                 .getServices(token)
-                .subscribe( servicesResponse -> {
+                .subscribe(servicesResponse -> {
                     if (servicesResponse.getCode() != 200) {
                         showLoading.setValue(false);
                         return;
@@ -990,6 +999,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         fieldData.escape = escape(fieldConfig);
         setListWithData.setValue(fieldData);
         buildForm.setValue(true);
+        mSelectedWorkflowTypeLiveData.setValue(mSelectedType);
         showLoading.setValue(false);
         formSettings.addFieldDataItem(fieldData);
     }
@@ -1024,13 +1034,14 @@ public class CreateWorkflowViewModel extends ViewModel {
         int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
 
         if (fieldType.equals(FormSettings.TYPE_SYSTEM_USERS)) {
-            createSystemUserFieldasCustomField(field, listId, customFieldId, customLabel, associatedWorkflowTypeId);
+            createSystemUserFieldasCustomField(field, listId, customFieldId, customLabel,
+                    associatedWorkflowTypeId);
             return;
         }
 
         Disposable disposable = createWorkflowRepository
                 .getList(token, listId)
-                .subscribe( listsResponse -> {
+                .subscribe(listsResponse -> {
                     List<ListItem> listItems = listsResponse.getItems();
                     ListItem listItem;
                     ListField listField = null;
@@ -1099,19 +1110,20 @@ public class CreateWorkflowViewModel extends ViewModel {
             return listField;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe( listField -> {
+                .subscribe(listField -> {
                     ListField fieldData = (ListField) listField;
                     showListField(fieldData, field.getFieldConfigObject());
 
                     showLoading.setValue(false);
                     buildForm.setValue(true);
+                    mSelectedWorkflowTypeLiveData.setValue(mSelectedType);
                 }, throwable -> {
                     showLoading.setValue(false);
                     buildForm.setValue(true);
+                    mSelectedWorkflowTypeLiveData.setValue(mSelectedType);
                 });
         disposables.add(disposable);
     }
-
 
     private void setWorkflowTypes() {
         Disposable disposable = Observable.fromCallable(() -> {
@@ -1136,11 +1148,12 @@ public class CreateWorkflowViewModel extends ViewModel {
             return fieldListSettings;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe( fieldListSettings -> {
+                .subscribe(fieldListSettings -> {
                     FieldListSettings data = (FieldListSettings) fieldListSettings;
                     setFieldList.setValue(data);
                     //setBaseFields();
                     buildForm.setValue(true);
+                    mSelectedWorkflowTypeLiveData.setValue(mSelectedType);
                     showLoading.setValue(false);
                 }, throwable -> {
                     Log.d(TAG, "setWorkflowTypes: error " + throwable.getMessage());
@@ -1167,7 +1180,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         }
         FieldData fieldData = new FieldData();
         fieldData.resLabel = customLabel;
-        fieldData.list =  listData;
+        fieldData.list = listData;
         fieldData.tag = TAG_WORKFLOW_TYPE;
         fieldData.isMultipleSelection = false;
         fieldData.escape = false; // workflow types are not send in meta data.
@@ -1209,7 +1222,6 @@ public class CreateWorkflowViewModel extends ViewModel {
             fieldListSettings.required = true;
             fieldListSettings.tag = field.getId();
 
-
             FieldConfig fieldConfig = field.getFieldConfigObject();
             boolean isMultipleSelection = fieldConfig.getMultiple();
             String customLabel = field.getFieldName();
@@ -1229,7 +1241,7 @@ public class CreateWorkflowViewModel extends ViewModel {
             }
             FieldData fieldData = new FieldData();
             fieldData.label = customLabel;
-            fieldData.list =  listData;
+            fieldData.list = listData;
             fieldData.tag = field.getId();
             fieldData.isMultipleSelection = isMultipleSelection;
             fieldData.escape = escape(fieldConfig);
@@ -1238,14 +1250,16 @@ public class CreateWorkflowViewModel extends ViewModel {
             return fieldListSettings;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe( fieldListSettings -> {
+                .subscribe(fieldListSettings -> {
                     FieldListSettings settings = (FieldListSettings) fieldListSettings;
                     setFieldList.setValue(settings);
                     showLoading.setValue(false);
                     buildForm.setValue(true);
+                    mSelectedWorkflowTypeLiveData.setValue(mSelectedType);
                 }, throwable -> {
                     showLoading.setValue(false);
                     buildForm.setValue(true);
+                    mSelectedWorkflowTypeLiveData.setValue(mSelectedType);
                 });
         disposables.add(disposable);
     }
@@ -1270,7 +1284,8 @@ public class CreateWorkflowViewModel extends ViewModel {
     public void getWorkflowTypes(String auth) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
         Log.d("test", "getWorkflowTypes: ");
-        createWorkflowRepository.getWorkflowTypes(auth).subscribe(this::onTypesSuccess, this::onFailure);
+        createWorkflowRepository.getWorkflowTypes(auth)
+                .subscribe(this::onTypesSuccess, this::onFailure);
     }
 
     public void getList(String auth, int id) {
@@ -1280,12 +1295,14 @@ public class CreateWorkflowViewModel extends ViewModel {
 
     public void getProducts(String auth) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
-        createWorkflowRepository.getProducts(auth).subscribe(this::onProductsSuccess, this::onFailure);
+        createWorkflowRepository.getProducts(auth)
+                .subscribe(this::onProductsSuccess, this::onFailure);
     }
 
     public void getServices(String auth) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
-        createWorkflowRepository.getServices(auth).subscribe(this::onServicesSuccess, this::onFailure);
+        createWorkflowRepository.getServices(auth)
+                .subscribe(this::onServicesSuccess, this::onFailure);
     }
 
     public void getUsers(String auth) {
@@ -1295,7 +1312,8 @@ public class CreateWorkflowViewModel extends ViewModel {
 
     public void getCountries(String auth) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
-        createWorkflowRepository.getCountries(auth).subscribe(this::onCountriesSuccess, this::onFailure);
+        createWorkflowRepository.getCountries(auth)
+                .subscribe(this::onCountriesSuccess, this::onFailure);
     }
 
     public void createWorkflow(String auth, int workflowTypeId, String title, String workflowMetas,
@@ -1307,7 +1325,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 
     private void onTypesSuccess(WorkflowTypesResponse workflowTypesResponse) {
         for (WorkflowType type : workflowTypesResponse.getList()) {
-            Log.d("test", "onTypesSuccess: "+type.getName());
+            Log.d("test", "onTypesSuccess: " + type.getName());
         }
         mWorkflowsLiveData.setValue(workflowTypesResponse);
     }
@@ -1346,6 +1364,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         Log.d(TAG, "onFailure: " + throwable.getMessage());
         showLoading.setValue(false);
     }
+
     private void onCreateFailure(Throwable throwable) {
         showLoading.setValue(false);
         DialogMessage dialogMessage = new DialogMessage();
@@ -1430,6 +1449,13 @@ public class CreateWorkflowViewModel extends ViewModel {
             showDialogMessage = new MutableLiveData<>();
         }
         return showDialogMessage;
+    }
+
+    protected LiveData<String> getObservableSelectedWorkflowType() {
+        if (mSelectedWorkflowTypeLiveData == null) {
+            mSelectedWorkflowTypeLiveData = new MutableLiveData<>();
+        }
+        return mSelectedWorkflowTypeLiveData;
     }
 
 }

@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
@@ -75,6 +76,7 @@ public class WorkflowDetailFragment extends Fragment {
         mBinding.tvWorkflowName.setText(mWorkflowListItem.getWorkflowTypeKey());
 
         setupViewPager();
+        setOnClickListeners();
         subscribe();
 
         showLoading(true);
@@ -90,6 +92,32 @@ public class WorkflowDetailFragment extends Fragment {
         mViewPagerAdapter = new WorkflowDetailViewPagerAdapter(getContext(), mWorkflowListItem,
                 getChildFragmentManager());
         mBinding.viewPager.setAdapter(mViewPagerAdapter);
+    }
+
+    private void setOnClickListeners() {
+        mBinding.btnOptions.setOnClickListener(this::showPopupMenu);
+    }
+
+    private void subscribe() {
+        final Observer<Integer> errorObserver = ((Integer data) -> {
+            showLoading(false);
+            if (null != data) {
+                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
+            }
+        });
+
+        workflowDetailViewModel.getObservableError().observe(this, errorObserver);
+        workflowDetailViewModel.getObservableShowToastMessage()
+                .observe(this, this::showToastMessage);
+        workflowDetailViewModel.getObservableCommentsTabCounter()
+                .observe(this, this::updateCommentsTabCounter);
+        workflowDetailViewModel.getObservableFilesTabCounter()
+                .observe(this, this::updateFilesTabCounter);
+        workflowDetailViewModel.getObservableStatusSpinner()
+                .observe(this, this::updateStatusSpinner);
+
+        workflowDetailViewModel.showLoading.observe(this, this::showLoading);
+        workflowDetailViewModel.setWorkflowIsOpen.observe(this, this::updateWorkflowStatus);
     }
 
     @UiThread
@@ -121,26 +149,20 @@ public class WorkflowDetailFragment extends Fragment {
                 .show();
     }
 
-    private void subscribe() {
-        final Observer<Integer> errorObserver = ((Integer data) -> {
-            showLoading(false);
-            if (null != data) {
-                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
-            }
-        });
+    /**
+     * Opens a {@link PopupMenu} with the defined options
+     *
+     * @param anchor the view which should act as the anchor for the menu. Normally it should be the
+     *               one that the user tapped to invoke this menu.
+     */
+    private void showPopupMenu(View anchor) {
+        //Creating the instance of PopupMenu
+        PopupMenu popup = new PopupMenu(getContext(), anchor);
+        popup.getMenuInflater().inflate(R.menu.menu_workflow_detail, popup.getMenu());
 
-        workflowDetailViewModel.getObservableError().observe(this, errorObserver);
-        workflowDetailViewModel.getObservableShowToastMessage()
-                .observe(this, this::showToastMessage);
-        workflowDetailViewModel.getObservableCommentsTabCounter()
-                .observe(this, this::updateCommentsTabCounter);
-        workflowDetailViewModel.getObservableFilesTabCounter()
-                .observe(this, this::updateFilesTabCounter);
-        workflowDetailViewModel.getObservableStatusSpinner()
-                .observe(this, this::updateStatusSpinner);
+        popup.setOnMenuItemClickListener(item -> true); //todo export PDF on click
 
-        workflowDetailViewModel.showLoading.observe(this, this::showLoading);
-        workflowDetailViewModel.setWorkflowIsOpen.observe(this, this::updateWorkflowStatus);
+        popup.show();
     }
 
     @UiThread
@@ -166,7 +188,8 @@ public class WorkflowDetailFragment extends Fragment {
                 R.layout.status_spinner_item, statusList);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mBinding.spStatus.setAdapter(adapter);
-        mBinding.spStatus.setSelection(0, false); //prevent the listener from being called on initialization
+        mBinding.spStatus
+                .setSelection(0, false); //prevent the listener from being called on initialization
         mBinding.spStatus.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

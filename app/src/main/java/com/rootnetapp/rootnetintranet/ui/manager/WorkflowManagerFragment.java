@@ -1,14 +1,8 @@
 package com.rootnetapp.rootnetintranet.ui.manager;
 
-
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.SharedPreferences;
-import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 public class WorkflowManagerFragment extends Fragment implements ManagerInterface {
 
@@ -68,9 +68,11 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
                 .of(this, factory)
                 .get(WorkflowManagerViewModel.class);
         //TODO preferences inyectadas con Dagger
-        SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        token = "Bearer "+ prefs.getString("token","");
+        SharedPreferences prefs = getContext()
+                .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        token = "Bearer " + prefs.getString("token", "");
         binding.recPendingworkflows.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recPendingworkflows.setNestedScrollingEnabled(false);
         subscribe();
         binding.btnMonth.setOnClickListener(this::filterClicked);
         binding.btnWeek.setOnClickListener(this::filterClicked);
@@ -81,12 +83,12 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         binding.btnOutoftime.setOnClickListener(this::showWorkflowsDialog);
         binding.btnUpdated.setOnClickListener(this::showWorkflowsDialog);
         binding.btnShowmore.setOnClickListener(this::showMoreClicked);
-        start = Utils.getMonthDay(0,1);
-        end = Utils.getMonthDay(0,30);
-        binding.tvSelecteddates.setText("("+start+" - "+end+")");
+        start = Utils.getMonthDay(0, 1);
+        end = Utils.getMonthDay(0, 30);
+        binding.tvSelecteddates.setText("(" + start + " - " + end + ")");
         binding.tvSelecteddatetitle.setText(getString(R.string.current_month));
-        start = start+"T00:00:00-0000";
-        end = end+"T00:00:00-0000";
+        start = start + "T00:00:00-0000";
+        end = end + "T00:00:00-0000";
         workflows = new ArrayList<>();
         getPendingWorkflows();
         return view;
@@ -102,15 +104,16 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
             Utils.hideLoading();
             if (null != data) {
                 workflows.addAll(data.getList());
-                if(data.getPager().isIsLastPage()){
+                if (data.getPager().isIsLastPage()) {
                     binding.btnShowmore.setVisibility(View.GONE);
-                }else{
+                } else {
                     binding.btnShowmore.setVisibility(View.VISIBLE);
                 }
                 if (workflows.size() != 0) {
                     binding.lytNoworkflows.setVisibility(View.GONE);
                     binding.recPendingworkflows.setVisibility(View.VISIBLE);
-                    binding.recPendingworkflows.setAdapter(new PendingWorkflowsAdapter(workflows, this));
+                    binding.recPendingworkflows
+                            .setAdapter(new PendingWorkflowsAdapter(workflows, this));
                 } else {
                     binding.recPendingworkflows.setVisibility(View.GONE);
                     binding.lytNoworkflows.setVisibility(View.VISIBLE);
@@ -140,49 +143,64 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     }
 
     private void filterClicked(View view) {
-        switch (view.getId()){
-            case R.id.btn_month:{
-                binding.btnMonth.setBackground(getResources().getDrawable(R.drawable.selectedfilter_bg));
+        switch (view.getId()) {
+            case R.id.btn_month: {
+                binding.btnMonth
+                        .setBackground(getResources().getDrawable(R.drawable.selectedfilter_bg));
                 binding.btnMonth.setTextColor(getResources().getColor(R.color.white));
-                binding.btnWeek.setBackground(getResources().getDrawable(R.drawable.unselectedfilter_bg));
-                binding.btnWeek.setTextColor(getResources().getColor(R.color.unselected_filter_text));
-                binding.btnDay.setBackground(getResources().getDrawable(R.drawable.unselectedfilter_bg));
-                binding.btnDay.setTextColor(getResources().getColor(R.color.unselected_filter_text));
-                start = Utils.getMonthDay(0,1);
-                end = Utils.getMonthDay(0,30);
-                binding.tvSelecteddates.setText("("+start+" - "+end+")");
+                binding.btnWeek
+                        .setBackground(getResources().getDrawable(R.drawable.unselectedfilter_bg));
+                binding.btnWeek
+                        .setTextColor(getResources().getColor(R.color.unselected_filter_text));
+                binding.btnDay
+                        .setBackground(getResources().getDrawable(R.drawable.unselectedfilter_bg));
+                binding.btnDay
+                        .setTextColor(getResources().getColor(R.color.unselected_filter_text));
+                start = Utils.getMonthDay(0, 1);
+                end = Utils.getMonthDay(0, 30);
+                binding.tvSelecteddates.setText("(" + start + " - " + end + ")");
                 binding.tvSelecteddatetitle.setText(getString(R.string.current_month));
-                start = start+"T00:00:00-0000";
-                end = end+"T00:00:00-0000";
+                start = start + "T00:00:00-0000";
+                end = end + "T00:00:00-0000";
                 break;
             }
-            case R.id.btn_week:{
-                binding.btnMonth.setBackground(getResources().getDrawable(R.drawable.unselectedfilter_bg));
-                binding.btnMonth.setTextColor(getResources().getColor(R.color.unselected_filter_text));
-                binding.btnWeek.setBackground(getResources().getDrawable(R.drawable.selectedfilter_bg));
+            case R.id.btn_week: {
+                binding.btnMonth
+                        .setBackground(getResources().getDrawable(R.drawable.unselectedfilter_bg));
+                binding.btnMonth
+                        .setTextColor(getResources().getColor(R.color.unselected_filter_text));
+                binding.btnWeek
+                        .setBackground(getResources().getDrawable(R.drawable.selectedfilter_bg));
                 binding.btnWeek.setTextColor(getResources().getColor(R.color.white));
-                binding.btnDay.setBackground(getResources().getDrawable(R.drawable.unselectedfilter_bg));
-                binding.btnDay.setTextColor(getResources().getColor(R.color.unselected_filter_text));
+                binding.btnDay
+                        .setBackground(getResources().getDrawable(R.drawable.unselectedfilter_bg));
+                binding.btnDay
+                        .setTextColor(getResources().getColor(R.color.unselected_filter_text));
                 start = Utils.getWeekStart();
                 end = Utils.getWeekEnd();
-                binding.tvSelecteddates.setText("("+start+" - "+end+")");
+                binding.tvSelecteddates.setText("(" + start + " - " + end + ")");
                 binding.tvSelecteddatetitle.setText(getString(R.string.current_week));
-                start = start+"T00:00:00-0000";
-                end = end+"T00:00:00-0000";
+                start = start + "T00:00:00-0000";
+                end = end + "T00:00:00-0000";
                 break;
             }
-            case R.id.btn_day:{
-                binding.btnMonth.setBackground(getResources().getDrawable(R.drawable.unselectedfilter_bg));
-                binding.btnMonth.setTextColor(getResources().getColor(R.color.unselected_filter_text));
-                binding.btnWeek.setBackground(getResources().getDrawable(R.drawable.unselectedfilter_bg));
-                binding.btnWeek.setTextColor(getResources().getColor(R.color.unselected_filter_text));
-                binding.btnDay.setBackground(getResources().getDrawable(R.drawable.selectedfilter_bg));
+            case R.id.btn_day: {
+                binding.btnMonth
+                        .setBackground(getResources().getDrawable(R.drawable.unselectedfilter_bg));
+                binding.btnMonth
+                        .setTextColor(getResources().getColor(R.color.unselected_filter_text));
+                binding.btnWeek
+                        .setBackground(getResources().getDrawable(R.drawable.unselectedfilter_bg));
+                binding.btnWeek
+                        .setTextColor(getResources().getColor(R.color.unselected_filter_text));
+                binding.btnDay
+                        .setBackground(getResources().getDrawable(R.drawable.selectedfilter_bg));
                 binding.btnDay.setTextColor(getResources().getColor(R.color.white));
                 start = Utils.getCurrentDate();
-                binding.tvSelecteddates.setText("("+start+")");
+                binding.tvSelecteddates.setText("(" + start + ")");
                 binding.tvSelecteddatetitle.setText(getString(R.string.today));
-                start = start+"T00:00:00-0000";
-                end = Utils.getCurrentDate()+"T23:59:59-0000";
+                start = start + "T00:00:00-0000";
+                end = Utils.getCurrentDate() + "T23:59:59-0000";
                 break;
             }
         }
@@ -193,10 +211,10 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
 
     @Override
     public void setDate(String start, String end) {
-        binding.tvSelecteddates.setText("("+start+" - "+end+")");
+        binding.tvSelecteddates.setText("(" + start + " - " + end + ")");
         binding.tvSelecteddatetitle.setText(getString(R.string.selected_period));
-        this.start = start+"T00:00:00-0000";
-        this.end = end+"T00:00:00-0000";
+        this.start = start + "T00:00:00-0000";
+        this.end = end + "T00:00:00-0000";
         workflows = new ArrayList<>();
         page = 0;
         getPendingWorkflows();
@@ -208,23 +226,23 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     }
 
     private void showWorkflowsDialog(View view) {
-        switch (view.getId()){
-            case R.id.btn_pendingapproval:{
+        switch (view.getId()) {
+            case R.id.btn_pendingapproval: {
                 anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
                         ManagerWorkflowsDialog.DialogTypes.PENDING, null));
                 break;
             }
-            case R.id.btn_workflows:{
+            case R.id.btn_workflows: {
                 anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
                         ManagerWorkflowsDialog.DialogTypes.WORKFLOWS, null));
                 break;
             }
-            case R.id.btn_outoftime:{
+            case R.id.btn_outoftime: {
                 anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
                         ManagerWorkflowsDialog.DialogTypes.OUT_OF_TIME, null));
                 break;
             }
-            case R.id.btn_updated:{
+            case R.id.btn_updated: {
                 anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
                         ManagerWorkflowsDialog.DialogTypes.UPDATED, null));
                 break;

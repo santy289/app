@@ -3,6 +3,7 @@ package com.rootnetapp.rootnetintranet.data.remote;
 
 import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
+import com.rootnetapp.rootnetintranet.models.requests.approval.ApprovalRequest;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
@@ -288,11 +289,9 @@ public interface ApiInterface {
                                             @Field("files") List<CommentFile> files);
     @Headers({"Domain-Name: api"})
     @POST("intranet/workflow/{id}/approval")
-    @FormUrlEncoded
     Observable<WorkflowApproveRejectResponse> postApproveReject(@Header("Authorization") String authorization,
                                                                 @Path("id") int workflowId,
-                                                                @Field("approved") boolean isApproved,
-                                                                @Field("next_status") int nextStatus);
+                                                                @Body ApprovalRequest request);
 
     @Headers({"Domain-Name: api"})
     @POST("intranet/workflows/records/file")

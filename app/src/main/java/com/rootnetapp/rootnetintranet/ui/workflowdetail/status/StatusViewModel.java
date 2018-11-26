@@ -100,6 +100,8 @@ public class StatusViewModel extends ViewModel {
                 approvalResponse -> {
                     // transform WorkflowApproveRejectResponse to String[]
 
+                    showLoading.setValue(false);
+
                     //WorkflowDb incomingWorkflow = approvalResponse.getWorkflow();
                     mWorkflow = approvalResponse.getWorkflow();
                     String[] statuses = buildArrayForStatusUpdate(mWorkflow);
@@ -109,7 +111,6 @@ public class StatusViewModel extends ViewModel {
 
                     updateUIWithWorkflowType(currentWorkflowType, mWorkflow.getCurrentStatus());
 
-                    showLoading.setValue(false);
                     showToastMessage.setValue(R.string.request_successfully);
                     return statuses;
                 }

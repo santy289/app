@@ -69,9 +69,9 @@ public class StatusRepository {
         )
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(success -> responseApproveRejection.postValue(success), throwable -> {
+                .subscribe(success -> responseApproveRejection.setValue(success), throwable -> {
                     Log.d(TAG, "approveWorkflow: " + throwable.getMessage());
-                    showLoading.postValue(false);
+                    showLoading.setValue(false);
                 });
         disposables.add(disposable);
     }

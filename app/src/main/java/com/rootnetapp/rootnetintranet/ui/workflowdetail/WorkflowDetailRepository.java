@@ -39,6 +39,12 @@ public class WorkflowDetailRepository {
         disposables.clear();
     }
 
+    /**
+     * Gets the desired Workflow by the object ID.
+     *
+     * @param auth       Access token to use for endpoint request.
+     * @param workflowId object ID that will be passed on to the endpoint.
+     */
     public Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {
         return service.getWorkflow(auth, workflowId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());

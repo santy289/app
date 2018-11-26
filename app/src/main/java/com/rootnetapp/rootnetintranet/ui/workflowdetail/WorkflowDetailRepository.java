@@ -84,7 +84,7 @@ public class WorkflowDetailRepository {
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(success -> exportPdfResponseLiveData.setValue(success), throwable -> {
-                    Log.d(TAG, "activateWorkflow: " + throwable.getMessage());
+                    Log.d(TAG, "exportPdfFile: " + throwable.getMessage());
                     showLoading.setValue(false);
                 });
         disposables.add(disposable);

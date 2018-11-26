@@ -1,16 +1,8 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.SharedPreferences;
-import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,6 +26,15 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.RecyclerView;
 import me.riddhimanadib.formmaster.FormBuilder;
 import me.riddhimanadib.formmaster.listener.OnFormElementValueChangedListener;
 import me.riddhimanadib.formmaster.model.BaseFormElement;
@@ -47,7 +48,6 @@ import me.riddhimanadib.formmaster.model.FormElementTextNumber;
 import me.riddhimanadib.formmaster.model.FormElementTextPhone;
 import me.riddhimanadib.formmaster.model.FormElementTextSingleLine;
 import me.riddhimanadib.formmaster.model.FormHeader;
-
 
 public class WorkFlowCreateFragment extends Fragment implements OnFormElementValueChangedListener {
 
@@ -81,7 +81,8 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         fragmentCreateWorkflowBinding = DataBindingUtil.inflate(
                 inflater,
                 R.layout.fragment_create_workflow,
@@ -97,8 +98,9 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
                 .of(this, createWorkflowViewModelFactory)
                 .get(CreateWorkflowViewModel.class);
         subscribe();
-        SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String token = "Bearer "+ prefs.getString("token","");
+        SharedPreferences prefs = getContext()
+                .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        String token = "Bearer " + prefs.getString("token", "");
 
         fragmentCreateWorkflowBinding.btnCreate.setOnClickListener(v -> {
             postFormData();
@@ -121,7 +123,11 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         int tag = baseFormElement.getTag();
         if (tag == CreateWorkflowViewModel.TAG_WORKFLOW_TYPE) {
             String typeSelected = baseFormElement.getValue();
-            viewModel.generateFieldsByType(typeSelected);
+            if (!typeSelected.isEmpty()) {
+                //workaround to solve the bug that caused the selected workflow type to disappear
+                viewModel.setSelectedType(typeSelected);
+                viewModel.generateFieldsByType();
+            }
         }
     }
 
@@ -330,7 +336,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
                     .setPickerTitle(getString(R.string.pick_option))
                     .setNegativeText(getString(R.string.cancel));
             formItems.add(multipleList);
-       } else {
+        } else {
             FormElementPickerSingle singleList = FormElementPickerSingle
                     .createInstance()
                     .setTitle(label)
@@ -338,7 +344,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
                     .setOptions(labels)
                     .setPickerTitle(getString(R.string.pick_option));
             formItems.add(singleList);
-       }
+        }
     }
 
     private void fileUploadField(FieldData fieldData) {
@@ -363,6 +369,17 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
 
     private void buildForm() {
         formBuilder.addFormElements(formItems);
+    }
+
+    @UiThread
+    private void setSelectedWorkflowType(String typeName) {
+        //workaround to solve the bug that caused the selected workflow type to disappear
+        BaseFormElement workflowTypeFormElement = formBuilder
+                .getFormElement(CreateWorkflowViewModel.TAG_WORKFLOW_TYPE);
+
+        if (workflowTypeFormElement == null || typeName == null) return;
+
+        workflowTypeFormElement.setValue(typeName);
     }
 
     private void showDialog(DialogMessage dialogMessage) {
@@ -399,7 +416,7 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
     }
 
     private void clearFormFields(Boolean clear) {
-        if(1 >= formItems.size()){
+        if (1 >= formItems.size()) {
             return;
         }
         formItems.subList(1, formItems.size()).clear();
@@ -415,9 +432,11 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         final Observer<DialogMessage> showDialogObserver = (this::showDialog);
         viewModel.getObservableShowDialogMessage().observe(this, showDialogObserver);
 
+        viewModel.getObservableSelectedWorkflowType().observe(this, this::setSelectedWorkflowType);
+
         viewModel.setTypeList.observe(this, this::addFieldList);
 
-        viewModel.buildForm.observe(this, ( build -> buildForm()));
+        viewModel.buildForm.observe(this, (build -> buildForm()));
 
         viewModel.setTextField.observe(this, this::addTexField);
 

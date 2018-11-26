@@ -23,6 +23,8 @@ import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerFragment;
 import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerModule;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileModule;
+import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsFragment;
+import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsModule;
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment.ResetPasswordFragment;
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment.ResetPasswordModule;
 import com.rootnetapp.rootnetintranet.ui.resetPass.tokenfragment.RequestTokenFragment;
@@ -75,7 +77,8 @@ import dagger.Component;
                 InformationModule.class,
                 ApprovalHistoryModule.class,
                 CommentsModule.class,
-                FilesModule.class
+                FilesModule.class,
+                QuickActionsModule.class
         }
 )
 
@@ -134,4 +137,6 @@ public interface AppComponent {
     void inject(CommentsFragment commentsFragment);
 
     void inject(FilesFragment filesFragment);
+
+    void inject(QuickActionsFragment filesFragment);
 }

@@ -115,6 +115,9 @@ public class WorkflowDetailFragment extends Fragment {
                 .observe(this, this::updateFilesTabCounter);
         workflowDetailViewModel.getObservableStatusSpinner()
                 .observe(this, this::updateStatusSpinner);
+        workflowDetailViewModel.updateActiveStatusFromUserAction
+                .observe(this, this::updateWorkflowStatus);
+        workflowDetailViewModel.handleShowLoadingByRepo.observe(this, this::showLoading);
 
         workflowDetailViewModel.showLoading.observe(this, this::showLoading);
         workflowDetailViewModel.setWorkflowIsOpen.observe(this, this::updateWorkflowStatus);
@@ -197,7 +200,8 @@ public class WorkflowDetailFragment extends Fragment {
                 //code is executed only when the user is making a selection
                 Object tag = mBinding.spStatus.getTag();
                 if (tag == null || (int) tag != position) {
-                    workflowDetailViewModel.setStatusSelection(position); //todo check
+                    workflowDetailViewModel.setStatusSelection(position);
+                    workflowDetailViewModel.handleWorkflowActivation(position);
                 }
             }
 

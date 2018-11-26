@@ -12,6 +12,7 @@ import java.util.List;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 import androidx.viewpager.widget.ViewPager;
 import io.reactivex.disposables.CompositeDisposable;
@@ -32,6 +33,9 @@ public class WorkflowDetailViewModel extends ViewModel {
     protected MutableLiveData<StatusUiData> setWorkflowIsOpen;
     protected MutableLiveData<Integer> showToastMessage;
 
+    protected LiveData<StatusUiData> updateActiveStatusFromUserAction;
+    protected LiveData<Boolean> handleShowLoadingByRepo;
+
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
     private String mToken;
@@ -46,6 +50,8 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.mRepository = workflowDetailRepository;
         this.showLoading = new MutableLiveData<>();
         this.setWorkflowIsOpen = new MutableLiveData<>();
+
+        subscribe();
     }
 
     @Override
@@ -59,6 +65,54 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.mWorkflowListItem = workflow;
         getWorkflow(this.mToken, this.mWorkflowListItem.getWorkflowId());
         getStatusList();
+    }
+
+    /**
+     * This subscribe function will make map transformations to observe LiveData objects in the
+     * repository. Here we will handle all incoming data from the repo.
+     */
+    private void subscribe() {
+        // Transformation for observing approval and rejection of workflows.
+        updateActiveStatusFromUserAction = Transformations.map(
+                mRepository.getActivationResponse(),
+                approvalResponse -> {
+                    // transform WorkflowActivationResponse to StatusUiData
+
+                    showLoading.setValue(false);
+
+                    // if correct, this API will only return one workflow
+
+                    // check for emptiness of main list
+                    List<List<WorkflowDb>> responseList = approvalResponse.getData();
+                    if (responseList.isEmpty()) {
+                        showToastMessage.setValue(R.string.error);
+                        return mStatusUiData;
+                    }
+
+                    // check for emptiness of workflow list
+                    List<WorkflowDb> workflowDbList = responseList.get(0);
+                    if (workflowDbList.isEmpty()) {
+                        showToastMessage.setValue(R.string.error);
+                        return mStatusUiData;
+                    }
+
+                    mWorkflow = workflowDbList.get(0);
+
+                    showToastMessage.setValue(R.string.request_successfully);
+
+                    mStatusUiData.setSelectedIndex(mWorkflow.isOpen() ? INDEX_STATUS_OPEN : INDEX_STATUS_CLOSED);
+                    return mStatusUiData;
+                }
+        );
+
+        // Transformation used in case that a workflow approval or rejection fails.
+        handleShowLoadingByRepo = Transformations.map(
+                mRepository.getErrorShowLoading(),
+                show -> {
+                    showToastMessage.setValue(R.string.error);
+                    return show;
+                }
+        );
     }
 
     private void getStatusList() {
@@ -77,6 +131,14 @@ public class WorkflowDetailViewModel extends ViewModel {
     protected void setStatusSelection(int selectedIndex) {
         mStatusUiData.setSelectedIndex(selectedIndex);
         setWorkflowIsOpen.setValue(mStatusUiData);
+    }
+
+    /**
+     * Calls the endpoint to change the Workflow active status.
+     */
+    protected void handleWorkflowActivation(int selectedIndex) {
+        showLoading.setValue(true);
+        mRepository.postWorkflowActivation(mToken, mWorkflow.getId(), selectedIndex == INDEX_STATUS_OPEN);
     }
 
     private void getWorkflow(String auth, int workflowId) {

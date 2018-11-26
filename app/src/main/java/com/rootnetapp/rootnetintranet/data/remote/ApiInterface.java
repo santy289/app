@@ -1,10 +1,10 @@
 package com.rootnetapp.rootnetintranet.data.remote;
 
-
 import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
+import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
@@ -339,4 +339,10 @@ public interface ApiInterface {
                                                       @Field("description") String description,
                                                       @Field("author") int author);
 
+    @Headers({"Domain-Name: api"})
+    @PATCH("intranet/workflow/activation")
+    @FormUrlEncoded
+    Observable<WorkflowActivationResponse> postWorkflowActivation(@Header("Authorization") String authorization,
+                                                                  @Field("workflows[]") List<Integer> workflowIds,
+                                                                  @Field("open") boolean isOpen);
 }

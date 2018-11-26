@@ -1,14 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist.adapters;
 
-import androidx.paging.PagedList;
-import androidx.paging.PagedListAdapter;
 import android.content.Context;
-import androidx.annotation.ColorRes;
-import androidx.annotation.IntegerRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.DiffUtil;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.view.LayoutInflater;
@@ -19,6 +11,14 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowItemBinding;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragmentInterface;
+
+import androidx.annotation.ColorRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.paging.PagedList;
+import androidx.paging.PagedListAdapter;
+import androidx.recyclerview.widget.DiffUtil;
 
 public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem, WorkflowViewholder> {
     private ArrayMap<Integer, Boolean> expandedItems;
@@ -102,9 +102,9 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
         }
         Context context = holder.binding.tvStatus.getContext();
         if (item.isStatus()) {
-            holder.binding.tvStatus.setText(context.getString(R.string.active));
+            holder.binding.tvStatus.setText(context.getString(R.string.open));
         } else {
-            holder.binding.tvStatus.setText(context.getString(R.string.inactive));
+            holder.binding.tvStatus.setText(context.getString(R.string.closed));
         }
 
         String createdAt = item.getCreatedAtFormatted();

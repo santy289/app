@@ -92,6 +92,7 @@ public class StatusFragment extends Fragment {
         statusViewModel.getObservableShowToastMessage().observe(this, this::showToastMessage);
 
         statusViewModel.showLoading.observe(this, this::showLoading);
+        statusViewModel.handleShowLoadingByRepo.observe(this, this::showLoading);
         statusViewModel.updateStatusUi.observe(this, this::updateStatusDetails);
         statusViewModel.updateCurrentApproversList.observe(this, this::updateCurrentApproversList);
         statusViewModel.hideApproverListOnEmptyData

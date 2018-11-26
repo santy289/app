@@ -33,10 +33,10 @@ public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<Integer> mCommentsTabCounter;
     private MutableLiveData<Integer> mFilesTabCounter;
     private MutableLiveData<StatusUiData> mStatusSpinnerLiveData;
+    private MutableLiveData<Integer> mShowToastMessage;
 
     protected MutableLiveData<Boolean> showLoading;
     protected MutableLiveData<StatusUiData> setWorkflowIsOpen;
-    protected MutableLiveData<Integer> showToastMessage;
 
     protected LiveData<StatusUiData> updateActiveStatusFromUserAction;
     protected LiveData<File> retrieveWorkflowPdfFile;
@@ -91,20 +91,20 @@ public class WorkflowDetailViewModel extends ViewModel {
                     // check for emptiness of main list
                     List<List<WorkflowDb>> responseList = activationResponse.getData();
                     if (responseList.isEmpty()) {
-                        showToastMessage.setValue(R.string.error);
+                        mShowToastMessage.setValue(R.string.error);
                         return mStatusUiData;
                     }
 
                     // check for emptiness of workflow list
                     List<WorkflowDb> workflowDbList = responseList.get(0);
                     if (workflowDbList.isEmpty()) {
-                        showToastMessage.setValue(R.string.error);
+                        mShowToastMessage.setValue(R.string.error);
                         return mStatusUiData;
                     }
 
                     mWorkflow = workflowDbList.get(0);
 
-                    showToastMessage.setValue(R.string.request_successfully);
+                    mShowToastMessage.setValue(R.string.request_successfully);
 
                     mStatusUiData.setSelectedIndex(
                             mWorkflow.isOpen() ? INDEX_STATUS_OPEN : INDEX_STATUS_CLOSED);
@@ -124,7 +124,7 @@ public class WorkflowDetailViewModel extends ViewModel {
 
                     String base64 = exportPdfResponse.getProject();
                     if (base64 == null || base64.isEmpty()) {
-                        showToastMessage.setValue(R.string.error);
+                        mShowToastMessage.setValue(R.string.error);
                         return null;
                     }
 
@@ -134,7 +134,7 @@ public class WorkflowDetailViewModel extends ViewModel {
 
                     } catch (IOException e) {
                         Log.e(TAG, "exportPDF: ", e);
-                        showToastMessage.setValue(R.string.error);
+                        mShowToastMessage.setValue(R.string.error);
                         return null;
                     }
 
@@ -145,7 +145,7 @@ public class WorkflowDetailViewModel extends ViewModel {
         handleShowLoadingByRepo = Transformations.map(
                 mRepository.getErrorShowLoading(),
                 show -> {
-                    showToastMessage.setValue(R.string.error);
+                    mShowToastMessage.setValue(R.string.failure_connect);
                     return show;
                 }
         );
@@ -240,10 +240,10 @@ public class WorkflowDetailViewModel extends ViewModel {
     }
 
     protected LiveData<Integer> getObservableShowToastMessage() {
-        if (showToastMessage == null) {
-            showToastMessage = new MutableLiveData<>();
+        if (mShowToastMessage == null) {
+            mShowToastMessage = new MutableLiveData<>();
         }
-        return showToastMessage;
+        return mShowToastMessage;
     }
 
     protected LiveData<Integer> getObservableCommentsTabCounter() {

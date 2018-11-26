@@ -3,8 +3,6 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
-import com.rootnetapp.rootnetintranet.data.local.db.profile.ProfileDao;
-import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.exportpdf.ExportPdfResponse;
@@ -23,9 +21,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class WorkflowDetailRepository {
 
-    private ApiInterface service;
-    private ProfileDao profileDao;
-    private WorkflowTypeDbDao workflowTypeDbDao;
+    private final ApiInterface service;
 
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<WorkflowActivationResponse> activationResponseLiveData;
@@ -37,8 +33,6 @@ public class WorkflowDetailRepository {
 
     public WorkflowDetailRepository(ApiInterface service, AppDatabase database) {
         this.service = service;
-        this.profileDao = database.profileDao();
-        this.workflowTypeDbDao = database.workflowTypeDbDao();
     }
 
     protected void clearDisposables() {

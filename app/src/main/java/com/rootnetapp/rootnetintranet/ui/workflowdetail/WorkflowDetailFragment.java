@@ -177,6 +177,7 @@ public class WorkflowDetailFragment extends Fragment {
         }
     }
 
+    @UiThread
     private void showToastMessage(@StringRes int messageRes) {
         Toast.makeText(
                 getContext(),

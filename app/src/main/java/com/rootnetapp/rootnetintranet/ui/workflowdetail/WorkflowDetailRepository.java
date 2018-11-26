@@ -25,6 +25,7 @@ public class WorkflowDetailRepository {
 
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<WorkflowActivationResponse> activationResponseLiveData;
+    private MutableLiveData<Boolean> activationFailedLiveData;
     private MutableLiveData<ExportPdfResponse> exportPdfResponseLiveData;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
@@ -72,6 +73,7 @@ public class WorkflowDetailRepository {
                 .subscribe(success -> activationResponseLiveData.setValue(success), throwable -> {
                     Log.d(TAG, "activateWorkflow: " + throwable.getMessage());
                     showLoading.setValue(false);
+                    activationFailedLiveData.setValue(true);
                 });
         disposables.add(disposable);
     }
@@ -101,6 +103,13 @@ public class WorkflowDetailRepository {
             activationResponseLiveData = new MutableLiveData<>();
         }
         return activationResponseLiveData;
+    }
+
+    protected LiveData<Boolean> getActivationFailed() {
+        if (activationFailedLiveData == null) {
+            activationFailedLiveData = new MutableLiveData<>();
+        }
+        return activationFailedLiveData;
     }
 
     protected LiveData<ExportPdfResponse> getExportPdfResponse() {

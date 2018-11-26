@@ -129,6 +129,8 @@ public class WorkflowDetailFragment extends Fragment {
         workflowDetailViewModel.retrieveWorkflowPdfFile
                 .observe(this, this::openPdfFile);
         workflowDetailViewModel.handleShowLoadingByRepo.observe(this, this::showLoading);
+        workflowDetailViewModel.handleSetWorkflowIsOpenByRepo
+                .observe(this, this::updateWorkflowStatus);
 
         workflowDetailViewModel.showLoading.observe(this, this::showLoading);
         workflowDetailViewModel.setWorkflowIsOpen.observe(this, this::updateWorkflowStatus);
@@ -161,7 +163,8 @@ public class WorkflowDetailFragment extends Fragment {
 
         Intent target = new Intent(Intent.ACTION_VIEW);
 
-        Uri fileUri = FileProvider.getUriForFile(getContext(), getContext().getApplicationContext().getPackageName() + ".fileprovider", pdfFile);
+        Uri fileUri = FileProvider.getUriForFile(getContext(),
+                getContext().getApplicationContext().getPackageName() + ".fileprovider", pdfFile);
 
         target.setDataAndType(fileUri, "application/pdf");
         target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);

@@ -41,6 +41,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     protected LiveData<StatusUiData> updateActiveStatusFromUserAction;
     protected LiveData<File> retrieveWorkflowPdfFile;
     protected LiveData<Boolean> handleShowLoadingByRepo;
+    protected LiveData<StatusUiData> handleSetWorkflowIsOpenByRepo;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
@@ -141,12 +142,26 @@ public class WorkflowDetailViewModel extends ViewModel {
                 }
         );
 
-        // Transformation used in case that a workflow approval or rejection fails.
+        // Transformation used in case that any repo request fails
         handleShowLoadingByRepo = Transformations.map(
                 mRepository.getErrorShowLoading(),
                 show -> {
                     mShowToastMessage.setValue(R.string.failure_connect);
                     return show;
+                }
+        );
+
+        // Transformation used in case that the workflow activation fails
+        handleSetWorkflowIsOpenByRepo = Transformations.map(
+                mRepository.getActivationFailed(),
+                statusUiData -> {
+                    /*
+                    Set the original status. mWorkflow object is only updated if the request is successful.
+                    Thus, it will always hold the correct status
+                     */
+                    mStatusUiData.setSelectedIndex(mWorkflow.isOpen() ? INDEX_STATUS_OPEN :
+                            INDEX_STATUS_CLOSED);
+                    return mStatusUiData;
                 }
         );
     }

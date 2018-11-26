@@ -1,12 +1,17 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 
+import android.util.Log;
+
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +39,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     protected MutableLiveData<Integer> showToastMessage;
 
     protected LiveData<StatusUiData> updateActiveStatusFromUserAction;
+    protected LiveData<File> retrieveWorkflowPdfFile;
     protected LiveData<Boolean> handleShowLoadingByRepo;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
@@ -75,7 +81,7 @@ public class WorkflowDetailViewModel extends ViewModel {
         // Transformation for observing approval and rejection of workflows.
         updateActiveStatusFromUserAction = Transformations.map(
                 mRepository.getActivationResponse(),
-                approvalResponse -> {
+                activationResponse -> {
                     // transform WorkflowActivationResponse to StatusUiData
 
                     showLoading.setValue(false);
@@ -83,7 +89,7 @@ public class WorkflowDetailViewModel extends ViewModel {
                     // if correct, this API will only return one workflow
 
                     // check for emptiness of main list
-                    List<List<WorkflowDb>> responseList = approvalResponse.getData();
+                    List<List<WorkflowDb>> responseList = activationResponse.getData();
                     if (responseList.isEmpty()) {
                         showToastMessage.setValue(R.string.error);
                         return mStatusUiData;
@@ -100,8 +106,38 @@ public class WorkflowDetailViewModel extends ViewModel {
 
                     showToastMessage.setValue(R.string.request_successfully);
 
-                    mStatusUiData.setSelectedIndex(mWorkflow.isOpen() ? INDEX_STATUS_OPEN : INDEX_STATUS_CLOSED);
+                    mStatusUiData.setSelectedIndex(
+                            mWorkflow.isOpen() ? INDEX_STATUS_OPEN : INDEX_STATUS_CLOSED);
                     return mStatusUiData;
+                }
+        );
+
+        // Transformation for observing the workflow export pdf file
+        retrieveWorkflowPdfFile = Transformations.map(
+                mRepository.getExportPdfResponse(),
+                exportPdfResponse -> {
+                    // transform ExportPdfResponse to File
+
+                    showLoading.setValue(false);
+
+                    // the API will return a base64 string representing the file
+
+                    String base64 = exportPdfResponse.getProject();
+                    if (base64 == null || base64.isEmpty()) {
+                        showToastMessage.setValue(R.string.error);
+                        return null;
+                    }
+
+                    String fileName = mWorkflow.getWorkflowTypeKey() + " - " + mWorkflow.getTitle();
+                    try {
+                        return Utils.decodePdfFromBase64Binary(base64, fileName);
+
+                    } catch (IOException e) {
+                        Log.e(TAG, "exportPDF: ", e);
+                        showToastMessage.setValue(R.string.error);
+                        return null;
+                    }
+
                 }
         );
 
@@ -138,7 +174,16 @@ public class WorkflowDetailViewModel extends ViewModel {
      */
     protected void handleWorkflowActivation(int selectedIndex) {
         showLoading.setValue(true);
-        mRepository.postWorkflowActivation(mToken, mWorkflow.getId(), selectedIndex == INDEX_STATUS_OPEN);
+        mRepository.postWorkflowActivation(mToken, mWorkflow.getId(),
+                selectedIndex == INDEX_STATUS_OPEN);
+    }
+
+    /**
+     * Calls the endpoint to retrieve the PDF file for this Workflow
+     */
+    protected void handleExportPdf() {
+        showLoading.setValue(true);
+        mRepository.getWorkflowPdfFile(mToken, mWorkflow.getId());
     }
 
     private void getWorkflow(String auth, int workflowId) {

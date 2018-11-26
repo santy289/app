@@ -1,8 +1,13 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 
+import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +24,7 @@ import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.WorkflowDetailViewPagerAdapter;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +35,7 @@ import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
@@ -36,6 +43,8 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.viewpager.widget.ViewPager;
 
 public class WorkflowDetailFragment extends Fragment {
+
+    private static final int REQUEST_EXTERNAL_STORAGE_PERMISSIONS = 700;
 
     @Inject
     WorkflowDetailViewModelFactory workflowViewModelFactory;
@@ -117,6 +126,8 @@ public class WorkflowDetailFragment extends Fragment {
                 .observe(this, this::updateStatusSpinner);
         workflowDetailViewModel.updateActiveStatusFromUserAction
                 .observe(this, this::updateWorkflowStatus);
+        workflowDetailViewModel.retrieveWorkflowPdfFile
+                .observe(this, this::openPdfFile);
         workflowDetailViewModel.handleShowLoadingByRepo.observe(this, this::showLoading);
 
         workflowDetailViewModel.showLoading.observe(this, this::showLoading);
@@ -144,6 +155,28 @@ public class WorkflowDetailFragment extends Fragment {
                         statusUiData.getColorResList().get(selectedIndex))));
     }
 
+    @UiThread
+    private void openPdfFile(File pdfFile) {
+        if (pdfFile == null) return;
+
+        Intent target = new Intent(Intent.ACTION_VIEW);
+
+        Uri fileUri = FileProvider.getUriForFile(getContext(), getContext().getApplicationContext().getPackageName() + ".fileprovider", pdfFile);
+
+        target.setDataAndType(fileUri, "application/pdf");
+        target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        Intent intent = Intent.createChooser(target,
+                getString(R.string.workflow_detail_status_fragment_open_file));
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            // Instruct the user to install a PDF reader here
+            showToastMessage(R.string.workflow_detail_status_fragment_no_pdf_reader);
+        }
+    }
+
     private void showToastMessage(@StringRes int messageRes) {
         Toast.makeText(
                 getContext(),
@@ -163,7 +196,13 @@ public class WorkflowDetailFragment extends Fragment {
         PopupMenu popup = new PopupMenu(getContext(), anchor);
         popup.getMenuInflater().inflate(R.menu.menu_workflow_detail, popup.getMenu());
 
-        popup.setOnMenuItemClickListener(item -> true); //todo export PDF on click
+        popup.setOnMenuItemClickListener(item -> {
+            if (checkExternalStoragePermissions()) {
+                workflowDetailViewModel.handleExportPdf();
+            }
+
+            return true;
+        });
 
         popup.show();
     }
@@ -210,5 +249,44 @@ public class WorkflowDetailFragment extends Fragment {
 
             }
         });
+    }
+
+    /**
+     * Verify whether the user has granted permissions to read/write the external storage.
+     *
+     * @return whether the permissions are granted.
+     */
+    private boolean checkExternalStoragePermissions() {
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                            Manifest.permission.READ_EXTERNAL_STORAGE},
+                    REQUEST_EXTERNAL_STORAGE_PERMISSIONS);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_EXTERNAL_STORAGE_PERMISSIONS: {
+                // check for both permissions
+                if (grantResults.length > 1
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permissions granted
+                    workflowDetailViewModel.handleExportPdf();
+                }
+            }
+        }
     }
 }

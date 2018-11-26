@@ -14,6 +14,7 @@ import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWork
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse;
+import com.rootnetapp.rootnetintranet.models.responses.exportpdf.ExportPdfResponse;
 import com.rootnetapp.rootnetintranet.models.responses.file.FilesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
@@ -345,4 +346,9 @@ public interface ApiInterface {
     Observable<WorkflowActivationResponse> postWorkflowActivation(@Header("Authorization") String authorization,
                                                                   @Field("workflows[]") List<Integer> workflowIds,
                                                                   @Field("open") boolean isOpen);
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows/{id}/pdf?dump=false")
+    Observable<ExportPdfResponse> getWorkflowPdfFile(@Header("Authorization") String authorization,
+                                                     @Path("id") int workflowId);
 }

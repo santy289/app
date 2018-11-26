@@ -7,6 +7,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.profile.ProfileDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
+import com.rootnetapp.rootnetintranet.models.responses.exportpdf.ExportPdfResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 
 import java.util.ArrayList;
@@ -21,12 +22,14 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class WorkflowDetailRepository {
+
     private ApiInterface service;
     private ProfileDao profileDao;
     private WorkflowTypeDbDao workflowTypeDbDao;
 
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<WorkflowActivationResponse> activationResponseLiveData;
+    private MutableLiveData<ExportPdfResponse> exportPdfResponseLiveData;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
@@ -73,11 +76,38 @@ public class WorkflowDetailRepository {
         disposables.add(disposable);
     }
 
+    /**
+     * Gets a PDF file for the specified Workflow.
+     *
+     * @param token      Access token to use for endpoint request.
+     * @param workflowId object ID to retrieve the PDF file.
+     */
+    protected void getWorkflowPdfFile(String token, int workflowId) {
+        Disposable disposable = service.getWorkflowPdfFile(
+                token,
+                workflowId
+        )
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(success -> exportPdfResponseLiveData.setValue(success), throwable -> {
+                    Log.d(TAG, "activateWorkflow: " + throwable.getMessage());
+                    showLoading.setValue(false);
+                });
+        disposables.add(disposable);
+    }
+
     protected LiveData<WorkflowActivationResponse> getActivationResponse() {
         if (activationResponseLiveData == null) {
             activationResponseLiveData = new MutableLiveData<>();
         }
         return activationResponseLiveData;
+    }
+
+    protected LiveData<ExportPdfResponse> getExportPdfResponse() {
+        if (exportPdfResponseLiveData == null) {
+            exportPdfResponseLiveData = new MutableLiveData<>();
+        }
+        return exportPdfResponseLiveData;
     }
 
     protected LiveData<Boolean> getErrorShowLoading() {

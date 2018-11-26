@@ -71,7 +71,7 @@ public class WorkflowDetailRepository {
     }
 
     /**
-     * Gets a PDF file for the specified Workflow.
+     * Gets a PDF file (base64 encoded) for the specified Workflow.
      *
      * @param token      Access token to use for endpoint request.
      * @param workflowId object ID to retrieve the PDF file.

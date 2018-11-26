@@ -25,6 +25,12 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> {
         this.comments = comments;
     }
 
+    public void addItem(Comment comment){
+        comments.add(0, comment);
+        notifyItemInserted(0);
+        getItemCount();
+    }
+
     @NonNull
     @Override
     public CommentsViewholder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {

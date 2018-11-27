@@ -216,6 +216,9 @@
     <string name="request_successfully">Pedido realizado exitosamente.</string>
 
     <!--WorkflowDetailFragment-->
+    <string name="workflow_detail_status_fragment_open_file">Abrir Archivo</string>
+    <string name="workflow_detail_status_fragment_no_pdf_reader">Su dispositivo no puede abrir archivos PDF. Por favor instale un lector de PDF.</string>
+    <string name="workflow_detail_status_fragment_permissions_not_granted">No es posible exportar el PDF debido a que los permisos no fueron otorgados.</string>
     <!--StatusFragment-->
     <string name="workflow_detail_status_fragment_title">Estatus</string>
     <string name="workflow_detail_status_fragment_status_summary">Estatus del Workflow</string>
@@ -232,6 +235,7 @@
     <string name="workflow_detail_status_fragment_reject">Rechazar</string>
     <string name="workflow_detail_status_fragment_spinner_title">- Elija un Estatus -</string>
     <string name="workflow_detail_status_fragment_must_select_step">Debes seleccionar un estatus</string>
+    <string name="workflow_detail_status_fragment_export_pdf">Exportar PDF</string>
     <!--InformationFragment-->
     <string name="workflow_detail_information_fragment_title">@string/workflow_detail_information_fragment_information</string>
     <string name="workflow_detail_information_fragment_important_things">Datos Importantes Sobre Este Estatus</string>

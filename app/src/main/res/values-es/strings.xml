@@ -266,4 +266,8 @@
     <string name="bottom_nav_timeline">Timeline</string>
     <string name="bottom_nav_workflow_list">Workflows</string>
     <string name="bottom_nav_workflow_dashboard">Dashboard</string>
+    <string name="quick_actions_edit_workflow">Editar Workflow</string>
+    <string name="quick_actions_approve_workflow">Aprobar Workflow</string>
+    <string name="quick_actions_change_status">Cambiar Estatus</string>
+    <string name="quick_actions_comment">Comentar</string>
 </resources>

@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
+import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
@@ -43,12 +44,15 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -112,6 +116,7 @@ public class MainActivity extends AppCompatActivity
         startBackgroundWorkflowRequest();
         setFilterBoxListeners();
         setupBottomNavigation();
+        setupSpeedDialFab();
     }
 
     @Override
@@ -233,10 +238,10 @@ public class MainActivity extends AppCompatActivity
                 });
     }
 
-    private void handleBottomNavigationSelection(@NonNull MenuItem item){
+    private void handleBottomNavigationSelection(@NonNull MenuItem item) {
         item.setChecked(true);
 
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.menu_timeline:
                 showFragment(TimelineFragment.newInstance(this), true);
                 break;
@@ -248,6 +253,40 @@ public class MainActivity extends AppCompatActivity
             case R.id.menu_dashboard:
                 showFragment(WorkflowManagerFragment.newInstance(this), true);
                 break;
+        }
+    }
+
+    private void setupSpeedDialFab() {
+        addActionItem(R.id.fab_edit_workflow, R.string.quick_actions_edit_workflow, R.drawable.ic_edit_black_24dp);
+        addActionItem(R.id.fab_approve_workflow, R.string.quick_actions_approve_workflow, R.drawable.ic_thumb_up_black_24dp);
+        addActionItem(R.id.fab_change_status, R.string.quick_actions_change_status, R.drawable.ic_compare_arrows_black_24dp);
+        addActionItem(R.id.fab_comment, R.string.quick_actions_comment, R.drawable.ic_message_black_24dp);
+
+        mainBinding.fabSpeedDial.setOnActionSelectedListener(this::handleSpeedDialClick);
+    }
+
+    private void addActionItem(@IdRes int idRes, @StringRes int titleRes, @DrawableRes int drawableRes){
+        mainBinding.fabSpeedDial.addActionItem(
+                new SpeedDialActionItem.Builder(idRes, drawableRes)
+                        .setLabel(getString(titleRes))
+                        .setFabBackgroundColor(ContextCompat.getColor(this, R.color.white))
+                        .setFabImageTintColor(ContextCompat.getColor(this, R.color.black))
+                        .setLabelBackgroundColor(ContextCompat.getColor(this, R.color.white))
+                        .setLabelColor(ContextCompat.getColor(this, R.color.black))
+                        .setLabelClickable(false)
+                        .create()
+        );
+    }
+
+    private boolean handleSpeedDialClick(SpeedDialActionItem speedDialActionItem) {
+        //TODO open fragments
+        switch (speedDialActionItem.getId()) {
+            case R.id.fab_comment:
+//                showFragment(QuickActionsFragment.newInstance(this), false);
+
+                return true; // true to keep the Speed Dial open
+            default:
+                return false;
         }
     }
 

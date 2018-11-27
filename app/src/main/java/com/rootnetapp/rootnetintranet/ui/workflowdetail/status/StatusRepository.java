@@ -50,16 +50,36 @@ public class StatusRepository {
         return profileDao.getProfilesInvolved(id);
     }
 
+    /**
+     * Gets the desired WorkflowType by the object ID.
+     *
+     * @param auth   Access token to use for endpoint request.
+     * @param typeId object ID that will be passed on to the endpoint.
+     */
     protected Observable<WorkflowTypeResponse> getWorkflowType(String auth, int typeId) {
         return service.getWorkflowType(auth, typeId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    /**
+     * Gets the desired Workflow by the object ID.
+     *
+     * @param auth       Access token to use for endpoint request.
+     * @param workflowId object ID that will be passed on to the endpoint.
+     */
     protected Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {
         return service.getWorkflow(auth, workflowId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    /**
+     * Performs a request to either approve or reject a certain status of a Workflow.
+     *
+     * @param token      Access token to use for endpoint request.
+     * @param workflowId object ID to perform the action that will be passed on to the endpoint.
+     * @param isApproved whether to approve or reject the specified status.
+     * @param nextStatus the status to approve or reject.
+     */
     protected void approveWorkflow(String token, int workflowId, boolean isApproved, int nextStatus) {
         Disposable disposable = service.postApproveReject(
                 token,
@@ -69,7 +89,7 @@ public class StatusRepository {
         )
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(success -> responseApproveRejection.postValue(success), throwable -> {
+                .subscribe(success -> responseApproveRejection.setValue(success), throwable -> {
                     Log.d(TAG, "approveWorkflow: " + throwable.getMessage());
                     showLoading.setValue(false);
                 });

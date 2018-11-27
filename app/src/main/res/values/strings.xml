@@ -71,7 +71,7 @@
     <string name="description">Description</string>
     <string name="lastname">Last Name</string>
     <string name="creator">Creator</string>
-    <string name="type">Type</string>
+    <string name="type">Please select a workflow type</string>
     <string name="created_at">Created At</string>
     <string name="condition">Condition</string>
     <string name="country">Country</string>
@@ -223,7 +223,7 @@
     <!--StatusFragment-->
     <string name="workflow_detail_status_fragment_title">Status</string>
     <string name="workflow_detail_status_fragment_status_summary">Workflow Status</string>
-    <string name="workflow_detail_status_fragment_status_summary_last_status">Last Status</string>
+    <string name="workflow_detail_status_fragment_status_summary_last_status">Previous Status</string>
     <string name="workflow_detail_status_fragment_status_summary_current_status">Current Status</string>
     <string name="workflow_detail_status_fragment_status_summary_next_status">Next Statuses</string>
     <string name="workflow_detail_status_fragment_next_step">Choose Next Step</string>

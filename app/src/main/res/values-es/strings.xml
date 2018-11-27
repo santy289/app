@@ -72,7 +72,7 @@
     <string name="description">Descripción</string>
     <string name="lastname">Apellido</string>
     <string name="creator">Autor</string>
-    <string name="type">Tipo</string>
+    <string name="type">Seleccione un tipo de workflow</string>
     <string name="created_at">Creado En</string>
     <string name="condition">Condición</string>
     <string name="country">País</string>
@@ -221,7 +221,7 @@
     <!--StatusFragment-->
     <string name="workflow_detail_status_fragment_title">Estatus</string>
     <string name="workflow_detail_status_fragment_status_summary">Estatus del Workflow</string>
-    <string name="workflow_detail_status_fragment_status_summary_last_status">Último Estatus</string>
+    <string name="workflow_detail_status_fragment_status_summary_last_status">Estatus Anterior</string>
     <string name="workflow_detail_status_fragment_status_summary_current_status">Estatus Actual</string>
     <string name="workflow_detail_status_fragment_status_summary_next_status">Próximo Estatus</string>
     <string name="workflow_detail_status_fragment_next_step">Elija el Siguiente Paso</string>

@@ -119,6 +119,7 @@ public class StatusViewModel extends ViewModel {
         handleShowLoadingByRepo = Transformations.map(
                 mRepository.getErrorShowLoading(),
                 show -> {
+                    showLoading.setValue(false);
                     showToastMessage.setValue(R.string.error);
                     return show;
                 }

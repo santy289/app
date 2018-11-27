@@ -51,6 +51,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.quickactions.QuickActionsActivity"
+            android:label="@string/quick_actions_activity_title"
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait"/>
         <service
             android:name=".services.manager.WorkflowManagerService"
             android:enabled="true"

@@ -1,26 +1,31 @@
 package com.rootnetapp.rootnetintranet.ui.quickactions;
 
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryRepository;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryViewModel;
+import com.rootnetapp.rootnetintranet.ui.main.MainActivityRepository;
+import com.rootnetapp.rootnetintranet.ui.main.MainActivityViewModel;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+/**
+ * Created by root on 24/04/18.
+ */
+
 public class QuickActionsViewModelFactory implements ViewModelProvider.Factory {
 
-    private QuickActionsRepository quickActionsRepository;
+    private QuickActionsRepository repository;
 
-    public QuickActionsViewModelFactory(QuickActionsRepository quickActionsRepository) {
-        this.quickActionsRepository = quickActionsRepository;
+    public QuickActionsViewModelFactory(QuickActionsRepository repository) {
+        this.repository = repository;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        if (modelClass.isAssignableFrom(ApprovalHistoryViewModel.class)) {
-            return (T) new QuickActionsViewModel(quickActionsRepository);
+        if (modelClass.isAssignableFrom(QuickActionsViewModel.class)) {
+            return (T) new QuickActionsViewModel(repository);
         }
         throw new IllegalArgumentException("Unknown ViewModel class");
     }
+
 }

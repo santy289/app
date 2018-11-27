@@ -34,6 +34,8 @@ import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.main.adapters.SearchAdapter;
 import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerFragment;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
+import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
+import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
@@ -257,15 +259,20 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setupSpeedDialFab() {
-        addActionItem(R.id.fab_edit_workflow, R.string.quick_actions_edit_workflow, R.drawable.ic_edit_black_24dp);
-        addActionItem(R.id.fab_approve_workflow, R.string.quick_actions_approve_workflow, R.drawable.ic_thumb_up_black_24dp);
-        addActionItem(R.id.fab_change_status, R.string.quick_actions_change_status, R.drawable.ic_compare_arrows_black_24dp);
-        addActionItem(R.id.fab_comment, R.string.quick_actions_comment, R.drawable.ic_message_black_24dp);
+        addActionItem(R.id.fab_edit_workflow, R.string.quick_actions_edit_workflow,
+                R.drawable.ic_edit_black_24dp);
+        addActionItem(R.id.fab_approve_workflow, R.string.quick_actions_approve_workflow,
+                R.drawable.ic_thumb_up_black_24dp);
+        addActionItem(R.id.fab_change_status, R.string.quick_actions_change_status,
+                R.drawable.ic_compare_arrows_black_24dp);
+        addActionItem(R.id.fab_comment, R.string.quick_actions_comment,
+                R.drawable.ic_message_black_24dp);
 
         mainBinding.fabSpeedDial.setOnActionSelectedListener(this::handleSpeedDialClick);
     }
 
-    private void addActionItem(@IdRes int idRes, @StringRes int titleRes, @DrawableRes int drawableRes){
+    private void addActionItem(@IdRes int idRes, @StringRes int titleRes,
+                               @DrawableRes int drawableRes) {
         mainBinding.fabSpeedDial.addActionItem(
                 new SpeedDialActionItem.Builder(idRes, drawableRes)
                         .setLabel(getString(titleRes))
@@ -279,15 +286,34 @@ public class MainActivity extends AppCompatActivity
     }
 
     private boolean handleSpeedDialClick(SpeedDialActionItem speedDialActionItem) {
-        //TODO open fragments
+        @QuickAction int quickAction;
         switch (speedDialActionItem.getId()) {
-            case R.id.fab_comment:
-//                showFragment(QuickActionsFragment.newInstance(this), false);
 
-                return true; // true to keep the Speed Dial open
+            case R.id.fab_edit_workflow:
+                quickAction = QuickAction.EDIT_WORKFLOW;
+                break;
+
+            case R.id.fab_approve_workflow:
+                quickAction = QuickAction.APPROVE_WORKFLOW;
+                break;
+
+            case R.id.fab_change_status:
+                quickAction = QuickAction.CHANGE_STATUS;
+                break;
+
+            case R.id.fab_comment:
+                quickAction = QuickAction.COMMENT;
+                break;
+
             default:
                 return false;
         }
+
+        Intent intent = new Intent(this, QuickActionsActivity.class);
+        intent.putExtra(QuickActionsActivity.EXTRA_ACTION, quickAction);
+        startActivity(intent);
+
+        return false; // true to keep the Speed Dial open
     }
 
     private void initActionListeners() {

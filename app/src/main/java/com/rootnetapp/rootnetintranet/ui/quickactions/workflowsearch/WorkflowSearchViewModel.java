@@ -1,15 +1,15 @@
-package com.rootnetapp.rootnetintranet.ui.quickactions;
+package com.rootnetapp.rootnetintranet.ui.quickactions.workflowsearch;
 
 import androidx.lifecycle.ViewModel;
 import io.reactivex.disposables.CompositeDisposable;
 
-public class QuickActionsViewModel extends ViewModel {
+public class WorkflowSearchViewModel extends ViewModel {
 
-    private QuickActionsRepository repository;
+    private WorkflowSearchRepository repository;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
-    public QuickActionsViewModel(QuickActionsRepository repository) {
+    public WorkflowSearchViewModel(WorkflowSearchRepository repository) {
         this.repository = repository;
     }
 

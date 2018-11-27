@@ -8,13 +8,15 @@ import dagger.Provides;
 
 @Module
 public class QuickActionsModule {
+
     @Provides
-    QuickActionsRepository provideQuickActionsRepository(ApiInterface service, AppDatabase database) {
-        return new QuickActionsRepository(service, database);
+    QuickActionsRepository provideQuickActionsRepository(AppDatabase database, ApiInterface apiInterface) {
+        return new QuickActionsRepository(database, apiInterface);
     }
 
     @Provides
-    QuickActionsViewModelFactory provideQuickActionsViewModelFactory(QuickActionsRepository quickActionsRepository) {
-        return new QuickActionsViewModelFactory(quickActionsRepository);
+    QuickActionsViewModelFactory provideQuickActionsViewModelFactory(QuickActionsRepository repository) {
+        return new QuickActionsViewModelFactory(repository);
     }
+
 }

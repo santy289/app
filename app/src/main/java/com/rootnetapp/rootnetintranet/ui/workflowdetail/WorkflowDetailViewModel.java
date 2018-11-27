@@ -170,6 +170,11 @@ public class WorkflowDetailViewModel extends ViewModel {
         );
     }
 
+    /**
+     * Creates a single instance of {@link StatusUiData} that will live in this ViewModel, called on
+     * initialization only. This instance will also hold the selected status state. This is used to
+     * initially populate the UI dropdown with data.
+     */
     private void getStatusList() {
         List<Integer> stringResList = new ArrayList<>();
         stringResList.add(INDEX_STATUS_OPEN, R.string.open);
@@ -183,6 +188,12 @@ public class WorkflowDetailViewModel extends ViewModel {
         mStatusSpinnerLiveData.setValue(mStatusUiData);
     }
 
+    /**
+     * Sets the current state of {@link #mStatusUiData}. This is used to maintain a reference to the
+     * selected dropdown index in the ViewModel.
+     *
+     * @param selectedIndex dropdown index.
+     */
     protected void setStatusSelection(int selectedIndex) {
         mStatusUiData.setSelectedIndex(selectedIndex);
         setWorkflowIsOpen.setValue(mStatusUiData);
@@ -198,7 +209,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     }
 
     /**
-     * Calls the endpoint to retrieve the PDF file for this Workflow
+     * Calls the endpoint to retrieve the PDF file for this Workflow.
      */
     protected void handleExportPdf() {
         showLoading.setValue(true);

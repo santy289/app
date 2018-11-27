@@ -274,6 +274,17 @@ public class Utils {
         return encodedString;
     }
 
+    /**
+     * Transforms a Base64 encoded string into a {@link File} object. Also, saves the file locally
+     * on the external downloads folder.
+     *
+     * @param base64   encoded string.
+     * @param fileName name of the file to be saved.
+     *
+     * @return the file object that was created.
+     *
+     * @throws IOException exception caused by the decoding/saving operations.
+     */
     public static File decodePdfFromBase64Binary(String base64,
                                                  String fileName) throws IOException {
         String downloadsPath = Environment

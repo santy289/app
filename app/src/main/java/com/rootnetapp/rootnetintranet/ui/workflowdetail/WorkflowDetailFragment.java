@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -145,6 +146,12 @@ public class WorkflowDetailFragment extends Fragment {
         }
     }
 
+    /**
+     * Changes the UI state (text and color) of the selected status. This is called after user
+     * interaction with the {@link Spinner} and after the API request is completed.
+     *
+     * @param statusUiData object that contains the current state of the status UI.
+     */
     @UiThread
     private void updateWorkflowStatus(StatusUiData statusUiData) {
         int selectedIndex = statusUiData.getSelectedIndex();
@@ -157,6 +164,15 @@ public class WorkflowDetailFragment extends Fragment {
                         statusUiData.getColorResList().get(selectedIndex))));
     }
 
+    /**
+     * Creates an {@link Intent} chooser to open a PDF file. If the device is not suitable to read
+     * the file, will display a {@link Toast} message. Uses a {@link FileProvider} to create the
+     * file URI, instead of using the {@link Uri#fromFile(File)} method.
+     *
+     * @param pdfFile the file to be opened.
+     *
+     * @see <a href="https://developer.android.com/reference/android/support/v4/content/FileProvider">FileProvider</a>
+     */
     @UiThread
     private void openPdfFile(File pdfFile) {
         if (pdfFile == null) return;
@@ -223,6 +239,12 @@ public class WorkflowDetailFragment extends Fragment {
         mViewPagerAdapter.notifyDataSetChanged();
     }
 
+    /**
+     * Creates the status {@link Spinner} and its {@link ArrayAdapter}.
+     *
+     * @param statusUiData instance object that contains all of the data needed to populate the
+     *                     {@link Spinner}.
+     */
     @UiThread
     private void updateStatusSpinner(StatusUiData statusUiData) {
         List<String> statusList = new ArrayList<>();

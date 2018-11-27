@@ -265,9 +265,9 @@ public class MainActivity extends AppCompatActivity
         addActionItem(R.id.fab_change_status, R.string.quick_actions_change_status,
                 R.drawable.ic_compare_arrows_black_24dp);
         addActionItem(R.id.fab_approve_workflow, R.string.quick_actions_approve_workflow,
-                R.drawable.ic_thumb_up_black_24dp);
+                R.drawable.ic_like_black_24dp);
         addActionItem(R.id.fab_edit_workflow, R.string.quick_actions_edit_workflow,
-                R.drawable.ic_edit_black_24dp);
+                R.drawable.ic_workflow_black_24dp);
 
         mainBinding.fabSpeedDial.setOnActionSelectedListener(this::handleSpeedDialClick);
     }

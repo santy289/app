@@ -273,4 +273,7 @@
 
     <!--QuickActionsActivity-->
     <string name="quick_actions_activity_title">Acciones rápidas</string>
+    <!--WorkflowSearchFragment-->
+    <string name="workflow_search_fragment_search_hint">Buscar workflow…</string>
+    <string name="workflow_search_fragment_search_no_results">Tu búsqueda no ha traído resultados</string>
 </resources>

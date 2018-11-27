@@ -8,66 +8,57 @@
         android:layout_height="match_parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/lyt_comments"
+            android:id="@+id/lyt_workflow_search"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:visibility="visible">
-
-            <Switch
-                android:id="@+id/switch_private_public"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:switchPadding="8dp"
-                android:text="@string/public_comment"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@color/dark_gray"
-                android:textSize="16sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+            android:background="@color/white">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_comment"
+                android:id="@+id/et_search"
                 style="@style/Widget.MaterialComponents.TextInputEditText.OutlinedBox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_margin="16dp"
                 android:background="@drawable/spinner_bg"
-                android:hint="@string/workflow_detail_comments_fragment_input_comment_hint"
-                android:inputType="textMultiLine"
-                android:maxLines="5"
+                android:hint="@string/workflow_search_fragment_search_hint"
+                android:maxLines="1"
                 android:paddingStart="10dp"
                 android:paddingTop="5dp"
                 android:paddingEnd="10dp"
                 android:paddingBottom="5dp"
                 android:scrollbars="vertical"
                 android:textSize="16sp"
-                app:layout_constraintEnd_toStartOf="@+id/btn_comment"
-                app:layout_constraintStart_toStartOf="@id/switch_private_public"
-                app:layout_constraintTop_toBottomOf="@+id/switch_private_public" />
+                app:layout_constraintEnd_toStartOf="@+id/btn_search"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <Button
-                android:id="@+id/btn_comment"
+                android:id="@+id/btn_search"
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
                 android:layout_width="35dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
                 android:layout_marginEnd="16dp"
-                app:backgroundTint="@color/green"
-                app:cornerRadius="50dp"
-                app:icon="@drawable/ic_message_black_24dp"
+                app:backgroundTint="@color/white"
+                app:icon="@drawable/ic_search_black_24dp"
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
-                app:iconSize="20sp"
-                app:layout_constraintBottom_toBottomOf="@+id/et_comment"
+                app:iconTint="@color/black"
+                app:layout_constraintBottom_toBottomOf="@+id/et_search"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/et_comment"
-                app:layout_constraintTop_toTopOf="@+id/et_comment" />
+                app:layout_constraintStart_toEndOf="@+id/et_search"
+                app:layout_constraintTop_toTopOf="@+id/et_search"
+                app:rippleColor="@color/dark_gray" />
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="et_search,btn_search" />
 
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_comments"
+                android:id="@+id/rv_workflows"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -79,21 +70,21 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/et_comment"
+                app:layout_constraintTop_toBottomOf="@id/barrier"
                 app:layout_constraintVertical_bias="0.0" />
 
             <TextView
-                android:id="@+id/tv_no_comments"
+                android:id="@+id/tv_no_results"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:padding="8dp"
-                android:text="@string/workflow_detail_comments_fragment_no_comments"
+                android:text="@string/workflow_search_fragment_search_no_results"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
                 android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="@id/rv_comments"
-                app:layout_constraintStart_toStartOf="@id/rv_comments"
-                app:layout_constraintTop_toBottomOf="@id/et_comment"
+                app:layout_constraintEnd_toEndOf="@id/rv_workflows"
+                app:layout_constraintStart_toStartOf="@id/rv_workflows"
+                app:layout_constraintTop_toBottomOf="@id/barrier"
                 tools:visibility="visible" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

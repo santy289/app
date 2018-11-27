@@ -4,8 +4,7 @@ import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -25,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -35,6 +35,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public class Utils {
 
@@ -62,7 +64,6 @@ public class Utils {
     private static final String TAG = "Utils.Rootnet";
 
     private static final String ENCODING_UTF_8 = "UTF-8";
-
 
     public static void showLoading(Context ctx) {
         if (progress == null) {
@@ -100,7 +101,9 @@ public class Utils {
 
     /**
      * Receives ISO 8601 Date format and returns a UI ready date format for comments.
+     *
      * @param isoStringDate Iso String from server.
+     *
      * @return returns formatted Date
      */
     public static String serverFormatToFormat(String isoStringDate, String format) {
@@ -113,7 +116,7 @@ public class Utils {
             // Adjust semicolon position to string without semicolon.
             semicolonPosition = isoStringDate.length() - 2;
             String first = isoStringDate.substring(0, semicolonPosition);
-            String second = isoStringDate.substring(semicolonPosition, semicolonPosition+2);
+            String second = isoStringDate.substring(semicolonPosition, semicolonPosition + 2);
             StringBuilder stringBuilder = new StringBuilder();
             isoStringDate = stringBuilder.append(first).append(":").append(second).toString();
         }
@@ -138,7 +141,8 @@ public class Utils {
         return ZoneId.of("UTC");
     }
 
-    public static ZonedDateTime getDate(@NonNull String isoDateString, DateTimeFormatter dateTimeFormatter) {
+    public static ZonedDateTime getDate(@NonNull String isoDateString,
+                                        DateTimeFormatter dateTimeFormatter) {
         return ZonedDateTime
                 .parse(isoDateString, dateTimeFormatter)
                 .withZoneSameInstant(getZoneId());
@@ -167,35 +171,35 @@ public class Utils {
         return mimeType;
     }
 
-    public static String getCurrentDate(){
+    public static String getCurrentDate() {
         Date c = Calendar.getInstance().getTime();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return df.format(c);
     }
 
-    public static String getMonthDay(int month, int day){
+    public static String getMonthDay(int month, int day) {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MONTH, month);
-        calendar.set(Calendar.DAY_OF_MONTH,  day);
+        calendar.set(Calendar.DAY_OF_MONTH, day);
         Date c = calendar.getTime();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return df.format(c);
     }
 
-    public static String getWeekStart(){
+    public static String getWeekStart() {
         Calendar calendar = Calendar.getInstance();
-        while(calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
-            calendar.add(Calendar.DAY_OF_YEAR, -1) ;
+        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+            calendar.add(Calendar.DAY_OF_YEAR, -1);
         }
         Date c = calendar.getTime();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return df.format(c);
     }
 
-    public static String getWeekEnd(){
+    public static String getWeekEnd() {
         Calendar calendar = Calendar.getInstance();
-        while(calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY){
-            calendar.add(Calendar.DAY_OF_YEAR, 1) ;
+        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
         }
         Date c = calendar.getTime();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -204,10 +208,11 @@ public class Utils {
 
     public static String replaceLast(String string, String substring, String replacement) {
         int index = string.lastIndexOf(substring);
-        if (index == -1)
+        if (index == -1) {
             return string;
+        }
         return string.substring(0, index) + replacement
-                + string.substring(index+substring.length());
+                + string.substring(index + substring.length());
     }
 
     public static JWToken decode(String token) {
@@ -229,7 +234,8 @@ public class Utils {
     private static String base64Decode(String string) {
         String decoded = "";
         try {
-            byte[] bytes = Base64.decode(string, Base64.URL_SAFE | Base64.NO_WRAP | Base64.NO_PADDING);
+            byte[] bytes = Base64
+                    .decode(string, Base64.URL_SAFE | Base64.NO_WRAP | Base64.NO_PADDING);
             decoded = new String(bytes, ENCODING_UTF_8);
         } catch (IllegalArgumentException e) {
             Log.d(TAG, "Not valid base 64 encoding");
@@ -268,6 +274,33 @@ public class Utils {
         return encodedString;
     }
 
+    /**
+     * Transforms a Base64 encoded string into a {@link File} object. Also, saves the file locally
+     * on the external downloads folder.
+     *
+     * @param base64   encoded string.
+     * @param fileName name of the file to be saved.
+     *
+     * @return the file object that was created.
+     *
+     * @throws IOException exception caused by the decoding/saving operations.
+     */
+    public static File decodePdfFromBase64Binary(String base64,
+                                                 String fileName) throws IOException {
+        String downloadsPath = Environment
+                .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/";
+
+        final File pdfFile = new File(downloadsPath + fileName + ".pdf");
+        byte[] pdfAsBytes = Base64.decode(base64, 0);
+        FileOutputStream os;
+        os = new FileOutputStream(pdfFile, false);
+        os.write(pdfAsBytes);
+        os.flush();
+        os.close();
+
+        return pdfFile;
+    }
+
     private static byte[] loadFile(File file) throws IOException {
         InputStream is = new FileInputStream(file);
 
@@ -275,17 +308,17 @@ public class Utils {
         if (length > Integer.MAX_VALUE) {
             // File is too large
         }
-        byte[] bytes = new byte[(int)length];
+        byte[] bytes = new byte[(int) length];
 
         int offset = 0;
         int numRead = 0;
         while (offset < bytes.length
-                && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
+                && (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0) {
             offset += numRead;
         }
 
         if (offset < bytes.length) {
-            throw new IOException("Could not completely read file "+file.getName());
+            throw new IOException("Could not completely read file " + file.getName());
         }
 
         is.close();

@@ -75,7 +75,8 @@
                 app:layout_anchorGravity="bottom|end"
                 app:layout_behavior="@string/speeddial_scrolling_view_snackbar_behavior"
                 app:sdExpansionMode="top"
-                app:sdMainFabClosedSrc="@drawable/ic_check_accent_24dp"
+                app:sdMainFabAnimationRotateAngle="90"
+                app:sdMainFabClosedSrc="@drawable/ic_diamond_white"
                 app:sdOverlayLayout="@id/overlay" />
 
             <com.google.android.material.bottomnavigation.BottomNavigationView

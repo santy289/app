@@ -1,10 +1,10 @@
 package com.rootnetapp.rootnetintranet.data.remote;
 
-
 import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
+import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
@@ -14,6 +14,7 @@ import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWork
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse;
+import com.rootnetapp.rootnetintranet.models.responses.exportpdf.ExportPdfResponse;
 import com.rootnetapp.rootnetintranet.models.responses.file.FilesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
@@ -339,4 +340,15 @@ public interface ApiInterface {
                                                       @Field("description") String description,
                                                       @Field("author") int author);
 
+    @Headers({"Domain-Name: api"})
+    @PATCH("intranet/workflow/activation")
+    @FormUrlEncoded
+    Observable<WorkflowActivationResponse> postWorkflowActivation(@Header("Authorization") String authorization,
+                                                                  @Field("workflows[]") List<Integer> workflowIds,
+                                                                  @Field("open") boolean isOpen);
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows/{id}/pdf?dump=false")
+    Observable<ExportPdfResponse> getWorkflowPdfFile(@Header("Authorization") String authorization,
+                                                     @Path("id") int workflowId);
 }

@@ -272,7 +272,7 @@ public class MainActivity extends AppCompatActivity
                         .setFabBackgroundColor(ContextCompat.getColor(this, R.color.white))
                         .setFabImageTintColor(ContextCompat.getColor(this, R.color.black))
                         .setLabelBackgroundColor(ContextCompat.getColor(this, R.color.white))
-                        .setLabelColor(ContextCompat.getColor(this, R.color.black))
+                        .setLabelColor(ContextCompat.getColor(this, R.color.dark_gray))
                         .setLabelClickable(false)
                         .create()
         );

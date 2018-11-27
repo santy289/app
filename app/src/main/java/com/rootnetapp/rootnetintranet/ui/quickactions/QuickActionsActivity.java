@@ -21,7 +21,8 @@ import androidx.lifecycle.ViewModelProviders;
 
 public class QuickActionsActivity extends AppCompatActivity {
 
-    public static final String EXTRA_ACTION = "ExtraAction";
+    public static final String EXTRA_ACTION = "Extra.Action";
+    public static final String EXTRA_TITLE = "Extra.Title";
 
     private static final String TAG = "QuickActionsActivity";
 
@@ -55,7 +56,10 @@ public class QuickActionsActivity extends AppCompatActivity {
     private void setActionBar() {
         setSupportActionBar(mBinding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(getTitle());
+
+        String title = getIntent().getStringExtra(EXTRA_TITLE);
+        if (title == null || title.isEmpty()) title = getTitle().toString();
+        getSupportActionBar().setTitle(title);
     }
 
     public void showFragment(Fragment fragment, boolean addtobackstack) {

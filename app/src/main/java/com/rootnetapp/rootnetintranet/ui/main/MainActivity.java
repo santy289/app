@@ -312,6 +312,7 @@ public class MainActivity extends AppCompatActivity
 
         Intent intent = new Intent(this, QuickActionsActivity.class);
         intent.putExtra(QuickActionsActivity.EXTRA_ACTION, quickAction);
+        intent.putExtra(QuickActionsActivity.EXTRA_TITLE, speedDialActionItem.getLabel(this));
         startActivity(intent);
 
         return false; // true to keep the Speed Dial open

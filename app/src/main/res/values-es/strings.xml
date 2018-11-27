@@ -218,6 +218,7 @@
     <!--WorkflowDetailFragment-->
     <string name="workflow_detail_status_fragment_open_file">Abrir Archivo</string>
     <string name="workflow_detail_status_fragment_no_pdf_reader">Su dispositivo no puede abrir archivos PDF. Por favor instale un lector de PDF.</string>
+    <string name="workflow_detail_status_fragment_permissions_not_granted">No es posible exportar el PDF debido a que los permisos no fueron otorgados.</string>
     <!--StatusFragment-->
     <string name="workflow_detail_status_fragment_title">Estatus</string>
     <string name="workflow_detail_status_fragment_status_summary">Estatus del Workflow</string>

@@ -220,6 +220,7 @@
     <!--WorkflowDetailFragment-->
     <string name="workflow_detail_status_fragment_open_file">Open File</string>
     <string name="workflow_detail_status_fragment_no_pdf_reader">This file cannot be opened by your device. Please install a PDF reader.</string>
+    <string name="workflow_detail_status_fragment_permissions_not_granted">Cannot export PDF because the permissions were not granted.</string>
     <!--StatusFragment-->
     <string name="workflow_detail_status_fragment_title">Status</string>
     <string name="workflow_detail_status_fragment_status_summary">Workflow Status</string>

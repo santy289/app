@@ -259,4 +259,9 @@
     <string name="workflow_detail_files_fragment_documents">Documents</string>
     <string name="workflow_detail_files_fragment_no_files">No files to show</string>
     <string name="workflow_detail_files_fragment_file_name">File Name</string>
+
+    <!--MainActivity-->
+    <string name="bottom_nav_timeline">Timeline</string>
+    <string name="bottom_nav_workflow_list">Workflows</string>
+    <string name="bottom_nav_workflow_dashboard">Dashboard</string>
 </resources>

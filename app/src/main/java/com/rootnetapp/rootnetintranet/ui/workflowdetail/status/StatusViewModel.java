@@ -43,6 +43,7 @@ public class StatusViewModel extends ViewModel {
 
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Integer> showToastMessage;
+    private MutableLiveData<Boolean> mTieStatusLiveData;
 
     protected MutableLiveData<Boolean> showLoading;
     protected MutableLiveData<List<Approver>> updateCurrentApproversList;
@@ -335,7 +336,19 @@ public class StatusViewModel extends ViewModel {
         updateUIWithWorkflow(mWorkflow);
     }
 
+    /**
+     * Update the activation status (Open/Closed) and the tie state of the current status.
+     *
+     * @param workflow current workflow.
+     */
     private void updateUIWithWorkflow(WorkflowDb workflow) {
+        boolean isTied = workflow.getNextStatusRequirements().isApproveTie()
+                && workflow.getNextStatusRequirements().getApprovedCount() == workflow
+                .getNextStatusRequirements().getRejectedCount();
+        mTieStatusLiveData.setValue(isTied);
+        showToastMessage.setValue(
+                R.string.workflow_detail_status_fragment_status_summary_tied_status_message);
+
         setWorkflowIsOpen.setValue(workflow.isOpen());
         updateProfilesInvolvedUi(workflow.getProfilesInvolved());
     }
@@ -525,8 +538,9 @@ public class StatusViewModel extends ViewModel {
             return profilesList;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::setProfilesInvovledOnUi, throwable -> Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable
-                        .getMessage()));
+                .subscribe(this::setProfilesInvovledOnUi, throwable -> Log
+                        .d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable
+                                .getMessage()));
         mDisposables.add(disposable);
     }
 
@@ -564,5 +578,12 @@ public class StatusViewModel extends ViewModel {
             showToastMessage = new MutableLiveData<>();
         }
         return showToastMessage;
+    }
+
+    protected LiveData<Boolean> getObservableTieStatus() {
+        if (mTieStatusLiveData == null) {
+            mTieStatusLiveData = new MutableLiveData<>();
+        }
+        return mTieStatusLiveData;
     }
 }

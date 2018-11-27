@@ -42,9 +42,9 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.viewpager.widget.ViewPager;
 
-public class WorkflowDetailFragment extends Fragment {
+import static com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailViewModel.REQUEST_EXTERNAL_STORAGE_PERMISSIONS;
 
-    private static final int REQUEST_EXTERNAL_STORAGE_PERMISSIONS = 700;
+public class WorkflowDetailFragment extends Fragment {
 
     @Inject
     WorkflowDetailViewModelFactory workflowViewModelFactory;
@@ -280,17 +280,6 @@ public class WorkflowDetailFragment extends Fragment {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
                                            @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_EXTERNAL_STORAGE_PERMISSIONS: {
-                // check for both permissions
-                if (grantResults.length > 1
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
-                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-
-                    // permissions granted
-                    workflowDetailViewModel.handleExportPdf();
-                }
-            }
-        }
+        workflowDetailViewModel.handleRequestPermissionsResult(requestCode, grantResults);
     }
 }

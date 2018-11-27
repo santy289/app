@@ -1,5 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 
+import android.content.pm.PackageManager;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
@@ -27,6 +29,8 @@ public class WorkflowDetailViewModel extends ViewModel {
 
     private static final int INDEX_STATUS_OPEN = 0;
     private static final int INDEX_STATUS_CLOSED = 1;
+
+    protected static final int REQUEST_EXTERNAL_STORAGE_PERMISSIONS = 700;
 
     private WorkflowDetailRepository mRepository;
     private MutableLiveData<Integer> mErrorLiveData;
@@ -199,6 +203,27 @@ public class WorkflowDetailViewModel extends ViewModel {
     protected void handleExportPdf() {
         showLoading.setValue(true);
         mRepository.getWorkflowPdfFile(mToken, mWorkflow.getId());
+    }
+
+    /**
+     * Checks if the requested permissions were granted and then proceed to export the PDF file.
+     *
+     * @param requestCode  to identify the request
+     * @param grantResults array containing the request results.
+     */
+    protected void handleRequestPermissionsResult(int requestCode, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_EXTERNAL_STORAGE_PERMISSIONS: {
+                // check for both permissions
+                if (grantResults.length > 1
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permissions granted
+                    handleExportPdf();
+                }
+            }
+        }
     }
 
     private void getWorkflow(String auth, int workflowId) {

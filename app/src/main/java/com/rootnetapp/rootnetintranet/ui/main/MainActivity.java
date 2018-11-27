@@ -291,11 +291,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initActionListeners() {
-        mainBinding.leftDrawer.navTimeline.setOnClickListener(this::drawerClicks);
-        mainBinding.leftDrawer.navWorkflows.setOnClickListener(this::drawerClicks);
-        mainBinding.leftDrawer.navWorkflowmanager.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navProfile.setOnClickListener(this::drawerClicks);
-        mainBinding.leftDrawer.buttonWorkflow.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navExit.setOnClickListener(this::drawerClicks);
         mainBinding.rightDrawer.drawerBackButton.setOnClickListener(view -> {
             if (sortingActive) {
@@ -477,36 +473,9 @@ public class MainActivity extends AppCompatActivity
     private void drawerClicks(View view) {
         int id = view.getId();
         switch (id) {
-            case R.id.nav_timeline: {
-                showFragment(TimelineFragment.newInstance(this), false);
-                mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
-                break;
-            }
-            case R.id.nav_workflows: {
-                showFragment(WorkflowFragment.newInstance(this), false);
-                mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
-                break;
-            }
             case R.id.nav_profile: {
                 showFragment(ProfileFragment.newInstance(this), false);
                 mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
-                break;
-            }
-            case R.id.nav_workflowmanager: {
-                showFragment(WorkflowManagerFragment.newInstance(this), false);
-                mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
-                break;
-            }
-            case R.id.button_workflow: {
-                if (mainBinding.leftDrawer.expansionWorkflow.getVisibility() == View.GONE) {
-                    mainBinding.leftDrawer.arrow1
-                            .setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
-                    mainBinding.leftDrawer.expansionWorkflow.setVisibility(View.VISIBLE);
-                } else {
-                    mainBinding.leftDrawer.arrow1
-                            .setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
-                    mainBinding.leftDrawer.expansionWorkflow.setVisibility(View.GONE);
-                }
                 break;
             }
             case R.id.nav_exit: {

@@ -214,6 +214,7 @@
     <string name="last_status">Estatus Pasado</string>
     <string name="next_status">Próximo Estatus</string>
     <string name="request_successfully">Pedido realizado exitosamente.</string>
+    <string name="functionality_not_available">Esta función aún no está disponible.</string>
 
     <!--WorkflowDetailFragment-->
     <string name="workflow_detail_status_fragment_open_file">Abrir Archivo</string>

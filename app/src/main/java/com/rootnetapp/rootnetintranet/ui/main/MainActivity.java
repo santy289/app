@@ -292,7 +292,8 @@ public class MainActivity extends AppCompatActivity
 
             case R.id.fab_edit_workflow:
                 quickAction = QuickAction.EDIT_WORKFLOW;
-                break;
+                showToastMessage(R.string.functionality_not_available); //todo add action
+                return true;
 
             case R.id.fab_approve_workflow:
                 quickAction = QuickAction.APPROVE_WORKFLOW;
@@ -300,7 +301,8 @@ public class MainActivity extends AppCompatActivity
 
             case R.id.fab_change_status:
                 quickAction = QuickAction.CHANGE_STATUS;
-                break;
+                showToastMessage(R.string.functionality_not_available); //todo add action
+                return true;
 
             case R.id.fab_comment:
                 quickAction = QuickAction.COMMENT;
@@ -686,6 +688,14 @@ public class MainActivity extends AppCompatActivity
             sortTitle.setVisibility(View.VISIBLE);
             sortSubtitle.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                this,
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
     }
 
     private void subscribe() {

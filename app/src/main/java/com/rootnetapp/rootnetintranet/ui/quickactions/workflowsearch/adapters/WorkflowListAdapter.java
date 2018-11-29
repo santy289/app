@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowSearchItemBinding;
 import com.rootnetapp.rootnetintranet.ui.quickactions.workflowsearch.WorkflowSearchFragmentInterface;
 
@@ -17,9 +18,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class WorkflowListAdapter extends RecyclerView.Adapter<WorkflowListViewHolder> {
 
-    //todo remove this and replace with WorkflowExpandableAdapter
+    //todo remove this and replace with WorkflowExpandableAdapter OR add paging
 
-    private List<WorkflowDb> workflows;
+    private List<WorkflowListItem> workflows;
     private WorkflowSearchFragmentInterface mInterface;
 
     public WorkflowListAdapter(WorkflowSearchFragmentInterface anInterface) {
@@ -27,7 +28,7 @@ public class WorkflowListAdapter extends RecyclerView.Adapter<WorkflowListViewHo
         workflows = new ArrayList<>();
     }
 
-    public void setData(List<WorkflowDb> workflows){
+    public void setData(List<WorkflowListItem> workflows){
         this.workflows = workflows;
         notifyDataSetChanged();
         getItemCount();
@@ -45,11 +46,11 @@ public class WorkflowListAdapter extends RecyclerView.Adapter<WorkflowListViewHo
 
     @Override
     public void onBindViewHolder(@NonNull WorkflowListViewHolder holder, int i) {
-        WorkflowDb item = getItem(i);
+        WorkflowListItem item = getItem(i);
 
         holder.binding.getRoot().setOnClickListener(v -> {
             int position = holder.getAdapterPosition();
-            WorkflowDb selectedItem = getItem(position);
+            WorkflowListItem selectedItem = getItem(position);
             mInterface.performAction(selectedItem);
         });
 
@@ -57,7 +58,7 @@ public class WorkflowListAdapter extends RecyclerView.Adapter<WorkflowListViewHo
         holder.binding.tvTitle.setText(mainTitle);
 
 
-        holder.binding.tvType.setText(item.getWorkflowType().getName());
+        holder.binding.tvType.setText(item.getWorkflowTypeName());
 
         Context context = holder.binding.tvStatus.getContext();
         if (item.isStatus()) {
@@ -72,7 +73,7 @@ public class WorkflowListAdapter extends RecyclerView.Adapter<WorkflowListViewHo
         return workflows.size();
     }
 
-    private WorkflowDb getItem(int index) {
+    private WorkflowListItem getItem(int index) {
         return workflows.get(index);
     }
 }

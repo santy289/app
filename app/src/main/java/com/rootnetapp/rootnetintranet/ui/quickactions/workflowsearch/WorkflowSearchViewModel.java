@@ -2,7 +2,9 @@ package com.rootnetapp.rootnetintranet.ui.quickactions.workflowsearch;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.lifecycle.LiveData;
@@ -17,12 +19,12 @@ public class WorkflowSearchViewModel extends ViewModel {
 
     private MutableLiveData<Integer> showToastMessage;
     private MutableLiveData<Boolean> showList;
-    private MutableLiveData<List<WorkflowDb>> mWorkflowListLiveData;
+    private MutableLiveData<List<WorkflowListItem>> mWorkflowListLiveData;
     //    private MutableLiveData<PagedList<WorkflowListItem>> updateWithSortedList; //todo paged list
     //    private LiveData<PagedList<WorkflowListItem>> liveWorkflows;
 
     protected MutableLiveData<Boolean> showLoading;
-    protected LiveData<List<WorkflowDb>> workflowListFromRepo;
+    protected LiveData<List<WorkflowListItem>> workflowListFromRepo;
     protected LiveData<Boolean> handleShowLoadingByRepo;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
@@ -54,12 +56,17 @@ public class WorkflowSearchViewModel extends ViewModel {
         workflowListFromRepo = Transformations.map(
                 mRepository.getObservableWorkflowList(),
                 workflowResponseDb -> {
-                    // todo transform WorkflowResponseDb to WorkflowListItem
+                    // transform WorkflowDb list to WorkflowListItem list
 
-                    updateUIWithWorkflowList(workflowResponseDb.getList());
+                    List<WorkflowListItem> workflowListItems = new ArrayList<>();
+                    for (WorkflowDb workflow : workflowResponseDb.getList()) {
+                        workflowListItems.add(new WorkflowListItem(workflow));
+                    }
+
+                    updateUIWithWorkflowList(workflowListItems);
                     showLoading.setValue(false);
                     showToastMessage.setValue(R.string.request_successfully);
-                    return workflowResponseDb.getList();
+                    return workflowListItems;
                 }
         );
 
@@ -110,7 +117,7 @@ public class WorkflowSearchViewModel extends ViewModel {
      *
      * @param workflowList updated list.
      */
-    protected void updateUIWithWorkflowList(List<WorkflowDb> workflowList) {
+    protected void updateUIWithWorkflowList(List<WorkflowListItem> workflowList) {
         if (workflowList == null || workflowList.size() < 1) {
             showList.setValue(false);
             return;
@@ -120,7 +127,7 @@ public class WorkflowSearchViewModel extends ViewModel {
         showList.setValue(true);
     }
 
-    protected LiveData<List<WorkflowDb>> getObservableWorkflowList() {
+    protected LiveData<List<WorkflowListItem>> getObservableWorkflowList() {
         if (mWorkflowListLiveData == null) {
             mWorkflowListLiveData = new MutableLiveData<>();
         }

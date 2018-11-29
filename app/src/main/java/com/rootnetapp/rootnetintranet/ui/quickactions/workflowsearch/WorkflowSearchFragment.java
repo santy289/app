@@ -10,7 +10,7 @@ import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowSearchBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
@@ -110,7 +110,7 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
      * @param workflowDbList updated list.
      */
     @UiThread
-    private void updateAdapterList(List<WorkflowDb> workflowDbList) {
+    private void updateAdapterList(List<WorkflowListItem> workflowDbList) {
         mAdapter.setData(workflowDbList);
     }
 
@@ -131,7 +131,7 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
     }
 
     @Override
-    public void performAction(WorkflowDb item) {
+    public void performAction(WorkflowListItem item) {
         //todo add implementation
         /*workflowViewModel.resetFilterSettings();
         mainActivityInterface.showFragment(WorkflowDetailFragment.newInstance(item,

@@ -1,9 +1,9 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist;
 
-import androidx.room.ColumnInfo;
-import androidx.room.Ignore;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -11,7 +11,11 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Ignore;
+
 public class WorkflowListItem {
+
     public int workflowId;
     public int workflowTypeId;
     public long remainingTime;
@@ -43,6 +47,31 @@ public class WorkflowListItem {
     private String formattedCreatedAt;
     @Ignore
     private String formattedUpdatedAt;
+
+    public WorkflowListItem() {}
+
+    /**
+     * Temporary constructor. Converts a {@link WorkflowDb} object into this.
+     *
+     * @param workflowDb object to be converted.
+     */
+    public WorkflowListItem(WorkflowDb workflowDb) {
+        workflowId = workflowDb.getId();
+        workflowTypeId = workflowDb.getWorkflowTypeId();
+        remainingTime = workflowDb.getRemainingTime();
+        workflowTypeName = workflowDb.getWorkflowType() != null ? workflowDb.getWorkflowType()
+                .getName() : null;
+        title = workflowDb.getTitle();
+        workflowTypeKey = workflowDb.getWorkflowTypeKey();
+        fullName = workflowDb.getAuthor() != null ? workflowDb.getAuthor().getFullName() : null;
+        currentStatusName = workflowDb.getCurrentStatusName();
+        createdAt = workflowDb.getCreatedAt();
+        updatedAt = workflowDb.getUpdatedAt();
+        start = workflowDb.getStart();
+        end = workflowDb.getEnd();
+        status = workflowDb.isStatus();
+        currentStatus = workflowDb.getCurrentStatus();
+    }
 
     public int getWorkflowId() {
         return workflowId;
@@ -239,6 +268,8 @@ public class WorkflowListItem {
     @Override
     public int hashCode() {
 
-        return Objects.hash(getWorkflowId(), getWorkflowTypeId(), getWorkflowTypeName(), getTitle(), getWorkflowTypeKey(), getFullName(), getCurrentStatusName(), getCreatedAt(), getUpdatedAt(), getStart(), getEnd(), isStatus());
+        return Objects.hash(getWorkflowId(), getWorkflowTypeId(), getWorkflowTypeName(), getTitle(),
+                getWorkflowTypeKey(), getFullName(), getCurrentStatusName(), getCreatedAt(),
+                getUpdatedAt(), getStart(), getEnd(), isStatus());
     }
 }

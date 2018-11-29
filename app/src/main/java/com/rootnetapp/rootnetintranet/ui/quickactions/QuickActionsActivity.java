@@ -19,7 +19,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProviders;
 
-public class QuickActionsActivity extends AppCompatActivity {
+public class QuickActionsActivity extends AppCompatActivity implements QuickActionsInterface {
 
     public static final String EXTRA_ACTION = "Extra.Action";
     public static final String EXTRA_TITLE = "Extra.Title";
@@ -62,13 +62,14 @@ public class QuickActionsActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(title);
     }
 
-    public void showFragment(Fragment fragment, boolean addtobackstack) {
+    @Override
+    public void showFragment(Fragment fragment, boolean addToBackStack) {
         String tag = fragment.getClass().getSimpleName();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out,
                 android.R.anim.fade_in, android.R.anim.fade_out);
         transaction.replace(R.id.container, fragment);
-        if (addtobackstack) {
+        if (addToBackStack) {
             transaction.addToBackStack(tag);
         }
         transaction.commit();

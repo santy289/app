@@ -22,6 +22,7 @@
                 android:ellipsize="end"
                 android:gravity="center_vertical"
                 android:maxLines="2"
+                android:paddingTop="16dp"
                 android:textColor="@color/colorPrimary"
                 android:textSize="18sp"
                 tools:text="Now we have some very long text to test if we can have something here correctly without breaking Long text in here." />
@@ -70,7 +71,7 @@
             <FrameLayout
                 android:id="@+id/container"
                 android:layout_width="0dp"
-                android:layout_height="200dp"
+                android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

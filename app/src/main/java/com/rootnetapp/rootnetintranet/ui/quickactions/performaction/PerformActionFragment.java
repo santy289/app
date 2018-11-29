@@ -82,7 +82,7 @@ public class PerformActionFragment extends Fragment {
     private void showActionFragment() {
         switch (mAction) {
             case QuickAction.COMMENT:
-                showFragment(CommentsFragment.newInstance(mWorkflowListItem), true);
+                showFragment(CommentsFragment.newInstance(mWorkflowListItem, false), true);
                 break;
             case QuickAction.APPROVE_WORKFLOW:
                 showFragment(StatusFragment.newInstance(mWorkflowListItem), true);

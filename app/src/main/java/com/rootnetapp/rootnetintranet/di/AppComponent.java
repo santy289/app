@@ -25,6 +25,8 @@ import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileModule;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsModule;
+import com.rootnetapp.rootnetintranet.ui.quickactions.performaction.PerformActionFragment;
+import com.rootnetapp.rootnetintranet.ui.quickactions.performaction.PerformActionModule;
 import com.rootnetapp.rootnetintranet.ui.quickactions.workflowsearch.WorkflowSearchFragment;
 import com.rootnetapp.rootnetintranet.ui.quickactions.workflowsearch.WorkflowSearchModule;
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment.ResetPasswordFragment;
@@ -81,7 +83,8 @@ import dagger.Component;
                 CommentsModule.class,
                 FilesModule.class,
                 QuickActionsModule.class,
-                WorkflowSearchModule.class
+                WorkflowSearchModule.class,
+                PerformActionModule.class
         }
 )
 
@@ -144,4 +147,6 @@ public interface AppComponent {
     void inject(QuickActionsActivity quickActionsActivity);
 
     void inject(WorkflowSearchFragment workflowSearchFragment);
+
+    void inject(PerformActionFragment performActionFragment);
 }

@@ -25,7 +25,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_margin="16dp"
-                    android:background="@drawable/spinner_bg"
+                    android:background="@drawable/edit_text_bg"
                     android:hint="@string/workflow_search_fragment_search_hint"
                     android:maxLines="1"
                     android:paddingStart="10dp"
@@ -62,7 +62,6 @@
                     app:barrierDirection="bottom"
                     app:constraint_referenced_ids="et_search,btn_search" />
 
-
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_workflows"
                     android:layout_width="match_parent"
@@ -70,21 +69,19 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@drawable/border_bg_workflow_search"
                     android:clipToPadding="false"
-                    android:paddingBottom="8dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/barrier"
-                    app:layout_constraintVertical_bias="0.0" />
+                    app:layout_constraintTop_toBottomOf="@id/barrier" />
 
                 <TextView
                     android:id="@+id/tv_no_results"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:padding="8dp"
                     android:text="@string/workflow_search_fragment_search_no_results"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
                     android:visibility="gone"

@@ -26,10 +26,12 @@ import javax.inject.Inject;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
+import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -116,9 +118,16 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
      * Creates the RecyclerView that will hold the workflow list.
      */
     private void setupWorkflowRecyclerView() {
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
-        mBinding.rvWorkflows.setLayoutManager(mLayoutManager);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
+        mBinding.rvWorkflows.setLayoutManager(layoutManager);
         mBinding.rvWorkflows.setNestedScrollingEnabled(false);
+
+        DividerItemDecoration itemDecoration = new DividerItemDecoration(getContext(),
+                ((LinearLayoutManager) layoutManager).getOrientation());
+        itemDecoration.setDrawable(
+                ContextCompat.getDrawable(getContext(), R.drawable.recycler_divider));
+        mBinding.rvWorkflows.addItemDecoration(itemDecoration);
+
         mAdapter = new WorkflowListAdapter(this);
         mBinding.rvWorkflows.setAdapter(mAdapter);
 

@@ -6,8 +6,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp">
+        android:background="?selectableItemBackground"
+        android:padding="8dp">
 
         <TextView
             android:id="@+id/tv_title"
@@ -20,6 +20,7 @@
             android:maxLines="2"
             android:textColor="@color/colorPrimary"
             android:textSize="18sp"
+            android:textStyle="bold"
             tools:text="Now we have some very long text to test if we can have something here correctly without breaking Long text in here." />
 
         <TextView
@@ -28,7 +29,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:text="@string/workflow_search_fragment_search_type"
-            android:textColor="@color/colorPrimary"
+            android:textColor="@color/dark_gray"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@id/tv_title"
             app:layout_constraintTop_toBottomOf="@id/tv_title" />
 
@@ -37,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
-            android:textColor="@color/low_gray_text"
+            android:textColor="@color/dark_gray"
             app:layout_constraintBottom_toBottomOf="@id/tv_type_title"
             app:layout_constraintStart_toEndOf="@id/tv_type_title"
             app:layout_constraintTop_toTopOf="@id/tv_type_title"
@@ -48,7 +50,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/workflow_search_fragment_search_status"
-            android:textColor="@color/colorPrimary"
+            android:textColor="@color/dark_gray"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@id/tv_type_title"
             app:layout_constraintTop_toBottomOf="@id/tv_type_title" />
 
@@ -57,7 +60,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
-            android:textColor="@color/low_gray_text"
+            android:textColor="@color/dark_gray"
             app:layout_constraintBottom_toBottomOf="@id/tv_status_title"
             app:layout_constraintStart_toEndOf="@id/tv_status_title"
             app:layout_constraintTop_toTopOf="@id/tv_status_title"

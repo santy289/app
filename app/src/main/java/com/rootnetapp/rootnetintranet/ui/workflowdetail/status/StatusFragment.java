@@ -90,6 +90,7 @@ public class StatusFragment extends Fragment {
 
         statusViewModel.getObservableError().observe(this, errorObserver);
         statusViewModel.getObservableShowToastMessage().observe(this, this::showToastMessage);
+        statusViewModel.getObservableTieStatus().observe(this, this::showTieStatusLabel);
 
         statusViewModel.showLoading.observe(this, this::showLoading);
         statusViewModel.handleShowLoadingByRepo.observe(this, this::showLoading);
@@ -174,8 +175,11 @@ public class StatusFragment extends Fragment {
                         Integer stepIndex;
 
                         //account for hint as the first item
-                        if (position == 0) stepIndex = null; //null gets ignored by API call
-                        else stepIndex = position - 1;
+                        if (position == 0) {
+                            stepIndex = null; //null gets ignored by API call
+                        } else {
+                            stepIndex = position - 1;
+                        }
 
                         statusViewModel.setApproveSpinnerItemSelection(stepIndex);
                     }
@@ -265,6 +269,16 @@ public class StatusFragment extends Fragment {
             mBinding.includeAllPeopleInvolved.rvAllPeopleInvolved.setVisibility(View.VISIBLE);
             mBinding.includeAllPeopleInvolved.noPeopleInvolved.setVisibility(View.GONE);
         }
+    }
+
+    /**
+     * The TIED label should be shown if the current status is tied.
+     *
+     * @param show whether to show the label.
+     */
+    @UiThread
+    private void showTieStatusLabel(boolean show) {
+        mBinding.includeStatusSummary.tvTiedStatus.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     private void showToastMessage(@StringRes int messageRes) {

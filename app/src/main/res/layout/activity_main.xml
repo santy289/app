@@ -70,13 +70,11 @@
                 android:id="@+id/fab_speed_dial"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="end|bottom"
                 android:layout_marginBottom="@dimen/bottom_navigation_bar_height"
-                app:layout_anchor="@+id/bottom_navigation"
-                app:layout_anchorGravity="bottom|end"
                 app:layout_behavior="@string/speeddial_scrolling_view_snackbar_behavior"
                 app:sdExpansionMode="top"
-                app:sdMainFabAnimationRotateAngle="90"
-                app:sdMainFabClosedSrc="@drawable/ic_diamond_white"
+                app:sdMainFabClosedSrc="@drawable/ic_diamond_black_24dp"
                 app:sdOverlayLayout="@id/overlay" />
 
             <com.google.android.material.bottomnavigation.BottomNavigationView

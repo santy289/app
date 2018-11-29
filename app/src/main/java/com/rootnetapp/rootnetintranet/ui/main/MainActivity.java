@@ -3,7 +3,9 @@ package com.rootnetapp.rootnetintranet.ui.main;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -270,6 +272,8 @@ public class MainActivity extends AppCompatActivity
                 R.drawable.ic_workflow_black_24dp);
 
         mainBinding.fabSpeedDial.setOnActionSelectedListener(this::handleSpeedDialClick);
+        mainBinding.fabSpeedDial.getMainFab().setSupportImageTintList(ColorStateList.valueOf(
+                Color.WHITE)); //this is the only way to change the icon color
     }
 
     private void addActionItem(@IdRes int idRes, @StringRes int titleRes,

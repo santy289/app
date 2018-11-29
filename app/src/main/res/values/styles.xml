@@ -45,4 +45,12 @@
     <style name="SplashTheme" parent="Theme.MaterialComponents.NoActionBar">
         <item name="android:windowBackground">@drawable/splash_bg</item>
     </style>
+
+    <style name="AppTheme.SpeedDialView" parent="AppTheme">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorPrimaryDark">@color/white</item>
+        <item name="colorAccent">@color/fab_color</item>
+        <item name="colorControlNormal">@color/white</item>
+    </style>
 </resources>

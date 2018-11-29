@@ -83,9 +83,9 @@ public class WorkflowSearchViewModel extends ViewModel {
     }
 
     /**
-     * Retrieves the latest workflows.
+     * Retrieves the latest workflows without a search query.
      */
-    private void getRecentWorkflowList() {
+    protected void getRecentWorkflowList() {
         showLoading.setValue(true);
         mRepository.getRecentWorkflows(mToken);
     }

@@ -3,6 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.quickactions.workflowsearch;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,6 +72,7 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
 
         workflowSearchViewModel.init(token);
         setupWorkflowRecyclerView();
+        setOnClickListeners();
         subscribe();
 
         return view;
@@ -114,6 +116,30 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
 //        fragmentWorkflowBinding.swipeRefreshLayout.setOnRefreshListener(this);
     }
 
+    /**
+     * Sets the click listeners for the buttons inside this fragment.
+     */
+    private void setOnClickListeners() {
+        mBinding.btnSearch.setOnClickListener(v -> {
+            performSearch();
+        });
+    }
+
+    /**
+     * Executes the search button action by requesting the queried list. If the text query is empty,
+     * this will retrieve the recent workflows instead.
+     */
+    private void performSearch() {
+        String query = mBinding.etSearch.getText().toString();
+
+        if (TextUtils.isEmpty(query)) {
+            workflowSearchViewModel.getRecentWorkflowList();
+            return;
+        }
+
+        workflowSearchViewModel.getWorkflowList(query);
+    }
+
     @UiThread
     private void showLoading(boolean show) {
         if (show) {
@@ -131,7 +157,13 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
      */
     @UiThread
     private void updateAdapterList(List<WorkflowListItem> workflowDbList) {
+        clearSearchText();
         mAdapter.setData(workflowDbList);
+    }
+
+    @UiThread
+    private void clearSearchText() {
+        mBinding.etSearch.setText(null);
     }
 
     /**

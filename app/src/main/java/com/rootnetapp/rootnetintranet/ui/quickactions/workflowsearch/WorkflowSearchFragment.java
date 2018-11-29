@@ -76,14 +76,29 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
         return view;
     }
 
+    /**
+     * Begins to observe for changes on the LiveData'ss of the ViewModel. The removeObservers()
+     * method is to avoid the observable to be created more than once when back stack navigation
+     * occurs.
+     */
     private void subscribe() {
+        workflowSearchViewModel.getObservableWorkflowList().removeObservers(this);
         workflowSearchViewModel.getObservableWorkflowList().observe(this, this::updateAdapterList);
+
+        workflowSearchViewModel.getObservableShowList().removeObservers(this);
         workflowSearchViewModel.getObservableShowList().observe(this, this::showListContent);
+
+        workflowSearchViewModel.getObservableShowToastMessage().removeObservers(this);
         workflowSearchViewModel.getObservableShowToastMessage()
                 .observe(this, this::showToastMessage);
 
+        workflowSearchViewModel.showLoading.removeObservers(this);
         workflowSearchViewModel.showLoading.observe(this, this::showLoading);
+
+        workflowSearchViewModel.workflowListFromRepo.removeObservers(this);
         workflowSearchViewModel.workflowListFromRepo.observe(this, this::updateAdapterList);
+
+        workflowSearchViewModel.handleShowLoadingByRepo.removeObservers(this);
         workflowSearchViewModel.handleShowLoadingByRepo.observe(this, this::showLoading);
     }
 

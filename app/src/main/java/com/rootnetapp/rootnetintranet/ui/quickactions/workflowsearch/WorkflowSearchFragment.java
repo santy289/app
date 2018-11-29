@@ -3,7 +3,6 @@ package com.rootnetapp.rootnetintranet.ui.quickactions.workflowsearch;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +25,7 @@ import javax.inject.Inject;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
+import androidx.core.widget.NestedScrollView;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
@@ -84,9 +84,6 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
      * occurs.
      */
     private void subscribe() {
-        workflowSearchViewModel.getObservableWorkflowList().removeObservers(this);
-        workflowSearchViewModel.getObservableWorkflowList().observe(this, this::updateAdapterList);
-
         workflowSearchViewModel.getObservableShowList().removeObservers(this);
         workflowSearchViewModel.getObservableShowList().observe(this, this::showListContent);
 
@@ -113,8 +110,24 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
         mBinding.rvWorkflows.setNestedScrollingEnabled(false);
         mAdapter = new WorkflowListAdapter(this);
         mBinding.rvWorkflows.setAdapter(mAdapter);
-        // Swipe to refresh recyclerView
-//        fragmentWorkflowBinding.swipeRefreshLayout.setOnRefreshListener(this);
+
+        mBinding.scrollView.setOnScrollChangeListener(
+                (NestedScrollView.OnScrollChangeListener) (scrollView, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+                    if (workflowSearchViewModel.isLoading()) {
+                        return;
+                    }
+
+                    // We take the last child in the scrollview
+                    View view = scrollView.getChildAt(scrollView.getChildCount() - 1);
+                    int diff = (view.getBottom() - (scrollView.getHeight() + scrollView
+                            .getScrollY()));
+
+                    // if diff is zero, then the bottom has been reached
+                    if (diff == 0) {
+                        workflowSearchViewModel.increasePageNumber();
+                        workflowSearchViewModel.getWorkflowList();
+                    }
+                });
     }
 
     /**
@@ -127,16 +140,13 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
     }
 
     /**
-     * Executes the search button action by requesting the queried list. If the text query is empty,
-     * this will retrieve the recent workflows instead.
+     * Executes the search button action by requesting the queried list.
      */
     private void performSearch() {
-        String query = mBinding.etSearch.getText().toString();
+        clearAdapterList();
+        workflowSearchViewModel.resetPageNumber();
 
-        if (TextUtils.isEmpty(query)) {
-            workflowSearchViewModel.getRecentWorkflowList();
-            return;
-        }
+        String query = mBinding.etSearch.getText().toString();
 
         workflowSearchViewModel.getWorkflowList(query);
     }
@@ -151,7 +161,7 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
     }
 
     /**
-     * Sets new data to the RecyclerView adapter. For this to work, {@link
+     * Adds new data to the RecyclerView adapter. For this to work, {@link
      * #setupWorkflowRecyclerView()} must have been called on fragment initialization.
      *
      * @param workflowDbList updated list.
@@ -159,11 +169,17 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
     @UiThread
     private void updateAdapterList(List<WorkflowListItem> workflowDbList) {
         clearSearchText();
-        mAdapter.setData(workflowDbList);
+        mAdapter.addData(workflowDbList);
+    }
+
+    @UiThread
+    private void clearAdapterList() {
+        mAdapter.clearData();
     }
 
     @UiThread
     private void clearSearchText() {
+        mBinding.etSearch.clearFocus();
         mBinding.etSearch.setText(null);
     }
 

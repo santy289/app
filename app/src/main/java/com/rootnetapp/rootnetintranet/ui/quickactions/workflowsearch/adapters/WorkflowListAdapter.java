@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowSearchItemBinding;
 import com.rootnetapp.rootnetintranet.ui.quickactions.workflowsearch.WorkflowSearchFragmentInterface;
@@ -28,10 +27,20 @@ public class WorkflowListAdapter extends RecyclerView.Adapter<WorkflowListViewHo
         workflows = new ArrayList<>();
     }
 
-    public void setData(List<WorkflowListItem> workflows){
-        this.workflows = workflows;
-        notifyDataSetChanged();
+    public void addData(List<WorkflowListItem> workflows) {
+        int positionStart = this.workflows.size();
+
+        this.workflows.addAll(workflows);
+
+        int positionEnd = this.workflows.size() - 1;
+
+        notifyItemRangeInserted(positionStart, positionEnd);
         getItemCount();
+    }
+
+    public void clearData(){
+        this.workflows = new ArrayList<>();
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -56,7 +65,6 @@ public class WorkflowListAdapter extends RecyclerView.Adapter<WorkflowListViewHo
 
         String mainTitle = item.getTitle() + " - " + item.getWorkflowTypeKey();
         holder.binding.tvTitle.setText(mainTitle);
-
 
         holder.binding.tvType.setText(item.getWorkflowTypeName());
 

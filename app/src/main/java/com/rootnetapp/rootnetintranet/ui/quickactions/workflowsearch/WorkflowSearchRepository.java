@@ -47,7 +47,6 @@ public class WorkflowSearchRepository {
                 PAGE_LIMIT,
                 page,
                 true,
-                true,
                 query,
                 true
         )
@@ -65,12 +64,12 @@ public class WorkflowSearchRepository {
      *
      * @param auth authentication token.
      */
-    protected void getRecentWorkflows(String auth) {
+    protected void getRecentWorkflows(String auth, int pageNumber) {
         Disposable disposable = service.getWorkflowsDb(
                 auth,
                 PAGE_LIMIT,
                 true,
-                1,
+                pageNumber,
                 true
         )
                 .subscribeOn(Schedulers.newThread())

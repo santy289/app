@@ -47,7 +47,6 @@ public class PerformActionRepository {
                 PAGE_LIMIT,
                 page,
                 true,
-                true,
                 query,
                 true
         )

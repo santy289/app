@@ -19,7 +19,6 @@ public class WorkflowSearchViewModel extends ViewModel {
 
     private MutableLiveData<Integer> showToastMessage;
     private MutableLiveData<Boolean> showList;
-    private MutableLiveData<List<WorkflowListItem>> mWorkflowListLiveData;
     //    private MutableLiveData<PagedList<WorkflowListItem>> updateWithSortedList; //todo paged list
     //    private LiveData<PagedList<WorkflowListItem>> liveWorkflows;
 
@@ -29,6 +28,10 @@ public class WorkflowSearchViewModel extends ViewModel {
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
     private String mToken;
+
+    private int mPageNumber;
+    private String mQuery;
+    private boolean isLoading;
 
     public WorkflowSearchViewModel(WorkflowSearchRepository repository) {
         this.mRepository = repository;
@@ -44,7 +47,8 @@ public class WorkflowSearchViewModel extends ViewModel {
 
     protected void init(String token) {
         this.mToken = token;
-        getRecentWorkflowList();
+        mPageNumber = 1;
+        getWorkflowList();
     }
 
     /**
@@ -58,6 +62,7 @@ public class WorkflowSearchViewModel extends ViewModel {
                 workflowResponseDb -> {
                     // transform WorkflowDb list to WorkflowListItem list
 
+                    isLoading = false;
                     showLoading.setValue(false);
 
                     List<WorkflowListItem> workflowListItems = new ArrayList<>();
@@ -65,7 +70,8 @@ public class WorkflowSearchViewModel extends ViewModel {
                         workflowListItems.add(new WorkflowListItem(workflow));
                     }
 
-                    updateUIWithWorkflowList(workflowListItems);
+                    showList.setValue(workflowListItems.size() > 0);
+
                     return workflowListItems;
                 }
         );
@@ -74,6 +80,7 @@ public class WorkflowSearchViewModel extends ViewModel {
         handleShowLoadingByRepo = Transformations.map(
                 mRepository.getErrorShowLoading(),
                 show -> {
+                    isLoading = false;
                     showLoading.setValue(false);
                     showToastMessage.setValue(R.string.error);
                     return show;
@@ -84,69 +91,63 @@ public class WorkflowSearchViewModel extends ViewModel {
     /**
      * Retrieves the latest workflows without a search query.
      */
-    protected void getRecentWorkflowList() {
+    private void getRecentWorkflowList() {
         showLoading.setValue(true);
-        mRepository.getRecentWorkflows(mToken);
+        mRepository.getRecentWorkflows(mToken, mPageNumber);
     }
 
     /**
-     * Retrieve the workflows that match the text query.
+     * Retrieve the workflows that match the text query. If the query is not set, retrieves the list
+     * without filtering.
      *
      * @param query text to search.
      */
     protected void getWorkflowList(String query) {
-        showLoading.setValue(true);
-        mRepository.getWorkflowsBySearchQuery(mToken, 1, query); //todo paging
-    }
+        isLoading = true;
 
-    /*protected void handleUiAndIncomingList(PagedList<WorkflowListItem> listWorkflows) {
-        if (listWorkflows == null) {
-            showList.setValue(false);
+        mQuery = query;
+
+        if (mQuery == null || mQuery.isEmpty()) {
+            getRecentWorkflowList();
             return;
         }
-        if(listWorkflows.size() < 1){
-            showList.setValue(false);
-            return;
-        }
-        updateWithSortedList.setValue(listWorkflows);
-        showList.setValue(true);
-    }*/
+
+        showLoading.setValue(true);
+        mRepository.getWorkflowsBySearchQuery(mToken, mPageNumber, query);
+    }
 
     /**
-     * Passes the updated list to the UI using LiveData.
-     *
-     * @param workflowList updated list.
+     * Performs a search query with the last saved value.
      */
-    protected void updateUIWithWorkflowList(List<WorkflowListItem> workflowList) {
-        if (workflowList == null || workflowList.size() < 1) {
-            showList.setValue(false);
-            return;
-        }
-
-        mWorkflowListLiveData.setValue(workflowList);
-        showList.setValue(true);
+    protected void getWorkflowList() {
+        getWorkflowList(mQuery);
     }
 
-    protected LiveData<List<WorkflowListItem>> getObservableWorkflowList() {
-        if (mWorkflowListLiveData == null) {
-            mWorkflowListLiveData = new MutableLiveData<>();
-        }
-        return mWorkflowListLiveData;
+    /**
+     * This should be called every time the RecyclerView or ScrollView detects that it has reached
+     * the bottom, thus it needs to fetch more items.
+     */
+    protected void increasePageNumber() {
+        mPageNumber++;
     }
 
-    /*protected LiveData<PagedList<WorkflowListItem>> getObservableAllWorkflows() {
-        if (liveWorkflows == null) {
-            liveWorkflows = new MutableLiveData<>();
-        }
-        return liveWorkflows;
+    /**
+     * This should be called every time that the search query is modified, so we can fetch the first
+     * items for the new query.
+     */
+    protected void resetPageNumber() {
+        mPageNumber = 0;
     }
 
-    protected LiveData<PagedList<WorkflowListItem>> getObservableUpdateWithSortedList() {
-        if (updateWithSortedList == null) {
-            updateWithSortedList = new MutableLiveData<>();
-        }
-        return updateWithSortedList;
-    }*/
+    /**
+     * The RecyclerView or ScrollView must check for this so they will not perform a request while
+     * another is still being executed.
+     *
+     * @return whether there is a request being processed.
+     */
+    protected boolean isLoading() {
+        return isLoading;
+    }
 
     public LiveData<Boolean> getObservableShowList() {
         if (showList == null) {

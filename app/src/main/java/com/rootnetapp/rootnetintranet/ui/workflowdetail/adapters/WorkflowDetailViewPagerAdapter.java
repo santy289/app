@@ -53,7 +53,7 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
             case 2:
                 return ApprovalHistoryFragment.newInstance(mWorkflowItem);
             case 3:
-                return CommentsFragment.newInstance(mWorkflowItem);
+                return CommentsFragment.newInstance(mWorkflowItem, true);
             case 4:
                 return FilesFragment.newInstance(mWorkflowItem);
             default:

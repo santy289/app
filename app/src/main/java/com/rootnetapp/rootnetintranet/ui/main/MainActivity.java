@@ -245,15 +245,15 @@ public class MainActivity extends AppCompatActivity
 
         switch (item.getItemId()) {
             case R.id.menu_timeline:
-                showFragment(TimelineFragment.newInstance(this), true);
+                showFragment(TimelineFragment.newInstance(this), false);
                 break;
 
             case R.id.menu_workflow_list:
-                showFragment(WorkflowFragment.newInstance(this), true);
+                showFragment(WorkflowFragment.newInstance(this), false);
                 break;
 
             case R.id.menu_dashboard:
-                showFragment(WorkflowManagerFragment.newInstance(this), true);
+                showFragment(WorkflowManagerFragment.newInstance(this), false);
                 break;
         }
     }

@@ -83,6 +83,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         token = "Bearer " + prefs.getString("token", "");
         binding.recTimeline.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recTimeline.setNestedScrollingEnabled(false);
         subscribe();
         binding.btnMonth.setOnClickListener(this::filterClicked);
         binding.btnWeek.setOnClickListener(this::filterClicked);

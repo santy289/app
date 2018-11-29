@@ -1,17 +1,8 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist;
 
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.paging.PagedList;
 import android.content.Context;
 import android.content.SharedPreferences;
-import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import androidx.fragment.app.Fragment;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -22,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -42,7 +34,17 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-public class WorkflowFragment extends Fragment implements WorkflowFragmentInterface, SwipeRefreshLayout.OnRefreshListener {
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.paging.PagedList;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+public class WorkflowFragment extends Fragment implements WorkflowFragmentInterface,
+        SwipeRefreshLayout.OnRefreshListener {
 
     @Inject
     WorkflowViewModelFactory workflowViewModelFactory;
@@ -70,7 +72,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     public static final int INDEX_CHECK = 1;
 
     MainActivityViewModel mainViewModel;
-
 
     // Used when we have a general workflow.
     final Observer<PagedList<WorkflowListItem>> getAllWorkflowsObserver = (listWorkflows -> {
@@ -123,7 +124,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         setupWorkflowRecyclerView();
         setupClickListeners();
         setupSearchListener();
-        SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        SharedPreferences prefs = getContext()
+                .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         workflowViewModel.initWorkflowList(prefs, this);
         if (firstLoad) {
             subscribe();
@@ -141,7 +143,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     public void showDetail(WorkflowListItem item) {
         workflowViewModel.resetFilterSettings();
         mainActivityInterface.showFragment(WorkflowDetailFragment.newInstance(item,
-                mainActivityInterface),true);
+                mainActivityInterface), true);
     }
 
     // swipe down to refresh - SwipeRefreshLayout
@@ -152,7 +154,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     private void setupSearchListener() {
         fragmentWorkflowBinding.inputSearch.setOnKeyListener((v, keyCode, event) -> {
-            if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+            if ((event
+                    .getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
                 String searchText = fragmentWorkflowBinding.inputSearch.getText().toString();
                 workflowViewModel.filterBySearchText(searchText, this);
                 return true;
@@ -164,6 +167,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     private void setupWorkflowRecyclerView() {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         fragmentWorkflowBinding.recWorkflows.setLayoutManager(mLayoutManager);
+        fragmentWorkflowBinding.recWorkflows.setNestedScrollingEnabled(false);
         adapter = new WorkflowExpandableAdapter(this);
         fragmentWorkflowBinding.recWorkflows.setAdapter(adapter);
         // Swipe to refresh recyclerView
@@ -270,9 +274,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             toogleFilterSwitch(toggle[INDEX_TYPE], check);
         });
 
-        final Observer<Integer> setSelectTypeObserver = ( index -> {
+        final Observer<Integer> setSelectTypeObserver = (index -> {
             if (index == null) {
-                workflowFiltersMenuBinding.spnWorkflowtype.setSelection(WorkflowViewModel.NO_TYPE_SELECTED);
+                workflowFiltersMenuBinding.spnWorkflowtype
+                        .setSelection(WorkflowViewModel.NO_TYPE_SELECTED);
                 return;
             }
             workflowFiltersMenuBinding.spnWorkflowtype.setSelection(index);
@@ -293,13 +298,16 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.getObservableError().observe(this, errorObserver);
         workflowViewModel.getObservableShowLoading().observe(this, showLoadingObserver);
         addWorkflowsObserver();
-        workflowViewModel.getObservableUpdateWithSortedList().observe(this, updateWithSortedListObserver);
+        workflowViewModel.getObservableUpdateWithSortedList()
+                .observe(this, updateWithSortedListObserver);
         workflowViewModel.getObservableToggleRadioButton().observe(this, toggleRadioButtonObserver);
         workflowViewModel.getObservableToggleSwitch().observe(this, toggleSwitchObserver);
         workflowViewModel.getObservableShowList().observe(this, showListObserver);
         workflowViewModel.getObservableAddWorkflowObserver().observe(this, addWorkflowsObserver);
-        workflowViewModel.getObservableSetAllCheckboxesList().observe(this, setAllCeckboxesObserver);
-        workflowViewModel.getObservableToggleFilterSwitch().observe(this, toggleSwitchFilterObserver);
+        workflowViewModel.getObservableSetAllCheckboxesList()
+                .observe(this, setAllCeckboxesObserver);
+        workflowViewModel.getObservableToggleFilterSwitch()
+                .observe(this, toggleSwitchFilterObserver);
         workflowViewModel.getObservableSetSelectType().observe(this, setSelectTypeObserver);
         workflowViewModel.showBottomSheetLoading.observe(this, this::showBottomSheetLoading);
         workflowViewModel.getObservableLoadMore().observe(this, this::showBottomSheetLoading);
@@ -307,22 +315,33 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         subscribeToTypeMenu();
         workflowViewModel.rightDrawerFilterMenus.observe(this, this::createFilterListRightDrawer);
         workflowViewModel.rightDrawerOptionMenus.observe(this, this::createOptionListRightDrawer);
-        workflowViewModel.invalidateDrawerOptionsList.observe(this, this::handleInvalidateOptionsList);
-        workflowViewModel.messageMainToggleRadioButton.observe(this, this::handleMessageMainToggleRadioButton);
-        workflowViewModel.messageMainToggleSwitch.observe(this, this::handleMessageMainToggleSwitch);
-        workflowViewModel.messageMainUpdateSortSelection.observe(this, this::handleMessageMainUpdateSortSelection);
+        workflowViewModel.invalidateDrawerOptionsList
+                .observe(this, this::handleInvalidateOptionsList);
+        workflowViewModel.messageMainToggleRadioButton
+                .observe(this, this::handleMessageMainToggleRadioButton);
+        workflowViewModel.messageMainToggleSwitch
+                .observe(this, this::handleMessageMainToggleSwitch);
+        workflowViewModel.messageMainUpdateSortSelection
+                .observe(this, this::handleMessageMainUpdateSortSelection);
         workflowViewModel.messageMainBaseFilters.observe(this, this::handleMessageMainBaseFilters);
-        workflowViewModel.messageMainBaseFilterSelectionToFilterList.observe(this, this::handleMessageMainBaseFilterSelected);
+        workflowViewModel.messageMainBaseFilterSelectionToFilterList
+                .observe(this, this::handleMessageMainBaseFilterSelected);
 
         // MainActivity's ViewModel
-        mainViewModel.messageContainerToWorkflowList.observe(this, this::handleRightDrawerFilterClick);
+        mainViewModel.messageContainerToWorkflowList
+                .observe(this, this::handleRightDrawerFilterClick);
         mainViewModel.messageBackActionToWorkflowList.observe(this, this::handleBackAction);
-        mainViewModel.messageOptionSelectedToWorkflowList.observe(this, this::handleRightDrawerOptionSelectedClick);
+        mainViewModel.messageOptionSelectedToWorkflowList
+                .observe(this, this::handleRightDrawerOptionSelectedClick);
         mainViewModel.messageInitSortByToWorkflowList.observe(this, this::handleInitSortBy);
-        mainViewModel.messageRadioButtonClickedToWorkflowList.observe(this, this::handleMessageRadioButtonClickedToWorkflowList);
-        mainViewModel.messageSortSwitchActionToWorkflowList.observe(this, this::handleMessageSortSwitchActionToWorkflowList);
-        mainViewModel.messageBaseFiltersClickedToWorkflowList.observe(this, this::handleMessageBaseFiltersClicked);
-        mainViewModel.messageBaseFilterPositionSelectedToWorkflowList.observe(this, this::handleMessageBaseFilterPositionSelected);
+        mainViewModel.messageRadioButtonClickedToWorkflowList
+                .observe(this, this::handleMessageRadioButtonClickedToWorkflowList);
+        mainViewModel.messageSortSwitchActionToWorkflowList
+                .observe(this, this::handleMessageSortSwitchActionToWorkflowList);
+        mainViewModel.messageBaseFiltersClickedToWorkflowList
+                .observe(this, this::handleMessageBaseFiltersClicked);
+        mainViewModel.messageBaseFilterPositionSelectedToWorkflowList
+                .observe(this, this::handleMessageBaseFilterPositionSelected);
     }
 
     private void handleMessageMainBaseFilterSelected(Integer resLabel) {
@@ -345,7 +364,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         mainViewModel.receiveMessageUpdateSortSelection(sortType);
     }
 
-    private void handleMessageSortSwitchActionToWorkflowList(RightDrawerSortSwitchAction actionMessage) {
+    private void handleMessageSortSwitchActionToWorkflowList(
+            RightDrawerSortSwitchAction actionMessage) {
         workflowViewModel.handleSwitchOnClick(
                 actionMessage.viewRadioType,
                 actionMessage.sortType,
@@ -408,28 +428,29 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         LayoutInflater inflater = LayoutInflater.from(getContext());
         WorkflowTypeSpinnerAdapter adapter = new WorkflowTypeSpinnerAdapter(inflater, itemMenus);
 
-        workflowFiltersMenuBinding.spnWorkflowtype.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                workflowViewModel.loadWorkflowsByType(position, WorkflowFragment.this);
-                prepareWorkflowListWithFilters();
-            }
+        workflowFiltersMenuBinding.spnWorkflowtype
+                .setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position,
+                                               long id) {
+                        workflowViewModel.loadWorkflowsByType(position, WorkflowFragment.this);
+                        prepareWorkflowListWithFilters();
+                    }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Not needed but class needs to override it.
-            }
-        });
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                        // Not needed but class needs to override it.
+                    }
+                });
 
         workflowFiltersMenuBinding.spnWorkflowtype.setAdapter(adapter);
     }
 
-
-
     private void prepareWorkflowListWithFilters() {
         boolean isCheckedMyPendings = workflowFiltersMenuBinding.swchMyworkflows.isChecked();
         boolean isCheckedStatus = workflowFiltersMenuBinding.swchStatus.isChecked();
-        int typeIdPositionInArray = workflowFiltersMenuBinding.spnWorkflowtype.getSelectedItemPosition();
+        int typeIdPositionInArray = workflowFiltersMenuBinding.spnWorkflowtype
+                .getSelectedItemPosition();
 
         workflowViewModel.handleWorkflowTypeFilters(
                 WorkflowFragment.this,
@@ -451,7 +472,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         switch (switchType) {
             case SWITCH_NUMBER:
                 workflowFiltersMenuBinding.swchWorkflownumber.setChecked(check);
-                setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchWorkflownumber, check);
+                setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchWorkflownumber,
+                        check);
                 break;
             case SWITCH_CREATED_DATE:
                 workflowFiltersMenuBinding.swchCreatedate.setChecked(check);
@@ -462,7 +484,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchUpdatedate, check);
                 break;
             default:
-                Log.d(TAG, "toggleAscendingDescendingSwitch: Trying to perform a toggle and there is no related Switch object");
+                Log.d(TAG,
+                        "toggleAscendingDescendingSwitch: Trying to perform a toggle and there is no related Switch object");
                 break;
         }
     }
@@ -476,7 +499,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 workflowFiltersMenuBinding.swchStatus.setChecked(check);
                 break;
             default:
-                Log.d(TAG, "toogleFilterSwitch: Trying to perform a toggle and there is no related Switch object");
+                Log.d(TAG,
+                        "toogleFilterSwitch: Trying to perform a toggle and there is no related Switch object");
                 break;
         }
     }
@@ -503,7 +527,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             case RADIO_CLEAR_ALL:
                 workflowFiltersMenuBinding.radioGroupSortBy.clearCheck();
             default:
-                Log.d(TAG, "toggleRadioButtonFilter: Trying to perform toggle on unknown radio button");
+                Log.d(TAG,
+                        "toggleRadioButtonFilter: Trying to perform toggle on unknown radio button");
                 break;
         }
     }

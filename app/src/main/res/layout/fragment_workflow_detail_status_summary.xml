@@ -39,8 +39,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:textColor="@color/black"
             android:text="@string/workflow_detail_status_fragment_status_summary_current_status"
+            android:textColor="@color/black"
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="@+id/tv_last_status"
             app:layout_constraintTop_toBottomOf="@+id/tv_last_status" />
@@ -54,6 +54,22 @@
             app:layout_constraintBottom_toBottomOf="@+id/tv_title_current_status"
             app:layout_constraintStart_toEndOf="@+id/tv_title_current_status"
             app:layout_constraintTop_toTopOf="@+id/tv_title_current_status" />
+
+        <TextView
+            android:id="@+id/tv_tied_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="@string/workflow_detail_status_fragment_status_summary_tied_status"
+            android:textAllCaps="true"
+            android:textColor="@color/dark_gray"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_title_current_status"
+            app:layout_constraintStart_toStartOf="@+id/view_circle"
+            app:layout_constraintTop_toTopOf="@+id/tv_title_current_status"
+            tools:visibility="visible" />
 
         <TextView
             android:id="@+id/tv_current_status"

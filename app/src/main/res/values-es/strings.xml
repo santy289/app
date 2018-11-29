@@ -226,6 +226,8 @@
     <string name="workflow_detail_status_fragment_status_summary_last_status">Estatus Anterior</string>
     <string name="workflow_detail_status_fragment_status_summary_current_status">Estatus Actual</string>
     <string name="workflow_detail_status_fragment_status_summary_next_status">Próximo Estatus</string>
+    <string name="workflow_detail_status_fragment_status_summary_tied_status">Empatado</string>
+    <string name="workflow_detail_status_fragment_status_summary_tied_status_message">El estatus actual está empatado</string>
     <string name="workflow_detail_status_fragment_next_step">Elija el Siguiente Paso</string>
     <string name="workflow_detail_status_fragment_next_step_approvers">Aprobadores del siguiente paso:</string>
     <string name="workflow_detail_status_fragment_next_step_mass_approval">Aprobación masiva</string>

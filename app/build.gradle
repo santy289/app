@@ -85,6 +85,7 @@ dependencies {
     implementation "com.obsez.android.lib.filechooser:filechooser:$rootProject.fileChooser"
 
     implementation 'com.jakewharton.threetenabp:threetenabp:1.1.1'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.0' //debug API calls
 
     //Test
     androidTestImplementation 'androidx.test:runner:1.1.0'

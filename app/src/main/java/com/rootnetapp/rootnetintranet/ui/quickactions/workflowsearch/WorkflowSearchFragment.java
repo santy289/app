@@ -110,6 +110,7 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
     private void setupWorkflowRecyclerView() {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         mBinding.rvWorkflows.setLayoutManager(mLayoutManager);
+        mBinding.rvWorkflows.setNestedScrollingEnabled(false);
         mAdapter = new WorkflowListAdapter(this);
         mBinding.rvWorkflows.setAdapter(mAdapter);
         // Swipe to refresh recyclerView

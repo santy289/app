@@ -6,10 +6,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentPerformActionBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
@@ -20,7 +18,6 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusFragment;
 import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
@@ -64,19 +61,10 @@ public class PerformActionFragment extends Fragment {
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
 
-        performActionViewModel.init(token);
         setWorkflowUI();
         showActionFragment();
 
         return view;
-    }
-
-    private void subscribe() {
-        performActionViewModel.getObservableShowToastMessage()
-                .observe(this, this::showToastMessage);
-
-        performActionViewModel.showLoading.observe(this, this::showLoading);
-        performActionViewModel.handleShowLoadingByRepo.observe(this, this::showLoading);
     }
 
     private void showActionFragment() {
@@ -122,23 +110,5 @@ public class PerformActionFragment extends Fragment {
         } else {
             mBinding.tvStatus.setText(context.getString(R.string.closed));
         }
-    }
-
-    @UiThread
-    private void showLoading(boolean show) {
-        if (show) {
-            Utils.showLoading(getContext());
-        } else {
-            Utils.hideLoading();
-        }
-    }
-
-    @UiThread
-    private void showToastMessage(@StringRes int messageRes) {
-        Toast.makeText(
-                getContext(),
-                getString(messageRes),
-                Toast.LENGTH_SHORT)
-                .show();
     }
 }

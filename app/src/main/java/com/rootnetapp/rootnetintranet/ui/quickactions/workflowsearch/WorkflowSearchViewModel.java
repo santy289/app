@@ -66,7 +66,6 @@ public class WorkflowSearchViewModel extends ViewModel {
                     }
 
                     updateUIWithWorkflowList(workflowListItems);
-                    showToastMessage.setValue(R.string.request_successfully);
                     return workflowListItems;
                 }
         );

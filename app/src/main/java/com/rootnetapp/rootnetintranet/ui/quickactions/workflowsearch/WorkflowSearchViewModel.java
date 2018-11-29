@@ -58,13 +58,14 @@ public class WorkflowSearchViewModel extends ViewModel {
                 workflowResponseDb -> {
                     // transform WorkflowDb list to WorkflowListItem list
 
+                    showLoading.setValue(false);
+
                     List<WorkflowListItem> workflowListItems = new ArrayList<>();
                     for (WorkflowDb workflow : workflowResponseDb.getList()) {
                         workflowListItems.add(new WorkflowListItem(workflow));
                     }
 
                     updateUIWithWorkflowList(workflowListItems);
-                    showLoading.setValue(false);
                     showToastMessage.setValue(R.string.request_successfully);
                     return workflowListItems;
                 }

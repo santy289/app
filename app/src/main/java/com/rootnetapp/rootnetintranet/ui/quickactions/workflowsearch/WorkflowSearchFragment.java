@@ -14,6 +14,8 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowSearchBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
+import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsInterface;
+import com.rootnetapp.rootnetintranet.ui.quickactions.performaction.PerformActionFragment;
 import com.rootnetapp.rootnetintranet.ui.quickactions.workflowsearch.adapters.WorkflowListAdapter;
 
 import java.util.List;
@@ -35,6 +37,7 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
     WorkflowSearchViewModelFactory workflowSearchViewModelFactory;
     private WorkflowSearchViewModel workflowSearchViewModel;
     private FragmentWorkflowSearchBinding mBinding;
+    private QuickActionsInterface mQuickActionsInterface;
     private @QuickAction int mAction;
     private WorkflowListAdapter mAdapter;
 
@@ -42,8 +45,10 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
         // Required empty public constructor
     }
 
-    public static WorkflowSearchFragment newInstance(@QuickAction int action) {
+    public static WorkflowSearchFragment newInstance(QuickActionsInterface quickActionsInterface,
+                                                     @QuickAction int action) {
         WorkflowSearchFragment fragment = new WorkflowSearchFragment();
+        fragment.mQuickActionsInterface = quickActionsInterface;
         fragment.mAction = action;
         return fragment;
     }
@@ -130,12 +135,14 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
         }
     }
 
+    /**
+     * Instantiates and shows a new fragment that will handle the action for the selected workflow.
+     *
+     * @param item selected workflow.
+     */
     @Override
     public void performAction(WorkflowListItem item) {
-        //todo add implementation
-        /*workflowViewModel.resetFilterSettings();
-        mainActivityInterface.showFragment(WorkflowDetailFragment.newInstance(item,
-                mainActivityInterface),true);*/
+        mQuickActionsInterface.showFragment(PerformActionFragment.newInstance(item, mAction), true);
     }
 
     @UiThread

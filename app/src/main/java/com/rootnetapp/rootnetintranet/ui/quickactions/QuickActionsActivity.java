@@ -50,7 +50,7 @@ public class QuickActionsActivity extends AppCompatActivity implements QuickActi
                 .getIntExtra(EXTRA_ACTION, QuickAction.APPROVE_WORKFLOW);
 
         setActionBar();
-        showFragment(WorkflowSearchFragment.newInstance(action), false);
+        showFragment(WorkflowSearchFragment.newInstance(this, action), false);
     }
 
     private void setActionBar() {

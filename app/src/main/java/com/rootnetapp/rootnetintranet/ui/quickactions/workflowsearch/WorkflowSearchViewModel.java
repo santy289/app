@@ -19,10 +19,9 @@ public class WorkflowSearchViewModel extends ViewModel {
 
     private MutableLiveData<Integer> showToastMessage;
     private MutableLiveData<Boolean> showList;
-    //    private MutableLiveData<PagedList<WorkflowListItem>> updateWithSortedList; //todo paged list
-    //    private LiveData<PagedList<WorkflowListItem>> liveWorkflows;
 
     protected MutableLiveData<Boolean> showLoading;
+    protected MutableLiveData<Boolean> showBottomSheetLoading;
     protected LiveData<List<WorkflowListItem>> workflowListFromRepo;
     protected LiveData<Boolean> handleShowLoadingByRepo;
 
@@ -36,6 +35,7 @@ public class WorkflowSearchViewModel extends ViewModel {
     public WorkflowSearchViewModel(WorkflowSearchRepository repository) {
         this.mRepository = repository;
         this.showLoading = new MutableLiveData<>();
+        this.showBottomSheetLoading = new MutableLiveData<>();
 
         subscribe();
     }
@@ -63,6 +63,7 @@ public class WorkflowSearchViewModel extends ViewModel {
                     // transform WorkflowDb list to WorkflowListItem list
 
                     isLoading = false;
+                    showBottomSheetLoading.setValue(false);
                     showLoading.setValue(false);
 
                     List<WorkflowListItem> workflowListItems = new ArrayList<>();
@@ -82,6 +83,7 @@ public class WorkflowSearchViewModel extends ViewModel {
                 show -> {
                     isLoading = false;
                     showLoading.setValue(false);
+                    showBottomSheetLoading.setValue(false);
                     showToastMessage.setValue(R.string.error);
                     return show;
                 }
@@ -92,7 +94,12 @@ public class WorkflowSearchViewModel extends ViewModel {
      * Retrieves the latest workflows without a search query.
      */
     private void getRecentWorkflowList() {
-        showLoading.setValue(true);
+        if (mPageNumber > 1) {
+            showBottomSheetLoading.setValue(true);
+        } else {
+            showLoading.setValue(true);
+        }
+
         mRepository.getRecentWorkflows(mToken, mPageNumber);
     }
 
@@ -112,7 +119,12 @@ public class WorkflowSearchViewModel extends ViewModel {
             return;
         }
 
-        showLoading.setValue(true);
+        if (mPageNumber > 1) {
+            showBottomSheetLoading.setValue(true);
+        } else {
+            showLoading.setValue(true);
+        }
+
         mRepository.getWorkflowsBySearchQuery(mToken, mPageNumber, query);
     }
 
@@ -136,7 +148,7 @@ public class WorkflowSearchViewModel extends ViewModel {
      * items for the new query.
      */
     protected void resetPageNumber() {
-        mPageNumber = 0;
+        mPageNumber = 1;
     }
 
     /**

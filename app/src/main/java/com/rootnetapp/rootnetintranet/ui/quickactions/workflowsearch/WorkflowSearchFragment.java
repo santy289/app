@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -41,6 +42,7 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
     private QuickActionsInterface mQuickActionsInterface;
     private @QuickAction int mAction;
     private WorkflowListAdapter mAdapter;
+    private BottomSheetBehavior mBottomSheetBehavior;
 
     public WorkflowSearchFragment() {
         // Required empty public constructor
@@ -73,9 +75,15 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
         workflowSearchViewModel.init(token);
         setupWorkflowRecyclerView();
         setOnClickListeners();
+        setupBottomSheet();
         subscribe();
 
         return view;
+    }
+
+    private void setupBottomSheet() {
+        mBottomSheetBehavior = BottomSheetBehavior.from(mBinding.includeBottomSheet.bottomSheet);
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
 
     /**
@@ -93,6 +101,9 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
 
         workflowSearchViewModel.showLoading.removeObservers(this);
         workflowSearchViewModel.showLoading.observe(this, this::showLoading);
+
+        workflowSearchViewModel.showBottomSheetLoading.removeObservers(this);
+        workflowSearchViewModel.showBottomSheetLoading.observe(this, this::showBottomSheetLoading);
 
         workflowSearchViewModel.workflowListFromRepo.removeObservers(this);
         workflowSearchViewModel.workflowListFromRepo.observe(this, this::updateAdapterList);
@@ -216,5 +227,14 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
                 getString(messageRes),
                 Toast.LENGTH_SHORT)
                 .show();
+    }
+
+    @UiThread
+    private void showBottomSheetLoading(Boolean show) {
+        if (show) {
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        } else {
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        }
     }
 }

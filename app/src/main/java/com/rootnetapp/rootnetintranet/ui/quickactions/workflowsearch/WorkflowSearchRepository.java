@@ -15,7 +15,7 @@ import io.reactivex.schedulers.Schedulers;
 public class WorkflowSearchRepository {
 
     private static final String TAG = "WorkflowSearchRepo";
-    private static final int PAGE_LIMIT = 10;
+    private static final int PAGE_LIMIT = 20;
 
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<WorkflowResponseDb> responseWorkflowList;

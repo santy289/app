@@ -346,8 +346,10 @@ public class StatusViewModel extends ViewModel {
                 && workflow.getNextStatusRequirements().getApprovedCount() == workflow
                 .getNextStatusRequirements().getRejectedCount();
         mTieStatusLiveData.setValue(isTied);
-        showToastMessage.setValue(
-                R.string.workflow_detail_status_fragment_status_summary_tied_status_message);
+        if (isTied) {
+            showToastMessage.setValue(
+                    R.string.workflow_detail_status_fragment_status_summary_tied_status_message);
+        }
 
         setWorkflowIsOpen.setValue(workflow.isOpen());
         updateProfilesInvolvedUi(workflow.getProfilesInvolved());

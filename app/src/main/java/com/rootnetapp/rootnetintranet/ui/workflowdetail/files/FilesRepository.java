@@ -1,15 +1,12 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.files;
 
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
-import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
-import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
+import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
 import com.rootnetapp.rootnetintranet.models.responses.file.FilesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
-
-import java.util.List;
 
 import androidx.lifecycle.MutableLiveData;
 import io.reactivex.Observable;
@@ -55,8 +52,8 @@ public class FilesRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    protected Observable<AttachResponse> attachFile(String auth, List<WorkflowPresetsRequest> request, CommentFile fileRequest) {
-        return service.attachFile(auth, request, fileRequest).subscribeOn(Schedulers.newThread())
+    protected Observable<AttachResponse> attachFile(String auth, AttachFilesRequest request) {
+        return service.attachFile(auth, request).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 }

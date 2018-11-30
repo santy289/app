@@ -18,6 +18,7 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailFilesBinding;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
+import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.responses.file.DocumentsFile;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
@@ -110,6 +111,8 @@ public class FilesFragment extends Fragment {
             showLoading(false);
             if (data != null && data) {
                 filesViewModel.getFiles(mWorkflowListItem.getWorkflowId());
+
+                clearFileRequest();
             } else {
                 Toast.makeText(getContext(), "error", Toast.LENGTH_LONG).show();
             }
@@ -133,7 +136,8 @@ public class FilesFragment extends Fragment {
     private void uploadFiles() {
 
         if (fileRequest != null && mDocumentsAdapter != null) {
-            List<WorkflowPresetsRequest> request = new ArrayList<>();
+            AttachFilesRequest request = new AttachFilesRequest();
+            List<WorkflowPresetsRequest> presetsRequestList = new ArrayList<>();
             List<Integer> presets = new ArrayList<>();
             int i = 0;
             for (Boolean isSelected : mDocumentsAdapter.isSelected) {
@@ -145,9 +149,17 @@ public class FilesFragment extends Fragment {
             if (presets.isEmpty()) {
                 showToastMessage(R.string.select_preset);
             } else {
-                request.add(new WorkflowPresetsRequest(mWorkflowListItem.getWorkflowId(), presets));
+                WorkflowPresetsRequest presetsRequest = new WorkflowPresetsRequest();
+                presetsRequest.setWorkflowId(mWorkflowListItem.getWorkflowId());
+                presetsRequest.setPresets(presets);
+                presetsRequest.setFile(fileRequest);
+                presetsRequest.setPresetType(WorkflowPresetsRequest.PRESET_TYPE_FILE);
+                presetsRequestList.add(presetsRequest);
+
+                request.setWorkflows(presetsRequestList);
+
                 showLoading(true);
-                filesViewModel.attachFile(request, fileRequest); //todo does not upload
+                filesViewModel.attachFile(request);
             }
         } else {
             showToastMessage(R.string.select_file);
@@ -171,11 +183,14 @@ public class FilesFragment extends Fragment {
                 showToastMessage(R.string.workflow_detail_files_fragment_no_file_manager);
             }
         } else {
-            fileRequest = null;
-            setButtonAttachmentText(getString(R.string.attach));
-            setFileUploadedText(getString(R.string.uploaded_file));
-            mBinding.tvFileUploaded.setVisibility(View.GONE);
+            clearFileRequest();
         }
+    }
+
+    private void clearFileRequest() {
+        fileRequest = null;
+        setButtonAttachmentText(getString(R.string.attach));
+        setFileUploadedText(null);
     }
 
     @Override
@@ -199,7 +214,6 @@ public class FilesFragment extends Fragment {
                         File file = new File(uri.toString());
                         byte[] bytes = Utils.fileToByte(file);
 
-                        mBinding.tvFileUploaded.setVisibility(View.VISIBLE);
                         setFileUploadedText(mBinding.tvFileUploaded.getText() + " " + fileName);
                         setButtonAttachmentText(getString(R.string.remove_file));
 
@@ -250,6 +264,7 @@ public class FilesFragment extends Fragment {
 
     @UiThread
     private void setFileUploadedText(String text) {
+        mBinding.tvFileUploaded.setVisibility(text != null ? View.VISIBLE : View.GONE);
         mBinding.tvFileUploaded.setText(text);
     }
 

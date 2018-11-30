@@ -4,7 +4,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.requests.approval.ApprovalRequest;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
-import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
+import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
@@ -296,10 +296,8 @@ public interface ApiInterface {
 
     @Headers({"Domain-Name: api"})
     @POST("intranet/workflows/records/file")
-    @FormUrlEncoded
     Observable<AttachResponse> attachFile(@Header("Authorization") String authorization,
-                                          @Field("workflows") List<WorkflowPresetsRequest> request,
-                                          @Field("file") CommentFile fileRequest);
+                                          @Body AttachFilesRequest request);
 
     @Headers({"Domain-Name: api"})
     @GET("timeline?")

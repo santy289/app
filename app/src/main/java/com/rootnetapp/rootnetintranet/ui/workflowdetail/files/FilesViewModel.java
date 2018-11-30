@@ -3,8 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.files;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
-import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
-import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
+import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
 import com.rootnetapp.rootnetintranet.models.responses.file.DocumentsFile;
 import com.rootnetapp.rootnetintranet.models.responses.file.FilesResponse;
@@ -109,9 +108,9 @@ public class FilesViewModel extends ViewModel {
         setFilesTabCounter(documents.size());
     }
 
-    protected void attachFile(List<WorkflowPresetsRequest> request, CommentFile fileRequest) {
+    protected void attachFile(AttachFilesRequest request) {
         Disposable disposable = mRepository
-                .attachFile(mToken, request, fileRequest)
+                .attachFile(mToken, request)
                 .subscribe(this::onAttachSuccess, this::onFailure);
         mDisposables.add(disposable);
     }

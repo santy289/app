@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.comments;
 
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
+import com.rootnetapp.rootnetintranet.models.requests.comment.PostCommentRequest;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
@@ -48,13 +49,17 @@ public class CommentsRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    protected Observable<CommentResponse> postComment(String auth, int workflowId, String comment, boolean isPrivate, List<CommentFile> files) {
+    protected Observable<CommentResponse> postComment(String auth, int workflowId, String comment,
+                                                       boolean isPrivate, List<CommentFile> files) {
+        PostCommentRequest request = new PostCommentRequest();
+        request.setDescription(comment);
+        request.setIsPrivate(isPrivate);
+        request.setCommentFiles(files);
+
         return service.postComment(
                 auth,
                 workflowId,
-                comment,
-                isPrivate,
-                files)
+                request)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }

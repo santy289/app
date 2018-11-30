@@ -127,7 +127,6 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
         mBinding.rvAttachments.setLayoutManager(
                 new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
         mBinding.rvAttachments.setAdapter(mAttachmentsAdapter);
-//        mBinding.rvAttachments.setNestedScrollingEnabled(false);
     }
 
     private void setOnClickListeners() {
@@ -242,6 +241,11 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    /**
+     * Receives the chosen file from the user and adds to the UI list.
+     *
+     * @param commentFile the file that the user chose to attach.
+     */
     @UiThread
     private void addNewAttachment(CommentFile commentFile) {
         if (commentFile != null && mAttachmentsAdapter != null) {
@@ -252,12 +256,26 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
         }
     }
 
+    /**
+     * Removes all of the attachments from the list. This should be called after the comment is
+     * sent.
+     *
+     * @param clear unused param, needed by the LiveData.
+     */
     @UiThread
     private void clearAttachmentsList(boolean clear) {
+        if (!clear) return;
+
         mAttachmentsAdapter = new AttachmentsAdapter(this, new ArrayList<>());
         mBinding.rvAttachments.setAdapter(mAttachmentsAdapter);
     }
 
+    /**
+     * Removes the attachment from the UI list and the ViewModel list. This is called after user
+     * interaction.
+     *
+     * @param commentFile the attachment that the user selected.
+     */
     @Override
     public void removeAttachment(CommentFile commentFile) {
         mAttachmentsAdapter.removeItem(commentFile);

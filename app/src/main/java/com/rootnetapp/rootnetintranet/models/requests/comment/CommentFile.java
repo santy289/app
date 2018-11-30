@@ -2,14 +2,13 @@ package com.rootnetapp.rootnetintranet.models.requests.comment;
 
 import com.squareup.moshi.Json;
 
-import java.io.File;
-
 /**
  * Created by root on 05/04/18.
  */
 
-
 public class CommentFile {
+
+    public static final String FILE_ENTITY = "workflowcommentfile"; //https://example.dev.rootnetapp.com/download/workflowcommentfile://21
 
     @Json(name = "file")
     private String file;

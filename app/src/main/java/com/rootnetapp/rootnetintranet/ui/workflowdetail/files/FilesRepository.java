@@ -18,8 +18,6 @@ public class FilesRepository {
 
     private static final String TAG = "FilesRepository";
 
-    private MutableLiveData<Boolean> showLoading;
-
     private ApiInterface service;
 
     private final CompositeDisposable disposables = new CompositeDisposable();

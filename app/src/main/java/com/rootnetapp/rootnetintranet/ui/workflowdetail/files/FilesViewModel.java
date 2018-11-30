@@ -1,9 +1,19 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.files;
 
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.OpenableColumns;
+import android.util.Base64;
+
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
+import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
+import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
 import com.rootnetapp.rootnetintranet.models.responses.file.DocumentsFile;
 import com.rootnetapp.rootnetintranet.models.responses.file.FilesResponse;
@@ -12,6 +22,9 @@ import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesRespon
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.lifecycle.LiveData;
@@ -20,16 +33,22 @@ import androidx.lifecycle.ViewModel;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
+import static android.app.Activity.RESULT_OK;
+
 public class FilesViewModel extends ViewModel {
 
     private static final String TAG = "FilesViewModel";
 
+    protected static final int REQUEST_FILE_TO_ATTACH = 555;
+
     private FilesRepository mRepository;
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
-    private MutableLiveData<Integer> mErrorLiveData;
-    private MutableLiveData<Boolean> mAttachLiveData;
+    private MutableLiveData<Integer> mToastMessageLiveData;
+    private MutableLiveData<Boolean> mAttachSuccessLiveData;
     private MutableLiveData<Integer> mFilesTabCounter;
+    private MutableLiveData<String> mUploadedFileNameLiveData;
+    private MutableLiveData<Integer> mAttachButtonTextLiveData;
 
     protected MutableLiveData<Boolean> showLoading;
     protected MutableLiveData<Boolean> showTemplateDocumentsUi;
@@ -38,6 +57,8 @@ public class FilesViewModel extends ViewModel {
 
     private String mToken;
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the workflow.
+    private CommentFile mFileRequest;
+    private List<Preset> mPresets;
 
     protected FilesViewModel(FilesRepository filesRepository) {
         this.mRepository = filesRepository;
@@ -60,9 +81,8 @@ public class FilesViewModel extends ViewModel {
         mRepository.clearDisposables();
     }
 
-    private List<Preset> presets;
     protected List<Preset> getPresets() {
-        return presets;
+        return mPresets;
     }
 
     private void getTemplateBy(int templateId) {
@@ -108,7 +128,118 @@ public class FilesViewModel extends ViewModel {
         setFilesTabCounter(documents.size());
     }
 
-    protected void attachFile(AttachFilesRequest request) {
+    /**
+     * Handles the result of the file chooser intent. Retrieves information about the selected file
+     * and sends that info to the UI. Also, creates the FileRequest object that will be used in
+     * {@link #uploadFile(List)}
+     *
+     * @param context     used to retrieve the file name and size.
+     * @param requestCode ActivityResult requestCode.
+     * @param resultCode  ActivityResult resultCode.
+     * @param data        the file URI that was selected.
+     */
+    protected void handleFileSelectedResult(Context context, int requestCode, int resultCode,
+                                            Intent data) {
+        switch (requestCode) {
+            case REQUEST_FILE_TO_ATTACH:
+                if (resultCode == RESULT_OK) {
+                    try {
+                        Uri uri = data.getData();
+
+                        if (uri == null) {
+                            mToastMessageLiveData.setValue(R.string.select_file);
+                            return;
+                        }
+
+                        Cursor returnCursor = context.getContentResolver()
+                                .query(uri, null, null, null, null);
+
+                        if (returnCursor == null){
+                            mToastMessageLiveData.setValue(R.string.error_selecting_file);
+                            return;
+                        }
+
+                        returnCursor.moveToFirst();
+
+                        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
+                        int size = (int) returnCursor.getLong(sizeIndex);
+
+                        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                        String fileName = returnCursor.getString(nameIndex);
+
+                        returnCursor.close();
+
+                        File file = new File(uri.toString());
+                        byte[] bytes = Utils.fileToByte(file);
+
+                        mUploadedFileNameLiveData.setValue(fileName);
+                        mAttachButtonTextLiveData.setValue(R.string.remove_file);
+
+                        String encodedFile = Base64.encodeToString(bytes, Base64.DEFAULT);
+                        String fileType = Utils.getMimeType(data.getData(), context);
+
+                        mFileRequest = new CommentFile(encodedFile, fileType, fileName, size);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
+        }
+    }
+
+    /**
+     * This should be called every time the file request is no longer valid.
+     */
+    protected void clearFileRequest() {
+        mFileRequest = null;
+    }
+
+    protected CommentFile getFileRequest() {
+        return mFileRequest;
+    }
+
+    /**
+     * Creates the object that will be sent to the endpoint to upload a file. For this to be
+     * completed, the user must have selected a preset.
+     *
+     * @param presetsList all of the presets that are available, used to check which one the user
+     *                    selected.
+     */
+    protected void uploadFile(List<Preset> presetsList) {
+        if (mFileRequest == null) {
+            mToastMessageLiveData.setValue(R.string.select_file);
+            return;
+        }
+
+        AttachFilesRequest request = new AttachFilesRequest();
+        List<WorkflowPresetsRequest> presetsRequestList = new ArrayList<>();
+        List<Integer> presets = new ArrayList<>();
+
+        for (Preset preset : presetsList) {
+            if (preset.isSelected()) {
+                presets.add(preset.getId());
+            }
+        }
+
+        if (presets.isEmpty()) {
+            mToastMessageLiveData.setValue(R.string.select_preset);
+            return;
+        }
+
+        WorkflowPresetsRequest presetsRequest = new WorkflowPresetsRequest();
+        presetsRequest.setWorkflowId(mWorkflowListItem.getWorkflowId());
+        presetsRequest.setPresets(presets);
+        presetsRequest.setFile(mFileRequest);
+        presetsRequest.setPresetType(WorkflowPresetsRequest.PRESET_TYPE_FILE);
+        presetsRequestList.add(presetsRequest);
+
+        request.setWorkflows(presetsRequestList);
+
+        showLoading.setValue(true);
+        attachFile(request);
+    }
+
+    private void attachFile(AttachFilesRequest request) {
         Disposable disposable = mRepository
                 .attachFile(mToken, request)
                 .subscribe(this::onAttachSuccess, this::onFailure);
@@ -116,15 +247,16 @@ public class FilesViewModel extends ViewModel {
     }
 
     private void onAttachSuccess(AttachResponse attachResponse) {
-        mAttachLiveData.setValue(true);
+        showLoading.setValue(false);
+        mAttachSuccessLiveData.setValue(attachResponse.getList().size() > 0);
+        getFiles(mWorkflowListItem.getWorkflowId());
     }
 
     /**
      * Calls the repository for obtaining a new Workflow Type by a type id.
-     * @param auth
-     *  Access token to use for endpoint request.
-     * @param typeId
-     *  Id that will be passed on to the endpoint.
+     *
+     * @param auth   Access token to use for endpoint request.
+     * @param typeId Id that will be passed on to the endpoint.
      */
     private void getWorkflowType(String auth, int typeId) {
         Disposable disposable = mRepository
@@ -133,15 +265,13 @@ public class FilesViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
-    private WorkflowTypeDb currentWorkflowType;
-
     /**
      * Handles success response from endpoint when looking for a workflow type.
      *
      * @param response Incoming response from server.
      */
     private void onTypeSuccess(WorkflowTypeResponse response) {
-        currentWorkflowType = response.getWorkflowType();
+        WorkflowTypeDb currentWorkflowType = response.getWorkflowType();
         if (currentWorkflowType == null) {
             return;
         }
@@ -150,7 +280,7 @@ public class FilesViewModel extends ViewModel {
 
     private void updateUIWithWorkflowType(WorkflowTypeDb currentWorkflowType) {
         getTemplateBy(currentWorkflowType.getTemplateId());
-        this.presets = currentWorkflowType.getPresets();
+        this.mPresets = currentWorkflowType.getPresets();
     }
 
     private void setFilesTabCounter(int counter) {
@@ -159,21 +289,21 @@ public class FilesViewModel extends ViewModel {
 
     private void onFailure(Throwable throwable) {
         showLoading.setValue(false);
-        mErrorLiveData.setValue(R.string.failure_connect);
+        mToastMessageLiveData.setValue(R.string.failure_connect);
     }
 
-    protected LiveData<Integer> getObservableError() {
-        if (mErrorLiveData == null) {
-            mErrorLiveData = new MutableLiveData<>();
+    protected LiveData<Integer> getObservableToastMessage() {
+        if (mToastMessageLiveData == null) {
+            mToastMessageLiveData = new MutableLiveData<>();
         }
-        return mErrorLiveData;
+        return mToastMessageLiveData;
     }
 
-    protected LiveData<Boolean> getObservableAttach() {
-        if (mAttachLiveData == null) {
-            mAttachLiveData = new MutableLiveData<>();
+    protected LiveData<Boolean> getObservableAttachSuccess() {
+        if (mAttachSuccessLiveData == null) {
+            mAttachSuccessLiveData = new MutableLiveData<>();
         }
-        return mAttachLiveData;
+        return mAttachSuccessLiveData;
     }
 
     protected LiveData<Integer> getObservableFilesTabCounter() {
@@ -181,5 +311,19 @@ public class FilesViewModel extends ViewModel {
             mFilesTabCounter = new MutableLiveData<>();
         }
         return mFilesTabCounter;
+    }
+
+    protected LiveData<String> getObservableUploadedFileName() {
+        if (mUploadedFileNameLiveData == null) {
+            mUploadedFileNameLiveData = new MutableLiveData<>();
+        }
+        return mUploadedFileNameLiveData;
+    }
+
+    protected LiveData<Integer> getObservableAttachButtonText() {
+        if (mAttachButtonTextLiveData == null) {
+            mAttachButtonTextLiveData = new MutableLiveData<>();
+        }
+        return mAttachButtonTextLiveData;
     }
 }

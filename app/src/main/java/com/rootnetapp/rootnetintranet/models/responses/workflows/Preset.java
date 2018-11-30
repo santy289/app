@@ -21,6 +21,8 @@ public class Preset {
     @Json(name = "updatedAt")
     private String updatedAt;
 
+    private boolean isSelected;
+
     public int getId() {
         return id;
     }
@@ -69,4 +71,11 @@ public class Preset {
         this.updatedAt = updatedAt;
     }
 
+    public boolean isSelected() {
+        return isSelected;
+    }
+
+    public void setSelected(boolean selected) {
+        isSelected = selected;
+    }
 }

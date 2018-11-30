@@ -10,7 +10,6 @@ import com.rootnetapp.rootnetintranet.databinding.DocumentsItemBinding;
 import com.rootnetapp.rootnetintranet.models.responses.file.DocumentsFile;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -26,15 +25,10 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder> 
     public List<Preset> totalDocuments;
     private List<DocumentsFile> files;
     private Context context;
-    public List<Boolean> isSelected;
 
     public DocumentsAdapter(List<Preset> totalDocuments, List<DocumentsFile> files) {
         this.totalDocuments = totalDocuments;
         this.files = files;
-        this.isSelected = new ArrayList<>();
-        for (Preset item : totalDocuments) {
-            this.isSelected.add(false);
-        }
     }
 
     @NonNull
@@ -60,7 +54,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder> 
         }
         holder.binding.tvName.setText(item.getName());
         holder.binding.chbxItem.setOnCheckedChangeListener(
-                (compoundButton, b) -> isSelected.set(i, b));
+                (compoundButton, b) -> item.setSelected(b));
         if (file != null) {
             holder.binding.imgUploaded.setImageResource(R.drawable.ic_check_accent_24dp);
             holder.binding.imgUploaded

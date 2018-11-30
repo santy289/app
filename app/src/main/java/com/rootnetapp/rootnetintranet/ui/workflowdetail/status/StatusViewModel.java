@@ -145,6 +145,11 @@ public class StatusViewModel extends ViewModel {
 
         statuses[INDEX_LAST_STATUS] = getLastStatusLabel(incomingWorkflow,
                 currentWorkflowType.getStatus());
+
+        // if there isn't a last status, it's because we are on the initial status, so we set the
+        // last status label to the initial status (current status) as well.
+        if (statuses[INDEX_LAST_STATUS].isEmpty()) statuses[INDEX_LAST_STATUS] = currentStatus;
+
         statuses[INDEX_CURRENT_STATUS] = currentStatus;
         statuses[INDEX_NEXT_STATUS] = getNextStatuses(incomingWorkflow, currentWorkflowType);
         return statuses;

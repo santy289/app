@@ -230,7 +230,6 @@
     <string name="workflow_detail_status_fragment_next_step">Elija el Siguiente Paso</string>
     <string name="workflow_detail_status_fragment_next_step_approvers">Aprobadores del siguiente paso:</string>
     <string name="workflow_detail_status_fragment_next_step_mass_approval">Aprobación masiva</string>
-    <string name="workflow_detail_status_fragment_all_people_involved">Personas Involucradas en los Estatus</string>
     <string name="workflow_detail_status_fragment_approve">Aprobar</string>
     <string name="workflow_detail_status_fragment_reject">Rechazar</string>
     <string name="workflow_detail_status_fragment_spinner_title">- Elija un Estatus -</string>
@@ -247,6 +246,8 @@
     <string name="workflow_detail_information_fragment_end_date">Fecha de Fin</string>
     <string name="workflow_detail_information_fragment_project_time">Tiempo de Projecto (meses)</string>
     <string name="workflow_detail_information_fragment_owner">Dueño</string>
+    <!--PeopleInvolvedFragment-->
+    <string name="workflow_detail_people_involved_fragment_title">Personas Involucradas</string>
     <!--ApprovalHistoryFragment-->
     <string name="workflow_detail_approval_history_fragment_title">@string/workflow_detail_approval_history_fragment_approval_history</string>
     <string name="workflow_detail_approval_history_fragment_approval_history">Historial de Aprobaciones</string>

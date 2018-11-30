@@ -42,6 +42,8 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationModule;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved.PeopleInvolvedFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved.PeopleInvolvedModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusModule;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
@@ -75,7 +77,8 @@ import dagger.Component;
                 InformationModule.class,
                 ApprovalHistoryModule.class,
                 CommentsModule.class,
-                FilesModule.class
+                FilesModule.class,
+                PeopleInvolvedModule.class
         }
 )
 
@@ -134,4 +137,6 @@ public interface AppComponent {
     void inject(CommentsFragment commentsFragment);
 
     void inject(FilesFragment filesFragment);
+
+    void inject(PeopleInvolvedFragment peopleInvolvedFragment);
 }

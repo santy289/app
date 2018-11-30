@@ -44,6 +44,7 @@ public class CommentsViewModel extends ViewModel {
     private MutableLiveData<Integer> mCommentsTabCounter;
     private MutableLiveData<Boolean> mEnableCommentButton;
     private MutableLiveData<CommentFile> mNewCommentFileLiveData;
+    private MutableLiveData<Boolean> mClearAttachments;
 
     protected MutableLiveData<Boolean> showLoading;
 
@@ -73,7 +74,7 @@ public class CommentsViewModel extends ViewModel {
     /**
      * Handles the result of the file chooser intent. Retrieves information about the selected file
      * and sends that info to the UI. Also, adds the file to {@link #mCommentFiles} list that will
-     * be used in {@link #postComment(String, List)}.
+     * be used in {@link #postComment(String)}.
      *
      * @param context     used to retrieve the file name and size.
      * @param requestCode ActivityResult requestCode.
@@ -157,6 +158,10 @@ public class CommentsViewModel extends ViewModel {
         commentsCounter += 1;
         setCommentsTabCounter(commentsCounter);
         mCommentLiveData.setValue(commentResponse.getResponse());
+
+        mCommentFiles.clear();
+        mClearAttachments.setValue(true);
+
         showLoading.setValue(false);
         mEnableCommentButton.setValue(true);
     }
@@ -168,7 +173,7 @@ public class CommentsViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
-    protected void postComment(String comment, List<CommentFile> files) {
+    protected void postComment(String comment) {
         mEnableCommentButton.setValue(false);
         showLoading.setValue(true);
         Disposable disposable = mRepository
@@ -177,7 +182,7 @@ public class CommentsViewModel extends ViewModel {
                         mWorkflowListItem.getWorkflowId(),
                         comment,
                         isPrivateComment,
-                        files)
+                        mCommentFiles)
                 .subscribe(this::onPostCommentSuccess,
                         this::onFailure);
         mDisposables.add(disposable);
@@ -243,5 +248,12 @@ public class CommentsViewModel extends ViewModel {
             mNewCommentFileLiveData = new MutableLiveData<>();
         }
         return mNewCommentFileLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableClearAttachments() {
+        if (mClearAttachments == null) {
+            mClearAttachments = new MutableLiveData<>();
+        }
+        return mClearAttachments;
     }
 }

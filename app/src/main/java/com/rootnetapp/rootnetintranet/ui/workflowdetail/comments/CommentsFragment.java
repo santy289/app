@@ -1,10 +1,8 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.comments;
 
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -23,7 +21,6 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailViewModel;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.adapters.AttachmentsAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.adapters.CommentsAdapter;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +29,6 @@ import javax.inject.Inject;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
-import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
@@ -106,6 +102,7 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
                 .observe(this, this::enableCommentButton);
         commentsViewModel.getObservableNewCommentFile()
                 .observe(this, this::addNewAttachment);
+        commentsViewModel.getObservableClearAttachments().observe(this, this::clearAttachmentsList);
 
         commentsViewModel.showLoading.observe(this, this::showLoading);
     }
@@ -147,8 +144,7 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
             return;
         }
 
-        //todo allow to upload files to a comment
-        commentsViewModel.postComment(comment, new ArrayList<>());
+        commentsViewModel.postComment(comment);
     }
 
     @UiThread
@@ -257,17 +253,23 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
     }
 
     @UiThread
-    private void showToastMessage(@StringRes int messageRes) {
-        Toast.makeText(
-                getContext(),
-                getString(messageRes),
-                Toast.LENGTH_SHORT)
-                .show();
+    private void clearAttachmentsList(boolean clear) {
+        mAttachmentsAdapter = new AttachmentsAdapter(this, new ArrayList<>());
+        mBinding.rvAttachments.setAdapter(mAttachmentsAdapter);
     }
 
     @Override
     public void removeAttachment(CommentFile commentFile) {
         mAttachmentsAdapter.removeItem(commentFile);
         commentsViewModel.removeCommentAttachment(commentFile);
+    }
+
+    @UiThread
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                getContext(),
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
     }
 }

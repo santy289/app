@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.comments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -28,9 +29,10 @@ import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
+import static com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsViewModel.REQUEST_FILE_TO_ATTACH;
 
 public class CommentsFragment extends Fragment {
 
@@ -86,20 +88,16 @@ public class CommentsFragment extends Fragment {
     }
 
     private void subscribe() {
-        final Observer<Integer> errorObserver = ((Integer data) -> {
-            showLoading(false);
-            if (data != null) {
-                showToastMessage(data);
-            }
-        });
-
-        commentsViewModel.getObservableError().observe(this, errorObserver);
+        commentsViewModel.getObservableToastMessage().observe(this, this::showToastMessage);
         commentsViewModel.getObservableComments().observe(this, this::updateCommentsList);
         commentsViewModel.getObservableHideComments().observe(this, this::hideCommentsList);
         commentsViewModel.getObservableComment().observe(this, this::addNewComment);
         commentsViewModel.getObservableCommentsTabCounter().observe(this, this::updateTabCounter);
-        commentsViewModel.getObservableEnableCommentButton()
-                .observe(this, this::enableCommentButton);
+        commentsViewModel.getObservableEnableCommentButton().observe(this, this::enableCommentButton);
+        commentsViewModel.getObservableCommentFiles().observe(this,
+                commentFiles -> {
+
+                }); //todo add observer
 
         commentsViewModel.showLoading.observe(this, this::showLoading);
     }
@@ -121,6 +119,7 @@ public class CommentsFragment extends Fragment {
 
     private void setOnClickListeners() {
         mBinding.btnComment.setOnClickListener(v -> sendComment());
+        mBinding.btnAttach.setOnClickListener(v -> showFileChooser());
     }
 
     private void sendComment() {
@@ -201,6 +200,34 @@ public class CommentsFragment extends Fragment {
             mBinding.switchPrivatePublic.setTextColor(getResources().getColor(R.color.dark_gray));
         }
         mBinding.switchPrivatePublic.setText(state);
+    }
+
+    /**
+     * If there is no file selected, displays a native file chooser, the user must select which file
+     * they wish to upload. In case that the file chooser cannot be opened, shows a Toast message.
+     * Otherwise, clears the current selected file and allows the user to select a new file.
+     */
+    @UiThread
+    private void showFileChooser() {
+
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("*/*");
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            try {
+                startActivityForResult(Intent.createChooser(
+                        intent,
+                        getString(R.string.workflow_detail_comments_fragment_select_file)),
+                        REQUEST_FILE_TO_ATTACH);
+            } catch (android.content.ActivityNotFoundException ex) {
+                // Potentially direct the user to the Market with a Dialog
+                showToastMessage(R.string.workflow_detail_comments_fragment_no_file_manager);
+            }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        commentsViewModel.handleFileSelectedResult(getContext(), requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @UiThread

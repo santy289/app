@@ -1,12 +1,23 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.comments;
 
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.OpenableColumns;
+import android.util.Base64;
+
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.lifecycle.LiveData;
@@ -15,19 +26,24 @@ import androidx.lifecycle.ViewModel;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
+import static android.app.Activity.RESULT_OK;
+
 public class CommentsViewModel extends ViewModel {
 
     private static final String TAG = "CommentsViewModel";
 
+    protected static final int REQUEST_FILE_TO_ATTACH = 555;
+
     private CommentsRepository mRepository;
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
-    private MutableLiveData<Integer> mErrorLiveData;
+    private MutableLiveData<Integer> mToastMessageLiveData;
     private MutableLiveData<List<Comment>> mCommentsLiveData;
     private MutableLiveData<Comment> mCommentLiveData;
     private MutableLiveData<Boolean> mHideComments;
     private MutableLiveData<Integer> mCommentsTabCounter;
     private MutableLiveData<Boolean> mEnableCommentButton;
+    private MutableLiveData<List<CommentFile>> mCommentFilesLiveData;
 
     protected MutableLiveData<Boolean> showLoading;
 
@@ -35,6 +51,7 @@ public class CommentsViewModel extends ViewModel {
 
     private String mToken;
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the workflow.
+    private List<CommentFile> mCommentFiles;
 
     protected CommentsViewModel(CommentsRepository commentsRepository) {
         this.mRepository = commentsRepository;
@@ -51,6 +68,65 @@ public class CommentsViewModel extends ViewModel {
     protected void onCleared() {
         mDisposables.clear();
         mRepository.clearDisposables();
+    }
+
+    /**
+     * Handles the result of the file chooser intent. Retrieves information about the selected file
+     * and sends that info to the UI. Also, adds the file to {@link #mCommentFiles} list that will
+     * be used in {@link #postComment(String, List)}.
+     *
+     * @param context     used to retrieve the file name and size.
+     * @param requestCode ActivityResult requestCode.
+     * @param resultCode  ActivityResult resultCode.
+     * @param data        the file URI that was selected.
+     */
+    protected void handleFileSelectedResult(Context context, int requestCode, int resultCode,
+                                            Intent data) {
+        switch (requestCode) {
+            case REQUEST_FILE_TO_ATTACH:
+                if (resultCode == RESULT_OK) {
+                    try {
+                        Uri uri = data.getData();
+
+                        if (uri == null) {
+                            mToastMessageLiveData.setValue(R.string.select_file);
+                            return;
+                        }
+
+                        Cursor returnCursor = context.getContentResolver()
+                                .query(uri, null, null, null, null);
+
+                        if (returnCursor == null) {
+                            mToastMessageLiveData.setValue(R.string.error_selecting_file);
+                            return;
+                        }
+
+                        returnCursor.moveToFirst();
+
+                        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
+                        int size = (int) returnCursor.getLong(sizeIndex);
+
+                        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                        String fileName = returnCursor.getString(nameIndex);
+
+                        returnCursor.close();
+
+                        File file = new File(uri.toString());
+                        byte[] bytes = Utils.fileToByte(file);
+
+                        String encodedFile = Base64.encodeToString(bytes, Base64.DEFAULT);
+                        String fileType = Utils.getMimeType(data.getData(), context);
+
+                        if (mCommentFiles == null) mCommentFiles = new ArrayList<>();
+
+                        mCommentFiles.add(new CommentFile(encodedFile, fileType, fileName, size));
+                        mCommentFilesLiveData.setValue(mCommentFiles);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
+        }
     }
 
     // TODO Remove when we finally have comments List in ViewModel and NOT in Fragment.
@@ -111,14 +187,14 @@ public class CommentsViewModel extends ViewModel {
 
     private void onFailure(Throwable throwable) {
         showLoading.setValue(false);
-        mErrorLiveData.setValue(R.string.failure_connect);
+        mToastMessageLiveData.setValue(R.string.failure_connect);
     }
 
-    protected LiveData<Integer> getObservableError() {
-        if (mErrorLiveData == null) {
-            mErrorLiveData = new MutableLiveData<>();
+    protected LiveData<Integer> getObservableToastMessage() {
+        if (mToastMessageLiveData == null) {
+            mToastMessageLiveData = new MutableLiveData<>();
         }
-        return mErrorLiveData;
+        return mToastMessageLiveData;
     }
 
     protected LiveData<List<Comment>> getObservableComments() {
@@ -154,5 +230,12 @@ public class CommentsViewModel extends ViewModel {
             mEnableCommentButton = new MutableLiveData<>();
         }
         return mEnableCommentButton;
+    }
+
+    protected LiveData<List<CommentFile>> getObservableCommentFiles() {
+        if (mCommentFilesLiveData == null) {
+            mCommentFilesLiveData = new MutableLiveData<>();
+        }
+        return mCommentFilesLiveData;
     }
 }

@@ -1,8 +1,10 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.comments;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -14,11 +16,14 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailCommentsBinding;
+import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailViewModel;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.adapters.AttachmentsAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.adapters.CommentsAdapter;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,14 +32,16 @@ import javax.inject.Inject;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
+import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import static com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsViewModel.REQUEST_FILE_TO_ATTACH;
 
-public class CommentsFragment extends Fragment {
+public class CommentsFragment extends Fragment implements CommentsFragmentInterface {
 
     @Inject
     CommentsViewModelFactory commentsViewModelFactory;
@@ -43,6 +50,7 @@ public class CommentsFragment extends Fragment {
     private WorkflowListItem mWorkflowListItem;
 
     private CommentsAdapter mCommentsAdapter;
+    private AttachmentsAdapter mAttachmentsAdapter;
 
     private WorkflowDetailViewModel workflowDetailViewModel;
 
@@ -80,7 +88,8 @@ public class CommentsFragment extends Fragment {
 
         setupSwitch();
         setOnClickListeners();
-        setupRecycler();
+        setupCommentsRecycler();
+        setupAttachmentsRecycler();
         subscribe();
         commentsViewModel.initDetails(token, mWorkflowListItem);
 
@@ -93,11 +102,10 @@ public class CommentsFragment extends Fragment {
         commentsViewModel.getObservableHideComments().observe(this, this::hideCommentsList);
         commentsViewModel.getObservableComment().observe(this, this::addNewComment);
         commentsViewModel.getObservableCommentsTabCounter().observe(this, this::updateTabCounter);
-        commentsViewModel.getObservableEnableCommentButton().observe(this, this::enableCommentButton);
-        commentsViewModel.getObservableCommentFiles().observe(this,
-                commentFiles -> {
-
-                }); //todo add observer
+        commentsViewModel.getObservableEnableCommentButton()
+                .observe(this, this::enableCommentButton);
+        commentsViewModel.getObservableNewCommentFile()
+                .observe(this, this::addNewAttachment);
 
         commentsViewModel.showLoading.observe(this, this::showLoading);
     }
@@ -110,11 +118,19 @@ public class CommentsFragment extends Fragment {
                 });
     }
 
-    private void setupRecycler() {
+    private void setupCommentsRecycler() {
         mCommentsAdapter = new CommentsAdapter(new ArrayList<>());
         mBinding.rvComments.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvComments.setAdapter(mCommentsAdapter);
         mBinding.rvComments.setNestedScrollingEnabled(false);
+    }
+
+    private void setupAttachmentsRecycler() {
+        mAttachmentsAdapter = new AttachmentsAdapter(this, new ArrayList<>());
+        mBinding.rvAttachments.setLayoutManager(
+                new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
+        mBinding.rvAttachments.setAdapter(mAttachmentsAdapter);
+//        mBinding.rvAttachments.setNestedScrollingEnabled(false);
     }
 
     private void setOnClickListeners() {
@@ -210,18 +226,18 @@ public class CommentsFragment extends Fragment {
     @UiThread
     private void showFileChooser() {
 
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("*/*");
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            try {
-                startActivityForResult(Intent.createChooser(
-                        intent,
-                        getString(R.string.workflow_detail_comments_fragment_select_file)),
-                        REQUEST_FILE_TO_ATTACH);
-            } catch (android.content.ActivityNotFoundException ex) {
-                // Potentially direct the user to the Market with a Dialog
-                showToastMessage(R.string.workflow_detail_comments_fragment_no_file_manager);
-            }
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        try {
+            startActivityForResult(Intent.createChooser(
+                    intent,
+                    getString(R.string.workflow_detail_comments_fragment_select_file)),
+                    REQUEST_FILE_TO_ATTACH);
+        } catch (android.content.ActivityNotFoundException ex) {
+            // Potentially direct the user to the Market with a Dialog
+            showToastMessage(R.string.workflow_detail_comments_fragment_no_file_manager);
+        }
     }
 
     @Override
@@ -231,11 +247,27 @@ public class CommentsFragment extends Fragment {
     }
 
     @UiThread
+    private void addNewAttachment(CommentFile commentFile) {
+        if (commentFile != null && mAttachmentsAdapter != null) {
+            mAttachmentsAdapter.addItem(commentFile);
+            mBinding.rvAttachments.scrollToPosition(mAttachmentsAdapter.getItemCount() - 1);
+        } else {
+            showToastMessage(R.string.error);
+        }
+    }
+
+    @UiThread
     private void showToastMessage(@StringRes int messageRes) {
         Toast.makeText(
                 getContext(),
                 getString(messageRes),
                 Toast.LENGTH_SHORT)
                 .show();
+    }
+
+    @Override
+    public void removeAttachment(CommentFile commentFile) {
+        mAttachmentsAdapter.removeItem(commentFile);
+        commentsViewModel.removeCommentAttachment(commentFile);
     }
 }

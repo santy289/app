@@ -43,7 +43,7 @@ public class CommentsViewModel extends ViewModel {
     private MutableLiveData<Boolean> mHideComments;
     private MutableLiveData<Integer> mCommentsTabCounter;
     private MutableLiveData<Boolean> mEnableCommentButton;
-    private MutableLiveData<List<CommentFile>> mCommentFilesLiveData;
+    private MutableLiveData<CommentFile> mNewCommentFileLiveData;
 
     protected MutableLiveData<Boolean> showLoading;
 
@@ -119,14 +119,20 @@ public class CommentsViewModel extends ViewModel {
 
                         if (mCommentFiles == null) mCommentFiles = new ArrayList<>();
 
-                        mCommentFiles.add(new CommentFile(encodedFile, fileType, fileName, size));
-                        mCommentFilesLiveData.setValue(mCommentFiles);
+                        CommentFile commentFile = new CommentFile(encodedFile, fileType, fileName,
+                                size);
+                        mCommentFiles.add(commentFile);
+                        mNewCommentFileLiveData.setValue(commentFile);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
                 break;
         }
+    }
+
+    protected void removeCommentAttachment(CommentFile commentFile){
+        mCommentFiles.remove(commentFile);
     }
 
     // TODO Remove when we finally have comments List in ViewModel and NOT in Fragment.
@@ -232,10 +238,10 @@ public class CommentsViewModel extends ViewModel {
         return mEnableCommentButton;
     }
 
-    protected LiveData<List<CommentFile>> getObservableCommentFiles() {
-        if (mCommentFilesLiveData == null) {
-            mCommentFilesLiveData = new MutableLiveData<>();
+    protected LiveData<CommentFile> getObservableNewCommentFile() {
+        if (mNewCommentFileLiveData == null) {
+            mNewCommentFileLiveData = new MutableLiveData<>();
         }
-        return mCommentFilesLiveData;
+        return mNewCommentFileLiveData;
     }
 }

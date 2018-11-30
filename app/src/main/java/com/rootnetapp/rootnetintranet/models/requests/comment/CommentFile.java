@@ -2,6 +2,8 @@ package com.rootnetapp.rootnetintranet.models.requests.comment;
 
 import com.squareup.moshi.Json;
 
+import java.io.File;
+
 /**
  * Created by root on 05/04/18.
  */
@@ -17,6 +19,8 @@ public class CommentFile {
     private String name;
     @Json(name = "size")
     private int size;
+
+    private File localFile;
 
     public CommentFile(String file, String type, String name, int size) {
         this.file = file;
@@ -57,4 +61,11 @@ public class CommentFile {
         this.size = size;
     }
 
+    public File getLocalFile() {
+        return localFile;
+    }
+
+    public void setLocalFile(File localFile) {
+        this.localFile = localFile;
+    }
 }

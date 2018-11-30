@@ -53,12 +53,12 @@
                     android:paddingBottom="10dp"
                     android:scrollbars="vertical"
                     android:textSize="16sp"
+                    app:layout_constrainedWidth="true"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/btn_attach"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constrainedWidth="true"
                     app:layout_constraintTop_toTopOf="parent"
-                    tools:text="TEST TEST TEST TEST TEST TEST TEST TEST TEST"/>
+                    tools:text="TEST TEST TEST TEST TEST TEST TEST TEST TEST" />
 
                 <Button
                     android:id="@+id/btn_attach"
@@ -96,6 +96,18 @@
                 app:layout_constraintStart_toEndOf="@+id/lyt_comment_input"
                 app:layout_constraintTop_toTopOf="@+id/lyt_comment_input" />
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_attachments"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:clipToPadding="false"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lyt_comment_input" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_comments"
@@ -110,7 +122,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/lyt_comment_input"
+                app:layout_constraintTop_toBottomOf="@id/rv_attachments"
                 app:layout_constraintVertical_bias="0.0" />
 
             <TextView
@@ -124,7 +136,7 @@
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="@id/rv_comments"
                 app:layout_constraintStart_toStartOf="@id/rv_comments"
-                app:layout_constraintTop_toBottomOf="@id/lyt_comment_input"
+                app:layout_constraintTop_toBottomOf="@id/rv_attachments"
                 tools:visibility="visible" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

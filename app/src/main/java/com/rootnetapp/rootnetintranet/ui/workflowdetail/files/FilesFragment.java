@@ -29,6 +29,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
@@ -98,7 +99,7 @@ public class FilesFragment extends Fragment {
         final Observer<Integer> errorObserver = ((Integer data) -> {
             showLoading(false);
             if (null != data) {
-                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
+                showToastMessage(data);
             }
         });
 
@@ -139,16 +140,14 @@ public class FilesFragment extends Fragment {
                 i++;
             }
             if (presets.isEmpty()) {
-                Toast.makeText(getContext(), getString(R.string.select_preset),
-                        Toast.LENGTH_SHORT).show();
+                showToastMessage(R.string.select_preset);
             } else {
                 request.add(new WorkflowPresetsRequest(mWorkflowListItem.getWorkflowId(), presets));
                 showLoading(true);
                 filesViewModel.attachFile(request, fileRequest); //todo does not upload
             }
         } else {
-            Toast.makeText(getContext(), getString(R.string.select_file),
-                    Toast.LENGTH_SHORT).show();
+            showToastMessage(R.string.select_file);
         }
     }
 
@@ -160,13 +159,13 @@ public class FilesFragment extends Fragment {
             intent.setType("*/*");
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             try {
-                startActivityForResult(
-                        Intent.createChooser(intent, "Select a File to Upload"),
+                startActivityForResult(Intent.createChooser(
+                        intent,
+                        getString(R.string.workflow_detail_files_fragment_select_file)),
                         FILE_SELECT_CODE);
             } catch (android.content.ActivityNotFoundException ex) {
                 // Potentially direct the user to the Market with a Dialog
-                Toast.makeText(getContext(), "Please install a File Manager.",
-                        Toast.LENGTH_SHORT).show();
+                showToastMessage(R.string.workflow_detail_files_fragment_no_file_manager);
             }
         } else {
             fileRequest = null;
@@ -262,5 +261,14 @@ public class FilesFragment extends Fragment {
         if (workflowDetailViewModel != null) {
             workflowDetailViewModel.setFilesCounter(counter);
         }
+    }
+
+    @UiThread
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                getContext(),
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
     }
 }

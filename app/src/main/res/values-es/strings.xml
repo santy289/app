@@ -263,4 +263,6 @@
     <string name="workflow_detail_files_fragment_documents">Documentos</string>
     <string name="workflow_detail_files_fragment_no_files">Ningún archivo a mostrar</string>
     <string name="workflow_detail_files_fragment_file_name">Nombre del archivo</string>
+    <string name="workflow_detail_files_fragment_no_file_manager">Por favor instale un manejador de archivos.</string>
+    <string name="workflow_detail_files_fragment_select_file">Elija el archivo para subir</string>
 </resources>

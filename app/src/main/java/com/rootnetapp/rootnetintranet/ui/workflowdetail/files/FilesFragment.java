@@ -3,7 +3,10 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.files;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -181,9 +184,20 @@ public class FilesFragment extends Fragment {
             case FILE_SELECT_CODE:
                 if (resultCode == RESULT_OK) {
                     try {
-                        File file = new File(data.getData().toString());
+                        Uri uri = data.getData();
+
+                        Cursor returnCursor = getContext().getContentResolver()
+                                .query(uri, null, null, null, null);
+                        returnCursor.moveToFirst();
+
+                        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
+                        int size = (int) returnCursor.getLong(sizeIndex);
+
+                        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                        String fileName = returnCursor.getString(nameIndex);
+
+                        File file = new File(uri.toString());
                         byte[] bytes = Utils.fileToByte(file);
-                        String fileName = file.getName();
 
                         mBinding.tvFileUploaded.setVisibility(View.VISIBLE);
                         setFileUploadedText(mBinding.tvFileUploaded.getText() + " " + fileName);
@@ -192,8 +206,7 @@ public class FilesFragment extends Fragment {
                         String encodedFile = Base64.encodeToString(bytes, Base64.DEFAULT);
                         String fileType = Utils.getMimeType(data.getData(), getContext());
 
-                        fileRequest = new CommentFile(encodedFile, fileType, fileName,
-                                (int) file.length());
+                        fileRequest = new CommentFile(encodedFile, fileType, fileName, size);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

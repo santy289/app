@@ -28,25 +28,56 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_comment"
-                style="@style/Widget.MaterialComponents.TextInputEditText.OutlinedBox"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/lyt_comment_input"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/spinner_bg"
-                android:hint="@string/workflow_detail_comments_fragment_input_comment_hint"
-                android:inputType="textMultiLine"
-                android:maxLines="5"
-                android:paddingStart="10dp"
-                android:paddingTop="5dp"
-                android:paddingEnd="10dp"
-                android:paddingBottom="5dp"
-                android:scrollbars="vertical"
-                android:textSize="16sp"
                 app:layout_constraintEnd_toStartOf="@+id/btn_comment"
                 app:layout_constraintStart_toStartOf="@id/switch_private_public"
-                app:layout_constraintTop_toBottomOf="@+id/switch_private_public" />
+                app:layout_constraintTop_toBottomOf="@+id/switch_private_public">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_comment"
+                    style="@style/Widget.MaterialComponents.TextInputEditText.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:hint="@string/workflow_detail_comments_fragment_input_comment_hint"
+                    android:inputType="textMultiLine"
+                    android:maxLines="5"
+                    android:paddingStart="5dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="5dp"
+                    android:paddingBottom="10dp"
+                    android:scrollbars="vertical"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/btn_attach"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constrainedWidth="true"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="TEST TEST TEST TEST TEST TEST TEST TEST TEST"/>
+
+                <Button
+                    android:id="@+id/btn_attach"
+                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                    android:layout_width="35dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:backgroundTint="@color/white"
+                    app:backgroundTint="@color/white"
+                    app:icon="@drawable/ic_attach_file_black_24dp"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp"
+                    app:iconSize="20sp"
+                    app:iconTint="@color/black"
+                    app:layout_constraintBottom_toBottomOf="@+id/et_comment"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/et_comment"
+                    app:rippleColor="@color/dark_gray" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <Button
                 android:id="@+id/btn_comment"
@@ -60,10 +91,10 @@
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
                 app:iconSize="20sp"
-                app:layout_constraintBottom_toBottomOf="@+id/et_comment"
+                app:layout_constraintBottom_toBottomOf="@+id/lyt_comment_input"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/et_comment"
-                app:layout_constraintTop_toTopOf="@+id/et_comment" />
+                app:layout_constraintStart_toEndOf="@+id/lyt_comment_input"
+                app:layout_constraintTop_toTopOf="@+id/lyt_comment_input" />
 
 
             <androidx.recyclerview.widget.RecyclerView
@@ -79,7 +110,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/et_comment"
+                app:layout_constraintTop_toBottomOf="@id/lyt_comment_input"
                 app:layout_constraintVertical_bias="0.0" />
 
             <TextView
@@ -93,7 +124,7 @@
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="@id/rv_comments"
                 app:layout_constraintStart_toStartOf="@id/rv_comments"
-                app:layout_constraintTop_toBottomOf="@id/et_comment"
+                app:layout_constraintTop_toBottomOf="@id/lyt_comment_input"
                 tools:visibility="visible" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

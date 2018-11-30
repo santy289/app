@@ -20,8 +20,6 @@ public class CommentFile {
     @Json(name = "size")
     private int size;
 
-    private File localFile;
-
     public CommentFile(String file, String type, String name, int size) {
         this.file = file;
         this.type = type;
@@ -59,13 +57,5 @@ public class CommentFile {
 
     public void setSize(int size) {
         this.size = size;
-    }
-
-    public File getLocalFile() {
-        return localFile;
-    }
-
-    public void setLocalFile(File localFile) {
-        this.localFile = localFile;
     }
 }

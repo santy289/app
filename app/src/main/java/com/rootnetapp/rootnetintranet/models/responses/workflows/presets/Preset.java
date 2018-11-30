@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.models.responses.workflows;
+package com.rootnetapp.rootnetintranet.models.responses.workflows.presets;
 
 import com.squareup.moshi.Json;
 
@@ -16,6 +16,10 @@ public class Preset {
     private String url;
     @Json(name = "order")
     private int order;
+    @Json(name = "default_file_id")
+    private String defaultFileId;
+    @Json(name = "preset_file")
+    private PresetFile presetFile;
     @Json(name = "createdAt")
     private String createdAt;
     @Json(name = "updatedAt")
@@ -53,6 +57,22 @@ public class Preset {
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    public String getDefaultFileId() {
+        return defaultFileId;
+    }
+
+    public void setDefaultFileId(String defaultFileId) {
+        this.defaultFileId = defaultFileId;
+    }
+
+    public PresetFile getPresetFile() {
+        return presetFile;
+    }
+
+    public void setPresetFile(PresetFile presetFile) {
+        this.presetFile = presetFile;
     }
 
     public String getCreatedAt() {

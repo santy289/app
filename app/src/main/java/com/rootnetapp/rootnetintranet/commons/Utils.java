@@ -275,7 +275,7 @@ public class Utils {
     }
 
     /**
-     * Transforms a Base64 encoded string into a {@link File} object. Also, saves the file locally
+     * Transforms a Base64 encoded string into a PDF {@link File} object. Also, saves the file locally
      * on the external downloads folder.
      *
      * @param base64   encoded string.
@@ -291,6 +291,33 @@ public class Utils {
                 .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/";
 
         final File pdfFile = new File(downloadsPath + fileName + ".pdf");
+        byte[] pdfAsBytes = Base64.decode(base64, 0);
+        FileOutputStream os;
+        os = new FileOutputStream(pdfFile, false);
+        os.write(pdfAsBytes);
+        os.flush();
+        os.close();
+
+        return pdfFile;
+    }
+
+    /**
+     * Transforms a Base64 encoded string into a {@link File} object. Also, saves the file locally
+     * on the external downloads folder.
+     *
+     * @param base64   encoded string.
+     * @param fileName name of the file to be saved.
+     *
+     * @return the file object that was created.
+     *
+     * @throws IOException exception caused by the decoding/saving operations.
+     */
+    public static File decodeFileFromBase64Binary(String base64,
+                                                 String fileName) throws IOException {
+        String downloadsPath = Environment
+                .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/";
+
+        final File pdfFile = new File(downloadsPath + fileName);
         byte[] pdfAsBytes = Base64.decode(base64, 0);
         FileOutputStream os;
         os = new FileOutputStream(pdfFile, false);

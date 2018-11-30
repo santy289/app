@@ -267,4 +267,6 @@
     <string name="workflow_detail_files_fragment_file_name">File Name</string>
     <string name="workflow_detail_files_fragment_no_file_manager">Please install a File Manager.</string>
     <string name="workflow_detail_files_fragment_select_file">Select a file to upload</string>
+    <string name="workflow_detail_files_fragment_open_file">Open File</string>
+    <string name="workflow_detail_files_fragment_cannot_open_file">This file cannot be opened by your device.</string>
 </resources>

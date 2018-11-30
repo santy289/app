@@ -8,7 +8,8 @@ import android.view.ViewGroup;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.databinding.DocumentsItemBinding;
 import com.rootnetapp.rootnetintranet.models.responses.file.DocumentsFile;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.presets.Preset;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragmentInterface;
 
 import java.util.List;
 
@@ -25,8 +26,11 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder> 
     public List<Preset> totalDocuments;
     private List<DocumentsFile> files;
     private Context context;
+    private FilesFragmentInterface mFilesFragmentInterface;
 
-    public DocumentsAdapter(List<Preset> totalDocuments, List<DocumentsFile> files) {
+    public DocumentsAdapter(FilesFragmentInterface filesFragmentInterface,
+                            List<Preset> totalDocuments, List<DocumentsFile> files) {
+        this.mFilesFragmentInterface = filesFragmentInterface;
         this.totalDocuments = totalDocuments;
         this.files = files;
     }
@@ -65,6 +69,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder> 
             String hour = file.getCreatedAt().split(" ")[1];
             holder.binding.tvDate.setText(date + " - " + hour);
         } else {
+            holder.binding.tvFileName.setText(item.getName());
             holder.binding.imgUploaded.setImageResource(R.drawable.ic_close_black_24dp);
             holder.binding.imgUploaded.setColorFilter(ContextCompat.getColor(context, R.color.red),
                     android.graphics.PorterDuff.Mode.SRC_IN);
@@ -90,6 +95,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder> 
                 holder.binding.lytDetails.setVisibility(View.GONE);
             }
         });
+
+        holder.binding.imgDownload.setOnClickListener(
+                v -> mFilesFragmentInterface.downloadPreset(item));
     }
 
     @Override

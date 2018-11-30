@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
 import android.util.Base64;
+import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -15,17 +16,19 @@ import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
+import com.rootnetapp.rootnetintranet.models.responses.downloadfile.DownloadFileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.file.DocumentsFile;
 import com.rootnetapp.rootnetintranet.models.responses.file.FilesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.templates.Templates;
 import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesResponse;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.presets.Preset;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -49,6 +52,7 @@ public class FilesViewModel extends ViewModel {
     private MutableLiveData<Integer> mFilesTabCounter;
     private MutableLiveData<String> mUploadedFileNameLiveData;
     private MutableLiveData<Integer> mAttachButtonTextLiveData;
+    private MutableLiveData<File> mOpenDownloadedFileLiveData;
 
     protected MutableLiveData<Boolean> showLoading;
     protected MutableLiveData<Boolean> showTemplateDocumentsUi;
@@ -154,7 +158,7 @@ public class FilesViewModel extends ViewModel {
                         Cursor returnCursor = context.getContentResolver()
                                 .query(uri, null, null, null, null);
 
-                        if (returnCursor == null){
+                        if (returnCursor == null) {
                             mToastMessageLiveData.setValue(R.string.error_selecting_file);
                             return;
                         }
@@ -235,11 +239,11 @@ public class FilesViewModel extends ViewModel {
 
         request.setWorkflows(presetsRequestList);
 
-        showLoading.setValue(true);
         attachFile(request);
     }
 
     private void attachFile(AttachFilesRequest request) {
+        showLoading.setValue(true);
         Disposable disposable = mRepository
                 .attachFile(mToken, request)
                 .subscribe(this::onAttachSuccess, this::onFailure);
@@ -250,6 +254,45 @@ public class FilesViewModel extends ViewModel {
         showLoading.setValue(false);
         mAttachSuccessLiveData.setValue(attachResponse.getList().size() > 0);
         getFiles(mWorkflowListItem.getWorkflowId());
+    }
+
+    protected void downloadPreset(Preset preset) {
+        downloadFile(preset.getPresetFile().getEntity().toLowerCase(Locale.US),
+                preset.getPresetFile().getId());
+    }
+
+    protected void downloadDocumentFile(DocumentsFile documentsFile) {
+        downloadFile(DocumentsFile.FILE_ENTITY, documentsFile.getId());
+    }
+
+    private void downloadFile(String entity, int fileId) {
+        showLoading.setValue(true);
+        Disposable disposable = mRepository
+                .downloadFile(mToken, entity, fileId)
+                .subscribe(this::onDownloadSuccess, this::onFailure);
+        mDisposables.add(disposable);
+    }
+
+    private void onDownloadSuccess(DownloadFileResponse downloadFileResponse) {
+        showLoading.setValue(false);
+
+        // the API will return a base64 string representing the file
+
+        String base64 = downloadFileResponse.getFile().getContent();
+        if (base64 == null || base64.isEmpty()) {
+            mToastMessageLiveData.setValue(R.string.error);
+            return;
+        }
+
+        String fileName = downloadFileResponse.getFile().getFilename();
+        try {
+            mOpenDownloadedFileLiveData
+                    .setValue(Utils.decodeFileFromBase64Binary(base64, fileName));
+
+        } catch (IOException e) {
+            Log.e(TAG, "downloadFile: ", e);
+            mToastMessageLiveData.setValue(R.string.error);
+        }
     }
 
     /**
@@ -325,5 +368,12 @@ public class FilesViewModel extends ViewModel {
             mAttachButtonTextLiveData = new MutableLiveData<>();
         }
         return mAttachButtonTextLiveData;
+    }
+
+    protected LiveData<File> getObservableOpenDownloadedFile() {
+        if (mOpenDownloadedFileLiveData == null) {
+            mOpenDownloadedFileLiveData = new MutableLiveData<>();
+        }
+        return mOpenDownloadedFileLiveData;
     }
 }

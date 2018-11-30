@@ -14,6 +14,7 @@ import com.rootnetapp.rootnetintranet.models.responses.country.CountryDbResponse
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
+import com.rootnetapp.rootnetintranet.models.responses.downloadfile.DownloadFileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.exportpdf.ExportPdfResponse;
 import com.rootnetapp.rootnetintranet.models.responses.file.FilesResponse;
@@ -57,7 +58,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.QueryMap;
-
+import retrofit2.http.Streaming;
 
 public interface ApiInterface {
 
@@ -348,4 +349,11 @@ public interface ApiInterface {
     @GET("intranet/workflows/{id}/pdf?dump=false")
     Observable<ExportPdfResponse> getWorkflowPdfFile(@Header("Authorization") String authorization,
                                                      @Path("id") int workflowId);
+
+    @Headers({"Domain-Name: api"})
+    @Streaming
+    @GET("files/udownload/{entity}://{id}")
+    Observable<DownloadFileResponse> downloadFile(@Header("Authorization") String authorization,
+                                                  @Path("entity") String entity,
+                                                  @Path("id") int fileId);
 }

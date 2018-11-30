@@ -1,19 +1,19 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflow;
 
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowType;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.CalculatedField;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowStateInfo;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.presets.Preset;
+import com.squareup.moshi.Json;
+
+import java.util.List;
+
 import androidx.room.ColumnInfo;
 import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
-
-import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowType;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.CalculatedField;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowStateInfo;
-import com.squareup.moshi.Json;
-
-import java.util.List;
 
 @Entity
 public class Workflow {

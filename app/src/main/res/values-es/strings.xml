@@ -265,4 +265,6 @@
     <string name="workflow_detail_files_fragment_file_name">Nombre del archivo</string>
     <string name="workflow_detail_files_fragment_no_file_manager">Por favor instale un manejador de archivos.</string>
     <string name="workflow_detail_files_fragment_select_file">Elija el archivo para subir</string>
+    <string name="workflow_detail_files_fragment_open_file">Abrir Archivo</string>
+    <string name="workflow_detail_files_fragment_cannot_open_file">Su dispositivo no puede abrir este archivo.</string>
 </resources>

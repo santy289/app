@@ -8,6 +8,8 @@ import com.squareup.moshi.Json;
 
 public class DocumentsFile {
 
+    public static final String FILE_ENTITY = "workflowfilerecords";
+
     @Json(name = "id")
     private int id;
     @Json(name = "preset_id")

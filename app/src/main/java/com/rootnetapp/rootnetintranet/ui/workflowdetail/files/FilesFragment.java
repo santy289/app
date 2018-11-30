@@ -1,8 +1,10 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.files;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,10 +16,12 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailFilesBinding;
 import com.rootnetapp.rootnetintranet.models.responses.file.DocumentsFile;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.presets.Preset;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailViewModel;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.adapters.DocumentsAdapter;
 
+import java.io.File;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -25,6 +29,7 @@ import javax.inject.Inject;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
+import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
@@ -32,7 +37,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import static com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesViewModel.REQUEST_FILE_TO_ATTACH;
 
-public class FilesFragment extends Fragment {
+public class FilesFragment extends Fragment implements FilesFragmentInterface {
 
     @Inject
     FilesViewModelFactory filesViewModelFactory;
@@ -90,6 +95,7 @@ public class FilesFragment extends Fragment {
         filesViewModel.getObservableFilesTabCounter().observe(this, this::updateTabCounter);
         filesViewModel.getObservableUploadedFileName().observe(this, this::setFileUploadedTextWith);
         filesViewModel.getObservableAttachButtonText().observe(this, this::setButtonAttachmentText);
+        filesViewModel.getObservableOpenDownloadedFile().observe(this, this::openPresetFile);
 
         filesViewModel.showLoading.observe(this, this::showLoading);
         filesViewModel.setDocumentsView.observe(this, this::setDocumentsView);
@@ -204,6 +210,7 @@ public class FilesFragment extends Fragment {
     @UiThread
     private void setDocumentsView(List<DocumentsFile> documents) {
         mDocumentsAdapter = new DocumentsAdapter(
+                this,
                 filesViewModel.getPresets(),
                 documents
         );
@@ -235,5 +242,47 @@ public class FilesFragment extends Fragment {
                 getString(messageRes),
                 Toast.LENGTH_SHORT)
                 .show();
+    }
+
+    @Override
+    public void downloadPreset(Preset preset) {
+        filesViewModel.downloadPreset(preset);
+    }
+
+    @Override
+    public void downloadDocumentFile(DocumentsFile documentsFile){
+        filesViewModel.downloadDocumentFile(documentsFile);
+    }
+
+    /**
+     * Creates an {@link Intent} chooser the downloaded file. If the device is not suitable to read
+     * the file, will display a {@link Toast} message. Uses a {@link FileProvider} to create the
+     * file URI, instead of using the {@link Uri#fromFile(File)} method.
+     *
+     * @param file the file to be opened.
+     *
+     * @see <a href="https://developer.android.com/reference/android/support/v4/content/FileProvider">FileProvider</a>
+     */
+    @UiThread
+    private void openPresetFile(File file) {
+        if (file == null) return;
+
+        Intent target = new Intent(Intent.ACTION_VIEW);
+
+        Uri fileUri = FileProvider.getUriForFile(getContext(),
+                getContext().getApplicationContext().getPackageName() + ".fileprovider", file);
+
+        target.setDataAndType(fileUri, "*/*");
+        target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        Intent intent = Intent.createChooser(target,
+                getString(R.string.workflow_detail_files_fragment_open_file));
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            // Instruct the user to install a PDF reader here
+            showToastMessage(R.string.workflow_detail_files_fragment_cannot_open_file);
+        }
     }
 }

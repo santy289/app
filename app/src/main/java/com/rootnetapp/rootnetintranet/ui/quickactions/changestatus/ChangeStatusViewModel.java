@@ -51,7 +51,7 @@ public class ChangeStatusViewModel extends ViewModel {
             Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", token);
 
-            WebViewData data = new WebViewData(headers, url);
+            WebViewData data = new WebViewData(headers, url, domain);
             mWebViewDataLiveData.setValue(data);
         } catch (IOException e) {
             Log.e(TAG, "initMainViewModel: error: " + e.getMessage());

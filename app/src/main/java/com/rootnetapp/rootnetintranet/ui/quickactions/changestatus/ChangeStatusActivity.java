@@ -6,13 +6,18 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
-import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.ActivityChangeStatusBinding;
+import com.rootnetapp.rootnetintranet.models.responses.domain.Client;
+import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 
 import javax.inject.Inject;
 
@@ -31,6 +36,8 @@ public class ChangeStatusActivity extends AppCompatActivity {
     ChangeStatusViewModelFactory changeStatusViewModelFactory;
     ChangeStatusViewModel changeStatusViewModel;
     private ActivityChangeStatusBinding mBinding;
+    private String mToken;
+    private boolean firstLoad;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,13 +48,13 @@ public class ChangeStatusActivity extends AppCompatActivity {
                 .of(this, changeStatusViewModelFactory)
                 .get(ChangeStatusViewModel.class);
         SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String token = "Bearer " + prefs.getString("token", "");
+        mToken = "Bearer " + prefs.getString("token", "");
         WorkflowListItem item = getIntent().getParcelableExtra(EXTRA_WORKFLOW_LIST_ITEM);
 
         setActionBar();
         subscribe();
 
-        changeStatusViewModel.init(prefs, token, item);
+        changeStatusViewModel.init(prefs, mToken, item);
     }
 
     private void subscribe() {
@@ -79,7 +86,25 @@ public class ChangeStatusActivity extends AppCompatActivity {
         ws.setAppCacheEnabled(true);
         Log.d(TAG, "Enabled HTML5-Features");
 
-        mBinding.webView.setWebChromeClient(new WebChromeClient());
+        mBinding.webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView webView, String url) {
+                String authScript = "localStorage.setItem('jwt','" + mToken + "');";
+                webView.evaluateJavascript(authScript, null);
+
+                Moshi moshi = new Moshi.Builder().build();
+
+                JsonAdapter<ClientResponse> clientResponseJsonAdapter = moshi.adapter(ClientResponse.class);
+                String globalJson = clientResponseJsonAdapter.toJson(data.getClientResponse());
+                String globalScript = "localStorage.setItem('global','" + globalJson + "');";
+                webView.evaluateJavascript(globalScript, null);
+
+                JsonAdapter<Client> clientJsonAdapter = moshi.adapter(Client.class);
+                String clientJson = clientJsonAdapter.toJson(data.getClientResponse().getClient());
+                String clientScript = "localStorage.setItem('client','" + clientJson + "');";
+                webView.evaluateJavascript(clientScript, null);
+            }
+        });
         mBinding.webView.loadUrl(data.getUrl(), data.getHeaders());
     }
 

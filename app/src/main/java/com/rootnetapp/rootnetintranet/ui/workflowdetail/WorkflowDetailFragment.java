@@ -252,19 +252,8 @@ public class WorkflowDetailFragment extends Fragment {
             statusList.add(getString(stringRes));
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(),
-                R.layout.status_spinner_item, statusList) {
-            @Override
-            public View getView(int position, View convertView,ViewGroup parent) {
-
-                View v = super.getView(position, convertView, parent);
-
-//                ((TextView) v).setGravity(Gravity.CENTER);
-
-                return v;
-
-            }
-        };
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
+                R.layout.status_spinner_item, statusList);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mBinding.spStatus.setAdapter(adapter);
         mBinding.spStatus

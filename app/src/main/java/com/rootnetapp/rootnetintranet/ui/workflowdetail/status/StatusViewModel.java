@@ -12,6 +12,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.SpecificApprovers;
 import com.rootnetapp.rootnetintranet.models.createworkflow.StatusSpecific;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 
@@ -362,6 +363,10 @@ public class StatusViewModel extends ViewModel {
 
         // Update current approvers list on UI.
         List<Approver> typeConfigurationApprovers = currentStatus.getApproversList();
+        for (Approver approver : typeConfigurationApprovers) {
+            approver.approved = ApproverHistory.getApprovalStateForStatusAndApprover(
+                    mWorkflow.getWorkflowApprovalHistory(), approver.statusId, approver.entityId);
+        }
         SpecificApprovers currentSpecificApprovers = mWorkflow.getCurrentSpecificApprovers();
 
         updateCurrentApproverUi(typeConfigurationApprovers, currentSpecificApprovers);
@@ -405,11 +410,17 @@ public class StatusViewModel extends ViewModel {
             Approver approver;
             ProfileInvolved profileInvolved;
             for (int i = 0; i < globalList.size(); i++) {
-                profileInvolved = mRepository.getProfileBy(globalList.get(i));
+                int id = globalList.get(i);
+
+                profileInvolved = mRepository.getProfileBy(id);
                 if (profileInvolved == null) {
                     continue;
                 }
                 approver = generateApproverWith(profileInvolved);
+                approver.entityId = id;
+                approver.approved = ApproverHistory.getApprovalStateForStatusAndApprover(
+                        mWorkflow.getWorkflowApprovalHistory(), approver.statusId, approver.entityId);
+
                 approverList.add(approver);
             }
             return approverList;
@@ -450,11 +461,17 @@ public class StatusViewModel extends ViewModel {
             Approver approver;
             ProfileInvolved profileInvolved;
             for (int i = 0; i < statusSpecificList.size(); i++) {
-                profileInvolved = mRepository.getProfileBy(statusSpecificList.get(i).user);
+                int id = statusSpecificList.get(i).user;
+                profileInvolved = mRepository.getProfileBy(id);
                 if (profileInvolved == null) {
                     continue;
                 }
                 approver = generateApproverWith(profileInvolved);
+
+                approver.entityId = id;
+                approver.approved = ApproverHistory.getApprovalStateForStatusAndApprover(
+                        mWorkflow.getWorkflowApprovalHistory(), approver.statusId, approver.entityId);
+
                 approverList.add(approver);
             }
             return approverList;

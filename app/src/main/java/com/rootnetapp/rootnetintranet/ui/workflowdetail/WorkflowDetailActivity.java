@@ -9,110 +9,101 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
-import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailBinding;
+import com.rootnetapp.rootnetintranet.databinding.ActivityWorkflowDetailBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
-import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.WorkflowDetailViewPagerAdapter;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
-import androidx.appcompat.widget.PopupMenu;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.viewpager.widget.ViewPager;
 
 import static com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailViewModel.REQUEST_EXTERNAL_STORAGE_PERMISSIONS;
 
-public class WorkflowDetailFragment extends Fragment {
+public class WorkflowDetailActivity extends AppCompatActivity {
+
+    public static final String EXTRA_WORKFLOW_LIST_ITEM = "Extra.WorkflowListItem";
+
+    private static final String TAG = "WorkflowDetailActivity";
 
     @Inject
     WorkflowDetailViewModelFactory workflowViewModelFactory;
     private WorkflowDetailViewModel workflowDetailViewModel;
-    private FragmentWorkflowDetailBinding mBinding;
-    private MainActivityInterface mMainActivityInterface;
+    private ActivityWorkflowDetailBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
     private WorkflowDetailViewPagerAdapter mViewPagerAdapter;
 
-    public WorkflowDetailFragment() {
-        // Required empty public constructor
-    }
-
-    public static WorkflowDetailFragment newInstance(WorkflowListItem item,
-                                                     MainActivityInterface mainActivityInterface) {
-        WorkflowDetailFragment fragment = new WorkflowDetailFragment();
-        fragment.mWorkflowListItem = item;
-        fragment.mMainActivityInterface = mainActivityInterface;
-        return fragment;
-    }
-
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        mBinding = DataBindingUtil.inflate(inflater,
-                R.layout.fragment_workflow_detail, container, false);
-        View view = mBinding.getRoot();
-        ((RootnetApp) getActivity().getApplication()).getAppComponent().inject(this);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_workflow_detail);
+        ((RootnetApp) getApplication()).getAppComponent().inject(this);
         workflowDetailViewModel = ViewModelProviders
                 .of(this, workflowViewModelFactory)
                 .get(WorkflowDetailViewModel.class);
 
-        SharedPreferences prefs = getContext()
-                .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String token = "Bearer " + prefs.getString("token", "");
-        mBinding.tvWorkflowId.setText(mWorkflowListItem.getTitle());
-        mBinding.tvWorkflowName.setText(mWorkflowListItem.getWorkflowTypeKey());
+        mWorkflowListItem = getIntent().getParcelableExtra(EXTRA_WORKFLOW_LIST_ITEM);
 
+        SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        String token = "Bearer " + prefs.getString("token", "");
+
+        setActionBar();
         setupViewPager();
         setOnClickListeners();
         subscribe();
 
         showLoading(true);
         workflowDetailViewModel.initDetails(token, mWorkflowListItem);
+    }
 
-        return view;
+    private void setActionBar() {
+        setSupportActionBar(mBinding.toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        String title = mWorkflowListItem.title;
+        String subtitle = mWorkflowListItem.getWorkflowTypeKey();
+        if (title == null || title.isEmpty()) title = getTitle().toString();
+        getSupportActionBar().setTitle(title);
+        getSupportActionBar().setSubtitle(subtitle);
     }
 
     /**
      * Initializes and set the {@link WorkflowDetailViewPagerAdapter} for the {@link ViewPager}.
      */
     private void setupViewPager() {
-        mViewPagerAdapter = new WorkflowDetailViewPagerAdapter(getContext(), mWorkflowListItem,
-                getChildFragmentManager());
+        mViewPagerAdapter = new WorkflowDetailViewPagerAdapter(this, mWorkflowListItem,
+                getSupportFragmentManager());
         mBinding.viewPager.setAdapter(mViewPagerAdapter);
     }
 
     private void setOnClickListeners() {
-        mBinding.btnOptions.setOnClickListener(this::showPopupMenu);
+        mBinding.fab.setOnClickListener(v -> workflowDetailViewModel.toggleWorkflowActivation());
     }
 
     private void subscribe() {
         final Observer<Integer> errorObserver = ((Integer data) -> {
             showLoading(false);
             if (null != data) {
-                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(data), Toast.LENGTH_LONG).show();
             }
         });
 
@@ -123,8 +114,6 @@ public class WorkflowDetailFragment extends Fragment {
                 .observe(this, this::updateCommentsTabCounter);
         workflowDetailViewModel.getObservableFilesTabCounter()
                 .observe(this, this::updateFilesTabCounter);
-        workflowDetailViewModel.getObservableStatusSpinner()
-                .observe(this, this::updateStatusSpinner);
         workflowDetailViewModel.updateActiveStatusFromUserAction
                 .observe(this, this::updateWorkflowStatus);
         workflowDetailViewModel.retrieveWorkflowPdfFile
@@ -140,7 +129,7 @@ public class WorkflowDetailFragment extends Fragment {
     @UiThread
     private void showLoading(boolean show) {
         if (show) {
-            Utils.showLoading(getContext());
+            Utils.showLoading(this);
         } else {
             Utils.hideLoading();
         }
@@ -154,14 +143,10 @@ public class WorkflowDetailFragment extends Fragment {
      */
     @UiThread
     private void updateWorkflowStatus(StatusUiData statusUiData) {
-        int selectedIndex = statusUiData.getSelectedIndex();
-
-        mBinding.spStatus.setSelection(selectedIndex);
-        mBinding.spStatus
-                .setTag(selectedIndex); //workaround to prevent the listener from being called
-        mBinding.viewSpinnerBackground.setBackgroundTintList(ColorStateList
-                .valueOf(ContextCompat.getColor(getContext(),
-                        statusUiData.getColorResList().get(selectedIndex))));
+        mBinding.fab.setSupportBackgroundTintList(ColorStateList
+                .valueOf(ContextCompat.getColor(this, statusUiData.getSelectedColor())));
+        mBinding.fab
+                .setImageDrawable(ContextCompat.getDrawable(this, statusUiData.getSelectedIcon()));
     }
 
     /**
@@ -179,52 +164,30 @@ public class WorkflowDetailFragment extends Fragment {
 
         Intent target = new Intent(Intent.ACTION_VIEW);
 
-        Uri fileUri = FileProvider.getUriForFile(getContext(),
-                getContext().getApplicationContext().getPackageName() + ".fileprovider", pdfFile);
+        Uri fileUri = FileProvider.getUriForFile(this,
+                this.getApplicationContext().getPackageName() + ".fileprovider", pdfFile);
 
         target.setDataAndType(fileUri, "application/pdf");
         target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         Intent intent = Intent.createChooser(target,
-                getString(R.string.workflow_detail_status_fragment_open_file));
+                getString(R.string.workflow_detail_activity_open_file));
         try {
             startActivity(intent);
         } catch (ActivityNotFoundException e) {
             // Instruct the user to install a PDF reader here
-            showToastMessage(R.string.workflow_detail_status_fragment_no_pdf_reader);
+            showToastMessage(R.string.workflow_detail_activity_no_pdf_reader);
         }
     }
 
     @UiThread
     private void showToastMessage(@StringRes int messageRes) {
         Toast.makeText(
-                getContext(),
+                this,
                 getString(messageRes),
                 Toast.LENGTH_SHORT)
                 .show();
-    }
-
-    /**
-     * Opens a {@link PopupMenu} with the defined options
-     *
-     * @param anchor the view which should act as the anchor for the menu. Normally it should be the
-     *               one that the user tapped to invoke this menu.
-     */
-    private void showPopupMenu(View anchor) {
-        //Creating the instance of PopupMenu
-        PopupMenu popup = new PopupMenu(getContext(), anchor);
-        popup.getMenuInflater().inflate(R.menu.menu_workflow_detail, popup.getMenu());
-
-        popup.setOnMenuItemClickListener(item -> {
-            if (checkExternalStoragePermissions()) {
-                workflowDetailViewModel.handleExportPdf();
-            }
-
-            return true;
-        });
-
-        popup.show();
     }
 
     @UiThread
@@ -240,57 +203,20 @@ public class WorkflowDetailFragment extends Fragment {
     }
 
     /**
-     * Creates the status {@link Spinner} and its {@link ArrayAdapter}.
-     *
-     * @param statusUiData instance object that contains all of the data needed to populate the
-     *                     {@link Spinner}.
-     */
-    @UiThread
-    private void updateStatusSpinner(StatusUiData statusUiData) {
-        List<String> statusList = new ArrayList<>();
-        for (int stringRes : statusUiData.getStringResList()) {
-            statusList.add(getString(stringRes));
-        }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
-                R.layout.status_spinner_item, statusList);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mBinding.spStatus.setAdapter(adapter);
-        mBinding.spStatus
-                .setSelection(0, false); //prevent the listener from being called on initialization
-        mBinding.spStatus.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                //workaround to prevent the listener from being called
-                //code is executed only when the user is making a selection
-                Object tag = mBinding.spStatus.getTag();
-                if (tag == null || (int) tag != position) {
-                    workflowDetailViewModel.setStatusSelection(position);
-                    workflowDetailViewModel.handleWorkflowActivation(position);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-    }
-
-    /**
      * Verify whether the user has granted permissions to read/write the external storage.
      *
      * @return whether the permissions are granted.
      */
     private boolean checkExternalStoragePermissions() {
         // Here, thisActivity is the current activity
-        if (ContextCompat.checkSelfPermission(getContext(),
+        if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(getContext(),
+                && ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
-            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                            Manifest.permission.READ_EXTERNAL_STORAGE},
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                 Manifest.permission.READ_EXTERNAL_STORAGE},
                     REQUEST_EXTERNAL_STORAGE_PERMISSIONS);
 
             return false;
@@ -303,5 +229,28 @@ public class WorkflowDetailFragment extends Fragment {
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
                                            @NonNull int[] grantResults) {
         workflowDetailViewModel.handleRequestPermissionsResult(requestCode, grantResults);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_workflow_detail, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+
+            return true;
+
+        } else if (item.getItemId() == R.id.export_pdf) {
+            if (checkExternalStoragePermissions()) {
+                workflowDetailViewModel.handleExportPdf();
+            }
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

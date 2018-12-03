@@ -12,6 +12,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.SpecificApprovers;
 import com.rootnetapp.rootnetintranet.models.createworkflow.StatusSpecific;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 
@@ -50,8 +51,6 @@ public class StatusViewModel extends ViewModel {
     protected MutableLiveData<List<String>> updateApproveSpinner;
     protected MutableLiveData<Boolean> hideApproveSpinnerOnEmptyData;
     protected MutableLiveData<Boolean> hideApproverListOnEmptyData;
-    protected MutableLiveData<List<ProfileInvolved>> updateProfilesInvolved;
-    protected MutableLiveData<Boolean> hideProfilesInvolvedList;
     protected MutableLiveData<Boolean> setWorkflowIsOpen;
     protected MutableLiveData<String[]> updateStatusUi;
     protected LiveData<String[]> updateStatusUiFromUserAction;
@@ -70,8 +69,6 @@ public class StatusViewModel extends ViewModel {
         this.updateApproveSpinner = new MutableLiveData<>();
         this.hideApproveSpinnerOnEmptyData = new MutableLiveData<>();
         this.hideApproverListOnEmptyData = new MutableLiveData<>();
-        this.updateProfilesInvolved = new MutableLiveData<>();
-        this.hideProfilesInvolvedList = new MutableLiveData<>();
         this.setWorkflowIsOpen = new MutableLiveData<>();
         this.updateStatusUi = new MutableLiveData<>();
 
@@ -145,6 +142,11 @@ public class StatusViewModel extends ViewModel {
 
         statuses[INDEX_LAST_STATUS] = getLastStatusLabel(incomingWorkflow,
                 currentWorkflowType.getStatus());
+
+        // if there isn't a last status, it's because we are on the initial status, so we set the
+        // last status label to the initial status (current status) as well.
+        if (statuses[INDEX_LAST_STATUS].isEmpty()) statuses[INDEX_LAST_STATUS] = currentStatus;
+
         statuses[INDEX_CURRENT_STATUS] = currentStatus;
         statuses[INDEX_NEXT_STATUS] = getNextStatuses(incomingWorkflow, currentWorkflowType);
         return statuses;
@@ -346,11 +348,12 @@ public class StatusViewModel extends ViewModel {
                 && workflow.getNextStatusRequirements().getApprovedCount() == workflow
                 .getNextStatusRequirements().getRejectedCount();
         mTieStatusLiveData.setValue(isTied);
-        showToastMessage.setValue(
-                R.string.workflow_detail_status_fragment_status_summary_tied_status_message);
+        if (isTied) {
+            showToastMessage.setValue(
+                    R.string.workflow_detail_status_fragment_status_summary_tied_status_message);
+        }
 
         setWorkflowIsOpen.setValue(workflow.isOpen());
-        updateProfilesInvolvedUi(workflow.getProfilesInvolved());
     }
 
     private void updateUIWithWorkflowType(WorkflowTypeDb currentWorkflowType, int statusId) {
@@ -360,6 +363,10 @@ public class StatusViewModel extends ViewModel {
 
         // Update current approvers list on UI.
         List<Approver> typeConfigurationApprovers = currentStatus.getApproversList();
+        for (Approver approver : typeConfigurationApprovers) {
+            approver.approved = ApproverHistory.getApprovalStateForStatusAndApprover(
+                    mWorkflow.getWorkflowApprovalHistory(), approver.statusId, approver.entityId);
+        }
         SpecificApprovers currentSpecificApprovers = mWorkflow.getCurrentSpecificApprovers();
 
         updateCurrentApproverUi(typeConfigurationApprovers, currentSpecificApprovers);
@@ -403,11 +410,17 @@ public class StatusViewModel extends ViewModel {
             Approver approver;
             ProfileInvolved profileInvolved;
             for (int i = 0; i < globalList.size(); i++) {
-                profileInvolved = mRepository.getProfileBy(globalList.get(i));
+                int id = globalList.get(i);
+
+                profileInvolved = mRepository.getProfileBy(id);
                 if (profileInvolved == null) {
                     continue;
                 }
                 approver = generateApproverWith(profileInvolved);
+                approver.entityId = id;
+                approver.approved = ApproverHistory.getApprovalStateForStatusAndApprover(
+                        mWorkflow.getWorkflowApprovalHistory(), approver.statusId, approver.entityId);
+
                 approverList.add(approver);
             }
             return approverList;
@@ -448,11 +461,17 @@ public class StatusViewModel extends ViewModel {
             Approver approver;
             ProfileInvolved profileInvolved;
             for (int i = 0; i < statusSpecificList.size(); i++) {
-                profileInvolved = mRepository.getProfileBy(statusSpecificList.get(i).user);
+                int id = statusSpecificList.get(i).user;
+                profileInvolved = mRepository.getProfileBy(id);
                 if (profileInvolved == null) {
                     continue;
                 }
                 approver = generateApproverWith(profileInvolved);
+
+                approver.entityId = id;
+                approver.approved = ApproverHistory.getApprovalStateForStatusAndApprover(
+                        mWorkflow.getWorkflowApprovalHistory(), approver.statusId, approver.entityId);
+
                 approverList.add(approver);
             }
             return approverList;
@@ -510,51 +529,6 @@ public class StatusViewModel extends ViewModel {
         }
 
         updateApproveSpinner.setValue(nextStatusList);
-    }
-
-    /**
-     * Given some profile ids it will look in the profiles tables in the local database for matching
-     * Profiles, and return a ProfileInvolved object with limited profile information for the UI. It
-     * will look for those profiles in the background thread.
-     *
-     * @param profilesId List of profiles to look in the database.
-     */
-    private void updateProfilesInvolvedUi(List<Integer> profilesId) {
-        if (profilesId == null || profilesId.size() < 1) {
-            hideProfilesInvolvedList.setValue(true);
-            return;
-        }
-
-        Disposable disposable = Observable.fromCallable(() -> {
-            List<ProfileInvolved> profilesList = new ArrayList<>();
-            ProfileInvolved profileInvolved;
-            for (int i = 0; i < profilesId.size(); i++) {
-                profileInvolved = mRepository.getProfileBy(profilesId.get(i));
-                if (profileInvolved == null) {
-                    continue;
-                }
-                profilesList.add(profileInvolved);
-            }
-            return profilesList;
-        }).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::setProfilesInvovledOnUi, throwable -> Log
-                        .d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable
-                                .getMessage()));
-        mDisposables.add(disposable);
-    }
-
-    /**
-     * Sends back to the View a list of profiles that are involved to the current workflow.
-     *
-     * @param profiles Profiles to be used for UI list.
-     */
-    private void setProfilesInvovledOnUi(List<ProfileInvolved> profiles) {
-        if (profiles == null || profiles.size() < 1) {
-            hideProfilesInvolvedList.setValue(true);
-            return;
-        }
-        updateProfilesInvolved.setValue(profiles);
     }
 
     protected void setApproveSpinnerItemSelection(@Nullable Integer approveSpinnerItemSelection) {

@@ -167,6 +167,7 @@ public class WorkflowDb {
     }
 
     public List<ApproverHistory> getWorkflowApprovalHistory() {
+        ApproverHistory.sortList(workflowApprovalHistory);
         return workflowApprovalHistory;
     }
 

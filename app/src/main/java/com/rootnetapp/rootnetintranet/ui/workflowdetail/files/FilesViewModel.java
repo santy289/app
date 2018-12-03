@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.files;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -43,6 +45,7 @@ public class FilesViewModel extends ViewModel {
     private static final String TAG = "FilesViewModel";
 
     protected static final int REQUEST_FILE_TO_ATTACH = 555;
+    protected static final int REQUEST_EXTERNAL_STORAGE_PERMISSIONS = 700;
 
     private FilesRepository mRepository;
     private final CompositeDisposable mDisposables = new CompositeDisposable();
@@ -63,6 +66,8 @@ public class FilesViewModel extends ViewModel {
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the workflow.
     private CommentFile mFileRequest;
     private List<Preset> mPresets;
+    private DocumentsFile mDocumentFileToDownload;
+    private Preset mPresetToDownload;
 
     protected FilesViewModel(FilesRepository filesRepository) {
         this.mRepository = filesRepository;
@@ -130,6 +135,63 @@ public class FilesViewModel extends ViewModel {
         }
         setDocumentsView.setValue(documents);
         setFilesTabCounter(documents.size());
+    }
+
+    /**
+     * Sets the queued preset to download. This is only used if the system is requesting
+     * permissions.
+     *
+     * @param presetToDownload queued file.
+     */
+    protected void setPresetToDownload(Preset presetToDownload) {
+        mPresetToDownload = presetToDownload;
+    }
+
+    /**
+     * Sets the queued file to download. This is only used if the system is requesting permissions.
+     *
+     * @param documentsFile queued file.
+     */
+    protected void setDocumentFileToDownload(DocumentsFile documentsFile) {
+        mDocumentFileToDownload = documentsFile;
+    }
+
+    /**
+     * Checks if the requested permissions were granted and then proceed to export the PDF file.
+     *
+     * @param requestCode  to identify the request
+     * @param grantResults array containing the request results.
+     */
+    protected void handleRequestPermissionsResult(int requestCode, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_EXTERNAL_STORAGE_PERMISSIONS: {
+                // check for both permissions
+                if (grantResults.length > 1
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permissions granted
+                    if (mPresetToDownload != null) {
+                        downloadPreset(mPresetToDownload);
+
+                    } else if (mDocumentFileToDownload != null) {
+                        downloadDocumentFile(mDocumentFileToDownload);
+
+                    } else {
+                        mToastMessageLiveData.setValue(R.string.error);
+                    }
+
+                    // clear the references
+                    setPresetToDownload(null);
+                    setDocumentFileToDownload(null);
+
+                } else {
+                    // at least one permission was denied
+                    mToastMessageLiveData.setValue(
+                            R.string.workflow_detail_files_fragment_permissions_not_granted);
+                }
+            }
+        }
     }
 
     /**

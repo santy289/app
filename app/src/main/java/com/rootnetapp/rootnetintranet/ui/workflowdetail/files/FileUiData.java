@@ -2,7 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.files;
 
 import java.io.File;
 
-public class FileUiData {
+class FileUiData {
 
     private File file;
     private String mimeType;

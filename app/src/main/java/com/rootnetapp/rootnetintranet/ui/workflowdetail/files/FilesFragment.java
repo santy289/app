@@ -1,9 +1,11 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.files;
 
+import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -29,12 +31,14 @@ import javax.inject.Inject;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import static com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesViewModel.REQUEST_EXTERNAL_STORAGE_PERMISSIONS;
 import static com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesViewModel.REQUEST_FILE_TO_ATTACH;
 
 public class FilesFragment extends Fragment implements FilesFragmentInterface {
@@ -95,7 +99,7 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
         filesViewModel.getObservableFilesTabCounter().observe(this, this::updateTabCounter);
         filesViewModel.getObservableUploadedFileName().observe(this, this::setFileUploadedTextWith);
         filesViewModel.getObservableAttachButtonText().observe(this, this::setButtonAttachmentText);
-        filesViewModel.getObservableOpenDownloadedFile().observe(this, this::openPresetFile);
+        filesViewModel.getObservableOpenDownloadedFile().observe(this, this::openDownloadedFile);
 
         filesViewModel.showLoading.observe(this, this::showLoading);
         filesViewModel.setDocumentsView.observe(this, this::setDocumentsView);
@@ -246,13 +250,28 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
 
     @Override
     public void downloadPreset(Preset preset) {
-        filesViewModel.downloadPreset(preset);
+        if (checkExternalStoragePermissions()) {
+            filesViewModel.downloadPreset(preset);
+        } else {
+            filesViewModel.setPresetToDownload(preset);
+
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                            Manifest.permission.READ_EXTERNAL_STORAGE},
+                    REQUEST_EXTERNAL_STORAGE_PERMISSIONS);
+        }
     }
 
     @Override
-    public void downloadDocumentFile(DocumentsFile documentsFile){
-        //todo permissions
-        filesViewModel.downloadDocumentFile(documentsFile);
+    public void downloadDocumentFile(DocumentsFile documentsFile) {
+        if (checkExternalStoragePermissions()) {
+            filesViewModel.downloadDocumentFile(documentsFile);
+        } else {
+            filesViewModel.setDocumentFileToDownload(documentsFile);
+
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                            Manifest.permission.READ_EXTERNAL_STORAGE},
+                    REQUEST_EXTERNAL_STORAGE_PERMISSIONS);
+        }
     }
 
     /**
@@ -265,13 +284,14 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
      * @see <a href="https://developer.android.com/reference/android/support/v4/content/FileProvider">FileProvider</a>
      */
     @UiThread
-    private void openPresetFile(FileUiData fileUiData) {
+    private void openDownloadedFile(FileUiData fileUiData) {
         if (fileUiData.getFile() == null) return;
 
         Intent target = new Intent(Intent.ACTION_VIEW);
 
         Uri fileUri = FileProvider.getUriForFile(getContext(),
-                getContext().getApplicationContext().getPackageName() + ".fileprovider", fileUiData.getFile());
+                getContext().getApplicationContext().getPackageName() + ".fileprovider",
+                fileUiData.getFile());
 
         target.setDataAndType(fileUri, fileUiData.getMimeType());
         target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -285,5 +305,24 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
             // Instruct the user to install a PDF reader here
             showToastMessage(R.string.workflow_detail_files_fragment_cannot_open_file);
         }
+    }
+
+    /**
+     * Verify whether the user has granted permissions to read/write the external storage.
+     *
+     * @return whether the permissions are granted.
+     */
+    private boolean checkExternalStoragePermissions() {
+        // Here, thisActivity is the current activity
+        return ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        filesViewModel.handleRequestPermissionsResult(requestCode, grantResults);
     }
 }

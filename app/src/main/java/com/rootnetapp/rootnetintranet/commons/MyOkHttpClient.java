@@ -1,8 +1,5 @@
 package com.rootnetapp.rootnetintranet.commons;
 
-import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
-import okhttp3.OkHttpClient;
-
 import java.security.cert.CertificateException;
 
 import javax.net.ssl.HostnameVerifier;
@@ -11,6 +8,10 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+
+import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 public class MyOkHttpClient {
     public static OkHttpClient getUnsafeOkHttpClient() {
@@ -49,7 +50,12 @@ public class MyOkHttpClient {
                 }
             });
 
+            //for debug, logs every request with the tag OkHttp
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
             OkHttpClient client = RetrofitUrlManager.getInstance().with(builder)
+                    .addInterceptor(logging)
                     .build();
 
             //OkHttpClient okHttpClient = builder.build();

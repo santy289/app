@@ -6,6 +6,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.ProfileDao;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
+import com.rootnetapp.rootnetintranet.models.requests.approval.ApprovalRequest;
 import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.WorkflowApproveRejectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
@@ -50,26 +51,45 @@ public class StatusRepository {
         return profileDao.getProfilesInvolved(id);
     }
 
+    /**
+     * Gets the desired WorkflowType by the object ID.
+     *
+     * @param auth   Access token to use for endpoint request.
+     * @param typeId object ID that will be passed on to the endpoint.
+     */
     protected Observable<WorkflowTypeResponse> getWorkflowType(String auth, int typeId) {
         return service.getWorkflowType(auth, typeId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    /**
+     * Gets the desired Workflow by the object ID.
+     *
+     * @param auth       Access token to use for endpoint request.
+     * @param workflowId object ID that will be passed on to the endpoint.
+     */
     protected Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {
         return service.getWorkflow(auth, workflowId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    /**
+     * Performs a request to either approve or reject a certain status of a Workflow.
+     *
+     * @param token      Access token to use for endpoint request.
+     * @param workflowId object ID to perform the action that will be passed on to the endpoint.
+     * @param isApproved whether to approve or reject the specified status.
+     * @param nextStatus the status to approve or reject.
+     */
     protected void approveWorkflow(String token, int workflowId, boolean isApproved, int nextStatus) {
         Disposable disposable = service.postApproveReject(
                 token,
                 workflowId,
-                isApproved,
-                nextStatus
+                new ApprovalRequest(isApproved, nextStatus)
         )
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(success -> responseApproveRejection.postValue(success), throwable -> {
+                .subscribe(success -> responseApproveRejection.setValue(success), throwable -> {
                     Log.d(TAG, "approveWorkflow: " + throwable.getMessage());
                     showLoading.setValue(false);
                 });

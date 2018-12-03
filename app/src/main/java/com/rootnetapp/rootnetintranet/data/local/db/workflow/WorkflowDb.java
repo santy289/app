@@ -1,5 +1,16 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflow;
 
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.converters.StringDateConverter;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
+import com.rootnetapp.rootnetintranet.models.createworkflow.SpecificApprovers;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.NextStatusRequirements;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
+import com.squareup.moshi.Json;
+
+import java.util.List;
+
 import androidx.room.ColumnInfo;
 import androidx.room.Embedded;
 import androidx.room.Entity;
@@ -8,17 +19,6 @@ import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
-
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.converters.StringDateConverter;
-import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
-import com.rootnetapp.rootnetintranet.models.createworkflow.SpecificApprovers;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
-import com.squareup.moshi.Json;
-
-import java.util.List;
 
 @Entity(foreignKeys = @ForeignKey(entity = WorkflowTypeDb.class,
                                             parentColumns = "id",
@@ -145,6 +145,10 @@ public class WorkflowDb {
     @Ignore
     @Json(name = "pending_approval")
     private List<Integer> pendingApproval;
+
+    @Ignore
+    @Json(name = "next_status_requirements")
+    private NextStatusRequirements nextStatusRequirements;
 
     public WorkflowTypeDb getWorkflowType() {
         return workflowType;
@@ -362,4 +366,11 @@ public class WorkflowDb {
         this.currentStatusName = currentStatusName;
     }
 
+    public NextStatusRequirements getNextStatusRequirements() {
+        return nextStatusRequirements;
+    }
+
+    public void setNextStatusRequirements(NextStatusRequirements nextStatusRequirements) {
+        this.nextStatusRequirements = nextStatusRequirements;
+    }
 }

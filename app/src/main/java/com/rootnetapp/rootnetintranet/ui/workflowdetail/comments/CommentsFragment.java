@@ -24,6 +24,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
@@ -77,6 +78,7 @@ public class CommentsFragment extends Fragment {
 
         setupSwitch();
         setOnClickListeners();
+        setupRecycler();
         subscribe();
         commentsViewModel.initDetails(token, mWorkflowListItem);
 
@@ -86,8 +88,8 @@ public class CommentsFragment extends Fragment {
     private void subscribe() {
         final Observer<Integer> errorObserver = ((Integer data) -> {
             showLoading(false);
-            if (null != data) {
-                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
+            if (data != null) {
+                showToastMessage(data);
             }
         });
 
@@ -108,6 +110,13 @@ public class CommentsFragment extends Fragment {
                     updateSwitchUi(isChecked);
                     commentsViewModel.setPrivateComment(isChecked);
                 });
+    }
+
+    private void setupRecycler() {
+        mCommentsAdapter = new CommentsAdapter(new ArrayList<>());
+        mBinding.rvComments.setLayoutManager(new LinearLayoutManager(getContext()));
+        mBinding.rvComments.setAdapter(mCommentsAdapter);
+        mBinding.rvComments.setNestedScrollingEnabled(false);
     }
 
     private void setOnClickListeners() {
@@ -139,19 +148,16 @@ public class CommentsFragment extends Fragment {
     @UiThread
     private void updateCommentsList(List<Comment> commentList) {
         mCommentsAdapter = new CommentsAdapter(commentList);
-        mBinding.rvComments.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvComments.setAdapter(mCommentsAdapter);
-        mBinding.rvComments.setNestedScrollingEnabled(false);
     }
 
     @UiThread
     private void addNewComment(Comment comment) {
-        if (comment != null && (null != mCommentsAdapter)) {
-            mCommentsAdapter.comments.add(0, comment);
-            mCommentsAdapter.notifyItemChanged(0);
+        if (comment != null && mCommentsAdapter != null) {
+            mCommentsAdapter.addItem(comment);
+            hideCommentsList(false);
         } else {
-            Toast.makeText(getContext(), getString(R.string.error_comment), Toast.LENGTH_LONG)
-                    .show();
+            showToastMessage(R.string.error_comment);
         }
         mBinding.etComment.setText(null);
     }
@@ -195,5 +201,14 @@ public class CommentsFragment extends Fragment {
             mBinding.switchPrivatePublic.setTextColor(getResources().getColor(R.color.dark_gray));
         }
         mBinding.switchPrivatePublic.setText(state);
+    }
+
+    @UiThread
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                getContext(),
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
     }
 }

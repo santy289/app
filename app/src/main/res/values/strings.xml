@@ -71,7 +71,7 @@
     <string name="description">Description</string>
     <string name="lastname">Last Name</string>
     <string name="creator">Creator</string>
-    <string name="type">Type</string>
+    <string name="type">Please select a workflow type</string>
     <string name="created_at">Created At</string>
     <string name="condition">Condition</string>
     <string name="country">Country</string>
@@ -218,12 +218,17 @@
     <string name="request_successfully">Request done successfully.</string>
 
     <!--WorkflowDetailFragment-->
+    <string name="workflow_detail_status_fragment_open_file">Open File</string>
+    <string name="workflow_detail_status_fragment_no_pdf_reader">This file cannot be opened by your device. Please install a PDF reader.</string>
+    <string name="workflow_detail_status_fragment_permissions_not_granted">Cannot export PDF because the permissions were not granted.</string>
     <!--StatusFragment-->
     <string name="workflow_detail_status_fragment_title">Status</string>
     <string name="workflow_detail_status_fragment_status_summary">Workflow Status</string>
-    <string name="workflow_detail_status_fragment_status_summary_last_status">Last Status</string>
+    <string name="workflow_detail_status_fragment_status_summary_last_status">Previous Status</string>
     <string name="workflow_detail_status_fragment_status_summary_current_status">Current Status</string>
     <string name="workflow_detail_status_fragment_status_summary_next_status">Next Statuses</string>
+    <string name="workflow_detail_status_fragment_status_summary_tied_status">Tied</string>
+    <string name="workflow_detail_status_fragment_status_summary_tied_status_message">The current status is tied</string>
     <string name="workflow_detail_status_fragment_next_step">Choose Next Step</string>
     <string name="workflow_detail_status_fragment_next_step_approvers">Next step approvers:</string>
     <string name="workflow_detail_status_fragment_next_step_mass_approval">Mass approval</string>
@@ -232,6 +237,7 @@
     <string name="workflow_detail_status_fragment_reject">Reject</string>
     <string name="workflow_detail_status_fragment_spinner_title">- Select Step -</string>
     <string name="workflow_detail_status_fragment_must_select_step">You must select a step first</string>
+    <string name="workflow_detail_status_fragment_export_pdf">Export PDF</string>
     <!--InformationFragment-->
     <string name="workflow_detail_information_fragment_title">@string/workflow_detail_information_fragment_information</string>
     <string name="workflow_detail_information_fragment_important_things">Important Things About This Step</string>

@@ -1,4 +1,4 @@
-<layout>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
@@ -13,10 +13,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/white"
-            android:paddingBottom="10dp"
-            android:paddingEnd="15dp"
             android:paddingStart="15dp"
             android:paddingTop="10dp"
+            android:paddingEnd="15dp"
+            android:paddingBottom="10dp"
             android:text="@string/timeline"
             android:textAllCaps="true"
             android:textColor="@color/colorPrimaryDark"
@@ -28,32 +28,32 @@
             android:layout_height="0.5dp"
             android:background="@color/detailsColor" />
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_marginTop="20dp"
             android:layout_marginBottom="10dp"
-            android:paddingEnd="15dp"
+            android:orientation="horizontal"
             android:paddingStart="15dp"
-            android:layout_marginTop="20dp">
+            android:paddingEnd="15dp">
 
             <LinearLayout
                 android:id="@+id/btn_selectdates"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_toStartOf="@+id/lyt_fltr"
-                android:background="@drawable/unselectedfilter_bg"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="2"
+                android:background="@drawable/border_bg_timeline_buttons"
                 android:gravity="center_vertical"
-                android:layout_centerVertical="true"
                 android:orientation="horizontal"
-                android:paddingBottom="10dp"
-                android:paddingTop="10dp">
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp">
 
                 <ImageView
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:layout_marginEnd="4dp"
                     android:layout_marginStart="8dp"
+                    android:layout_marginEnd="4dp"
                     android:src="@drawable/ic_mail_black_24dp"
                     android:tint="@color/transparentArrow" />
 
@@ -66,75 +66,106 @@
                         android:id="@+id/tv_selecteddatetitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
                         android:layout_marginStart="4dp"
-                        android:text="Selected dates: "
+                        android:layout_marginEnd="8dp"
                         android:textColor="@color/colorPrimary"
-                        android:textSize="10sp" />
+                        android:textSize="12sp"
+                        tools:text="Selected dates: " />
 
                     <TextView
                         android:id="@+id/tv_selecteddates"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
                         android:layout_marginStart="4dp"
-                        android:text="(Dec 1 2017 - Dec 31 2017)"
+                        android:layout_marginEnd="8dp"
                         android:textColor="@color/colorPrimary"
-                        android:textSize="10sp" />
+                        android:textSize="12sp"
+                        tools:text="(Dec 1 2017 - Dec 31 2017)" />
 
                 </LinearLayout>
-
-
-
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/lyt_fltr"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="20dp">
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/border_bg_timeline_buttons"
+                android:orientation="vertical"
+                android:padding="1dp">
 
-                <Button
-                    android:id="@+id/btn_day"
-                    android:layout_width="45dp"
-                    android:layout_height="35dp"
-                    android:background="@drawable/unselectedfilter_bg"
+                <TextView
+                    android:id="@+id/tv_day"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/unselected_filter"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:minWidth="40dp"
+                    android:paddingStart="16dp"
+                    android:paddingTop="5dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="5dp"
                     android:text="@string/day"
+                    android:textAllCaps="true"
                     android:textColor="@color/unselected_filter_text"
-                    android:textSize="9sp" />
+                    android:textSize="12sp" />
 
-                <Button
-                    android:id="@+id/btn_week"
-                    android:layout_width="45dp"
-                    android:layout_height="35dp"
-                    android:background="@drawable/unselectedfilter_bg"
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/detailsColor" />
+
+                <TextView
+                    android:id="@+id/tv_week"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/unselected_filter"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:paddingStart="16dp"
+                    android:paddingTop="5dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="5dp"
                     android:text="@string/week"
+                    android:textAllCaps="true"
                     android:textColor="@color/unselected_filter_text"
-                    android:textSize="9sp" />
+                    android:textSize="12sp" />
 
-                <Button
-                    android:id="@+id/btn_month"
-                    android:layout_width="45dp"
-                    android:layout_height="35dp"
-                    android:background="@drawable/selectedfilter_bg"
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/detailsColor" />
+
+                <TextView
+                    android:id="@+id/tv_month"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/selected_filter"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:paddingStart="16dp"
+                    android:paddingTop="5dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="5dp"
                     android:text="@string/month"
+                    android:textAllCaps="true"
                     android:textColor="@color/white"
-                    android:textSize="9sp" />
+                    android:textSize="12sp" />
 
             </LinearLayout>
 
-        </RelativeLayout>
+        </LinearLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/grey_bg"
+            android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
-            android:paddingEnd="15dp"
+            android:background="@color/grey_bg"
             android:paddingStart="15dp"
-            android:layout_marginTop="10dp">
+            android:paddingEnd="15dp">
 
             <ImageView
                 android:id="@+id/img_filter"
@@ -143,15 +174,15 @@
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:background="@drawable/unselectedfilter_bg"
-                android:tint="@color/selected_filter"
                 android:padding="15dp"
-                android:src="@drawable/ic_mail_black_24dp"/>
+                android:src="@drawable/ic_mail_black_24dp"
+                android:tint="@color/selected_filter" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_toStartOf="@id/img_filter"
                 android:layout_centerVertical="true"
+                android:layout_toStartOf="@id/img_filter"
                 android:orientation="vertical">
 
                 <TextView
@@ -159,8 +190,8 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="10dp"
                     android:paddingBottom="3dp"
-                    android:textStyle="bold"
-                    android:text="@string/filtered_by"/>
+                    android:text="@string/filtered_by"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tv_filtertype"
@@ -168,8 +199,8 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="3dp"
                     android:paddingBottom="10dp"
-                    android:textColor="@color/colorPrimary"
-                    android:text="Filter Type"/>
+                    android:text="Filter Type"
+                    android:textColor="@color/colorPrimary" />
 
             </LinearLayout>
 
@@ -179,18 +210,18 @@
             android:id="@+id/rec_timeline"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingEnd="15dp"
-            android:paddingStart="15dp" />
+            android:paddingStart="15dp"
+            android:paddingEnd="15dp" />
 
         <TextView
             android:id="@+id/lyt_notimeline"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingEnd="15dp"
-            android:paddingTop="10dp"
             android:paddingStart="15dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="15dp"
             android:text="@string/no_items"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
     </LinearLayout>
 </layout>

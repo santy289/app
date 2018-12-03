@@ -72,7 +72,7 @@
     <string name="description">Descripción</string>
     <string name="lastname">Apellido</string>
     <string name="creator">Autor</string>
-    <string name="type">Tipo</string>
+    <string name="type">Seleccione un tipo de workflow</string>
     <string name="created_at">Creado En</string>
     <string name="condition">Condición</string>
     <string name="country">País</string>
@@ -216,12 +216,17 @@
     <string name="request_successfully">Pedido realizado exitosamente.</string>
 
     <!--WorkflowDetailFragment-->
+    <string name="workflow_detail_status_fragment_open_file">Abrir Archivo</string>
+    <string name="workflow_detail_status_fragment_no_pdf_reader">Su dispositivo no puede abrir archivos PDF. Por favor instale un lector de PDF.</string>
+    <string name="workflow_detail_status_fragment_permissions_not_granted">No es posible exportar el PDF debido a que los permisos no fueron otorgados.</string>
     <!--StatusFragment-->
     <string name="workflow_detail_status_fragment_title">Estatus</string>
     <string name="workflow_detail_status_fragment_status_summary">Estatus del Workflow</string>
-    <string name="workflow_detail_status_fragment_status_summary_last_status">Último Estatus</string>
+    <string name="workflow_detail_status_fragment_status_summary_last_status">Estatus Anterior</string>
     <string name="workflow_detail_status_fragment_status_summary_current_status">Estatus Actual</string>
     <string name="workflow_detail_status_fragment_status_summary_next_status">Próximo Estatus</string>
+    <string name="workflow_detail_status_fragment_status_summary_tied_status">Empatado</string>
+    <string name="workflow_detail_status_fragment_status_summary_tied_status_message">El estatus actual está empatado</string>
     <string name="workflow_detail_status_fragment_next_step">Elija el Siguiente Paso</string>
     <string name="workflow_detail_status_fragment_next_step_approvers">Aprobadores del siguiente paso:</string>
     <string name="workflow_detail_status_fragment_next_step_mass_approval">Aprobación masiva</string>
@@ -230,6 +235,7 @@
     <string name="workflow_detail_status_fragment_reject">Rechazar</string>
     <string name="workflow_detail_status_fragment_spinner_title">- Elija un Estatus -</string>
     <string name="workflow_detail_status_fragment_must_select_step">Debes seleccionar un estatus</string>
+    <string name="workflow_detail_status_fragment_export_pdf">Exportar PDF</string>
     <!--InformationFragment-->
     <string name="workflow_detail_information_fragment_title">@string/workflow_detail_information_fragment_information</string>
     <string name="workflow_detail_information_fragment_important_things">Datos Importantes Sobre Este Estatus</string>

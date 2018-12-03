@@ -257,6 +257,12 @@ public class FilesViewModel extends ViewModel {
     }
 
     protected void downloadPreset(Preset preset) {
+        if (preset.getPresetFile() == null) {
+            mToastMessageLiveData
+                    .setValue(R.string.workflow_detail_files_fragment_preset_unavailable);
+            return;
+        }
+
         downloadFile(preset.getPresetFile().getEntity().toLowerCase(Locale.US),
                 preset.getPresetFile().getId());
     }

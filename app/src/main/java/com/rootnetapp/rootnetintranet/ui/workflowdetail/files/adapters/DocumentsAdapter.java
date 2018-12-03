@@ -69,7 +69,12 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder> 
             String hour = file.getCreatedAt().split(" ")[1];
             holder.binding.tvDate.setText(date + " - " + hour);
         } else {
-            holder.binding.tvFileName.setText(item.getName());
+            if (item.getPresetFile() != null) {
+                holder.binding.tvFileName.setText(item.getPresetFile().getFileName());
+                holder.binding.imgDownload.setVisibility(View.VISIBLE);
+            } else {
+                holder.binding.imgDownload.setVisibility(View.GONE);
+            }
             holder.binding.imgUploaded.setImageResource(R.drawable.ic_close_black_24dp);
             holder.binding.imgUploaded.setColorFilter(ContextCompat.getColor(context, R.color.red),
                     android.graphics.PorterDuff.Mode.SRC_IN);
@@ -96,8 +101,19 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder> 
             }
         });
 
-        holder.binding.imgDownload.setOnClickListener(
-                v -> mFilesFragmentInterface.downloadPreset(item));
+        DocumentsFile finalFile = file;
+        holder.binding.imgDownload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (finalFile != null) {
+                    // file exists, proceed to download it
+                    mFilesFragmentInterface.downloadDocumentFile(finalFile);
+                } else {
+                    // file has not been uploaded, download the preset instead
+                    mFilesFragmentInterface.downloadPreset(item);
+                }
+            }
+        });
     }
 
     @Override

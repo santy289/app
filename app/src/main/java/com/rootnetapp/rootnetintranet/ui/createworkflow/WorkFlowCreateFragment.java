@@ -17,6 +17,7 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.FragmentCreateWorkflowBinding;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.adapters.FormItemsAdapter;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
@@ -119,6 +120,62 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         return view;
     }
 
+    private void subscribe() {
+
+        viewModel.getObservableAddWorkflowTypeItem().observe(this, this::addWorkflowTypeItem);
+        viewModel.getObservableAddFormItem().observe(this, this::addItemToForm);
+        viewModel.getObservableAddFormItemList().observe(this, this::addItemListToForm);
+
+        viewModel.setFieldTextWithData.observe(this, this::addTexFieldData);
+
+        final Observer<Boolean> showLoadingObserver = (this::showLoading);
+        viewModel.getObservableShowLoading().observe(this, showLoadingObserver);
+
+        final Observer<DialogMessage> showDialogObserver = (this::showDialog);
+        viewModel.getObservableShowDialogMessage().observe(this, showDialogObserver);
+
+        viewModel.setTypeList.observe(this, this::addFieldList);
+
+        viewModel.buildForm.observe(this, (build -> buildForm()));
+
+        viewModel.setTextField.observe(this, this::addTexField);
+
+        viewModel.setTextFieldMultiLine.observe(this, this::addTextFieldMultiLines);
+
+        viewModel.setDatePicker.observe(this, this::datePickerField);
+
+        viewModel.setFormHeader.observe(this, this::formHeader);
+
+        viewModel.setFieldList.observe(this, this::addFieldList);
+
+        viewModel.setFieldNumericWithData.observe(this, this::addNumericField);
+
+        viewModel.setFieldAreaWithData.observe(this, this::addTextFieldMultiLines);
+
+        viewModel.setFieldDateWithData.observe(this, this::datePickerField);
+
+        viewModel.refreshForm.observe(this, refresh -> refreshForm());
+
+        viewModel.setFieldSwitchWithData.observe(this, this::addSwitchField);
+
+        viewModel.setFieldEmailWithData.observe(this, this::addEmailField);
+
+        viewModel.setFieldPhoneWithData.observe(this, this::addPhoneField);
+
+        viewModel.setListWithData.observe(this, this::addList);
+
+        viewModel.setFileUploadField.observe(this, this::fileUploadField);
+
+        viewModel.clearFormFields.observe(this, this::clearFormFields);
+
+        viewModel.goBack.observe(this, back -> goBack());
+
+        viewModel.showUploadButton.observe(this, this::setUploadMenu);
+
+        viewModel.chooseFile.observe(this, choose -> chooseFile());
+
+    }
+
     private void setupFormRecycler() {
         mAdapter = new FormItemsAdapter(getContext(), new ArrayList<>());
         mBinding.rvFields.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -212,8 +269,8 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
                 .setOptions(settings.items).setPickerTitle(getString(R.string.pick_option));
         formItems.add(fieldList);
     }
-
     // Single line
+
     private void addTexField(int[] settingsData) {
         String label = getString(settingsData[CreateWorkflowViewModel.INDEX_RES_STRING]);
         boolean required = settingsData[CreateWorkflowViewModel.INDEX_REQUIRED] == CreateWorkflowViewModel.REQUIRED;
@@ -234,8 +291,8 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
                 .setRequired(required);
         formItems.add(textField);
     }
-
     // Multiple lines
+
     private void addTextFieldMultiLines(int[] settingsData) {
         String label = getString(settingsData[CreateWorkflowViewModel.INDEX_RES_STRING]);
         boolean required = settingsData[CreateWorkflowViewModel.INDEX_REQUIRED] == CreateWorkflowViewModel.REQUIRED;
@@ -421,6 +478,16 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
     }
 
     @UiThread
+    private void addWorkflowTypeItem(SingleChoiceFormItem singleChoiceFormItem) {
+        mAdapter.addItem(singleChoiceFormItem);
+
+        singleChoiceFormItem.setOnSelectedListener(item -> {
+            String selection = item.getValue();
+            viewModel.generateFieldsByType(selection);
+        });
+    }
+
+    @UiThread
     private void addItemToForm(BaseFormItem item) {
         mAdapter.addItem(item);
     }
@@ -428,61 +495,6 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
     @UiThread
     private void addItemListToForm(List<BaseFormItem> list) {
         mAdapter.addList(list); //todo check lag when adding many
-    }
-
-    private void subscribe() {
-
-        viewModel.getObservableAddFormItem().observe(this, this::addItemToForm);
-        viewModel.getObservableAddFormItemList().observe(this, this::addItemListToForm);
-
-        viewModel.setFieldTextWithData.observe(this, this::addTexFieldData);
-
-        final Observer<Boolean> showLoadingObserver = (this::showLoading);
-        viewModel.getObservableShowLoading().observe(this, showLoadingObserver);
-
-        final Observer<DialogMessage> showDialogObserver = (this::showDialog);
-        viewModel.getObservableShowDialogMessage().observe(this, showDialogObserver);
-
-        viewModel.setTypeList.observe(this, this::addFieldList);
-
-        viewModel.buildForm.observe(this, (build -> buildForm()));
-
-        viewModel.setTextField.observe(this, this::addTexField);
-
-        viewModel.setTextFieldMultiLine.observe(this, this::addTextFieldMultiLines);
-
-        viewModel.setDatePicker.observe(this, this::datePickerField);
-
-        viewModel.setFormHeader.observe(this, this::formHeader);
-
-        viewModel.setFieldList.observe(this, this::addFieldList);
-
-        viewModel.setFieldNumericWithData.observe(this, this::addNumericField);
-
-        viewModel.setFieldAreaWithData.observe(this, this::addTextFieldMultiLines);
-
-        viewModel.setFieldDateWithData.observe(this, this::datePickerField);
-
-        viewModel.refreshForm.observe(this, refresh -> refreshForm());
-
-        viewModel.setFieldSwitchWithData.observe(this, this::addSwitchField);
-
-        viewModel.setFieldEmailWithData.observe(this, this::addEmailField);
-
-        viewModel.setFieldPhoneWithData.observe(this, this::addPhoneField);
-
-        viewModel.setListWithData.observe(this, this::addList);
-
-        viewModel.setFileUploadField.observe(this, this::fileUploadField);
-
-        viewModel.clearFormFields.observe(this, this::clearFormFields);
-
-        viewModel.goBack.observe(this, back -> goBack());
-
-        viewModel.showUploadButton.observe(this, this::setUploadMenu);
-
-        viewModel.chooseFile.observe(this, choose -> chooseFile());
-
     }
 
 }

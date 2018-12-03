@@ -72,6 +72,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Integer> mCreateErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
+    private MutableLiveData<SingleChoiceFormItem> mAddWorkflowTypeItemLiveData;
     private MutableLiveData<BaseFormItem> mAddFormItemLiveData;
     private MutableLiveData<List<BaseFormItem>> mAddFormItemListLiveData;
     private List<WorkflowTypeItemMenu> workflowTypeMenuItems;
@@ -807,7 +808,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(singleChoiceFormItem -> {
-                    mAddFormItemLiveData.setValue((SingleChoiceFormItem) singleChoiceFormItem);
+                    mAddWorkflowTypeItemLiveData.setValue((SingleChoiceFormItem) singleChoiceFormItem);
                     showLoading.setValue(false);
                 }, throwable -> {
                     Log.d(TAG, "setWorkflowTypes: error " + throwable.getMessage());
@@ -1516,6 +1517,13 @@ public class CreateWorkflowViewModel extends ViewModel {
             showDialogMessage = new MutableLiveData<>();
         }
         return showDialogMessage;
+    }
+
+    protected LiveData<SingleChoiceFormItem> getObservableAddWorkflowTypeItem() {
+        if (mAddWorkflowTypeItemLiveData == null) {
+            mAddWorkflowTypeItemLiveData = new MutableLiveData<>();
+        }
+        return mAddWorkflowTypeItemLiveData;
     }
 
     protected LiveData<BaseFormItem> getObservableAddFormItem() {

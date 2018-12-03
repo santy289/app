@@ -87,42 +87,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tv_title_next_step" />
 
-            <TextView
-                android:id="@+id/tv_title_all_people_involved"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/workflow_detail_status_fragment_all_people_involved"
-                android:textAllCaps="true"
-                android:textColor="@color/workflow_details_section_title"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="@id/tv_title_workflow_status"
-                app:layout_constraintTop_toBottomOf="@id/include_next_step" />
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="2dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:background="@color/workflow_details_section_title_bar"
-                app:layout_constraintBottom_toBottomOf="@+id/tv_title_all_people_involved"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/tv_title_all_people_involved"
-                app:layout_constraintTop_toTopOf="@+id/tv_title_all_people_involved" />
-
-            <include
-                android:id="@+id/include_all_people_involved"
-                layout="@layout/fragment_workflow_detail_status_all_people_involved"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_title_all_people_involved" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 </layout>

@@ -117,7 +117,7 @@
     <string name="axe">Axe</string>
     <string name="people_involved">PEOPLE INVOLVED</string>
     <string name="approval_history">WORKFLOW APPROVAL HISTORY</string>
-    <string name="approved">Approved:</string>
+    <string name="approved">Approved</string>
     <string name="template">TEMPLATE:</string>
     <string name="upload">UPLOAD</string>
     <string name="versions">Versions</string>
@@ -218,10 +218,11 @@
     <string name="request_successfully">Request done successfully.</string>
     <string name="functionality_not_available">This functionality is not available yet</string>
 
-    <!--WorkflowDetailFragment-->
-    <string name="workflow_detail_status_fragment_open_file">Open File</string>
-    <string name="workflow_detail_status_fragment_no_pdf_reader">This file cannot be opened by your device. Please install a PDF reader.</string>
-    <string name="workflow_detail_status_fragment_permissions_not_granted">Cannot export PDF because the permissions were not granted.</string>
+    <!--WorkflowDetailActivity-->
+    <string name="workflow_detail_activity_title">Workflow Details</string>
+    <string name="workflow_detail_activity_open_file">Open File</string>
+    <string name="workflow_detail_activity_no_pdf_reader">This file cannot be opened by your device. Please install a PDF reader.</string>
+    <string name="workflow_detail_activity_permissions_not_granted">Cannot export PDF because the permissions were not granted.</string>
     <!--StatusFragment-->
     <string name="workflow_detail_status_fragment_title">Status</string>
     <string name="workflow_detail_status_fragment_status_summary">Workflow Status</string>
@@ -233,7 +234,6 @@
     <string name="workflow_detail_status_fragment_next_step">Choose Next Step</string>
     <string name="workflow_detail_status_fragment_next_step_approvers">Next step approvers:</string>
     <string name="workflow_detail_status_fragment_next_step_mass_approval">Mass approval</string>
-    <string name="workflow_detail_status_fragment_all_people_involved">People Involved In All Statuses</string>
     <string name="workflow_detail_status_fragment_approve">Approve</string>
     <string name="workflow_detail_status_fragment_reject">Reject</string>
     <string name="workflow_detail_status_fragment_spinner_title">- Select Step -</string>
@@ -250,6 +250,8 @@
     <string name="workflow_detail_information_fragment_end_date">End Date</string>
     <string name="workflow_detail_information_fragment_project_time">Project Time (months)</string>
     <string name="workflow_detail_information_fragment_owner">Owner</string>
+    <!--PeopleInvolvedFragment-->
+    <string name="workflow_detail_people_involved_fragment_title">People Involved</string>
     <!--ApprovalHistoryFragment-->
     <string name="workflow_detail_approval_history_fragment_title">@string/workflow_detail_approval_history_fragment_approval_history</string>
     <string name="workflow_detail_approval_history_fragment_approval_history">Approval History</string>

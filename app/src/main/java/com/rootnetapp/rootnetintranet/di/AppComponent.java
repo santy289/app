@@ -40,7 +40,7 @@ import com.rootnetapp.rootnetintranet.ui.splash.SplashModule;
 import com.rootnetapp.rootnetintranet.ui.sync.SyncActivity;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineModule;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryModule;
@@ -50,6 +50,8 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationModule;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved.PeopleInvolvedFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved.PeopleInvolvedModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusModule;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
@@ -84,6 +86,7 @@ import dagger.Component;
                 ApprovalHistoryModule.class,
                 CommentsModule.class,
                 FilesModule.class,
+                PeopleInvolvedModule.class
                 QuickActionsModule.class,
                 WorkflowSearchModule.class,
                 PerformActionModule.class,
@@ -129,7 +132,7 @@ public interface AppComponent {
 
     void inject(CustomCountryPicker countryPicker);
 
-    void inject(WorkflowDetailFragment workflowDetailFragment);
+    void inject(WorkflowDetailActivity workflowDetailActivity);
 
     void inject(TimelineFragment timelineFragment);
 
@@ -154,4 +157,6 @@ public interface AppComponent {
     void inject(PerformActionFragment performActionFragment);
 
     void inject(ChangeStatusActivity changeStatusActivity);
+
+    void inject(PeopleInvolvedFragment peopleInvolvedFragment);
 }

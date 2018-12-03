@@ -73,15 +73,21 @@ public class ApprovalHistoryViewModel extends ViewModel {
                     continue;
                 }
                 approverHistory.avatarPicture = profileInvolved.picture;
-                return  approverHistoryList;
             }
+
+            ApproverHistory.sortList(approverHistoryList);
+
             return approverHistoryList;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(approverHistories -> updateApprovalHistoryList.setValue(approverHistories), throwable -> {
-                    hideHistoryApprovalList.setValue(true);
-                    Log.d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable.getMessage());
-                });
+                .subscribe(
+                        approverHistories -> updateApprovalHistoryList.setValue(approverHistories),
+                        throwable -> {
+                            hideHistoryApprovalList.setValue(true);
+                            Log.d(TAG,
+                                    "updateProfilesInvolvedUi: Something went wrong - " + throwable
+                                            .getMessage());
+                        });
 
         mDisposables.add(disposable);
     }

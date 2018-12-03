@@ -5,11 +5,12 @@ import android.content.Context;
 import com.google.android.material.tabs.TabLayout;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved.PeopleInvolvedFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusFragment;
 
 import androidx.fragment.app.Fragment;
@@ -18,7 +19,7 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 /**
- * Adapter for {@link ViewPager} in {@link WorkflowDetailFragment}. Displays a fixed number of pages
+ * Adapter for {@link ViewPager} in {@link WorkflowDetailActivity}. Displays a fixed number of pages
  * linked with a {@link TabLayout}.
  */
 public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
@@ -51,10 +52,12 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
             case 1:
                 return InformationFragment.newInstance(mWorkflowItem);
             case 2:
-                return ApprovalHistoryFragment.newInstance(mWorkflowItem);
+                return PeopleInvolvedFragment.newInstance(mWorkflowItem);
             case 3:
-                return CommentsFragment.newInstance(mWorkflowItem, true);
+                return ApprovalHistoryFragment.newInstance(mWorkflowItem);
             case 4:
+                return CommentsFragment.newInstance(mWorkflowItem);
+            case 5:
                 return FilesFragment.newInstance(mWorkflowItem);
             default:
                 return null;
@@ -68,7 +71,7 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
      */
     @Override
     public int getCount() {
-        return 5;
+        return 6;
     }
 
     /**
@@ -90,14 +93,16 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
             case 1:
                 return mContext.getString(R.string.workflow_detail_information_fragment_title);
             case 2:
-                return mContext.getString(R.string.workflow_detail_approval_history_fragment_title);
+                return mContext.getString(R.string.workflow_detail_people_involved_fragment_title);
             case 3:
+                return mContext.getString(R.string.workflow_detail_approval_history_fragment_title);
+            case 4:
                 title = mContext.getString(R.string.workflow_detail_comments_fragment_title);
                 if (getCommentsCounter() > 0) {
                     title += " (" + getCommentsCounter() + ")";
                 }
                 return title;
-            case 4:
+            case 5:
                 title = mContext.getString(R.string.workflow_detail_files_fragment_title);
                 if (getFilesCounter() > 0) {
                     title += " (" + getFilesCounter() + ")";

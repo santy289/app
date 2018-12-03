@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,7 +27,7 @@ import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.WorkFlowCreateFragment;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityViewModel;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowExpandableAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowTypeSpinnerAdapter;
 
@@ -43,8 +44,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-public class WorkflowFragment extends Fragment implements WorkflowFragmentInterface,
-        SwipeRefreshLayout.OnRefreshListener {
+public class WorkflowFragment extends Fragment implements WorkflowFragmentInterface, SwipeRefreshLayout.OnRefreshListener {
 
     @Inject
     WorkflowViewModelFactory workflowViewModelFactory;
@@ -142,8 +142,9 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     @Override
     public void showDetail(WorkflowListItem item) {
         workflowViewModel.resetFilterSettings();
-        mainActivityInterface.showFragment(WorkflowDetailFragment.newInstance(item,
-                mainActivityInterface), true);
+        Intent intent = new Intent(getActivity(), WorkflowDetailActivity.class);
+        intent.putExtra(WorkflowDetailActivity.EXTRA_WORKFLOW_LIST_ITEM, item);
+        mainActivityInterface.showActivity(intent);
     }
 
     // swipe down to refresh - SwipeRefreshLayout

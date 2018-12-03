@@ -118,7 +118,7 @@
     <string name="axe">Axe</string>
     <string name="people_involved">PERSONAS INVOLUCRADAS</string>
     <string name="approval_history">HISTORIAL DE APROBACIONES DE WORKFLOW</string>
-    <string name="approved">Aprobado:</string>
+    <string name="approved">Aprobado</string>
     <string name="template">TEMPLATE:</string>
     <string name="upload">SUBIR</string>
     <string name="versions">Versiones</string>
@@ -216,10 +216,11 @@
     <string name="request_successfully">Pedido realizado exitosamente.</string>
     <string name="functionality_not_available">Esta función aún no está disponible.</string>
 
-    <!--WorkflowDetailFragment-->
-    <string name="workflow_detail_status_fragment_open_file">Abrir Archivo</string>
-    <string name="workflow_detail_status_fragment_no_pdf_reader">Su dispositivo no puede abrir archivos PDF. Por favor instale un lector de PDF.</string>
-    <string name="workflow_detail_status_fragment_permissions_not_granted">No es posible exportar el PDF debido a que los permisos no fueron otorgados.</string>
+    <!--WorkflowDetailActivity-->
+    <string name="workflow_detail_activity_title">Detalles de Workflow</string>
+    <string name="workflow_detail_activity_open_file">Abrir Archivo</string>
+    <string name="workflow_detail_activity_no_pdf_reader">Su dispositivo no puede abrir archivos PDF. Por favor instale un lector de PDF.</string>
+    <string name="workflow_detail_activity_permissions_not_granted">No es posible exportar el PDF debido a que los permisos no fueron otorgados.</string>
     <!--StatusFragment-->
     <string name="workflow_detail_status_fragment_title">Estatus</string>
     <string name="workflow_detail_status_fragment_status_summary">Estatus del Workflow</string>
@@ -231,7 +232,6 @@
     <string name="workflow_detail_status_fragment_next_step">Elija el Siguiente Paso</string>
     <string name="workflow_detail_status_fragment_next_step_approvers">Aprobadores del siguiente paso:</string>
     <string name="workflow_detail_status_fragment_next_step_mass_approval">Aprobación masiva</string>
-    <string name="workflow_detail_status_fragment_all_people_involved">Personas Involucradas en los Estatus</string>
     <string name="workflow_detail_status_fragment_approve">Aprobar</string>
     <string name="workflow_detail_status_fragment_reject">Rechazar</string>
     <string name="workflow_detail_status_fragment_spinner_title">- Elija un Estatus -</string>
@@ -248,6 +248,8 @@
     <string name="workflow_detail_information_fragment_end_date">Fecha de Fin</string>
     <string name="workflow_detail_information_fragment_project_time">Tiempo de Projecto (meses)</string>
     <string name="workflow_detail_information_fragment_owner">Dueño</string>
+    <!--PeopleInvolvedFragment-->
+    <string name="workflow_detail_people_involved_fragment_title">Personas Involucradas</string>
     <!--ApprovalHistoryFragment-->
     <string name="workflow_detail_approval_history_fragment_title">@string/workflow_detail_approval_history_fragment_approval_history</string>
     <string name="workflow_detail_approval_history_fragment_approval_history">Historial de Aprobaciones</string>

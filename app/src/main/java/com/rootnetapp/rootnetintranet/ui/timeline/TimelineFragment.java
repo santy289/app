@@ -2,7 +2,6 @@ package com.rootnetapp.rootnetintranet.ui.timeline;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -85,9 +84,9 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         binding.recTimeline.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recTimeline.setNestedScrollingEnabled(false);
         subscribe();
-        binding.btnMonth.setOnClickListener(this::filterClicked);
-        binding.btnWeek.setOnClickListener(this::filterClicked);
-        binding.btnDay.setOnClickListener(this::filterClicked);
+        binding.tvMonth.setOnClickListener(this::filterClicked);
+        binding.tvWeek.setOnClickListener(this::filterClicked);
+        binding.tvDay.setOnClickListener(this::filterClicked);
         binding.btnSelectdates.setOnClickListener(this::selectDates);
         start = Utils.getMonthDay(0, 1);
         end = Utils.getMonthDay(0, 30);
@@ -117,7 +116,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
 
     private void filterClicked(View view) {
         switch (view.getId()) {
-            case R.id.btn_month: {
+            case R.id.tv_month: {
                 selectMonthButton(true);
                 selectWeekButton(false);
                 selectDayButton(false);
@@ -130,7 +129,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
                 end = end + "T00:00:00-0000";
                 break;
             }
-            case R.id.btn_week: {
+            case R.id.tv_week: {
                 selectMonthButton(false);
                 selectWeekButton(true);
                 selectDayButton(false);
@@ -143,7 +142,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
                 end = end + "T00:00:00-0000";
                 break;
             }
-            case R.id.btn_day: {
+            case R.id.tv_day: {
                 selectMonthButton(false);
                 selectWeekButton(false);
                 selectDayButton(true);
@@ -162,39 +161,33 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
     @UiThread
     private void selectMonthButton(boolean select) {
         if (select) {
-            binding.btnMonth.setBackgroundTintList(ColorStateList
-                    .valueOf(ContextCompat.getColor(getContext(), R.color.selected_filter)));
-            binding.btnMonth.setTextColor(getResources().getColor(R.color.white));
+            binding.tvMonth.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.selected_filter));
+            binding.tvMonth.setTextColor(getResources().getColor(R.color.white));
         } else {
-            binding.btnMonth.setBackgroundTintList(ColorStateList
-                    .valueOf(ContextCompat.getColor(getContext(), R.color.unselected_filter)));
-            binding.btnMonth.setTextColor(getResources().getColor(R.color.unselected_filter_text));
+            binding.tvMonth.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.unselected_filter));
+            binding.tvMonth.setTextColor(getResources().getColor(R.color.unselected_filter_text));
         }
     }
 
     @UiThread
     private void selectWeekButton(boolean select) {
         if (select) {
-            binding.btnWeek.setBackgroundTintList(ColorStateList
-                    .valueOf(ContextCompat.getColor(getContext(), R.color.selected_filter)));
-            binding.btnWeek.setTextColor(getResources().getColor(R.color.white));
+            binding.tvWeek.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.selected_filter));
+            binding.tvWeek.setTextColor(getResources().getColor(R.color.white));
         } else {
-            binding.btnWeek.setBackgroundTintList(ColorStateList
-                    .valueOf(ContextCompat.getColor(getContext(), R.color.unselected_filter)));
-            binding.btnWeek.setTextColor(getResources().getColor(R.color.unselected_filter_text));
+            binding.tvWeek.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.unselected_filter));
+            binding.tvWeek.setTextColor(getResources().getColor(R.color.unselected_filter_text));
         }
     }
 
     @UiThread
     private void selectDayButton(boolean select) {
         if (select) {
-            binding.btnDay.setBackgroundTintList(ColorStateList
-                    .valueOf(ContextCompat.getColor(getContext(), R.color.selected_filter)));
-            binding.btnDay.setTextColor(getResources().getColor(R.color.white));
+            binding.tvDay.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.selected_filter));
+            binding.tvDay.setTextColor(getResources().getColor(R.color.white));
         } else {
-            binding.btnDay.setBackgroundTintList(ColorStateList
-                    .valueOf(ContextCompat.getColor(getContext(), R.color.unselected_filter)));
-            binding.btnDay.setTextColor(getResources().getColor(R.color.unselected_filter_text));
+            binding.tvDay.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.unselected_filter));
+            binding.tvDay.setTextColor(getResources().getColor(R.color.unselected_filter_text));
         }
     }
 

@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -45,6 +46,8 @@ public class Utils {
     public static final String remainderOfDomain = ".rootnetapp.com";
 
     public static String domain;
+
+    public static final String SERVER_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
 
     public static String getImgDomain() {
         return imgDomain;
@@ -325,4 +328,12 @@ public class Utils {
         return bytes;
     }
 
+    public static Date getDateFromString(String date, String format) {
+        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.US);
+        try {
+            return sdf.parse(date);
+        } catch (ParseException e) {
+            return null;
+        }
+    }
 }

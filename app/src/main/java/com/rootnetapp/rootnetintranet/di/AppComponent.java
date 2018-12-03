@@ -32,7 +32,7 @@ import com.rootnetapp.rootnetintranet.ui.splash.SplashModule;
 import com.rootnetapp.rootnetintranet.ui.sync.SyncActivity;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineModule;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryModule;
@@ -120,7 +120,7 @@ public interface AppComponent {
 
     void inject(CustomCountryPicker countryPicker);
 
-    void inject(WorkflowDetailFragment workflowDetailFragment);
+    void inject(WorkflowDetailActivity workflowDetailActivity);
 
     void inject(TimelineFragment timelineFragment);
 

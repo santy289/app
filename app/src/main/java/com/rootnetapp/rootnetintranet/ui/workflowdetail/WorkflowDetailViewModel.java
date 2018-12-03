@@ -236,7 +236,7 @@ public class WorkflowDetailViewModel extends ViewModel {
                 } else {
                     // at least one permission was denied
                     mShowToastMessage.setValue(
-                            R.string.workflow_detail_status_fragment_permissions_not_granted);
+                            R.string.workflow_detail_activity_permissions_not_granted);
                 }
             }
         }

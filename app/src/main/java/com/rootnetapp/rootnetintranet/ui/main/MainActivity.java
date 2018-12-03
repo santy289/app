@@ -191,6 +191,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void showActivity(Intent intent) {
+        startActivity(intent);
+    }
+
+    @Override
     public void showDialog(DialogFragment dialogFragment) {
         disposeDialog();
         dialogFragment.show(fragmentManager, "dialog");

@@ -5,7 +5,7 @@ import android.content.Context;
 import com.google.android.material.tabs.TabLayout;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
@@ -19,7 +19,7 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 /**
- * Adapter for {@link ViewPager} in {@link WorkflowDetailFragment}. Displays a fixed number of pages
+ * Adapter for {@link ViewPager} in {@link WorkflowDetailActivity}. Displays a fixed number of pages
  * linked with a {@link TabLayout}.
  */
 public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {

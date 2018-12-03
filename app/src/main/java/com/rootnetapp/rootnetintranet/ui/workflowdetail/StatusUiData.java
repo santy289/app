@@ -1,38 +1,31 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 
-import java.util.List;
+import androidx.annotation.ColorRes;
+import androidx.annotation.DrawableRes;
 
 public class StatusUiData {
-    private List<Integer> stringResList;
-    private List<Integer> colorResList;
-    private int selectedIndex;
 
-    protected StatusUiData(List<Integer> stringResList, List<Integer> colorResList){
-        this.stringResList = stringResList;
-        this.colorResList = colorResList;
+    private @DrawableRes int selectedIcon;
+    private @ColorRes int selectedColor;
+
+    protected StatusUiData(@DrawableRes int selectedIcon, @ColorRes int selectedColor) {
+        this.selectedIcon = selectedIcon;
+        this.selectedColor = selectedColor;
     }
 
-    public List<Integer> getStringResList() {
-        return stringResList;
+    public int getSelectedIcon() {
+        return selectedIcon;
     }
 
-    public void setStringResList(List<Integer> stringResList) {
-        this.stringResList = stringResList;
+    public void setSelectedIcon(int selectedIcon) {
+        this.selectedIcon = selectedIcon;
     }
 
-    public List<Integer> getColorResList() {
-        return colorResList;
+    public int getSelectedColor() {
+        return selectedColor;
     }
 
-    public void setColorResList(List<Integer> colorResList) {
-        this.colorResList = colorResList;
-    }
-
-    public int getSelectedIndex() {
-        return selectedIndex;
-    }
-
-    public void setSelectedIndex(int selectedIndex) {
-        this.selectedIndex = selectedIndex;
+    public void setSelectedColor(int selectedColor) {
+        this.selectedColor = selectedColor;
     }
 }

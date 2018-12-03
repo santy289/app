@@ -6,11 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -22,8 +22,6 @@ import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.WorkflowDetailViewPagerAdapter;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -67,11 +65,10 @@ public class WorkflowDetailActivity extends AppCompatActivity {
 
         SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
-//        mBinding.tvWorkflowId.setText(mWorkflowListItem.getTitle());
-//        mBinding.tvWorkflowName.setText(mWorkflowListItem.getWorkflowTypeKey());
 
         setActionBar();
         setupViewPager();
+        setOnClickListeners();
         subscribe();
 
         showLoading(true);
@@ -98,6 +95,10 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         mBinding.viewPager.setAdapter(mViewPagerAdapter);
     }
 
+    private void setOnClickListeners() {
+        mBinding.fab.setOnClickListener(v -> workflowDetailViewModel.toggleWorkflowActivation());
+    }
+
     private void subscribe() {
         final Observer<Integer> errorObserver = ((Integer data) -> {
             showLoading(false);
@@ -113,8 +114,6 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 .observe(this, this::updateCommentsTabCounter);
         workflowDetailViewModel.getObservableFilesTabCounter()
                 .observe(this, this::updateFilesTabCounter);
-        workflowDetailViewModel.getObservableStatusSpinner()
-                .observe(this, this::updateStatusSpinner);
         workflowDetailViewModel.updateActiveStatusFromUserAction
                 .observe(this, this::updateWorkflowStatus);
         workflowDetailViewModel.retrieveWorkflowPdfFile
@@ -144,14 +143,10 @@ public class WorkflowDetailActivity extends AppCompatActivity {
      */
     @UiThread
     private void updateWorkflowStatus(StatusUiData statusUiData) {
-        int selectedIndex = statusUiData.getSelectedIndex();
-
-        /*mBinding.spStatus.setSelection(selectedIndex);
-        mBinding.spStatus
-                .setTag(selectedIndex); //workaround to prevent the listener from being called
-        mBinding.viewSpinnerBackground.setBackgroundTintList(ColorStateList
-                .valueOf(ContextCompat.getColor(this,
-                        statusUiData.getColorResList().get(selectedIndex))));*/
+        mBinding.fab.setSupportBackgroundTintList(ColorStateList
+                .valueOf(ContextCompat.getColor(this, statusUiData.getSelectedColor())));
+        mBinding.fab
+                .setImageDrawable(ContextCompat.getDrawable(this, statusUiData.getSelectedIcon()));
     }
 
     /**
@@ -208,44 +203,6 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Creates the status {@link Spinner} and its {@link ArrayAdapter}.
-     *
-     * @param statusUiData instance object that contains all of the data needed to populate the
-     *                     {@link Spinner}.
-     */
-    @UiThread
-    private void updateStatusSpinner(StatusUiData statusUiData) {
-        List<String> statusList = new ArrayList<>();
-        for (int stringRes : statusUiData.getStringResList()) {
-            statusList.add(getString(stringRes));
-        }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                R.layout.status_spinner_item, statusList);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        /*mBinding.spStatus.setAdapter(adapter);
-        mBinding.spStatus
-                .setSelection(0, false); //prevent the listener from being called on initialization
-        mBinding.spStatus.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                //workaround to prevent the listener from being called
-                //code is executed only when the user is making a selection
-                Object tag = mBinding.spStatus.getTag();
-                if (tag == null || (int) tag != position) {
-                    workflowDetailViewModel.setStatusSelection(position);
-                    workflowDetailViewModel.handleWorkflowActivation(position);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });*/
-    }
-
-    /**
      * Verify whether the user has granted permissions to read/write the external storage.
      *
      * @return whether the permissions are granted.
@@ -274,7 +231,6 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         workflowDetailViewModel.handleRequestPermissionsResult(requestCode, grantResults);
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_workflow_detail, menu);
@@ -289,7 +245,7 @@ public class WorkflowDetailActivity extends AppCompatActivity {
 
             return true;
 
-        } else if (item.getItemId() == R.id.export_pdf){
+        } else if (item.getItemId() == R.id.export_pdf) {
             if (checkExternalStoragePermissions()) {
                 workflowDetailViewModel.handleExportPdf();
             }

@@ -13,7 +13,6 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -36,7 +35,6 @@ public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Integer> mCommentsTabCounter;
     private MutableLiveData<Integer> mFilesTabCounter;
-    private MutableLiveData<StatusUiData> mStatusSpinnerLiveData;
     private MutableLiveData<Integer> mShowToastMessage;
 
     protected MutableLiveData<Boolean> showLoading;
@@ -75,7 +73,6 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.mToken = token;
         this.mWorkflowListItem = workflow;
         getWorkflow(this.mToken, this.mWorkflowListItem.getWorkflowId());
-        getStatusList();
     }
 
     /**
@@ -111,8 +108,7 @@ public class WorkflowDetailViewModel extends ViewModel {
 
                     mShowToastMessage.setValue(R.string.request_successfully);
 
-                    mStatusUiData.setSelectedIndex(
-                            mWorkflow.isOpen() ? INDEX_STATUS_OPEN : INDEX_STATUS_CLOSED);
+                    updateStatusUiData(mWorkflow.isOpen(), true);
                     return mStatusUiData;
                 }
         );
@@ -163,49 +159,35 @@ public class WorkflowDetailViewModel extends ViewModel {
                     Set the original status. mWorkflow object is only updated if the request is successful.
                     Thus, it will always hold the correct status
                      */
-                    mStatusUiData.setSelectedIndex(mWorkflow.isOpen() ? INDEX_STATUS_OPEN :
-                            INDEX_STATUS_CLOSED);
+                    updateStatusUiData(mWorkflow.isOpen(), true);
                     return mStatusUiData;
                 }
         );
     }
 
     /**
-     * Creates a single instance of {@link StatusUiData} that will live in this ViewModel, called on
-     * initialization only. This instance will also hold the selected status state. This is used to
-     * initially populate the UI dropdown with data.
-     */
-    private void getStatusList() {
-        List<Integer> stringResList = new ArrayList<>();
-        stringResList.add(INDEX_STATUS_OPEN, R.string.open);
-        stringResList.add(INDEX_STATUS_CLOSED, R.string.closed);
-
-        List<Integer> colorResList = new ArrayList<>();
-        colorResList.add(INDEX_STATUS_OPEN, R.color.green);
-        colorResList.add(INDEX_STATUS_CLOSED, R.color.red);
-
-        mStatusUiData = new StatusUiData(stringResList, colorResList);
-        mStatusSpinnerLiveData.setValue(mStatusUiData);
-    }
-
-    /**
-     * Sets the current state of {@link #mStatusUiData}. This is used to maintain a reference to the
-     * selected dropdown index in the ViewModel.
+     * Sends the parameters to modify the UI regarding the open/closed status.
      *
-     * @param selectedIndex dropdown index.
+     * @param open            whether the workflow is open or closed.
+     * @param userInteraction whether to use the {@link #setWorkflowIsOpen} LiveData. If true, it's
+     *                        because it's been called from user interaction, so the {@link
+     *                        #updateActiveStatusFromUserAction} LiveData will handle the update.
      */
-    protected void setStatusSelection(int selectedIndex) {
-        mStatusUiData.setSelectedIndex(selectedIndex);
-        setWorkflowIsOpen.setValue(mStatusUiData);
+    private void updateStatusUiData(boolean open, boolean userInteraction) {
+        int iconRes = open ? R.drawable.ic_lock_open_black_24dp : R.drawable.ic_lock_outline_black_24dp;
+        int colorRes = open ? R.color.green : R.color.red;
+        mStatusUiData = new StatusUiData(iconRes, colorRes);
+
+        if (!userInteraction) setWorkflowIsOpen.setValue(mStatusUiData);
     }
 
     /**
-     * Calls the endpoint to change the Workflow active status.
+     * Calls the endpoint to change the Workflow active status. This will toggle the current state,
+     * set it to closed if it's open and vice-versa.
      */
-    protected void handleWorkflowActivation(int selectedIndex) {
+    protected void toggleWorkflowActivation() {
         showLoading.setValue(true);
-        mRepository.postWorkflowActivation(mToken, mWorkflow.getId(),
-                selectedIndex == INDEX_STATUS_OPEN);
+        mRepository.postWorkflowActivation(mToken, mWorkflow.getId(), !mWorkflow.isOpen());
     }
 
     /**
@@ -257,12 +239,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     private void onWorkflowSuccess(WorkflowResponse workflowResponse) {
         showLoading.setValue(false);
         mWorkflow = workflowResponse.getWorkflow();
-        updateUIWithWorkflow(mWorkflow);
-    }
-
-    private void updateUIWithWorkflow(WorkflowDb workflow) {
-        mStatusUiData.setSelectedIndex(workflow.isOpen() ? INDEX_STATUS_OPEN : INDEX_STATUS_CLOSED);
-        setWorkflowIsOpen.setValue(mStatusUiData);
+        updateStatusUiData(mWorkflow.isOpen(), false);
     }
 
     /**
@@ -314,12 +291,5 @@ public class WorkflowDetailViewModel extends ViewModel {
             mFilesTabCounter = new MutableLiveData<>();
         }
         return mFilesTabCounter;
-    }
-
-    protected LiveData<StatusUiData> getObservableStatusSpinner() {
-        if (mStatusSpinnerLiveData == null) {
-            mStatusSpinnerLiveData = new MutableLiveData<>();
-        }
-        return mStatusSpinnerLiveData;
     }
 }

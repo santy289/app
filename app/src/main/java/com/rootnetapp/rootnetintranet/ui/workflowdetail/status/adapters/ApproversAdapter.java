@@ -59,8 +59,9 @@ public class ApproversAdapter extends RecyclerView.Adapter<ApproversViewholder> 
                     .into(viewholder.binding.detailApproverAvatar);
         }
 
+        //we use INVISIBLE instead of GONE to keep the constraints
         viewholder.binding.detailApproverRequired
-                .setVisibility(currentApprover.isRequire ? View.VISIBLE : View.GONE);
+                .setVisibility(currentApprover.isRequire ? View.VISIBLE : View.INVISIBLE);
 
         viewholder.binding.detailApproverName.setText(currentApprover.entityName);
 

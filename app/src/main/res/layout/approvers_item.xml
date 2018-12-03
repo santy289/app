@@ -48,7 +48,7 @@
             app:layout_constraintStart_toEndOf="@id/detail_approver_name"
             app:layout_constraintTop_toTopOf="@id/detail_approver_name"
             app:layout_constraintWidth_min="100dp"
-            tools:visibility="visible" />
+            tools:visibility="invisible" />
 
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/barrier"

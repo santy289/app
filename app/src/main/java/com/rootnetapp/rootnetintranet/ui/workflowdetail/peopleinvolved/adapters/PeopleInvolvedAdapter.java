@@ -1,8 +1,6 @@
-package com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters;
+package com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved.adapters;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -16,6 +14,9 @@ import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.Profi
 import com.rootnetapp.rootnetintranet.databinding.PeopleInvolvedItemBinding;
 
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class PeopleInvolvedAdapter extends RecyclerView.Adapter<PeopleInvolvedViewholder>{
     private List<ProfileInvolved> profiles;

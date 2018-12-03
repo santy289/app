@@ -12,13 +12,11 @@ import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailStatusBinding;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters.ApproversAdapter;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters.PeopleInvolvedAdapter;
 
 import java.util.List;
 
@@ -98,8 +96,6 @@ public class StatusFragment extends Fragment {
         statusViewModel.updateCurrentApproversList.observe(this, this::updateCurrentApproversList);
         statusViewModel.hideApproverListOnEmptyData
                 .observe(this, this::hideApproverListOnEmptyData);
-        statusViewModel.updateProfilesInvolved.observe(this, this::updateProfilesInvolved);
-        statusViewModel.hideProfilesInvolvedList.observe(this, this::hideProfilesInvolvedList);
         statusViewModel.updateApproveSpinner.observe(this, this::updateApproveSpinner);
         statusViewModel.hideApproveSpinnerOnEmptyData
                 .observe(this, this::hideApproveSpinnerOnEmptyData);
@@ -229,19 +225,6 @@ public class StatusFragment extends Fragment {
         mBinding.includeNextStep.rvApprovers.setAdapter(new ApproversAdapter(currentApprovers));
     }
 
-    /**
-     * Updates the profiles involved.
-     *
-     * @param profiles List of profiles to display in People Involved recyclerView.
-     */
-    @UiThread
-    private void updateProfilesInvolved(List<ProfileInvolved> profiles) {
-        mBinding.includeAllPeopleInvolved.rvAllPeopleInvolved
-                .setLayoutManager(new LinearLayoutManager(getContext()));
-        mBinding.includeAllPeopleInvolved.rvAllPeopleInvolved
-                .setAdapter(new PeopleInvolvedAdapter(profiles));
-    }
-
     @UiThread
     private void hideApproverListOnEmptyData(boolean hide) {
         if (hide) {
@@ -252,22 +235,6 @@ public class StatusFragment extends Fragment {
             mBinding.includeNextStep.tvTitleApprovers.setVisibility(View.GONE);
             mBinding.includeNextStep.rvApprovers.setVisibility(View.GONE);
             mBinding.includeNextStep.btnMassApproval.setVisibility(View.GONE);
-        }
-    }
-
-    /**
-     * Hides list of people involved and shows a text message instead.
-     *
-     * @param hide Action to take.
-     */
-    @UiThread
-    private void hideProfilesInvolvedList(boolean hide) {
-        if (hide) {
-            mBinding.includeAllPeopleInvolved.rvAllPeopleInvolved.setVisibility(View.GONE);
-            mBinding.includeAllPeopleInvolved.noPeopleInvolved.setVisibility(View.VISIBLE);
-        } else {
-            mBinding.includeAllPeopleInvolved.rvAllPeopleInvolved.setVisibility(View.VISIBLE);
-            mBinding.includeAllPeopleInvolved.noPeopleInvolved.setVisibility(View.GONE);
         }
     }
 

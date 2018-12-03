@@ -23,7 +23,7 @@ public class ApprovalHistoryAdapter extends RecyclerView.Adapter<ApprovalViewhol
 
     private List<ApproverHistory> approverList;
 
-    private static final String format = "MMM d, y - h:m a";
+    private static final String format = "MMM d, y - hh:mm a";
 
     public ApprovalHistoryAdapter(List<ApproverHistory> approverList) {
         this.approverList = approverList;

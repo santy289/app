@@ -1,8 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +16,10 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
 
 import java.util.List;
 
-public class ApproversAdapter extends RecyclerView.Adapter<ApproversViewholder>{
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+public class ApproversAdapter extends RecyclerView.Adapter<ApproversViewholder> {
 
     private List<Approver> currentApprovers;
 
@@ -43,8 +44,9 @@ public class ApproversAdapter extends RecyclerView.Adapter<ApproversViewholder>{
         }
         Approver currentApprover = currentApprovers.get(i);
 
+        Context context = viewholder.binding.detailApproverAvatar.getContext();
+
         if (!TextUtils.isEmpty(currentApprover.entityAvatar)) {
-            Context context = viewholder.binding.detailApproverAvatar.getContext();
             String path = Utils.imgDomain + currentApprover.entityAvatar;
             GlideUrl url = new GlideUrl(path);
             Glide.with(context)
@@ -57,13 +59,20 @@ public class ApproversAdapter extends RecyclerView.Adapter<ApproversViewholder>{
                     .into(viewholder.binding.detailApproverAvatar);
         }
 
-        if (currentApprover.isRequire) {
-            viewholder.binding.detailApproverRequired.setVisibility(View.VISIBLE);
-        } else {
-            viewholder.binding.detailApproverRequired.setVisibility(View.GONE);
-        }
+        //we use INVISIBLE instead of GONE to keep the constraints
+        viewholder.binding.detailApproverRequired
+                .setVisibility(currentApprover.isRequire ? View.VISIBLE : View.INVISIBLE);
 
         viewholder.binding.detailApproverName.setText(currentApprover.entityName);
+
+        if (currentApprover.approved) {
+            viewholder.binding.detailApproverState.setText(context.getString(R.string.approved));
+            viewholder.binding.detailApproverState.setTextColor(context.getResources().getColor(R.color.green));
+        } else {
+            viewholder.binding.detailApproverState.setText(context.getString(R.string.rejected));
+            viewholder.binding.detailApproverState.setTextColor(context.getResources().getColor(R.color.red));
+        }
+
         viewholder.binding.executePendingBindings();
     }
 
@@ -71,6 +80,5 @@ public class ApproversAdapter extends RecyclerView.Adapter<ApproversViewholder>{
     public int getItemCount() {
         return currentApprovers.size();
     }
-
 
 }

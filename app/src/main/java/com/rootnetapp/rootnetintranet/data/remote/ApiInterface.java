@@ -352,7 +352,7 @@ public interface ApiInterface {
 
     @Headers({"Domain-Name: api"})
     @Streaming
-    @GET("files/udownload/{entity}://{id}")
+    @GET("file/download/{entity}/{id}")
     Observable<DownloadFileResponse> downloadFile(@Header("Authorization") String authorization,
                                                   @Path("entity") String entity,
                                                   @Path("id") int fileId);

@@ -15,7 +15,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailCommentsBinding;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailViewModel;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.adapters.CommentsAdapter;
 
@@ -54,7 +54,7 @@ public class CommentsFragment extends Fragment {
      * Creates an instance for this fragment. Can be instantiated form any view.
      *
      * @param item          workflow to display its comments.
-     * @param isFromDetails whether this fragment was created from {@link WorkflowDetailFragment}.
+     * @param isFromDetails whether this fragment was created from {@link WorkflowDetailActivity}.
      *
      * @return instance of this fragment.
      */

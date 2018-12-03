@@ -29,10 +29,9 @@ public class QuickActionsActivity extends AppCompatActivity implements QuickActi
 
     @Inject
     QuickActionsViewModelFactory quickActionsViewModelFactory;
-    QuickActionsViewModel quickActionsViewModel;
+    private QuickActionsViewModel quickActionsViewModel;
     private ActivityQuickActionsBinding mBinding;
     private FragmentManager fragmentManager;
-    private SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +42,7 @@ public class QuickActionsActivity extends AppCompatActivity implements QuickActi
                 .of(this, quickActionsViewModelFactory)
                 .get(QuickActionsViewModel.class);
         fragmentManager = getSupportFragmentManager();
-        sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
 
         fragmentManager = getSupportFragmentManager();
 

@@ -4,7 +4,7 @@ import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 
 import java.util.Map;
 
-public class WebViewData {
+class WebViewData {
 
     private Map<String, String> headers;
     private String url;

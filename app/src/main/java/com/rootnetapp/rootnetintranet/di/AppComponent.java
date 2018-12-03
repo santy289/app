@@ -86,7 +86,7 @@ import dagger.Component;
                 ApprovalHistoryModule.class,
                 CommentsModule.class,
                 FilesModule.class,
-                PeopleInvolvedModule.class
+                PeopleInvolvedModule.class,
                 QuickActionsModule.class,
                 WorkflowSearchModule.class,
                 PerformActionModule.class,

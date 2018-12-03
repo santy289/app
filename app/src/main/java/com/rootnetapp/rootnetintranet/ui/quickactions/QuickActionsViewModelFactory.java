@@ -1,8 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.quickactions;
 
-import com.rootnetapp.rootnetintranet.ui.main.MainActivityRepository;
-import com.rootnetapp.rootnetintranet.ui.main.MainActivityViewModel;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;

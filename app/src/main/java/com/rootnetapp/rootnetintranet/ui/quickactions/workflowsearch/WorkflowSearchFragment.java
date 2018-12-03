@@ -156,9 +156,7 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
      * Sets the click listeners for the buttons inside this fragment.
      */
     private void setOnClickListeners() {
-        mBinding.btnSearch.setOnClickListener(v -> {
-            performSearch();
-        });
+        mBinding.btnSearch.setOnClickListener(v -> performSearch());
     }
 
     /**

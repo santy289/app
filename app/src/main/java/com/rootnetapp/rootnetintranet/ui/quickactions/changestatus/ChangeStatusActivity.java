@@ -28,9 +28,8 @@ public class ChangeStatusActivity extends AppCompatActivity {
 
     @Inject
     ChangeStatusViewModelFactory changeStatusViewModelFactory;
-    ChangeStatusViewModel changeStatusViewModel;
+    private ChangeStatusViewModel changeStatusViewModel;
     private ActivityChangeStatusBinding mBinding;
-    private String token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +40,7 @@ public class ChangeStatusActivity extends AppCompatActivity {
                 .of(this, changeStatusViewModelFactory)
                 .get(ChangeStatusViewModel.class);
         SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        token = "Bearer " + prefs.getString("token", "");
+        String token = "Bearer " + prefs.getString("token", "");
         WorkflowListItem item = getIntent().getParcelableExtra(EXTRA_WORKFLOW_LIST_ITEM);
 
         setActionBar();

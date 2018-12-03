@@ -20,7 +20,7 @@ public class WorkflowListAdapter extends RecyclerView.Adapter<WorkflowListViewHo
     //todo remove this and replace with WorkflowExpandableAdapter OR add paging
 
     private List<WorkflowListItem> workflows;
-    private WorkflowSearchFragmentInterface mInterface;
+    private final WorkflowSearchFragmentInterface mInterface;
 
     public WorkflowListAdapter(WorkflowSearchFragmentInterface anInterface) {
         this.mInterface = anInterface;

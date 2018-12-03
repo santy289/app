@@ -251,6 +251,7 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
 
     @Override
     public void downloadDocumentFile(DocumentsFile documentsFile){
+        //todo permissions
         filesViewModel.downloadDocumentFile(documentsFile);
     }
 
@@ -259,20 +260,20 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
      * the file, will display a {@link Toast} message. Uses a {@link FileProvider} to create the
      * file URI, instead of using the {@link Uri#fromFile(File)} method.
      *
-     * @param file the file to be opened.
+     * @param fileUiData the file data containing the file to be opened.
      *
      * @see <a href="https://developer.android.com/reference/android/support/v4/content/FileProvider">FileProvider</a>
      */
     @UiThread
-    private void openPresetFile(File file) {
-        if (file == null) return;
+    private void openPresetFile(FileUiData fileUiData) {
+        if (fileUiData.getFile() == null) return;
 
         Intent target = new Intent(Intent.ACTION_VIEW);
 
         Uri fileUri = FileProvider.getUriForFile(getContext(),
-                getContext().getApplicationContext().getPackageName() + ".fileprovider", file);
+                getContext().getApplicationContext().getPackageName() + ".fileprovider", fileUiData.getFile());
 
-        target.setDataAndType(fileUri, "*/*");
+        target.setDataAndType(fileUri, fileUiData.getMimeType());
         target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 

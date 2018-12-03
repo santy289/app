@@ -52,7 +52,7 @@ public class FilesViewModel extends ViewModel {
     private MutableLiveData<Integer> mFilesTabCounter;
     private MutableLiveData<String> mUploadedFileNameLiveData;
     private MutableLiveData<Integer> mAttachButtonTextLiveData;
-    private MutableLiveData<File> mOpenDownloadedFileLiveData;
+    private MutableLiveData<FileUiData> mOpenDownloadedFileLiveData;
 
     protected MutableLiveData<Boolean> showLoading;
     protected MutableLiveData<Boolean> showTemplateDocumentsUi;
@@ -286,8 +286,10 @@ public class FilesViewModel extends ViewModel {
 
         String fileName = downloadFileResponse.getFile().getFilename();
         try {
-            mOpenDownloadedFileLiveData
-                    .setValue(Utils.decodeFileFromBase64Binary(base64, fileName));
+            FileUiData fileUiData = new FileUiData(
+                    Utils.decodeFileFromBase64Binary(base64, fileName),
+                    downloadFileResponse.getFile().getMime());
+            mOpenDownloadedFileLiveData.setValue(fileUiData);
 
         } catch (IOException e) {
             Log.e(TAG, "downloadFile: ", e);
@@ -370,7 +372,7 @@ public class FilesViewModel extends ViewModel {
         return mAttachButtonTextLiveData;
     }
 
-    protected LiveData<File> getObservableOpenDownloadedFile() {
+    protected LiveData<FileUiData> getObservableOpenDownloadedFile() {
         if (mOpenDownloadedFileLiveData == null) {
             mOpenDownloadedFileLiveData = new MutableLiveData<>();
         }

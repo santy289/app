@@ -102,16 +102,13 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder> 
         });
 
         DocumentsFile finalFile = file;
-        holder.binding.imgDownload.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (finalFile != null) {
-                    // file exists, proceed to download it
-                    mFilesFragmentInterface.downloadDocumentFile(finalFile);
-                } else {
-                    // file has not been uploaded, download the preset instead
-                    mFilesFragmentInterface.downloadPreset(item);
-                }
+        holder.binding.imgDownload.setOnClickListener(v -> {
+            if (finalFile != null) {
+                // file exists, proceed to download it
+                mFilesFragmentInterface.downloadDocumentFile(finalFile);
+            } else {
+                // file has not been uploaded, download the preset instead
+                mFilesFragmentInterface.downloadPreset(item);
             }
         });
     }

@@ -186,8 +186,12 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position,
                                                    long id) {
-                            item.setValue(item.getOptions().get(position));
-                            item.getOnSelectedListener().onSelected(item);
+                            // this prevents the listener to be triggered by setSelection
+                            Object tag = holder.getBinding().spSteps.getTag();
+                            if (tag == null || (int) tag != position) {
+                                item.setValue(item.getOptions().get(position));
+                                item.getOnSelectedListener().onSelected(item);
+                            }
                         }
 
                         @Override
@@ -196,7 +200,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                         }
                     });
         } else {
-            holder.getBinding().spSteps.setSelection(item.getOptions().indexOf(item.getValue()));
+            // this prevents the listener to be triggered by setSelection
+            int index = item.getOptions().indexOf(item.getValue());
+            holder.getBinding().spSteps.setTag(index);
+            holder.getBinding().spSteps.setSelection(index);
         }
     }
 

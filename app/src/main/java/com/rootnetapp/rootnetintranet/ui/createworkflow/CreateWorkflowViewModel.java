@@ -467,7 +467,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                     FormSettings settings = (FormSettings) formSettings;
                     showFields(settings);
                 }, throwable -> {
-                    showLoading.postValue(false);
+                    showLoading.setValue(false);
                 });
         disposables.add(disposable);
 
@@ -798,11 +798,6 @@ public class CreateWorkflowViewModel extends ViewModel {
                     .setTag(TAG_WORKFLOW_TYPE)
                     .setOptions(formSettings.getNames())
                     .build();
-
-            singleChoiceFormItem.setOnSelectedListener(item -> {
-                String selection = item.getValue();
-                this.generateFieldsByType(selection);
-            });
 
             return singleChoiceFormItem;
         }).subscribeOn(Schedulers.newThread())

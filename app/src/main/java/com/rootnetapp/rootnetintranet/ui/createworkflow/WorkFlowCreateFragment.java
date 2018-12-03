@@ -41,7 +41,6 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import me.riddhimanadib.formmaster.FormBuilder;
-import me.riddhimanadib.formmaster.listener.OnFormElementValueChangedListener;
 import me.riddhimanadib.formmaster.model.BaseFormElement;
 import me.riddhimanadib.formmaster.model.FormElementPickerDate;
 import me.riddhimanadib.formmaster.model.FormElementPickerMulti;
@@ -54,7 +53,7 @@ import me.riddhimanadib.formmaster.model.FormElementTextPhone;
 import me.riddhimanadib.formmaster.model.FormElementTextSingleLine;
 import me.riddhimanadib.formmaster.model.FormHeader;
 
-public class WorkFlowCreateFragment extends Fragment implements OnFormElementValueChangedListener {
+public class WorkFlowCreateFragment extends Fragment {
 
     @Inject
     CreateWorkflowViewModelFactory createWorkflowViewModelFactory;
@@ -180,21 +179,13 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
         mAdapter = new FormItemsAdapter(getContext(), new ArrayList<>());
         mBinding.rvFields.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvFields.setAdapter(mAdapter);
+        mBinding.rvFields.setNestedScrollingEnabled(false);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         viewModel.onCleared();
-    }
-
-    @Override
-    public void onValueChanged(BaseFormElement baseFormElement) {
-        int tag = baseFormElement.getTag();
-        if (tag == CreateWorkflowViewModel.TAG_WORKFLOW_TYPE) {
-            String typeSelected = baseFormElement.getValue();
-            viewModel.generateFieldsByType(typeSelected);
-        }
     }
 
     @Override
@@ -218,13 +209,6 @@ public class WorkFlowCreateFragment extends Fragment implements OnFormElementVal
 
     private void setUploadMenu(Boolean visible) {
         uploadMenu.setVisible(visible);
-    }
-
-    private void startBuilder() {
-        formBuilder = new FormBuilder(
-                getContext(),
-                mBinding.rvFields,
-                this);
     }
 
     private void chooseFile() {

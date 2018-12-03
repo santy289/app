@@ -1,17 +1,9 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist;
 
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.paging.PagedList;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import androidx.fragment.app.Fragment;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -22,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -34,13 +27,22 @@ import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.WorkFlowCreateFragment;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityViewModel;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowExpandableAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowTypeSpinnerAdapter;
 
 import java.util.List;
 
 import javax.inject.Inject;
+
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.paging.PagedList;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class WorkflowFragment extends Fragment implements WorkflowFragmentInterface, SwipeRefreshLayout.OnRefreshListener {
 
@@ -140,8 +142,9 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     @Override
     public void showDetail(WorkflowListItem item) {
         workflowViewModel.resetFilterSettings();
-        mainActivityInterface.showFragment(WorkflowDetailFragment.newInstance(item,
-                mainActivityInterface),true);
+        Intent intent = new Intent(getActivity(), WorkflowDetailActivity.class);
+        intent.putExtra(WorkflowDetailActivity.EXTRA_WORKFLOW_LIST_ITEM, item);
+        mainActivityInterface.showActivity(intent);
     }
 
     // swipe down to refresh - SwipeRefreshLayout

@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.quickactions.workflowsearch;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowSearchBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsInterface;
+import com.rootnetapp.rootnetintranet.ui.quickactions.changestatus.ChangeStatusActivity;
 import com.rootnetapp.rootnetintranet.ui.quickactions.performaction.PerformActionFragment;
 import com.rootnetapp.rootnetintranet.ui.quickactions.workflowsearch.adapters.WorkflowListAdapter;
 
@@ -226,6 +228,13 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
      */
     @Override
     public void performAction(WorkflowListItem item) {
+        if (mAction == QuickAction.CHANGE_STATUS) {
+            Intent intent = new Intent(getActivity(), ChangeStatusActivity.class);
+            intent.putExtra(ChangeStatusActivity.EXTRA_WORKFLOW_LIST_ITEM, item);
+            mQuickActionsInterface.showActivity(intent);
+            return;
+        }
+
         mQuickActionsInterface.showFragment(PerformActionFragment.newInstance(item, mAction), true);
     }
 

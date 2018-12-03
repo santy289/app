@@ -25,6 +25,8 @@ import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileModule;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsModule;
+import com.rootnetapp.rootnetintranet.ui.quickactions.changestatus.ChangeStatusActivity;
+import com.rootnetapp.rootnetintranet.ui.quickactions.changestatus.ChangeStatusModule;
 import com.rootnetapp.rootnetintranet.ui.quickactions.performaction.PerformActionFragment;
 import com.rootnetapp.rootnetintranet.ui.quickactions.performaction.PerformActionModule;
 import com.rootnetapp.rootnetintranet.ui.quickactions.workflowsearch.WorkflowSearchFragment;
@@ -84,7 +86,8 @@ import dagger.Component;
                 FilesModule.class,
                 QuickActionsModule.class,
                 WorkflowSearchModule.class,
-                PerformActionModule.class
+                PerformActionModule.class,
+                ChangeStatusModule.class
         }
 )
 
@@ -149,4 +152,6 @@ public interface AppComponent {
     void inject(WorkflowSearchFragment workflowSearchFragment);
 
     void inject(PerformActionFragment performActionFragment);
+
+    void inject(ChangeStatusActivity changeStatusActivity);
 }

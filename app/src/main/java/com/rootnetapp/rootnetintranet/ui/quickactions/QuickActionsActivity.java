@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.quickactions;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -73,6 +74,11 @@ public class QuickActionsActivity extends AppCompatActivity implements QuickActi
             transaction.addToBackStack(tag);
         }
         transaction.commit();
+    }
+
+    @Override
+    public void showActivity(Intent intent) {
+        startActivity(intent);
     }
 
     @Override

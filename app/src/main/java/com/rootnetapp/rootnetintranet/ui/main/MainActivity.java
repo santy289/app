@@ -305,8 +305,7 @@ public class MainActivity extends AppCompatActivity
 
             case R.id.fab_change_status:
                 quickAction = QuickAction.CHANGE_STATUS;
-                showToastMessage(R.string.functionality_not_available); //todo add action
-                return true;
+                break;
 
             case R.id.fab_comment:
                 quickAction = QuickAction.COMMENT;

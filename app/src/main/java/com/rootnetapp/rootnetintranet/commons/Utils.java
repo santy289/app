@@ -338,23 +338,43 @@ public class Utils {
     }
 
     /**
-     * Parses the given date in integers with the specified format.
+     * Creates the given date in integers as a Date object
      *
      * @param year        year in integer
      * @param monthOfYear 0-11
      * @param dayOfMonth  1-31
-     * @param format      date format
      *
-     * @return a fully formatted date.
+     * @return Date object
      */
-    public static String getFormattedDateFromIntegers(int year, int monthOfYear, int dayOfMonth,
-                                                      String format) {
+    public static Date getDateFromIntegers(int year, int monthOfYear, int dayOfMonth) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, year);
         calendar.set(Calendar.MONTH, monthOfYear);
         calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-        Date c = calendar.getTime();
-        SimpleDateFormat df = new SimpleDateFormat(format, Locale.getDefault());
-        return df.format(c);
+        return calendar.getTime();
+    }
+
+    /**
+     * Formats the given date object to the required WS format.
+     *
+     * @param date date to format
+     *
+     * @return formatted date.
+     */
+    public static String getDatePostFormat(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        return sdf.format(date);
+    }
+
+    /**
+     * Formats the given date object to the given format
+     *
+     * @param date date to format
+     *
+     * @return formatted date.
+     */
+    public static String getFormattedDate(Date date, String outputFormat) {
+        SimpleDateFormat sdf = new SimpleDateFormat(outputFormat, Locale.getDefault());
+        return sdf.format(date);
     }
 }

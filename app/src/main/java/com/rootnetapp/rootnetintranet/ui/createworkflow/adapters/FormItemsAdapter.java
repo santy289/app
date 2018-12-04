@@ -1,7 +1,9 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow.adapters;
 
 import android.content.Context;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +27,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormIt
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -153,6 +156,23 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         setTextInputParams(holder.getBinding().etInput, item.getInputType());
 
+        holder.getBinding().etInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                item.setValue(s.toString());
+            }
+        });
+
         if (hasToEvaluateValid && !item.isValid()) {
             item.setErrorMessage(item.getErrorMessage());
             holder.getBinding().etInput.setBackgroundResource(R.drawable.spinner_bg_error);
@@ -257,10 +277,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             // the style mdtp_ActionButton.Text must be overridden in styles.xml for MaterialComponents
             DatePickerDialog dpd = DatePickerDialog.newInstance(
                     (view, year, monthOfYear, dayOfMonth) -> {
-                        String date = Utils
-                                .getFormattedDateFromIntegers(year, monthOfYear, dayOfMonth,
-                                        item.getDateFormat());
-                        holder.getBinding().tvSelectedDate.setText(date);
+                        Date date = Utils.getDateFromIntegers(year, monthOfYear, dayOfMonth);
+
+                        holder.getBinding().tvSelectedDate.setText(Utils.getFormattedDate(date, Utils.SERVER_DATE_FORMAT));
+                        item.setValue(date);
                     }
             );
 

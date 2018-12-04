@@ -142,6 +142,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             case TextInputFormItem.InputType.TEXT_AREA:
                 etInput.setInputType(
                         InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+                etInput.setMaxLines(5);
                 break;
 
             case TextInputFormItem.InputType.PHONE:

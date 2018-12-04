@@ -51,7 +51,7 @@ import me.riddhimanadib.formmaster.model.FormElementTextPhone;
 import me.riddhimanadib.formmaster.model.FormElementTextSingleLine;
 import me.riddhimanadib.formmaster.model.FormHeader;
 
-public class WorkFlowCreateFragment extends Fragment {
+public class CreateWorkflowFragment extends Fragment {
 
     @Inject
     CreateWorkflowViewModelFactory createWorkflowViewModelFactory;
@@ -66,10 +66,10 @@ public class WorkFlowCreateFragment extends Fragment {
     private FormItemsAdapter mAdapter;
     private AdapterView.OnItemClickListener mOnSingleChoiceItemClickListener;
 
-    public WorkFlowCreateFragment() { }
+    public CreateWorkflowFragment() { }
 
-    public static WorkFlowCreateFragment newInstance(MainActivityInterface mainActivityInterface) {
-        WorkFlowCreateFragment fragment = new WorkFlowCreateFragment();
+    public static CreateWorkflowFragment newInstance(MainActivityInterface mainActivityInterface) {
+        CreateWorkflowFragment fragment = new CreateWorkflowFragment();
         fragment.mainActivityInterface = mainActivityInterface;
         return fragment;
     }

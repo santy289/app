@@ -246,19 +246,23 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                         public void onItemSelected(AdapterView<?> parent, View view, int position,
                                                    long id) {
 
-                            // the user has selected the No Selection option
-                            if (position == 0) {
-                                //fixme the spinner stops working
-                                item.setValue(null);
-                                item.getOnSelectedListener().onSelected(item);
-                                return;
-                            }
+
 
                             // this prevents the listener to be triggered by setSelection
                             Object tag = holder.getBinding().spInput.getTag();
                             if (tag == null || (int) tag != position) {
-                                int index = position--; // because of the No Selection option
-                                item.setValue(item.getOptions().get(position));
+
+                                // the user has selected the No Selection option
+                                if (position == 0) {
+                                    //fixme the spinner stops working
+                                    item.setValue(null);
+                                    item.getOnSelectedListener().onSelected(item);
+                                    return;
+                                }
+
+                                // the user has selected a valid option
+                                int index = position - 1; // because of the No Selection option
+                                item.setValue(item.getOptions().get(index));
                                 item.getOnSelectedListener().onSelected(item);
                             }
                         }

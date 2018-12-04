@@ -442,6 +442,7 @@ public class WorkFlowCreateFragment extends Fragment {
         singleChoiceFormItem.setOnSelectedListener(item -> {
             if (item.getValue() == null) {
                 viewModel.clearForm();
+                mAdapter.setHasToEvaluateValid(false);
                 return;
             }
 

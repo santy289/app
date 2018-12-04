@@ -1,13 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist;
 
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
-import androidx.paging.PagedList;
 import android.content.SharedPreferences;
-import androidx.annotation.IdRes;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -41,6 +34,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import androidx.annotation.IdRes;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModel;
+import androidx.paging.PagedList;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -848,7 +848,7 @@ public class WorkflowViewModel extends ViewModel {
         // TODO update FILTERSETTINGS FILTER LIST WITH FIELDS
 
         filterSettings.updateFilterListWithDynamicField(listField, fieldData, fieldConfig);
-        formSettings.addFieldDataItem(fieldData);
+//        formSettings.addFieldDataItem(fieldData); //todo check
     }
 
     private void setTeamList(FormFieldsByWorkflowType field) {
@@ -893,7 +893,7 @@ public class WorkflowViewModel extends ViewModel {
             fieldData.tag = field.getId();
             fieldData.isMultipleSelection = isMultipleSelection;
             fieldData.escape = escape(fieldConfig);
-            formSettings.addFieldDataItem(fieldData);
+//            formSettings.addFieldDataItem(fieldData); //todo check
             //setFieldList.postValue(fieldListSettings);
             return fieldListSettings;
         }).subscribeOn(Schedulers.newThread())

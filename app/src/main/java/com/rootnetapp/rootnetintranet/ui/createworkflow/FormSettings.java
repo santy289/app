@@ -51,8 +51,6 @@ public class FormSettings {
     private long createdTimestamp;
     private ArrayList<FormCreateProfile> profiles;
     private List<FormFieldsByWorkflowType> fields; // Full info of all fields.
-    private ArrayList<ListField> formLists;
-    private ArrayList<FieldData> fieldItems;
     private Moshi moshi;
     private String uploadFileName;
     private String uploadFileExtension;
@@ -96,8 +94,6 @@ public class FormSettings {
         ids = new ArrayList<>();
         profiles = new ArrayList<>();
         fields = new ArrayList<>();
-        formLists = new ArrayList<>();
-        fieldItems = new ArrayList<>();
         indexWorkflowTypeSelected = 0;
         title = "";
         description = "";
@@ -832,16 +828,10 @@ public class FormSettings {
         this.fields = fields;
     }
 
-    public ArrayList<ListField> getFormLists() {
-        return formLists;
-    }
-
-    public void setFormLists(ArrayList<ListField> formLists) {
-        this.formLists = formLists;
-    }
-
     public ListField addListToForm(ListItem newList, String customLabel, int customFieldId,
                                    String type) {
+        //todo check
+
         ListField listField = new ListField();
         listField.id = newList.getId();
         listField.listId = newList.getListId();
@@ -863,12 +853,13 @@ public class FormSettings {
         }
 
         listField.children = tempList;
-        formLists.add(listField);
+//        formLists.add(listField);
         return listField;
     }
 
     public ListField addServiceListToForm(List<Service> incomingList, String customLabel,
                                           int customFieldId, String type) {
+        //todo check
         ListField listField = new ListField();
         listField.customFieldId = customFieldId;
         listField.listType = type;
@@ -884,12 +875,13 @@ public class FormSettings {
             tempList.add(item);
         }
         listField.children = tempList;
-        formLists.add(listField);
+//        formLists.add(listField);
         return listField;
     }
 
     public ListField addRolesLisToForm(List<Role> incomingList, String customLabel,
                                        int customFieldId, String type) {
+        //todo check
         ListField listField = new ListField();
         listField.customFieldId = customFieldId;
         listField.listType = type;
@@ -904,12 +896,13 @@ public class FormSettings {
             tempList.add(item);
         }
         listField.children = tempList;
-        formLists.add(listField);
+//        formLists.add(listField);
         return listField;
     }
 
     public ListField addProductLisToForm(List<ProductFormList> incomingList, String customLabel,
                                          int customFieldId, String type) {
+        //todo check
         ListField listField = new ListField();
         listField.customFieldId = customFieldId;
         listField.listType = type;
@@ -925,12 +918,8 @@ public class FormSettings {
             tempList.add(item);
         }
         listField.children = tempList;
-        formLists.add(listField);
+//        formLists.add(listField);
         return listField;
-    }
-
-    public ArrayList<FieldData> getFieldItems() {
-        return fieldItems;
     }
 
     final static String MACHINE_NAME_TITLE = "wf_title";
@@ -955,7 +944,8 @@ public class FormSettings {
     }
 
     public ArrayList<FieldData> getFieldItemsForPost() {
-        ArrayList<FieldData> postFieldData = (ArrayList<FieldData>) fieldItems.clone();
+        //todo implement
+        /*ArrayList<FieldData> postFieldData = (ArrayList<FieldData>) fieldItems.clone();
         FieldData fieldData;
         int tag;
         String machineName;
@@ -1009,8 +999,9 @@ public class FormSettings {
             }
         }
 
-        return postFieldData;
+        return postFieldData;*/
 
+        return null;
     }
 
     private String findMachineNameBy(int id) {
@@ -1024,24 +1015,20 @@ public class FormSettings {
         return "";
     }
 
-    public void setFieldItems(ArrayList<FieldData> fieldItems) {
-        this.fieldItems = fieldItems;
-    }
-
-    public void addFieldDataItem(FieldData fieldData) {
-        fieldItems.add(fieldData);
-    }
-
-    public void clearFormFieldData() {
+    protected void clearFormItems() {
         pendingFileUpload = null;
-        if (1 >= fieldItems.size()) {
-            return;
-        }
-        fieldItems.subList(1, fieldItems.size()).clear();
 
-        if (1 >= fields.size()) {
+        List<BaseFormItem> formItems = getFormItems();
+
+        if (formItems.size() <= 1) {
             return;
         }
+        formItems.subList(1, formItems.size()).clear();
+
+        if (formItems.size() <= 1) {
+            return;
+        }
+
         fields.subList(1, fields.size()).clear();
     }
 

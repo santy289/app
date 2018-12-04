@@ -42,8 +42,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         notifyItemInserted(getItemCount() - 1);
     }
 
-    public void addList(List<BaseFormItem> list) {
-        mDataset.addAll(list);
+    public void setData(List<BaseFormItem> list) {
+        mDataset = list;
         notifyDataSetChanged();
     }
 

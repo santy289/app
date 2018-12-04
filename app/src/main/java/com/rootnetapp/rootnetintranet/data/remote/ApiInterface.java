@@ -120,6 +120,7 @@ public interface ApiInterface {
                                                @Query("page") int page,
                                                @Query("status") boolean status);
 
+
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?")
     Observable<WorkflowResponseDb> getWorkflowsDb(@Header("Authorization") String authorization,
@@ -127,9 +128,14 @@ public interface ApiInterface {
                                                   @Query("open") boolean open,
                                                   @Query("page") int page,
                                                   @Query("workflow_type") boolean showTypeDetails);
-
-
-
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?")
+    Observable<WorkflowResponseDb> getWorkflowsBySearchQuery(@Header("Authorization") String authorization,
+                                                             @Query("limit") int limit,
+                                                             @Query("page") int page,
+                                                             @Query("open") boolean open,
+                                                             @Query("query") String query,
+                                                             @Query("workflow_type") boolean showTypeDetails);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?")

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/lyt_perform_action"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:paddingTop="16dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/lyt_workflow"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/border_bg_workflow_perform_action"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp">
+
+                <TextView
+                    android:id="@+id/tv_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:ellipsize="end"
+                    android:gravity="center_vertical"
+                    android:maxLines="2"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="18sp"
+                    tools:text="Now we have some very long text to test if we can have something here correctly without breaking Long text in here." />
+
+                <TextView
+                    android:id="@+id/tv_type_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="@string/workflow_search_fragment_search_type"
+                    android:textColor="@color/colorPrimary"
+                    app:layout_constraintStart_toStartOf="@id/tv_title"
+                    app:layout_constraintTop_toBottomOf="@id/tv_title" />
+
+                <TextView
+                    android:id="@+id/tv_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:textColor="@color/low_gray_text"
+                    app:layout_constraintBottom_toBottomOf="@id/tv_type_title"
+                    app:layout_constraintStart_toEndOf="@id/tv_type_title"
+                    app:layout_constraintTop_toTopOf="@id/tv_type_title"
+                    tools:text="Reclutamiento" />
+
+                <TextView
+                    android:id="@+id/tv_status_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/workflow_search_fragment_search_status"
+                    android:textColor="@color/colorPrimary"
+                    app:layout_constraintStart_toStartOf="@id/tv_type_title"
+                    app:layout_constraintTop_toBottomOf="@id/tv_type_title" />
+
+                <TextView
+                    android:id="@+id/tv_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:textColor="@color/low_gray_text"
+                    app:layout_constraintBottom_toBottomOf="@id/tv_status_title"
+                    app:layout_constraintStart_toEndOf="@id/tv_status_title"
+                    app:layout_constraintTop_toTopOf="@id/tv_status_title"
+                    tools:text="Open" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <FrameLayout
+                android:id="@+id/container"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lyt_workflow" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+</layout>

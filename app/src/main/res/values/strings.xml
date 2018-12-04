@@ -216,6 +216,7 @@
     <string name="last_status">Last Status</string>
     <string name="next_status">Next Status</string>
     <string name="request_successfully">Request done successfully.</string>
+    <string name="functionality_not_available">This functionality is not available yet</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Workflow Details</string>
@@ -273,4 +274,23 @@
     <string name="workflow_detail_files_fragment_cannot_open_file">This file cannot be opened by your device.</string>
     <string name="workflow_detail_files_fragment_preset_unavailable">This preset is not available to download.</string>
     <string name="workflow_detail_files_fragment_permissions_not_granted">Cannot download the file because the permissions were not granted.</string>
+
+    <!--MainActivity-->
+    <string name="bottom_nav_timeline">Timeline</string>
+    <string name="bottom_nav_workflow_list">Workflows</string>
+    <string name="bottom_nav_workflow_dashboard">Dashboard</string>
+    <string name="quick_actions_edit_workflow">Edit Workflow</string>
+    <string name="quick_actions_approve_workflow">Approve Workflow</string>
+    <string name="quick_actions_change_status">Change Status</string>
+    <string name="quick_actions_comment">Comment</string>
+
+    <!--QuickActionsActivity-->
+    <string name="quick_actions_activity_title">Quick Actions</string>
+    <!--ChangeStatusActivity-->
+    <string name="change_status_activity_title">Change Status</string>
+    <!--WorkflowSearchFragment-->
+    <string name="workflow_search_fragment_search_hint">Search workflow…</string>
+    <string name="workflow_search_fragment_search_no_results">Your search did not find any results</string>
+    <string name="workflow_search_fragment_search_type">Type:</string>
+    <string name="workflow_search_fragment_search_status">Status:</string>
 </resources>

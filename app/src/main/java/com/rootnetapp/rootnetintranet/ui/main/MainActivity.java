@@ -1,28 +1,14 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
-import androidx.databinding.DataBindingUtil;
+import android.graphics.Color;
 import android.os.Bundle;
-import androidx.annotation.IntegerRes;
-import androidx.annotation.StringRes;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.PopupMenu;
-import androidx.appcompat.widget.SearchView;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -38,6 +24,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
+import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
@@ -49,6 +36,8 @@ import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.main.adapters.SearchAdapter;
 import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerFragment;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
+import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
+import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
@@ -58,6 +47,25 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOption
 import java.util.List;
 
 import javax.inject.Inject;
+
+import androidx.annotation.DrawableRes;
+import androidx.annotation.IdRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
+import androidx.appcompat.widget.SearchView;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.databinding.DataBindingUtil;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.CHECK;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.INDEX_CHECK;
@@ -111,6 +119,8 @@ public class MainActivity extends AppCompatActivity
         showFragment(TimelineFragment.newInstance(this), false);
         startBackgroundWorkflowRequest();
         setFilterBoxListeners();
+        setupBottomNavigation();
+        setupSpeedDialFab();
     }
 
     @Override
@@ -167,7 +177,8 @@ public class MainActivity extends AppCompatActivity
     public void showFragment(Fragment fragment, boolean addtobackstack) {
         String tag = fragment.getClass().getSimpleName();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out);
+        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out,
+                android.R.anim.fade_in, android.R.anim.fade_out);
         transaction.replace(R.id.container, fragment);
         if (addtobackstack) {
             transaction.addToBackStack(tag);
@@ -228,12 +239,97 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void setupBottomNavigation() {
+        mainBinding.bottomNavigation.setOnNavigationItemSelectedListener(
+                item -> {
+                    handleBottomNavigationSelection(item);
+                    return false;
+                });
+    }
+
+    private void handleBottomNavigationSelection(@NonNull MenuItem item) {
+        item.setChecked(true);
+
+        switch (item.getItemId()) {
+            case R.id.menu_timeline:
+                showFragment(TimelineFragment.newInstance(this), false);
+                break;
+
+            case R.id.menu_workflow_list:
+                showFragment(WorkflowFragment.newInstance(this), false);
+                break;
+
+            case R.id.menu_dashboard:
+                showFragment(WorkflowManagerFragment.newInstance(this), false);
+                break;
+        }
+    }
+
+    private void setupSpeedDialFab() {
+        //reverse order
+        addActionItem(R.id.fab_comment, R.string.quick_actions_comment,
+                R.drawable.ic_message_black_24dp);
+        addActionItem(R.id.fab_change_status, R.string.quick_actions_change_status,
+                R.drawable.ic_compare_arrows_black_24dp);
+        addActionItem(R.id.fab_approve_workflow, R.string.quick_actions_approve_workflow,
+                R.drawable.ic_like_black_24dp);
+        addActionItem(R.id.fab_edit_workflow, R.string.quick_actions_edit_workflow,
+                R.drawable.ic_workflow_black_24dp);
+
+        mainBinding.fabSpeedDial.setOnActionSelectedListener(this::handleSpeedDialClick);
+        mainBinding.fabSpeedDial.getMainFab().setSupportImageTintList(ColorStateList.valueOf(
+                Color.WHITE)); //this is the only way to change the icon color
+    }
+
+    private void addActionItem(@IdRes int idRes, @StringRes int titleRes,
+                               @DrawableRes int drawableRes) {
+        mainBinding.fabSpeedDial.addActionItem(
+                new SpeedDialActionItem.Builder(idRes, drawableRes)
+                        .setLabel(getString(titleRes))
+                        .setFabBackgroundColor(ContextCompat.getColor(this, R.color.white))
+                        .setFabImageTintColor(ContextCompat.getColor(this, R.color.black))
+                        .setLabelBackgroundColor(ContextCompat.getColor(this, R.color.white))
+                        .setLabelColor(ContextCompat.getColor(this, R.color.dark_gray))
+                        .setLabelClickable(false)
+                        .create()
+        );
+    }
+
+    private boolean handleSpeedDialClick(SpeedDialActionItem speedDialActionItem) {
+        @QuickAction int quickAction;
+        switch (speedDialActionItem.getId()) {
+
+            case R.id.fab_edit_workflow:
+                quickAction = QuickAction.EDIT_WORKFLOW;
+                showToastMessage(R.string.functionality_not_available); //todo add action
+                return true;
+
+            case R.id.fab_approve_workflow:
+                quickAction = QuickAction.APPROVE_WORKFLOW;
+                break;
+
+            case R.id.fab_change_status:
+                quickAction = QuickAction.CHANGE_STATUS;
+                break;
+
+            case R.id.fab_comment:
+                quickAction = QuickAction.COMMENT;
+                break;
+
+            default:
+                return false;
+        }
+
+        Intent intent = new Intent(this, QuickActionsActivity.class);
+        intent.putExtra(QuickActionsActivity.EXTRA_ACTION, quickAction);
+        intent.putExtra(QuickActionsActivity.EXTRA_TITLE, speedDialActionItem.getLabel(this));
+        startActivity(intent);
+
+        return false; // true to keep the Speed Dial open
+    }
+
     private void initActionListeners() {
-        mainBinding.leftDrawer.navTimeline.setOnClickListener(this::drawerClicks);
-        mainBinding.leftDrawer.navWorkflows.setOnClickListener(this::drawerClicks);
-        mainBinding.leftDrawer.navWorkflowmanager.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navProfile.setOnClickListener(this::drawerClicks);
-        mainBinding.leftDrawer.buttonWorkflow.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navExit.setOnClickListener(this::drawerClicks);
         mainBinding.rightDrawer.drawerBackButton.setOnClickListener(view -> {
             if (sortingActive) {
@@ -255,13 +351,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void openRightDrawer(boolean open) {
-        if (mainBinding.drawerLayout.isDrawerOpen(Gravity.END)) {
+        if (mainBinding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
             return;
         }
-        mainBinding.drawerLayout.openDrawer(Gravity.END);
+        mainBinding.drawerLayout.openDrawer(GravityCompat.END);
     }
 
     boolean sortingActive = false;
+
     private void showSortByViews(boolean show) {
         if (show) {
             mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.sorting));
@@ -309,40 +406,45 @@ public class MainActivity extends AppCompatActivity
             case RADIO_CLEAR_ALL:
                 mainBinding.rightDrawer.sortOptions.radioGroupSortBy.clearCheck();
             default:
-                Log.d(TAG, "toggleRadioButtonFilter: Trying to perform toggle on unknown radio button");
+                Log.d(TAG,
+                        "toggleRadioButtonFilter: Trying to perform toggle on unknown radio button");
                 break;
         }
     }
-
-
 
     // TODO refactor name to setDrawerSortBy
     @Deprecated
     private void setFilterBoxListeners() {
         // radio button listeners
-        mainBinding.rightDrawer.sortOptions.chbxWorkflownumber.setOnClickListener(this::onRadioButtonClicked);
-        mainBinding.rightDrawer.sortOptions.chbxCreatedate.setOnClickListener(this::onRadioButtonClicked);
-        mainBinding.rightDrawer.sortOptions.chbxUpdatedate.setOnClickListener(this::onRadioButtonClicked);
+        mainBinding.rightDrawer.sortOptions.chbxWorkflownumber
+                .setOnClickListener(this::onRadioButtonClicked);
+        mainBinding.rightDrawer.sortOptions.chbxCreatedate
+                .setOnClickListener(this::onRadioButtonClicked);
+        mainBinding.rightDrawer.sortOptions.chbxUpdatedate
+                .setOnClickListener(this::onRadioButtonClicked);
 
         // ascending / descending listeners
 
         mainBinding.rightDrawer.sortOptions.swchWorkflownumber.setOnClickListener(view -> {
-            Switch aSwitch = ((Switch)view);
+            Switch aSwitch = ((Switch) view);
             boolean isChecked = aSwitch.isChecked();
             viewModel.handleSwitchOnClick(RADIO_NUMBER, Sort.sortType.BYNUMBER, isChecked);
-            setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchWorkflownumber, isChecked);
+            setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchWorkflownumber,
+                    isChecked);
         });
         mainBinding.rightDrawer.sortOptions.swchCreatedate.setOnClickListener(view -> {
-            Switch aSwitch = ((Switch)view);
+            Switch aSwitch = ((Switch) view);
             boolean isChecked = aSwitch.isChecked();
             viewModel.handleSwitchOnClick(RADIO_CREATED_DATE, Sort.sortType.BYCREATE, isChecked);
-            setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchCreatedate, isChecked);
+            setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchCreatedate,
+                    isChecked);
         });
         mainBinding.rightDrawer.sortOptions.swchUpdatedate.setOnClickListener(view -> {
-            Switch aSwitch = ((Switch)view);
+            Switch aSwitch = ((Switch) view);
             boolean isChecked = aSwitch.isChecked();
             viewModel.handleSwitchOnClick(RADIO_UPDATED_DATE, Sort.sortType.BYUPDATE, isChecked);
-            setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchUpdatedate, isChecked);
+            setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchUpdatedate,
+                    isChecked);
         });
     }
 
@@ -350,18 +452,22 @@ public class MainActivity extends AppCompatActivity
         switch (switchType) {
             case SWITCH_NUMBER:
                 mainBinding.rightDrawer.sortOptions.swchWorkflownumber.setChecked(check);
-                setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchWorkflownumber, check);
+                setSwitchAscendingDescendingText(
+                        mainBinding.rightDrawer.sortOptions.swchWorkflownumber, check);
                 break;
             case SWITCH_CREATED_DATE:
                 mainBinding.rightDrawer.sortOptions.swchCreatedate.setChecked(check);
-                setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchCreatedate, check);
+                setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchCreatedate,
+                        check);
                 break;
             case SWITCH_UPDATED_DATE:
                 mainBinding.rightDrawer.sortOptions.swchUpdatedate.setChecked(check);
-                setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchUpdatedate, check);
+                setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchUpdatedate,
+                        check);
                 break;
             default:
-                Log.d(TAG, "toggleAscendingDescendingSwitch: Trying to perform a toggle and there is no related Switch object");
+                Log.d(TAG,
+                        "toggleAscendingDescendingSwitch: Trying to perform a toggle and there is no related Switch object");
                 break;
         }
     }
@@ -402,39 +508,12 @@ public class MainActivity extends AppCompatActivity
         popup.show();
     }
 
-
-
     private void drawerClicks(View view) {
         int id = view.getId();
         switch (id) {
-            case R.id.nav_timeline: {
-                showFragment(TimelineFragment.newInstance(this), false);
-                mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
-                break;
-            }
-            case R.id.nav_workflows: {
-                showFragment(WorkflowFragment.newInstance(this), false);
-                mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
-                break;
-            }
             case R.id.nav_profile: {
                 showFragment(ProfileFragment.newInstance(this), false);
                 mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
-                break;
-            }
-            case R.id.nav_workflowmanager: {
-                showFragment(WorkflowManagerFragment.newInstance(this), false);
-                mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
-                break;
-            }
-            case R.id.button_workflow: {
-                if (mainBinding.leftDrawer.expansionWorkflow.getVisibility() == View.GONE) {
-                    mainBinding.leftDrawer.arrow1.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
-                    mainBinding.leftDrawer.expansionWorkflow.setVisibility(View.VISIBLE);
-                } else {
-                    mainBinding.leftDrawer.arrow1.setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
-                    mainBinding.leftDrawer.expansionWorkflow.setVisibility(View.GONE);
-                }
                 break;
             }
             case R.id.nav_exit: {
@@ -466,20 +545,20 @@ public class MainActivity extends AppCompatActivity
         sharedPref.edit().putString(key, content).apply();
     }
 
-
     protected void collapseActionView(Boolean collapse) {
-        if(mSearch != null){
+        if (mSearch != null) {
             mSearch.collapseActionView();
         }
     }
 
     protected void hideKeyboard(Boolean hide) {
-        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager) getSystemService(
+                Context.INPUT_METHOD_SERVICE);
         if (imm == null) {
             return;
         }
         // verify if the soft keyboard is open
-        if(!imm.isAcceptingText()) {
+        if (!imm.isAcceptingText()) {
             return;
         }
         View view = getCurrentFocus();
@@ -506,10 +585,11 @@ public class MainActivity extends AppCompatActivity
         LayoutInflater inflater = LayoutInflater.from(this);
         rightDrawerFiltersAdapter = new RightDrawerFiltersAdapter(inflater, menus);
 
-        mainBinding.rightDrawer.rightDrawerFilters.setOnItemClickListener((parent, view, position, id) -> {
-            // Clicks on Filter List
-             viewModel.sendFilterClickToWorflowList(position);
-        });
+        mainBinding.rightDrawer.rightDrawerFilters
+                .setOnItemClickListener((parent, view, position, id) -> {
+                    // Clicks on Filter List
+                    viewModel.sendFilterClickToWorflowList(position);
+                });
         mainBinding.rightDrawer.rightDrawerFilters.setAdapter(rightDrawerFiltersAdapter);
     }
 
@@ -549,7 +629,8 @@ public class MainActivity extends AppCompatActivity
         setRightDrawerOptionsAdapter(optionsList.optionsList, listener);
     }
 
-    private void setRightDrawerOptionsAdapter(List<WorkflowTypeMenu> optionsList, AdapterView.OnItemClickListener listener) {
+    private void setRightDrawerOptionsAdapter(List<WorkflowTypeMenu> optionsList,
+                                              AdapterView.OnItemClickListener listener) {
         LayoutInflater inflater = LayoutInflater.from(this);
         rightDrawerOptionsAdapter = new RightDrawerOptionsAdapter(inflater, optionsList);
         mainBinding.rightDrawer.rightDrawerFilters.setOnItemClickListener(listener);
@@ -567,7 +648,6 @@ public class MainActivity extends AppCompatActivity
     private void handleUpdateBaseFilterSelectionUpdateWith(@StringRes int resLabel) {
         mainBinding.rightDrawer.rightDrawerBaseSubtitle.setText(resLabel);
     }
-
 
     private void invalidateOptionList() {
         if (rightDrawerOptionsAdapter == null) {
@@ -606,7 +686,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void hideSortingViews(boolean hide) {
-        TextView sortTitle =  mainBinding.rightDrawer.rightDrawerSortBy;
+        TextView sortTitle = mainBinding.rightDrawer.rightDrawerSortBy;
         TextView sortSubtitle = mainBinding.rightDrawer.rightDrawerSortSelection;
 
         if (hide) {
@@ -618,13 +698,21 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                this,
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
+    }
+
     private void subscribe() {
         subscribeForLogin();
         final Observer<Integer> errorObserver = ((Integer data) -> {
             // TODO handle error when we cant find Users, workflowlike and workflow
         });
 
-        final Observer<Integer> setSearchMenuObserver = ( layoutId -> {
+        final Observer<Integer> setSearchMenuObserver = (layoutId -> {
 
         });
 
@@ -659,19 +747,21 @@ public class MainActivity extends AppCompatActivity
         viewModel.receiveMessageToggleRadioButton.observe(this, toggleRadioButtonObserver);
         viewModel.receiveMessageToggleSwitch.observe(this, toggleSwitchObserver);
         viewModel.receiveMessageUpdateSortSelected.observe(this, this::updateSortFieldSelection);
-        viewModel.receiveMessageCreateBaseFiltersAdapter.observe(this, this::setRightDrawerBaseFilters);
-        viewModel.receiveMessageBaseFilterSelected.observe(this, this::handleUpdateBaseFilterSelectionUpdateWith);
+        viewModel.receiveMessageCreateBaseFiltersAdapter
+                .observe(this, this::setRightDrawerBaseFilters);
+        viewModel.receiveMessageBaseFilterSelected
+                .observe(this, this::handleUpdateBaseFilterSelectionUpdateWith);
         viewModel.openRightDrawer.observe(this, this::openRightDrawer);
     }
 
     private void subscribeForLogin() {
         final Observer<Boolean> attemptTokenRefreshObserver = (response -> attemptToLogin());
-        final Observer<String> saveToPreferenceObserver = (content -> saveInPreferences("token", content));
+        final Observer<String> saveToPreferenceObserver = (content -> saveInPreferences("token",
+                content));
         final Observer<Boolean> goToDomainObserver = (this::goToDomain);
         viewModel.getObservableAttemptTokenRefresh().observe(this, attemptTokenRefreshObserver);
         viewModel.getObservableSaveToPreference().observe(this, saveToPreferenceObserver);
         viewModel.getObservableGoToDomain().observe(this, goToDomainObserver);
     }
-
 
 }

@@ -214,6 +214,7 @@
     <string name="last_status">Estatus Pasado</string>
     <string name="next_status">Próximo Estatus</string>
     <string name="request_successfully">Pedido realizado exitosamente.</string>
+    <string name="functionality_not_available">Esta función aún no está disponible.</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Detalles de Workflow</string>
@@ -271,4 +272,23 @@
     <string name="workflow_detail_files_fragment_cannot_open_file">Su dispositivo no puede abrir este archivo.</string>
     <string name="workflow_detail_files_fragment_preset_unavailable">Este template no está disponible.</string>
     <string name="workflow_detail_files_fragment_permissions_not_granted">No es posible descargar el archivo debido a que los permisos no fueron otorgados.</string>
+
+    <!--MainActivity-->
+    <string name="bottom_nav_timeline">Timeline</string>
+    <string name="bottom_nav_workflow_list">Workflows</string>
+    <string name="bottom_nav_workflow_dashboard">Dashboard</string>
+    <string name="quick_actions_edit_workflow">Editar Workflow</string>
+    <string name="quick_actions_approve_workflow">Aprobar Workflow</string>
+    <string name="quick_actions_change_status">Cambiar Estatus</string>
+    <string name="quick_actions_comment">Comentar</string>
+
+    <!--QuickActionsActivity-->
+    <string name="quick_actions_activity_title">Acciones rápidas</string>
+    <!--ChangeStatusActivity-->
+    <string name="change_status_activity_title">Cambiar Estatus</string>
+    <!--WorkflowSearchFragment-->
+    <string name="workflow_search_fragment_search_hint">Buscar workflow…</string>
+    <string name="workflow_search_fragment_search_no_results">Tu búsqueda no ha traído resultados</string>
+    <string name="workflow_search_fragment_search_type">Tipo:</string>
+    <string name="workflow_search_fragment_search_status">Estatus:</string>
 </resources>

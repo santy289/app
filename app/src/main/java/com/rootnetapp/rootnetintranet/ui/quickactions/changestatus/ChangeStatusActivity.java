@@ -60,6 +60,14 @@ public class ChangeStatusActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(getTitle());
     }
 
+    /**
+     * Creates and setups the WebView that will be used to display the ChangeStatus action. The web
+     * page uses Angular.js with HTML5, so we need to enable all of the HTML5 features of the
+     * WebView. Also, we need to send our mobile device user session to the web page, using the
+     * WebView localStorage.
+     *
+     * @param data the object holding every value we need to setup the WebView.
+     */
     @UiThread
     @SuppressLint("SetJavaScriptEnabled")
     private void setupWebView(WebViewData data) {
@@ -78,6 +86,7 @@ public class ChangeStatusActivity extends AppCompatActivity {
         ws.setAppCacheEnabled(true);
         Log.d(TAG, "Enabled HTML5-Features");
 
+        //fixme this should save on the browser localStorage and load the user session
         /*mBinding.webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView webView, String url) {

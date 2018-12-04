@@ -62,6 +62,13 @@ public class QuickActionsActivity extends AppCompatActivity implements QuickActi
         getSupportActionBar().setTitle(title);
     }
 
+    /**
+     * Shows the given instantiated fragment inside the container FrameLayout with a fade in/out
+     * animation. Gives the option to add the fragment to the navigation back stack.
+     *
+     * @param fragment       instantiated fragment.
+     * @param addToBackStack whether to add the fragment to the navigation back stack
+     */
     @Override
     public void showFragment(Fragment fragment, boolean addToBackStack) {
         String tag = fragment.getClass().getSimpleName();

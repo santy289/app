@@ -1,8 +1,10 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.comments;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -23,6 +25,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailViewModel;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.adapters.AttachmentsAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.adapters.CommentsAdapter;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +34,7 @@ import javax.inject.Inject;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
+import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
@@ -115,6 +119,7 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
         commentsViewModel.getObservableNewCommentFile()
                 .observe(this, this::addNewAttachment);
         commentsViewModel.getObservableClearAttachments().observe(this, this::clearAttachmentsList);
+        commentsViewModel.getObservableOpenDownloadedAttachment().observe(this, this::openDownloadedFile);
 
         commentsViewModel.showLoading.observe(this, this::showLoading);
     }
@@ -296,8 +301,41 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
 
     @Override
     public void downloadCommentAttachment(CommentFileResponse commentFileResponse) {
-        //todo download file
-        return;
+        //todo permissions
+        commentsViewModel.downloadAttachment(commentFileResponse);
+    }
+
+    /**
+     * Creates an {@link Intent} chooser the downloaded file. If the device is not suitable to read
+     * the file, will display a {@link Toast} message. Uses a {@link FileProvider} to create the
+     * file URI, instead of using the {@link Uri#fromFile(File)} method.
+     *
+     * @param attachmentUiData the file data containing the file to be opened.
+     *
+     * @see <a href="https://developer.android.com/reference/android/support/v4/content/FileProvider">FileProvider</a>
+     */
+    @UiThread
+    private void openDownloadedFile(AttachmentUiData attachmentUiData) {
+        if (attachmentUiData.getFile() == null) return;
+
+        Intent target = new Intent(Intent.ACTION_VIEW);
+
+        Uri fileUri = FileProvider.getUriForFile(getContext(),
+                getContext().getApplicationContext().getPackageName() + ".fileprovider",
+                attachmentUiData.getFile());
+
+        target.setDataAndType(fileUri, attachmentUiData.getMimeType());
+        target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        Intent intent = Intent.createChooser(target,
+                getString(R.string.workflow_detail_comments_fragment_open_file));
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            // Instruct the user to install a PDF reader here
+            showToastMessage(R.string.workflow_detail_comments_fragment_cannot_open_file);
+        }
     }
 
     @UiThread

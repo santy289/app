@@ -6,14 +6,17 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
 import android.util.Base64;
+import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
+import com.rootnetapp.rootnetintranet.models.responses.comments.CommentFileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.downloadfile.DownloadFileResponse;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,6 +48,7 @@ public class CommentsViewModel extends ViewModel {
     private MutableLiveData<Boolean> mEnableCommentButton;
     private MutableLiveData<CommentFile> mNewCommentFileLiveData;
     private MutableLiveData<Boolean> mClearAttachments;
+    private MutableLiveData<AttachmentUiData> mOpenDownloadedAttachmentLiveData;
 
     protected MutableLiveData<Boolean> showLoading;
 
@@ -132,7 +136,7 @@ public class CommentsViewModel extends ViewModel {
         }
     }
 
-    protected void removeCommentAttachment(CommentFile commentFile){
+    protected void removeCommentAttachment(CommentFile commentFile) {
         mCommentFiles.remove(commentFile);
     }
 
@@ -196,6 +200,49 @@ public class CommentsViewModel extends ViewModel {
         mCommentsTabCounter.setValue(counter);
     }
 
+    /**
+     * Prepares a request to the endpoint for the desired file.
+     *
+     * @param commentFileResponse the file object to download.
+     */
+    protected void downloadAttachment(CommentFileResponse commentFileResponse) {
+        showLoading.setValue(true);
+        Disposable disposable = mRepository
+                .downloadAttachment(mToken, CommentFileResponse.FILE_ENTITY, commentFileResponse.getId())
+                .subscribe(this::onDownloadSuccess, this::onFailure);
+        mDisposables.add(disposable);
+    }
+
+    /**
+     * Callback for the success file download. Converts and saves it to a local file and sends it
+     * back to the UI for displaying purposes.
+     *
+     * @param downloadFileResponse the downloaded file response.
+     */
+    private void onDownloadSuccess(DownloadFileResponse downloadFileResponse) {
+        showLoading.setValue(false);
+
+        // the API will return a base64 string representing the file
+
+        String base64 = downloadFileResponse.getFile().getContent();
+        if (base64 == null || base64.isEmpty()) {
+            mToastMessageLiveData.setValue(R.string.error);
+            return;
+        }
+
+        String fileName = downloadFileResponse.getFile().getFilename();
+        try {
+            AttachmentUiData attachmentUiData = new AttachmentUiData(
+                    Utils.decodeFileFromBase64Binary(base64, fileName),
+                    downloadFileResponse.getFile().getMime());
+            mOpenDownloadedAttachmentLiveData.setValue(attachmentUiData);
+
+        } catch (IOException e) {
+            Log.e(TAG, "downloadFile: ", e);
+            mToastMessageLiveData.setValue(R.string.error);
+        }
+    }
+
     private void onFailure(Throwable throwable) {
         showLoading.setValue(false);
         mToastMessageLiveData.setValue(R.string.failure_connect);
@@ -255,5 +302,12 @@ public class CommentsViewModel extends ViewModel {
             mClearAttachments = new MutableLiveData<>();
         }
         return mClearAttachments;
+    }
+
+    protected LiveData<AttachmentUiData> getObservableOpenDownloadedAttachment() {
+        if (mOpenDownloadedAttachmentLiveData == null) {
+            mOpenDownloadedAttachmentLiveData = new MutableLiveData<>();
+        }
+        return mOpenDownloadedAttachmentLiveData;
     }
 }

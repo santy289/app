@@ -5,6 +5,7 @@ import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.comment.PostCommentRequest;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.downloadfile.DownloadFileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 
@@ -61,6 +62,11 @@ public class CommentsRepository {
                 workflowId,
                 request)
                 .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<DownloadFileResponse> downloadAttachment(String auth, String entity, int fileId) {
+        return service.downloadFile(auth, entity, fileId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 }

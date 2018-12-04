@@ -146,8 +146,7 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
 
                     // if diff is zero, then the bottom has been reached
                     if (diff == 0) {
-                        workflowSearchViewModel.increasePageNumber();
-                        workflowSearchViewModel.getWorkflowList();
+                        workflowSearchViewModel.bottomReached();
                     }
                 });
     }
@@ -164,11 +163,9 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
      */
     private void performSearch() {
         clearAdapterList();
-        workflowSearchViewModel.resetPageNumber();
 
         String query = mBinding.etSearch.getText().toString();
-
-        workflowSearchViewModel.getWorkflowList(query);
+        workflowSearchViewModel.performSearch(query);
     }
 
     @UiThread

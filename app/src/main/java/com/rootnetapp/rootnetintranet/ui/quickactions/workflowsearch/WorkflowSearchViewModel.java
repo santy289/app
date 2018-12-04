@@ -129,9 +129,28 @@ public class WorkflowSearchViewModel extends ViewModel {
     }
 
     /**
+     * This should be called by the View when the user has commanded a new search action.
+     *
+     * @param query input by the user.
+     */
+    protected void performSearch(String query) {
+        resetPageNumber();
+        getWorkflowList(query);
+    }
+
+    /**
+     * This should be called when the scroll has reached the bottom, meaning we need to fetch more
+     * items.
+     */
+    protected void bottomReached() {
+        increasePageNumber();
+        getWorkflowList();
+    }
+
+    /**
      * Performs a search query with the last saved value.
      */
-    protected void getWorkflowList() {
+    private void getWorkflowList() {
         getWorkflowList(mQuery);
     }
 
@@ -139,7 +158,7 @@ public class WorkflowSearchViewModel extends ViewModel {
      * This should be called every time the RecyclerView or ScrollView detects that it has reached
      * the bottom, thus it needs to fetch more items.
      */
-    protected void increasePageNumber() {
+    private void increasePageNumber() {
         mPageNumber++;
     }
 
@@ -147,7 +166,7 @@ public class WorkflowSearchViewModel extends ViewModel {
      * This should be called every time that the search query is modified, so we can fetch the first
      * items for the new query.
      */
-    protected void resetPageNumber() {
+    private void resetPageNumber() {
         mPageNumber = 1;
     }
 
@@ -161,7 +180,7 @@ public class WorkflowSearchViewModel extends ViewModel {
         return isLoading;
     }
 
-    public LiveData<Boolean> getObservableShowList() {
+    protected LiveData<Boolean> getObservableShowList() {
         if (showList == null) {
             showList = new MutableLiveData<>();
         }

@@ -28,9 +28,9 @@ public class TextInputFormItem extends BaseFormItem {
             matchesRegex = Pattern.compile(getRegex()).matcher(getValue()).matches();
         }
 
-        if (isFilled && matchesRegex) return true;
+        if (isFilled) return matchesRegex;
 
-        return !isFilled && !isRequired();
+        return !isRequired();
 
     }
 

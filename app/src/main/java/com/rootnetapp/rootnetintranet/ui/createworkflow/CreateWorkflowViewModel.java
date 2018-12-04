@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Patterns;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -597,11 +598,11 @@ public class CreateWorkflowViewModel extends ViewModel {
                 .setInputType(valueType)
                 .build();
 
-        /*switch (item.getInputType()){
+        switch (item.getInputType()){
             case TextInputFormItem.InputType.EMAIL:
                 item.setRegex(Patterns.EMAIL_ADDRESS.toString());
                 break;
-        }*/
+        }
 
         formSettings.getFormItems().add(item);
     }

@@ -1,6 +1,6 @@
 package com.rootnetapp.rootnetintranet.models.responses.workflowtypes;
 
-import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.presets.Preset;
 import com.squareup.moshi.Json;
 
 import java.util.List;

@@ -1,17 +1,14 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.files;
 
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
-import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
-import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
+import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
+import com.rootnetapp.rootnetintranet.models.responses.downloadfile.DownloadFileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.file.FilesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 
-import java.util.List;
-
-import androidx.lifecycle.MutableLiveData;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -20,8 +17,6 @@ import io.reactivex.schedulers.Schedulers;
 public class FilesRepository {
 
     private static final String TAG = "FilesRepository";
-
-    private MutableLiveData<Boolean> showLoading;
 
     private ApiInterface service;
 
@@ -55,8 +50,13 @@ public class FilesRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    protected Observable<AttachResponse> attachFile(String auth, List<WorkflowPresetsRequest> request, CommentFile fileRequest) {
-        return service.attachFile(auth, request, fileRequest).subscribeOn(Schedulers.newThread())
+    protected Observable<AttachResponse> attachFile(String auth, AttachFilesRequest request) {
+        return service.attachFile(auth, request).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<DownloadFileResponse> downloadFile(String auth, String entity, int fileId) {
+        return service.downloadFile(auth, entity, fileId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 }

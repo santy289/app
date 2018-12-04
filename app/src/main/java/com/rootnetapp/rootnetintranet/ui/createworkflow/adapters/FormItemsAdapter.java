@@ -3,7 +3,6 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow.adapters;
 import android.content.Context;
 import android.text.Editable;
 import android.text.InputType;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -158,23 +157,6 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         setTextInputParams(holder.getBinding().etInput, item.getInputType());
 
-        holder.getBinding().etInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                item.setValue(s.toString());
-            }
-        });
-
         if (hasToEvaluateValid && !item.isValid()) {
             item.setErrorMessage(item.getErrorMessage());
             holder.getBinding().etInput.setBackgroundResource(R.drawable.spinner_bg_error);
@@ -246,15 +228,12 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                         public void onItemSelected(AdapterView<?> parent, View view, int position,
                                                    long id) {
 
-
-
                             // this prevents the listener to be triggered by setSelection
                             Object tag = holder.getBinding().spInput.getTag();
                             if (tag == null || (int) tag != position) {
 
                                 // the user has selected the No Selection option
                                 if (position == 0) {
-                                    //fixme the spinner stops working
                                     item.setValue(null);
                                     item.getOnSelectedListener().onSelected(item);
                                     return;
@@ -349,5 +328,61 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         holder.getBinding().spCurrency.setAdapter(
                 new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
                         item.getOptions()));
+    }
+
+    public void retrieveValuesFromViews(RecyclerView recylerView) {
+        for (int i = 0; i < mDataset.size(); i++) {
+            BaseFormItem item = mDataset.get(i);
+
+            RecyclerView.ViewHolder holder = recylerView.findViewHolderForAdapterPosition(i);
+
+            if (holder == null) continue;
+
+            switch (getItemViewType(i)) {
+
+                case FormItemViewType.TEXT_INPUT:
+                    retrieveValueForTextInputView(((TextInputViewHolder) holder),
+                            (TextInputFormItem) item);
+                    continue;
+
+                case FormItemViewType.SINGLE_CHOICE:
+                    //the value is set when the user selects the spinner item
+                    continue;
+
+                case FormItemViewType.BOOLEAN:
+                    retrieveValueForBooleanView(((BooleanViewHolder) holder),
+                            (BooleanFormItem) item);
+                    continue;
+
+                case FormItemViewType.DATE:
+                    //the value is set when the user selects the date from the dialog
+                    continue;
+
+                case FormItemViewType.CURRENCY:
+//                    populateCurrencyView((CurrencyViewHolder) holder, i);
+                    continue;
+
+                default:
+                    throw new IllegalStateException("Invalid ViewType");
+            }
+        }
+    }
+
+    private void retrieveValueForTextInputView(TextInputViewHolder holder,
+                                                    TextInputFormItem item) {
+        Editable text = holder.getBinding().etInput.getText();
+        String value = text == null ? null : text.toString();
+        item.setValue(value);
+    }
+
+    private void retrieveValueForSingleChoiceView(SingleChoiceViewHolder holder,
+                                                    SingleChoiceFormItem item) {
+        Option selectedOption = item.getOptions().get(holder.getBinding().spInput.getSelectedItemPosition());
+        item.setValue(selectedOption);
+    }
+
+    private void retrieveValueForBooleanView(BooleanViewHolder holder,
+                                                    BooleanFormItem item) {
+        item.setValue(holder.getBinding().switchInput.isChecked());
     }
 }

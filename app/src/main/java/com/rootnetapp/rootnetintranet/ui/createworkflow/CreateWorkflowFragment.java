@@ -172,6 +172,7 @@ public class CreateWorkflowFragment extends Fragment {
 
     private void setOnClickListeners() {
         mBinding.btnCreate.setOnClickListener(v -> {
+            mAdapter.retrieveValuesFromViews(mBinding.rvFields);
             viewModel.handleCreateWorkflowAction();
         });
     }

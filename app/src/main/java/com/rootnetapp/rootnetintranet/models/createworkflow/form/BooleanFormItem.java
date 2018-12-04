@@ -1,10 +1,8 @@
 package com.rootnetapp.rootnetintranet.models.createworkflow.form;
 
-import androidx.annotation.Nullable;
-
 public class BooleanFormItem extends BaseFormItem {
 
-    private @Nullable Boolean value;
+    private boolean value;
 
     private BooleanFormItem() {
         //Constructor is private for Builder pattern
@@ -12,16 +10,14 @@ public class BooleanFormItem extends BaseFormItem {
 
     @Override
     public boolean isValid() {
-        //todo add validation
-        return false;
+        return true;
     }
 
-    @Nullable
-    public Boolean getValue() {
+    public boolean getValue() {
         return value;
     }
 
-    public void setValue(@Nullable Boolean value) {
+    public void setValue(boolean value) {
         this.value = value;
     }
 
@@ -32,7 +28,7 @@ public class BooleanFormItem extends BaseFormItem {
         private int tag;
         private boolean isRequired;
         private boolean isEscaped;
-        private Boolean value;
+        private boolean value;
 
         public Builder setTitle(String title) {
             this.title = title;
@@ -64,7 +60,7 @@ public class BooleanFormItem extends BaseFormItem {
             return this;
         }
 
-        public Builder setValue(Boolean value) {
+        public Builder setValue(boolean value) {
             this.value = value;
 
             return this;

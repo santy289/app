@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.models.createworkflow.form;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.regex.Pattern;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.StringDef;
@@ -11,7 +12,7 @@ public class TextInputFormItem extends BaseFormItem {
     private @Nullable String value;
     private @Nullable String hint;
     private @Nullable String regex;
-    private @Nullable String regexErrorMessage;
+    private @Nullable String errorMessage;
     private @InputType String inputType;
 
     private TextInputFormItem() {
@@ -20,8 +21,17 @@ public class TextInputFormItem extends BaseFormItem {
 
     @Override
     public boolean isValid() {
-        //todo add validation
-        return false;
+        boolean isFilled = getValue() != null && !getValue().isEmpty();
+
+        boolean matchesRegex = true;
+        if (getRegex() != null && isFilled) {
+            matchesRegex = Pattern.compile(getRegex()).matcher(getValue()).matches();
+        }
+
+        if (isFilled && matchesRegex) return true;
+
+        return !isFilled && !isRequired();
+
     }
 
     @Nullable
@@ -52,12 +62,12 @@ public class TextInputFormItem extends BaseFormItem {
     }
 
     @Nullable
-    public String getRegexErrorMessage() {
-        return regexErrorMessage;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
-    public void setRegexErrorMessage(@Nullable String regexErrorMessage) {
-        this.regexErrorMessage = regexErrorMessage;
+    public void setErrorMessage(@Nullable String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 
     public String getInputType() {
@@ -78,7 +88,7 @@ public class TextInputFormItem extends BaseFormItem {
         private String value;
         private String hint;
         private String regex;
-        private String regexErrorMessage;
+        private String errorMessage;
         private @InputType String inputType;
 
         public Builder setTitle(String title) {
@@ -129,8 +139,8 @@ public class TextInputFormItem extends BaseFormItem {
             return this;
         }
 
-        public Builder setRegexErrorMessage(String regexErrorMessage) {
-            this.regexErrorMessage = regexErrorMessage;
+        public Builder setErrorMessage(String errorMessage) {
+            this.errorMessage = errorMessage;
 
             return this;
         }
@@ -152,7 +162,7 @@ public class TextInputFormItem extends BaseFormItem {
             item.setValue(value);
             item.setHint(hint);
             item.setRegex(regex);
-            item.setRegexErrorMessage(regexErrorMessage);
+            item.setErrorMessage(errorMessage);
             item.setInputType(inputType);
             item.setViewType(FormItemViewType.TEXT_INPUT);
 

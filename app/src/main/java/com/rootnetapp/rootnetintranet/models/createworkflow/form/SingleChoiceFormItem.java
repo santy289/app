@@ -16,8 +16,10 @@ public class SingleChoiceFormItem extends BaseFormItem {
 
     @Override
     public boolean isValid() {
-        //todo add validation
-        return false;
+        if (!isRequired()) return true;
+
+        return isRequired() && getValue() != null && !getValue().isEmpty();
+
     }
 
     @Nullable

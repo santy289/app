@@ -102,13 +102,9 @@ public class WorkFlowCreateFragment extends Fragment {
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
 
-        mBinding.btnCreate.setOnClickListener(v -> {
-            postFormData();
-        });
-
+        setOnClickListeners();
         setupFormRecycler();
         subscribe();
-//        startBuilder();
 
         viewModel.initForm(token);
         return view;
@@ -119,6 +115,7 @@ public class WorkFlowCreateFragment extends Fragment {
         viewModel.getObservableAddWorkflowTypeItem().observe(this, this::addWorkflowTypeItem);
         viewModel.getObservableAddFormItem().observe(this, this::addItemToForm);
         viewModel.getObservableSetFormItemList().observe(this, this::setItemListToForm);
+        viewModel.getObservableValidationUi().observe(this, this::updateValidationUi);
 
         viewModel.setFieldTextWithData.observe(this, this::addTexFieldData);
 
@@ -173,6 +170,12 @@ public class WorkFlowCreateFragment extends Fragment {
         mBinding.rvFields.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvFields.setAdapter(mAdapter);
         mBinding.rvFields.setNestedScrollingEnabled(false);
+    }
+
+    private void setOnClickListeners() {
+        mBinding.btnCreate.setOnClickListener(v -> {
+            viewModel.handleCreateWorkflowAction();
+        });
     }
 
     @Override
@@ -429,15 +432,6 @@ public class WorkFlowCreateFragment extends Fragment {
         }
     }
 
-    private void postFormData() {
-        //todo check
-        /*if (!formBuilder.isValidForm()) {
-            viewModel.checkForContent(formBuilder);
-            return;
-        }
-        viewModel.postWorkflow(formBuilder);*/
-    }
-
     private void refreshForm() {
         RecyclerView.Adapter adapter =
                 mBinding.rvFields.getAdapter();
@@ -465,6 +459,15 @@ public class WorkFlowCreateFragment extends Fragment {
     @UiThread
     private void setItemListToForm(List<BaseFormItem> list) {
         mAdapter.setData(list);
+    }
+
+    @UiThread
+    private void updateValidationUi(BaseFormItem firstInvalidItem) {
+        mAdapter.setHasToEvaluateValid(true);
+
+        if (firstInvalidItem == null) return;
+        int firstInvalidPosition = mAdapter.getItemPosition(firstInvalidItem);
+        mBinding.rvFields.scrollToPosition(firstInvalidPosition); //todo does not work
     }
 
 }

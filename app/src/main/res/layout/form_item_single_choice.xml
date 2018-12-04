@@ -25,13 +25,13 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="@drawable/spinner_bg"
-            app:layout_constraintBottom_toBottomOf="@+id/sp_steps"
-            app:layout_constraintEnd_toEndOf="@+id/sp_steps"
-            app:layout_constraintStart_toStartOf="@+id/sp_steps"
-            app:layout_constraintTop_toTopOf="@+id/sp_steps" />
+            app:layout_constraintBottom_toBottomOf="@+id/sp_input"
+            app:layout_constraintEnd_toEndOf="@+id/sp_input"
+            app:layout_constraintStart_toStartOf="@+id/sp_input"
+            app:layout_constraintTop_toTopOf="@+id/sp_input" />
 
         <Spinner
-            android:id="@+id/sp_steps"
+            android:id="@+id/sp_input"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:spinnerMode="dialog"

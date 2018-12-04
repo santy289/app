@@ -1032,4 +1032,15 @@ public class FormSettings {
         fields.subList(1, fields.size()).clear();
     }
 
+    /**
+     * @return the first item that is not valid, index-based. Null if all of the items are valid.
+     */
+    protected BaseFormItem findFirstInvalidItem() {
+        for (BaseFormItem item : getFormItems()) {
+            if (!item.isValid()) return item;
+        }
+
+        return null;
+    }
+
 }

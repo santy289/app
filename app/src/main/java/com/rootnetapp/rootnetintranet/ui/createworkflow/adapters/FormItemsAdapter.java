@@ -37,6 +37,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private Context mContext;
     private FragmentManager mFragmentManager;
     private List<BaseFormItem> mDataset;
+    private boolean hasToEvaluateValid;
 
     public FormItemsAdapter(Context context, FragmentManager fragmentManager,
                             List<BaseFormItem> dataset) {
@@ -52,6 +53,11 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     public void setData(List<BaseFormItem> list) {
         mDataset = list;
+        notifyDataSetChanged();
+    }
+
+    public void setHasToEvaluateValid(boolean hasToEvaluateValid) {
+        this.hasToEvaluateValid = hasToEvaluateValid;
         notifyDataSetChanged();
     }
 
@@ -127,8 +133,12 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         return getItem(position).getViewType();
     }
 
-    protected BaseFormItem getItem(int position) {
+    private BaseFormItem getItem(int position) {
         return mDataset.get(position);
+    }
+
+    public int getItemPosition(BaseFormItem item) {
+        return mDataset.indexOf(item);
     }
 
     @Override
@@ -142,6 +152,14 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         holder.getBinding().tvTitle.setText(item.getTitle());
 
         setTextInputParams(holder.getBinding().etInput, item.getInputType());
+
+        if (hasToEvaluateValid && !item.isValid()) {
+            item.setErrorMessage(item.getErrorMessage());
+            holder.getBinding().etInput.setBackgroundResource(R.drawable.spinner_bg_error);
+        } else {
+            item.setErrorMessage(null);
+            holder.getBinding().etInput.setBackgroundResource(R.drawable.spinner_bg);
+        }
     }
 
     private void setTextInputParams(AppCompatEditText etInput, String type) {
@@ -184,19 +202,20 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         String title = item.getTitle();
         if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
         holder.getBinding().tvTitle.setText(title);
-        holder.getBinding().spSteps.setAdapter(
+        holder.getBinding().spInput.setAdapter(
                 new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
                         item.getOptions()));
-        if (holder.getBinding().spSteps.getOnItemSelectedListener() == null) {
-            holder.getBinding().spSteps
+
+        if (holder.getBinding().spInput.getOnItemSelectedListener() == null) {
+            holder.getBinding().spInput
                     .setSelection(0, false); //workaround so the listener won't be called on init
-            holder.getBinding().spSteps.setOnItemSelectedListener(
+            holder.getBinding().spInput.setOnItemSelectedListener(
                     new AdapterView.OnItemSelectedListener() {
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position,
                                                    long id) {
                             // this prevents the listener to be triggered by setSelection
-                            Object tag = holder.getBinding().spSteps.getTag();
+                            Object tag = holder.getBinding().spInput.getTag();
                             if (tag == null || (int) tag != position) {
                                 item.setValue(item.getOptions().get(position));
                                 item.getOnSelectedListener().onSelected(item);
@@ -211,8 +230,15 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         } else {
             // this prevents the listener to be triggered by setSelection
             int index = item.getOptions().indexOf(item.getValue());
-            holder.getBinding().spSteps.setTag(index);
-            holder.getBinding().spSteps.setSelection(index);
+            holder.getBinding().spInput.setTag(index);
+            holder.getBinding().spInput.setSelection(index);
+        }
+
+        if (hasToEvaluateValid && !item.isValid()) {
+            holder.getBinding().viewSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg_error);
+        } else {
+            holder.getBinding().viewSpinnerBackground.setBackgroundResource(R.drawable.spinner_bg);
         }
     }
 
@@ -220,6 +246,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         BooleanFormItem item = (BooleanFormItem) getItem(position);
 
         holder.getBinding().switchInput.setText(item.getTitle());
+        holder.getBinding().switchInput.setOnCheckedChangeListener(
+                (buttonView, isChecked) -> item.setValue(isChecked));
     }
 
     private void populateDateView(DateViewHolder holder, int position) {
@@ -260,6 +288,11 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         holder.getBinding().tvTitle.setText(item.getTitle());
 
+        if (hasToEvaluateValid && !item.isValid()) {
+            holder.getBinding().tvSelectedDate.setBackgroundResource(R.drawable.spinner_bg_error);
+        } else {
+            holder.getBinding().tvSelectedDate.setBackgroundResource(R.drawable.spinner_bg);
+        }
     }
 
     private void populateCurrencyView(CurrencyViewHolder holder, int position) {

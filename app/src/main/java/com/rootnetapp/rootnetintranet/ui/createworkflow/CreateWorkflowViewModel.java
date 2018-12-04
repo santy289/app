@@ -65,6 +65,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<SingleChoiceFormItem> mAddWorkflowTypeItemLiveData;
     private MutableLiveData<BaseFormItem> mAddFormItemLiveData;
     private MutableLiveData<List<BaseFormItem>> mSetFormItemListLiveData;
+    private MutableLiveData<BaseFormItem> mValidationUiLiveData;
     private List<WorkflowTypeItemMenu> workflowTypeMenuItems;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
@@ -486,16 +487,14 @@ public class CreateWorkflowViewModel extends ViewModel {
         }
 
         //we cannot add the first item again because it's already in the form.
-        List<BaseFormItem> itemsToAdd = formSettings.getFormItems()
-                .subList(1, formSettings.getFormItems().size());
         mSetFormItemListLiveData.setValue(formSettings.getFormItems());
-//        buildForm.setValue(true);
     }
 
     private void buildField(FormFieldsByWorkflowType field) {
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
         switch (typeInfo.getType()) {
             case FormSettings.TYPE_TEXT:
+            case FormSettings.TYPE_TEXT_AREA:
                 createTextInputFormItem(field);
                 break;
             case FormSettings.TYPE_DATE:
@@ -506,12 +505,6 @@ public class CreateWorkflowViewModel extends ViewModel {
                 break;
             /*case FormSettings.TYPE_SYSTEM_USERS:
                 handleList(field, FormSettings.TYPE_SYSTEM_USERS);
-                break;
-            case FormSettings.TYPE_TEXT_AREA:
-                handleBuildTextArea(field);
-                break;
-            case FormSettings.TYPE_CHECKBOX:
-                handleCheckBox(field);
                 break;
             case FormSettings.TYPE_PROJECT:
                 handleProject(field);
@@ -602,6 +595,12 @@ public class CreateWorkflowViewModel extends ViewModel {
                 .setInputType(valueType)
                 .build();
 
+        /*switch (item.getInputType()){
+            case TextInputFormItem.InputType.EMAIL:
+                item.setRegex(Patterns.EMAIL_ADDRESS.toString());
+                break;
+        }*/
+
         formSettings.getFormItems().add(item);
     }
 
@@ -641,6 +640,27 @@ public class CreateWorkflowViewModel extends ViewModel {
         formSettings.getFormItems().add(item);
     }
     //endregion
+
+    protected void handleCreateWorkflowAction() {
+        if (validateFormItems()) {
+            // all of the items are valid.
+            // todo send post
+        }
+    }
+
+    private boolean validateFormItems() {
+        boolean isValid = true;
+
+        for (BaseFormItem item : formSettings.getFormItems()) {
+            if (!item.isValid()) {
+                isValid = false;
+            }
+        }
+
+        mValidationUiLiveData.setValue(formSettings.findFirstInvalidItem());
+
+        return isValid;
+    }
 
     private void handleFile(FormFieldsByWorkflowType field) {
         showUploadButton.setValue(true);
@@ -1501,5 +1521,12 @@ public class CreateWorkflowViewModel extends ViewModel {
             mSetFormItemListLiveData = new MutableLiveData<>();
         }
         return mSetFormItemListLiveData;
+    }
+
+    protected LiveData<BaseFormItem> getObservableValidationUi() {
+        if (mValidationUiLiveData == null) {
+            mValidationUiLiveData = new MutableLiveData<>();
+        }
+        return mValidationUiLiveData;
     }
 }

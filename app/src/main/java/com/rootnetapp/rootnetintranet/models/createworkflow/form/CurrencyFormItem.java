@@ -20,6 +20,12 @@ public class CurrencyFormItem extends BaseFormItem {
         return false;
     }
 
+    @Override
+    public String getStringValue() {
+        //todo string value
+        return null;
+    }
+
     public List<String> getOptions() {
         return options;
     }

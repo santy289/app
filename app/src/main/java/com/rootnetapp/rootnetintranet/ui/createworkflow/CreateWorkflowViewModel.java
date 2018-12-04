@@ -16,6 +16,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.PendingFileUpload;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
@@ -48,7 +49,6 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import me.riddhimanadib.formmaster.FormBuilder;
-import me.riddhimanadib.formmaster.model.BaseFormElement;
 
 public class CreateWorkflowViewModel extends ViewModel {
 
@@ -71,7 +71,6 @@ public class CreateWorkflowViewModel extends ViewModel {
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     protected MutableLiveData<List<String>> setTypeList;
-    protected MutableLiveData<Boolean> buildForm;
     protected MutableLiveData<int[]> setTextField;
     protected MutableLiveData<int[]> setTextFieldMultiLine;
     protected MutableLiveData<int[]> setDatePicker;
@@ -114,7 +113,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         this.createWorkflowRepository = createWorkflowRepository;
         setFieldTextWithData = new MutableLiveData<>();
         setTypeList = new MutableLiveData<>();
-        buildForm = new MutableLiveData<>();
         setTextField = new MutableLiveData<>();
         setTextFieldMultiLine = new MutableLiveData<>();
         setDatePicker = new MutableLiveData<>();
@@ -160,7 +158,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         showDialogMessage.setValue(dialog);
     }
 
-    private WorkflowMetas createMetaData(FieldData fieldData, BaseFormElement baseFormElement) {
+    private WorkflowMetas createMetaData(BaseFormItem formItem) {
 //        int fieldId = fieldData.tag;
 //        TypeInfo typeInfo = formSettings.findFieldDataById(fieldId);
 //        if (typeInfo.getValueType().equals(FormSettings.VALUE_EMAIL)) {
@@ -173,11 +171,11 @@ public class CreateWorkflowViewModel extends ViewModel {
 //        }
 
         WorkflowMetas workflowMeta = new WorkflowMetas();
-        int workflowTypeFieldId = baseFormElement.getTag();
-        String value = baseFormElement.getValue();
+        int workflowTypeFieldId = formItem.getTag();
+        String value = formItem.getStringValue();
         workflowMeta.setUnformattedValue(value);
         workflowMeta.setWorkflowTypeFieldId(workflowTypeFieldId);
-        formSettings.formatMetaData(workflowMeta, fieldData);
+        formSettings.formatMetaData(workflowMeta, formItem);
         return workflowMeta;
     }
 
@@ -204,7 +202,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         pendingFileUpload.file = file;
 
         setFileUploadField.setValue(pendingFileUpload.fieldData);
-        buildForm.setValue(true);
 
         //todo check
 
@@ -238,17 +235,18 @@ public class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void successUpload(FileUploadResponse fileUploadResponse) {
-        showLoading.setValue(true);
-        ArrayList<FieldData> fieldItems = formSettings.getFieldItemsForPost();
+        //todo implement
+        /*showLoading.setValue(true);
+        ArrayList<FieldData> fieldItems = formSettings.getFormItemsToPost();
         ArrayMap<String, Integer> baseInfo = formSettings.getBaseMachineNamesAndIds();
         PendingFileUpload pendingFileUpload = formSettings.getPendingFileUpload();
         int id = fileUploadResponse.getFileId();
         pendingFileUpload.fileId = id;
-        startPostCreateWorkflow(baseInfo, formSettings.getFormBuilder(), fieldItems);
+        startPostCreateWorkflow(baseInfo, formSettings.getFormBuilder(), fieldItems);*/
     }
 
-    protected void postWorkflow(FormBuilder formBuilder) {
-        ArrayList<FieldData> fieldItems = formSettings.getFieldItemsForPost();
+    protected void postWorkflow() {
+        List<BaseFormItem> formItemsForPost = formSettings.getFormItemsToPost();
         ArrayMap<String, Integer> baseInfo = formSettings.getBaseMachineNamesAndIds();
 
         if (baseInfo.isEmpty()) {
@@ -265,12 +263,13 @@ public class CreateWorkflowViewModel extends ViewModel {
         // TODO check if we have a file to upload first and then continue with the rest.
         if (formSettings.getPendingFileUpload() == null || formSettings
                 .getPendingFileUpload().file == null) {
-            startPostCreateWorkflow(baseInfo, formBuilder, fieldItems);
+            startPostCreateWorkflow(baseInfo, formItemsForPost);
             return;
         }
 
         //for using later during actual post.
-        formSettings.setFormBuilder(formBuilder);
+        //todo implement
+       /* formSettings.setFormBuilder(formBuilder);
         PendingFileUpload pendingFileUpload = formSettings.getPendingFileUpload();
 
         Disposable disposable = Observable.fromCallable(() -> {
@@ -285,33 +284,30 @@ public class CreateWorkflowViewModel extends ViewModel {
                     showLoading.setValue(false);
                     Log.d(TAG, "uploadFile: Error while encoding to Base64");
                 });
-        disposables.add(disposable);
+        disposables.add(disposable);*/
 
     }
 
     private void startPostCreateWorkflow(ArrayMap<String, Integer> baseInfo,
-                                         FormBuilder formBuilder, ArrayList<FieldData> fieldItems) {
+                                         List<BaseFormItem> formItems) {
         int titleTag = baseInfo.get(FormSettings.MACHINE_NAME_TITLE);
         int descriptionTag = baseInfo.get(FormSettings.MACHINE_NAME_DESCRIPTION);
         int startTag = baseInfo.get(FormSettings.MACHINE_NAME_START_DATE);
 
         int workflowTypeId = formSettings.getWorkflowTypeIdSelected();
-        String title = formBuilder.getFormElement(titleTag).getValue();
-        String description = formBuilder.getFormElement(descriptionTag).getValue();
-        String start = formatUiDateToPostDate(formBuilder.getFormElement(startTag).getValue());
+        String title = ((TextInputFormItem) formSettings.findItem(titleTag)).getValue();
+        String description = ((TextInputFormItem) formSettings.findItem(descriptionTag)).getValue();
+        String start = Utils
+                .getDatePostFormat(((DateFormItem) formSettings.findItem(startTag)).getValue());
 
-        ArrayList<BaseFormElement> formElements = new ArrayList<>();
-        FieldData fieldData;
-        BaseFormElement baseFormElement;
         List<WorkflowMetas> metas = new ArrayList<>();
         WorkflowMetas workflowMetas;
         String value;
 
-        for (int i = 0; i < fieldItems.size(); i++) {
-            fieldData = fieldItems.get(i);
-            baseFormElement = formBuilder.getFormElement(fieldData.tag);
+        for (int i = 0; i < formItems.size(); i++) {
+            BaseFormItem formItem = formItems.get(i);
 
-            int fieldId = fieldData.tag;
+            /*int fieldId = fieldData.tag;
             // Check for phone and currency fields
             if (!hasValidFields(fieldId, baseFormElement.getValue())) {
                 showLoading.setValue(false);
@@ -329,9 +325,9 @@ public class CreateWorkflowViewModel extends ViewModel {
                 Log.d(TAG, "postWorkflow: found");
                 formSettings.setCurrencyType(baseFormElement.getValue(), fieldData);
                 continue;
-            }
+            }*/
 
-            workflowMetas = createMetaData(fieldData, baseFormElement);
+            workflowMetas = createMetaData(formItem);
             if (workflowMetas == null) {
                 showLoading.setValue(false);
                 return;
@@ -359,6 +355,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                 }
             }
         }
+
         postToServer(metas, workflowTypeId, title, start, description);
     }
 
@@ -554,18 +551,23 @@ public class CreateWorkflowViewModel extends ViewModel {
             }
             String name;
             Integer id;
+            Option option;
+            List<Option> options = new ArrayList<>();
             for (int i = 0; i < types.size(); i++) {
                 name = types.get(i).getName();
                 id = types.get(i).getId();
                 formSettings.setId(id);
                 formSettings.setName(name);
+
+                option = new Option(id, name);
+                options.add(option);
             }
 
             SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
                     .setTitleRes(R.string.type)
                     .setRequired(true)
                     .setTag(TAG_WORKFLOW_TYPE)
-                    .setOptions(formSettings.getNames())
+                    .setOptions(options)
                     .build();
 
             formSettings.getFormItems().add(singleChoiceFormItem);
@@ -644,7 +646,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     protected void handleCreateWorkflowAction() {
         if (validateFormItems()) {
             // all of the items are valid.
-            // todo send post
+            postWorkflow();
         }
     }
 

@@ -6,8 +6,8 @@ import androidx.annotation.Nullable;
 
 public class SingleChoiceFormItem extends BaseFormItem {
 
-    private @Nullable String value;
-    private List<String> options;
+    private @Nullable Option value;
+    private List<Option> options;
     private OnSelectedListener onSelectedListener;
 
     private SingleChoiceFormItem() {
@@ -18,24 +18,29 @@ public class SingleChoiceFormItem extends BaseFormItem {
     public boolean isValid() {
         if (!isRequired()) return true;
 
-        return isRequired() && getValue() != null && !getValue().isEmpty();
+        return isRequired() && getValue() != null;
 
+    }
+
+    @Override
+    public String getStringValue() {
+        return getValue() != null ? getValue().getName() : null;
     }
 
     @Nullable
-    public String getValue() {
+    public Option getValue() {
         return value;
     }
 
-    public void setValue(@Nullable String value) {
+    public void setValue(@Nullable Option value) {
         this.value = value;
     }
 
-    public List<String> getOptions() {
+    public List<Option> getOptions() {
         return options;
     }
 
-    public void setOptions(List<String> options) {
+    public void setOptions(List<Option> options) {
         this.options = options;
     }
 
@@ -55,8 +60,8 @@ public class SingleChoiceFormItem extends BaseFormItem {
         private int tag;
         private boolean isRequired;
         private boolean isEscaped;
-        private String value;
-        private List<String> options;
+        private Option value;
+        private List<Option> options;
 
         public Builder setTitle(String title) {
             this.title = title;
@@ -88,13 +93,13 @@ public class SingleChoiceFormItem extends BaseFormItem {
             return this;
         }
 
-        public Builder setValue(String value) {
+        public Builder setValue(Option value) {
             this.value = value;
 
             return this;
         }
 
-        public Builder setOptions(List<String> options) {
+        public Builder setOptions(List<Option> options) {
             this.options = options;
 
             return this;

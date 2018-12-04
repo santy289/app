@@ -16,6 +16,8 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductJsonValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.role.Role;
 import com.rootnetapp.rootnetintranet.models.responses.services.Service;
@@ -32,7 +34,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -264,30 +265,31 @@ public class FormSettings {
         return id;
     }
 
-    public WorkflowMetas formatMetaData(WorkflowMetas metaData, FieldData fieldData) {
+    public WorkflowMetas formatMetaData(WorkflowMetas metaData, BaseFormItem formItem) {
         int fieldId = metaData.getWorkflowTypeFieldId();
         TypeInfo typeInfo = findFieldDataById(fieldId);
         if (typeInfo == null) {
             return metaData;
         }
-        format(metaData, typeInfo, fieldData);
+        format(metaData, typeInfo, formItem);
         return metaData;
     }
 
-    public WorkflowMetas formatMetaData(WorkflowMetas metaData, FieldData fieldData,
+    public WorkflowMetas formatMetaData(WorkflowMetas metaData, BaseFormItem formItem,
                                         FieldConfig fieldConfig) {
         TypeInfo typeInfo = fieldConfig.getTypeInfo();
         if (typeInfo == null) {
             return metaData;
         }
-        boolean rememberRealValue = fieldData.isMultipleSelection;
-        fieldData.isMultipleSelection = true;
-        format(metaData, typeInfo, fieldData);
-        fieldData.isMultipleSelection = rememberRealValue;
+        //todo check
+        /*boolean rememberRealValue = fieldData.isMultipleSelection;
+        fieldData.isMultipleSelection = true;*/
+        format(metaData, typeInfo, formItem);
+//        fieldData.isMultipleSelection = rememberRealValue;
         return metaData;
     }
 
-    private void format(WorkflowMetas metaData, TypeInfo typeInfo, FieldData fieldData) {
+    private void format(WorkflowMetas metaData, TypeInfo typeInfo, BaseFormItem formItem) {
         String value = metaData.getUnformattedValue();
         if (TextUtils.isEmpty(value)) {
             return;
@@ -336,7 +338,7 @@ public class FormSettings {
                 metaData.setValue("");
                 break;
             case FormSettings.VALUE_ENTITY:
-                handleList(fieldData, metaData, value);
+                handleSingleSelection((SingleChoiceFormItem) formItem, metaData, value);
                 break;
             case FormSettings.VALUE_LIST:
                 if (typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
@@ -346,7 +348,7 @@ public class FormSettings {
                 }
 
                 if (typeInfo.getType().equals(TYPE_PRODUCT)) {
-                    String json = getProductJson(value, fieldData, metaData);
+                    String json = getProductJson(value, (SingleChoiceFormItem) formItem, metaData);
                     metaData.setValue(json);
                     break;
                 }
@@ -356,7 +358,7 @@ public class FormSettings {
 
                 }
 
-                handleList(fieldData, metaData, value);
+                handleSingleSelection((SingleChoiceFormItem) formItem, metaData, value);
                 break;
             case FormSettings.VALUE_STRING:
                 if (typeInfo.getType().equals(TYPE_PHONE)) {
@@ -376,7 +378,7 @@ public class FormSettings {
         }
 
         // Do not escape this fields
-        if (!fieldData.escape
+        if (!formItem.isEscaped()
                 || typeInfo.getType().equals(TYPE_SYSTEM_USERS)
                 || typeInfo.getType().equals(TYPE_PHONE)
                 || typeInfo.getType().equals(TYPE_CURRENCY)
@@ -393,14 +395,14 @@ public class FormSettings {
         metaData.setValue(gson.toJson(metaValue));
     }
 
-    private String getProductJson(String value, FieldData fieldData, WorkflowMetas workflowMetas) {
-        ArrayList<ListFieldItemMeta> list = fieldData.list;
-        ListFieldItemMeta item;
+    private String getProductJson(String value, SingleChoiceFormItem formItem, WorkflowMetas workflowMetas) {
+        List<Option> list = formItem.getOptions();
+        Option item;
         int id = 0;
         for (int i = 0; i < list.size(); i++) {
             item = list.get(i);
-            if (item.name.equals(value)) {
-                id = item.id;
+            if (item.getName().equals(value)) {
+                id = item.getId();
                 break;
             }
         }
@@ -492,14 +494,14 @@ public class FormSettings {
         }
     }
 
-    private void handleList(FieldData fieldData, WorkflowMetas metaData, String value) {
-        ArrayList<ListFieldItemMeta> list = fieldData.list;
+    private void handleSingleSelection(SingleChoiceFormItem formItem, WorkflowMetas metaData, String value) {
+        List<Option> list = formItem.getOptions();
         if (list == null) {
             return;
         }
 
         int id;
-        if (fieldData.isMultipleSelection) {
+        /*if (fieldData.isMultipleSelection) {
             ArrayList<String> matches = new ArrayList<>();
             String selection;
             List<String> values = Arrays.asList(value.split("\\s*,\\s*"));
@@ -528,15 +530,18 @@ public class FormSettings {
         } else {
             id = findIdByValue(list, value);
             metaData.setValue(String.valueOf(id));
-        }
+        }*/
+
+        id = findIdByValue(list, value);
+        metaData.setValue(String.valueOf(id));
     }
 
-    private int findIdByValue(ArrayList<ListFieldItemMeta> list, String value) {
-        ListFieldItemMeta item;
-        for (int j = 0; j < list.size(); j++) {
-            item = list.get(j);
-            if (value.equals(item.name)) {
-                return item.id;
+    private int findIdByValue(List<Option> options, String value) {
+        Option item;
+        for (int j = 0; j < options.size(); j++) {
+            item = options.get(j);
+            if (value.equals(item.getName())) {
+                return item.getId();
             }
         }
         return 0;
@@ -939,20 +944,22 @@ public class FormSettings {
 
     public String postTitle = "";
 
-    public ArrayMap<String, Integer> getBaseMachineNamesAndIds() {
+    protected ArrayMap<String, Integer> getBaseMachineNamesAndIds() {
         return baseMachineNamesAndIds;
     }
 
-    public ArrayList<FieldData> getFieldItemsForPost() {
-        //todo implement
-        /*ArrayList<FieldData> postFieldData = (ArrayList<FieldData>) fieldItems.clone();
-        FieldData fieldData;
+    protected List<BaseFormItem> getFormItemsToPost() {
+
+        List<BaseFormItem> formItemsToPost = new ArrayList<>(getFormItems());
+        BaseFormItem formItem;
         int tag;
         String machineName;
         ArrayList<Integer> toRemove = new ArrayList<>();
-        for (int i = 0; i < postFieldData.size(); i++) {
-            fieldData = postFieldData.get(i);
-            tag = fieldData.tag;
+
+        //todo improve this algorithm
+        for (int i = 0; i < formItemsToPost.size(); i++) {
+            formItem = formItemsToPost.get(i);
+            tag = formItem.getTag();
             if (tag == CreateWorkflowViewModel.TAG_WORKFLOW_TYPE) {
                 toRemove.add(tag);
                 continue;
@@ -990,18 +997,16 @@ public class FormSettings {
         int id;
         for (int i = 0; i < toRemove.size(); i++) {
             removeTag = toRemove.get(i);
-            for (int j = 0; j < postFieldData.size(); j++) {
-                id = postFieldData.get(j).tag;
+            for (int j = 0; j < formItemsToPost.size(); j++) {
+                id = formItemsToPost.get(j).getTag();
                 if (removeTag == id) {
-                    postFieldData.remove(j);
+                    formItemsToPost.remove(j);
                     break;
                 }
             }
         }
 
-        return postFieldData;*/
-
-        return null;
+        return formItemsToPost;
     }
 
     private String findMachineNameBy(int id) {
@@ -1043,4 +1048,18 @@ public class FormSettings {
         return null;
     }
 
+    /**
+     * Goes through the items list in order to find a specific form item based on its tag.
+     *
+     * @param tag the tag to find
+     *
+     * @return the form item matching the tag. Null if none was found.
+     */
+    protected BaseFormItem findItem(int tag) {
+        for (BaseFormItem item : getFormItems()) {
+            if (item.getTag() == tag) return item;
+        }
+
+        return null;
+    }
 }

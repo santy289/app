@@ -127,8 +127,6 @@ public class WorkFlowCreateFragment extends Fragment {
 
         viewModel.setTypeList.observe(this, this::addFieldList);
 
-        viewModel.buildForm.observe(this, (build -> buildForm()));
-
         viewModel.setTextField.observe(this, this::addTexField);
 
         viewModel.setTextFieldMultiLine.observe(this, this::addTextFieldMultiLines);
@@ -412,10 +410,6 @@ public class WorkFlowCreateFragment extends Fragment {
 //        formItems.add(formHeader);
     }
 
-    private void buildForm() {
-//        formBuilder.addFormElements(formItems);
-    }
-
     private void showDialog(DialogMessage dialogMessage) {
         FragmentManager fm = getFragmentManager();
         ValidateFormDialog dialog = ValidateFormDialog.newInstance(
@@ -446,7 +440,7 @@ public class WorkFlowCreateFragment extends Fragment {
         mAdapter.addItem(singleChoiceFormItem);
 
         singleChoiceFormItem.setOnSelectedListener(item -> {
-            String selection = item.getValue();
+            String selection = item.getValue().getName();
             viewModel.generateFieldsByType(selection);
         });
     }

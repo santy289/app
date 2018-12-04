@@ -13,6 +13,11 @@ public class BooleanFormItem extends BaseFormItem {
         return true;
     }
 
+    @Override
+    public String getStringValue() {
+        return getValue() ? "true" : "false";
+    }
+
     public boolean getValue() {
         return value;
     }

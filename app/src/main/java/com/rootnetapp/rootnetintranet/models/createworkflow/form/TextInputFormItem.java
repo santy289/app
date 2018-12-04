@@ -34,6 +34,11 @@ public class TextInputFormItem extends BaseFormItem {
 
     }
 
+    @Override
+    public String getStringValue() {
+        return getValue();
+    }
+
     @Nullable
     public String getValue() {
         return value;

@@ -589,7 +589,7 @@ public class WorkflowViewModel extends ViewModel {
         WorkflowMetas workflowMeta = new WorkflowMetas();
         workflowMeta.setUnformattedValue(valueSelected);
         workflowMeta.setWorkflowTypeFieldId(workflowTypeFieldId);
-        formSettings.formatMetaData(workflowMeta, fieldData, fieldConfig);
+//        formSettings.formatMetaData(workflowMeta, fieldData, fieldConfig); //todo check
         return workflowMeta;
     }
 

@@ -13,6 +13,7 @@ public abstract class BaseFormItem {
     private @FormItemViewType int viewType;
 
     public abstract boolean isValid();
+    public abstract String getStringValue();
 
     public @Nullable
     String getTitle() {

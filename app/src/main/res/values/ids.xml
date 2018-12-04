@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="id" name="fab_edit_workflow" />
+    <item type="id" name="fab_approve_workflow" />
+    <item type="id" name="fab_change_status" />
+    <item type="id" name="fab_comment" />
+</resources>

@@ -23,6 +23,14 @@ import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerFragment;
 import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerModule;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileModule;
+import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
+import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsModule;
+import com.rootnetapp.rootnetintranet.ui.quickactions.changestatus.ChangeStatusActivity;
+import com.rootnetapp.rootnetintranet.ui.quickactions.changestatus.ChangeStatusModule;
+import com.rootnetapp.rootnetintranet.ui.quickactions.performaction.PerformActionFragment;
+import com.rootnetapp.rootnetintranet.ui.quickactions.performaction.PerformActionModule;
+import com.rootnetapp.rootnetintranet.ui.quickactions.workflowsearch.WorkflowSearchFragment;
+import com.rootnetapp.rootnetintranet.ui.quickactions.workflowsearch.WorkflowSearchModule;
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment.ResetPasswordFragment;
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment.ResetPasswordModule;
 import com.rootnetapp.rootnetintranet.ui.resetPass.tokenfragment.RequestTokenFragment;
@@ -78,7 +86,11 @@ import dagger.Component;
                 ApprovalHistoryModule.class,
                 CommentsModule.class,
                 FilesModule.class,
-                PeopleInvolvedModule.class
+                PeopleInvolvedModule.class,
+                QuickActionsModule.class,
+                WorkflowSearchModule.class,
+                PerformActionModule.class,
+                ChangeStatusModule.class
         }
 )
 
@@ -137,6 +149,14 @@ public interface AppComponent {
     void inject(CommentsFragment commentsFragment);
 
     void inject(FilesFragment filesFragment);
+
+    void inject(QuickActionsActivity quickActionsActivity);
+
+    void inject(WorkflowSearchFragment workflowSearchFragment);
+
+    void inject(PerformActionFragment performActionFragment);
+
+    void inject(ChangeStatusActivity changeStatusActivity);
 
     void inject(PeopleInvolvedFragment peopleInvolvedFragment);
 }

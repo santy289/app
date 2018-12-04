@@ -1,10 +1,13 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.files;
 
+import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
-import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,33 +17,31 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailFilesBinding;
-import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
-import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.responses.file.DocumentsFile;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.presets.Preset;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailViewModel;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.adapters.DocumentsAdapter;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import static android.app.Activity.RESULT_OK;
+import static com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesViewModel.REQUEST_EXTERNAL_STORAGE_PERMISSIONS;
+import static com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesViewModel.REQUEST_FILE_TO_ATTACH;
 
-public class FilesFragment extends Fragment {
-
-    private static final int FILE_SELECT_CODE = 555;
+public class FilesFragment extends Fragment implements FilesFragmentInterface {
 
     @Inject
     FilesViewModelFactory filesViewModelFactory;
@@ -48,7 +49,6 @@ public class FilesFragment extends Fragment {
     private FragmentWorkflowDetailFilesBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
 
-    private CommentFile fileRequest = null;
     private DocumentsAdapter mDocumentsAdapter = null;
 
     private WorkflowDetailViewModel workflowDetailViewModel;
@@ -89,31 +89,17 @@ public class FilesFragment extends Fragment {
         subscribe();
         filesViewModel.initDetails(token, mWorkflowListItem);
 
-        //todo download the files
-
         return view;
     }
 
     private void subscribe() {
-        final Observer<Integer> errorObserver = ((Integer data) -> {
-            showLoading(false);
-            if (null != data) {
-                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
-            }
-        });
 
-        final Observer<Boolean> attachObserver = ((Boolean data) -> {
-            showLoading(false);
-            if (data != null && data) {
-                filesViewModel.getFiles(mWorkflowListItem.getWorkflowId());
-            } else {
-                Toast.makeText(getContext(), "error", Toast.LENGTH_LONG).show();
-            }
-        });
-
-        filesViewModel.getObservableError().observe(this, errorObserver);
-        filesViewModel.getObservableAttach().observe(this, attachObserver);
+        filesViewModel.getObservableToastMessage().observe(this, this::showToastMessage);
+        filesViewModel.getObservableAttachSuccess().observe(this, this::handleAttachmentUiResponse);
         filesViewModel.getObservableFilesTabCounter().observe(this, this::updateTabCounter);
+        filesViewModel.getObservableUploadedFileName().observe(this, this::setFileUploadedTextWith);
+        filesViewModel.getObservableAttachButtonText().observe(this, this::setButtonAttachmentText);
+        filesViewModel.getObservableOpenDownloadedFile().observe(this, this::openDownloadedFile);
 
         filesViewModel.showLoading.observe(this, this::showLoading);
         filesViewModel.setDocumentsView.observe(this, this::setDocumentsView);
@@ -123,84 +109,49 @@ public class FilesFragment extends Fragment {
 
     private void setOnClickListeners() {
         mBinding.btnAttachment.setOnClickListener(v -> showFileChooser());
-        mBinding.btnUpload.setOnClickListener(v -> uploadFiles());
+        mBinding.btnUpload.setOnClickListener(
+                v -> filesViewModel.uploadFile(mDocumentsAdapter.totalDocuments));
     }
 
-    private void uploadFiles() {
-
-        if (fileRequest != null && mDocumentsAdapter != null) {
-            List<WorkflowPresetsRequest> request = new ArrayList<>();
-            List<Integer> presets = new ArrayList<>();
-            int i = 0;
-            for (Boolean isSelected : mDocumentsAdapter.isSelected) {
-                if (isSelected) {
-                    presets.add(mDocumentsAdapter.totalDocuments.get(i).getId());
-                }
-                i++;
-            }
-            if (presets.isEmpty()) {
-                Toast.makeText(getContext(), getString(R.string.select_preset),
-                        Toast.LENGTH_SHORT).show();
-            } else {
-                request.add(new WorkflowPresetsRequest(mWorkflowListItem.getWorkflowId(), presets));
-                showLoading(true);
-                filesViewModel.attachFile(request, fileRequest); //todo does not upload
-            }
-        } else {
-            Toast.makeText(getContext(), getString(R.string.select_file),
-                    Toast.LENGTH_SHORT).show();
-        }
-    }
-
+    /**
+     * If there is no file selected, displays a native file chooser, the user must select which file
+     * they wish to upload. In case that the file chooser cannot be opened, shows a Toast message.
+     * Otherwise, clears the current selected file and allows the user to select a new file.
+     */
     @UiThread
     private void showFileChooser() {
 
-        if (fileRequest == null) {
+        if (filesViewModel.getFileRequest() == null) {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("*/*");
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             try {
-                startActivityForResult(
-                        Intent.createChooser(intent, "Select a File to Upload"),
-                        FILE_SELECT_CODE);
+                startActivityForResult(Intent.createChooser(
+                        intent,
+                        getString(R.string.workflow_detail_files_fragment_select_file)),
+                        REQUEST_FILE_TO_ATTACH);
             } catch (android.content.ActivityNotFoundException ex) {
                 // Potentially direct the user to the Market with a Dialog
-                Toast.makeText(getContext(), "Please install a File Manager.",
-                        Toast.LENGTH_SHORT).show();
+                showToastMessage(R.string.workflow_detail_files_fragment_no_file_manager);
             }
         } else {
-            fileRequest = null;
-            setButtonAttachmentText(getString(R.string.attach));
-            setFileUploadedText(getString(R.string.uploaded_file));
-            mBinding.tvFileUploaded.setVisibility(View.GONE);
+            clearFileRequest();
         }
+    }
+
+    /**
+     * Clears the current selected file by removing any references to it and enabling the user to
+     * select a new file.
+     */
+    private void clearFileRequest() {
+        filesViewModel.clearFileRequest();
+        setButtonAttachmentText(R.string.attach);
+        setFileUploadedTextWith(null);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case FILE_SELECT_CODE:
-                if (resultCode == RESULT_OK) {
-                    try {
-                        File file = new File(data.getData().toString());
-                        byte[] bytes = Utils.fileToByte(file);
-                        String fileName = file.getName();
-
-                        mBinding.tvFileUploaded.setVisibility(View.VISIBLE);
-                        setFileUploadedText(mBinding.tvFileUploaded.getText() + " " + fileName);
-                        setButtonAttachmentText(getString(R.string.remove_file));
-
-                        String encodedFile = Base64.encodeToString(bytes, Base64.DEFAULT);
-                        String fileType = Utils.getMimeType(data.getData(), getContext());
-
-                        fileRequest = new CommentFile(encodedFile, fileType, fileName,
-                                (int) file.length());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                break;
-        }
+        filesViewModel.handleFileSelectedResult(getContext(), requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -213,6 +164,12 @@ public class FilesFragment extends Fragment {
         }
     }
 
+    /**
+     * Whether to display the templates list or not, the only scenario where this list would be
+     * hidden includes an absence of templates.
+     *
+     * @param show whether to show the UI.
+     */
     @UiThread
     private void showTemplateDocumentsUi(boolean show) {
         if (show) {
@@ -236,19 +193,28 @@ public class FilesFragment extends Fragment {
         mBinding.tvTitleFiles.setText(title);
     }
 
+    /**
+     * Concats the file name to a "File uploaded" title.
+     *
+     * @param fileName only the file name that was attached.
+     */
     @UiThread
-    private void setFileUploadedText(String text) {
+    private void setFileUploadedTextWith(String fileName) {
+        mBinding.tvFileUploaded.setVisibility(fileName != null ? View.VISIBLE : View.GONE);
+
+        String text = getString(R.string.uploaded_file) + " " + fileName;
         mBinding.tvFileUploaded.setText(text);
     }
 
     @UiThread
-    private void setButtonAttachmentText(String text) {
-        mBinding.btnAttachment.setText(text);
+    private void setButtonAttachmentText(@StringRes int stringRes) {
+        mBinding.btnAttachment.setText(getString(stringRes));
     }
 
     @UiThread
     private void setDocumentsView(List<DocumentsFile> documents) {
         mDocumentsAdapter = new DocumentsAdapter(
+                this,
                 filesViewModel.getPresets(),
                 documents
         );
@@ -262,5 +228,101 @@ public class FilesFragment extends Fragment {
         if (workflowDetailViewModel != null) {
             workflowDetailViewModel.setFilesCounter(counter);
         }
+    }
+
+    @UiThread
+    private void handleAttachmentUiResponse(boolean success) {
+        if (success) {
+            clearFileRequest();
+        } else {
+            showToastMessage(R.string.error);
+        }
+    }
+
+    @UiThread
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                getContext(),
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
+    }
+
+    @Override
+    public void downloadPreset(Preset preset) {
+        if (checkExternalStoragePermissions()) {
+            filesViewModel.downloadPreset(preset);
+        } else {
+            filesViewModel.setPresetToDownload(preset);
+
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                            Manifest.permission.READ_EXTERNAL_STORAGE},
+                    REQUEST_EXTERNAL_STORAGE_PERMISSIONS);
+        }
+    }
+
+    @Override
+    public void downloadDocumentFile(DocumentsFile documentsFile) {
+        if (checkExternalStoragePermissions()) {
+            filesViewModel.downloadDocumentFile(documentsFile);
+        } else {
+            filesViewModel.setDocumentFileToDownload(documentsFile);
+
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                            Manifest.permission.READ_EXTERNAL_STORAGE},
+                    REQUEST_EXTERNAL_STORAGE_PERMISSIONS);
+        }
+    }
+
+    /**
+     * Creates an {@link Intent} chooser the downloaded file. If the device is not suitable to read
+     * the file, will display a {@link Toast} message. Uses a {@link FileProvider} to create the
+     * file URI, instead of using the {@link Uri#fromFile(File)} method.
+     *
+     * @param fileUiData the file data containing the file to be opened.
+     *
+     * @see <a href="https://developer.android.com/reference/android/support/v4/content/FileProvider">FileProvider</a>
+     */
+    @UiThread
+    private void openDownloadedFile(FileUiData fileUiData) {
+        if (fileUiData.getFile() == null) return;
+
+        Intent target = new Intent(Intent.ACTION_VIEW);
+
+        Uri fileUri = FileProvider.getUriForFile(getContext(),
+                getContext().getApplicationContext().getPackageName() + ".fileprovider",
+                fileUiData.getFile());
+
+        target.setDataAndType(fileUri, fileUiData.getMimeType());
+        target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        Intent intent = Intent.createChooser(target,
+                getString(R.string.workflow_detail_files_fragment_open_file));
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            // Instruct the user to install a PDF reader here
+            showToastMessage(R.string.workflow_detail_files_fragment_cannot_open_file);
+        }
+    }
+
+    /**
+     * Verify whether the user has granted permissions to read/write the external storage.
+     *
+     * @return whether the permissions are granted.
+     */
+    private boolean checkExternalStoragePermissions() {
+        // Here, thisActivity is the current activity
+        return ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        filesViewModel.handleRequestPermissionsResult(requestCode, grantResults);
     }
 }

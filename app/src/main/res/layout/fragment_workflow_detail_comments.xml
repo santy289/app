@@ -34,7 +34,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/spinner_bg"
+                android:background="@drawable/edit_text_bg"
                 android:hint="@string/workflow_detail_comments_fragment_input_comment_hint"
                 android:inputType="textMultiLine"
                 android:maxLines="5"

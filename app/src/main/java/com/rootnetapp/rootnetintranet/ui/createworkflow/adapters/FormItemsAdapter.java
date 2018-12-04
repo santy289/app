@@ -279,7 +279,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                     (view, year, monthOfYear, dayOfMonth) -> {
                         Date date = Utils.getDateFromIntegers(year, monthOfYear, dayOfMonth);
 
-                        holder.getBinding().tvSelectedDate.setText(Utils.getFormattedDate(date, Utils.SERVER_DATE_FORMAT));
+                        holder.getBinding().tvSelectedDate.setText(Utils.getFormattedDate(date, item.getDateFormat()));
                         item.setValue(date);
                     }
             );

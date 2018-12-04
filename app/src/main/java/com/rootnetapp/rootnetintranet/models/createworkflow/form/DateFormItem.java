@@ -6,9 +6,12 @@ import androidx.annotation.Nullable;
 
 public class DateFormItem extends BaseFormItem {
 
+    private static final String DEFAULT_FORMAT = "MMMM dd, yyyy";
+
     private @Nullable Date value;
     private @Nullable Date minDate;
     private @Nullable Date maxDate;
+    private @Nullable String dateFormat;
 
     private DateFormItem() {
         //Constructor is private for Builder pattern
@@ -47,6 +50,15 @@ public class DateFormItem extends BaseFormItem {
         this.maxDate = maxDate;
     }
 
+    public String getDateFormat() {
+        if (dateFormat == null) return DEFAULT_FORMAT;
+        return dateFormat;
+    }
+
+    public void setDateFormat(@Nullable String dateFormat) {
+        this.dateFormat = dateFormat;
+    }
+
     public static class Builder {
 
         private String title;
@@ -57,6 +69,7 @@ public class DateFormItem extends BaseFormItem {
         private Date value;
         private Date minDate;
         private Date maxDate;
+        private String dateFormat;
 
         public Builder setTitle(String title) {
             this.title = title;
@@ -106,6 +119,12 @@ public class DateFormItem extends BaseFormItem {
             return this;
         }
 
+        public Builder setDateFormat(String dateFormat) {
+            this.dateFormat = dateFormat;
+
+            return this;
+        }
+
         public DateFormItem build() {
             DateFormItem item = new DateFormItem();
 
@@ -117,6 +136,7 @@ public class DateFormItem extends BaseFormItem {
             item.setValue(value);
             item.setMinDate(minDate);
             item.setMaxDate(maxDate);
+            item.setDateFormat(dateFormat);
             item.setViewType(FormItemViewType.DATE);
 
             return item;

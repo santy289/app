@@ -46,4 +46,7 @@
         <item name="android:windowBackground">@drawable/splash_bg</item>
     </style>
 
+    <!--For DatePickerDialog library-->
+    <style name="mdtp_ActionButton.Text" parent="Widget.MaterialComponents.Button.TextButton" />
+
 </resources>

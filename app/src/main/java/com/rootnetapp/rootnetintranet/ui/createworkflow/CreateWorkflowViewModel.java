@@ -14,6 +14,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PendingFileUpload;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
@@ -497,10 +498,10 @@ public class CreateWorkflowViewModel extends ViewModel {
 //                handleBuildText(field);
                 createTextInputFormItem(field); //todo check
                 break;
-            /*case FormSettings.TYPE_DATE:
-                handleBuildDate(field);
+            case FormSettings.TYPE_DATE:
+                createDateFormItem(field);
                 break;
-            case FormSettings.TYPE_SYSTEM_USERS:
+            /*case FormSettings.TYPE_SYSTEM_USERS:
                 handleList(field, FormSettings.TYPE_SYSTEM_USERS);
                 break;
             case FormSettings.TYPE_TEXT_AREA:
@@ -545,6 +546,80 @@ public class CreateWorkflowViewModel extends ViewModel {
                 break;
         }
     }
+
+    //region Create Form Items
+    private void createWorkflowTypeItem() {
+        //used to be setWorkflowTypes
+
+        Disposable disposable = Observable.fromCallable(() -> {
+            List<WorkflowTypeItemMenu> types = createWorkflowRepository.getWorklowTypeNames();
+            if (types == null || types.size() < 1) {
+                return false;
+            }
+            String name;
+            Integer id;
+            for (int i = 0; i < types.size(); i++) {
+                name = types.get(i).getName();
+                id = types.get(i).getId();
+                formSettings.setId(id);
+                formSettings.setName(name);
+            }
+
+            SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
+                    .setTitleRes(R.string.type)
+                    .setRequired(true)
+                    .setTag(TAG_WORKFLOW_TYPE)
+                    .setOptions(formSettings.getNames())
+                    .build();
+
+            formSettings.getFormItems().add(singleChoiceFormItem);
+
+            return singleChoiceFormItem;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(singleChoiceFormItem -> {
+                    mAddWorkflowTypeItemLiveData
+                            .setValue((SingleChoiceFormItem) singleChoiceFormItem);
+                    showLoading.setValue(false);
+                }, throwable -> {
+                    Log.d(TAG, "setWorkflowTypes: error " + throwable.getMessage());
+                    showLoading.postValue(false);
+                });
+        disposables.add(disposable);
+    }
+
+    private void createTextInputFormItem(FormFieldsByWorkflowType field) {
+        String valueType = field.getFieldConfigObject().getTypeInfo().getValueType();
+
+        TextInputFormItem item = new TextInputFormItem.Builder()
+                .setTitle(field.getFieldName())
+                .setRequired(field.isRequired())
+                .setTag(field.getId())
+                .setEscaped(escape(field.fieldConfigObject))
+                .setInputType(valueType)
+                .build();
+
+        formSettings.getFormItems().add(item);
+    }
+
+    private void createDateFormItem(FormFieldsByWorkflowType field) {
+        String valueType = field.getFieldConfigObject().getTypeInfo().getValueType();
+
+        if (!valueType.equals(FormSettings.VALUE_DATE)) {
+            Log.d(TAG, "createDateFormItem: Value not recognized " + valueType);
+            return;
+        }
+
+        DateFormItem item = new DateFormItem.Builder()
+                .setTitle(field.getFieldName())
+                .setRequired(field.isRequired())
+                .setTag(field.getId())
+                .setEscaped(escape(field.fieldConfigObject))
+                .build();
+
+        formSettings.getFormItems().add(item);
+    }
+    //endregion
 
     private void handleFile(FormFieldsByWorkflowType field) {
         showUploadButton.setValue(true);
@@ -752,62 +827,6 @@ public class CreateWorkflowViewModel extends ViewModel {
                 Log.d(TAG, "handleBuildProject: Not recognized " + valueType);
         }
     }
-
-    //region Create Form Items
-    private void createTextInputFormItem(FormFieldsByWorkflowType field) {
-        String valueType = field.getFieldConfigObject().getTypeInfo().getValueType();
-
-        TextInputFormItem item = new TextInputFormItem.Builder()
-                .setTitle(field.getFieldName())
-                .setRequired(field.isRequired())
-                .setTag(field.getId())
-                .setEscaped(escape(field.fieldConfigObject))
-                .setInputType(valueType)
-                .build();
-
-        formSettings.getFormItems().add(item);
-    }
-
-    private void createWorkflowTypeItem() {
-        //used to be setWorkflowTypes
-
-        Disposable disposable = Observable.fromCallable(() -> {
-            List<WorkflowTypeItemMenu> types = createWorkflowRepository.getWorklowTypeNames();
-            if (types == null || types.size() < 1) {
-                return false;
-            }
-            String name;
-            Integer id;
-            for (int i = 0; i < types.size(); i++) {
-                name = types.get(i).getName();
-                id = types.get(i).getId();
-                formSettings.setId(id);
-                formSettings.setName(name);
-            }
-
-            SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
-                    .setTitleRes(R.string.type)
-                    .setRequired(true)
-                    .setTag(TAG_WORKFLOW_TYPE)
-                    .setOptions(formSettings.getNames())
-                    .build();
-
-            formSettings.getFormItems().add(singleChoiceFormItem);
-
-            return singleChoiceFormItem;
-        }).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(singleChoiceFormItem -> {
-                    mAddWorkflowTypeItemLiveData
-                            .setValue((SingleChoiceFormItem) singleChoiceFormItem);
-                    showLoading.setValue(false);
-                }, throwable -> {
-                    Log.d(TAG, "setWorkflowTypes: error " + throwable.getMessage());
-                    showLoading.postValue(false);
-                });
-        disposables.add(disposable);
-    }
-    //endregion
 
     @Deprecated
     private void handleBuildDate(FormFieldsByWorkflowType field) {

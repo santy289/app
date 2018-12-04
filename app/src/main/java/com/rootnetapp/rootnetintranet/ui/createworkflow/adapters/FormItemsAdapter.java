@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
+import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.FormItemBooleanBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemCurrencyBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemDateBinding;
@@ -20,20 +22,26 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
+import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
+import java.util.Calendar;
 import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatEditText;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Context mContext;
+    private FragmentManager mFragmentManager;
     private List<BaseFormItem> mDataset;
 
-    public FormItemsAdapter(Context context, List<BaseFormItem> dataset) {
+    public FormItemsAdapter(Context context, FragmentManager fragmentManager,
+                            List<BaseFormItem> dataset) {
         this.mContext = context;
+        this.mFragmentManager = fragmentManager;
         this.mDataset = dataset;
     }
 
@@ -217,13 +225,41 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private void populateDateView(DateViewHolder holder, int position) {
         DateFormItem item = (DateFormItem) getItem(position);
 
+        holder.getBinding().tvSelectedDate.setOnClickListener(v -> {
+            // the style mdtp_ActionButton.Text must be overridden in styles.xml for MaterialComponents
+            DatePickerDialog dpd = DatePickerDialog.newInstance(
+                    (view, year, monthOfYear, dayOfMonth) -> {
+                        String date = Utils
+                                .getFormattedDateFromIntegers(year, monthOfYear, dayOfMonth,
+                                        item.getDateFormat());
+                        holder.getBinding().tvSelectedDate.setText(date);
+                    }
+            );
+
+            //region Data
+            dpd.setTitle(item.getTitle());
+
+            Calendar calendar = Calendar.getInstance();
+            if (item.getMinDate() != null) {
+                calendar.setTime(item.getMinDate());
+                dpd.setMinDate(calendar);
+            }
+            if (item.getMaxDate() != null) {
+                calendar.setTime(item.getMaxDate());
+                dpd.setMinDate(calendar);
+            }
+            //endregion
+
+            //region UI
+            dpd.setOkText(R.string.accept);
+            dpd.setCancelText(R.string.cancel);
+            //endregion
+
+            dpd.show(mFragmentManager, String.valueOf(item.getTag()));
+        });
+
         holder.getBinding().tvTitle.setText(item.getTitle());
-        if (item.getMinDate() != null) {
-            holder.getBinding().dpInput.setMinDate(item.getMinDate().getTime());
-        }
-        if (item.getMaxDate() != null) {
-            holder.getBinding().dpInput.setMaxDate(item.getMaxDate().getTime());
-        }
+
     }
 
     private void populateCurrencyView(CurrencyViewHolder holder, int position) {

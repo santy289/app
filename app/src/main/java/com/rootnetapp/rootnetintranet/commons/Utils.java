@@ -329,11 +329,32 @@ public class Utils {
     }
 
     public static Date getDateFromString(String date, String format) {
-        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.US);
+        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
         try {
             return sdf.parse(date);
         } catch (ParseException e) {
             return null;
         }
+    }
+
+    /**
+     * Parses the given date in integers with the specified format.
+     *
+     * @param year        year in integer
+     * @param monthOfYear 0-11
+     * @param dayOfMonth  1-31
+     * @param format      date format
+     *
+     * @return a fully formatted date.
+     */
+    public static String getFormattedDateFromIntegers(int year, int monthOfYear, int dayOfMonth,
+                                                      String format) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, year);
+        calendar.set(Calendar.MONTH, monthOfYear);
+        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        Date c = calendar.getTime();
+        SimpleDateFormat df = new SimpleDateFormat(format, Locale.getDefault());
+        return df.format(c);
     }
 }

@@ -169,7 +169,7 @@ public class WorkFlowCreateFragment extends Fragment {
     }
 
     private void setupFormRecycler() {
-        mAdapter = new FormItemsAdapter(getContext(), new ArrayList<>());
+        mAdapter = new FormItemsAdapter(getContext(), getChildFragmentManager(), new ArrayList<>());
         mBinding.rvFields.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvFields.setAdapter(mAdapter);
         mBinding.rvFields.setNestedScrollingEnabled(false);

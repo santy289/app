@@ -116,9 +116,10 @@ public class CommentsViewModel extends ViewModel {
 
                         returnCursor.close();
 
-                        File file = new File(uri.toString());
+                        File file = new File(uri.getPath());
                         byte[] bytes = Utils.fileToByte(file);
 
+                        //fixme this actually encodes the file path and not the file content
                         String encodedFile = Base64.encodeToString(bytes, Base64.DEFAULT);
                         String fileType = Utils.getMimeType(data.getData(), context);
 

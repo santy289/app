@@ -294,7 +294,7 @@ public class Utils {
                 .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/";
 
         final File pdfFile = new File(downloadsPath + fileName + ".pdf");
-        byte[] pdfAsBytes = Base64.decode(base64, 0);
+        byte[] pdfAsBytes = Base64.decode(base64, Base64.DEFAULT);
         FileOutputStream os;
         os = new FileOutputStream(pdfFile, false);
         os.write(pdfAsBytes);
@@ -321,7 +321,7 @@ public class Utils {
                 .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/";
 
         final File file = new File(downloadsPath + fileName);
-        byte[] fileAsBytes = Base64.decode(base64, 0);
+        byte[] fileAsBytes = Base64.decode(base64, Base64.DEFAULT);
         FileOutputStream os;
         os = new FileOutputStream(file, false);
         os.write(fileAsBytes);

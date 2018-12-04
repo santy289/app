@@ -8,8 +8,6 @@ import com.squareup.moshi.Json;
 
 public class CommentFile {
 
-    public static final String FILE_ENTITY = "workflowcommentfile"; //https://example.dev.rootnetapp.com/download/workflowcommentfile://21
-
     @Json(name = "file")
     private String file;
     @Json(name = "type")

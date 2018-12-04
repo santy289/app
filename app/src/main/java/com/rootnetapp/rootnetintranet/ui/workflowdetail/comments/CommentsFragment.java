@@ -16,6 +16,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailCommentsBinding;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
+import com.rootnetapp.rootnetintranet.models.responses.comments.CommentFileResponse;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailViewModel;
@@ -127,7 +128,7 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
     }
 
     private void setupCommentsRecycler() {
-        mCommentsAdapter = new CommentsAdapter(new ArrayList<>());
+        mCommentsAdapter = new CommentsAdapter(this, getContext(), new ArrayList<>());
         mBinding.rvComments.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvComments.setAdapter(mCommentsAdapter);
         mBinding.rvComments.setNestedScrollingEnabled(false);
@@ -168,7 +169,7 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
 
     @UiThread
     private void updateCommentsList(List<Comment> commentList) {
-        mCommentsAdapter = new CommentsAdapter(commentList);
+        mCommentsAdapter = new CommentsAdapter(this, getContext(), commentList);
         mBinding.rvComments.setAdapter(mCommentsAdapter);
     }
 
@@ -291,6 +292,12 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
     public void removeAttachment(CommentFile commentFile) {
         mAttachmentsAdapter.removeItem(commentFile);
         commentsViewModel.removeCommentAttachment(commentFile);
+    }
+
+    @Override
+    public void downloadCommentAttachment(CommentFileResponse commentFileResponse) {
+        //todo download file
+        return;
     }
 
     @UiThread

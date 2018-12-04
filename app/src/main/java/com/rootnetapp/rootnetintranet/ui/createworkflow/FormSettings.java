@@ -486,7 +486,7 @@ public class FormSettings {
 
     private void handleBoolean(TypeInfo typeInfo, WorkflowMetas metaData, String value) {
         if (typeInfo.getType().equals(TYPE_CHECKBOX)) {
-            if (value.equals("Sí") || value.equals("Yes")) {
+            if (value.equals("Sí") || value.equals("Yes") || value.equals("true")) {
                 metaData.setValue("true");
             } else {
                 metaData.setValue("false");

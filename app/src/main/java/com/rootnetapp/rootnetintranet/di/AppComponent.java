@@ -23,6 +23,14 @@ import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerFragment;
 import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerModule;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileModule;
+import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
+import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsModule;
+import com.rootnetapp.rootnetintranet.ui.quickactions.changestatus.ChangeStatusActivity;
+import com.rootnetapp.rootnetintranet.ui.quickactions.changestatus.ChangeStatusModule;
+import com.rootnetapp.rootnetintranet.ui.quickactions.performaction.PerformActionFragment;
+import com.rootnetapp.rootnetintranet.ui.quickactions.performaction.PerformActionModule;
+import com.rootnetapp.rootnetintranet.ui.quickactions.workflowsearch.WorkflowSearchFragment;
+import com.rootnetapp.rootnetintranet.ui.quickactions.workflowsearch.WorkflowSearchModule;
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment.ResetPasswordFragment;
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment.ResetPasswordModule;
 import com.rootnetapp.rootnetintranet.ui.resetPass.tokenfragment.RequestTokenFragment;
@@ -32,7 +40,7 @@ import com.rootnetapp.rootnetintranet.ui.splash.SplashModule;
 import com.rootnetapp.rootnetintranet.ui.sync.SyncActivity;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineModule;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryModule;
@@ -42,6 +50,8 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationModule;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved.PeopleInvolvedFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved.PeopleInvolvedModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusModule;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
@@ -75,7 +85,12 @@ import dagger.Component;
                 InformationModule.class,
                 ApprovalHistoryModule.class,
                 CommentsModule.class,
-                FilesModule.class
+                FilesModule.class,
+                PeopleInvolvedModule.class,
+                QuickActionsModule.class,
+                WorkflowSearchModule.class,
+                PerformActionModule.class,
+                ChangeStatusModule.class
         }
 )
 
@@ -117,7 +132,7 @@ public interface AppComponent {
 
     void inject(CustomCountryPicker countryPicker);
 
-    void inject(WorkflowDetailFragment workflowDetailFragment);
+    void inject(WorkflowDetailActivity workflowDetailActivity);
 
     void inject(TimelineFragment timelineFragment);
 
@@ -134,4 +149,14 @@ public interface AppComponent {
     void inject(CommentsFragment commentsFragment);
 
     void inject(FilesFragment filesFragment);
+
+    void inject(QuickActionsActivity quickActionsActivity);
+
+    void inject(WorkflowSearchFragment workflowSearchFragment);
+
+    void inject(PerformActionFragment performActionFragment);
+
+    void inject(ChangeStatusActivity changeStatusActivity);
+
+    void inject(PeopleInvolvedFragment peopleInvolvedFragment);
 }

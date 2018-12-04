@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters;
+package com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved.adapters;
 
 import com.rootnetapp.rootnetintranet.databinding.PeopleInvolvedItemBinding;
 

@@ -117,7 +117,7 @@
     <string name="axe">Axe</string>
     <string name="people_involved">PEOPLE INVOLVED</string>
     <string name="approval_history">WORKFLOW APPROVAL HISTORY</string>
-    <string name="approved">Approved:</string>
+    <string name="approved">Approved</string>
     <string name="template">TEMPLATE:</string>
     <string name="upload">UPLOAD</string>
     <string name="versions">Versions</string>
@@ -216,11 +216,13 @@
     <string name="last_status">Last Status</string>
     <string name="next_status">Next Status</string>
     <string name="request_successfully">Request done successfully.</string>
+    <string name="functionality_not_available">This functionality is not available yet</string>
 
-    <!--WorkflowDetailFragment-->
-    <string name="workflow_detail_status_fragment_open_file">Open File</string>
-    <string name="workflow_detail_status_fragment_no_pdf_reader">This file cannot be opened by your device. Please install a PDF reader.</string>
-    <string name="workflow_detail_status_fragment_permissions_not_granted">Cannot export PDF because the permissions were not granted.</string>
+    <!--WorkflowDetailActivity-->
+    <string name="workflow_detail_activity_title">Workflow Details</string>
+    <string name="workflow_detail_activity_open_file">Open File</string>
+    <string name="workflow_detail_activity_no_pdf_reader">This file cannot be opened by your device. Please install a PDF reader.</string>
+    <string name="workflow_detail_activity_permissions_not_granted">Cannot export PDF because the permissions were not granted.</string>
     <!--StatusFragment-->
     <string name="workflow_detail_status_fragment_title">Status</string>
     <string name="workflow_detail_status_fragment_status_summary">Workflow Status</string>
@@ -232,7 +234,6 @@
     <string name="workflow_detail_status_fragment_next_step">Choose Next Step</string>
     <string name="workflow_detail_status_fragment_next_step_approvers">Next step approvers:</string>
     <string name="workflow_detail_status_fragment_next_step_mass_approval">Mass approval</string>
-    <string name="workflow_detail_status_fragment_all_people_involved">People Involved In All Statuses</string>
     <string name="workflow_detail_status_fragment_approve">Approve</string>
     <string name="workflow_detail_status_fragment_reject">Reject</string>
     <string name="workflow_detail_status_fragment_spinner_title">- Select Step -</string>
@@ -249,6 +250,8 @@
     <string name="workflow_detail_information_fragment_end_date">End Date</string>
     <string name="workflow_detail_information_fragment_project_time">Project Time (months)</string>
     <string name="workflow_detail_information_fragment_owner">Owner</string>
+    <!--PeopleInvolvedFragment-->
+    <string name="workflow_detail_people_involved_fragment_title">People Involved</string>
     <!--ApprovalHistoryFragment-->
     <string name="workflow_detail_approval_history_fragment_title">@string/workflow_detail_approval_history_fragment_approval_history</string>
     <string name="workflow_detail_approval_history_fragment_approval_history">Approval History</string>
@@ -269,4 +272,29 @@
     <string name="workflow_detail_files_fragment_documents">Documents</string>
     <string name="workflow_detail_files_fragment_no_files">No files to show</string>
     <string name="workflow_detail_files_fragment_file_name">File Name</string>
+    <string name="workflow_detail_files_fragment_no_file_manager">Please install a File Manager.</string>
+    <string name="workflow_detail_files_fragment_select_file">Select a file to upload</string>
+    <string name="workflow_detail_files_fragment_open_file">Open File</string>
+    <string name="workflow_detail_files_fragment_cannot_open_file">This file cannot be opened by your device.</string>
+    <string name="workflow_detail_files_fragment_preset_unavailable">This preset is not available to download.</string>
+    <string name="workflow_detail_files_fragment_permissions_not_granted">Cannot download the file because the permissions were not granted.</string>
+
+    <!--MainActivity-->
+    <string name="bottom_nav_timeline">Timeline</string>
+    <string name="bottom_nav_workflow_list">Workflows</string>
+    <string name="bottom_nav_workflow_dashboard">Dashboard</string>
+    <string name="quick_actions_edit_workflow">Edit Workflow</string>
+    <string name="quick_actions_approve_workflow">Approve Workflow</string>
+    <string name="quick_actions_change_status">Change Status</string>
+    <string name="quick_actions_comment">Comment</string>
+
+    <!--QuickActionsActivity-->
+    <string name="quick_actions_activity_title">Quick Actions</string>
+    <!--ChangeStatusActivity-->
+    <string name="change_status_activity_title">Change Status</string>
+    <!--WorkflowSearchFragment-->
+    <string name="workflow_search_fragment_search_hint">Search workflow…</string>
+    <string name="workflow_search_fragment_search_no_results">Your search did not find any results</string>
+    <string name="workflow_search_fragment_search_type">Type:</string>
+    <string name="workflow_search_fragment_search_status">Status:</string>
 </resources>

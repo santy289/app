@@ -30,4 +30,6 @@ public class Approver {
     @Json(name = "entity_avatar")
     public String entityAvatar;
 
+    public boolean approved;
+
 }

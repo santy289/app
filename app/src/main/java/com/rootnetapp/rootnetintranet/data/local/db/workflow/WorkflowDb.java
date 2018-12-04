@@ -5,7 +5,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.models.createworkflow.SpecificApprovers;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.NextStatusRequirements;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.presets.Preset;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
 import com.squareup.moshi.Json;
 
@@ -167,6 +167,7 @@ public class WorkflowDb {
     }
 
     public List<ApproverHistory> getWorkflowApprovalHistory() {
+        ApproverHistory.sortList(workflowApprovalHistory);
         return workflowApprovalHistory;
     }
 

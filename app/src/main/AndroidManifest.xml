@@ -51,6 +51,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.quickactions.QuickActionsActivity"
+            android:label="@string/quick_actions_activity_title"
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ui.quickactions.changestatus.ChangeStatusActivity"
+            android:label="@string/change_status_activity_title"
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ui.workflowdetail.WorkflowDetailActivity"
+            android:label="@string/title_activity_edit_profile"
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait"/>
         <service
             android:name=".services.manager.WorkflowManagerService"
             android:enabled="true"

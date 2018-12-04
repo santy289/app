@@ -17,6 +17,7 @@ import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailComments
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailViewModel;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.adapters.AttachmentsAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.adapters.CommentsAdapter;
@@ -49,14 +50,24 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
     private AttachmentsAdapter mAttachmentsAdapter;
 
     private WorkflowDetailViewModel workflowDetailViewModel;
+    private boolean isFromDetails;
 
     public CommentsFragment() {
         // Required empty public constructor
     }
 
-    public static CommentsFragment newInstance(WorkflowListItem item) {
+    /**
+     * Creates an instance for this fragment. Can be instantiated form any view.
+     *
+     * @param item          workflow to display its comments.
+     * @param isFromDetails whether this fragment was created from {@link WorkflowDetailActivity}.
+     *
+     * @return instance of this fragment.
+     */
+    public static CommentsFragment newInstance(WorkflowListItem item, boolean isFromDetails) {
         CommentsFragment fragment = new CommentsFragment();
         fragment.mWorkflowListItem = item;
+        fragment.isFromDetails = isFromDetails;
         return fragment;
     }
 
@@ -72,7 +83,7 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
                 .of(this, commentsViewModelFactory)
                 .get(CommentsViewModel.class);
 
-        if (getParentFragment() != null) {
+        if (getParentFragment() != null && isFromDetails) {
             workflowDetailViewModel = ViewModelProviders
                     .of(getParentFragment())
                     .get(WorkflowDetailViewModel.class);

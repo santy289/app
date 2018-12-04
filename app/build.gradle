@@ -7,7 +7,7 @@ android {
         applicationId "com.rootnetapp.rootnetintranet"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 2
+        versionCode 3
         versionName "1.0"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -71,7 +71,7 @@ dependencies {
     implementation "me.jessyan:retrofit-url-manager:$rootProject.retrofitUrlInterceptorVersion"
 
     implementation "me.riddhimanadib.form-master:form-master:1.1.0"
-
+    implementation "com.leinardi.android:speed-dial:2.0.0"
 
     implementation "com.squareup.retrofit2:adapter-rxjava2:$rootProject.rxjavaLibraryVersion"
     implementation "io.reactivex.rxjava2:rxandroid:$rootProject.rxandroidLibraryVersion"

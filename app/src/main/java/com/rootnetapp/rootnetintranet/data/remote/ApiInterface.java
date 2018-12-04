@@ -6,6 +6,7 @@ import com.rootnetapp.rootnetintranet.models.requests.approval.ApprovalRequest;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.comment.PostCommentRequest;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
+import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
@@ -15,6 +16,7 @@ import com.rootnetapp.rootnetintranet.models.responses.country.CountryDbResponse
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
+import com.rootnetapp.rootnetintranet.models.responses.downloadfile.DownloadFileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.exportpdf.ExportPdfResponse;
 import com.rootnetapp.rootnetintranet.models.responses.file.FilesResponse;
@@ -58,7 +60,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.QueryMap;
-
+import retrofit2.http.Streaming;
 
 public interface ApiInterface {
 
@@ -120,6 +122,7 @@ public interface ApiInterface {
                                                @Query("page") int page,
                                                @Query("status") boolean status);
 
+
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?")
     Observable<WorkflowResponseDb> getWorkflowsDb(@Header("Authorization") String authorization,
@@ -127,9 +130,14 @@ public interface ApiInterface {
                                                   @Query("open") boolean open,
                                                   @Query("page") int page,
                                                   @Query("workflow_type") boolean showTypeDetails);
-
-
-
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?")
+    Observable<WorkflowResponseDb> getWorkflowsBySearchQuery(@Header("Authorization") String authorization,
+                                                             @Query("limit") int limit,
+                                                             @Query("page") int page,
+                                                             @Query("open") boolean open,
+                                                             @Query("query") String query,
+                                                             @Query("workflow_type") boolean showTypeDetails);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?")
@@ -294,10 +302,8 @@ public interface ApiInterface {
 
     @Headers({"Domain-Name: api"})
     @POST("intranet/workflows/records/file")
-    @FormUrlEncoded
     Observable<AttachResponse> attachFile(@Header("Authorization") String authorization,
-                                          @Field("workflows") List<WorkflowPresetsRequest> request,
-                                          @Field("file") CommentFile fileRequest);
+                                          @Body AttachFilesRequest request);
 
     @Headers({"Domain-Name: api"})
     @GET("timeline?")
@@ -348,4 +354,11 @@ public interface ApiInterface {
     @GET("intranet/workflows/{id}/pdf?dump=false")
     Observable<ExportPdfResponse> getWorkflowPdfFile(@Header("Authorization") String authorization,
                                                      @Path("id") int workflowId);
+
+    @Headers({"Domain-Name: api"})
+    @Streaming
+    @GET("file/download/{entity}/{id}")
+    Observable<DownloadFileResponse> downloadFile(@Header("Authorization") String authorization,
+                                                  @Path("entity") String entity,
+                                                  @Path("id") int fileId);
 }

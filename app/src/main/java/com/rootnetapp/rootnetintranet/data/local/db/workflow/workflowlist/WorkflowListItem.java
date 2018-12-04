@@ -1,9 +1,11 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist;
 
-import androidx.room.ColumnInfo;
-import androidx.room.Ignore;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -11,7 +13,11 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 
-public class WorkflowListItem {
+import androidx.room.ColumnInfo;
+import androidx.room.Ignore;
+
+public class WorkflowListItem implements Parcelable {
+
     public int workflowId;
     public int workflowTypeId;
     public long remainingTime;
@@ -43,6 +49,31 @@ public class WorkflowListItem {
     private String formattedCreatedAt;
     @Ignore
     private String formattedUpdatedAt;
+
+    public WorkflowListItem() {}
+
+    /**
+     * Temporary constructor. Converts a {@link WorkflowDb} object into this.
+     *
+     * @param workflowDb object to be converted.
+     */
+    public WorkflowListItem(WorkflowDb workflowDb) {
+        workflowId = workflowDb.getId();
+        workflowTypeId = workflowDb.getWorkflowTypeId();
+        remainingTime = workflowDb.getRemainingTime();
+        workflowTypeName = workflowDb.getWorkflowType() != null ? workflowDb.getWorkflowType()
+                .getName() : null;
+        title = workflowDb.getTitle();
+        workflowTypeKey = workflowDb.getWorkflowTypeKey();
+        fullName = workflowDb.getAuthor() != null ? workflowDb.getAuthor().getFullName() : null;
+        currentStatusName = workflowDb.getCurrentStatusName();
+        createdAt = workflowDb.getCreatedAt();
+        updatedAt = workflowDb.getUpdatedAt();
+        start = workflowDb.getStart();
+        end = workflowDb.getEnd();
+        status = workflowDb.isStatus();
+        currentStatus = workflowDb.getCurrentStatus();
+    }
 
     public int getWorkflowId() {
         return workflowId;
@@ -239,6 +270,71 @@ public class WorkflowListItem {
     @Override
     public int hashCode() {
 
-        return Objects.hash(getWorkflowId(), getWorkflowTypeId(), getWorkflowTypeName(), getTitle(), getWorkflowTypeKey(), getFullName(), getCurrentStatusName(), getCreatedAt(), getUpdatedAt(), getStart(), getEnd(), isStatus());
+        return Objects.hash(getWorkflowId(), getWorkflowTypeId(), getWorkflowTypeName(), getTitle(),
+                getWorkflowTypeKey(), getFullName(), getCurrentStatusName(), getCreatedAt(),
+                getUpdatedAt(), getStart(), getEnd(), isStatus());
     }
+
+    //region Parcelable
+    protected WorkflowListItem(Parcel in) {
+        workflowId = in.readInt();
+        workflowTypeId = in.readInt();
+        remainingTime = in.readLong();
+        workflowTypeName = in.readString();
+        title = in.readString();
+        workflowTypeKey = in.readString();
+        fullName = in.readString();
+        currentStatusName = in.readString();
+        createdAt = in.readString();
+        updatedAt = in.readString();
+        start = in.readString();
+        end = in.readString();
+        status = in.readByte() != 0x00;
+        currentStatus = in.readInt();
+        selected = in.readByte() != 0x00;
+        isChecked = in.readByte() != 0x00;
+        formattedCreatedAt = in.readString();
+        formattedUpdatedAt = in.readString();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(workflowId);
+        dest.writeInt(workflowTypeId);
+        dest.writeLong(remainingTime);
+        dest.writeString(workflowTypeName);
+        dest.writeString(title);
+        dest.writeString(workflowTypeKey);
+        dest.writeString(fullName);
+        dest.writeString(currentStatusName);
+        dest.writeString(createdAt);
+        dest.writeString(updatedAt);
+        dest.writeString(start);
+        dest.writeString(end);
+        dest.writeByte((byte) (status ? 0x01 : 0x00));
+        dest.writeInt(currentStatus);
+        dest.writeByte((byte) (selected ? 0x01 : 0x00));
+        dest.writeByte((byte) (isChecked ? 0x01 : 0x00));
+        dest.writeString(formattedCreatedAt);
+        dest.writeString(formattedUpdatedAt);
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<WorkflowListItem> CREATOR = new Parcelable.Creator<WorkflowListItem>() {
+        @Override
+        public WorkflowListItem createFromParcel(Parcel in) {
+            return new WorkflowListItem(in);
+        }
+
+        @Override
+        public WorkflowListItem[] newArray(int size) {
+            return new WorkflowListItem[size];
+        }
+    };
+    //endregion
 }

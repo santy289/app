@@ -1,42 +1,43 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context="com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment">
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
+            android:layout_height="wrap_content"
             android:background="@color/white"
-            >
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
                 android:layout_marginTop="10dp"
+                android:layout_marginEnd="15dp"
                 android:layout_marginBottom="10dp"
-                android:textSize="18sp"
+                android:text="@string/workflow_list"
                 android:textColor="@color/colorPrimaryDark"
-                android:textStyle="bold"
-                android:text="@string/workflow_list"/>
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
             <View
                 android:layout_width="match_parent"
-                android:background="@color/detailsColor"
-                android:layout_height="1dp"/>
+                android:layout_height="1dp"
+                android:background="@color/detailsColor" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
                 android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp">
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginBottom="10dp"
+                android:orientation="horizontal">
 
                 <Button
                     android:id="@+id/btn_filters"
@@ -45,20 +46,20 @@
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:backgroundTint="@color/colorPrimary"
-                    android:textColor="@color/white"
-                    android:text="@string/filters"/>
+                    android:text="@string/filters"
+                    android:textColor="@color/white" />
 
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
                     android:layout_marginEnd="15dp"
                     android:layout_toStartOf="@id/btn_filters"
-                    android:layout_centerVertical="true"
                     android:background="@drawable/spinner_bg"
                     android:orientation="horizontal"
                     android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
                     android:paddingTop="5dp"
+                    android:paddingEnd="10dp"
                     android:paddingBottom="5dp">
 
                     <ImageView
@@ -68,24 +69,24 @@
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_gravity="center"
-                        android:tint="@color/black"
-                        android:src="@android:drawable/ic_menu_search" />
+                        android:src="@android:drawable/ic_menu_search"
+                        android:tint="@color/black" />
 
                     <androidx.appcompat.widget.AppCompatEditText
                         android:id="@+id/input_search"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_toStartOf="@id/img_search"
                         android:layout_centerVertical="true"
+                        android:layout_toStartOf="@id/img_search"
                         android:background="@color/noColor"
                         android:hint="@string/search"
                         android:inputType="text"
-                        android:textSize="15sp"
                         android:maxLines="1"
                         android:paddingStart="10dp"
-                        android:paddingEnd="10dp"
                         android:paddingTop="2dp"
-                        android:paddingBottom="2dp"/>
+                        android:paddingEnd="10dp"
+                        android:paddingBottom="2dp"
+                        android:textSize="15sp" />
 
                 </RelativeLayout>
 
@@ -102,26 +103,26 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
-                    android:buttonTint="@color/colorPrimary"
-                    android:layout_centerVertical="true"/>
+                    android:layout_centerVertical="true"
+                    android:buttonTint="@color/colorPrimary" />
 
                 <ImageView
                     android:id="@+id/img_1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_margin="5dp"
                     android:layout_toEndOf="@id/chbx_select_all"
                     android:src="@drawable/ic_more_vert_black_24dp"
-                    android:tint="@color/colorPrimary"
-                    android:layout_margin="5dp"
-                    android:layout_centerVertical="true"/>
+                    android:tint="@color/colorPrimary" />
 
                 <View
                     android:layout_width="match_parent"
-                    android:background="@color/colorPrimary"
                     android:layout_height="1dp"
                     android:layout_centerVertical="true"
+                    android:layout_toStartOf="@+id/btn_add"
                     android:layout_toEndOf="@id/img_1"
-                    android:layout_toStartOf="@+id/btn_add"/>
+                    android:background="@color/colorPrimary" />
 
                 <Button
                     android:id="@+id/btn_add"
@@ -130,33 +131,36 @@
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:backgroundTint="@color/green"
-                    android:textColor="@color/white"
-                    android:text="@string/btn_add"/>
+                    android:text="@string/btn_add"
+                    android:textColor="@color/white" />
 
             </RelativeLayout>
+
 
             <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
                 android:id="@+id/swipeRefreshLayout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rec_workflows"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="15dp"
+                    android:layout_marginTop="10dp"
                     android:layout_marginEnd="15dp" />
             </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
             <TextView
                 android:id="@+id/lyt_noworkflows"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingEnd="15dp"
-                android:paddingTop="10dp"
                 android:paddingStart="15dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="15dp"
                 android:text="@string/no_items"
-                android:visibility="gone"/>
+                android:visibility="gone" />
         </LinearLayout>
         <!-- include bottom sheet -->
         <include layout="@layout/bottom_sheet_loading" />

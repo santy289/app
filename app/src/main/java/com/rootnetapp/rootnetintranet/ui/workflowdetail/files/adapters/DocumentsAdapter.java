@@ -8,9 +8,9 @@ import android.view.ViewGroup;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.databinding.DocumentsItemBinding;
 import com.rootnetapp.rootnetintranet.models.responses.file.DocumentsFile;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.Preset;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.presets.Preset;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragmentInterface;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -26,15 +26,13 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder> 
     public List<Preset> totalDocuments;
     private List<DocumentsFile> files;
     private Context context;
-    public List<Boolean> isSelected;
+    private FilesFragmentInterface mFilesFragmentInterface;
 
-    public DocumentsAdapter(List<Preset> totalDocuments, List<DocumentsFile> files) {
+    public DocumentsAdapter(FilesFragmentInterface filesFragmentInterface,
+                            List<Preset> totalDocuments, List<DocumentsFile> files) {
+        this.mFilesFragmentInterface = filesFragmentInterface;
         this.totalDocuments = totalDocuments;
         this.files = files;
-        this.isSelected = new ArrayList<>();
-        for (Preset item : totalDocuments) {
-            this.isSelected.add(false);
-        }
     }
 
     @NonNull
@@ -60,7 +58,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder> 
         }
         holder.binding.tvName.setText(item.getName());
         holder.binding.chbxItem.setOnCheckedChangeListener(
-                (compoundButton, b) -> isSelected.set(i, b));
+                (compoundButton, b) -> item.setSelected(b));
         if (file != null) {
             holder.binding.imgUploaded.setImageResource(R.drawable.ic_check_accent_24dp);
             holder.binding.imgUploaded
@@ -71,6 +69,12 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder> 
             String hour = file.getCreatedAt().split(" ")[1];
             holder.binding.tvDate.setText(date + " - " + hour);
         } else {
+            if (item.getPresetFile() != null) {
+                holder.binding.tvFileName.setText(item.getPresetFile().getFileName());
+                holder.binding.imgDownload.setVisibility(View.VISIBLE);
+            } else {
+                holder.binding.imgDownload.setVisibility(View.GONE);
+            }
             holder.binding.imgUploaded.setImageResource(R.drawable.ic_close_black_24dp);
             holder.binding.imgUploaded.setColorFilter(ContextCompat.getColor(context, R.color.red),
                     android.graphics.PorterDuff.Mode.SRC_IN);
@@ -94,6 +98,17 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder> 
                         .setColorFilter(ContextCompat.getColor(context, R.color.transparentArrow),
                                 android.graphics.PorterDuff.Mode.SRC_IN);
                 holder.binding.lytDetails.setVisibility(View.GONE);
+            }
+        });
+
+        DocumentsFile finalFile = file;
+        holder.binding.imgDownload.setOnClickListener(v -> {
+            if (finalFile != null) {
+                // file exists, proceed to download it
+                mFilesFragmentInterface.downloadDocumentFile(finalFile);
+            } else {
+                // file has not been uploaded, download the preset instead
+                mFilesFragmentInterface.downloadPreset(item);
             }
         });
     }

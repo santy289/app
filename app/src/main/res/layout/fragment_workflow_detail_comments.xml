@@ -33,7 +33,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/spinner_bg"
+                android:background="@drawable/edit_text_bg"
                 app:layout_constraintEnd_toStartOf="@+id/btn_comment"
                 app:layout_constraintStart_toStartOf="@id/switch_private_public"
                 app:layout_constraintTop_toBottomOf="@+id/switch_private_public">

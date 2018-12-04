@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -45,6 +46,8 @@ public class Utils {
     public static final String remainderOfDomain = ".rootnetapp.com";
 
     public static String domain;
+
+    public static final String SERVER_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
 
     public static String getImgDomain() {
         return imgDomain;
@@ -275,7 +278,7 @@ public class Utils {
     }
 
     /**
-     * Transforms a Base64 encoded string into a {@link File} object. Also, saves the file locally
+     * Transforms a Base64 encoded string into a PDF {@link File} object. Also, saves the file locally
      * on the external downloads folder.
      *
      * @param base64   encoded string.
@@ -291,6 +294,33 @@ public class Utils {
                 .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/";
 
         final File pdfFile = new File(downloadsPath + fileName + ".pdf");
+        byte[] pdfAsBytes = Base64.decode(base64, 0);
+        FileOutputStream os;
+        os = new FileOutputStream(pdfFile, false);
+        os.write(pdfAsBytes);
+        os.flush();
+        os.close();
+
+        return pdfFile;
+    }
+
+    /**
+     * Transforms a Base64 encoded string into a {@link File} object. Also, saves the file locally
+     * on the external downloads folder.
+     *
+     * @param base64   encoded string.
+     * @param fileName name of the file to be saved.
+     *
+     * @return the file object that was created.
+     *
+     * @throws IOException exception caused by the decoding/saving operations.
+     */
+    public static File decodeFileFromBase64Binary(String base64,
+                                                 String fileName) throws IOException {
+        String downloadsPath = Environment
+                .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/";
+
+        final File pdfFile = new File(downloadsPath + fileName);
         byte[] pdfAsBytes = Base64.decode(base64, 0);
         FileOutputStream os;
         os = new FileOutputStream(pdfFile, false);
@@ -325,4 +355,12 @@ public class Utils {
         return bytes;
     }
 
+    public static Date getDateFromString(String date, String format) {
+        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.US);
+        try {
+            return sdf.parse(date);
+        } catch (ParseException e) {
+            return null;
+        }
+    }
 }

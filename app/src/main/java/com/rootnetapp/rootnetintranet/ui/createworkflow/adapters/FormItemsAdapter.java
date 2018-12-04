@@ -22,10 +22,12 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -222,9 +224,18 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         String title = item.getTitle();
         if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
         holder.getBinding().tvTitle.setText(title);
+
+        List<Option> options = new ArrayList<>(item.getOptions());
+        String hint = mContext.getString(R.string.no_selection_hint);
+        // check whether the hint has already been added
+        if (!options.get(0).getName().equals(hint)) {
+            // add hint as first item
+            options.add(0, new Option(0, hint));
+        }
+
         holder.getBinding().spInput.setAdapter(
                 new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
-                        item.getOptions()));
+                        options));
 
         if (holder.getBinding().spInput.getOnItemSelectedListener() == null) {
             holder.getBinding().spInput
@@ -234,9 +245,19 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position,
                                                    long id) {
+
+                            // the user has selected the No Selection option
+                            if (position == 0) {
+                                //fixme the spinner stops working
+                                item.setValue(null);
+                                item.getOnSelectedListener().onSelected(item);
+                                return;
+                            }
+
                             // this prevents the listener to be triggered by setSelection
                             Object tag = holder.getBinding().spInput.getTag();
                             if (tag == null || (int) tag != position) {
+                                int index = position--; // because of the No Selection option
                                 item.setValue(item.getOptions().get(position));
                                 item.getOnSelectedListener().onSelected(item);
                             }
@@ -250,6 +271,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         } else {
             // this prevents the listener to be triggered by setSelection
             int index = item.getOptions().indexOf(item.getValue());
+            index++; // because of the No Selection option
             holder.getBinding().spInput.setTag(index);
             holder.getBinding().spInput.setSelection(index);
         }
@@ -279,7 +301,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                     (view, year, monthOfYear, dayOfMonth) -> {
                         Date date = Utils.getDateFromIntegers(year, monthOfYear, dayOfMonth);
 
-                        holder.getBinding().tvSelectedDate.setText(Utils.getFormattedDate(date, item.getDateFormat()));
+                        holder.getBinding().tvSelectedDate
+                                .setText(Utils.getFormattedDate(date, item.getDateFormat()));
                         item.setValue(date);
                     }
             );

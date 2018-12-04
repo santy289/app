@@ -440,6 +440,11 @@ public class WorkFlowCreateFragment extends Fragment {
         mAdapter.addItem(singleChoiceFormItem);
 
         singleChoiceFormItem.setOnSelectedListener(item -> {
+            if (item.getValue() == null) {
+                viewModel.clearForm();
+                return;
+            }
+
             String selection = item.getValue().getName();
             viewModel.generateFieldsByType(selection);
         });

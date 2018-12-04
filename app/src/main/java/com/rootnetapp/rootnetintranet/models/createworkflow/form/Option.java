@@ -3,6 +3,7 @@ package com.rootnetapp.rootnetintranet.models.createworkflow.form;
 import androidx.annotation.NonNull;
 
 public class Option {
+
     private int id;
     private String name;
 
@@ -30,6 +31,6 @@ public class Option {
     @NonNull
     @Override
     public String toString() {
-        return name;
+        return getName() == null ? "" : getName();
     }
 }

@@ -461,7 +461,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 
     }
 
-    private void clearForm() {
+    protected void clearForm() {
         showUploadButton.setValue(false);
         formSettings.clearFormItems();
         mSetFormItemListLiveData.setValue(formSettings.getFormItems());

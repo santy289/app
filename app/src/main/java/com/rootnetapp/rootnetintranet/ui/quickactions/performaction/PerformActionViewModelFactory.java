@@ -4,10 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-/**
- * Created by root on 24/04/18.
- */
-
 public class PerformActionViewModelFactory implements ViewModelProvider.Factory {
 
     private PerformActionRepository repository;

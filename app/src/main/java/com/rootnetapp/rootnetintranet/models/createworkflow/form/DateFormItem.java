@@ -1,5 +1,7 @@
 package com.rootnetapp.rootnetintranet.models.createworkflow.form;
 
+import com.rootnetapp.rootnetintranet.commons.Utils;
+
 import java.util.Date;
 
 import androidx.annotation.Nullable;
@@ -19,8 +21,14 @@ public class DateFormItem extends BaseFormItem {
 
     @Override
     public boolean isValid() {
-        //todo add validation
-        return false;
+        if (!isRequired()) return true;
+
+        return isRequired() && getValue() != null;
+    }
+
+    @Override
+    public String getStringValue() {
+        return getValue() != null ? Utils.getDatePostFormat(getValue()) : null;
     }
 
     @Nullable

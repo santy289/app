@@ -14,6 +14,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PendingFileUpload;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
@@ -495,11 +496,13 @@ public class CreateWorkflowViewModel extends ViewModel {
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
         switch (typeInfo.getType()) {
             case FormSettings.TYPE_TEXT:
-//                handleBuildText(field);
-                createTextInputFormItem(field); //todo check
+                createTextInputFormItem(field);
                 break;
             case FormSettings.TYPE_DATE:
                 createDateFormItem(field);
+                break;
+            case FormSettings.TYPE_CHECKBOX:
+                createBooleanFormItem(field);
                 break;
             /*case FormSettings.TYPE_SYSTEM_USERS:
                 handleList(field, FormSettings.TYPE_SYSTEM_USERS);
@@ -611,6 +614,24 @@ public class CreateWorkflowViewModel extends ViewModel {
         }
 
         DateFormItem item = new DateFormItem.Builder()
+                .setTitle(field.getFieldName())
+                .setRequired(field.isRequired())
+                .setTag(field.getId())
+                .setEscaped(escape(field.fieldConfigObject))
+                .build();
+
+        formSettings.getFormItems().add(item);
+    }
+
+    private void createBooleanFormItem(FormFieldsByWorkflowType field) {
+        String valueType = field.getFieldConfigObject().getTypeInfo().getValueType();
+
+        if (!valueType.equals(FormSettings.VALUE_BOOLEAN)) {
+            Log.d(TAG, "createBooleanFormItem: Value not recognized: " + valueType);
+            return;
+        }
+
+        BooleanFormItem item = new BooleanFormItem.Builder()
                 .setTitle(field.getFieldName())
                 .setRequired(field.isRequired())
                 .setTag(field.getId())

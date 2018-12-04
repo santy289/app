@@ -29,7 +29,7 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
 
-    <style name="SwitchStyle" parent="Theme.MaterialComponents.Light">
+    <style name="SwitchStyle" parent="Widget.MaterialComponents.CompoundButton.Switch">
         <!-- active thumb & track color (30% transparency) -->
         <item name="colorControlActivated">@color/colorPrimary</item>
 

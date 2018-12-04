@@ -219,7 +219,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private void populateBooleanView(BooleanViewHolder holder, int position) {
         BooleanFormItem item = (BooleanFormItem) getItem(position);
 
-        holder.getBinding().tvTitle.setText(item.getTitle());
+        holder.getBinding().switchInput.setText(item.getTitle());
     }
 
     private void populateDateView(DateViewHolder holder, int position) {

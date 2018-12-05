@@ -899,10 +899,11 @@ public class CreateWorkflowViewModel extends ViewModel {
             return;
         }
 
-        String value = meta.getValue();
+        String value = String.valueOf(meta.getDisplayValue());
 
         TextInputFormItem textInputFormItem = (TextInputFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
+
         textInputFormItem.setValue(value);
     }
 
@@ -923,7 +924,7 @@ public class CreateWorkflowViewModel extends ViewModel {
             return;
         }
 
-        String value = meta.getValue(); // now returns "10 / 25 / 2018"
+        String value = String.valueOf(meta.getDisplayValue()); // now returns "10 / 25 / 2018"
 
         DateFormItem startDateItem = (DateFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());

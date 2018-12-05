@@ -544,6 +544,10 @@ public class CreateWorkflowViewModel extends ViewModel {
 
     private void buildField(FormFieldsByWorkflowType field) {
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
+
+        //todo support multiple lists.
+        if (field.getFieldConfigObject().getMultiple()) return;
+
         switch (typeInfo.getType()) {
 
             case FormSettings.TYPE_TEXT:

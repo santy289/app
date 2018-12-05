@@ -24,6 +24,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem.InputType;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
@@ -88,22 +89,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
-    protected MutableLiveData<List<String>> setTypeList;
-    protected MutableLiveData<int[]> setTextField;
-    protected MutableLiveData<int[]> setTextFieldMultiLine;
-    protected MutableLiveData<int[]> setDatePicker;
-    protected MutableLiveData<Integer> setFormHeader;
-    protected MutableLiveData<FieldListSettings> setFieldList;
-    protected MutableLiveData<FieldData> setFieldTextWithData;
-    protected MutableLiveData<FieldData> setFieldNumericWithData;
-    protected MutableLiveData<FieldData> setFieldAreaWithData;
-    protected MutableLiveData<FieldData> setFieldDateWithData;
-    protected MutableLiveData<FieldData> setFieldSwitchWithData;
-    protected MutableLiveData<FieldData> setFieldEmailWithData;
-    protected MutableLiveData<FieldData> setFieldPhoneWithData;
-    protected MutableLiveData<FieldData> setListWithData;
     protected MutableLiveData<FieldData> setFileUploadField;
-    protected MutableLiveData<Boolean> refreshForm;
     protected MutableLiveData<Boolean> showUploadButton;
     protected MutableLiveData<Boolean> chooseFile;
 
@@ -117,37 +103,15 @@ public class CreateWorkflowViewModel extends ViewModel {
     private WorkflowListItem mWorkflowListItem;
     private WorkflowDb mWorkflow;
 
-    protected static final int REQUIRED = 10;
-    protected static final int NOT_REQUIRED = 11;
-
-    protected static final int INDEX_RES_STRING = 0;
-    protected static final int INDEX_REQUIRED = 1;
-
     protected static final int TAG_WORKFLOW_TYPE = 80;
 
     private final int UPLOAD_FILE_SIZE_LIMIT = 10;
 
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.mRepository = createWorkflowRepository;
-        setFieldTextWithData = new MutableLiveData<>();
-        setTypeList = new MutableLiveData<>();
-        setTextField = new MutableLiveData<>();
-        setTextFieldMultiLine = new MutableLiveData<>();
-        setDatePicker = new MutableLiveData<>();
-        setFormHeader = new MutableLiveData<>();
-        setFieldList = new MutableLiveData<>();
-        setFieldNumericWithData = new MutableLiveData<>();
-        setFieldAreaWithData = new MutableLiveData<>();
-        setFieldDateWithData = new MutableLiveData<>();
-        refreshForm = new MutableLiveData<>();
-        setFieldSwitchWithData = new MutableLiveData<>();
-        setFieldEmailWithData = new MutableLiveData<>();
-        setFieldPhoneWithData = new MutableLiveData<>();
-        setListWithData = new MutableLiveData<>();
         goBack = new MutableLiveData<>();
         showUploadButton = new MutableLiveData<>();
         chooseFile = new MutableLiveData<>();
-        setFileUploadField = new MutableLiveData<>();
     }
 
     protected void initForm(String token, @Nullable WorkflowListItem item) {
@@ -508,12 +472,20 @@ public class CreateWorkflowViewModel extends ViewModel {
 
     }
 
+    /**
+     * Removes all of the current form items and sends the data to the UI to remove them aswell.
+     */
     protected void clearForm() {
         showUploadButton.setValue(false);
         formSettings.clearFormItems();
         mSetFormItemListLiveData.setValue(formSettings.getFormItems());
     }
 
+    /**
+     * Creates all of the form items according to their params. Sends each form item to the UI.
+     *
+     * @param formSettings holder of the current form params.
+     */
     private void showFields(FormSettings formSettings) {
         List<FormFieldsByWorkflowType> fields = formSettings.getFields();
         for (int i = 0; i < fields.size(); i++) {
@@ -542,6 +514,11 @@ public class CreateWorkflowViewModel extends ViewModel {
         getWorkflow(mToken, mWorkflowListItem.getWorkflowId());
     }
 
+    /**
+     * Create a specific form item according to its params.
+     *
+     * @param field the form item params.
+     */
     private void buildField(FormFieldsByWorkflowType field) {
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
 
@@ -557,7 +534,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 
             case FormSettings.TYPE_LINK:
                 //value type is "text", does not work for us, so we change it to "link"
-                typeInfo.setValueType(TextInputFormItem.InputType.LINK);
+                typeInfo.setValueType(InputType.LINK);
                 createTextInputFormItem(field);
                 break;
 
@@ -611,6 +588,11 @@ public class CreateWorkflowViewModel extends ViewModel {
     }
 
     //region Create Form Items
+
+    /**
+     * Creates the WorkflowType form item. Performs a request to the repo to retrieve the options
+     * and then send the form item to the UI.
+     */
     private void createWorkflowTypeItem() {
         //used to be setWorkflowTypes
 
@@ -663,6 +645,10 @@ public class CreateWorkflowViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
+    /**
+     * Creates the Products form item. Performs a request to the repo to retrieve the options and
+     * then send the form item to the UI.
+     */
     private void createProductsFormItem(FormFieldsByWorkflowType field) {
         Disposable disposable = mRepository
                 .getProducts(mToken)
@@ -703,6 +689,10 @@ public class CreateWorkflowViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
+    /**
+     * Creates the Roles form item. Performs a request to the repo to retrieve the options and then
+     * send the form item to the UI.
+     */
     private void createRolesFormItem(FormFieldsByWorkflowType field) {
         Disposable disposable = mRepository
                 .getRoles(mToken)
@@ -744,6 +734,10 @@ public class CreateWorkflowViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
+    /**
+     * Creates the Services form item. Performs a request to the repo to retrieve the options and
+     * then send the form item to the UI.
+     */
     private void createServicesFormItem(FormFieldsByWorkflowType field) {
         Disposable disposable = mRepository
                 .getServices(mToken)
@@ -784,6 +778,10 @@ public class CreateWorkflowViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
+    /**
+     * Creates the Projects form item. Performs a request to the repo to retrieve the options and
+     * then send the form item to the UI.
+     */
     private void createProjectsFormItem(FormFieldsByWorkflowType field) {
 //        // TODO endpoint at this point returns an empty array.
 //        Disposable disposable = mRepository
@@ -825,6 +823,10 @@ public class CreateWorkflowViewModel extends ViewModel {
 //        mDisposables.add(disposable);
     }
 
+    /**
+     * Creates the SystemUsers form item. Performs a request to the repo to retrieve the options and
+     * then send the form item to the UI.
+     */
     private void createSystemUsersFormItem(FormFieldsByWorkflowType field) {
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
 
@@ -865,6 +867,10 @@ public class CreateWorkflowViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
+    /**
+     * Creates a custom list form item. Performs a request to the repo to retrieve the options and
+     * then send the form item to the UI.
+     */
     private void createCustomListFormItem(FormFieldsByWorkflowType field) {
         FieldConfig fieldConfig = field.getFieldConfigObject();
         int listId = fieldConfig.getListInfo().getId();
@@ -907,6 +913,12 @@ public class CreateWorkflowViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
+    /**
+     * Creates a custom TextInput item with the specified params and sends the item to the UI. Adds
+     * a regex validation for some specific {@link InputType}s.
+     *
+     * @param field item params.
+     */
     private void createTextInputFormItem(FormFieldsByWorkflowType field) {
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
         String valueType = typeInfo.getValueType();
@@ -922,10 +934,10 @@ public class CreateWorkflowViewModel extends ViewModel {
                 .build();
 
         switch (item.getInputType()) {
-            case TextInputFormItem.InputType.EMAIL:
+            case InputType.EMAIL:
                 item.setRegex(Patterns.EMAIL_ADDRESS.toString());
                 break;
-            case TextInputFormItem.InputType.LINK:
+            case InputType.LINK:
                 item.setRegex(Patterns.WEB_URL.toString());
                 break;
         }
@@ -933,6 +945,11 @@ public class CreateWorkflowViewModel extends ViewModel {
         formSettings.getFormItems().add(item);
     }
 
+    /**
+     * Creates a custom Date item with the specified params and sends the item to the UI.
+     *
+     * @param field item params.
+     */
     private void createDateFormItem(FormFieldsByWorkflowType field) {
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
         String valueType = typeInfo.getValueType();
@@ -954,6 +971,12 @@ public class CreateWorkflowViewModel extends ViewModel {
         formSettings.getFormItems().add(item);
     }
 
+    /**
+     * Creates a custom Boolean/Checkbox item with the specified params and sends the item to the
+     * UI.
+     *
+     * @param field item params.
+     */
     private void createBooleanFormItem(FormFieldsByWorkflowType field) {
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
         String valueType = typeInfo.getValueType();
@@ -977,6 +1000,14 @@ public class CreateWorkflowViewModel extends ViewModel {
     //endregion
 
     //region Fill Data
+
+    /**
+     * Performs a request to the remote repository to fetch the workflow information in order to
+     * fill the form items.
+     *
+     * @param auth       token
+     * @param workflowId ID of the workflow that is being edited.
+     */
     private void getWorkflow(String auth, int workflowId) {
         Disposable disposable = mRepository
                 .getWorkflow(auth, workflowId)
@@ -1217,6 +1248,9 @@ public class CreateWorkflowViewModel extends ViewModel {
     }
     //endregion
 
+    /**
+     * This is called by the View when the user submits the form.
+     */
     protected void handleCreateWorkflowAction() {
         if (validateFormItems()) {
             // all of the items are valid.
@@ -1224,6 +1258,13 @@ public class CreateWorkflowViewModel extends ViewModel {
         }
     }
 
+    /**
+     * Performs the validation for every form item present in the current form. Each item's method
+     * is in charge of handling the validation, here we simply check whether one of them is invalid
+     * to prevent the action from being completed.
+     *
+     * @return whether all of the form items are valid.
+     */
     private boolean validateFormItems() {
         boolean isValid = true;
 
@@ -1443,206 +1484,6 @@ public class CreateWorkflowViewModel extends ViewModel {
     }
 
     @Deprecated
-    private void handleBuildDate(FormFieldsByWorkflowType field) {
-        //todo implement
-        /*String valueType = field.getFieldConfigObject().getTypeInfo().getValueType();
-        FieldData fieldData = new FieldData();
-        fieldData.label = field.getFieldName();
-        fieldData.required = field.isRequired();
-        fieldData.tag = field.getId();
-        fieldData.escape = escape(field.fieldConfigObject);
-        switch (valueType) {
-            case FormSettings.VALUE_DATE:
-                setFieldDateWithData.setValue(fieldData);
-                break;
-            default:
-                Log.d(TAG, "handleBuildDate: Value not recognized " + valueType);
-                break;
-        }
-        formSettings.addFieldDataItem(fieldData);*/
-    }
-
-    @Deprecated
-    private void handleCheckBox(FormFieldsByWorkflowType field) {
-        //todo implement
-        /*String statusMachineName = field.getFieldConfigObject().getMachineName();
-        if (statusMachineName != null && statusMachineName.equals("wf_status")) {
-            return;
-        }
-
-        String valueType = field.getFieldConfigObject().getTypeInfo().getValueType();
-        FieldData fieldData = new FieldData();
-        fieldData.label = field.getFieldName();
-        fieldData.required = field.isRequired();
-        fieldData.tag = field.getId();
-        fieldData.escape = escape(field.fieldConfigObject);
-        switch (valueType) {
-            case FormSettings.VALUE_BOOLEAN:
-                setFieldSwitchWithData.setValue(fieldData);
-                break;
-            default:
-                Log.d(TAG, "handleCheckBox: Value not recognized: " + valueType);
-                break;
-        }
-        formSettings.addFieldDataItem(fieldData);*/
-    }
-
-    @Deprecated
-    private void handleBuildProduct(FormFieldsByWorkflowType field) {
-        //todo check
-        /*FieldConfig fieldConfig = field.getFieldConfigObject();
-        String customLabel = field.getFieldName();
-        int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
-        boolean isMultipleSelection = fieldConfig.getMultiple();
-        int customFieldId = field.getId();
-
-        Disposable disposable = mRepository
-                .getProducts(mToken)
-                .subscribe(productsResponse -> {
-                    if (productsResponse.getCode() != 200) {
-                        showLoading.setValue(false);
-                        return;
-                    }
-                    List<ProductFormList> list = productsResponse.getList();
-                    ListField listField = formSettings.addProductLisToForm(
-                            list,
-                            customLabel,
-                            customFieldId,
-                            FormSettings.TYPE_ROLE
-                    );
-                    listField.isMultipleSelection = isMultipleSelection;
-                    listField.associatedWorkflowTypeId = associatedWorkflowTypeId;
-
-                    if (listField.children.size() < 1) {
-                        return;
-                    }
-                    showListField(listField, fieldConfig);
-                }, throwable -> {
-                    showLoading.setValue(false);
-                    Log.d(TAG, "handeBuilProduct: " + throwable.getMessage());
-                });
-
-        mDisposables.add(disposable);*/
-
-    }
-
-    @Deprecated
-    private void handleProject(FormFieldsByWorkflowType field) {
-        FieldConfig fieldConfig = field.getFieldConfigObject();
-        boolean isMultipleSelection = fieldConfig.getMultiple();
-        String customLabel = field.getFieldName();
-        int customFieldId = field.getId();
-        int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
-
-        // TODO endpoint at this point returns an empty array.
-//        Disposable disposable = mRepository
-//                .getProjects(mToken)
-//                .subscribe( projectResponse -> {
-//
-//                    if (roleResponse.getCode() != 200) {
-//                        showLoading.setValue(false);
-//                        return;
-//                    }
-//                    List<Role> list = roleResponse.getList();
-//                    ListField listField = formSettings.addRolesLisToForm(
-//                            list,
-//                            customLabel,
-//                            customFieldId,
-//                            FormSettings.TYPE_ROLE
-//                    );
-//                    listField.isMultipleSelection = isMultipleSelection;
-//                    listField.associatedWorkflowTypeId = associatedWorkflowTypeId;
-//
-//                    if (listField.children.size() < 1) {
-//                        return;
-//                    }
-//                    showListField(listField);
-//                }, throwable -> {
-//                    showLoading.setValue(false);
-//                    Log.d(TAG, "handeBuildRoles: " + throwable.getMessage());
-//                });
-//
-//        mDisposables.add(disposable);
-    }
-
-    @Deprecated
-    private void handeBuildRoles(FormFieldsByWorkflowType field) {
-        //todo implement
-        /*FieldConfig fieldConfig = field.getFieldConfigObject();
-        boolean isMultipleSelection = fieldConfig.getMultiple();
-        String customLabel = field.getFieldName();
-        int customFieldId = field.getId();
-        int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
-
-        Disposable disposable = mRepository
-                .getRoles(mToken)
-                .subscribe(roleResponse -> {
-                    if (roleResponse.getCode() != 200) {
-                        showLoading.setValue(false);
-                        return;
-                    }
-                    List<Role> list = roleResponse.getList();
-                    ListField listField = formSettings.addRolesLisToForm(
-                            list,
-                            customLabel,
-                            customFieldId,
-                            FormSettings.TYPE_ROLE
-                    );
-                    listField.isMultipleSelection = isMultipleSelection;
-                    listField.associatedWorkflowTypeId = associatedWorkflowTypeId;
-
-                    if (listField.children.size() < 1) {
-                        return;
-                    }
-                    showListField(listField, fieldConfig);
-                }, throwable -> {
-                    showLoading.setValue(false);
-                    Log.d(TAG, "handeBuildRoles: " + throwable.getMessage());
-                });
-
-        mDisposables.add(disposable);*/
-    }
-
-    @Deprecated
-    private void handleBuildService(FormFieldsByWorkflowType field) {
-        //todo implement
-
-        /*FieldConfig fieldConfig = field.getFieldConfigObject();
-        boolean isMultipleSelection = fieldConfig.getMultiple();
-        String customLabel = field.getFieldName();
-        int customFieldId = field.getId();
-        int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
-
-        Disposable disposable = mRepository
-                .getServices(mToken)
-                .subscribe(servicesResponse -> {
-                    if (servicesResponse.getCode() != 200) {
-                        showLoading.setValue(false);
-                        return;
-                    }
-                    List<Service> list = servicesResponse.getList();
-                    ListField listField = formSettings.addServiceListToForm(
-                            list,
-                            customLabel,
-                            customFieldId,
-                            FormSettings.TYPE_SERVICE
-                    );
-                    listField.isMultipleSelection = isMultipleSelection;
-                    listField.associatedWorkflowTypeId = associatedWorkflowTypeId;
-
-                    if (listField.children.size() < 1) {
-                        return;
-                    }
-
-                    showListField(listField, fieldConfig);
-                }, throwable -> {
-                    Log.d(TAG, "handleBuildService: can't get service: " + throwable.getMessage());
-                    showLoading.setValue(false);
-                });
-        mDisposables.add(disposable);*/
-    }
-
-    @Deprecated
     private void showListField(ListField listField, FieldConfig fieldConfig) {
         //todo check
        /* FieldData fieldData = new FieldData();
@@ -1728,56 +1569,6 @@ public class CreateWorkflowViewModel extends ViewModel {
                     Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
                 });
 
-        mDisposables.add(disposable);*/
-    }
-
-    @Deprecated
-    private void createSystemUserFieldasCustomField(
-            FormFieldsByWorkflowType field,
-            int listId,
-            int customFieldId,
-            String customLabel,
-            int associatedWorkflowTypeId) {
-        //todo check
-        /*Disposable disposable = Observable.fromCallable(() -> {
-            List<FormCreateProfile> profiles = formSettings.getProfiles();
-            if (profiles == null || profiles.size() < 1) {
-                return false;
-            }
-            ListField listField = new ListField();
-            listField.listId = listId;
-            listField.customFieldId = customFieldId;
-            listField.customLabel = customLabel;
-            listField.associatedWorkflowTypeId = associatedWorkflowTypeId;
-            listField.isMultipleSelection = false;
-            listField.listType = FormSettings.TYPE_SYSTEM_USERS;
-
-            ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
-            for (int i = 0; i < profiles.size(); i++) {
-                FormCreateProfile profile = profiles.get(i);
-                ListFieldItemMeta item = new ListFieldItemMeta(
-                        profile.getId(),
-                        profile.getUsername(),
-                        customFieldId
-                );
-                tempList.add(item);
-            }
-
-            listField.children = tempList;
-
-            return listField;
-        }).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(listField -> {
-                    ListField fieldData = (ListField) listField;
-                    showListField(fieldData, field.getFieldConfigObject());
-
-                    showLoading.setValue(false);
-                    buildForm.setValue(true);
-                }, throwable -> {
-                    showLoading.setValue(false);
-                    buildForm.setValue(true);
-                });
         mDisposables.add(disposable);*/
     }
 

@@ -150,6 +150,13 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         return mDataset.size();
     }
 
+    /**
+     * Handles the view for the {@link TextInputFormItem}. Displays the UI according to the
+     * visibility, enabled and validation params.
+     *
+     * @param holder   view holder
+     * @param position item position in adapter.
+     */
     private void populateTextInputView(TextInputViewHolder holder, int position) {
         TextInputFormItem item = (TextInputFormItem) getItem(position);
 
@@ -186,6 +193,12 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
     }
 
+    /**
+     * Maps the appropriate input type for the EditText according to our server type.
+     *
+     * @param etInput the EditText to be set
+     * @param type    server input type.
+     */
     private void setTextInputParams(AppCompatEditText etInput, String type) {
         switch (type) {
 
@@ -225,6 +238,13 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
     }
 
+    /**
+     * Handles the view for the {@link SingleChoiceFormItem}. Displays the UI according to the
+     * visibility, enabled and validation params.
+     *
+     * @param holder   view holder
+     * @param position item position in adapter.
+     */
     private void populateSingleChoiceView(SingleChoiceViewHolder holder, int position) {
         SingleChoiceFormItem item = (SingleChoiceFormItem) getItem(position);
 
@@ -244,6 +264,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
                         options));
 
+        //only creates the listener once.
         if (holder.getBinding().spInput.getOnItemSelectedListener() == null) {
             holder.getBinding().spInput
                     .setSelection(0, false); //workaround so the listener won't be called on init
@@ -316,6 +337,13 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
     }
 
+    /**
+     * Handles the view for the {@link BooleanFormItem}. Displays the UI according to the visibility
+     * params.
+     *
+     * @param holder   view holder
+     * @param position item position in adapter.
+     */
     private void populateBooleanView(BooleanViewHolder holder, int position) {
         BooleanFormItem item = (BooleanFormItem) getItem(position);
 
@@ -336,6 +364,14 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         holder.getBinding().switchInput.setEnabled(item.isEnabled());
     }
 
+    /**
+     * Handles the view for the {@link DateFormItem}. Displays the UI according to the visibility,
+     * enabled and validation params. Uses a 3rd party library to handle the dialog that will open
+     * upon user interaction.
+     *
+     * @param holder   view holder
+     * @param position item position in adapter.
+     */
     private void populateDateView(DateViewHolder holder, int position) {
         DateFormItem item = (DateFormItem) getItem(position);
 
@@ -409,6 +445,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     private void populateCurrencyView(CurrencyViewHolder holder, int position) {
+        //todo implement
         CurrencyFormItem item = (CurrencyFormItem) getItem(position);
 
         holder.getBinding().tvTitle.setText(item.getTitle());
@@ -425,6 +462,13 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
     }
 
+    /**
+     * Goes through every item in the adapter, except for {@link SingleChoiceFormItem} and {@link
+     * DateFormItem} (because they are already set via listeners), and retrieves the selected value
+     * from the View to save it into the class object.
+     *
+     * @param recylerView the RecyclerView that this adapter is attached to.
+     */
     public void retrieveValuesFromViews(RecyclerView recylerView) {
         for (int i = 0; i < mDataset.size(); i++) {
             BaseFormItem item = mDataset.get(i);
@@ -463,6 +507,12 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
     }
 
+    /**
+     * Saves the current selected value from the {@link TextInputFormItem} view into the class object.
+     *
+     * @param holder the view holder.
+     * @param item   desired item.
+     */
     private void retrieveValueForTextInputView(TextInputViewHolder holder,
                                                TextInputFormItem item) {
         Editable text = holder.getBinding().etInput.getText();
@@ -470,13 +520,12 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         item.setValue(value);
     }
 
-    private void retrieveValueForSingleChoiceView(SingleChoiceViewHolder holder,
-                                                  SingleChoiceFormItem item) {
-        Option selectedOption = item.getOptions()
-                .get(holder.getBinding().spInput.getSelectedItemPosition());
-        item.setValue(selectedOption);
-    }
-
+    /**
+     * Saves the current selected value from the {@link BooleanFormItem} view into the class object.
+     *
+     * @param holder the view holder.
+     * @param item   desired item.
+     */
     private void retrieveValueForBooleanView(BooleanViewHolder holder,
                                              BooleanFormItem item) {
         item.setValue(holder.getBinding().switchInput.isChecked());

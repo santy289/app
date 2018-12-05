@@ -16,6 +16,7 @@ public abstract class BaseFormItem {
     private boolean isVisible = true;
     private @FormItemViewType int viewType;
     private TypeInfo typeInfo; //server type
+    private String machineName;
 
     public abstract boolean isValid();
     public abstract String getStringValue();
@@ -91,5 +92,13 @@ public abstract class BaseFormItem {
 
     public void setTypeInfo(TypeInfo typeInfo) {
         this.typeInfo = typeInfo;
+    }
+
+    public String getMachineName() {
+        return machineName;
+    }
+
+    public void setMachineName(String machineName) {
+        this.machineName = machineName;
     }
 }

@@ -64,6 +64,7 @@ public class CurrencyFormItem extends BaseFormItem {
         private boolean isEnabled = true;
         private boolean isVisible = true;
         private TypeInfo typeInfo;
+        private String machineName;
         private Double value;
         private String selectedOption;
         private List<String> options;
@@ -116,6 +117,12 @@ public class CurrencyFormItem extends BaseFormItem {
             return this;
         }
 
+        public Builder setMachineName(String machineName) {
+            this.machineName = machineName;
+
+            return this;
+        }
+
         public Builder setValue(Double value) {
             this.value = value;
 
@@ -145,6 +152,7 @@ public class CurrencyFormItem extends BaseFormItem {
             item.setEnabled(isEnabled);
             item.setVisible(isVisible);
             item.setTypeInfo(typeInfo);
+            item.setMachineName(machineName);
             item.setValue(value);
             item.setSelectedOption(selectedOption);
             item.setOptions(options);

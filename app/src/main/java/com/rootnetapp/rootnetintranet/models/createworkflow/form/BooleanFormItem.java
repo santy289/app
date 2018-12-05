@@ -38,6 +38,7 @@ public class BooleanFormItem extends BaseFormItem {
         private boolean isEnabled = true;
         private boolean isVisible = true;
         private TypeInfo typeInfo;
+        private String machineName;
         private boolean value;
 
         public Builder setTitle(String title) {
@@ -88,6 +89,12 @@ public class BooleanFormItem extends BaseFormItem {
             return this;
         }
 
+        public Builder setMachineName(String machineName) {
+            this.machineName = machineName;
+
+            return this;
+        }
+
         public Builder setValue(boolean value) {
             this.value = value;
 
@@ -105,6 +112,7 @@ public class BooleanFormItem extends BaseFormItem {
             item.setEnabled(isEnabled);
             item.setVisible(isVisible);
             item.setTypeInfo(typeInfo);
+            item.setMachineName(machineName);
             item.setValue(value);
             item.setViewType(FormItemViewType.BOOLEAN);
 

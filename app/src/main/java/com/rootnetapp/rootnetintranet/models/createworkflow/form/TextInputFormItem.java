@@ -95,6 +95,7 @@ public class TextInputFormItem extends BaseFormItem {
         private boolean isEnabled = true;
         private boolean isVisible = true;
         private TypeInfo typeInfo;
+        private String machineName;
         private String value;
         private String hint;
         private String regex;
@@ -149,6 +150,12 @@ public class TextInputFormItem extends BaseFormItem {
             return this;
         }
 
+        public Builder setMachineName(String machineName) {
+            this.machineName = machineName;
+
+            return this;
+        }
+
         public Builder setValue(String value) {
             this.value = value;
 
@@ -190,6 +197,7 @@ public class TextInputFormItem extends BaseFormItem {
             item.setEnabled(isEnabled);
             item.setVisible(isVisible);
             item.setTypeInfo(typeInfo);
+            item.setMachineName(machineName);
             item.setValue(value);
             item.setHint(hint);
             item.setRegex(regex);

@@ -64,6 +64,8 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import me.riddhimanadib.formmaster.FormBuilder;
 
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_TYPE;
+
 public class CreateWorkflowViewModel extends ViewModel {
 
     private MutableLiveData<WorkflowTypesResponse> mWorkflowsLiveData;
@@ -637,6 +639,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                     .setValue(selectedOption)
                     .setEnabled(selectedOption == null) //if we are in edit mode, disable it
                     .setVisible(selectedOption == null) //if we are in edit mode, hide it
+                    .setMachineName(MACHINE_NAME_TYPE)
                     .build();
 
             formSettings.getFormItems().add(singleChoiceFormItem);
@@ -656,8 +659,6 @@ public class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void createProductsFormItem(FormFieldsByWorkflowType field) {
-        TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
-
         Disposable disposable = mRepository
                 .getProducts(mToken)
                 .subscribe(productsResponse -> {
@@ -684,7 +685,8 @@ public class CreateWorkflowViewModel extends ViewModel {
                             .setRequired(field.isRequired())
                             .setTag(field.getFieldId())
                             .setOptions(options)
-                            .setTypeInfo(typeInfo)
+                            .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                            .setMachineName(field.getFieldConfigObject().getMachineName())
                             .build();
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
@@ -697,8 +699,6 @@ public class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void createRolesFormItem(FormFieldsByWorkflowType field) {
-        TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
-
         Disposable disposable = mRepository
                 .getRoles(mToken)
                 .subscribe(roleResponse -> {
@@ -726,7 +726,8 @@ public class CreateWorkflowViewModel extends ViewModel {
                             .setRequired(field.isRequired())
                             .setTag(field.getFieldId())
                             .setOptions(options)
-                            .setTypeInfo(typeInfo)
+                            .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                            .setMachineName(field.getFieldConfigObject().getMachineName())
                             .build();
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
@@ -739,8 +740,6 @@ public class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void createServicesFormItem(FormFieldsByWorkflowType field) {
-        TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
-
         Disposable disposable = mRepository
                 .getServices(mToken)
                 .subscribe(servicesResponse -> {
@@ -767,7 +766,8 @@ public class CreateWorkflowViewModel extends ViewModel {
                             .setRequired(field.isRequired())
                             .setTag(field.getFieldId())
                             .setOptions(options)
-                            .setTypeInfo(typeInfo)
+                            .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                            .setMachineName(field.getFieldConfigObject().getMachineName())
                             .build();
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
@@ -779,8 +779,6 @@ public class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void createProjectsFormItem(FormFieldsByWorkflowType field) {
-        TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
-
 //        // TODO endpoint at this point returns an empty array.
 //        Disposable disposable = mRepository
 //                .getProjects(mToken)
@@ -808,7 +806,8 @@ public class CreateWorkflowViewModel extends ViewModel {
 //                            .setRequired(field.isRequired())
 //                            .setTag(field.getFieldId())
 //                            .setOptions(options)
-//                            .setTypeInfo(typeInfo)
+//                            .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+//                            .setMachineName(field.getFieldConfigObject().getMachineName())
 //                            .build();
 //
 //                    mAddFormItemLiveData.setValue(singleChoiceFormItem);
@@ -844,7 +843,8 @@ public class CreateWorkflowViewModel extends ViewModel {
                     .setRequired(field.isRequired())
                     .setTag(field.getFieldId())
                     .setOptions(options)
-                    .setTypeInfo(typeInfo)
+                    .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                    .setMachineName(field.getFieldConfigObject().getMachineName())
                     .build();
 
         }).subscribeOn(Schedulers.newThread())
@@ -862,7 +862,6 @@ public class CreateWorkflowViewModel extends ViewModel {
     private void createCustomListFormItem(FormFieldsByWorkflowType field) {
         FieldConfig fieldConfig = field.getFieldConfigObject();
         int listId = fieldConfig.getListInfo().getId();
-        TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
 
         Disposable disposable = mRepository
                 .getList(mToken, listId)
@@ -890,7 +889,8 @@ public class CreateWorkflowViewModel extends ViewModel {
                             .setRequired(field.isRequired())
                             .setTag(field.getFieldId())
                             .setOptions(options)
-                            .setTypeInfo(typeInfo)
+                            .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                            .setMachineName(field.getFieldConfigObject().getMachineName())
                             .build();
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
@@ -909,9 +909,10 @@ public class CreateWorkflowViewModel extends ViewModel {
         TextInputFormItem item = new TextInputFormItem.Builder()
                 .setTitle(field.getFieldName())
                 .setRequired(field.isRequired())
-                .setTag(field.getId())
-                .setEscaped(escape(field.fieldConfigObject))
+                .setTag(field.getFieldId())
+                .setEscaped(escape(field.getFieldConfigObject()))
                 .setTypeInfo(typeInfo)
+                .setMachineName(field.getFieldConfigObject().getMachineName())
                 .setInputType(valueType)
                 .build();
 
@@ -939,8 +940,9 @@ public class CreateWorkflowViewModel extends ViewModel {
         DateFormItem item = new DateFormItem.Builder()
                 .setTitle(field.getFieldName())
                 .setRequired(field.isRequired())
-                .setTag(field.getId())
-                .setEscaped(escape(field.fieldConfigObject))
+                .setTag(field.getFieldId())
+                .setEscaped(escape(field.getFieldConfigObject()))
+                .setMachineName(field.getFieldConfigObject().getMachineName())
                 .setTypeInfo(typeInfo)
                 .build();
 
@@ -959,8 +961,9 @@ public class CreateWorkflowViewModel extends ViewModel {
         BooleanFormItem item = new BooleanFormItem.Builder()
                 .setTitle(field.getFieldName())
                 .setRequired(field.isRequired())
-                .setTag(field.getId())
-                .setEscaped(escape(field.fieldConfigObject))
+                .setTag(field.getFieldId())
+                .setEscaped(escape(field.getFieldConfigObject()))
+                .setMachineName(field.getFieldConfigObject().getMachineName())
                 .setTypeInfo(typeInfo)
                 .build();
 

@@ -65,6 +65,7 @@ public class SingleChoiceFormItem extends BaseFormItem {
         private boolean isEnabled = true;
         private boolean isVisible = true;
         private TypeInfo typeInfo;
+        private String machineName;
         private Option value;
         private List<Option> options;
 
@@ -116,6 +117,12 @@ public class SingleChoiceFormItem extends BaseFormItem {
             return this;
         }
 
+        public Builder setMachineName(String machineName) {
+            this.machineName = machineName;
+
+            return this;
+        }
+
         public Builder setValue(Option value) {
             this.value = value;
 
@@ -139,6 +146,7 @@ public class SingleChoiceFormItem extends BaseFormItem {
             item.setEnabled(isEnabled);
             item.setVisible(isVisible);
             item.setTypeInfo(typeInfo);
+            item.setMachineName(machineName);
             item.setValue(value);
             item.setOptions(options);
             item.setViewType(FormItemViewType.SINGLE_CHOICE);

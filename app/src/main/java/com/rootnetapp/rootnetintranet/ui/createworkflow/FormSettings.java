@@ -924,7 +924,7 @@ public class FormSettings {
     final static String MACHINE_NAME_STATUS = "wf_status";
     final static String MACHINE_NAME_CURRENT_STATUS = "wf_current_status";
     final static String MACHINE_NAME_OWNER = "wf_owner";
-    final static String MACHIEN_NAME_TYPE = "wf_type";
+    final static String MACHINE_NAME_TYPE = "wf_type";
     final static String MACHINE_NAME_REMAINING_TIME = "wf_remaining_time";
 
     public ArrayList<Integer> idsForBaseFields = new ArrayList<>();
@@ -953,7 +953,7 @@ public class FormSettings {
                 toRemove.add(tag);
                 continue;
             }
-            machineName = findMachineNameBy(tag);
+            machineName = formItem.getMachineName();
             if (TextUtils.isEmpty(machineName)) {
                 continue;
             }
@@ -977,7 +977,7 @@ public class FormSettings {
                     machineName.equals(MACHINE_NAME_STATUS) ||
                     machineName.equals(MACHINE_NAME_CURRENT_STATUS) ||
                     machineName.equals(MACHINE_NAME_OWNER) ||
-                    machineName.equals(MACHIEN_NAME_TYPE) ||
+                    machineName.equals(MACHINE_NAME_TYPE) ||
                     machineName.equals(MACHINE_NAME_REMAINING_TIME)) {
                 toRemove.add(tag);
             }
@@ -996,17 +996,6 @@ public class FormSettings {
         }
 
         return formItemsToPost;
-    }
-
-    private String findMachineNameBy(int id) {
-        FormFieldsByWorkflowType field;
-        for (int i = 0; i < fields.size(); i++) {
-            field = fields.get(i);
-            if (field.getId() == id) {
-                return field.getFieldConfigObject().getMachineName();
-            }
-        }
-        return "";
     }
 
     protected void clearFormItems() {

@@ -1203,11 +1203,11 @@ public class CreateWorkflowViewModel extends ViewModel {
             return;
         }
 
-        String value = String.valueOf(meta.getDisplayValue()); // now returns "10 / 25 / 2018"
+        String value = String.valueOf(meta.getDisplayValue()); // now returns "10/25/2018"
 
         DateFormItem startDateItem = (DateFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
-        Date startDate = Utils.getDateFromString(value, "dd / MM / yyyy");
+        Date startDate = Utils.getDateFromString(value, "dd/MM/yyyy");
         startDateItem.setValue(startDate);
     }
     //endregion

@@ -22,6 +22,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
+import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
@@ -74,6 +75,8 @@ public class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<BaseFormItem> mAddFormItemLiveData;
     private MutableLiveData<List<BaseFormItem>> mSetFormItemListLiveData;
     private MutableLiveData<BaseFormItem> mValidationUiLiveData;
+    private MutableLiveData<DialogMessage> showDialogMessage;
+    private MutableLiveData<Boolean> goBack;
     private List<WorkflowTypeItemMenu> workflowTypeMenuItems;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
@@ -94,8 +97,6 @@ public class CreateWorkflowViewModel extends ViewModel {
     protected MutableLiveData<FieldData> setListWithData;
     protected MutableLiveData<FieldData> setFileUploadField;
     protected MutableLiveData<Boolean> refreshForm;
-    protected MutableLiveData<DialogMessage> showDialogMessage;
-    protected MutableLiveData<Boolean> goBack;
     protected MutableLiveData<Boolean> showUploadButton;
     protected MutableLiveData<Boolean> chooseFile;
 
@@ -248,7 +249,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         PendingFileUpload pendingFileUpload = formSettings.getPendingFileUpload();
         int id = fileUploadResponse.getFileId();
         pendingFileUpload.fileId = id;
-        startPostCreateWorkflow(baseInfo, formSettings.getFormBuilder(), fieldItems);*/
+        startSendingWorkflow(baseInfo, formSettings.getFormBuilder(), fieldItems);*/
     }
 
     private void postWorkflow() {
@@ -269,7 +270,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         // TODO check if we have a file to upload first and then continue with the rest.
         if (formSettings.getPendingFileUpload() == null || formSettings
                 .getPendingFileUpload().file == null) {
-            startPostCreateWorkflow(baseInfo, formItemsForPost);
+            startSendingWorkflow(baseInfo, formItemsForPost);
             return;
         }
 
@@ -294,8 +295,8 @@ public class CreateWorkflowViewModel extends ViewModel {
 
     }
 
-    private void startPostCreateWorkflow(ArrayMap<String, Integer> baseInfo,
-                                         List<BaseFormItem> formItems) {
+    private void startSendingWorkflow(ArrayMap<String, Integer> baseInfo,
+                                      List<BaseFormItem> formItems) {
         int titleTag = baseInfo.get(FormSettings.MACHINE_NAME_TITLE);
         int descriptionTag = baseInfo.get(FormSettings.MACHINE_NAME_DESCRIPTION);
         int startTag = baseInfo.get(FormSettings.MACHINE_NAME_START_DATE);
@@ -362,7 +363,14 @@ public class CreateWorkflowViewModel extends ViewModel {
             }
         }
 
-        postToServer(metas, workflowTypeId, title, start, description);
+        if (mWorkflowListItem == null) {
+            // new workflow
+            postCreateToServer(metas, workflowTypeId, title, start, description);
+
+        } else {
+            //edit workflow
+            patchEditToServer(metas, mWorkflowListItem.getWorkflowId(), title, start, description);
+        }
     }
 
     private boolean hasValidFields(int fieldId, String value) {
@@ -405,8 +413,8 @@ public class CreateWorkflowViewModel extends ViewModel {
         return true;
     }
 
-    private void postToServer(List<WorkflowMetas> metas, int workflowTypeId, String title,
-                              String start, String description) {
+    private void postCreateToServer(List<WorkflowMetas> metas, int workflowTypeId, String title,
+                                    String start, String description) {
         CreateRequest createRequest = new CreateRequest();
         createRequest.workflowTypeId = workflowTypeId;
         createRequest.title = title;
@@ -423,6 +431,28 @@ public class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .createWorkflow(mToken, createRequest)
                 .subscribe(this::onCreateSuccess, this::onCreateFailure);
+
+        mDisposables.add(disposable);
+    }
+
+    private void patchEditToServer(List<WorkflowMetas> metas, int workflowId, String title,
+                                   String start, String description) {
+        EditRequest editRequest = new EditRequest();
+        editRequest.setWorkflowId(workflowId);
+        editRequest.setTitle(title);
+        editRequest.setStart(start);
+        editRequest.setDescription(description);
+        editRequest.setWorkflowMetas(metas);
+
+        // TODO remove this block later only for debugging
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<EditRequest> jsonAdapter = moshi.adapter(EditRequest.class);
+        String jsonString = jsonAdapter.toJson(editRequest);
+
+        // Accepts object
+        Disposable disposable = mRepository
+                .editWorkflow(mToken, editRequest)
+                .subscribe(this::onEditSuccess, this::onFailure);
 
         mDisposables.add(disposable);
     }
@@ -1668,6 +1698,15 @@ public class CreateWorkflowViewModel extends ViewModel {
         goBack.setValue(true);
     }
 
+    private void onEditSuccess(CreateWorkflowResponse createWorkflowResponse) {
+        showLoading.setValue(false);
+        DialogMessage dialogMessage = new DialogMessage();
+        dialogMessage.title = R.string.edited;
+        dialogMessage.message = R.string.workflow_edit;
+        showDialogMessage.setValue(dialogMessage);
+        goBack.setValue(true);
+    }
+
     private void onFailure(Throwable throwable) {
         Log.d(TAG, "onFailure: " + throwable.getMessage());
         showLoading.setValue(false);
@@ -1757,6 +1796,13 @@ public class CreateWorkflowViewModel extends ViewModel {
             showDialogMessage = new MutableLiveData<>();
         }
         return showDialogMessage;
+    }
+
+    protected LiveData<Boolean> getObservableGoBack() {
+        if (goBack == null) {
+            goBack = new MutableLiveData<>();
+        }
+        return goBack;
     }
 
     protected LiveData<SingleChoiceFormItem> getObservableAddWorkflowTypeItem() {

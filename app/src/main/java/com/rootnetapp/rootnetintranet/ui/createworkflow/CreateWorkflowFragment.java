@@ -35,7 +35,6 @@ import androidx.annotation.UiThread;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -120,13 +119,11 @@ public class CreateWorkflowFragment extends Fragment {
         viewModel.getObservableAddFormItem().observe(this, this::addItemToForm);
         viewModel.getObservableSetFormItemList().observe(this, this::setItemListToForm);
         viewModel.getObservableValidationUi().observe(this, this::updateValidationUi);
+        viewModel.getObservableShowLoading().observe(this, this::showLoading);
+        viewModel.getObservableShowDialogMessage().observe(this, this::showDialog);
+        viewModel.getObservableGoBack().observe(this, back -> goBack());
 
         viewModel.setFieldTextWithData.observe(this, this::addTexFieldData);
-
-        viewModel.getObservableShowLoading().observe(this, this::showLoading);
-
-        final Observer<DialogMessage> showDialogObserver = (this::showDialog);
-        viewModel.getObservableShowDialogMessage().observe(this, showDialogObserver);
 
         viewModel.setTypeList.observe(this, this::addFieldList);
 
@@ -157,8 +154,6 @@ public class CreateWorkflowFragment extends Fragment {
         viewModel.setListWithData.observe(this, this::addList);
 
         viewModel.setFileUploadField.observe(this, this::fileUploadField);
-
-        viewModel.goBack.observe(this, back -> goBack());
 
         viewModel.showUploadButton.observe(this, this::setUploadMenu);
 

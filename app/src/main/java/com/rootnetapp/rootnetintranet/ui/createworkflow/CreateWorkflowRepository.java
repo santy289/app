@@ -12,6 +12,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
 import com.rootnetapp.rootnetintranet.models.createworkflow.CurrencyFieldData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PhoneFieldData;
+import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
@@ -138,6 +139,11 @@ public class CreateWorkflowRepository {
 
     public Observable<CreateWorkflowResponse> createWorkflow(String token, CreateRequest body) {
         return service.createWorkflow(token, body).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<CreateWorkflowResponse> editWorkflow(String token, EditRequest request) {
+        return service.editWorkflow(token, request.getWorkflowId(), request).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 

@@ -188,6 +188,8 @@
     <string name="currency_type">Currency Type</string>
     <string name="created">Created</string>
     <string name="workflow_created">Your workflow was created.</string>
+    <string name="edited">Edited</string>
+    <string name="workflow_edit">You have edited this workflow.</string>
     <string name="error">Error</string>
     <string name="error_create_workflow">Something happened while saving your new workflow. Try again later.</string>
     <string name="choose_a_workflow">Choose a workflow type to continue.</string>

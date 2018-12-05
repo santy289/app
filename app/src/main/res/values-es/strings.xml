@@ -187,6 +187,8 @@
     <string name="currency_type">Tipo de Moneda</string>
     <string name="created">Creado</string>
     <string name="workflow_created">Su workflow fue creado.</string>
+    <string name="edited">Actualizado</string>
+    <string name="workflow_edit">Has actualizado este workflow.</string>
     <string name="error">Error</string>
     <string name="error_create_workflow">Algo ocurrió al intentar crear el nuevo workflow. Intente de nuevo mas tarde.</string>
     <string name="choose_a_workflow">Elija en tipo de workflow para continuar.</string>

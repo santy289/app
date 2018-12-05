@@ -76,9 +76,12 @@ public class Utils {
                 progress = new ProgressDialog(ctx);
             }
         }
-        progress.show();
-        progress.setMessage(ctx.getString(R.string.loading_message));
-        progress.setCancelable(false);
+
+        if (!progress.isShowing()) {
+            progress.show();
+            progress.setCancelable(false);
+            progress.setMessage(ctx.getString(R.string.loading_message));
+        }
     }
 
     public static void hideLoading() {
@@ -278,8 +281,8 @@ public class Utils {
     }
 
     /**
-     * Transforms a Base64 encoded string into a PDF {@link File} object. Also, saves the file locally
-     * on the external downloads folder.
+     * Transforms a Base64 encoded string into a PDF {@link File} object. Also, saves the file
+     * locally on the external downloads folder.
      *
      * @param base64   encoded string.
      * @param fileName name of the file to be saved.
@@ -316,7 +319,7 @@ public class Utils {
      * @throws IOException exception caused by the decoding/saving operations.
      */
     public static File decodeFileFromBase64Binary(String base64,
-                                                 String fileName) throws IOException {
+                                                  String fileName) throws IOException {
         String downloadsPath = Environment
                 .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/";
 

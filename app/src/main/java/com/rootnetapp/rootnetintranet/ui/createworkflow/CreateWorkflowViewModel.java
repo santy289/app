@@ -538,6 +538,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                 createTextInputFormItem(field);
                 break;
             case FormSettings.TYPE_DATE:
+            case FormSettings.TYPE_BIRTH_DATE:
                 createDateFormItem(field);
                 break;
             case FormSettings.TYPE_CHECKBOX:

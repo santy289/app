@@ -213,6 +213,11 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                         InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                 break;
 
+            case TextInputFormItem.InputType.LINK:
+                etInput.setInputType(
+                        InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+                break;
+
             case TextInputFormItem.InputType.TEXT:
             default:
                 etInput.setInputType(InputType.TYPE_CLASS_TEXT);

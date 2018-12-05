@@ -198,7 +198,8 @@ public class TextInputFormItem extends BaseFormItem {
             InputType.PHONE,
             InputType.EMAIL,
             InputType.NUMBER,
-            InputType.DECIMAL
+            InputType.DECIMAL,
+            InputType.LINK
     })
     public @interface InputType {
 
@@ -208,5 +209,6 @@ public class TextInputFormItem extends BaseFormItem {
         String EMAIL = "email";
         String NUMBER = "integer";
         String DECIMAL = "decimal";
+        String LINK = "link";
     }
 }

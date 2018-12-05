@@ -533,17 +533,27 @@ public class CreateWorkflowViewModel extends ViewModel {
     private void buildField(FormFieldsByWorkflowType field) {
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
         switch (typeInfo.getType()) {
+
             case FormSettings.TYPE_TEXT:
             case FormSettings.TYPE_TEXT_AREA:
                 createTextInputFormItem(field);
                 break;
+
+            case FormSettings.TYPE_LINK:
+                //value type is "text", does not work for us, so we change it to "link"
+                typeInfo.setValueType(TextInputFormItem.InputType.LINK);
+                createTextInputFormItem(field);
+                break;
+
             case FormSettings.TYPE_DATE:
             case FormSettings.TYPE_BIRTH_DATE:
                 createDateFormItem(field);
                 break;
+
             case FormSettings.TYPE_CHECKBOX:
                 createBooleanFormItem(field);
                 break;
+
             /*case FormSettings.TYPE_SYSTEM_USERS:
                 handleList(field, FormSettings.TYPE_SYSTEM_USERS);
                 break;
@@ -650,6 +660,9 @@ public class CreateWorkflowViewModel extends ViewModel {
         switch (item.getInputType()) {
             case TextInputFormItem.InputType.EMAIL:
                 item.setRegex(Patterns.EMAIL_ADDRESS.toString());
+                break;
+            case TextInputFormItem.InputType.LINK:
+                item.setRegex(Patterns.WEB_URL.toString());
                 break;
         }
 

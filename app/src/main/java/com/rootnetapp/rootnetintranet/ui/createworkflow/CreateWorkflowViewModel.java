@@ -347,8 +347,9 @@ public class CreateWorkflowViewModel extends ViewModel {
                 return;
             }
 
-            if (workflowMetas.getValue() != null && !workflowMetas.getValue().isEmpty())
-            metas.add(workflowMetas);
+            if (workflowMetas.getValue() != null && !workflowMetas.getValue().isEmpty()) {
+                metas.add(workflowMetas);
+            }
         }
 
         // remove empty fields
@@ -772,7 +773,8 @@ public class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
-                    Log.d(TAG, "createServicesFormItem: can't get service: " + throwable.getMessage());
+                    Log.d(TAG,
+                            "createServicesFormItem: can't get service: " + throwable.getMessage());
                     showLoading.setValue(false);
                 });
         mDisposables.add(disposable);
@@ -882,7 +884,6 @@ public class CreateWorkflowViewModel extends ViewModel {
                         Option option = new Option(id, name);
                         options.add(option);
                     }
-
 
                     SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
                             .setTitle(field.getFieldName())
@@ -1975,6 +1976,8 @@ public class CreateWorkflowViewModel extends ViewModel {
         DialogMessage dialogMessage = new DialogMessage();
         dialogMessage.title = R.string.created;
         dialogMessage.message = R.string.workflow_created;
+        dialogMessage.messageAggregate = " " + createWorkflowResponse.getWorkflow()
+                .getWorkflowTypeKey();
         showDialogMessage.setValue(dialogMessage);
         goBack.setValue(true);
     }
@@ -1984,6 +1987,8 @@ public class CreateWorkflowViewModel extends ViewModel {
         DialogMessage dialogMessage = new DialogMessage();
         dialogMessage.title = R.string.edited;
         dialogMessage.message = R.string.workflow_edit;
+        dialogMessage.messageAggregate = " " + createWorkflowResponse.getWorkflow()
+                .getWorkflowTypeKey();
         showDialogMessage.setValue(dialogMessage);
         goBack.setValue(true);
     }

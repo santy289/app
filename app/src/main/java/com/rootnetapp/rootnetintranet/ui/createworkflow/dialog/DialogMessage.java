@@ -4,4 +4,5 @@ public class DialogMessage {
     public int title;
     public int message;
     public String[] list;
+    public String messageAggregate;
 }

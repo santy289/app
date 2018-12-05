@@ -417,11 +417,16 @@ public class CreateWorkflowFragment extends Fragment {
 
     private void showDialog(DialogMessage dialogMessage) {
         FragmentManager fm = getFragmentManager();
+
+        String message = getString(dialogMessage.message);
+        if (dialogMessage.messageAggregate != null) message += dialogMessage.messageAggregate;
+
         ValidateFormDialog dialog = ValidateFormDialog.newInstance(
                 getString(dialogMessage.title),
-                getString(dialogMessage.message),
+                message,
                 dialogMessage.list
         );
+        
         dialog.show(fm, "validate_dialog");
     }
 

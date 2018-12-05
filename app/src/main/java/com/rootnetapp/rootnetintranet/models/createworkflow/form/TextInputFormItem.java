@@ -90,7 +90,7 @@ public class TextInputFormItem extends BaseFormItem {
         private int tag;
         private boolean isRequired;
         private boolean isEscaped;
-        private boolean isEnabled;
+        private boolean isEnabled = true;
         private String value;
         private String hint;
         private String regex;

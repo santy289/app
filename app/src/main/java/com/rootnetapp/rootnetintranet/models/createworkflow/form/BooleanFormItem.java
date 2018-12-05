@@ -33,7 +33,7 @@ public class BooleanFormItem extends BaseFormItem {
         private int tag;
         private boolean isRequired;
         private boolean isEscaped;
-        private boolean isEnabled;
+        private boolean isEnabled = true;
         private boolean value;
 
         public Builder setTitle(String title) {

@@ -74,7 +74,7 @@ public class DateFormItem extends BaseFormItem {
         private int tag;
         private boolean isRequired;
         private boolean isEscaped;
-        private boolean isEnabled;
+        private boolean isEnabled = true;
         private Date value;
         private Date minDate;
         private Date maxDate;

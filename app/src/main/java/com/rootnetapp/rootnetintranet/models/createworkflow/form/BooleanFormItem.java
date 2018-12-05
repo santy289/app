@@ -33,6 +33,7 @@ public class BooleanFormItem extends BaseFormItem {
         private int tag;
         private boolean isRequired;
         private boolean isEscaped;
+        private boolean isEnabled;
         private boolean value;
 
         public Builder setTitle(String title) {
@@ -65,6 +66,12 @@ public class BooleanFormItem extends BaseFormItem {
             return this;
         }
 
+        public Builder setEnabled(boolean isEnabled) {
+            this.isEnabled = isEnabled;
+
+            return this;
+        }
+
         public Builder setValue(boolean value) {
             this.value = value;
 
@@ -79,6 +86,7 @@ public class BooleanFormItem extends BaseFormItem {
             item.setTag(tag);
             item.setRequired(isRequired);
             item.setEscaped(isEscaped);
+            item.setEnabled(isEnabled);
             item.setValue(value);
             item.setViewType(FormItemViewType.BOOLEAN);
 

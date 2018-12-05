@@ -60,6 +60,7 @@ public class SingleChoiceFormItem extends BaseFormItem {
         private int tag;
         private boolean isRequired;
         private boolean isEscaped;
+        private boolean isEnabled;
         private Option value;
         private List<Option> options;
 
@@ -93,6 +94,12 @@ public class SingleChoiceFormItem extends BaseFormItem {
             return this;
         }
 
+        public Builder setEnabled(boolean isEnabled) {
+            this.isEnabled = isEnabled;
+
+            return this;
+        }
+
         public Builder setValue(Option value) {
             this.value = value;
 
@@ -113,6 +120,7 @@ public class SingleChoiceFormItem extends BaseFormItem {
             item.setTag(tag);
             item.setRequired(isRequired);
             item.setEscaped(isEscaped);
+            item.setEnabled(isEnabled);
             item.setValue(value);
             item.setOptions(options);
             item.setViewType(FormItemViewType.SINGLE_CHOICE);

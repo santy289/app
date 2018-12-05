@@ -311,6 +311,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         BooleanFormItem item = (BooleanFormItem) getItem(position);
 
         holder.getBinding().switchInput.setText(item.getTitle());
+        holder.getBinding().switchInput.setChecked(item.getValue());
         holder.getBinding().switchInput.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> item.setValue(isChecked));
 

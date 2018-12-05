@@ -75,6 +75,7 @@ public class DateFormItem extends BaseFormItem {
         private boolean isRequired;
         private boolean isEscaped;
         private boolean isEnabled = true;
+        private boolean isVisible = true;
         private Date value;
         private Date minDate;
         private Date maxDate;
@@ -116,6 +117,12 @@ public class DateFormItem extends BaseFormItem {
             return this;
         }
 
+        public Builder setVisible(boolean isVisible) {
+            this.isVisible = isVisible;
+
+            return this;
+        }
+
         public Builder setValue(Date value) {
             this.value = value;
 
@@ -149,6 +156,7 @@ public class DateFormItem extends BaseFormItem {
             item.setRequired(isRequired);
             item.setEscaped(isEscaped);
             item.setEnabled(isEnabled);
+            item.setVisible(isVisible);
             item.setValue(value);
             item.setMinDate(minDate);
             item.setMaxDate(maxDate);

@@ -158,6 +158,15 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         setTextInputParams(holder.getBinding().etInput, item.getInputType());
 
+        // verify visibility
+        if (!item.isVisible()) {
+            holder.hide();
+            return;
+        } else {
+            holder.show();
+        }
+
+        // verify enabled param
         if (!item.isEnabled()) {
             holder.getBinding().etInput.setBackgroundResource(R.drawable.spinner_bg_disabled);
             holder.getBinding().etInput.setEnabled(false);
@@ -167,6 +176,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.getBinding().etInput.setEnabled(true);
         }
 
+        // verify validation
         if (hasToEvaluateValid && !item.isValid()) {
             item.setErrorMessage(item.getErrorMessage());
             holder.getBinding().etInput.setBackgroundResource(R.drawable.spinner_bg_error);
@@ -269,6 +279,15 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.getBinding().spInput.setSelection(index);
         }
 
+        // verify visibility
+        if (!item.isVisible()) {
+            holder.hide();
+            return;
+        } else {
+            holder.show();
+        }
+
+        // verify enabled param
         if (!item.isEnabled()) {
             holder.getBinding().viewSpinnerBackground
                     .setBackgroundResource(R.drawable.spinner_bg_disabled);
@@ -279,6 +298,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.getBinding().spInput.setEnabled(true);
         }
 
+        // verify validation
         if (hasToEvaluateValid && !item.isValid()) {
             holder.getBinding().viewSpinnerBackground
                     .setBackgroundResource(R.drawable.spinner_bg_error);
@@ -294,6 +314,15 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         holder.getBinding().switchInput.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> item.setValue(isChecked));
 
+        // verify visibility
+        if (!item.isVisible()) {
+            holder.hide();
+            return;
+        } else {
+            holder.show();
+        }
+
+        // verify enabled param
         holder.getBinding().switchInput.setEnabled(item.isEnabled());
     }
 
@@ -342,6 +371,15 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                     .setText(Utils.getFormattedDate(item.getValue(), item.getDateFormat()));
         }
 
+        // verify visibility
+        if (!item.isVisible()) {
+            holder.hide();
+            return;
+        } else {
+            holder.show();
+        }
+
+        // verify enabled param
         if (!item.isEnabled()) {
             holder.getBinding().tvSelectedDate
                     .setBackgroundResource(R.drawable.spinner_bg_disabled);
@@ -352,6 +390,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.getBinding().tvSelectedDate.setEnabled(true);
         }
 
+        // verify validation
         if (hasToEvaluateValid && !item.isValid()) {
             holder.getBinding().tvSelectedDate.setBackgroundResource(R.drawable.spinner_bg_error);
         } else {
@@ -366,6 +405,14 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         holder.getBinding().spCurrency.setAdapter(
                 new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
                         item.getOptions()));
+
+        // verify visibility
+        if (!item.isVisible()) {
+            holder.hide();
+            return;
+        } else {
+            holder.show();
+        }
     }
 
     public void retrieveValuesFromViews(RecyclerView recylerView) {

@@ -60,6 +60,7 @@ public class CurrencyFormItem extends BaseFormItem {
         private boolean isRequired;
         private boolean isEscaped;
         private boolean isEnabled = true;
+        private boolean isVisible = true;
         private Double value;
         private String selectedOption;
         private List<String> options;
@@ -100,6 +101,12 @@ public class CurrencyFormItem extends BaseFormItem {
             return this;
         }
 
+        public Builder setVisible(boolean isVisible) {
+            this.isVisible = isVisible;
+
+            return this;
+        }
+
         public Builder setValue(Double value) {
             this.value = value;
 
@@ -127,6 +134,7 @@ public class CurrencyFormItem extends BaseFormItem {
             item.setRequired(isRequired);
             item.setEscaped(isEscaped);
             item.setEnabled(isEnabled);
+            item.setVisible(isVisible);
             item.setValue(value);
             item.setSelectedOption(selectedOption);
             item.setOptions(options);

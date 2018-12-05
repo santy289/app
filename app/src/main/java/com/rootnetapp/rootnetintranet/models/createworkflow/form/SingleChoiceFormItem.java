@@ -61,6 +61,7 @@ public class SingleChoiceFormItem extends BaseFormItem {
         private boolean isRequired;
         private boolean isEscaped;
         private boolean isEnabled = true;
+        private boolean isVisible = true;
         private Option value;
         private List<Option> options;
 
@@ -100,6 +101,12 @@ public class SingleChoiceFormItem extends BaseFormItem {
             return this;
         }
 
+        public Builder setVisible(boolean isVisible) {
+            this.isVisible = isVisible;
+
+            return this;
+        }
+
         public Builder setValue(Option value) {
             this.value = value;
 
@@ -121,6 +128,7 @@ public class SingleChoiceFormItem extends BaseFormItem {
             item.setRequired(isRequired);
             item.setEscaped(isEscaped);
             item.setEnabled(isEnabled);
+            item.setVisible(isVisible);
             item.setValue(value);
             item.setOptions(options);
             item.setViewType(FormItemViewType.SINGLE_CHOICE);

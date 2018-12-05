@@ -615,7 +615,8 @@ public class CreateWorkflowViewModel extends ViewModel {
                     .setTag(TAG_WORKFLOW_TYPE)
                     .setOptions(options)
                     .setValue(selectedOption)
-                    .setEnabled(selectedOption == null) //if no prior selection, enable it
+                    .setEnabled(selectedOption == null) //if we are in edit mode, disable it
+                    .setVisible(selectedOption == null) //if we are in edit mode, hide it
                     .build();
 
             formSettings.getFormItems().add(singleChoiceFormItem);

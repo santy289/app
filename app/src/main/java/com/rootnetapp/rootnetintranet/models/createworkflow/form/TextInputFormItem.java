@@ -91,6 +91,7 @@ public class TextInputFormItem extends BaseFormItem {
         private boolean isRequired;
         private boolean isEscaped;
         private boolean isEnabled = true;
+        private boolean isVisible = true;
         private String value;
         private String hint;
         private String regex;
@@ -129,6 +130,12 @@ public class TextInputFormItem extends BaseFormItem {
 
         public Builder setEnabled(boolean isEnabled) {
             this.isEnabled = isEnabled;
+
+            return this;
+        }
+
+        public Builder setVisible(boolean isVisible) {
+            this.isVisible = isVisible;
 
             return this;
         }
@@ -172,6 +179,7 @@ public class TextInputFormItem extends BaseFormItem {
             item.setRequired(isRequired);
             item.setEscaped(isEscaped);
             item.setEnabled(isEnabled);
+            item.setVisible(isVisible);
             item.setValue(value);
             item.setHint(hint);
             item.setRegex(regex);

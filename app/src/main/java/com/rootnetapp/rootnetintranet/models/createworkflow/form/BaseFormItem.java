@@ -11,6 +11,7 @@ public abstract class BaseFormItem {
     private boolean isRequired;
     private boolean isEscaped;
     private boolean isEnabled = true;
+    private boolean isVisible = true;
     private @FormItemViewType int viewType;
 
     public abstract boolean isValid();
@@ -63,6 +64,14 @@ public abstract class BaseFormItem {
 
     public void setEnabled(boolean enabled) {
         isEnabled = enabled;
+    }
+
+    public boolean isVisible() {
+        return isVisible;
+    }
+
+    public void setVisible(boolean visible) {
+        isVisible = visible;
     }
 
     public int getViewType() {

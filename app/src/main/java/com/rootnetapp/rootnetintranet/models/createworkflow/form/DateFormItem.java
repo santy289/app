@@ -9,7 +9,7 @@ import androidx.annotation.Nullable;
 
 public class DateFormItem extends BaseFormItem {
 
-    private static final String DEFAULT_FORMAT = "MMMM dd, yyyy";
+    private static final String DEFAULT_FORMAT = Utils.STANDARD_DATE_DISPLAY_FORMAT;
 
     private @Nullable Date value;
     private @Nullable Date minDate;

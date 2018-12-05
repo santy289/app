@@ -48,6 +48,7 @@ public class Utils {
     public static String domain;
 
     public static final String SERVER_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
+    public static final String STANDARD_DATE_DISPLAY_FORMAT = "MMMM dd, yyyy";
 
     public static String getImgDomain() {
         return imgDomain;
@@ -363,6 +364,7 @@ public class Utils {
         try {
             return sdf.parse(date);
         } catch (ParseException e) {
+            Log.d(TAG, "getDateFromString: ", e);
             return null;
         }
     }
@@ -406,5 +408,28 @@ public class Utils {
     public static String getFormattedDate(Date date, String outputFormat) {
         SimpleDateFormat sdf = new SimpleDateFormat(outputFormat, Locale.getDefault());
         return sdf.format(date);
+    }
+
+    /**
+     * Formats the given date String to the specified format.
+     *
+     * @param strDate date in String to format.
+     * @param inputFormat the format that the date is in.
+     * @param outputFormat the output format for the given date.
+     *
+     * @return formatted date.
+     */
+    public static String getFormattedDate(String strDate, String inputFormat, String outputFormat) {
+        SimpleDateFormat inputFormatter = new SimpleDateFormat(inputFormat, Locale.getDefault());
+        try {
+            Date date = inputFormatter.parse(strDate);
+            SimpleDateFormat outputFormatter = new SimpleDateFormat(outputFormat,
+                    Locale.getDefault());
+            return outputFormatter.format(date);
+
+        } catch (ParseException e) {
+            Log.d(TAG, "getFormattedDate: ", e);
+            return null;
+        }
     }
 }

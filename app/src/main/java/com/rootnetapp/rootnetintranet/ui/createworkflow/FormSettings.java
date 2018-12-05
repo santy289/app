@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
@@ -31,12 +32,8 @@ import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import androidx.collection.ArrayMap;
 import me.riddhimanadib.formmaster.FormBuilder;
@@ -299,20 +296,7 @@ public class FormSettings {
                 handleBoolean(typeInfo, metaData, value);
                 break;
             case FormSettings.VALUE_DATE:
-                SimpleDateFormat dateFormat = new SimpleDateFormat(
-                        "dd-MM-yyyy",
-                        Locale.getDefault());
-                String metaDateString = "";
-                try {
-                    Date convertedDate = dateFormat.parse(value);
-                    SimpleDateFormat serverFormat = new SimpleDateFormat(
-                            "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
-                            Locale.getDefault());
-                    metaDateString = serverFormat.format(convertedDate);
-                } catch (ParseException e) {
-                    Log.d(TAG, "StringDateToTimestamp: e = " + e.getMessage());
-                }
-                metaData.setValue(metaDateString);
+                metaData.setValue(value);
                 break;
             case FormSettings.VALUE_EMAIL:
                 metaData.setValue(value);
@@ -603,35 +587,12 @@ public class FormSettings {
                     return null;
                 }
 
-                String date = (String) meta.getDisplayValue(); // now returns 10 / 25 / 2018
-                // String date = (String) meta.getValue(); // Maybe try this but it returns a double quotes.
+                String date = (String) meta.getDisplayValue(); // now returns 10/25/2018
+                date = Utils
+                        .getFormattedDate(date, "dd/MM/yyyy", Utils.STANDARD_DATE_DISPLAY_FORMAT);
 
-                // TODO for now use displayValue directly. Verify that his will not change anymore.
-                // TODO Get rid of the unnecessary spaces in the date itself between the numbers.
                 information.setDisplayValue(date);
                 return information;
-
-            // TODO commenting out this block for now. Make sure we don't need this anymore.
-//                SimpleDateFormat serverFormat = new SimpleDateFormat(
-//                        "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
-//                        Locale.getDefault());
-//
-//                try {
-//                    Date dateFromServer = serverFormat.parse(date);
-//                    SimpleDateFormat dateFormat = new SimpleDateFormat(
-//                            "dd-MM-yyyy",
-//                            Locale.getDefault());
-//                    String formattedDate = dateFormat.format(dateFromServer);
-//                    information.setDisplayValue(formattedDate);
-//                    return information;
-//                } catch (ParseException e) {
-//                    e.printStackTrace();
-//                    information.setDisplayValue("");
-//                    String format = WorkflowDetailViewModel.FORMAT;
-//                    String formattedDate = Utils.standardServerFormatTo(date, format);
-//                    information.setDisplayValue(formattedDate);
-//                    return information;
-//                }
             case FormSettings.VALUE_EMAIL:
                 if (fieldConfig.getMultiple()) {
                     return null;

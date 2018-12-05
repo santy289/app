@@ -260,14 +260,18 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                                 // the user has selected the No Selection option
                                 if (position == 0) {
                                     item.setValue(null);
-                                    item.getOnSelectedListener().onSelected(item);
+                                    if (item.getOnSelectedListener() != null) {
+                                        item.getOnSelectedListener().onSelected(item);
+                                    }
                                     return;
                                 }
 
                                 // the user has selected a valid option
                                 int index = position - 1; // because of the No Selection option
                                 item.setValue(item.getOptions().get(index));
-                                item.getOnSelectedListener().onSelected(item);
+                                if (item.getOnSelectedListener() != null) {
+                                    item.getOnSelectedListener().onSelected(item);
+                                }
                             }
                         }
 

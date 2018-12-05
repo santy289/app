@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.models.createworkflow.form;
 
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 
 import java.util.Date;
 
@@ -76,6 +77,7 @@ public class DateFormItem extends BaseFormItem {
         private boolean isEscaped;
         private boolean isEnabled = true;
         private boolean isVisible = true;
+        private TypeInfo typeInfo;
         private Date value;
         private Date minDate;
         private Date maxDate;
@@ -123,6 +125,12 @@ public class DateFormItem extends BaseFormItem {
             return this;
         }
 
+        public Builder setTypeInfo(TypeInfo typeInfo) {
+            this.typeInfo = typeInfo;
+
+            return this;
+        }
+
         public Builder setValue(Date value) {
             this.value = value;
 
@@ -157,6 +165,7 @@ public class DateFormItem extends BaseFormItem {
             item.setEscaped(isEscaped);
             item.setEnabled(isEnabled);
             item.setVisible(isVisible);
+            item.setTypeInfo(typeInfo);
             item.setValue(value);
             item.setMinDate(minDate);
             item.setMaxDate(maxDate);

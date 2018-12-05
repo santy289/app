@@ -1,5 +1,7 @@
 package com.rootnetapp.rootnetintranet.models.createworkflow.form;
 
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
+
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
@@ -13,6 +15,7 @@ public abstract class BaseFormItem {
     private boolean isEnabled = true;
     private boolean isVisible = true;
     private @FormItemViewType int viewType;
+    private TypeInfo typeInfo; //server type
 
     public abstract boolean isValid();
     public abstract String getStringValue();
@@ -80,5 +83,13 @@ public abstract class BaseFormItem {
 
     public void setViewType(int viewType) {
         this.viewType = viewType;
+    }
+
+    public TypeInfo getTypeInfo() {
+        return typeInfo;
+    }
+
+    public void setTypeInfo(TypeInfo typeInfo) {
+        this.typeInfo = typeInfo;
     }
 }

@@ -1,5 +1,7 @@
 package com.rootnetapp.rootnetintranet.models.createworkflow.form;
 
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.regex.Pattern;
@@ -92,6 +94,7 @@ public class TextInputFormItem extends BaseFormItem {
         private boolean isEscaped;
         private boolean isEnabled = true;
         private boolean isVisible = true;
+        private TypeInfo typeInfo;
         private String value;
         private String hint;
         private String regex;
@@ -140,6 +143,12 @@ public class TextInputFormItem extends BaseFormItem {
             return this;
         }
 
+        public Builder setTypeInfo(TypeInfo typeInfo) {
+            this.typeInfo = typeInfo;
+
+            return this;
+        }
+
         public Builder setValue(String value) {
             this.value = value;
 
@@ -180,6 +189,7 @@ public class TextInputFormItem extends BaseFormItem {
             item.setEscaped(isEscaped);
             item.setEnabled(isEnabled);
             item.setVisible(isVisible);
+            item.setTypeInfo(typeInfo);
             item.setValue(value);
             item.setHint(hint);
             item.setRegex(regex);

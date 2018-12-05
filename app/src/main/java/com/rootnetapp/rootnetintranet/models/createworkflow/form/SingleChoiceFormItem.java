@@ -1,5 +1,7 @@
 package com.rootnetapp.rootnetintranet.models.createworkflow.form;
 
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
+
 import java.util.List;
 
 import androidx.annotation.Nullable;
@@ -62,6 +64,7 @@ public class SingleChoiceFormItem extends BaseFormItem {
         private boolean isEscaped;
         private boolean isEnabled = true;
         private boolean isVisible = true;
+        private TypeInfo typeInfo;
         private Option value;
         private List<Option> options;
 
@@ -107,6 +110,12 @@ public class SingleChoiceFormItem extends BaseFormItem {
             return this;
         }
 
+        public Builder setTypeInfo(TypeInfo typeInfo) {
+            this.typeInfo = typeInfo;
+
+            return this;
+        }
+
         public Builder setValue(Option value) {
             this.value = value;
 
@@ -129,6 +138,7 @@ public class SingleChoiceFormItem extends BaseFormItem {
             item.setEscaped(isEscaped);
             item.setEnabled(isEnabled);
             item.setVisible(isVisible);
+            item.setTypeInfo(typeInfo);
             item.setValue(value);
             item.setOptions(options);
             item.setViewType(FormItemViewType.SINGLE_CHOICE);

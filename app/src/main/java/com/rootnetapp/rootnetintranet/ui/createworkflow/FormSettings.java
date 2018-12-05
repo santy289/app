@@ -265,14 +265,13 @@ public class FormSettings {
         return id;
     }
 
-    public WorkflowMetas formatMetaData(WorkflowMetas metaData, BaseFormItem formItem) {
-        int fieldId = metaData.getWorkflowTypeFieldId();
-        TypeInfo typeInfo = findFieldDataById(fieldId);
+    protected void formatMetaData(WorkflowMetas metaData, BaseFormItem formItem) {
+        TypeInfo typeInfo = formItem.getTypeInfo();
         if (typeInfo == null) {
-            return metaData;
+            return;
         }
+
         format(metaData, typeInfo, formItem);
-        return metaData;
     }
 
     public WorkflowMetas formatMetaData(WorkflowMetas metaData, BaseFormItem formItem,
@@ -369,6 +368,7 @@ public class FormSettings {
                 metaData.setValue(value);
                 break;
             case FormSettings.VALUE_TEXT:
+            case FormSettings.TYPE_LINK:
                 metaData.setValue(value);
                 break;
             default:
@@ -503,6 +503,7 @@ public class FormSettings {
         }
 
         int id;
+        //todo handle multiple selection
         /*if (fieldData.isMultipleSelection) {
             ArrayList<String> matches = new ArrayList<>();
             String selection;
@@ -547,20 +548,6 @@ public class FormSettings {
             }
         }
         return 0;
-    }
-
-    public TypeInfo findFieldDataById(int id) {
-        FormFieldsByWorkflowType field;
-        TypeInfo typeInfo;
-        for (int i = 0; i < fields.size(); i++) {
-            field = fields.get(i);
-            if (id != field.id) {
-                continue;
-            }
-            typeInfo = field.getFieldConfigObject().getTypeInfo();
-            return typeInfo;
-        }
-        return null;
     }
 
     public List<BaseFormItem> getFormItems() {

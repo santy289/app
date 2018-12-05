@@ -1,5 +1,7 @@
 package com.rootnetapp.rootnetintranet.models.createworkflow.form;
 
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
+
 import java.util.List;
 
 import androidx.annotation.Nullable;
@@ -61,6 +63,7 @@ public class CurrencyFormItem extends BaseFormItem {
         private boolean isEscaped;
         private boolean isEnabled = true;
         private boolean isVisible = true;
+        private TypeInfo typeInfo;
         private Double value;
         private String selectedOption;
         private List<String> options;
@@ -107,6 +110,12 @@ public class CurrencyFormItem extends BaseFormItem {
             return this;
         }
 
+        public Builder setTypeInfo(TypeInfo typeInfo) {
+            this.typeInfo = typeInfo;
+
+            return this;
+        }
+
         public Builder setValue(Double value) {
             this.value = value;
 
@@ -135,6 +144,7 @@ public class CurrencyFormItem extends BaseFormItem {
             item.setEscaped(isEscaped);
             item.setEnabled(isEnabled);
             item.setVisible(isVisible);
+            item.setTypeInfo(typeInfo);
             item.setValue(value);
             item.setSelectedOption(selectedOption);
             item.setOptions(options);

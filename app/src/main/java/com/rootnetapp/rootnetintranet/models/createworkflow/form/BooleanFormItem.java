@@ -1,5 +1,7 @@
 package com.rootnetapp.rootnetintranet.models.createworkflow.form;
 
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
+
 public class BooleanFormItem extends BaseFormItem {
 
     private boolean value;
@@ -35,6 +37,7 @@ public class BooleanFormItem extends BaseFormItem {
         private boolean isEscaped;
         private boolean isEnabled = true;
         private boolean isVisible = true;
+        private TypeInfo typeInfo;
         private boolean value;
 
         public Builder setTitle(String title) {
@@ -79,6 +82,12 @@ public class BooleanFormItem extends BaseFormItem {
             return this;
         }
 
+        public Builder setTypeInfo(TypeInfo typeInfo) {
+            this.typeInfo = typeInfo;
+
+            return this;
+        }
+
         public Builder setValue(boolean value) {
             this.value = value;
 
@@ -95,6 +104,7 @@ public class BooleanFormItem extends BaseFormItem {
             item.setEscaped(isEscaped);
             item.setEnabled(isEnabled);
             item.setVisible(isVisible);
+            item.setTypeInfo(typeInfo);
             item.setValue(value);
             item.setViewType(FormItemViewType.BOOLEAN);
 

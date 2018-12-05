@@ -9,12 +9,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Toast;
 
 import com.obsez.android.lib.filechooser.ChooserDialog;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentCreateWorkflowBinding;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
@@ -22,7 +22,6 @@ import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.adapters.FormItemsAdapter;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.ValidateFormDialog;
-import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -55,8 +54,7 @@ public class CreateWorkflowFragment extends Fragment {
 
     @Inject
     CreateWorkflowViewModelFactory createWorkflowViewModelFactory;
-    CreateWorkflowViewModel viewModel;
-    private MainActivityInterface mainActivityInterface;
+    private CreateWorkflowViewModel viewModel;
     private FragmentCreateWorkflowBinding mBinding;
 
     private static final String TAG = "CreateFragment";
@@ -64,13 +62,17 @@ public class CreateWorkflowFragment extends Fragment {
 
     private MenuItem uploadMenu;
     private FormItemsAdapter mAdapter;
-    private AdapterView.OnItemClickListener mOnSingleChoiceItemClickListener;
+    private WorkflowListItem mWorkflowListItem;
 
     public CreateWorkflowFragment() { }
 
-    public static CreateWorkflowFragment newInstance(MainActivityInterface mainActivityInterface) {
+    public static CreateWorkflowFragment newInstance() {
+        return newInstance(null);
+    }
+
+    public static CreateWorkflowFragment newInstance(@Nullable WorkflowListItem itemToEdit) {
         CreateWorkflowFragment fragment = new CreateWorkflowFragment();
-        fragment.mainActivityInterface = mainActivityInterface;
+        fragment.mWorkflowListItem = itemToEdit;
         return fragment;
     }
 
@@ -102,11 +104,13 @@ public class CreateWorkflowFragment extends Fragment {
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
 
+        setupSubmitButton();
         setOnClickListeners();
         setupFormRecycler();
         subscribe();
 
-        viewModel.initForm(token);
+        viewModel.initForm(token, mWorkflowListItem);
+
         return view;
     }
 
@@ -119,8 +123,7 @@ public class CreateWorkflowFragment extends Fragment {
 
         viewModel.setFieldTextWithData.observe(this, this::addTexFieldData);
 
-        final Observer<Boolean> showLoadingObserver = (this::showLoading);
-        viewModel.getObservableShowLoading().observe(this, showLoadingObserver);
+        viewModel.getObservableShowLoading().observe(this, this::showLoading);
 
         final Observer<DialogMessage> showDialogObserver = (this::showDialog);
         viewModel.getObservableShowDialogMessage().observe(this, showDialogObserver);
@@ -161,6 +164,11 @@ public class CreateWorkflowFragment extends Fragment {
 
         viewModel.chooseFile.observe(this, choose -> chooseFile());
 
+    }
+
+    private void setupSubmitButton() {
+        mBinding.btnCreate.setText(
+                mWorkflowListItem == null ? R.string.create_workflow : R.string.edit_workflow);
     }
 
     private void setupFormRecycler() {
@@ -220,6 +228,7 @@ public class CreateWorkflowFragment extends Fragment {
                 .show();
     }
 
+    @UiThread
     private void showLoading(Boolean show) {
         if (show) {
             Utils.showLoading(getContext());
@@ -450,6 +459,11 @@ public class CreateWorkflowFragment extends Fragment {
             String selection = item.getValue().getName();
             viewModel.generateFieldsByType(selection);
         });
+
+        if (mWorkflowListItem != null) {
+            // triggers selection for the items to be created, since we already have a type.
+            singleChoiceFormItem.getOnSelectedListener().onSelected(singleChoiceFormItem);
+        }
     }
 
     @UiThread

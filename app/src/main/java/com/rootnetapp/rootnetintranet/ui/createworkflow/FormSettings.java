@@ -395,7 +395,8 @@ public class FormSettings {
         metaData.setValue(gson.toJson(metaValue));
     }
 
-    private String getProductJson(String value, SingleChoiceFormItem formItem, WorkflowMetas workflowMetas) {
+    private String getProductJson(String value, SingleChoiceFormItem formItem,
+                                  WorkflowMetas workflowMetas) {
         List<Option> list = formItem.getOptions();
         Option item;
         int id = 0;
@@ -494,7 +495,8 @@ public class FormSettings {
         }
     }
 
-    private void handleSingleSelection(SingleChoiceFormItem formItem, WorkflowMetas metaData, String value) {
+    private void handleSingleSelection(SingleChoiceFormItem formItem, WorkflowMetas metaData,
+                                       String value) {
         List<Option> list = formItem.getOptions();
         if (list == null) {
             return;
@@ -1058,6 +1060,17 @@ public class FormSettings {
     protected BaseFormItem findItem(int tag) {
         for (BaseFormItem item : getFormItems()) {
             if (item.getTag() == tag) return item;
+        }
+
+        return null;
+    }
+
+    protected BaseFormItem findItem(String machineName) {
+        for (int i = 0; i < fields.size(); i++) {
+            FormFieldsByWorkflowType field = fields.get(i);
+            if (field.getFieldConfigObject().getMachineName().equals(machineName)) {
+                return findItem(field.getId());
+            }
         }
 
         return null;

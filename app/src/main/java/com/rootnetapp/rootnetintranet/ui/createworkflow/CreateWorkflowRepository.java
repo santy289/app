@@ -1,7 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
-import androidx.lifecycle.LiveData;
-
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDBDao;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
@@ -21,12 +19,15 @@ import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse
 import com.rootnetapp.rootnetintranet.models.responses.project.ProjectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.role.RoleResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 
 import java.util.List;
 
+import androidx.lifecycle.LiveData;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -65,6 +66,16 @@ public class CreateWorkflowRepository {
 
     public List<FormFieldsByWorkflowType> getFiedsByWorkflowType(int byId) {
         return workflowTypeDbDao.getFields(byId);
+    }
+
+    protected Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {
+        return service.getWorkflow(auth, workflowId).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<WorkflowTypeResponse> getWorkflowType(String auth, int typeId) {
+        return service.getWorkflowType(auth, typeId).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Observable<WorkflowTypesResponse> getWorkflowTypes(String auth) {

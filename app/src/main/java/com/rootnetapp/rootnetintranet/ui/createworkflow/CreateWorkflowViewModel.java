@@ -6,6 +6,8 @@ import android.util.Patterns;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
@@ -17,7 +19,6 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.PendingFileUpload;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
-import com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
@@ -27,6 +28,8 @@ import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWork
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
@@ -38,9 +41,12 @@ import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import androidx.annotation.Nullable;
 import androidx.collection.ArrayMap;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -70,7 +76,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<BaseFormItem> mValidationUiLiveData;
     private List<WorkflowTypeItemMenu> workflowTypeMenuItems;
 
-    private final CompositeDisposable disposables = new CompositeDisposable();
+    private final CompositeDisposable mDisposables = new CompositeDisposable();
 
     protected MutableLiveData<List<String>> setTypeList;
     protected MutableLiveData<int[]> setTextField;
@@ -93,13 +99,15 @@ public class CreateWorkflowViewModel extends ViewModel {
     protected MutableLiveData<Boolean> showUploadButton;
     protected MutableLiveData<Boolean> chooseFile;
 
-    private CreateWorkflowRepository createWorkflowRepository;
+    private CreateWorkflowRepository mRepository;
 
     private static final String TAG = "CreateViewModel";
 
     private FormSettings formSettings;
 
-    private String token;
+    private String mToken;
+    private WorkflowListItem mWorkflowListItem;
+    private WorkflowDb mWorkflow;
 
     protected static final int REQUIRED = 10;
     protected static final int NOT_REQUIRED = 11;
@@ -112,7 +120,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     private final int UPLOAD_FILE_SIZE_LIMIT = 10;
 
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
-        this.createWorkflowRepository = createWorkflowRepository;
+        this.mRepository = createWorkflowRepository;
         setFieldTextWithData = new MutableLiveData<>();
         setTypeList = new MutableLiveData<>();
         setTextField = new MutableLiveData<>();
@@ -134,23 +142,19 @@ public class CreateWorkflowViewModel extends ViewModel {
         setFileUploadField = new MutableLiveData<>();
     }
 
-    public void initForm(String token) {
+    protected void initForm(String token, @Nullable WorkflowListItem item) {
         showLoading.setValue(true);
         if (formSettings == null) {
             formSettings = new FormSettings();
         }
-        this.token = token;
-        createWorkflowTypeItem();
-//        setWorkflowTypes();
-    }
+        this.mToken = token;
+        this.mWorkflowListItem = item;
 
-    public void createWorkflow() {
-        //todo check
-        Log.d(TAG, "createWorkflow: here");
+        createWorkflowTypeItem();
     }
 
     protected void onCleared() {
-        disposables.clear();
+        mDisposables.clear();
     }
 
     private void handleInvalidEmail() {
@@ -223,7 +227,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         filePost.setFile(filePostDetail);
 
         showLoading.setValue(true);
-        Disposable disposable = createWorkflowRepository.uploadFile(token, filePost)
+        Disposable disposable = mRepository.uploadFile(mToken, filePost)
                 .subscribe(fileUploadResponse -> {
                     showLoading.setValue(false);
                     successUpload(fileUploadResponse);
@@ -233,7 +237,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                     Log.d(TAG, "postFileRequest: file upload failed: " + throwable.getMessage());
                 });
 
-        disposables.add(disposable);
+        mDisposables.add(disposable);
     }
 
     private void successUpload(FileUploadResponse fileUploadResponse) {
@@ -247,7 +251,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         startPostCreateWorkflow(baseInfo, formSettings.getFormBuilder(), fieldItems);*/
     }
 
-    protected void postWorkflow() {
+    private void postWorkflow() {
         List<BaseFormItem> formItemsForPost = formSettings.getFormItemsToPost();
         ArrayMap<String, Integer> baseInfo = formSettings.getBaseMachineNamesAndIds();
 
@@ -286,7 +290,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                     showLoading.setValue(false);
                     Log.d(TAG, "uploadFile: Error while encoding to Base64");
                 });
-        disposables.add(disposable);*/
+        mDisposables.add(disposable);*/
 
     }
 
@@ -416,11 +420,11 @@ public class CreateWorkflowViewModel extends ViewModel {
         String jsonString = jsonAdapter.toJson(createRequest);
 
         // Accepts object
-        Disposable disposable = createWorkflowRepository
-                .createWorkflow(token, createRequest)
+        Disposable disposable = mRepository
+                .createWorkflow(mToken, createRequest)
                 .subscribe(this::onCreateSuccess, this::onCreateFailure);
 
-        disposables.add(disposable);
+        mDisposables.add(disposable);
     }
 
     protected void generateFieldsByType(String typeName) {
@@ -434,7 +438,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         clearForm();
         formSettings.setWorkflowTypeIdSelected(id);
         Disposable disposable = Observable.fromCallable(() -> {
-            List<FormFieldsByWorkflowType> fields = createWorkflowRepository
+            List<FormFieldsByWorkflowType> fields = mRepository
                     .getFiedsByWorkflowType(id);
             if (fields == null || fields.size() < 1) {
                 return false;
@@ -453,13 +457,12 @@ public class CreateWorkflowViewModel extends ViewModel {
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(formSettings -> {
-                    showLoading.setValue(false);
                     FormSettings settings = (FormSettings) formSettings;
                     showFields(settings);
                 }, throwable -> {
                     showLoading.setValue(false);
                 });
-        disposables.add(disposable);
+        mDisposables.add(disposable);
 
     }
 
@@ -485,8 +488,16 @@ public class CreateWorkflowViewModel extends ViewModel {
             buildField(field);
         }
 
-        //we cannot add the first item again because it's already in the form.
         mSetFormItemListLiveData.setValue(formSettings.getFormItems());
+
+        if (mWorkflowListItem == null) {
+            showLoading.setValue(false);
+            mSetFormItemListLiveData.setValue(formSettings.getFormItems());
+            return;
+        }
+
+        // edit mode
+        getWorkflow(mToken, mWorkflowListItem.getWorkflowId());
     }
 
     private void buildField(FormFieldsByWorkflowType field) {
@@ -547,22 +558,25 @@ public class CreateWorkflowViewModel extends ViewModel {
         //used to be setWorkflowTypes
 
         Disposable disposable = Observable.fromCallable(() -> {
-            List<WorkflowTypeItemMenu> types = createWorkflowRepository.getWorklowTypeNames();
+            List<WorkflowTypeItemMenu> types = mRepository.getWorklowTypeNames();
             if (types == null || types.size() < 1) {
                 return false;
             }
-            String name;
-            Integer id;
-            Option option;
+
+            Option selectedOption = null; //used only in edit mode
             List<Option> options = new ArrayList<>();
             for (int i = 0; i < types.size(); i++) {
-                name = types.get(i).getName();
-                id = types.get(i).getId();
+                String name = types.get(i).getName();
+                Integer id = types.get(i).getId();
                 formSettings.setId(id);
                 formSettings.setName(name);
 
-                option = new Option(id, name);
+                Option option = new Option(id, name);
                 options.add(option);
+
+                if (mWorkflowListItem != null && mWorkflowListItem.getWorkflowTypeId() == id) {
+                    selectedOption = option;
+                }
             }
 
             SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
@@ -570,6 +584,8 @@ public class CreateWorkflowViewModel extends ViewModel {
                     .setRequired(true)
                     .setTag(TAG_WORKFLOW_TYPE)
                     .setOptions(options)
+                    .setValue(selectedOption)
+                    .setEnabled(selectedOption == null) //if no prior selection, enable it
                     .build();
 
             formSettings.getFormItems().add(singleChoiceFormItem);
@@ -578,14 +594,14 @@ public class CreateWorkflowViewModel extends ViewModel {
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(singleChoiceFormItem -> {
+                    showLoading.setValue(false);
                     mAddWorkflowTypeItemLiveData
                             .setValue((SingleChoiceFormItem) singleChoiceFormItem);
-                    showLoading.setValue(false);
                 }, throwable -> {
                     Log.d(TAG, "setWorkflowTypes: error " + throwable.getMessage());
-                    showLoading.postValue(false);
+                    showLoading.setValue(false);
                 });
-        disposables.add(disposable);
+        mDisposables.add(disposable);
     }
 
     private void createTextInputFormItem(FormFieldsByWorkflowType field) {
@@ -642,6 +658,246 @@ public class CreateWorkflowViewModel extends ViewModel {
                 .build();
 
         formSettings.getFormItems().add(item);
+    }
+    //endregion
+
+    //region Fill Data
+    private void getWorkflow(String auth, int workflowId) {
+        Disposable disposable = mRepository
+                .getWorkflow(auth, workflowId)
+                .subscribe(this::onWorkflowSuccess, this::onFailure);
+        mDisposables.add(disposable);
+    }
+
+    /**
+     * Handles success when requesting for a workflow by id to the endpoint.
+     *
+     * @param workflowResponse Network response with workflow data.
+     */
+    private void onWorkflowSuccess(WorkflowResponse workflowResponse) {
+        showLoading.setValue(false);
+
+        mWorkflow = workflowResponse.getWorkflow();
+        updateWorkflowInformation(mWorkflow);
+    }
+
+    /**
+     * Fills the form data with the workflow info
+     *
+     * @param workflow Workflow with info to display on the form.
+     */
+    private void updateWorkflowInformation(WorkflowDb workflow) {
+
+        TextInputFormItem titleItem = (TextInputFormItem) formSettings
+                .findItem(FormSettings.MACHINE_NAME_TITLE);
+        titleItem.setValue(workflow.getTitle());
+
+        TextInputFormItem descriptionItem = (TextInputFormItem) formSettings
+                .findItem(FormSettings.MACHINE_NAME_DESCRIPTION);
+        descriptionItem.setValue(workflow.getDescription());
+
+        DateFormItem startDateItem = (DateFormItem) formSettings
+                .findItem(FormSettings.MACHINE_NAME_START_DATE);
+        Date startDate = Utils.getDateFromString(workflow.getStart(), Utils.SERVER_DATE_FORMAT);
+        startDateItem.setValue(startDate);
+//        String endDate = Utils.serverFormatToFormat(workflow.getEnd(), FORMAT);
+
+        if (workflow.getMetas().isEmpty()) {
+            mSetFormItemListLiveData.setValue(formSettings.getFormItems());
+            return;
+        }
+
+        List<Meta> metaList = workflow.getMetas();
+        Meta meta;
+        Moshi moshi = new Moshi.Builder().build();
+        FieldConfig fieldConfig;
+        TypeInfo typeInfo;
+        JsonAdapter<FieldConfig> jsonAdapter = moshi.adapter(FieldConfig.class);
+        for (int i = 0; i < metaList.size(); i++) {
+            meta = metaList.get(i);
+            try {
+                fieldConfig = jsonAdapter.fromJson(meta.getWorkflowTypeFieldConfig());
+                typeInfo = fieldConfig.getTypeInfo();
+                if (typeInfo == null) {
+                    continue;
+                }
+
+                switch (typeInfo.getType()) {
+                    case FormSettings.TYPE_TEXT:
+                    case FormSettings.TYPE_TEXT_AREA:
+                        fillTextInputFormItem(meta, fieldConfig);
+                        break;
+
+                    case FormSettings.TYPE_CHECKBOX:
+                        fillBooleanFormItem(meta, fieldConfig);
+                        break;
+
+                    case FormSettings.TYPE_DATE:
+                        fillDateFormItem(meta, fieldConfig);
+                        break;
+
+                    /*case FormSettings.VALUE_EMAIL:
+                        if (fieldConfig.getMultiple()) {
+                            return null;
+                        }
+                        if (!(meta.getDisplayValue() instanceof String)) {
+                            information.setDisplayValue("");
+                            return information;
+                        }
+
+                        information.setDisplayValue((String) meta.getDisplayValue());
+                        return information;
+                    case FormSettings.VALUE_INTEGER:
+
+                        if (fieldConfig.getMultiple()) {
+                            return null;
+                        }
+
+                        if (typeInfo.getType().equals(TYPE_TEXT)) {
+                            if (!(meta.getDisplayValue() instanceof String)) {
+                                information.setDisplayValue("");
+                                return information;
+                            }
+                            information.setDisplayValue((String) meta.getDisplayValue());
+                            return information;
+                        }
+
+                        if (typeInfo.getType().equals(TYPE_CURRENCY)) {
+                            PostCountryCodeAndValue currency;
+                            JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi
+                                    .adapter(PostCountryCodeAndValue.class);
+                            try {
+                                currency = jsonAdapter.fromJson(meta.getValue());
+                                information.setDisplayValue(String.valueOf(currency.value));
+                                return information;
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                information.setDisplayValue("");
+                                return information;
+                            } catch (JsonDataException e) {
+                                e.printStackTrace();
+                                information.setDisplayValue("");
+                                return information;
+                            }
+                        }
+
+                        if (typeInfo.getType().equals(TYPE_FILE)) {
+                            // TODO handle file.
+                            return null;
+                        }
+
+                        return null;
+                    case FormSettings.VALUE_ENTITY:
+                        if (typeInfo.getType().equals(TYPE_ROLE)) {
+                            String displayValue = getLabelFrom(meta);
+                            information.setDisplayValue(displayValue);
+                            return information;
+                        }
+
+                        return null;
+                    case FormSettings.VALUE_LIST:
+                        if (typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
+                            // TODO implement system user field
+//                    if (fieldConfig.getMultiple()) {
+//                        // {"id":50,"username":"jhonny Garzon","status":true,"email":"jgarzon600@gmail.com"}
+//                    } else {
+//
+//                    }
+
+                            Moshi moshi = new Moshi.Builder().build();
+                            JsonAdapter<PostSystemUser> jsonAdapter = moshi.adapter(PostSystemUser.class);
+                            try {
+                                PostSystemUser systemUser = jsonAdapter.fromJson(meta.getValue());
+                                information.setDisplayValue(systemUser.username);
+                                return information;
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                information.setDisplayValue("");
+                                return information;
+                            }
+                        }
+
+                        String displayValue = getLabelFrom(meta);
+                        information.setDisplayValue(displayValue);
+                        return information;
+                    case FormSettings.VALUE_STRING:
+                        // Until now phone type can only be single and not multiple
+                        if (typeInfo.getType().equals(TYPE_PHONE)) {
+                            PostCountryCodeAndValue phone;
+                            JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi
+                                    .adapter(PostCountryCodeAndValue.class);
+                            try {
+                                phone = jsonAdapter.fromJson(meta.getValue());
+                                information.setDisplayValue(String.valueOf(phone.value));
+                                return information;
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                information.setDisplayValue("");
+                                return information;
+                            } catch (JsonDataException e) {
+                                e.printStackTrace();
+                                information.setDisplayValue("");
+                                return information;
+                            }
+                        }
+
+                        if (!(meta.getDisplayValue() instanceof String)) {
+                            information.setDisplayValue("");
+                            return information;
+                        }
+
+                        information.setDisplayValue((String) meta.getDisplayValue());
+                        return information;*/
+
+                    default:
+                        Log.d(TAG, "format: invalid type. Not Known.");
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.d(TAG, "updateWorkflowInformation: " + e.getMessage());
+            }
+        }
+
+        showLoading.setValue(false);
+        mSetFormItemListLiveData.setValue(formSettings.getFormItems());
+    }
+
+    private void fillTextInputFormItem(Meta meta, FieldConfig fieldConfig) {
+        if (fieldConfig.getMultiple()) {
+            return;
+        }
+
+        String value = meta.getValue();
+
+        TextInputFormItem textInputFormItem = (TextInputFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+        textInputFormItem.setValue(value);
+    }
+
+    private void fillBooleanFormItem(Meta meta, FieldConfig fieldConfig) {
+        if (fieldConfig.getMultiple()) {
+            return;
+        }
+
+        String value = meta.getValue();
+
+        BooleanFormItem booleanFormItem = (BooleanFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+        booleanFormItem.setValue(Boolean.valueOf(value));
+    }
+
+    private void fillDateFormItem(Meta meta, FieldConfig fieldConfig) {
+        if (fieldConfig.getMultiple()) {
+            return;
+        }
+
+        String value = meta.getValue(); // now returns "10 / 25 / 2018"
+
+        DateFormItem startDateItem = (DateFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+        Date startDate = Utils.getDateFromString(value, "dd / MM / yyyy");
+        startDateItem.setValue(startDate);
     }
     //endregion
 
@@ -737,7 +993,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 
     }
 
-    private final static boolean isValidEmail(CharSequence target) {
+    private static boolean isValidEmail(CharSequence target) {
         if (target == null) {
             return false;
         }
@@ -747,7 +1003,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     private void handleCurrencyType(FormFieldsByWorkflowType field) {
         //todo implement
         FieldConfig fieldConfig = field.getFieldConfigObject();
-        Disposable disposable = createWorkflowRepository
+        Disposable disposable = mRepository
                 .getCurrencyCodes()
                 .subscribe(currencyFieldData -> {
                     //list
@@ -789,13 +1045,13 @@ public class CreateWorkflowViewModel extends ViewModel {
                     Log.d(TAG, "handeBuildRoles: " + throwable.getMessage());
                 });
 
-        disposables.add(disposable);
+        mDisposables.add(disposable);
     }
 
     private void handleBuildPhone(FormFieldsByWorkflowType field) {
         //todo implement
         FieldConfig fieldConfig = field.getFieldConfigObject();
-        Disposable disposable = createWorkflowRepository
+        Disposable disposable = mRepository
                 .getCountryCodes()
                 .subscribe(phoneFieldData -> {
                     //list
@@ -838,7 +1094,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                     Log.d(TAG, "handeBuildRoles: " + throwable.getMessage());
                 });
 
-        disposables.add(disposable);
+        mDisposables.add(disposable);
     }
 
     private boolean escape(FieldConfig fieldConfig) {
@@ -856,10 +1112,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                 || value.equals(FormSettings.VALUE_COORD)) {
             return true;
         }
-        if (value.equals(FormSettings.VALUE_LIST) && type.equals(FormSettings.TYPE_SYSTEM_USERS)) {
-            return true;
-        }
-        return false;
+        return value.equals(FormSettings.VALUE_LIST) && type.equals(FormSettings.TYPE_SYSTEM_USERS);
     }
 
     private void handleBuildEntity(FormFieldsByWorkflowType field) {
@@ -927,8 +1180,8 @@ public class CreateWorkflowViewModel extends ViewModel {
         boolean isMultipleSelection = fieldConfig.getMultiple();
         int customFieldId = field.getId();
 
-        Disposable disposable = createWorkflowRepository
-                .getProducts(token)
+        Disposable disposable = mRepository
+                .getProducts(mToken)
                 .subscribe(productsResponse -> {
                     if (productsResponse.getCode() != 200) {
                         showLoading.setValue(false);
@@ -953,7 +1206,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                     Log.d(TAG, "handeBuilProduct: " + throwable.getMessage());
                 });
 
-        disposables.add(disposable);*/
+        mDisposables.add(disposable);*/
 
     }
 
@@ -966,8 +1219,8 @@ public class CreateWorkflowViewModel extends ViewModel {
         int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
 
         // TODO endpoint at this point returns an empty array.
-//        Disposable disposable = createWorkflowRepository
-//                .getProjects(token)
+//        Disposable disposable = mRepository
+//                .getProjects(mToken)
 //                .subscribe( projectResponse -> {
 //
 //                    if (roleResponse.getCode() != 200) {
@@ -993,7 +1246,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 //                    Log.d(TAG, "handeBuildRoles: " + throwable.getMessage());
 //                });
 //
-//        disposables.add(disposable);
+//        mDisposables.add(disposable);
     }
 
     @Deprecated
@@ -1005,8 +1258,8 @@ public class CreateWorkflowViewModel extends ViewModel {
         int customFieldId = field.getId();
         int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
 
-        Disposable disposable = createWorkflowRepository
-                .getRoles(token)
+        Disposable disposable = mRepository
+                .getRoles(mToken)
                 .subscribe(roleResponse -> {
                     if (roleResponse.getCode() != 200) {
                         showLoading.setValue(false);
@@ -1031,7 +1284,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                     Log.d(TAG, "handeBuildRoles: " + throwable.getMessage());
                 });
 
-        disposables.add(disposable);*/
+        mDisposables.add(disposable);*/
     }
 
     @Deprecated
@@ -1044,8 +1297,8 @@ public class CreateWorkflowViewModel extends ViewModel {
         int customFieldId = field.getId();
         int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
 
-        Disposable disposable = createWorkflowRepository
-                .getServices(token)
+        Disposable disposable = mRepository
+                .getServices(mToken)
                 .subscribe(servicesResponse -> {
                     if (servicesResponse.getCode() != 200) {
                         showLoading.setValue(false);
@@ -1070,7 +1323,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                     Log.d(TAG, "handleBuildService: can't get service: " + throwable.getMessage());
                     showLoading.setValue(false);
                 });
-        disposables.add(disposable);*/
+        mDisposables.add(disposable);*/
     }
 
     @Deprecated
@@ -1126,8 +1379,8 @@ public class CreateWorkflowViewModel extends ViewModel {
             return;
         }
 
-        Disposable disposable = createWorkflowRepository
-                .getList(token, listId)
+        Disposable disposable = mRepository
+                .getList(mToken, listId)
                 .subscribe(listsResponse -> {
                     List<ListItem> listItems = listsResponse.getItems();
                     ListItem listItem;
@@ -1159,7 +1412,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                     Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
                 });
 
-        disposables.add(disposable);*/
+        mDisposables.add(disposable);*/
     }
 
     @Deprecated
@@ -1209,7 +1462,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                     showLoading.setValue(false);
                     buildForm.setValue(true);
                 });
-        disposables.add(disposable);*/
+        mDisposables.add(disposable);*/
     }
 
     @Deprecated
@@ -1261,7 +1514,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     private void setTeamList(FormFieldsByWorkflowType field) {
         //todo check
         /*Disposable disposable = Observable.fromCallable(() -> {
-            List<FormCreateProfile> profiles = createWorkflowRepository.getProfiles();
+            List<FormCreateProfile> profiles = mRepository.getProfiles();
             if (profiles == null || profiles.size() < 1) {
                 return false;
             }
@@ -1314,7 +1567,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                     showLoading.setValue(false);
                     buildForm.setValue(true);
                 });
-        disposables.add(disposable);*/
+        mDisposables.add(disposable);*/
     }
 
     private String formatUiDateToPostDate(String uiDateFormat) {
@@ -1339,42 +1592,42 @@ public class CreateWorkflowViewModel extends ViewModel {
     public void getWorkflowTypes(String auth) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
         Log.d("test", "getWorkflowTypes: ");
-        createWorkflowRepository.getWorkflowTypes(auth)
+        mRepository.getWorkflowTypes(auth)
                 .subscribe(this::onTypesSuccess, this::onFailure);
     }
 
     public void getList(String auth, int id) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
-        createWorkflowRepository.getList(auth, id).subscribe(this::onListSuccess, this::onFailure);
+        mRepository.getList(auth, id).subscribe(this::onListSuccess, this::onFailure);
     }
 
     public void getProducts(String auth) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
-        createWorkflowRepository.getProducts(auth)
+        mRepository.getProducts(auth)
                 .subscribe(this::onProductsSuccess, this::onFailure);
     }
 
     public void getServices(String auth) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
-        createWorkflowRepository.getServices(auth)
+        mRepository.getServices(auth)
                 .subscribe(this::onServicesSuccess, this::onFailure);
     }
 
     public void getUsers(String auth) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
-        createWorkflowRepository.getUsers(auth).subscribe(this::onUsersSuccess, this::onFailure);
+        mRepository.getUsers(auth).subscribe(this::onUsersSuccess, this::onFailure);
     }
 
     public void getCountries(String auth) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
-        createWorkflowRepository.getCountries(auth)
+        mRepository.getCountries(auth)
                 .subscribe(this::onCountriesSuccess, this::onFailure);
     }
 
     public void createWorkflow(String auth, int workflowTypeId, String title, String workflowMetas,
                                String start, String description) {
         //todo auth2 SOLO TESTING mientras no esta el backend live
-        createWorkflowRepository.createWorkflow(auth, workflowTypeId, title, workflowMetas,
+        mRepository.createWorkflow(auth, workflowTypeId, title, workflowMetas,
                 start, description).subscribe(this::onCreateSuccess, this::onCreateFailure);
     }
 

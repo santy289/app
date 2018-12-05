@@ -193,8 +193,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         });
 
         fragmentWorkflowBinding.btnAdd.setOnClickListener(view12 -> {
-            mainActivityInterface.showFragment(CreateWorkflowFragment.newInstance(
-                    mainActivityInterface),
+            mainActivityInterface.showFragment(CreateWorkflowFragment.newInstance(),
                     true
             );
         });

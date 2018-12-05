@@ -335,6 +335,12 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         });
 
         holder.getBinding().tvTitle.setText(item.getTitle());
+        if (item.getValue() == null) {
+            holder.getBinding().tvSelectedDate.setText(null);
+        } else {
+            holder.getBinding().tvSelectedDate
+                    .setText(Utils.getFormattedDate(item.getValue(), item.getDateFormat()));
+        }
 
         if (!item.isEnabled()) {
             holder.getBinding().tvSelectedDate

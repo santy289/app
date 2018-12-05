@@ -154,8 +154,18 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         TextInputFormItem item = (TextInputFormItem) getItem(position);
 
         holder.getBinding().tvTitle.setText(item.getTitle());
+        holder.getBinding().etInput.setText(item.getValue());
 
         setTextInputParams(holder.getBinding().etInput, item.getInputType());
+
+        if (!item.isEnabled()) {
+            holder.getBinding().etInput.setBackgroundResource(R.drawable.spinner_bg_disabled);
+            holder.getBinding().etInput.setEnabled(false);
+            return;
+        } else {
+            holder.getBinding().etInput.setBackgroundResource(R.drawable.spinner_bg);
+            holder.getBinding().etInput.setEnabled(true);
+        }
 
         if (hasToEvaluateValid && !item.isValid()) {
             item.setErrorMessage(item.getErrorMessage());
@@ -259,6 +269,16 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.getBinding().spInput.setSelection(index);
         }
 
+        if (!item.isEnabled()) {
+            holder.getBinding().viewSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg_disabled);
+            holder.getBinding().spInput.setEnabled(false);
+            return;
+        } else {
+            holder.getBinding().viewSpinnerBackground.setBackgroundResource(R.drawable.spinner_bg);
+            holder.getBinding().spInput.setEnabled(true);
+        }
+
         if (hasToEvaluateValid && !item.isValid()) {
             holder.getBinding().viewSpinnerBackground
                     .setBackgroundResource(R.drawable.spinner_bg_error);
@@ -273,6 +293,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         holder.getBinding().switchInput.setText(item.getTitle());
         holder.getBinding().switchInput.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> item.setValue(isChecked));
+
+        holder.getBinding().switchInput.setEnabled(item.isEnabled());
     }
 
     private void populateDateView(DateViewHolder holder, int position) {
@@ -313,6 +335,16 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         });
 
         holder.getBinding().tvTitle.setText(item.getTitle());
+
+        if (!item.isEnabled()) {
+            holder.getBinding().tvSelectedDate
+                    .setBackgroundResource(R.drawable.spinner_bg_disabled);
+            holder.getBinding().tvSelectedDate.setEnabled(false);
+            return;
+        } else {
+            holder.getBinding().tvSelectedDate.setBackgroundResource(R.drawable.spinner_bg);
+            holder.getBinding().tvSelectedDate.setEnabled(true);
+        }
 
         if (hasToEvaluateValid && !item.isValid()) {
             holder.getBinding().tvSelectedDate.setBackgroundResource(R.drawable.spinner_bg_error);
@@ -369,20 +401,21 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     private void retrieveValueForTextInputView(TextInputViewHolder holder,
-                                                    TextInputFormItem item) {
+                                               TextInputFormItem item) {
         Editable text = holder.getBinding().etInput.getText();
         String value = text == null ? null : text.toString();
         item.setValue(value);
     }
 
     private void retrieveValueForSingleChoiceView(SingleChoiceViewHolder holder,
-                                                    SingleChoiceFormItem item) {
-        Option selectedOption = item.getOptions().get(holder.getBinding().spInput.getSelectedItemPosition());
+                                                  SingleChoiceFormItem item) {
+        Option selectedOption = item.getOptions()
+                .get(holder.getBinding().spInput.getSelectedItemPosition());
         item.setValue(selectedOption);
     }
 
     private void retrieveValueForBooleanView(BooleanViewHolder holder,
-                                                    BooleanFormItem item) {
+                                             BooleanFormItem item) {
         item.setValue(holder.getBinding().switchInput.isChecked());
     }
 }

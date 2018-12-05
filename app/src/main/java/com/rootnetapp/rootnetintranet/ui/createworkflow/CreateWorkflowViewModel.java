@@ -17,6 +17,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.PendingFileUpload;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
@@ -598,7 +599,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                 .setInputType(valueType)
                 .build();
 
-        switch (item.getInputType()){
+        switch (item.getInputType()) {
             case TextInputFormItem.InputType.EMAIL:
                 item.setRegex(Patterns.EMAIL_ADDRESS.toString());
                 break;

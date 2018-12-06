@@ -31,6 +31,15 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
 
     private static final String TAG = "ListBoundaryCallback";
 
+    /**
+     * Constructor used when we want request a full workflow list request.
+     *
+     * @param service
+     * @param token
+     * @param currentPage
+     * @param workflowsCallback
+     * @param id
+     */
     public WorkflowListBoundaryCallback(
             ApiInterface service,
             String token,
@@ -46,6 +55,14 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
         this.id = id;
     }
 
+    /**
+     * Constructor used when we do a request without some specific id.
+     *
+     * @param service
+     * @param token
+     * @param currentPage
+     * @param workflowsCallback
+     */
     public WorkflowListBoundaryCallback(
             ApiInterface service,
             String token,

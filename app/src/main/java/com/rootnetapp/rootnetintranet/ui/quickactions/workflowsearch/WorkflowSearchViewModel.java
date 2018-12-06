@@ -11,6 +11,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
+import androidx.paging.PagedList;
 import io.reactivex.disposables.CompositeDisposable;
 
 public class WorkflowSearchViewModel extends ViewModel {
@@ -24,6 +25,9 @@ public class WorkflowSearchViewModel extends ViewModel {
     protected MutableLiveData<Boolean> showBottomSheetLoading;
     protected LiveData<List<WorkflowListItem>> workflowListFromRepo;
     protected LiveData<Boolean> handleShowLoadingByRepo;
+    private LiveData<PagedList<WorkflowListItem>> liveWorkflows;
+    private MutableLiveData<PagedList<WorkflowListItem>> updateWithSortedList;
+
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
     private String mToken;
@@ -48,7 +52,7 @@ public class WorkflowSearchViewModel extends ViewModel {
     protected void init(String token) {
         this.mToken = token;
         mPageNumber = 1;
-        getWorkflowList();
+        setWorkflowListNoFilters(token);
     }
 
     /**
@@ -88,6 +92,45 @@ public class WorkflowSearchViewModel extends ViewModel {
                     return show;
                 }
         );
+
+//        liveWorkflows = Transformations.map(
+//                mRepository.getAll
+//        )
+
+
+
+
+    }
+
+    // First to be called
+    private void setWorkflowListNoFilters(String token) {
+        mRepository.setWorkflowList(token);
+        liveWorkflows = mRepository.getAllWorkflows();
+    }
+
+    /**
+     * This will be call with the upcoming PagedList wrapper in order to fist determine if we have
+     * data and this will let the ViewModel take all the necessary decisions to update the UI
+     * accordingly. And finally it will pass on the data to the View if we have data to pass.
+     *
+     * @param listWorkflows
+     *  PagedList with the content coming from the database.
+     */
+    protected void handleUiAndIncomingList(PagedList<WorkflowListItem> listWorkflows) {
+        if (listWorkflows == null) {
+            showList.setValue(false);
+            return;
+        }
+        if(listWorkflows.size() < 1){
+            showList.setValue(false);
+            return;
+        }
+        updateWithSortedList.setValue(listWorkflows);
+        showList.setValue(true);
+    }
+
+    protected LiveData<PagedList<WorkflowListItem>> getAllWorkflows() {
+        return liveWorkflows;
     }
 
     /**
@@ -192,5 +235,12 @@ public class WorkflowSearchViewModel extends ViewModel {
             showToastMessage = new MutableLiveData<>();
         }
         return showToastMessage;
+    }
+
+    protected LiveData<PagedList<WorkflowListItem>> getObservableUpdateWithSortedList() {
+        if (updateWithSortedList == null) {
+            updateWithSortedList = new MutableLiveData<>();
+        }
+        return updateWithSortedList;
     }
 }

@@ -32,7 +32,9 @@ import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.paging.PagedList;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -76,8 +78,8 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
 
-        workflowSearchViewModel.init(token);
         setupWorkflowRecyclerView();
+        workflowSearchViewModel.init(token);
         setOnClickListeners();
         setupBottomSheet();
         subscribe();
@@ -109,11 +111,16 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
         workflowSearchViewModel.showBottomSheetLoading.removeObservers(this);
         workflowSearchViewModel.showBottomSheetLoading.observe(this, this::showBottomSheetLoading);
 
-        workflowSearchViewModel.workflowListFromRepo.removeObservers(this);
-        workflowSearchViewModel.workflowListFromRepo.observe(this, this::updateAdapterList);
+        final Observer<PagedList<WorkflowListItem>> updateWithSortedListObserver = (this::updateAdapterList);
 
         workflowSearchViewModel.handleShowLoadingByRepo.removeObservers(this);
         workflowSearchViewModel.handleShowLoadingByRepo.observe(this, this::showLoading);
+
+        workflowSearchViewModel
+                .getObservableUpdateWithSortedList()
+                .observe(this, updateWithSortedListObserver);
+
+        addWorkflowsObserver();
     }
 
     /**
@@ -132,23 +139,7 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
 
         mAdapter = new WorkflowListAdapter(this);
         mBinding.rvWorkflows.setAdapter(mAdapter);
-
-        mBinding.scrollView.setOnScrollChangeListener(
-                (NestedScrollView.OnScrollChangeListener) (scrollView, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-                    if (workflowSearchViewModel.isLoading()) {
-                        return;
-                    }
-
-                    // We take the last child in the scrollview
-                    View view = scrollView.getChildAt(scrollView.getChildCount() - 1);
-                    int diff = (view.getBottom() - (scrollView.getHeight() + scrollView
-                            .getScrollY()));
-
-                    // if diff is zero, then the bottom has been reached
-                    if (diff == 0) {
-                        workflowSearchViewModel.bottomReached();
-                    }
-                });
+        mBinding.rvWorkflows.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -162,7 +153,8 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
      * Executes the search button action by requesting the queried list.
      */
     private void performSearch() {
-        clearAdapterList();
+        // TODO make it work with new Adapter implementation. Still pending this work.
+        //clearAdapterList();
 
         String query = mBinding.etSearch.getText().toString();
         workflowSearchViewModel.performSearch(query);
@@ -184,14 +176,9 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
      * @param workflowDbList updated list.
      */
     @UiThread
-    private void updateAdapterList(List<WorkflowListItem> workflowDbList) {
+    private void updateAdapterList(PagedList<WorkflowListItem> workflowDbList) {
         clearSearchText();
-        mAdapter.addData(workflowDbList);
-    }
-
-    @UiThread
-    private void clearAdapterList() {
-        mAdapter.clearData();
+        mAdapter.submitList(workflowDbList);
     }
 
     @UiThread
@@ -231,6 +218,21 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
         }
 
         mQuickActionsInterface.showFragment(PerformActionFragment.newInstance(item, mAction), true);
+    }
+
+    // Used when we have a general workflow.
+    final Observer<PagedList<WorkflowListItem>> getAllWorkflowsObserver = (listWorkflows -> {
+//        fragmentWorkflowBinding.swipeRefreshLayout.setRefreshing(false);
+        if (mAdapter == null) {
+            return;
+        }
+
+        workflowSearchViewModel.handleUiAndIncomingList(listWorkflows);
+    });
+
+    private void addWorkflowsObserver() {
+        workflowSearchViewModel.getAllWorkflows().removeObservers(this);
+        workflowSearchViewModel.getAllWorkflows().observe(this, getAllWorkflowsObserver);
     }
 
     @UiThread

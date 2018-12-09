@@ -169,10 +169,12 @@
     <string name="sales_force">Sales Force - Status</string>
     <string name="users">Users</string>
     <string name="no_selection">No Selection</string>
+    <string name="no_selection_hint">- No Selection -</string>
     <string name="form_workflow_type">Workflow Type</string>
     <string name="pick_option">Pick any item</string>
     <string name="enter_email">Enter Email</string>
     <string name="create_workflow">Create Workflow</string>
+    <string name="edit_workflow">Edit Workflow</string>
     <string name="yes">Yes</string>
     <string name="no" translatable="false">No</string>
     <string name="ok" translatable="false">OK</string>
@@ -185,7 +187,9 @@
     <string name="country_code">Country Code</string>
     <string name="currency_type">Currency Type</string>
     <string name="created">Created</string>
-    <string name="workflow_created">Your workflow was created.</string>
+    <string name="workflow_created">You have created the workflow:</string>
+    <string name="edited">Edited</string>
+    <string name="workflow_edit">You have edited the workflow:</string>
     <string name="error">Error</string>
     <string name="error_create_workflow">Something happened while saving your new workflow. Try again later.</string>
     <string name="choose_a_workflow">Choose a workflow type to continue.</string>

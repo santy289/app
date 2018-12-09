@@ -4,6 +4,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.requests.approval.ApprovalRequest;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
+import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
 import com.rootnetapp.rootnetintranet.models.requests.comment.PostCommentRequest;
 import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
@@ -245,7 +246,6 @@ public interface ApiInterface {
                                                       @Field("start") String start,
                                                       @Field("description") String description);
 
-
     @Headers({"Domain-Name: api", "Content-Type: application/json;charset=UTF-8"})
     @POST("intranet/workflows")
     Observable<CreateWorkflowResponse> createWorkflow(@Header("Authorization") String authorization,
@@ -255,6 +255,13 @@ public interface ApiInterface {
     @POST("intranet/workflows")
     Observable<CreateWorkflowResponse> createWorkflow(@Header("Authorization") String authorization,
                                                       @Body String body);
+
+    //todo test
+    @Headers({"Domain-Name: api", "Content-Type: application/json;charset=UTF-8"})
+    @PATCH("intranet/workflows/{id}")
+    Observable<CreateWorkflowResponse> editWorkflow(@Header("Authorization") String authorization,
+                                                    @Path("id") int workflowId,
+                                                    @Body EditRequest body);
 
     @Headers({"Domain-Name: api"})
     @POST("upload/file")

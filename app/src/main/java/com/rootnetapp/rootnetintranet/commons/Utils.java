@@ -48,6 +48,7 @@ public class Utils {
     public static String domain;
 
     public static final String SERVER_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
+    public static final String STANDARD_DATE_DISPLAY_FORMAT = "MMMM dd, yyyy";
 
     public static String getImgDomain() {
         return imgDomain;
@@ -76,9 +77,12 @@ public class Utils {
                 progress = new ProgressDialog(ctx);
             }
         }
-        progress.show();
-        progress.setMessage(ctx.getString(R.string.loading_message));
-        progress.setCancelable(false);
+
+        if (!progress.isShowing()) {
+            progress.show();
+            progress.setCancelable(false);
+            progress.setMessage(ctx.getString(R.string.loading_message));
+        }
     }
 
     public static void hideLoading() {
@@ -278,8 +282,8 @@ public class Utils {
     }
 
     /**
-     * Transforms a Base64 encoded string into a PDF {@link File} object. Also, saves the file locally
-     * on the external downloads folder.
+     * Transforms a Base64 encoded string into a PDF {@link File} object. Also, saves the file
+     * locally on the external downloads folder.
      *
      * @param base64   encoded string.
      * @param fileName name of the file to be saved.
@@ -316,7 +320,7 @@ public class Utils {
      * @throws IOException exception caused by the decoding/saving operations.
      */
     public static File decodeFileFromBase64Binary(String base64,
-                                                 String fileName) throws IOException {
+                                                  String fileName) throws IOException {
         String downloadsPath = Environment
                 .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/";
 
@@ -356,10 +360,75 @@ public class Utils {
     }
 
     public static Date getDateFromString(String date, String format) {
-        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.US);
+        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
         try {
             return sdf.parse(date);
         } catch (ParseException e) {
+            Log.d(TAG, "getDateFromString: ", e);
+            return null;
+        }
+    }
+
+    /**
+     * Creates the given date in integers as a Date object
+     *
+     * @param year        year in integer
+     * @param monthOfYear 0-11
+     * @param dayOfMonth  1-31
+     *
+     * @return Date object
+     */
+    public static Date getDateFromIntegers(int year, int monthOfYear, int dayOfMonth) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, year);
+        calendar.set(Calendar.MONTH, monthOfYear);
+        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        return calendar.getTime();
+    }
+
+    /**
+     * Formats the given date object to the required WS format.
+     *
+     * @param date date to format
+     *
+     * @return formatted date.
+     */
+    public static String getDatePostFormat(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        return sdf.format(date);
+    }
+
+    /**
+     * Formats the given date object to the given format
+     *
+     * @param date date to format
+     *
+     * @return formatted date.
+     */
+    public static String getFormattedDate(Date date, String outputFormat) {
+        SimpleDateFormat sdf = new SimpleDateFormat(outputFormat, Locale.getDefault());
+        return sdf.format(date);
+    }
+
+    /**
+     * Formats the given date String to the specified format.
+     *
+     * @param strDate date in String to format.
+     * @param inputFormat the format that the date is in.
+     * @param outputFormat the output format for the given date.
+     *
+     * @return formatted date.
+     */
+    public static String getFormattedDate(String strDate, String inputFormat, String outputFormat) {
+        SimpleDateFormat inputFormatter = new SimpleDateFormat(inputFormat, Locale.getDefault());
+        try {
+            Date date = inputFormatter.parse(strDate);
+            SimpleDateFormat outputFormatter = new SimpleDateFormat(outputFormat,
+                    Locale.getDefault());
+            return outputFormatter.format(date);
+
+        } catch (ParseException e) {
+            Log.d(TAG, "getFormattedDate: ", e);
             return null;
         }
     }

@@ -11,6 +11,7 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentPerformActionBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusFragment;
@@ -70,7 +71,7 @@ public class PerformActionFragment extends Fragment {
     private void showActionFragment() {
         switch (mAction) {
             case QuickAction.EDIT_WORKFLOW:
-                //todo add fragment
+                showFragment(CreateWorkflowFragment.newInstance(mWorkflowListItem), true);
                 break;
             case QuickAction.APPROVE_WORKFLOW:
                 showFragment(StatusFragment.newInstance(mWorkflowListItem), true);

@@ -24,7 +24,7 @@ import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
-import com.rootnetapp.rootnetintranet.ui.createworkflow.WorkFlowCreateFragment;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityViewModel;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
@@ -193,8 +193,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         });
 
         fragmentWorkflowBinding.btnAdd.setOnClickListener(view12 -> {
-            mainActivityInterface.showFragment(WorkFlowCreateFragment.newInstance(
-                    mainActivityInterface),
+            mainActivityInterface.showFragment(CreateWorkflowFragment.newInstance(),
                     true
             );
         });

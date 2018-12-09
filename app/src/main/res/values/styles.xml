@@ -29,7 +29,7 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
 
-    <style name="SwitchStyle" parent="Theme.MaterialComponents.Light">
+    <style name="SwitchStyle" parent="Widget.MaterialComponents.CompoundButton.Switch">
         <!-- active thumb & track color (30% transparency) -->
         <item name="colorControlActivated">@color/colorPrimary</item>
 
@@ -45,4 +45,8 @@
     <style name="SplashTheme" parent="Theme.MaterialComponents.NoActionBar">
         <item name="android:windowBackground">@drawable/splash_bg</item>
     </style>
+
+    <!--For DatePickerDialog library-->
+    <style name="mdtp_ActionButton.Text" parent="Widget.MaterialComponents.Button.TextButton" />
+
 </resources>

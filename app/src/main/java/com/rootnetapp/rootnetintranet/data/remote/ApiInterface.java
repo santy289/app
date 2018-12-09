@@ -5,6 +5,8 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.requests.approval.ApprovalRequest;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
+import com.rootnetapp.rootnetintranet.models.requests.comment.PostCommentRequest;
+import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
@@ -296,12 +298,9 @@ public interface ApiInterface {
 
     @Headers({"Domain-Name: api"})
     @POST("intranet/workflow/{id}/comment")
-    @FormUrlEncoded
     Observable<CommentResponse> postComment(@Header("Authorization") String authorization,
                                             @Path("id") int workflowId,
-                                            @Field("description") String description,
-                                            @Field("is_private") boolean isPrivate,
-                                            @Field("files") List<CommentFile> files);
+                                            @Body PostCommentRequest request);
     @Headers({"Domain-Name: api"})
     @POST("intranet/workflow/{id}/approval")
     Observable<WorkflowApproveRejectResponse> postApproveReject(@Header("Authorization") String authorization,

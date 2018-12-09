@@ -298,7 +298,7 @@ public class Utils {
                 .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/";
 
         final File pdfFile = new File(downloadsPath + fileName + ".pdf");
-        byte[] pdfAsBytes = Base64.decode(base64, 0);
+        byte[] pdfAsBytes = Base64.decode(base64, Base64.DEFAULT);
         FileOutputStream os;
         os = new FileOutputStream(pdfFile, false);
         os.write(pdfAsBytes);
@@ -324,15 +324,15 @@ public class Utils {
         String downloadsPath = Environment
                 .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/";
 
-        final File pdfFile = new File(downloadsPath + fileName);
-        byte[] pdfAsBytes = Base64.decode(base64, 0);
+        final File file = new File(downloadsPath + fileName);
+        byte[] fileAsBytes = Base64.decode(base64, Base64.DEFAULT);
         FileOutputStream os;
-        os = new FileOutputStream(pdfFile, false);
-        os.write(pdfAsBytes);
+        os = new FileOutputStream(file, false);
+        os.write(fileAsBytes);
         os.flush();
         os.close();
 
-        return pdfFile;
+        return file;
     }
 
     private static byte[] loadFile(File file) throws IOException {

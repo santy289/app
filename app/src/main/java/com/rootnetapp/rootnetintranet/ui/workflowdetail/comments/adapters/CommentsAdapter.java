@@ -9,23 +9,33 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.CommentsItemBinding;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
+import com.rootnetapp.rootnetintranet.models.responses.comments.CommentFileResponse;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragmentInterface;
 
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> {
-
-    public List<Comment> comments;
+public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> implements
+        CommentsAdapterInterface {
 
     private static final String format = "MMM d, y - hh:mm a";
 
-    public CommentsAdapter(List<Comment> comments) {
+    public List<Comment> comments;
+
+    private Context mContext;
+    private CommentsFragmentInterface commentsFragmentInterface;
+
+
+    public CommentsAdapter(CommentsFragmentInterface commentsFragmentInterface,Context context, List<Comment> comments) {
+        this.commentsFragmentInterface = commentsFragmentInterface;
+        this.mContext = context;
         this.comments = comments;
     }
 
-    public void addItem(Comment comment){
+    public void addItem(Comment comment) {
         comments.add(0, comment);
         notifyItemInserted(0);
         getItemCount();
@@ -56,10 +66,20 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> {
         holder.binding.tvDate.setText(dateFormatted);
         holder.binding.tvComment.setText(item.getDescription());
         holder.binding.executePendingBindings();
+
+        CommentsAttachmentsAdapter adapter = new CommentsAttachmentsAdapter(this, item.getFiles());
+        holder.binding.rvAttachments.setLayoutManager(
+                new LinearLayoutManager(mContext, RecyclerView.HORIZONTAL, false));
+        holder.binding.rvAttachments.setAdapter(adapter);
     }
 
     @Override
     public int getItemCount() {
         return comments.size();
+    }
+
+    @Override
+    public void downloadAttachment(CommentFileResponse commentFile) {
+        commentsFragmentInterface.downloadCommentAttachment(commentFile);
     }
 }

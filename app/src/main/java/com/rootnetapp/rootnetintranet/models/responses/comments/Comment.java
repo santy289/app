@@ -13,7 +13,7 @@ public class Comment {
     @Json(name = "description")
     private String description;
     @Json(name = "files")
-    private List<Object> files = null;
+    private List<CommentFileResponse> files = null;
     @Json(name = "date")
     private String date;
     @Json(name = "is_private")
@@ -43,11 +43,11 @@ public class Comment {
         this.description = description;
     }
 
-    public List<Object> getFiles() {
+    public List<CommentFileResponse> getFiles() {
         return files;
     }
 
-    public void setFiles(List<Object> files) {
+    public void setFiles(List<CommentFileResponse> files) {
         this.files = files;
     }
 
@@ -59,11 +59,12 @@ public class Comment {
         this.date = date;
     }
 
-    public boolean isPrivate() {
+    public boolean isIsPrivate() {
         return isPrivate;
     }
 
-    public void setPrivate(boolean aPrivate) {
-        isPrivate = aPrivate;
+    public void setIsPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
     }
+
 }

@@ -26,7 +26,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:barrierDirection="end"
-            app:constraint_referenced_ids="img_user"/>
+            app:constraint_referenced_ids="img_user" />
 
         <TextView
             android:id="@+id/tv_name"
@@ -38,8 +38,8 @@
             android:textColor="@color/text_blue"
             android:textSize="16sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@id/tv_date"
             app:layout_constrainedWidth="true"
+            app:layout_constraintEnd_toStartOf="@id/tv_date"
             app:layout_constraintStart_toEndOf="@+id/barrier_img"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Jon Doe" />
@@ -50,16 +50,16 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            app:layout_constraintWidth_min="100dp"
             android:minWidth="40dp"
             android:textAlignment="textEnd"
-            android:textSize="12sp"
             android:textColor="@color/low_gray_text"
+            android:textSize="12sp"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintBottom_toBottomOf="@id/tv_name"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/tv_name"
             app:layout_constraintTop_toTopOf="@id/tv_name"
-            app:layout_constrainedWidth="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="@id/tv_name"
+            app:layout_constraintWidth_min="100dp"
             tools:text="November 12, 2018 - 12:00 PM" />
 
         <androidx.constraintlayout.widget.Barrier
@@ -67,7 +67,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:barrierDirection="bottom"
-            app:constraint_referenced_ids="tv_name,tv_date"/>
+            app:constraint_referenced_ids="tv_name,tv_date" />
 
         <TextView
             android:id="@+id/tv_comment"
@@ -77,11 +77,23 @@
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/barrier_img"
             app:layout_constraintTop_toBottomOf="@+id/barrier_text"
             tools:text="more and amore mandm jmuch mor info for this chat" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_attachments"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:paddingBottom="8dp"
+            android:clipToPadding="false"
+            android:paddingEnd="8dp"
+            android:paddingStart="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tv_comment"
+            app:layout_constraintTop_toBottomOf="@id/tv_comment" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

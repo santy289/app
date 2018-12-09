@@ -263,6 +263,10 @@
     <string name="workflow_detail_comments_fragment_input_comment_hint">Type your comment here…</string>
     <string name="workflow_detail_comments_fragment_button_comment">Comment</string>
     <string name="workflow_detail_comments_fragment_no_comments">There are no comments to show</string>
+    <string name="workflow_detail_comments_fragment_no_file_manager">Please install a File Manager.</string>
+    <string name="workflow_detail_comments_fragment_select_file">Select a file to upload</string>
+    <string name="workflow_detail_comments_fragment_open_file">Open File</string>
+    <string name="workflow_detail_comments_fragment_cannot_open_file">This file cannot be opened by your device.</string>
     <!--FilesFragment-->
     <string name="workflow_detail_files_fragment_title">@string/workflow_detail_files_fragment_documents</string>
     <string name="workflow_detail_files_fragment_documents">Documents</string>

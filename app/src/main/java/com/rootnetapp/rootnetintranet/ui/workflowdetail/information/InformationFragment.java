@@ -14,6 +14,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailInformationBinding;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Step;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.Information;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.InformationAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters.StepsAdapter;
@@ -37,13 +38,17 @@ public class InformationFragment extends Fragment {
     private InformationViewModel informationViewModel;
     private FragmentWorkflowDetailInformationBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
+    private BaseInformationFragmentInterface mBaseInformationFragmentInterface;
 
     public InformationFragment() {
         // Required empty public constructor
     }
 
-    public static InformationFragment newInstance(WorkflowListItem item) {
+    public static InformationFragment newInstance(
+            BaseInformationFragmentInterface baseInformationFragmentInterface,
+            WorkflowListItem item) {
         InformationFragment fragment = new InformationFragment();
+        fragment.mBaseInformationFragmentInterface = baseInformationFragmentInterface;
         fragment.mWorkflowListItem = item;
         return fragment;
     }
@@ -64,6 +69,7 @@ public class InformationFragment extends Fragment {
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
 
+        setOnClickListeners();
         subscribe();
         informationViewModel.initDetails(token, mWorkflowListItem);
 
@@ -84,6 +90,12 @@ public class InformationFragment extends Fragment {
         informationViewModel.updateInformationListUi.observe(this, this::updateInformationListUi);
         informationViewModel.showImportantInfoSection.observe(this, this::showImportantInfoSection);
         informationViewModel.loadImportantInfoSection.observe(this, this::loadImportantInfoSection);
+    }
+
+    private void setOnClickListeners() {
+        mBinding.btnEdit.setOnClickListener(v -> {
+            mBaseInformationFragmentInterface.showFragment(CreateWorkflowFragment.newInstance(mWorkflowListItem), true);
+        });
     }
 
     @UiThread

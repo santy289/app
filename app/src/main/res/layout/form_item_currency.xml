@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/form_items_space"
+        android:layout_marginBottom="@dimen/form_items_space">
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="5dp"
+            android:textAllCaps="true"
+            android:textColor="@color/colorPrimaryDark"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="placeholder title" />
+
+        <View
+            android:id="@+id/view_spinner_background"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/spinner_bg"
+            app:layout_constraintBottom_toBottomOf="@+id/sp_currency"
+            app:layout_constraintEnd_toEndOf="@+id/sp_currency"
+            app:layout_constraintStart_toStartOf="@+id/sp_currency"
+            app:layout_constraintTop_toTopOf="@+id/sp_currency" />
+
+        <Spinner
+            android:id="@+id/sp_currency"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:spinnerMode="dialog"
+            app:layout_constraintEnd_toStartOf="@+id/et_currency"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintStart_toStartOf="@id/tv_title"
+            app:layout_constraintTop_toBottomOf="@id/tv_title" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/et_currency"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/spinner_bg"
+            android:hint="@string/amount"
+            android:maxLines="1"
+            android:paddingStart="10dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="10dp"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@id/sp_currency"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight="2"
+            app:layout_constraintStart_toEndOf="@id/sp_currency"
+            app:layout_constraintTop_toTopOf="@id/sp_currency" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

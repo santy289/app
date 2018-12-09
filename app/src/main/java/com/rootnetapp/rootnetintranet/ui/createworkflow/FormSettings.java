@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
@@ -15,6 +16,9 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.PostCountryCodeAndVa
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductJsonValue;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.role.Role;
 import com.rootnetapp.rootnetintranet.models.responses.services.Service;
@@ -28,18 +32,14 @@ import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import androidx.collection.ArrayMap;
 import me.riddhimanadib.formmaster.FormBuilder;
 
 public class FormSettings {
+
     private ArrayList<String> names;
     private ArrayList<Integer> ids;
     private int indexWorkflowTypeSelected;
@@ -49,13 +49,12 @@ public class FormSettings {
     private long createdTimestamp;
     private ArrayList<FormCreateProfile> profiles;
     private List<FormFieldsByWorkflowType> fields; // Full info of all fields.
-    private ArrayList<ListField> formLists;
-    private ArrayList<FieldData> fieldItems;
     private Moshi moshi;
     private String uploadFileName;
     private String uploadFileExtension;
     private PendingFileUpload pendingFileUpload;
     private FormBuilder formBuilder;
+    private List<BaseFormItem> formItems; //new
 
     public static final String TYPE_TEXT = "text";
     public static final String TYPE_TEXT_AREA = "textarea";
@@ -93,8 +92,6 @@ public class FormSettings {
         ids = new ArrayList<>();
         profiles = new ArrayList<>();
         fields = new ArrayList<>();
-        formLists = new ArrayList<>();
-        fieldItems = new ArrayList<>();
         indexWorkflowTypeSelected = 0;
         title = "";
         description = "";
@@ -183,6 +180,7 @@ public class FormSettings {
     }
 
     public int countryCode;
+
     public boolean hasValidCountryCode() {
         if (countryCode > 0) {
             return true;
@@ -191,6 +189,7 @@ public class FormSettings {
     }
 
     public int countryCurrency;
+
     public boolean hasValidCountryCurrency() {
         if (countryCurrency > 0) {
             return true;
@@ -212,7 +211,7 @@ public class FormSettings {
             }
             countryCode = codeMeta.id;
         }
-     }
+    }
 
     public void setCurrencyType(String fieldValue, FieldData fieldData) {
         if (TextUtils.isEmpty(fieldValue)) {
@@ -263,54 +262,41 @@ public class FormSettings {
         return id;
     }
 
-    public WorkflowMetas formatMetaData(WorkflowMetas metaData, FieldData fieldData) {
-        int fieldId = metaData.getWorkflowTypeFieldId();
-        TypeInfo typeInfo = findFieldDataById(fieldId);
+    protected void formatMetaData(WorkflowMetas metaData, BaseFormItem formItem) {
+        TypeInfo typeInfo = formItem.getTypeInfo();
+        if (typeInfo == null) {
+            return;
+        }
+
+        format(metaData, typeInfo, formItem);
+    }
+
+    public WorkflowMetas formatMetaData(WorkflowMetas metaData, BaseFormItem formItem,
+                                        FieldConfig fieldConfig) {
+        TypeInfo typeInfo = fieldConfig.getTypeInfo();
         if (typeInfo == null) {
             return metaData;
         }
-        format(metaData, typeInfo, fieldData);
+        //todo check
+        /*boolean rememberRealValue = fieldData.isMultipleSelection;
+        fieldData.isMultipleSelection = true;*/
+        format(metaData, typeInfo, formItem);
+//        fieldData.isMultipleSelection = rememberRealValue;
         return metaData;
     }
 
-    public WorkflowMetas formatMetaData(WorkflowMetas metaData, FieldData fieldData, FieldConfig fieldConfig) {
-       TypeInfo typeInfo = fieldConfig.getTypeInfo();
-        if (typeInfo == null) {
-            return metaData;
-        }
-        boolean rememberRealValue = fieldData.isMultipleSelection;
-        fieldData.isMultipleSelection = true;
-        format(metaData, typeInfo, fieldData);
-        fieldData.isMultipleSelection = rememberRealValue;
-        return metaData;
-    }
-
-    private void format(WorkflowMetas metaData, TypeInfo typeInfo, FieldData fieldData) {
+    private void format(WorkflowMetas metaData, TypeInfo typeInfo, BaseFormItem formItem) {
         String value = metaData.getUnformattedValue();
         if (TextUtils.isEmpty(value)) {
             return;
         }
-
 
         switch (typeInfo.getValueType()) {
             case FormSettings.VALUE_BOOLEAN:
                 handleBoolean(typeInfo, metaData, value);
                 break;
             case FormSettings.VALUE_DATE:
-                SimpleDateFormat dateFormat = new SimpleDateFormat(
-                        "dd-MM-yyyy",
-                        Locale.getDefault());
-                String metaDateString = "";
-                try {
-                    Date convertedDate = dateFormat.parse(value);
-                    SimpleDateFormat serverFormat = new SimpleDateFormat(
-                            "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
-                            Locale.getDefault());
-                    metaDateString = serverFormat.format(convertedDate);
-                } catch (ParseException e) {
-                    Log.d(TAG, "StringDateToTimestamp: e = " + e.getMessage());
-                }
-                metaData.setValue(metaDateString);
+                metaData.setValue(value);
                 break;
             case FormSettings.VALUE_EMAIL:
                 metaData.setValue(value);
@@ -335,7 +321,7 @@ public class FormSettings {
                 metaData.setValue("");
                 break;
             case FormSettings.VALUE_ENTITY:
-                handleList(fieldData, metaData, value);
+                handleSingleSelection((SingleChoiceFormItem) formItem, metaData, value);
                 break;
             case FormSettings.VALUE_LIST:
                 if (typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
@@ -345,7 +331,7 @@ public class FormSettings {
                 }
 
                 if (typeInfo.getType().equals(TYPE_PRODUCT)) {
-                    String json = getProductJson(value, fieldData, metaData);
+                    String json = getProductJson(value, (SingleChoiceFormItem) formItem, metaData);
                     metaData.setValue(json);
                     break;
                 }
@@ -355,7 +341,7 @@ public class FormSettings {
 
                 }
 
-                handleList(fieldData, metaData, value);
+                handleSingleSelection((SingleChoiceFormItem) formItem, metaData, value);
                 break;
             case FormSettings.VALUE_STRING:
                 if (typeInfo.getType().equals(TYPE_PHONE)) {
@@ -366,6 +352,7 @@ public class FormSettings {
                 metaData.setValue(value);
                 break;
             case FormSettings.VALUE_TEXT:
+            case FormSettings.TYPE_LINK:
                 metaData.setValue(value);
                 break;
             default:
@@ -375,7 +362,7 @@ public class FormSettings {
         }
 
         // Do not escape this fields
-        if (!fieldData.escape
+        if (!formItem.isEscaped()
                 || typeInfo.getType().equals(TYPE_SYSTEM_USERS)
                 || typeInfo.getType().equals(TYPE_PHONE)
                 || typeInfo.getType().equals(TYPE_CURRENCY)
@@ -392,15 +379,16 @@ public class FormSettings {
         metaData.setValue(gson.toJson(metaValue));
     }
 
-    private String getProductJson(String value, FieldData fieldData, WorkflowMetas workflowMetas) {
-        ArrayList<ListFieldItemMeta> list = fieldData.list;
-        ListFieldItemMeta item;
+    private String getProductJson(String value, SingleChoiceFormItem formItem,
+                                  WorkflowMetas workflowMetas) {
+        List<Option> list = formItem.getOptions();
+        Option item;
         int id = 0;
         for (int i = 0; i < list.size(); i++) {
             item = list.get(i);
-            if (item.name.equals(value)) {
-               id = item.id;
-               break;
+            if (item.getName().equals(value)) {
+                id = item.getId();
+                break;
             }
         }
 
@@ -443,7 +431,8 @@ public class FormSettings {
         postCountryCodeAndValue.countryId = countryCurrency;
         postCountryCodeAndValue.value = Integer.valueOf(currencyNumber);
 
-        JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi.adapter(PostCountryCodeAndValue.class);
+        JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi
+                .adapter(PostCountryCodeAndValue.class);
         String jsonString = jsonAdapter.toJson(postCountryCodeAndValue);
         return jsonString;
     }
@@ -457,7 +446,8 @@ public class FormSettings {
         postCountryCodeAndValue.countryId = countryCode;
         postCountryCodeAndValue.value = Integer.valueOf(phoneNumber);
 
-        JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi.adapter(PostCountryCodeAndValue.class);
+        JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi
+                .adapter(PostCountryCodeAndValue.class);
         String jsonString = jsonAdapter.toJson(postCountryCodeAndValue);
         return jsonString;
     }
@@ -481,7 +471,7 @@ public class FormSettings {
 
     private void handleBoolean(TypeInfo typeInfo, WorkflowMetas metaData, String value) {
         if (typeInfo.getType().equals(TYPE_CHECKBOX)) {
-            if (value.equals("Sí") || value.equals("Yes")) {
+            if (value.equals("Sí") || value.equals("Yes") || value.equals("true")) {
                 metaData.setValue("true");
             } else {
                 metaData.setValue("false");
@@ -489,14 +479,16 @@ public class FormSettings {
         }
     }
 
-    private void handleList(FieldData fieldData, WorkflowMetas metaData, String value) {
-        ArrayList<ListFieldItemMeta> list = fieldData.list;
+    private void handleSingleSelection(SingleChoiceFormItem formItem, WorkflowMetas metaData,
+                                       String value) {
+        List<Option> list = formItem.getOptions();
         if (list == null) {
             return;
         }
 
         int id;
-        if (fieldData.isMultipleSelection) {
+        //todo handle multiple selection
+        /*if (fieldData.isMultipleSelection) {
             ArrayList<String> matches = new ArrayList<>();
             String selection;
             List<String> values = Arrays.asList(value.split("\\s*,\\s*"));
@@ -525,40 +517,41 @@ public class FormSettings {
         } else {
             id = findIdByValue(list, value);
             metaData.setValue(String.valueOf(id));
-        }
+        }*/
+
+        id = findIdByValue(list, value);
+        metaData.setValue(String.valueOf(id));
     }
 
-    private int findIdByValue(ArrayList<ListFieldItemMeta> list, String value) {
-        ListFieldItemMeta item;
-        for (int j = 0; j < list.size(); j++) {
-            item = list.get(j);
-            if (value.equals(item.name)) {
-                return item.id;
+    private int findIdByValue(List<Option> options, String value) {
+        Option item;
+        for (int j = 0; j < options.size(); j++) {
+            item = options.get(j);
+            if (value.equals(item.getName())) {
+                return item.getId();
             }
         }
         return 0;
     }
 
-    public TypeInfo findFieldDataById(int id) {
-        FormFieldsByWorkflowType field;
-        TypeInfo typeInfo;
-        for (int i = 0; i < fields.size(); i++) {
-            field = fields.get(i);
-            if (id != field.id) {
-                continue;
-            }
-            typeInfo = field.getFieldConfigObject().getTypeInfo();
-            return typeInfo;
+    public List<BaseFormItem> getFormItems() {
+        if (formItems == null) {
+            formItems = new ArrayList<>();
         }
-        return null;
+        return formItems;
+    }
+
+    public void setFormItems(List<BaseFormItem> formItems) {
+        this.formItems = formItems;
     }
 
     /**
      * Interface for a ViewModel that we help FormSettings in completed an Information object by
-     * requesting to a Repository for data in the network. Eventually this function will also continue
-     * updating the Workflow information section.
+     * requesting to a Repository for data in the network. Eventually this function will also
+     * continue updating the Workflow information section.
      */
     public interface FormSettingsViewModelDelegate {
+
         public void findInNetwork(Object value, Information information, FieldConfig fieldConfig);
     }
 
@@ -594,35 +587,12 @@ public class FormSettings {
                     return null;
                 }
 
-                String date = (String) meta.getDisplayValue(); // now returns 10 / 25 / 2018
-                // String date = (String) meta.getValue(); // Maybe try this but it returns a double quotes.
+                String date = (String) meta.getDisplayValue(); // now returns 10/25/2018
+                date = Utils
+                        .getFormattedDate(date, "dd/MM/yyyy", Utils.STANDARD_DATE_DISPLAY_FORMAT);
 
-                // TODO for now use displayValue directly. Verify that his will not change anymore.
-                // TODO Get rid of the unnecessary spaces in the date itself between the numbers.
                 information.setDisplayValue(date);
                 return information;
-
-                // TODO commenting out this block for now. Make sure we don't need this anymore.
-//                SimpleDateFormat serverFormat = new SimpleDateFormat(
-//                        "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
-//                        Locale.getDefault());
-//
-//                try {
-//                    Date dateFromServer = serverFormat.parse(date);
-//                    SimpleDateFormat dateFormat = new SimpleDateFormat(
-//                            "dd-MM-yyyy",
-//                            Locale.getDefault());
-//                    String formattedDate = dateFormat.format(dateFromServer);
-//                    information.setDisplayValue(formattedDate);
-//                    return information;
-//                } catch (ParseException e) {
-//                    e.printStackTrace();
-//                    information.setDisplayValue("");
-//                    String format = WorkflowDetailViewModel.FORMAT;
-//                    String formattedDate = Utils.standardServerFormatTo(date, format);
-//                    information.setDisplayValue(formattedDate);
-//                    return information;
-//                }
             case FormSettings.VALUE_EMAIL:
                 if (fieldConfig.getMultiple()) {
                     return null;
@@ -651,7 +621,8 @@ public class FormSettings {
 
                 if (typeInfo.getType().equals(TYPE_CURRENCY)) {
                     PostCountryCodeAndValue currency;
-                    JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi.adapter(PostCountryCodeAndValue.class);
+                    JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi
+                            .adapter(PostCountryCodeAndValue.class);
                     try {
                         currency = jsonAdapter.fromJson(meta.getValue());
                         information.setDisplayValue(String.valueOf(currency.value));
@@ -710,7 +681,8 @@ public class FormSettings {
                 // Until now phone type can only be single and not multiple
                 if (typeInfo.getType().equals(TYPE_PHONE)) {
                     PostCountryCodeAndValue phone;
-                    JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi.adapter(PostCountryCodeAndValue.class);
+                    JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi
+                            .adapter(PostCountryCodeAndValue.class);
                     try {
                         phone = jsonAdapter.fromJson(meta.getValue());
                         information.setDisplayValue(String.valueOf(phone.value));
@@ -751,7 +723,7 @@ public class FormSettings {
     private String getLabelFrom(Meta meta) {
         ArrayList<String> displayValue;
         try {
-            displayValue = (ArrayList<String>)meta.getDisplayValue();
+            displayValue = (ArrayList<String>) meta.getDisplayValue();
         } catch (ClassCastException e) {
             Log.d(TAG, "formatStringToObject: Value List casting problems");
             e.printStackTrace();
@@ -811,15 +783,10 @@ public class FormSettings {
         this.fields = fields;
     }
 
-    public ArrayList<ListField> getFormLists() {
-        return formLists;
-    }
+    public ListField addListToForm(ListItem newList, String customLabel, int customFieldId,
+                                   String type) {
+        //todo check
 
-    public void setFormLists(ArrayList<ListField> formLists) {
-        this.formLists = formLists;
-    }
-
-    public ListField addListToForm(ListItem newList, String customLabel, int customFieldId, String type) {
         ListField listField = new ListField();
         listField.id = newList.getId();
         listField.listId = newList.getListId();
@@ -841,11 +808,13 @@ public class FormSettings {
         }
 
         listField.children = tempList;
-        formLists.add(listField);
+//        formLists.add(listField);
         return listField;
     }
 
-    public ListField addServiceListToForm(List<Service> incomingList, String customLabel, int customFieldId, String type) {
+    public ListField addServiceListToForm(List<Service> incomingList, String customLabel,
+                                          int customFieldId, String type) {
+        //todo check
         ListField listField = new ListField();
         listField.customFieldId = customFieldId;
         listField.listType = type;
@@ -861,11 +830,13 @@ public class FormSettings {
             tempList.add(item);
         }
         listField.children = tempList;
-        formLists.add(listField);
+//        formLists.add(listField);
         return listField;
     }
 
-    public ListField addRolesLisToForm(List<Role> incomingList, String customLabel, int customFieldId, String type) {
+    public ListField addRolesLisToForm(List<Role> incomingList, String customLabel,
+                                       int customFieldId, String type) {
+        //todo check
         ListField listField = new ListField();
         listField.customFieldId = customFieldId;
         listField.listType = type;
@@ -880,11 +851,13 @@ public class FormSettings {
             tempList.add(item);
         }
         listField.children = tempList;
-        formLists.add(listField);
+//        formLists.add(listField);
         return listField;
     }
 
-    public ListField addProductLisToForm(List<ProductFormList> incomingList, String customLabel, int customFieldId, String type) {
+    public ListField addProductLisToForm(List<ProductFormList> incomingList, String customLabel,
+                                         int customFieldId, String type) {
+        //todo check
         ListField listField = new ListField();
         listField.customFieldId = customFieldId;
         listField.listType = type;
@@ -900,12 +873,8 @@ public class FormSettings {
             tempList.add(item);
         }
         listField.children = tempList;
-        formLists.add(listField);
+//        formLists.add(listField);
         return listField;
-    }
-
-    public ArrayList<FieldData> getFieldItems() {
-        return fieldItems;
     }
 
     final static String MACHINE_NAME_TITLE = "wf_title";
@@ -916,7 +885,7 @@ public class FormSettings {
     final static String MACHINE_NAME_STATUS = "wf_status";
     final static String MACHINE_NAME_CURRENT_STATUS = "wf_current_status";
     final static String MACHINE_NAME_OWNER = "wf_owner";
-    final static String MACHIEN_NAME_TYPE = "wf_type";
+    final static String MACHINE_NAME_TYPE = "wf_type";
     final static String MACHINE_NAME_REMAINING_TIME = "wf_remaining_time";
 
     public ArrayList<Integer> idsForBaseFields = new ArrayList<>();
@@ -925,24 +894,27 @@ public class FormSettings {
 
     public String postTitle = "";
 
-    public ArrayMap<String, Integer> getBaseMachineNamesAndIds() {
+    protected ArrayMap<String, Integer> getBaseMachineNamesAndIds() {
         return baseMachineNamesAndIds;
     }
 
-    public ArrayList<FieldData> getFieldItemsForPost() {
-        ArrayList<FieldData> postFieldData = (ArrayList<FieldData>) fieldItems.clone();
-        FieldData fieldData;
+    protected List<BaseFormItem> getFormItemsToPost() {
+
+        List<BaseFormItem> formItemsToPost = new ArrayList<>(getFormItems());
+        BaseFormItem formItem;
         int tag;
         String machineName;
         ArrayList<Integer> toRemove = new ArrayList<>();
-        for (int i = 0; i < postFieldData.size(); i++) {
-            fieldData = postFieldData.get(i);
-            tag = fieldData.tag;
+
+        //todo improve this algorithm
+        for (int i = 0; i < formItemsToPost.size(); i++) {
+            formItem = formItemsToPost.get(i);
+            tag = formItem.getTag();
             if (tag == CreateWorkflowViewModel.TAG_WORKFLOW_TYPE) {
                 toRemove.add(tag);
                 continue;
             }
-            machineName = findMachineNameBy(tag);
+            machineName = formItem.getMachineName();
             if (TextUtils.isEmpty(machineName)) {
                 continue;
             }
@@ -966,7 +938,7 @@ public class FormSettings {
                     machineName.equals(MACHINE_NAME_STATUS) ||
                     machineName.equals(MACHINE_NAME_CURRENT_STATUS) ||
                     machineName.equals(MACHINE_NAME_OWNER) ||
-                    machineName.equals(MACHIEN_NAME_TYPE) ||
+                    machineName.equals(MACHINE_NAME_TYPE) ||
                     machineName.equals(MACHINE_NAME_REMAINING_TIME)) {
                 toRemove.add(tag);
             }
@@ -975,52 +947,69 @@ public class FormSettings {
         int id;
         for (int i = 0; i < toRemove.size(); i++) {
             removeTag = toRemove.get(i);
-            for (int j = 0; j < postFieldData.size(); j++) {
-               id = postFieldData.get(j).tag;
-               if (removeTag == id) {
-                   postFieldData.remove(j);
-                   break;
-               }
+            for (int j = 0; j < formItemsToPost.size(); j++) {
+                id = formItemsToPost.get(j).getTag();
+                if (removeTag == id) {
+                    formItemsToPost.remove(j);
+                    break;
+                }
             }
         }
 
-        return postFieldData;
-
+        return formItemsToPost;
     }
 
-    private String findMachineNameBy(int id) {
-        FormFieldsByWorkflowType field;
-        for (int i = 0; i < fields.size(); i++) {
-            field = fields.get(i);
-            if (field.getId() == id) {
-                return field.getFieldConfigObject().getMachineName();
-            }
-        }
-        return "";
-    }
-
-    public void setFieldItems(ArrayList<FieldData> fieldItems) {
-        this.fieldItems = fieldItems;
-    }
-
-    public void addFieldDataItem(FieldData fieldData) {
-        fieldItems.add(fieldData);
-    }
-
-    public void clearFormFieldData() {
+    protected void clearFormItems() {
         pendingFileUpload = null;
-        if(1 >= fieldItems.size()){
-            return;
-        }
-        fieldItems.subList(1, fieldItems.size()).clear();
 
-        if (1 >= fields.size()) {
+        List<BaseFormItem> formItems = getFormItems();
+
+        if (formItems.size() <= 1) {
             return;
         }
+        formItems.subList(1, formItems.size()).clear();
+
+        if (formItems.size() <= 1) {
+            return;
+        }
+
         fields.subList(1, fields.size()).clear();
     }
 
+    /**
+     * @return the first item that is not valid, index-based. Null if all of the items are valid.
+     */
+    protected BaseFormItem findFirstInvalidItem() {
+        for (BaseFormItem item : getFormItems()) {
+            if (!item.isValid()) return item;
+        }
 
+        return null;
+    }
 
+    /**
+     * Goes through the items list in order to find a specific form item based on its tag.
+     *
+     * @param tag the tag to find
+     *
+     * @return the form item matching the tag. Null if none was found.
+     */
+    protected BaseFormItem findItem(int tag) {
+        for (BaseFormItem item : getFormItems()) {
+            if (item.getTag() == tag) return item;
+        }
 
+        return null;
+    }
+
+    protected BaseFormItem findItem(String machineName) {
+        for (int i = 0; i < fields.size(); i++) {
+            FormFieldsByWorkflowType field = fields.get(i);
+            if (field.getFieldConfigObject().getMachineName().equals(machineName)) {
+                return findItem(field.getId());
+            }
+        }
+
+        return null;
+    }
 }

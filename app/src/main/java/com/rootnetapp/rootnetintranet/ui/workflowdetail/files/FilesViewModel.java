@@ -241,6 +241,7 @@ public class FilesViewModel extends ViewModel {
                         mUploadedFileNameLiveData.setValue(fileName);
                         mAttachButtonTextLiveData.setValue(R.string.remove_file);
 
+                        //fixme this actually encodes the file path and not the file content
                         String encodedFile = Base64.encodeToString(bytes, Base64.DEFAULT);
                         String fileType = Utils.getMimeType(data.getData(), context);
 

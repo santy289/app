@@ -9,7 +9,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.BaseInformationFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved.PeopleInvolvedFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusFragment;
 
@@ -50,7 +50,7 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
             case 0:
                 return StatusFragment.newInstance(mWorkflowItem);
             case 1:
-                return InformationFragment.newInstance(mWorkflowItem);
+                return BaseInformationFragment.newInstance(mWorkflowItem);
             case 2:
                 return PeopleInvolvedFragment.newInstance(mWorkflowItem);
             case 3:

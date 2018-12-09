@@ -1,7 +1,10 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.comments;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -13,12 +16,16 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailCommentsBinding;
+import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
+import com.rootnetapp.rootnetintranet.models.responses.comments.CommentFileResponse;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailViewModel;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.adapters.AttachmentsAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.adapters.CommentsAdapter;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,13 +34,16 @@ import javax.inject.Inject;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
+import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-public class CommentsFragment extends Fragment {
+import static com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsViewModel.REQUEST_FILE_TO_ATTACH;
+
+public class CommentsFragment extends Fragment implements CommentsFragmentInterface {
 
     @Inject
     CommentsViewModelFactory commentsViewModelFactory;
@@ -42,6 +52,7 @@ public class CommentsFragment extends Fragment {
     private WorkflowListItem mWorkflowListItem;
 
     private CommentsAdapter mCommentsAdapter;
+    private AttachmentsAdapter mAttachmentsAdapter;
 
     private WorkflowDetailViewModel workflowDetailViewModel;
     private boolean isFromDetails;
@@ -89,7 +100,8 @@ public class CommentsFragment extends Fragment {
 
         setupSwitch();
         setOnClickListeners();
-        setupRecycler();
+        setupCommentsRecycler();
+        setupAttachmentsRecycler();
         subscribe();
         commentsViewModel.initDetails(token, mWorkflowListItem);
 
@@ -97,20 +109,17 @@ public class CommentsFragment extends Fragment {
     }
 
     private void subscribe() {
-        final Observer<Integer> errorObserver = ((Integer data) -> {
-            showLoading(false);
-            if (data != null) {
-                showToastMessage(data);
-            }
-        });
-
-        commentsViewModel.getObservableError().observe(this, errorObserver);
+        commentsViewModel.getObservableToastMessage().observe(this, this::showToastMessage);
         commentsViewModel.getObservableComments().observe(this, this::updateCommentsList);
         commentsViewModel.getObservableHideComments().observe(this, this::hideCommentsList);
         commentsViewModel.getObservableComment().observe(this, this::addNewComment);
         commentsViewModel.getObservableCommentsTabCounter().observe(this, this::updateTabCounter);
         commentsViewModel.getObservableEnableCommentButton()
                 .observe(this, this::enableCommentButton);
+        commentsViewModel.getObservableNewCommentFile()
+                .observe(this, this::addNewAttachment);
+        commentsViewModel.getObservableClearAttachments().observe(this, this::clearAttachmentsList);
+        commentsViewModel.getObservableOpenDownloadedAttachment().observe(this, this::openDownloadedFile);
 
         commentsViewModel.showLoading.observe(this, this::showLoading);
     }
@@ -123,15 +132,23 @@ public class CommentsFragment extends Fragment {
                 });
     }
 
-    private void setupRecycler() {
-        mCommentsAdapter = new CommentsAdapter(new ArrayList<>());
+    private void setupCommentsRecycler() {
+        mCommentsAdapter = new CommentsAdapter(this, getContext(), new ArrayList<>());
         mBinding.rvComments.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvComments.setAdapter(mCommentsAdapter);
         mBinding.rvComments.setNestedScrollingEnabled(false);
     }
 
+    private void setupAttachmentsRecycler() {
+        mAttachmentsAdapter = new AttachmentsAdapter(this, new ArrayList<>());
+        mBinding.rvAttachments.setLayoutManager(
+                new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
+        mBinding.rvAttachments.setAdapter(mAttachmentsAdapter);
+    }
+
     private void setOnClickListeners() {
         mBinding.btnComment.setOnClickListener(v -> sendComment());
+        mBinding.btnAttach.setOnClickListener(v -> showFileChooser());
     }
 
     private void sendComment() {
@@ -143,8 +160,7 @@ public class CommentsFragment extends Fragment {
             return;
         }
 
-        //todo allow to upload files to a comment
-        commentsViewModel.postComment(comment, new ArrayList<>());
+        commentsViewModel.postComment(comment);
     }
 
     @UiThread
@@ -158,7 +174,7 @@ public class CommentsFragment extends Fragment {
 
     @UiThread
     private void updateCommentsList(List<Comment> commentList) {
-        mCommentsAdapter = new CommentsAdapter(commentList);
+        mCommentsAdapter = new CommentsAdapter(this, getContext(), commentList);
         mBinding.rvComments.setAdapter(mCommentsAdapter);
     }
 
@@ -212,6 +228,114 @@ public class CommentsFragment extends Fragment {
             mBinding.switchPrivatePublic.setTextColor(getResources().getColor(R.color.dark_gray));
         }
         mBinding.switchPrivatePublic.setText(state);
+    }
+
+    /**
+     * If there is no file selected, displays a native file chooser, the user must select which file
+     * they wish to upload. In case that the file chooser cannot be opened, shows a Toast message.
+     * Otherwise, clears the current selected file and allows the user to select a new file.
+     */
+    @UiThread
+    private void showFileChooser() {
+
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        try {
+            startActivityForResult(Intent.createChooser(
+                    intent,
+                    getString(R.string.workflow_detail_comments_fragment_select_file)),
+                    REQUEST_FILE_TO_ATTACH);
+        } catch (android.content.ActivityNotFoundException ex) {
+            // Potentially direct the user to the Market with a Dialog
+            showToastMessage(R.string.workflow_detail_comments_fragment_no_file_manager);
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        commentsViewModel.handleFileSelectedResult(getContext(), requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    /**
+     * Receives the chosen file from the user and adds to the UI list.
+     *
+     * @param commentFile the file that the user chose to attach.
+     */
+    @UiThread
+    private void addNewAttachment(CommentFile commentFile) {
+        if (commentFile != null && mAttachmentsAdapter != null) {
+            mAttachmentsAdapter.addItem(commentFile);
+            mBinding.rvAttachments.scrollToPosition(mAttachmentsAdapter.getItemCount() - 1);
+        } else {
+            showToastMessage(R.string.error);
+        }
+    }
+
+    /**
+     * Removes all of the attachments from the list. This should be called after the comment is
+     * sent.
+     *
+     * @param clear unused param, needed by the LiveData.
+     */
+    @UiThread
+    private void clearAttachmentsList(boolean clear) {
+        if (!clear) return;
+
+        mAttachmentsAdapter = new AttachmentsAdapter(this, new ArrayList<>());
+        mBinding.rvAttachments.setAdapter(mAttachmentsAdapter);
+    }
+
+    /**
+     * Removes the attachment from the UI list and the ViewModel list. This is called after user
+     * interaction.
+     *
+     * @param commentFile the attachment that the user selected.
+     */
+    @Override
+    public void removeAttachment(CommentFile commentFile) {
+        mAttachmentsAdapter.removeItem(commentFile);
+        commentsViewModel.removeCommentAttachment(commentFile);
+    }
+
+    @Override
+    public void downloadCommentAttachment(CommentFileResponse commentFileResponse) {
+        //todo permissions
+        commentsViewModel.downloadAttachment(commentFileResponse);
+    }
+
+    /**
+     * Creates an {@link Intent} chooser the downloaded file. If the device is not suitable to read
+     * the file, will display a {@link Toast} message. Uses a {@link FileProvider} to create the
+     * file URI, instead of using the {@link Uri#fromFile(File)} method.
+     *
+     * @param attachmentUiData the file data containing the file to be opened.
+     *
+     * @see <a href="https://developer.android.com/reference/android/support/v4/content/FileProvider">FileProvider</a>
+     */
+    @UiThread
+    private void openDownloadedFile(AttachmentUiData attachmentUiData) {
+        if (attachmentUiData.getFile() == null) return;
+
+        Intent target = new Intent(Intent.ACTION_VIEW);
+
+        Uri fileUri = FileProvider.getUriForFile(getContext(),
+                getContext().getApplicationContext().getPackageName() + ".fileprovider",
+                attachmentUiData.getFile());
+
+        target.setDataAndType(fileUri, attachmentUiData.getMimeType());
+        target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        Intent intent = Intent.createChooser(target,
+                getString(R.string.workflow_detail_comments_fragment_open_file));
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            // Instruct the user to install a PDF reader here
+            showToastMessage(R.string.workflow_detail_comments_fragment_cannot_open_file);
+        }
     }
 
     @UiThread

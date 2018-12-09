@@ -170,10 +170,12 @@
     <string name="sales_force">Fuerza de Ventas - Estatus</string>
     <string name="users">Usuarios</string>
     <string name="no_selection">Sin Selección</string>
+    <string name="no_selection_hint">- Sin Selección -</string>
     <string name="form_workflow_type">Tipo de Workflow</string>
     <string name="pick_option">Selecciona uno</string>
     <string name="enter_email">Ingresar Email</string>
     <string name="create_workflow">Crear Workflow</string>
+    <string name="edit_workflow">Editar Workflow</string>
     <string name="yes">Sí</string>
     <string name="required_fields">Campos Requeridos</string>
     <string name="complete_form">Necesita completar estos campos</string>
@@ -184,7 +186,9 @@
     <string name="country_code">Código del País</string>
     <string name="currency_type">Tipo de Moneda</string>
     <string name="created">Creado</string>
-    <string name="workflow_created">Su workflow fue creado.</string>
+    <string name="workflow_created">Has creado el workflow:</string>
+    <string name="edited">Actualizado</string>
+    <string name="workflow_edit">Has actualizado el workflow:</string>
     <string name="error">Error</string>
     <string name="error_create_workflow">Algo ocurrió al intentar crear el nuevo workflow. Intente de nuevo mas tarde.</string>
     <string name="choose_a_workflow">Elija en tipo de workflow para continuar.</string>
@@ -261,6 +265,10 @@
     <string name="workflow_detail_comments_fragment_input_comment_hint">Escriba su comentario aquí…</string>
     <string name="workflow_detail_comments_fragment_button_comment">Comentar</string>
     <string name="workflow_detail_comments_fragment_no_comments">No hay comentarios para mostrar</string>
+    <string name="workflow_detail_comments_fragment_no_file_manager">Por favor instale un manejador de archivos.</string>
+    <string name="workflow_detail_comments_fragment_select_file">Elija el archivo para subir</string>
+    <string name="workflow_detail_comments_fragment_open_file">Abrir Archivo</string>
+    <string name="workflow_detail_comments_fragment_cannot_open_file">Su dispositivo no puede abrir este archivo.</string>
     <!--FilesFragment-->
     <string name="workflow_detail_files_fragment_title">@string/workflow_detail_files_fragment_documents</string>
     <string name="workflow_detail_files_fragment_documents">Documentos</string>

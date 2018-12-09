@@ -301,8 +301,7 @@ public class MainActivity extends AppCompatActivity
 
             case R.id.fab_edit_workflow:
                 quickAction = QuickAction.EDIT_WORKFLOW;
-                showToastMessage(R.string.functionality_not_available); //todo add action
-                return true;
+                break;
 
             case R.id.fab_approve_workflow:
                 quickAction = QuickAction.APPROVE_WORKFLOW;

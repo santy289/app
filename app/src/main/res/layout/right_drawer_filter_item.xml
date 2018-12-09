@@ -13,8 +13,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:textAppearance="?attr/textAppearanceHeadline1"
-
-        android:textSize="16sp"
+        android:textSize="14sp"
         app:layout_constraintEnd_toStartOf="@+id/right_drawer_image_checkmark"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

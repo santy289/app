@@ -2,9 +2,8 @@ package com.rootnetapp.rootnetintranet.di;
 
 import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerService;
 import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerServiceModule;
-import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowDialog;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowModule;
-import com.rootnetapp.rootnetintranet.ui.createworkflow.WorkFlowCreateFragment;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.CustomCountryPicker;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.CustomSpinner;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.ListSpinner;
@@ -116,9 +115,7 @@ public interface AppComponent {
 
     void inject(WorkflowFragment workflowFragment);
 
-    void inject(CreateWorkflowDialog createWorkflowDialog);
-
-    void inject(WorkFlowCreateFragment workFlowCreateFragment);
+    void inject(CreateWorkflowFragment createWorkflowFragment);
 
     void inject(CustomSpinner customSpinner);
 

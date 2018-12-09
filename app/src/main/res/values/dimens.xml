@@ -12,4 +12,5 @@
     <dimen name="filters_height">300dp</dimen>
     <dimen name="workflow_detail_standard_height">200dp</dimen>
     <dimen name="bottom_navigation_bar_height">56dp</dimen>
+    <dimen name="form_items_space">8dp</dimen>
 </resources>

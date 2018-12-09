@@ -6,7 +6,6 @@ import com.squareup.moshi.Json;
  * Created by root on 05/04/18.
  */
 
-
 public class CommentFile {
 
     @Json(name = "file")
@@ -56,5 +55,4 @@ public class CommentFile {
     public void setSize(int size) {
         this.size = size;
     }
-
 }

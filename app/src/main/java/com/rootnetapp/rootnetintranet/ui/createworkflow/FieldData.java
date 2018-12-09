@@ -5,6 +5,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import java.util.ArrayList;
 
 public class FieldData {
+
     public String label = "";
     public int resLabel;
     public boolean required;
@@ -12,4 +13,7 @@ public class FieldData {
     public int tag;
     public boolean escape;
     public ArrayList<ListFieldItemMeta> list;
+
+    public ArrayList<String> options;
+    public int type;
 }

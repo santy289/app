@@ -49,8 +49,6 @@ public class InformationViewModel extends ViewModel {
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the workflow.
     private WorkflowDb mWorkflow; // Not in DB and more complete response from network.
 
-    private static final String FORMAT = "MMM d, y";
-
     private FormSettings formSettings;
 
     protected InformationViewModel(InformationRepository informationRepository) {
@@ -81,8 +79,8 @@ public class InformationViewModel extends ViewModel {
     private void updateWorkflowInformation(WorkflowDb workflow, WorkflowTypeDb workflowTypeDb) {
         List<Information> informationList = new ArrayList<>();
 
-        String startDate = Utils.serverFormatToFormat(workflow.getStart(), FORMAT);
-        String endDate = Utils.serverFormatToFormat(workflow.getEnd(), FORMAT);
+        String startDate = Utils.serverFormatToFormat(workflow.getStart(), Utils.STANDARD_DATE_DISPLAY_FORMAT);
+        String endDate = Utils.serverFormatToFormat(workflow.getEnd(), Utils.STANDARD_DATE_DISPLAY_FORMAT);
 
         Information info = new Information(R.string.title, workflow.getTitle());
         informationList.add(info);

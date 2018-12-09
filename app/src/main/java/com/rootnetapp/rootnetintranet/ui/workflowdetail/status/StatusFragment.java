@@ -135,7 +135,12 @@ public class StatusFragment extends Fragment {
     private void updateStatusDetails(String[] statusNames) {
         mBinding.includeStatusSummary.tvLastStatus.setText(statusNames[INDEX_LAST_STATUS]);
         mBinding.includeStatusSummary.tvCurrentStatus.setText(statusNames[INDEX_CURRENT_STATUS]);
-        mBinding.includeStatusSummary.tvNextStatuses.setText(statusNames[INDEX_NEXT_STATUS]);
+
+        String nextStatus = statusNames[INDEX_NEXT_STATUS];
+        if (nextStatus == null || nextStatus.isEmpty()) {
+            nextStatus = getString(R.string.no_more_status);
+        }
+        mBinding.includeStatusSummary.tvNextStatuses.setText(nextStatus);
     }
 
     @UiThread

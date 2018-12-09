@@ -28,8 +28,8 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
 
     private static final String TAG = "WorkflowSearchRepo";
     private static final int PAGE_LIMIT = 20;
-    public static int ENDPOINT_PAGE_SIZE = 20;
-    private static int LIST_PAGE_SIZE = 20;
+    public static int ENDPOINT_PAGE_SIZE = 60;
+    private static int LIST_PAGE_SIZE = 60;
 
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<WorkflowResponseDb> responseWorkflowList;
@@ -103,7 +103,7 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
      * @param token
      */
     public void setWorkflowList(String token) {
-        DataSource.Factory<Integer, WorkflowListItem> factory = workflowDbDao.getWorkflows();
+        DataSource.Factory<Integer, WorkflowListItem> factory = workflowDbDao.getWorkflowsByUpdatedAt();
 
         // TODO test if callback exists and if it is NOT null clear disposables. We are creating a new instance.
         callback = new WorkflowSearchBoundaryCallback(

@@ -57,7 +57,7 @@ public class WorkflowSearchBoundaryCallback extends PagedList.BoundaryCallback<W
         Disposable disposable = service
                 .getWorkflowsDb(
                         token,
-                        WorkflowRepository.ENDPOINT_PAGE_SIZE,
+                        WorkflowSearchRepository.ENDPOINT_PAGE_SIZE,
                         true,
                         nextPage,
                         false)

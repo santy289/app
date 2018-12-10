@@ -178,6 +178,15 @@ public class CommentsViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
+    /**
+     * Sends a request to the remote repository to save a comment by the user. This is called by
+     * user interaction. Posts a comment related to a specific workflow. The comment includes the
+     * following parameters: <ul><li>Comment text (method param).</li>><li>Whether the comment is
+     * private or public ({@link #isPrivateComment}.</li><li>Optional: attached files ({@link
+     * #mCommentFiles}.</li></ul>
+     *
+     * @param comment comment text.
+     */
     protected void postComment(String comment) {
         mEnableCommentButton.setValue(false);
         showLoading.setValue(true);
@@ -209,7 +218,8 @@ public class CommentsViewModel extends ViewModel {
     protected void downloadAttachment(CommentFileResponse commentFileResponse) {
         showLoading.setValue(true);
         Disposable disposable = mRepository
-                .downloadAttachment(mToken, CommentFileResponse.FILE_ENTITY, commentFileResponse.getId())
+                .downloadAttachment(mToken, CommentFileResponse.FILE_ENTITY,
+                        commentFileResponse.getId())
                 .subscribe(this::onDownloadSuccess, this::onFailure);
         mDisposables.add(disposable);
     }

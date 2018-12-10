@@ -17,9 +17,4 @@
         app:chipIconTint="@color/white"
         android:textColor="@color/white"
         tools:text="file.pdf" />
-
-    <!-- app:chipBackgroundColor="@color/colorPrimary"
-        app:chipIconTint="@color/white"
-        app:closeIconTint="@color/white"-->
-
 </layout>

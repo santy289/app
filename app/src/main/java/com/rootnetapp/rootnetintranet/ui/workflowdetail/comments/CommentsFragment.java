@@ -119,7 +119,8 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
         commentsViewModel.getObservableNewCommentFile()
                 .observe(this, this::addNewAttachment);
         commentsViewModel.getObservableClearAttachments().observe(this, this::clearAttachmentsList);
-        commentsViewModel.getObservableOpenDownloadedAttachment().observe(this, this::openDownloadedFile);
+        commentsViewModel.getObservableOpenDownloadedAttachment()
+                .observe(this, this::openDownloadedFile);
 
         commentsViewModel.showLoading.observe(this, this::showLoading);
     }
@@ -299,6 +300,12 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
         commentsViewModel.removeCommentAttachment(commentFile);
     }
 
+    /**
+     * Sends a request to the ViewModel to retrieve the specified file in order to be opened by the
+     * device. Should check WRITE/READ external storage permissions before requesting.
+     *
+     * @param commentFileResponse file object.
+     */
     @Override
     public void downloadCommentAttachment(CommentFileResponse commentFileResponse) {
         //todo permissions

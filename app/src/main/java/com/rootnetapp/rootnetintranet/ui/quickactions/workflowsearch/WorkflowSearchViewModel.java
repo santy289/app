@@ -23,11 +23,12 @@ public class WorkflowSearchViewModel extends ViewModel {
 
     protected MutableLiveData<Boolean> showLoading;
     protected MutableLiveData<Boolean> showBottomSheetLoading;
+    private MutableLiveData<Boolean> messageViewSetLoadingMore;
+    private MutableLiveData<PagedList<WorkflowListItem>> updateWithSortedList;
     protected LiveData<List<WorkflowListItem>> workflowListFromRepo;
     protected LiveData<Boolean> handleShowLoadingByRepo;
     private LiveData<PagedList<WorkflowListItem>> liveWorkflows;
-    private MutableLiveData<PagedList<WorkflowListItem>> updateWithSortedList;
-
+    private LiveData<Boolean> handleUiLoadingCompleted;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
     private String mToken;
@@ -65,7 +66,6 @@ public class WorkflowSearchViewModel extends ViewModel {
                 mRepository.getObservableWorkflowList(),
                 workflowResponseDb -> {
                     // transform WorkflowDb list to WorkflowListItem list
-
                     isLoading = false;
                     showBottomSheetLoading.setValue(false);
                     showLoading.setValue(false);
@@ -81,31 +81,46 @@ public class WorkflowSearchViewModel extends ViewModel {
                 }
         );
 
-        // Transformation used in case that a workflow approval or rejection fails.
+        // Transformation used in case of failures in repo.
         handleShowLoadingByRepo = Transformations.map(
-                mRepository.getErrorShowLoading(),
+                mRepository.getObservableMessageError(),
                 show -> {
                     isLoading = false;
-                    showLoading.setValue(false);
                     showBottomSheetLoading.setValue(false);
                     showToastMessage.setValue(R.string.error);
                     return show;
                 }
         );
 
-//        liveWorkflows = Transformations.map(
-//                mRepository.getAll
-//        )
+        // Transformation used to observe when LivePagedList is set and ready to be used in Repo.
+        liveWorkflows = Transformations.switchMap(
+                mRepository.getObservableMessagePagedListSet(),
+                result -> {
+                    messageViewSetLoadingMore.setValue(true);
+                    showLoading.setValue(false);
+                    showBottomSheetLoading.setValue(false);
+                    return mRepository.getAllWorkflows();
+                }
+        );
 
-
-
-
+        // Transformation maps is sending false when the result is true because for now we
+        // only hide a bottom sheet when we save workflows in the database after loading more.
+        handleUiLoadingCompleted = Transformations.map(
+                mRepository.getObservableLoadingCompleted(),
+                result ->  !result
+        );
     }
 
-    // First to be called
+    /**
+     * This will be the called when we initialize the list of workflows for quick action. Also
+     * it will start the loading animation and pass a token to the repo in case the repo needs to
+     * call the network when we reached the end of the page.
+     *
+     * @param token
+     */
     private void setWorkflowListNoFilters(String token) {
+        showLoading.setValue(true);
         mRepository.setWorkflowList(token);
-        liveWorkflows = mRepository.getAllWorkflows();
     }
 
     /**
@@ -152,7 +167,7 @@ public class WorkflowSearchViewModel extends ViewModel {
      *
      * @param query text to search.
      */
-    protected void getWorkflowList(String query) {
+    private void getWorkflowList(String query) {
         isLoading = true;
 
         mQuery = query;
@@ -243,4 +258,23 @@ public class WorkflowSearchViewModel extends ViewModel {
         }
         return updateWithSortedList;
     }
+
+    protected LiveData<Boolean> getObservableMessageViewSetLoadingMore() {
+        if (messageViewSetLoadingMore == null) {
+            messageViewSetLoadingMore = new MutableLiveData<>();
+        }
+        return messageViewSetLoadingMore;
+    }
+
+    protected LiveData<Boolean> getObservableFromRepoLoadingMoreCallback() {
+        return mRepository.getObservableMessageLoadingMoreToUiFromCallback();
+    }
+
+    protected LiveData<Boolean> getObservableHandleUiLoadingCompleted() {
+        if (handleUiLoadingCompleted == null) {
+            handleUiLoadingCompleted = new MutableLiveData<>();
+        }
+        return handleUiLoadingCompleted;
+    }
+
 }

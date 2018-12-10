@@ -9,7 +9,6 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.IncomingWorkflowsCallback;
-import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowListBoundaryCallback;
 
 import java.util.List;
 
@@ -31,8 +30,10 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
     public static int ENDPOINT_PAGE_SIZE = 60;
     private static int LIST_PAGE_SIZE = 60;
 
-    private MutableLiveData<Boolean> showLoading;
+    private MutableLiveData<Boolean> messageErrorToViewModel;
     private MutableLiveData<WorkflowResponseDb> responseWorkflowList;
+    private MutableLiveData<Boolean> messagePagedListSet;
+    private MutableLiveData<Boolean> messageLoadingCompleted;
     private LiveData<PagedList<WorkflowListItem>> allWorkflows;
 
     private WorkflowDbDao workflowDbDao;
@@ -62,8 +63,7 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
 
     @Override
     public void showLoadingMore(boolean loadMore) {
-        // TODO update UI with loading show more or something.
-
+        // No need to implement we are using a LiveData implementation to replace this method.
     }
 
     /**
@@ -77,7 +77,6 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
      */
     public void insertWorkflows(List<WorkflowDb> worflows) {
         Disposable disposable = Observable.fromCallable(() -> {
-//            WorkflowDbDao workflowDbDao = database.workflowDbDao();
             workflowDbDao.insertWorkflows(worflows);
             callback.updateIsLoading(false);
             return true;
@@ -85,13 +84,16 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> {
                     showLoadingMore(false);
+
                     if (currentPage < lastPage) {
                         currentPage = currentPage + 1;
                     }
                     callback.updateCurrentPage(currentPage);
+                    messageLoadingCompleted.setValue(true);
                 }, throwable -> {
                     callback.updateIsLoading(false);
-                    showLoadingMore(false);
+//                    showLoadingMore(false);
+                    messageErrorToViewModel.setValue(false);
                     Log.d(TAG, "failure: Can't save to DB: " + throwable.getMessage());
                 });
         disposables.add(disposable);
@@ -103,27 +105,44 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
      * @param token
      */
     public void setWorkflowList(String token) {
-        DataSource.Factory<Integer, WorkflowListItem> factory = workflowDbDao.getWorkflowsByUpdatedAt();
+        Disposable disposable = Observable.fromCallable(() -> {
+            DataSource.Factory<Integer, WorkflowListItem> factory = workflowDbDao.getWorkflowsByUpdatedAt();
 
-        // TODO test if callback exists and if it is NOT null clear disposables. We are creating a new instance.
-        callback = new WorkflowSearchBoundaryCallback(
-                service,
-                token,
-                currentPage,
-                this
-        );
+            // TODO test if callback exists and if it is NOT null clear disposables. We are creating a new instance.
+            callback = new WorkflowSearchBoundaryCallback(
+                    service,
+                    token,
+                    currentPage,
+                    this
+            );
 
-        allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)
-                .setBoundaryCallback(callback)
-                .build();
-
-//        DataSourceWorkflowListFactory dataSourceFactory = new DataSourceWorkflowListFactory(database);
-//        workflowListItemDataSource = dataSourceFactory.create();
-//        allWorkflows = new LivePagedListBuilder<>(dataSourceFactory, pagedListConfig).build();
+            allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)
+                    .setBoundaryCallback(callback)
+                    .build();
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> {
+                    messagePagedListSet.setValue(result);
+                }, throwable -> {
+                    messageErrorToViewModel.setValue(false);
+                    Log.d(TAG, "failure: Can't init LivePagedListBuilder " + throwable.getMessage());
+                });
+        disposables.add(disposable);
     }
 
+    /**
+     * It assumes that allWorkflows was previously initialized with a LiveData PagedList otherwise
+     * it will not return any data.
+     *
+     * @return
+     */
     public LiveData<PagedList<WorkflowListItem>> getAllWorkflows() {
         return allWorkflows;
+    }
+
+    public LiveData<Boolean> getObservableMessageLoadingMoreToUiFromCallback() {
+        return callback.getObservableMessageLoadingMoreToUi();
     }
 
     /**
@@ -156,7 +175,7 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(success -> responseWorkflowList.setValue(success), throwable -> {
                     Log.d(TAG, "workflowListByQuery: " + throwable.getMessage());
-                    showLoading.setValue(false);
+                    messageErrorToViewModel.setValue(false);
                 });
         disposables.add(disposable);
     }
@@ -178,7 +197,7 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(success -> responseWorkflowList.setValue(success), throwable -> {
                     Log.d(TAG, "recentWorkflows: " + throwable.getMessage());
-                    showLoading.setValue(false);
+                    messageErrorToViewModel.setValue(false);
                 });
         disposables.add(disposable);
     }
@@ -190,11 +209,25 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
         return responseWorkflowList;
     }
 
-    protected LiveData<Boolean> getErrorShowLoading() {
-        if (showLoading == null) {
-            showLoading = new MutableLiveData<>();
+    protected LiveData<Boolean> getObservableMessageError() {
+        if (messageErrorToViewModel == null) {
+            messageErrorToViewModel = new MutableLiveData<>();
         }
-        return showLoading;
+        return messageErrorToViewModel;
+    }
+
+    protected LiveData<Boolean> getObservableMessagePagedListSet() {
+        if (messagePagedListSet == null) {
+            messagePagedListSet = new MutableLiveData<>();
+        }
+        return messagePagedListSet;
+    }
+
+    protected LiveData<Boolean> getObservableLoadingCompleted() {
+        if (messageLoadingCompleted == null) {
+            messageLoadingCompleted = new MutableLiveData<>();
+        }
+        return messageLoadingCompleted;
     }
 
 }

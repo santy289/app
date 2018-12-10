@@ -70,6 +70,7 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
                 R.layout.fragment_workflow_search, container, false);
         View view = mBinding.getRoot();
         ((RootnetApp) getActivity().getApplication()).getAppComponent().inject(this);
+        setupBottomSheet();
         workflowSearchViewModel = ViewModelProviders
                 .of(this, workflowSearchViewModelFactory)
                 .get(WorkflowSearchViewModel.class);
@@ -81,7 +82,6 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
         setupWorkflowRecyclerView();
         workflowSearchViewModel.init(token);
         setOnClickListeners();
-        setupBottomSheet();
         subscribe();
 
         return view;
@@ -120,7 +120,18 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
                 .getObservableUpdateWithSortedList()
                 .observe(this, updateWithSortedListObserver);
 
+        workflowSearchViewModel.getObservableMessageViewSetLoadingMore().removeObservers(this);
+        workflowSearchViewModel.getObservableMessageViewSetLoadingMore().observe(this, this::setLoadingMoreObservers);
+
+        workflowSearchViewModel.getObservableHandleUiLoadingCompleted().removeObservers(this);
+        workflowSearchViewModel.getObservableHandleUiLoadingCompleted().observe(this, this::showBottomSheetLoading);
+
         addWorkflowsObserver();
+    }
+
+    private void setLoadingMoreObservers(Boolean setObserver) {
+        workflowSearchViewModel.getObservableFromRepoLoadingMoreCallback().removeObservers(this);
+        workflowSearchViewModel.getObservableFromRepoLoadingMoreCallback().observe(this, this::showBottomSheetLoading);
     }
 
     /**

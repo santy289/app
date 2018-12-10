@@ -7,11 +7,12 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.IncomingWorkflowsCallback;
-import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
 
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.paging.PagedList;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -23,6 +24,7 @@ public class WorkflowSearchBoundaryCallback extends PagedList.BoundaryCallback<W
     private String token;
     private IncomingWorkflowsCallback callback;
     private boolean isLoading;
+    private MutableLiveData<Boolean> messageLoadingMoreToUi;
 
     private int currentPage;
     private int lastPage;
@@ -53,7 +55,7 @@ public class WorkflowSearchBoundaryCallback extends PagedList.BoundaryCallback<W
         if (nextPage > lastPage) {
             return;
         }
-        callback.showLoadingMore(true);
+        messageLoadingMoreToUi.setValue(true);
         Disposable disposable = service
                 .getWorkflowsDb(
                         token,
@@ -67,7 +69,7 @@ public class WorkflowSearchBoundaryCallback extends PagedList.BoundaryCallback<W
                         this::saveInDatabase,
                         throwable -> {
                             Log.d(TAG, "WorkflowSearchBoundaryCallback: Cant get workflows from network - " + throwable.getMessage());
-                            callback.showLoadingMore(false);
+                            messageLoadingMoreToUi.setValue(false);
                         }
                 );
 
@@ -116,5 +118,12 @@ public class WorkflowSearchBoundaryCallback extends PagedList.BoundaryCallback<W
         }
         lastPage = workflowsResponse.getPager().getLastPage();
         callback.handleResponse(workflowDbs, lastPage);
+    }
+
+    protected LiveData<Boolean> getObservableMessageLoadingMoreToUi() {
+        if (messageLoadingMoreToUi == null) {
+            messageLoadingMoreToUi = new MutableLiveData<>();
+        }
+        return messageLoadingMoreToUi;
     }
 }

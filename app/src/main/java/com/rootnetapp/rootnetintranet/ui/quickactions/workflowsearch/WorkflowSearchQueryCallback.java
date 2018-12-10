@@ -20,7 +20,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class WorkflowSearchBoundaryCallback
+public class WorkflowSearchQueryCallback
         extends PagedList.BoundaryCallback<WorkflowListItem>
         implements BoundaryCallbackInterface {
     private ApiInterface service;
@@ -28,7 +28,7 @@ public class WorkflowSearchBoundaryCallback
     private IncomingWorkflowsCallback callback;
     private boolean isLoading;
     private MutableLiveData<Boolean> messageLoadingMoreToUi;
-
+    private String query;
     private int currentPage;
     private int lastPage;
 
@@ -36,9 +36,10 @@ public class WorkflowSearchBoundaryCallback
 
     private static final String TAG = "SearchBoundaryCallback";
 
-    public WorkflowSearchBoundaryCallback(
+    public WorkflowSearchQueryCallback(
             ApiInterface service,
             String token,
+            String query,
             int currentPage,
             IncomingWorkflowsCallback workflowsCallback) {
         this.service = service;
@@ -47,6 +48,7 @@ public class WorkflowSearchBoundaryCallback
         this.callback = workflowsCallback;
         this.isLoading = false;
         this.lastPage = 2;
+        this.query = query;
     }
 
     @Override
@@ -60,11 +62,12 @@ public class WorkflowSearchBoundaryCallback
         }
         messageLoadingMoreToUi.setValue(true);
         Disposable disposable = service
-                .getWorkflowsDb(
+                .getWorkflowsBySearchQuery(
                         token,
+                        WorkflowSearchRepository.PAGE_LIMIT,
                         WorkflowSearchRepository.ENDPOINT_PAGE_SIZE,
                         true,
-                        nextPage,
+                        query,
                         false)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -129,4 +132,5 @@ public class WorkflowSearchBoundaryCallback
         }
         return messageLoadingMoreToUi;
     }
+
 }

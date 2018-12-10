@@ -24,7 +24,9 @@ public class WorkflowSearchViewModel extends ViewModel {
     protected MutableLiveData<Boolean> showLoading;
     protected MutableLiveData<Boolean> showBottomSheetLoading;
     private MutableLiveData<Boolean> messageViewSetLoadingMore;
+    private MutableLiveData<Boolean> messageViewSetQueryLoadingMore;
     private MutableLiveData<PagedList<WorkflowListItem>> updateWithSortedList;
+    private MutableLiveData<Boolean> messageUiResetListDataSource;
     protected LiveData<List<WorkflowListItem>> workflowListFromRepo;
     protected LiveData<Boolean> handleShowLoadingByRepo;
     private LiveData<PagedList<WorkflowListItem>> liveWorkflows;
@@ -41,7 +43,7 @@ public class WorkflowSearchViewModel extends ViewModel {
         this.mRepository = repository;
         this.showLoading = new MutableLiveData<>();
         this.showBottomSheetLoading = new MutableLiveData<>();
-
+        this.messageUiResetListDataSource = new MutableLiveData<>();
         subscribe();
     }
 
@@ -93,7 +95,22 @@ public class WorkflowSearchViewModel extends ViewModel {
         );
 
         // Transformation used to observe when LivePagedList is set and ready to be used in Repo.
-        liveWorkflows = Transformations.switchMap(
+        subscribeViewModelForUnfilteredList();
+
+        // Transformation maps is sending false when the result is true because for now we
+        // only hide a bottom sheet when we save workflows in the database after loading more.
+        handleUiLoadingCompleted = Transformations.map(
+                mRepository.getObservableLoadingCompleted(),
+                result ->  !result
+        );
+    }
+
+    /**
+     *ƒtart observing DataSource from repo which is not filtered,
+     * or not a search query.
+     */
+    private void subscribeViewModelForUnfilteredList() {
+       liveWorkflows = Transformations.switchMap(
                 mRepository.getObservableMessagePagedListSet(),
                 result -> {
                     messageViewSetLoadingMore.setValue(true);
@@ -102,13 +119,23 @@ public class WorkflowSearchViewModel extends ViewModel {
                     return mRepository.getAllWorkflows();
                 }
         );
+       messageUiResetListDataSource.setValue(true);
+    }
 
-        // Transformation maps is sending false when the result is true because for now we
-        // only hide a bottom sheet when we save workflows in the database after loading more.
-        handleUiLoadingCompleted = Transformations.map(
-                mRepository.getObservableLoadingCompleted(),
-                result ->  !result
+    /**
+     * Set list source LiveData to start observing DataSource from repo which is a search query.
+     */
+    private void subscribeViewModelForQuery() {
+        liveWorkflows = Transformations.switchMap(
+                mRepository.getObservableMessageQueryListSet(),
+                result -> {
+                    messageViewSetQueryLoadingMore.setValue(true);
+                    showLoading.setValue(false);
+                    showBottomSheetLoading.setValue(false);
+                    return mRepository.getAllWorkflows();
+                }
         );
+        messageUiResetListDataSource.setValue(true);
     }
 
     /**
@@ -192,24 +219,11 @@ public class WorkflowSearchViewModel extends ViewModel {
      * @param query input by the user.
      */
     protected void performSearch(String query) {
-        resetPageNumber();
-        getWorkflowList(query);
-    }
+//        resetPageNumber();
+//        getWorkflowList(query);
 
-    /**
-     * This should be called when the scroll has reached the bottom, meaning we need to fetch more
-     * items.
-     */
-    protected void bottomReached() {
-        increasePageNumber();
-        getWorkflowList();
-    }
-
-    /**
-     * Performs a search query with the last saved value.
-     */
-    private void getWorkflowList() {
-        getWorkflowList(mQuery);
+        subscribeViewModelForQuery();
+        mRepository.setQuerySearchList(mToken, query);
     }
 
     /**
@@ -266,8 +280,20 @@ public class WorkflowSearchViewModel extends ViewModel {
         return messageViewSetLoadingMore;
     }
 
+    protected LiveData<Boolean> getObservableMessageViewSetQueryLoadingMore() {
+        if (messageViewSetQueryLoadingMore == null) {
+            messageViewSetQueryLoadingMore = new MutableLiveData<>();
+        }
+        return messageViewSetQueryLoadingMore;
+    }
+
+
     protected LiveData<Boolean> getObservableFromRepoLoadingMoreCallback() {
         return mRepository.getObservableMessageLoadingMoreToUiFromCallback();
+    }
+
+    protected LiveData<Boolean> getObservableFromqueryLoadingMorecallback() {
+        return mRepository.getObservableSearchMessageLoadingMoreToUiFromCallback();
     }
 
     protected LiveData<Boolean> getObservableHandleUiLoadingCompleted() {
@@ -275,6 +301,13 @@ public class WorkflowSearchViewModel extends ViewModel {
             handleUiLoadingCompleted = new MutableLiveData<>();
         }
         return handleUiLoadingCompleted;
+    }
+
+    protected LiveData<Boolean> getObservableMessageUiResetListDataSource() {
+        if (messageUiResetListDataSource == null) {
+            messageUiResetListDataSource = new MutableLiveData<>();
+        }
+        return messageUiResetListDataSource;
     }
 
 }

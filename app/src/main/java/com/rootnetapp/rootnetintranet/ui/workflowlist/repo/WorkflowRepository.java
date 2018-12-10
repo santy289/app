@@ -161,7 +161,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
             searchText = "%" + searchText + "%";
             queryString = baseWorkflowListQuery +
                     "WHERE workflowdb.status = ? " +
-                    "AND workflowdb.title LIKE '%' || ? || '%'" +
+                    "AND workflowdb.title LIKE '%' || ? || '%' " +
                     "ORDER BY workflowdb.created_at DESC";
             objects = new Object[]{status, searchText};
         }
@@ -181,7 +181,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
             queryString = baseWorkflowListQuery +
                     "WHERE workflowdb.status = ? " +
                     "AND workflowdb.workflow_type_id = ? " +
-                    "AND workflowdb.title LIKE '%' || ? || '%'" +
+                    "AND workflowdb.title LIKE '%' || ? || '%' " +
                     "ORDER BY workflowdb.created_at DESC";
             objects = new Object[]{status, workflowTypeId, searchText};
         }
@@ -201,7 +201,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
             queryString = baseWorkflowListQuery +
                     "WHERE workflowdb.status = ? " +
                     "AND workflowdb.workflow_type_id = ? " +
-                    "AND workflowdb.title LIKE '%' || ? || '%'";
+                    "AND workflowdb.title LIKE '%' || ? || '%' ";
             objects = new Object[]{status, workflowTypeId, searchText};
         }
         if (isDescending) {
@@ -224,7 +224,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         } else {
             queryString = baseWorkflowListQuery +
                     "WHERE workflowdb.status = ? " +
-                    "AND workflowdb.title LIKE '%' || ? || '%'";
+                    "AND workflowdb.title LIKE '%' || ? || '%' ";
             objects = new Object[]{status, searchText};
         }
         if (isDescending) {

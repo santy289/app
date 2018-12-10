@@ -7,6 +7,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
+import com.rootnetapp.rootnetintranet.interfaces.BoundaryCallbackInterface;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.IncomingWorkflowsCallback;
 
@@ -26,19 +27,21 @@ import io.reactivex.schedulers.Schedulers;
 public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
 
     private static final String TAG = "WorkflowSearchRepo";
-    private static final int PAGE_LIMIT = 20;
+    protected static final int PAGE_LIMIT = 20;
     public static int ENDPOINT_PAGE_SIZE = 60;
     private static int LIST_PAGE_SIZE = 60;
 
     private MutableLiveData<Boolean> messageErrorToViewModel;
     private MutableLiveData<WorkflowResponseDb> responseWorkflowList;
     private MutableLiveData<Boolean> messagePagedListSet;
+    private MutableLiveData<Boolean> messagePagedQuerySet;
     private MutableLiveData<Boolean> messageLoadingCompleted;
     private LiveData<PagedList<WorkflowListItem>> allWorkflows;
 
     private WorkflowDbDao workflowDbDao;
     private ApiInterface service;
     private WorkflowSearchBoundaryCallback callback;
+    private WorkflowSearchQueryCallback queryCallback;
     private PagedList.Config pagedListConfig;
 
     private int currentPage = 1;
@@ -58,7 +61,7 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
     @Override
     public void handleResponse(List<WorkflowDb> workflowsResponse, int lastPage) {
         this.lastPage = lastPage;
-        insertWorkflows(workflowsResponse);
+        insertWorkflows(workflowsResponse, callback);
     }
 
     @Override
@@ -75,7 +78,7 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
      * @param worflows
      *  List of workflows to save into the database.
      */
-    public void insertWorkflows(List<WorkflowDb> worflows) {
+    public void insertWorkflows(List<WorkflowDb> worflows, BoundaryCallbackInterface callback) {
         Disposable disposable = Observable.fromCallable(() -> {
             workflowDbDao.insertWorkflows(worflows);
             callback.updateIsLoading(false);
@@ -105,8 +108,15 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
      * @param token
      */
     public void setWorkflowList(String token) {
+        currentPage = 1;
+        lastPage = 1;
+
         Disposable disposable = Observable.fromCallable(() -> {
             DataSource.Factory<Integer, WorkflowListItem> factory = workflowDbDao.getWorkflowsByUpdatedAt();
+
+            if (callback != null) {
+                callback.clearDisposables();
+            }
 
             // TODO test if callback exists and if it is NOT null clear disposables. We are creating a new instance.
             callback = new WorkflowSearchBoundaryCallback(
@@ -132,6 +142,78 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
     }
 
     /**
+     * Sets a new boundary callback and DataSource for a new LiveData PagedList.
+     *
+     * @param token
+     * @param query
+     */
+    public void setQuerySearchList(String token, String query) {
+        currentPage = 1;
+        lastPage = 1;
+
+        Disposable disposable = Observable.fromCallable(() -> {
+            DataSource.Factory<Integer, WorkflowListItem> factory = workflowDbDao.searchWorkflow(query);
+
+            if (queryCallback != null) {
+                queryCallback.clearDisposables();
+            }
+
+
+            // TODO test if callback exists and if it is NOT null clear disposables. We are creating a new instance.
+            queryCallback = new WorkflowSearchQueryCallback(
+                    service,
+                    token,
+                    query,
+                    currentPage,
+                    new IncomingWorkflowsCallback() {
+                        @Override
+                        public void handleResponse(List<WorkflowDb> workflowsResponse, int lastPage) {
+                            WorkflowSearchRepository.this.lastPage = lastPage;
+                            insertWorkflows(workflowsResponse, queryCallback);
+                        }
+
+                        @Override
+                        public void showLoadingMore(boolean loadMore) {
+
+                        }
+                    }
+            );
+
+            if (allWorkflows != null && allWorkflows.hasActiveObservers()) {
+                Log.d(TAG, "setWorkflowList: YES");
+            }
+
+            if (allWorkflows != null && allWorkflows.hasObservers()) {
+                Log.d(TAG, "setWorkflowList: YES");
+            }
+
+
+            allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)
+                    .setBoundaryCallback(queryCallback)
+                    .build();
+
+
+            if (allWorkflows != null && allWorkflows.hasActiveObservers()) {
+                Log.d(TAG, "setWorkflowList: YES");
+            }
+
+            if (allWorkflows != null && allWorkflows.hasObservers()) {
+                Log.d(TAG, "setWorkflowList: YES");
+            }
+
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> {
+                    messagePagedQuerySet.setValue(result);
+                }, throwable -> {
+                    messageErrorToViewModel.setValue(false);
+                    Log.d(TAG, "failure: Can't init LivePagedListBuilder " + throwable.getMessage());
+                });
+        disposables.add(disposable);
+    }
+
+    /**
      * It assumes that allWorkflows was previously initialized with a LiveData PagedList otherwise
      * it will not return any data.
      *
@@ -143,6 +225,10 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
 
     public LiveData<Boolean> getObservableMessageLoadingMoreToUiFromCallback() {
         return callback.getObservableMessageLoadingMoreToUi();
+    }
+
+    public LiveData<Boolean> getObservableSearchMessageLoadingMoreToUiFromCallback() {
+        return queryCallback.getObservableMessageLoadingMoreToUi();
     }
 
     /**
@@ -221,6 +307,13 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
             messagePagedListSet = new MutableLiveData<>();
         }
         return messagePagedListSet;
+    }
+
+    protected LiveData<Boolean> getObservableMessageQueryListSet() {
+        if (messagePagedQuerySet == null) {
+            messagePagedQuerySet = new MutableLiveData<>();
+        }
+        return messagePagedQuerySet;
     }
 
     protected LiveData<Boolean> getObservableLoadingCompleted() {

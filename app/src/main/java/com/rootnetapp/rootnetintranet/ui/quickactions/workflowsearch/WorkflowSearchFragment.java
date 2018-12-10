@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -123,15 +124,26 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
         workflowSearchViewModel.getObservableMessageViewSetLoadingMore().removeObservers(this);
         workflowSearchViewModel.getObservableMessageViewSetLoadingMore().observe(this, this::setLoadingMoreObservers);
 
+        workflowSearchViewModel.getObservableMessageViewSetQueryLoadingMore().removeObservers(this);
+        workflowSearchViewModel.getObservableMessageViewSetQueryLoadingMore().observe(this, this::setLoadingMoreObserversForQuery);
+
         workflowSearchViewModel.getObservableHandleUiLoadingCompleted().removeObservers(this);
         workflowSearchViewModel.getObservableHandleUiLoadingCompleted().observe(this, this::showBottomSheetLoading);
 
-        addWorkflowsObserver();
+        workflowSearchViewModel.getObservableMessageUiResetListDataSource().removeObservers(this);
+        workflowSearchViewModel.getObservableMessageUiResetListDataSource().observe(this, result -> addWorkflowsObserver());
+
+        //addWorkflowsObserver();
     }
 
     private void setLoadingMoreObservers(Boolean setObserver) {
         workflowSearchViewModel.getObservableFromRepoLoadingMoreCallback().removeObservers(this);
         workflowSearchViewModel.getObservableFromRepoLoadingMoreCallback().observe(this, this::showBottomSheetLoading);
+    }
+
+    private void setLoadingMoreObserversForQuery(Boolean setObserver) {
+        workflowSearchViewModel.getObservableFromqueryLoadingMorecallback().removeObservers(this);
+        workflowSearchViewModel.getObservableFromqueryLoadingMorecallback().observe(this, this::showBottomSheetLoading);
     }
 
     /**
@@ -188,7 +200,7 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
      */
     @UiThread
     private void updateAdapterList(PagedList<WorkflowListItem> workflowDbList) {
-        clearSearchText();
+        clearSearchText(); // TODO check what we have here in this list.
         mAdapter.submitList(workflowDbList);
     }
 
@@ -241,6 +253,11 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
         workflowSearchViewModel.handleUiAndIncomingList(listWorkflows);
     });
 
+    /**
+     * Method is used when we initialize our list of workflows, and also when we reset the
+     * DataSource for the recycler view. The ViewModel will call this method any time a new
+     * DataSource is initialized.
+     */
     private void addWorkflowsObserver() {
         workflowSearchViewModel.getAllWorkflows().removeObservers(this);
         workflowSearchViewModel.getAllWorkflows().observe(this, getAllWorkflowsObserver);

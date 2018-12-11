@@ -7,7 +7,7 @@ import android.util.Log;
 
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
-import androidx.work.WorkStatus;
+//import androidx.work.WorkStatus;
 import io.reactivex.Observable;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
@@ -19,7 +19,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class DomainRepository {
     ApiInterface services;
-    private LiveData<WorkStatus> responseApi;
+    //private LiveData<WorkStatus> responseApi;
 
 
     private static final String TAG = "DomainRepository";

@@ -39,7 +39,7 @@ ext {
     fileChooser                     = "1.1.10"
     jsonWebTokenVersion             = "1.1.1"
     roomVersion                     = "1.1.1"
-    workManager                     = "1.0.0-alpha10"
+    workManager                     = "1.0.0-alpha12"
     circleImageViewVersion          = "2.2.0"
     glideVersion                    = "4.7.1"
     picassoVersion                  = '2.71828'

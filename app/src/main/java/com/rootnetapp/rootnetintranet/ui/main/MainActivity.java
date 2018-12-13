@@ -26,11 +26,13 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
-import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerService;
+import com.rootnetapp.rootnetintranet.services.background.WorkflowManagerService;
+import com.rootnetapp.rootnetintranet.services.websocket.RootnetWebSocketListener;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.main.adapters.SearchAdapter;
@@ -45,6 +47,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFilter
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOptionsAdapter;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -66,6 +69,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import okhttp3.OkHttpClient;
 
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.CHECK;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.INDEX_CHECK;
@@ -88,6 +92,8 @@ public class MainActivity extends AppCompatActivity
     private FragmentManager fragmentManager;
     private SharedPreferences sharedPref;
     private MenuItem mSearch = null;
+
+    private OkHttpClient client;
 
     RightDrawerOptionsAdapter rightDrawerOptionsAdapter;
     RightDrawerFiltersAdapter rightDrawerFiltersAdapter;
@@ -121,6 +127,28 @@ public class MainActivity extends AppCompatActivity
         setFilterBoxListeners();
         setupBottomNavigation();
         setupSpeedDialFab();
+
+
+        String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
+        String port = sharedPref.getString(PreferenceKeys.PREF_PORT, "");
+
+//        client = new OkHttpClient.Builder()
+//                .readTimeout(3,  TimeUnit.SECONDS)
+//                .retryOnConnectionFailure(true)
+//                .build();
+//
+//        String token = "Bearer "+ sharedPref.getString("token","");
+//        //startTest(token);
+    }
+
+    private void startTest(String token) {
+//        Request request = new Request.Builder()
+//                .url("ws://echo.websocket.org")
+//                .addHeader("Authorization", token)
+//                .build();
+//        RootnetWebSocketListener listener = new RootnetWebSocketListener();
+//        WebSocket ws = client.newWebSocket(request, listener);
+//        client.dispatcher().executorService().shutdown();
     }
 
     @Override

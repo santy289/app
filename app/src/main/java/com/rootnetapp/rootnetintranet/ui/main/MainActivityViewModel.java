@@ -112,7 +112,7 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     protected void initMainViewModel(SharedPreferences sharedPreferences) {
-        String json = sharedPreferences.getString("domain", "");
+        String json = sharedPreferences.getString(PreferenceKeys.PREF_DOMAIN, "");
         if (json.isEmpty()) {
             Log.d("test", "onCreate: ALGO PASO");//todo mejorar esta validacion
             return;
@@ -137,9 +137,9 @@ public class MainActivityViewModel extends ViewModel {
             Log.d(TAG, "initMainViewModel: error: " + e.getMessage());
         }
 
-        String token = sharedPreferences.getString(PreferenceKeys.PREFERENCE_TOKEN, "");
+        String token = sharedPreferences.getString(PreferenceKeys.PREF_TOKEN, "");
         JWT jwt = new JWT(token);
-        int id = Integer.parseInt(jwt.getClaim(PreferenceKeys.PREFERENCE_PROFILE_ID).asString());
+        int id = Integer.parseInt(jwt.getClaim(PreferenceKeys.PREF_PROFILE_ID).asString());
         getUser(id);
     }
 

@@ -4,10 +4,6 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.annotation.NonNull;
 
-/**
- * Created by root on 24/04/18.
- */
-
 public class MainActivityViewModelFactory implements ViewModelProvider.Factory {
 
     private MainActivityRepository repository;

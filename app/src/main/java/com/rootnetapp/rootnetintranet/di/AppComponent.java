@@ -1,7 +1,7 @@
 package com.rootnetapp.rootnetintranet.di;
 
-import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerService;
-import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerServiceModule;
+import com.rootnetapp.rootnetintranet.services.background.WorkflowManagerService;
+import com.rootnetapp.rootnetintranet.services.background.WorkflowManagerServiceModule;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowModule;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.CustomCountryPicker;

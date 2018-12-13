@@ -67,7 +67,7 @@
             android:theme="@style/AppTheme"
             android:screenOrientation="portrait"/>
         <service
-            android:name=".services.manager.WorkflowManagerService"
+            android:name=".services.background.WorkflowManagerService"
             android:enabled="true"
             android:exported="false">
         </service>

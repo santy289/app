@@ -83,15 +83,15 @@ public class LoginViewModel extends ViewModel {
 
         String token = loginResponse.getToken();
         String[] content = new String[2];
-        content[0] = PreferenceKeys.PREFERENCE_TOKEN;
+        content[0] = PreferenceKeys.PREF_TOKEN;
         content[1] = token;
         saveToPreference.setValue(content);
 
-        content[0] = PreferenceKeys.PREFERENCE_USER_NAME;
+        content[0] = PreferenceKeys.PREF_USER_NAME;
         content[1] = userName.trim();
         saveToPreference.setValue(content);
 
-        content[0] = PreferenceKeys.PREFERENCE_PASSWORD;
+        content[0] = PreferenceKeys.PREF_PASSWORD;
         content[1] = password.trim();
         saveToPreference.setValue(content);
 
@@ -103,7 +103,7 @@ public class LoginViewModel extends ViewModel {
 
         JWT jwt = new JWT(token);
         String profileId = jwt.getClaim("profile_id").asString();
-        content[0] = PreferenceKeys.PREFERENCE_PROFILE_ID;
+        content[0] = PreferenceKeys.PREF_PROFILE_ID;
         content[1] = profileId;
         saveToPreference.setValue(content);
 

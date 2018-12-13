@@ -12,6 +12,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
@@ -96,12 +97,15 @@ public class SyncActivity extends AppCompatActivity {
 
     private void subscribeForLogin() {
         final Observer<Boolean> attemptTokenRefreshObserver = (response -> attemptToLogin());
-        final Observer<String> saveToPreferenceObserver = (content -> saveInPreferences("token", content));
+        final Observer<String> saveToPreferenceObserver = (content -> saveInPreferences(PreferenceKeys.PREF_TOKEN, content));
         final Observer<Boolean> goToDomainObserver = (this::goToDomain);
         syncHelper.getObservableAttemptTokenRefresh().observe(this, attemptTokenRefreshObserver);
         syncHelper.getObservableSavetoPreference().observe(this, saveToPreferenceObserver);
         syncHelper.getObservableGoToDomain().observe(this, goToDomainObserver);
-        syncHelper.saveIdToPreference.observe(this, integer -> saveIntegerInPreference("category_id", integer));
+        syncHelper.saveIdToPreference.observe(this, integer -> saveIntegerInPreference(PreferenceKeys.PREF_CATEGORY, integer));
+        syncHelper.saveStringToPreference.observe(this, value ->
+                saveInPreferences(value[SyncHelper.INDEX_KEY_STRING], value[SyncHelper.INDEX_KEY_VALUE]
+        ));
     }
 
 }

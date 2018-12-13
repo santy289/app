@@ -1,16 +1,13 @@
-package com.rootnetapp.rootnetintranet.services.manager;
+package com.rootnetapp.rootnetintranet.services.background;
 
-import android.os.SystemClock;
 import android.util.Log;
 
-import com.rootnetapp.rootnetintranet.commons.PendingWorkflows;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
 
 import java.util.List;
 
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 

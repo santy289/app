@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.services.manager;
+package com.rootnetapp.rootnetintranet.services.background;
 
 import android.app.IntentService;
 import android.content.Context;

@@ -45,12 +45,6 @@ public class SyncActivity extends AppCompatActivity {
         syncHelper.syncData(token);
     }
 
-    @Override
-    protected void onDestroy() {
-        syncHelper.clearDisposables();
-        super.onDestroy();
-    }
-
     private void attemptToLogin() {
         SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String user = prefs.getString("username", "");
@@ -81,6 +75,8 @@ public class SyncActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Failure", Toast.LENGTH_LONG).show();
             }
+
+            syncHelper.clearDisposables();
             startActivity(new Intent(this, MainActivity.class));
             finishAffinity();
         });

@@ -7,7 +7,8 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.1'
-
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -49,4 +50,13 @@ ext {
     jUnit                           = "4.12"
     okhttp                          = "3.12.0"
     autobahn                        = "18.5.1"
+    PLATFORM = project.properties.get('buildPlatform', 'android')
+    PLATFORM_ANDROID = 'android'
+    PLATFORM_NETTY = 'netty'
+    PLUGIN_ANDROID_APP = 'com.android.application'
+    PLUGIN_ANDROID_LIB = 'com.android.library'
+    PLUGIN_JAVA_APP = 'application'
+    PLUGIN_JAVA_LIB = 'java-library'
+    IS_ANDROID = PLATFORM == PLATFORM_ANDROID
+    BUILD_LEGACY = project.properties.get('buildLegacy', false)
 }

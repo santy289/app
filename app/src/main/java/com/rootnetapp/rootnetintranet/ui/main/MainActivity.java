@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -27,12 +28,12 @@ import com.bumptech.glide.RequestBuilder;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.services.background.WorkflowManagerService;
-import com.rootnetapp.rootnetintranet.services.websocket.RootnetWebSocketListener;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.main.adapters.SearchAdapter;
@@ -46,8 +47,11 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOptionsAdapter;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
@@ -129,27 +133,75 @@ public class MainActivity extends AppCompatActivity
         setupSpeedDialFab();
 
 
+
+        String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
+        if (TextUtils.isEmpty(protocol)) {
+            return;
+        }
+        initNotifications();
+    }
+
+    private void initNotifications() {
         String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
         String port = sharedPref.getString(PreferenceKeys.PREF_PORT, "");
-
-//        client = new OkHttpClient.Builder()
-//                .readTimeout(3,  TimeUnit.SECONDS)
-//                .retryOnConnectionFailure(true)
-//                .build();
+        String token = sharedPref.getString(PreferenceKeys.PREF_TOKEN, "");
 //
-//        String token = "Bearer "+ sharedPref.getString("token","");
-//        //startTest(token);
+//
+//        // Create a session object
+//        Session session = new Session();
+//        // Add all onJoin listeners
+//        session.addOnJoinListener(this::subscribeToWebsocket);
+//
+//        String domain;
+//        try {
+//            domain = getDomainName(Utils.domain);
+//        } catch (URISyntaxException e) {
+//            Log.d(TAG, "initNotifications: Missing websocket settings");
+//            return;
+//        }
+//
+//        String url = protocol + "://" + domain + ":" + port + "/";
+//        String realm = "master";
+//
+////        ArrayMap<String, Object> extra = new ArrayMap<>();
+////        extra.put("jwt", token);
+//
+//
+////         finally, provide everything to a Client and connect
+//        IAuthenticator authenticator = new ChallengeResponseAuth("", "");
+//        Client client = new Client(session, url, realm, authenticator);
+//
+////        Client client = new Client(session, url, realm);
+//
+//
+//        CompletableFuture<ExitInfo> exitInfoCompletableFuture = client.connect();
+    }
+    public static String getDomainName(String url) throws URISyntaxException {
+        URI uri = new URI(url);
+        String domain = uri.getHost();
+        return domain.startsWith("www.") ? domain.substring(4) : domain;
     }
 
-    private void startTest(String token) {
-//        Request request = new Request.Builder()
-//                .url("ws://echo.websocket.org")
-//                .addHeader("Authorization", token)
-//                .build();
-//        RootnetWebSocketListener listener = new RootnetWebSocketListener();
-//        WebSocket ws = client.newWebSocket(request, listener);
-//        client.dispatcher().executorService().shutdown();
-    }
+//    public void subscribeToWebsocket(Session session, SessionDetails details) {
+        // Subscribe to topic to receive its events.
+//        CompletableFuture<Subscription> subFuture = session.subscribe("master.notification",
+//                this::onEvent);
+//        subFuture.whenComplete((subscription, throwable) -> {
+//            if (throwable == null) {
+//                // We have successfully subscribed.
+//                System.out.println("Subscribed to topic " + subscription.topic);
+//            } else {
+//                // Something went bad.
+//                throwable.printStackTrace();
+//            }
+//        });
+//    }
+
+//    private void onEvent(List<Object> args, Map<String, Object> kwargs, EventDetails details) {
+//        System.out.println(String.format("Got event: %s", args.get(0)));
+//    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

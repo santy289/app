@@ -5,7 +5,7 @@ android {
     buildToolsVersion "28.0.3"
     defaultConfig {
         applicationId "com.rootnetapp.rootnetintranet"
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion 28
         versionCode 8
         versionName "1.0"
@@ -72,8 +72,6 @@ dependencies {
 
     implementation "me.riddhimanadib.form-master:form-master:1.1.0"
     implementation "com.leinardi.android:speed-dial:2.0.0"
-
-    //implementation "io.crossbar.autobahn:autobahn-android:$rootProject.autobahn"
 
     implementation "com.squareup.retrofit2:adapter-rxjava2:$rootProject.rxjavaLibraryVersion"
     implementation "io.reactivex.rxjava2:rxandroid:$rootProject.rxandroidLibraryVersion"

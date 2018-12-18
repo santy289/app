@@ -85,7 +85,8 @@ dependencies {
     implementation "com.obsez.android.lib.filechooser:filechooser:$rootProject.fileChooser"
 
     implementation 'com.jakewharton.threetenabp:threetenabp:1.1.1'
-    implementation "com.squareup.okhttp3:logging-interceptor:$rootProject.okhttp" //debug API calls
+    //debug API calls
+    implementation "com.squareup.okhttp3:logging-interceptor:$rootProject.okhttp"
     implementation 'com.wdullaer:materialdatetimepicker:4.1.0'
 
     //Test
@@ -94,5 +95,5 @@ dependencies {
     testImplementation "junit:junit:$rootProject.jUnit"
     implementation 'com.auth0.android:jwtdecode:1.1.1'
     implementation "de.hdodenhof:circleimageview:$rootProject.circleImageViewVersion"
-
+    implementation project(':autobahn')
 }

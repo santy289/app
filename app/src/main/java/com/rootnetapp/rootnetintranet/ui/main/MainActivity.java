@@ -73,6 +73,15 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import io.crossbar.autobahn.wamp.Client;
+import io.crossbar.autobahn.wamp.Session;
+import io.crossbar.autobahn.wamp.auth.ChallengeResponseAuth;
+import io.crossbar.autobahn.wamp.interfaces.IAuthenticator;
+import io.crossbar.autobahn.wamp.messages.Subscribe;
+import io.crossbar.autobahn.wamp.types.EventDetails;
+import io.crossbar.autobahn.wamp.types.ExitInfo;
+import io.crossbar.autobahn.wamp.types.SessionDetails;
+import io.crossbar.autobahn.wamp.types.Subscription;
 import okhttp3.OkHttpClient;
 
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.CHECK;
@@ -145,36 +154,36 @@ public class MainActivity extends AppCompatActivity
         String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
         String port = sharedPref.getString(PreferenceKeys.PREF_PORT, "");
         String token = sharedPref.getString(PreferenceKeys.PREF_TOKEN, "");
-//
-//
-//        // Create a session object
-//        Session session = new Session();
-//        // Add all onJoin listeners
-//        session.addOnJoinListener(this::subscribeToWebsocket);
-//
-//        String domain;
-//        try {
-//            domain = getDomainName(Utils.domain);
-//        } catch (URISyntaxException e) {
-//            Log.d(TAG, "initNotifications: Missing websocket settings");
-//            return;
-//        }
-//
-//        String url = protocol + "://" + domain + ":" + port + "/";
-//        String realm = "master";
-//
-////        ArrayMap<String, Object> extra = new ArrayMap<>();
-////        extra.put("jwt", token);
-//
-//
-////         finally, provide everything to a Client and connect
-//        IAuthenticator authenticator = new ChallengeResponseAuth("", "");
-//        Client client = new Client(session, url, realm, authenticator);
-//
-////        Client client = new Client(session, url, realm);
-//
-//
-//        CompletableFuture<ExitInfo> exitInfoCompletableFuture = client.connect();
+
+
+        // Create a session object
+        Session session = new Session();
+        // Add all onJoin listeners
+        session.addOnJoinListener(this::subscribeToWebsocket);
+
+        String domain;
+        try {
+            domain = getDomainName(Utils.domain);
+        } catch (URISyntaxException e) {
+            Log.d(TAG, "initNotifications: Missing websocket settings");
+            return;
+        }
+
+        String url = protocol + "://" + domain + ":" + port + "/";
+        String realm = "master";
+
+//        ArrayMap<String, Object> extra = new ArrayMap<>();
+//        extra.put("jwt", token);
+
+
+//         finally, provide everything to a Client and connect
+        IAuthenticator authenticator = new ChallengeResponseAuth("", "");
+        Client client = new Client(session, url, realm, authenticator);
+
+//        Client client = new Client(session, url, realm);
+
+
+        CompletableFuture<ExitInfo> exitInfoCompletableFuture = client.connect();
     }
     public static String getDomainName(String url) throws URISyntaxException {
         URI uri = new URI(url);
@@ -182,24 +191,24 @@ public class MainActivity extends AppCompatActivity
         return domain.startsWith("www.") ? domain.substring(4) : domain;
     }
 
-//    public void subscribeToWebsocket(Session session, SessionDetails details) {
-        // Subscribe to topic to receive its events.
-//        CompletableFuture<Subscription> subFuture = session.subscribe("master.notification",
-//                this::onEvent);
-//        subFuture.whenComplete((subscription, throwable) -> {
-//            if (throwable == null) {
-//                // We have successfully subscribed.
-//                System.out.println("Subscribed to topic " + subscription.topic);
-//            } else {
-//                // Something went bad.
-//                throwable.printStackTrace();
-//            }
-//        });
-//    }
+    public void subscribeToWebsocket(Session session, SessionDetails details) {
+//         Subscribe to topic to receive its events.
+        CompletableFuture<Subscription> subFuture = session.subscribe("master.notification",
+                this::onEvent);
+        subFuture.whenComplete((subscription, throwable) -> {
+            if (throwable == null) {
+                // We have successfully subscribed.
+                System.out.println("Subscribed to topic " + subscription.topic);
+            } else {
+                // Something went bad.
+                throwable.printStackTrace();
+            }
+        });
+    }
 
-//    private void onEvent(List<Object> args, Map<String, Object> kwargs, EventDetails details) {
-//        System.out.println(String.format("Got event: %s", args.get(0)));
-//    }
+    private void onEvent(List<Object> args, Map<String, Object> kwargs, EventDetails details) {
+        System.out.println(String.format("Got event: %s", args.get(0)));
+    }
 
 
 

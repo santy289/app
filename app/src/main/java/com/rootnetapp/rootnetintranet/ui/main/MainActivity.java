@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity
         if (TextUtils.isEmpty(protocol)) {
             return;
         }
-        initNotifications();
+        //initNotifications();
     }
 
     private void initNotifications() {
@@ -160,6 +160,26 @@ public class MainActivity extends AppCompatActivity
         Session session = new Session();
         // Add all onJoin listeners
         session.addOnJoinListener(this::subscribeToWebsocket);
+        session.addOnReadyListener(readySession -> {
+            Log.d(TAG, "initNotifications: On Ready Session");
+        });
+        session.addOnDisconnectListener((sessionDisconnect, clean) -> {
+            Log.d(TAG, "initNotifications: On Disconnect");
+        });
+
+        session.addOnConnectListener(sessionConnect -> {
+            Log.d(TAG, "initNotifications: on Connect");
+        });
+        session.addOnJoinListener((sessionJoin, details) -> {
+            Log.d(TAG, "initNotifications: on Join");
+        });
+        session.addOnLeaveListener((sessionLeave, details) -> {
+            if (details.reason.equals("thruway.error.authentication_failure")) {
+                Log.d(TAG, "initNotifications: failure");
+            } else {
+                Log.d(TAG, "initNotifications: something else");
+            }
+        });
 
         String domain;
         try {
@@ -172,13 +192,13 @@ public class MainActivity extends AppCompatActivity
         String url = protocol + "://" + domain + ":" + port + "/";
         String realm = "master";
 
-//        ArrayMap<String, Object> extra = new ArrayMap<>();
-//        extra.put("jwt", token);
-
 
 //         finally, provide everything to a Client and connect
-        IAuthenticator authenticator = new ChallengeResponseAuth("", "");
+        IAuthenticator authenticator = new ChallengeResponseAuth(token);
         Client client = new Client(session, url, realm, authenticator);
+
+
+
 
 //        Client client = new Client(session, url, realm);
 

@@ -16,37 +16,40 @@ import io.crossbar.autobahn.wamp.types.ChallengeResponse;
 import io.crossbar.autobahn.wamp.utils.AuthUtil;
 
 public class ChallengeResponseAuth implements IAuthenticator {
-    public static final String authmethod = "wampcra";
+    public static final String authmethod = "rootnetJWT";
 
-    public final String authid;
+//    public final String authid;
     public final Map<String, Object> authextra;
-    public final String secret;
+//    public final String secret;
 
-    private Mac sha256HMAC;
+    public final String token;
 
-    public ChallengeResponseAuth(String authid, String secret) {
-        this(authid, secret, null);
-    }
+//    private Mac sha256HMAC;
 
-    public ChallengeResponseAuth(String authid, String secret, Map<String, Object> authextra) {
-        this.authid = authid;
-        this.secret = secret;
-        this.authextra = authextra;
-        try {
-            SecretKeySpec secretKey = new SecretKeySpec(secret.getBytes("UTF-8"), "HmacSHA256");
-            sha256HMAC = Mac.getInstance("HmacSHA256");
-            sha256HMAC.init(secretKey);
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException | InvalidKeyException e) {
-            throw new RuntimeException(e);
-        }
+//    public ChallengeResponseAuth(String authid, String secret, Map<String, Object> authextra) {
+//        this.authid = authid;
+//        this.secret = secret;
+//        this.authextra = authextra;
+//        try {
+//            SecretKeySpec secretKey = new SecretKeySpec(secret.getBytes("UTF-8"), "HmacSHA256");
+//            sha256HMAC = Mac.getInstance("HmacSHA256");
+//            sha256HMAC.init(secretKey);
+//        } catch (NoSuchAlgorithmException | UnsupportedEncodingException | InvalidKeyException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
+    public ChallengeResponseAuth(String token) {
+        this.token = token;
+        authextra = null;
     }
 
     @Override
     public CompletableFuture<ChallengeResponse> onChallenge(Session session, Challenge challenge) {
-        String ch = (String) challenge.extra.get("challenge");
+//        String ch = (String) challenge.extra.get("challenge");
+        String test = "test";
         try {
-            String hash = AuthUtil.encodeToString(sha256HMAC.doFinal(ch.getBytes("UTF-8")));
-            return CompletableFuture.completedFuture(new ChallengeResponse(hash, authextra));
+//            String hash = AuthUtil.encodeToString(sha256HMAC.doFinal(ch.getBytes("UTF-8")));
+            return CompletableFuture.completedFuture(new ChallengeResponse(token, authextra));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

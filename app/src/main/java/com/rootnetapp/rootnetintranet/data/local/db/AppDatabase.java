@@ -25,7 +25,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDao;
         Field.class,
         Profile.class,
         CountryDB.class
-}, version = 5, exportSchema = false)
+}, version = 6, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     public abstract UserDao userDao();
     public abstract WorkflowDao workflowDao();

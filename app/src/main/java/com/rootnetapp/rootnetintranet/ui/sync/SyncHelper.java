@@ -379,7 +379,8 @@ public class SyncHelper {
             return true;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::success, this::userfailure);
+                .subscribe(this::success,
+                        this::userfailure);
         disposables.add(disposable);
     }
 
@@ -392,20 +393,20 @@ public class SyncHelper {
     }
 
     private void onWorkflowTypesSuccess(WorkflowTypesResponse response) {
-        Disposable disposable = Observable.fromCallable(() -> {
-            List<WorkflowType> workflowTypes = response.getList();
-            if (workflowTypes == null) {
-                return false;
-            }
-//            database.workflowDao().
-//            database.workflowDao().insertWorkflow(workflowTypes);
-            return true;
-        }).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe( success -> {
-
-                }, this::failure);
-        disposables.add(disposable);
+//        Disposable disposable = Observable.fromCallable(() -> {
+//            List<WorkflowType> workflowTypes = response.getList();
+//            if (workflowTypes == null) {
+//                return false;
+//            }
+////            database.workflowDao().
+////            database.workflowDao().insertWorkflow(workflowTypes);
+//            return true;
+//        }).subscribeOn(Schedulers.newThread())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe( success -> {
+//
+//                }, this::failure);
+//        disposables.add(disposable);
     }
 
     @Deprecated
@@ -420,7 +421,8 @@ public class SyncHelper {
                 return true;
             }).subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::success, this::failure);
+                    .subscribe(this::success,
+                            this::failure);
             disposables.add(disposable);
 //        }
     }

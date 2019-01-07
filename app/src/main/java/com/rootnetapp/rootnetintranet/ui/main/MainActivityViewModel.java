@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import androidx.annotation.IdRes;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.auth0.android.jwt.JWT;
@@ -19,13 +20,27 @@ import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
+import com.rootnetapp.rootnetintranet.services.websocket.WebsocketSecureHandler;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
+import io.crossbar.autobahn.wamp.Client;
+import io.crossbar.autobahn.wamp.Session;
+import io.crossbar.autobahn.wamp.auth.ChallengeResponseAuth;
+import io.crossbar.autobahn.wamp.interfaces.IAuthenticator;
+import io.crossbar.autobahn.wamp.types.EventDetails;
+import io.crossbar.autobahn.wamp.types.ExitInfo;
+import io.crossbar.autobahn.wamp.types.SessionDetails;
+import io.crossbar.autobahn.wamp.types.Subscription;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -77,6 +92,7 @@ public class MainActivityViewModel extends ViewModel {
     List<WorkflowTypeMenu> filtersList;
     List<WorkflowTypeMenu> optionsList;
 
+    private WebsocketSecureHandler webSocketHandler;
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     protected final static String IMG_LOGO = "imgLogo";
@@ -141,6 +157,19 @@ public class MainActivityViewModel extends ViewModel {
         JWT jwt = new JWT(token);
         int id = Integer.parseInt(jwt.getClaim(PreferenceKeys.PREF_PROFILE_ID).asString());
         getUser(id);
+    }
+
+    protected void initNotifications(SharedPreferences sharedPref) {
+        String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
+        String port = sharedPref.getString(PreferenceKeys.PREF_PORT, "");
+        String token = sharedPref.getString(PreferenceKeys.PREF_TOKEN, "");
+
+        if (TextUtils.isEmpty(protocol) || TextUtils.isEmpty(port) || TextUtils.isEmpty(token)) {
+            return;
+        }
+
+        webSocketHandler = new WebsocketSecureHandler(protocol, port, token);
+        webSocketHandler.initNotifications();
     }
 
     protected void sendFilterClickToWorflowList(int position) {

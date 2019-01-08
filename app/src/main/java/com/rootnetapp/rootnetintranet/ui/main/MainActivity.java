@@ -780,7 +780,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void prepareNotification(String title, String message) {
-
         Bitmap logoBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_round);
 
         Person user = new Person.Builder()

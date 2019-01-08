@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -27,13 +29,11 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.notifications.NotificationChannels;
-import com.rootnetapp.rootnetintranet.notifications.NotificationIds;
 import com.rootnetapp.rootnetintranet.services.background.WorkflowManagerService;
 import com.rootnetapp.rootnetintranet.services.websocket.WebsocketSecureHandler;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
@@ -779,11 +779,23 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void prepareNotification(String title, String message) {
-        Person user = new Person.Builder().setName("Intranet").build();
-        NotificationCompat.MessagingStyle messagingStyle = new NotificationCompat.MessagingStyle(user);
+
+        Bitmap logoBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_round);
+
+        Person user = new Person.Builder()
+                .setName("Intranet")
+//                .setIcon(IconCompat.createWithBitmap(logoBitmap))
+                .build();
         Date date = new Date();
-        NotificationCompat.MessagingStyle.Message messageStyle = new NotificationCompat.MessagingStyle.Message(message, date.getTime(), user);
+        NotificationCompat.MessagingStyle.Message messageStyle = new NotificationCompat.MessagingStyle.Message(
+                message,
+                date.getTime(),
+                user
+        );
+
+        NotificationCompat.MessagingStyle messagingStyle = new NotificationCompat.MessagingStyle(user);
         messagingStyle.addMessage(messageStyle);
+        messagingStyle.setConversationTitle(title);
 
         NotificationCompat.Builder notifyBuilder = new NotificationCompat.Builder(
                 this,
@@ -791,6 +803,7 @@ public class MainActivity extends AppCompatActivity
                 .setContentTitle(title)
                 .setContentText("New Comment")
                 .setSmallIcon(R.drawable.ic_message_black_24dp)
+                .setLargeIcon(logoBitmap)
                 .setAutoCancel(true)
                 .setStyle(messagingStyle)
                 // priority and defaults need to be set together

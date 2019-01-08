@@ -2,11 +2,15 @@ package com.rootnetapp.rootnetintranet.ui.main;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
+
+import android.app.NotificationManager;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import androidx.annotation.IdRes;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.auth0.android.jwt.JWT;
@@ -19,13 +23,27 @@ import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
+import com.rootnetapp.rootnetintranet.services.websocket.WebsocketSecureHandler;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
+import io.crossbar.autobahn.wamp.Client;
+import io.crossbar.autobahn.wamp.Session;
+import io.crossbar.autobahn.wamp.auth.ChallengeResponseAuth;
+import io.crossbar.autobahn.wamp.interfaces.IAuthenticator;
+import io.crossbar.autobahn.wamp.types.EventDetails;
+import io.crossbar.autobahn.wamp.types.ExitInfo;
+import io.crossbar.autobahn.wamp.types.SessionDetails;
+import io.crossbar.autobahn.wamp.types.Subscription;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -74,9 +92,14 @@ public class MainActivityViewModel extends ViewModel {
     public MutableLiveData<Integer> messageBaseFilterPositionSelectedToWorkflowList;
     public MutableLiveData<Boolean> invalidateOptionsList;
 
+    // receiving incoming notification from network
+    private LiveData<String[]> receiveIncomingNotification;
+    private NotificationManager notifyManager;
+
     List<WorkflowTypeMenu> filtersList;
     List<WorkflowTypeMenu> optionsList;
 
+    private WebsocketSecureHandler webSocketHandler;
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     protected final static String IMG_LOGO = "imgLogo";
@@ -109,10 +132,11 @@ public class MainActivityViewModel extends ViewModel {
     @Override
     protected void onCleared() {
         disposables.clear();
+        webSocketHandler.completeClient();
     }
 
     protected void initMainViewModel(SharedPreferences sharedPreferences) {
-        String json = sharedPreferences.getString("domain", "");
+        String json = sharedPreferences.getString(PreferenceKeys.PREF_DOMAIN, "");
         if (json.isEmpty()) {
             Log.d("test", "onCreate: ALGO PASO");//todo mejorar esta validacion
             return;
@@ -137,11 +161,36 @@ public class MainActivityViewModel extends ViewModel {
             Log.d(TAG, "initMainViewModel: error: " + e.getMessage());
         }
 
-        String token = sharedPreferences.getString(PreferenceKeys.PREFERENCE_TOKEN, "");
+        String token = sharedPreferences.getString(PreferenceKeys.PREF_TOKEN, "");
         JWT jwt = new JWT(token);
-        int id = Integer.parseInt(jwt.getClaim(PreferenceKeys.PREFERENCE_PROFILE_ID).asString());
+        int id = Integer.parseInt(jwt.getClaim(PreferenceKeys.PREF_PROFILE_ID).asString());
         getUser(id);
     }
+
+    void initNotifications(SharedPreferences sharedPref, NotificationManager notificationManager) {
+        String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
+        String port = sharedPref.getString(PreferenceKeys.PREF_PORT, "");
+        String token = sharedPref.getString(PreferenceKeys.PREF_TOKEN, "");
+
+        if (TextUtils.isEmpty(protocol) || TextUtils.isEmpty(port) || TextUtils.isEmpty(token)) {
+            return;
+        }
+
+        webSocketHandler = new WebsocketSecureHandler(protocol, port, token);
+        webSocketHandler.initNotifications();
+
+        receiveIncomingNotification = Transformations.map(
+          webSocketHandler.getObservableIncomingNotification(),
+          notificationArray -> {
+              Log.d(TAG, "initNotifications: test");
+
+
+              return notificationArray;
+          }
+        );
+    }
+
+
 
     protected void sendFilterClickToWorflowList(int position) {
         messageContainerToWorkflowList.setValue(position);
@@ -338,31 +387,36 @@ public class MainActivityViewModel extends ViewModel {
         return hideKeyboard;
     }
 
-    protected LiveData<Workflow> getObservableGoToWorkflowDetail() {
+    LiveData<Workflow> getObservableGoToWorkflowDetail() {
         if (goToWorkflowDetail == null) {
             goToWorkflowDetail = new MutableLiveData<>();
         }
         return goToWorkflowDetail;
     }
 
-    public LiveData<String> getObservableSaveToPreference() {
+    LiveData<String> getObservableSaveToPreference() {
         if (saveToPreference == null) {
             saveToPreference = new MutableLiveData<>();
         }
         return saveToPreference;
     }
 
-    public LiveData<Boolean> getObservableAttemptTokenRefresh() {
+    LiveData<Boolean> getObservableAttemptTokenRefresh() {
         if (attemptTokenRefresh == null) {
             attemptTokenRefresh = new MutableLiveData<>();
         }
         return attemptTokenRefresh;
     }
 
-    public LiveData<Boolean> getObservableGoToDomain() {
+    LiveData<Boolean> getObservableGoToDomain() {
         if (goToDomain == null) {
             goToDomain = new MutableLiveData<>();
         }
         return goToDomain;
     }
+
+    LiveData<String[]> getReceiveIncomingNotification() {
+        return receiveIncomingNotification;
+    }
+
 }

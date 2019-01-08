@@ -185,7 +185,7 @@ public class WorkflowViewModel extends ViewModel {
             return;
         }
         token = "Bearer "+ sharedPreferences.getString("token","");
-        userId = sharedPreferences.getString(PreferenceKeys.PREFERENCE_PROFILE_ID, "");
+        userId = sharedPreferences.getString(PreferenceKeys.PREF_PROFILE_ID, "");
         categoryId = sharedPreferences.getInt("category_id", 0);
         setWorkflowListNoFilters(token);
         subscribe(lifecycleOwner);

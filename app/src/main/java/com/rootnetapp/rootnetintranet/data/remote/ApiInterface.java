@@ -3,10 +3,8 @@ package com.rootnetapp.rootnetintranet.data.remote;
 import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.requests.approval.ApprovalRequest;
-import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
 import com.rootnetapp.rootnetintranet.models.requests.comment.PostCommentRequest;
-import com.rootnetapp.rootnetintranet.models.requests.files.WorkflowPresetsRequest;
 import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
@@ -35,6 +33,7 @@ import com.rootnetapp.rootnetintranet.models.responses.timeline.SubCommentsRespo
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
+import com.rootnetapp.rootnetintranet.models.responses.websocket.WebSocketSettingResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.WorkflowApproveRejectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
@@ -65,7 +64,8 @@ import retrofit2.http.Streaming;
 
 public interface ApiInterface {
 
-    /* El unico con v1 porque el base url en gradle properties no tiene el v1.
+    /**
+     * IMPORTANTE: El unico con v1 porque el base url en gradle properties no tiene el v1.
        Los demas no tienen v1 porque el endpoint esta enviando la api_domain + /v1/ en la url
     */
     @POST("v1/check/client")
@@ -368,4 +368,14 @@ public interface ApiInterface {
     Observable<DownloadFileResponse> downloadFile(@Header("Authorization") String authorization,
                                                   @Path("entity") String entity,
                                                   @Path("id") int fileId);
+
+    @Headers({"Domain-Name: api"})
+    @Streaming
+    @GET("options?key=socket_main")
+    Observable<WebSocketSettingResponse> getWsPort(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: api"})
+    @Streaming
+    @GET("options?key=socket_protocol")
+    Observable<WebSocketSettingResponse> getWsProtocol(@Header("Authorization") String authorization);
 }

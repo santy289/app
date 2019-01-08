@@ -4,10 +4,6 @@ import com.squareup.moshi.Json;
 
 import java.util.List;
 
-/**
- * Created by Propietario on 09/03/2018.
- */
-
 public class Package {
 
     @Json(name = "id")

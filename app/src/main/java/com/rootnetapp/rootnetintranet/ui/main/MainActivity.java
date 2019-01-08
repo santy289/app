@@ -1,5 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,11 +27,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
-import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerService;
+import com.rootnetapp.rootnetintranet.services.background.WorkflowManagerService;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.main.adapters.SearchAdapter;
@@ -66,6 +68,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import okhttp3.OkHttpClient;
 
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.CHECK;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.INDEX_CHECK;
@@ -89,6 +92,8 @@ public class MainActivity extends AppCompatActivity
     private SharedPreferences sharedPref;
     private MenuItem mSearch = null;
 
+    private OkHttpClient client;
+
     RightDrawerOptionsAdapter rightDrawerOptionsAdapter;
     RightDrawerFiltersAdapter rightDrawerFiltersAdapter;
 
@@ -100,14 +105,20 @@ public class MainActivity extends AppCompatActivity
         mainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         ((RootnetApp) getApplication()).getAppComponent().inject(this);
         mainBinding.navView.setCheckedItem(R.id.nav_timeline);
+        sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         viewModel = ViewModelProviders
                 .of(this, profileViewModelFactory)
                 .get(MainActivityViewModel.class);
+
+        viewModel.initNotifications(
+                sharedPref,
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE)
+        );
+
         fragmentManager = getSupportFragmentManager();
         setActionBar();
         subscribe();
         initActionListeners();
-        sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         viewModel.initMainViewModel(sharedPref);
 
         String workflowId = getIntent().getStringExtra("goToWorkflow");
@@ -751,6 +762,26 @@ public class MainActivity extends AppCompatActivity
         viewModel.receiveMessageBaseFilterSelected
                 .observe(this, this::handleUpdateBaseFilterSelectionUpdateWith);
         viewModel.openRightDrawer.observe(this, this::openRightDrawer);
+
+
+        viewModel.getReceiveIncomingNotification().observe(this, incomingNotification -> {
+
+
+
+
+            Log.d(TAG, "subscribe: HERE");
+
+
+
+
+
+
+        });
+
+
+
+
+
     }
 
     private void subscribeForLogin() {

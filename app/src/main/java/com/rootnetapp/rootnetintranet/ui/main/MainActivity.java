@@ -32,7 +32,10 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
+import com.rootnetapp.rootnetintranet.notifications.NotificationChannels;
+import com.rootnetapp.rootnetintranet.notifications.NotificationIds;
 import com.rootnetapp.rootnetintranet.services.background.WorkflowManagerService;
+import com.rootnetapp.rootnetintranet.services.websocket.WebsocketSecureHandler;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.main.adapters.SearchAdapter;
@@ -58,6 +61,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
@@ -765,23 +769,25 @@ public class MainActivity extends AppCompatActivity
 
 
         viewModel.getReceiveIncomingNotification().observe(this, incomingNotification -> {
-
-
-
-
-            Log.d(TAG, "subscribe: HERE");
-
-
-
-
-
-
+            prepareNotification(
+                    incomingNotification[WebsocketSecureHandler.INDEX_TITLE],
+                    incomingNotification[WebsocketSecureHandler.INDEX_MESSAGE]
+            );
         });
+    }
 
-
-
-
-
+    private void prepareNotification(String title, String message) {
+        NotificationCompat.Builder notifyBuilder = new NotificationCompat.Builder(
+                this,
+                NotificationChannels.WORKFLOW_COMMENTS_CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setSmallIcon(R.drawable.ic_message_black_24dp)
+                .setAutoCancel(true)
+                // priority and defaults need to be set together
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setDefaults(NotificationCompat.DEFAULT_ALL);
+        viewModel.notifyMessage(notifyBuilder);
     }
 
     private void subscribeForLogin() {

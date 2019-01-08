@@ -1,15 +1,19 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
+import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import androidx.annotation.IdRes;
 
+import android.graphics.Color;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -23,27 +27,16 @@ import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
+import com.rootnetapp.rootnetintranet.notifications.NotificationChannels;
+import com.rootnetapp.rootnetintranet.notifications.NotificationIds;
 import com.rootnetapp.rootnetintranet.services.websocket.WebsocketSecureHandler;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
-import io.crossbar.autobahn.wamp.Client;
-import io.crossbar.autobahn.wamp.Session;
-import io.crossbar.autobahn.wamp.auth.ChallengeResponseAuth;
-import io.crossbar.autobahn.wamp.interfaces.IAuthenticator;
-import io.crossbar.autobahn.wamp.types.EventDetails;
-import io.crossbar.autobahn.wamp.types.ExitInfo;
-import io.crossbar.autobahn.wamp.types.SessionDetails;
-import io.crossbar.autobahn.wamp.types.Subscription;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -100,6 +93,7 @@ public class MainActivityViewModel extends ViewModel {
     List<WorkflowTypeMenu> optionsList;
 
     private WebsocketSecureHandler webSocketHandler;
+    private NotificationManager notificationManager;
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     protected final static String IMG_LOGO = "imgLogo";
@@ -167,11 +161,11 @@ public class MainActivityViewModel extends ViewModel {
         getUser(id);
     }
 
+
     void initNotifications(SharedPreferences sharedPref, NotificationManager notificationManager) {
         String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
         String port = sharedPref.getString(PreferenceKeys.PREF_PORT, "");
         String token = sharedPref.getString(PreferenceKeys.PREF_TOKEN, "");
-
         if (TextUtils.isEmpty(protocol) || TextUtils.isEmpty(port) || TextUtils.isEmpty(token)) {
             return;
         }
@@ -188,9 +182,31 @@ public class MainActivityViewModel extends ViewModel {
               return notificationArray;
           }
         );
+
+        this.notificationManager = notificationManager;
+        createNotificationChannel(this.notificationManager);
     }
 
+    private void createNotificationChannel(NotificationManager notificationManager) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            return;
+        }
+        NotificationChannel notificationChannel = new NotificationChannel(
+                NotificationChannels.WORKFLOW_COMMENTS_CHANNEL_ID,
+                "Comments",
+                NotificationManager.IMPORTANCE_HIGH
+        );
+        notificationChannel.enableLights(true);
+        notificationChannel.setLightColor(Color.BLUE);
+        notificationChannel.enableVibration(true);
+        notificationChannel.setDescription("Workflow Comments");
 
+        notificationManager.createNotificationChannel(notificationChannel);
+    }
+
+    public void notifyMessage(NotificationCompat.Builder notifyBuilder) {
+        notificationManager.notify(NotificationIds.NOTIFICATION_ID, notifyBuilder.build());
+    }
 
     protected void sendFilterClickToWorflowList(int position) {
         messageContainerToWorkflowList.setValue(position);

@@ -65,6 +65,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.Person;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.IconCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -784,7 +785,7 @@ public class MainActivity extends AppCompatActivity
 
         Person user = new Person.Builder()
                 .setName("Intranet")
-//                .setIcon(IconCompat.createWithBitmap(logoBitmap))
+                .setIcon(IconCompat.createWithBitmap(logoBitmap))
                 .build();
         Date date = new Date();
         NotificationCompat.MessagingStyle.Message messageStyle = new NotificationCompat.MessagingStyle.Message(
@@ -804,7 +805,6 @@ public class MainActivity extends AppCompatActivity
                 .setContentText("New Comment")
                 .setSmallIcon(R.drawable.ic_message_black_24dp)
                 .setLargeIcon(logoBitmap)
-                .setAutoCancel(true)
                 .setStyle(messagingStyle)
                 // priority and defaults need to be set together
                 .setPriority(NotificationCompat.PRIORITY_MAX)

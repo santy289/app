@@ -31,16 +31,21 @@ public class WebsocketSecureHandler {
     private CompletableFuture<ExitInfo> exitInfoCompletableFuture;
 
     private MutableLiveData<String[]> incomingNotification;
+    private MutableLiveData<Integer> onErrorInWebsocket;
 
     private static final String TAG = "WebsocketHandler";
-    public static int INDEX_TITLE = 0;
-    public static int INDEX_MESSAGE = 1;
+    public static final int INDEX_TITLE = 0;
+    public static final int INDEX_MESSAGE = 1;
+
+    public static final int ERROR_AUTHENTICATION = 100;
+    public static final int ERROR_SUBSCRIBING = 101;
 
     public WebsocketSecureHandler(String protocol, String port, String token) {
         this.protocol = protocol;
         this.port = port;
         this.token = token;
         this.incomingNotification = new MutableLiveData<>();
+        this.onErrorInWebsocket = new MutableLiveData<>();
     }
 
     public String getProtocol() {
@@ -85,6 +90,7 @@ public class WebsocketSecureHandler {
         session.addOnLeaveListener((sessionLeave, details) -> {
             if (details.reason.equals("thruway.error.authentication_failure")) {
                 Log.d(TAG, "initNotifications: failure");
+                onErrorInWebsocket.postValue(ERROR_AUTHENTICATION);
             } else {
                 Log.d(TAG, "initNotifications: something else");
             }
@@ -118,6 +124,7 @@ public class WebsocketSecureHandler {
             } else {
                 // Something went bad.
                 throwable.printStackTrace();
+                onErrorInWebsocket.postValue(ERROR_SUBSCRIBING);
             }
         });
     }
@@ -139,7 +146,9 @@ public class WebsocketSecureHandler {
         String message = (String) incomingMessage.get(keyMessage);
         String title = (String) incomingMessage.get(keyTitle);
 
-        String[] notificationMessage = new String[]{title, message};
+        String[] notificationMessage = new String[2];
+        notificationMessage[INDEX_TITLE] = title;
+        notificationMessage[INDEX_MESSAGE] = message;
         incomingNotification.postValue(notificationMessage);
     }
 
@@ -151,5 +160,9 @@ public class WebsocketSecureHandler {
 
     public LiveData<String[]> getObservableIncomingNotification() {
         return incomingNotification;
+    }
+
+    public LiveData<Integer> getObservableOnErrorInWebsocket() {
+        return onErrorInWebsocket;
     }
 }

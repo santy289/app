@@ -162,6 +162,7 @@ public class MainActivityViewModel extends ViewModel {
     }
 
 
+    private int notificationCounterId = 0;
     void initNotifications(SharedPreferences sharedPref, NotificationManager notificationManager) {
         String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
         String port = sharedPref.getString(PreferenceKeys.PREF_PORT, "");
@@ -178,6 +179,7 @@ public class MainActivityViewModel extends ViewModel {
           notificationArray -> {
               Log.d(TAG, "initNotifications: test");
 
+              notificationCounterId += 1;
 
               return notificationArray;
           }
@@ -205,7 +207,10 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     public void notifyMessage(NotificationCompat.Builder notifyBuilder) {
-        notificationManager.notify(NotificationIds.NOTIFICATION_ID, notifyBuilder.build());
+        notificationManager.notify(
+                NotificationIds.NOTIFICATION_ID + notificationCounterId,
+                notifyBuilder.build()
+        );
     }
 
     protected void sendFilterClickToWorflowList(int position) {

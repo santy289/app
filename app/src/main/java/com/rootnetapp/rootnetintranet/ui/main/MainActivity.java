@@ -49,6 +49,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOptionsAdapter;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -62,6 +63,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.Person;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
@@ -777,16 +779,24 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void prepareNotification(String title, String message) {
+        Person user = new Person.Builder().setName("Intranet").build();
+        NotificationCompat.MessagingStyle messagingStyle = new NotificationCompat.MessagingStyle(user);
+        Date date = new Date();
+        NotificationCompat.MessagingStyle.Message messageStyle = new NotificationCompat.MessagingStyle.Message(message, date.getTime(), user);
+        messagingStyle.addMessage(messageStyle);
+
         NotificationCompat.Builder notifyBuilder = new NotificationCompat.Builder(
                 this,
                 NotificationChannels.WORKFLOW_COMMENTS_CHANNEL_ID)
                 .setContentTitle(title)
-                .setContentText(message)
+                .setContentText("New Comment")
                 .setSmallIcon(R.drawable.ic_message_black_24dp)
                 .setAutoCancel(true)
+                .setStyle(messagingStyle)
                 // priority and defaults need to be set together
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setDefaults(NotificationCompat.DEFAULT_ALL);
+
         viewModel.notifyMessage(notifyBuilder);
     }
 

@@ -126,6 +126,9 @@ public class SyncHelper {
                     success(true);
                 }, throwable -> {
                     Log.d(TAG, "getWsSettings: " + throwable.getMessage());
+                    if (throwable instanceof UnknownHostException) {
+                        Log.d(TAG, "getWsSettings: network is down probably");
+                    }
                     failure(throwable);
                 });
 

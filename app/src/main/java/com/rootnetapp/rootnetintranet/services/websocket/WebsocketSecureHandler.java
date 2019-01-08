@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import io.crossbar.autobahn.wamp.Client;
 import io.crossbar.autobahn.wamp.Session;
 import io.crossbar.autobahn.wamp.auth.ChallengeResponseAuth;
@@ -26,12 +28,19 @@ public class WebsocketSecureHandler {
     private String port;
     private String token;
 
+    private CompletableFuture<ExitInfo> exitInfoCompletableFuture;
+
+    private MutableLiveData<String[]> incomingNotification;
+
     private static final String TAG = "WebsocketHandler";
+    public static int INDEX_TITLE = 0;
+    public static int INDEX_MESSAGE = 1;
 
     public WebsocketSecureHandler(String protocol, String port, String token) {
         this.protocol = protocol;
         this.port = port;
         this.token = token;
+        this.incomingNotification = new MutableLiveData<>();
     }
 
     public String getProtocol() {
@@ -44,6 +53,15 @@ public class WebsocketSecureHandler {
 
     public String getToken() {
         return token;
+    }
+
+    public void completeClient() {
+        exitInfoCompletableFuture.complete(new ExitInfo(true));
+    }
+
+    public void cancelClient() {
+        // mayInterruptRunning doesn't affect the method implementation.
+        exitInfoCompletableFuture.cancel(true);
     }
 
     public void initNotifications() {
@@ -83,18 +101,10 @@ public class WebsocketSecureHandler {
         String url = protocol + "://" + domain + ":" + port + "/";
         String realm = "master";
 
-
 //         finally, provide everything to a Client and connect
         IAuthenticator authenticator = new ChallengeResponseAuth(token);
         Client client = new Client(session, url, realm, authenticator);
-
-
-
-        CompletableFuture<ExitInfo> exitInfoCompletableFuture = client.connect();
-        ExitInfo exitInfo = new ExitInfo(true);
-
-        exitInfoCompletableFuture.complete(exitInfo);
-
+        exitInfoCompletableFuture = client.connect();
     }
 
     private void subscribeToWebsocket(Session session, SessionDetails details) {
@@ -113,13 +123,11 @@ public class WebsocketSecureHandler {
     }
 
     private void onEvent(List<Object> args, Map<String, Object> kwargs, EventDetails details) {
-        System.out.println(String.format("Got event: %s", args.get(0)));
-
         String topic = details.topic;
         if (!topic.equals("master.notification")) {
             return;
         }
-        // TODO send notification
+
         int indexMessage = 1;
         LinkedHashMap incomingMessage = (LinkedHashMap) args.get(indexMessage);
         if (incomingMessage == null) {
@@ -130,12 +138,18 @@ public class WebsocketSecureHandler {
         String keyTitle = "title";
         String message = (String) incomingMessage.get(keyMessage);
         String title = (String) incomingMessage.get(keyTitle);
-    }
 
+        String[] notificationMessage = new String[]{title, message};
+        incomingNotification.postValue(notificationMessage);
+    }
 
     private static String getDomainName(String url) throws URISyntaxException {
         URI uri = new URI(url);
         String domain = uri.getHost();
         return domain.startsWith("www.") ? domain.substring(4) : domain;
+    }
+
+    public LiveData<String[]> getObservableIncomingNotification() {
+        return incomingNotification;
     }
 }

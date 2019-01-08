@@ -1,5 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,7 +9,6 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,7 +28,6 @@ import com.bumptech.glide.RequestBuilder;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
-import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
@@ -47,12 +46,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOptionsAdapter;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
@@ -74,15 +68,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
-import io.crossbar.autobahn.wamp.Client;
-import io.crossbar.autobahn.wamp.Session;
-import io.crossbar.autobahn.wamp.auth.ChallengeResponseAuth;
-import io.crossbar.autobahn.wamp.interfaces.IAuthenticator;
-import io.crossbar.autobahn.wamp.messages.Subscribe;
-import io.crossbar.autobahn.wamp.types.EventDetails;
-import io.crossbar.autobahn.wamp.types.ExitInfo;
-import io.crossbar.autobahn.wamp.types.SessionDetails;
-import io.crossbar.autobahn.wamp.types.Subscription;
 import okhttp3.OkHttpClient;
 
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.CHECK;
@@ -120,14 +105,20 @@ public class MainActivity extends AppCompatActivity
         mainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         ((RootnetApp) getApplication()).getAppComponent().inject(this);
         mainBinding.navView.setCheckedItem(R.id.nav_timeline);
+        sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         viewModel = ViewModelProviders
                 .of(this, profileViewModelFactory)
                 .get(MainActivityViewModel.class);
+
+        viewModel.initNotifications(
+                sharedPref,
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE)
+        );
+
         fragmentManager = getSupportFragmentManager();
         setActionBar();
         subscribe();
         initActionListeners();
-        sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         viewModel.initMainViewModel(sharedPref);
 
         String workflowId = getIntent().getStringExtra("goToWorkflow");
@@ -141,15 +132,6 @@ public class MainActivity extends AppCompatActivity
         setFilterBoxListeners();
         setupBottomNavigation();
         setupSpeedDialFab();
-
-
-
-        String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
-        if (TextUtils.isEmpty(protocol)) {
-            return;
-        }
-
-        viewModel.initNotifications(sharedPref);
     }
 
     @Override
@@ -780,6 +762,26 @@ public class MainActivity extends AppCompatActivity
         viewModel.receiveMessageBaseFilterSelected
                 .observe(this, this::handleUpdateBaseFilterSelectionUpdateWith);
         viewModel.openRightDrawer.observe(this, this::openRightDrawer);
+
+
+        viewModel.getReceiveIncomingNotification().observe(this, incomingNotification -> {
+
+
+
+
+            Log.d(TAG, "subscribe: HERE");
+
+
+
+
+
+
+        });
+
+
+
+
+
     }
 
     private void subscribeForLogin() {

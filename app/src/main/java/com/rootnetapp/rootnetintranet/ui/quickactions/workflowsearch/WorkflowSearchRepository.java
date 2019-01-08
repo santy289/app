@@ -32,7 +32,6 @@ public class WorkflowSearchRepository {
         disposables.clear();
     }
 
-
     /**
      * Performs a call to the endpoint requesting the workflows that match the specified text query.
      *

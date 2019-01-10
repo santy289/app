@@ -45,11 +45,12 @@ public class WorkflowDetailActivity extends AppCompatActivity {
 
     private static final String TAG = "WorkflowDetailActivity";
 
+    public static final String INTENT_EXTRA_ID = "intranet_workflow_id";
+
     @Inject
     WorkflowDetailViewModelFactory workflowViewModelFactory;
     private WorkflowDetailViewModel workflowDetailViewModel;
     private ActivityWorkflowDetailBinding mBinding;
-    private WorkflowListItem mWorkflowListItem;
     private WorkflowDetailViewPagerAdapter mViewPagerAdapter;
 
     @Override
@@ -61,26 +62,37 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 .of(this, workflowViewModelFactory)
                 .get(WorkflowDetailViewModel.class);
 
-        mWorkflowListItem = getIntent().getParcelableExtra(EXTRA_WORKFLOW_LIST_ITEM);
-
         SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
 
-        setActionBar();
-        setupViewPager();
         setOnClickListeners();
         subscribe();
 
         showLoading(true);
+
+        WorkflowListItem mWorkflowListItem = getIntent().getParcelableExtra(EXTRA_WORKFLOW_LIST_ITEM);
+
+        String workflowId;
+        if (mWorkflowListItem == null) {
+            workflowId = getIntent().getStringExtra(INTENT_EXTRA_ID);
+        }
+
         workflowDetailViewModel.initDetails(token, mWorkflowListItem);
     }
 
-    private void setActionBar() {
+    private void initUiWith(WorkflowListItem workflowListItem) {
+        setActionBar(workflowListItem);
+        setupViewPager(workflowListItem);
+        workflowDetailViewModel.getObservableWorflowListItem().removeObservers(this);
+    }
+
+
+    private void setActionBar(WorkflowListItem workflowListItem) {
         setSupportActionBar(mBinding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        String title = mWorkflowListItem.title;
-        String subtitle = mWorkflowListItem.getWorkflowTypeKey();
+        String title = workflowListItem.title;
+        String subtitle = workflowListItem.getWorkflowTypeKey();
         if (title == null || title.isEmpty()) title = getTitle().toString();
         getSupportActionBar().setTitle(title);
         getSupportActionBar().setSubtitle(subtitle);
@@ -89,8 +101,8 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     /**
      * Initializes and set the {@link WorkflowDetailViewPagerAdapter} for the {@link ViewPager}.
      */
-    private void setupViewPager() {
-        mViewPagerAdapter = new WorkflowDetailViewPagerAdapter(this, mWorkflowListItem,
+    private void setupViewPager(WorkflowListItem workflowListItem) {
+        mViewPagerAdapter = new WorkflowDetailViewPagerAdapter(this, workflowListItem,
                 getSupportFragmentManager());
         mBinding.viewPager.setAdapter(mViewPagerAdapter);
     }
@@ -121,6 +133,7 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         workflowDetailViewModel.handleShowLoadingByRepo.observe(this, this::showLoading);
         workflowDetailViewModel.handleSetWorkflowIsOpenByRepo
                 .observe(this, this::updateWorkflowStatus);
+        workflowDetailViewModel.getObservableWorflowListItem().observe(this, this::initUiWith);
 
         workflowDetailViewModel.showLoading.observe(this, this::showLoading);
         workflowDetailViewModel.setWorkflowIsOpen.observe(this, this::updateWorkflowStatus);

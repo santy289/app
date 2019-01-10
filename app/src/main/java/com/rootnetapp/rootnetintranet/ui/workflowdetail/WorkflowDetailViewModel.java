@@ -36,6 +36,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<Integer> mCommentsTabCounter;
     private MutableLiveData<Integer> mFilesTabCounter;
     private MutableLiveData<Integer> mShowToastMessage;
+    private MutableLiveData<WorkflowListItem> initUiWithWorkflowListItem;
 
     protected MutableLiveData<Boolean> showLoading;
     protected MutableLiveData<StatusUiData> setWorkflowIsOpen;
@@ -59,7 +60,7 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.mRepository = workflowDetailRepository;
         this.showLoading = new MutableLiveData<>();
         this.setWorkflowIsOpen = new MutableLiveData<>();
-
+        this.initUiWithWorkflowListItem = new MutableLiveData<>();
         subscribe();
     }
 
@@ -72,6 +73,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     protected void initDetails(String token, WorkflowListItem workflow) {
         this.mToken = token;
         this.mWorkflowListItem = workflow;
+        initUiWithWorkflowListItem.setValue(workflow);
         getWorkflow(this.mToken, this.mWorkflowListItem.getWorkflowId());
     }
 
@@ -291,5 +293,9 @@ public class WorkflowDetailViewModel extends ViewModel {
             mFilesTabCounter = new MutableLiveData<>();
         }
         return mFilesTabCounter;
+    }
+
+    protected LiveData<WorkflowListItem> getObservableWorflowListItem() {
+        return initUiWithWorkflowListItem;
     }
 }

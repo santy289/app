@@ -3,6 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.sync;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import android.database.sqlite.SQLiteConstraintException;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
@@ -287,6 +288,10 @@ public class SyncHelper {
     }
 
     private void worflowDbDaoTransactionsFailure(Throwable throwable) {
+        if (throwable instanceof SQLiteConstraintException) {
+            // TODO log and flag this using some analytics tool and send to server.
+            Log.d(TAG, "SQL Error: " + throwable.getMessage());
+        }
         mSyncLiveData.setValue(false);
     }
 

@@ -1,6 +1,8 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -44,6 +46,7 @@ import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
@@ -773,6 +776,7 @@ public class MainActivity extends AppCompatActivity
 
         viewModel.getReceiveIncomingNotification().observe(this, incomingNotification -> {
             prepareNotification(
+                    incomingNotification[WebsocketSecureHandler.INDEX_ID],
                     incomingNotification[WebsocketSecureHandler.INDEX_TITLE],
                     incomingNotification[WebsocketSecureHandler.INDEX_MESSAGE]
             );
@@ -797,17 +801,31 @@ public class MainActivity extends AppCompatActivity
         messagingStyle.addMessage(messageStyle);
         messagingStyle.setConversationTitle(title);
 
+        Intent detailIntent = new Intent(this, WorkflowDetailActivity.class);
+
+        detailIntent.putExtra(WorkflowDetailActivity.INTENT_EXTRA_ID, id);
+
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addNextIntentWithParentStack(detailIntent);
+        PendingIntent detailPendingIntent = stackBuilder.getPendingIntent(
+                0,
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
         NotificationCompat.Builder notifyBuilder = new NotificationCompat.Builder(
                 this,
                 NotificationChannels.WORKFLOW_COMMENTS_CHANNEL_ID)
                 .setContentTitle(title)
-                .setContentText("New Comment")
+                .setContentText(title)
+                .setContentIntent(detailPendingIntent)
                 .setSmallIcon(R.drawable.ic_message_black_24dp)
                 .setLargeIcon(logoBitmap)
                 .setStyle(messagingStyle)
+                .setAutoCancel(true)
                 // priority and defaults need to be set together
-                .setPriority(NotificationCompat.PRIORITY_MAX)
-                .setDefaults(NotificationCompat.DEFAULT_ALL);
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .setPriority(NotificationCompat.PRIORITY_MAX);
+
 
         viewModel.notifyMessage(notifyBuilder);
     }

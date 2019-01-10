@@ -1,5 +1,6 @@
 package com.rootnetapp.rootnetintranet.services.websocket;
 
+import android.net.Uri;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -36,6 +37,7 @@ public class WebsocketSecureHandler {
     private static final String TAG = "WebsocketHandler";
     public static final int INDEX_TITLE = 0;
     public static final int INDEX_MESSAGE = 1;
+    public static final int INDEX_ID = 2;
 
     public static final int ERROR_AUTHENTICATION = 100;
     public static final int ERROR_SUBSCRIBING = 101;
@@ -91,6 +93,7 @@ public class WebsocketSecureHandler {
             if (details.reason.equals("thruway.error.authentication_failure")) {
                 Log.d(TAG, "initNotifications: failure");
                 onErrorInWebsocket.postValue(ERROR_AUTHENTICATION);
+                // TODO log to analytics tool and send to server
             } else {
                 Log.d(TAG, "initNotifications: something else");
             }
@@ -143,13 +146,23 @@ public class WebsocketSecureHandler {
 
         String keyMessage = "message";
         String keyTitle = "title";
+        String keyId = "url";
         String message = (String) incomingMessage.get(keyMessage);
         String title = (String) incomingMessage.get(keyTitle);
+        String id = (String) incomingMessage.get(keyId);
 
-        String[] notificationMessage = new String[2];
+        id = getIdFromUrl(id);
+
+        String[] notificationMessage = new String[3];
         notificationMessage[INDEX_TITLE] = title;
         notificationMessage[INDEX_MESSAGE] = message;
+        notificationMessage[INDEX_ID] = id;
         incomingNotification.postValue(notificationMessage);
+    }
+
+    private String getIdFromUrl(String url) {
+        Uri uri = Uri.parse(url);
+        return uri.getLastPathSegment();
     }
 
     private static String getDomainName(String url) throws URISyntaxException {

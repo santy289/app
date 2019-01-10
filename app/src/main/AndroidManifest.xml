@@ -8,6 +8,8 @@
     <!-- Storage related permissions -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- Notification heads up permission -->
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
 
     <application
         android:name=".ui.RootnetApp"
@@ -63,6 +65,7 @@
             android:screenOrientation="portrait"/>
         <activity
             android:name=".ui.workflowdetail.WorkflowDetailActivity"
+            android:parentActivityName=".ui.main.MainActivity"
             android:label="@string/title_activity_edit_profile"
             android:theme="@style/AppTheme"
             android:screenOrientation="portrait"/>

@@ -36,6 +36,8 @@ public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<Integer> mCommentsTabCounter;
     private MutableLiveData<Integer> mFilesTabCounter;
     private MutableLiveData<Integer> mShowToastMessage;
+    private MutableLiveData<WorkflowListItem> initUiWithWorkflowListItem;
+    private LiveData<WorkflowListItem> handleRepoWorkflowRequest;
 
     protected MutableLiveData<Boolean> showLoading;
     protected MutableLiveData<StatusUiData> setWorkflowIsOpen;
@@ -59,7 +61,7 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.mRepository = workflowDetailRepository;
         this.showLoading = new MutableLiveData<>();
         this.setWorkflowIsOpen = new MutableLiveData<>();
-
+        this.initUiWithWorkflowListItem = new MutableLiveData<>();
         subscribe();
     }
 
@@ -69,10 +71,40 @@ public class WorkflowDetailViewModel extends ViewModel {
         mRepository.clearDisposables();
     }
 
-    protected void initDetails(String token, WorkflowListItem workflow) {
+    /**
+     * Initialize the Workflow detail screen using a WorkflowListItem coming from the user
+     * selection on the workflow list.
+     *
+     * @param token
+     * @param workflow
+     */
+    protected void initWithDetails(String token, WorkflowListItem workflow) {
         this.mToken = token;
         this.mWorkflowListItem = workflow;
+        initUiWithWorkflowListItem.setValue(workflow);
         getWorkflow(this.mToken, this.mWorkflowListItem.getWorkflowId());
+    }
+
+    /**
+     * Initialize the Workflow detail screen using an id. This method is responsible for looking the
+     * actual WorkflowDb object from the local database or network.
+     *
+     * @param token
+     * @param id
+     */
+    protected void initWithId(String token, String id) {
+        this.mToken = token;
+
+        handleRepoWorkflowRequest = Transformations.map(
+                mRepository.getObservableRetreiveFromDbWorkflow(),
+                workflowDb -> {
+                    initUiWithWorkflowListItem.setValue(workflowDb);
+                    getWorkflow(token, workflowDb.getWorkflowId());
+                    return workflowDb;
+                }
+        );
+
+        mRepository.getWorkflowFromDataSources(token, Integer.valueOf(id));
     }
 
     /**
@@ -291,5 +323,13 @@ public class WorkflowDetailViewModel extends ViewModel {
             mFilesTabCounter = new MutableLiveData<>();
         }
         return mFilesTabCounter;
+    }
+
+    protected LiveData<WorkflowListItem> getObservableWorflowListItem() {
+        return initUiWithWorkflowListItem;
+    }
+
+    protected LiveData<WorkflowListItem> getObservableHandleRepoWorkflowRequest() {
+        return handleRepoWorkflowRequest;
     }
 }

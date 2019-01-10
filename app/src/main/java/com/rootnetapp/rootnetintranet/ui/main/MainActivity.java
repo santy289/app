@@ -1,11 +1,15 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -27,12 +31,13 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
+import com.rootnetapp.rootnetintranet.notifications.NotificationChannels;
 import com.rootnetapp.rootnetintranet.services.background.WorkflowManagerService;
+import com.rootnetapp.rootnetintranet.services.websocket.WebsocketSecureHandler;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.main.adapters.SearchAdapter;
@@ -41,11 +46,13 @@ import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOptionsAdapter;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -58,7 +65,10 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.Person;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.IconCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -765,23 +775,66 @@ public class MainActivity extends AppCompatActivity
 
 
         viewModel.getReceiveIncomingNotification().observe(this, incomingNotification -> {
-
-
-
-
-            Log.d(TAG, "subscribe: HERE");
-
-
-
-
-
-
+            prepareNotification(
+                    incomingNotification[WebsocketSecureHandler.INDEX_ID],
+                    incomingNotification[WebsocketSecureHandler.INDEX_TITLE],
+                    incomingNotification[WebsocketSecureHandler.INDEX_MESSAGE]
+            );
         });
+    }
+
+    /**
+     * Preparing the notification that we are about to display. Making sure that we are passing a
+     * WorflowDb id, and this way the user can click on the notification to open this workflow.
+     * @param id
+     * @param title
+     * @param message
+     */
+    private void prepareNotification(String id, String title, String message) {
+        Bitmap logoBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_round);
+
+        Person user = new Person.Builder()
+                .setName("Intranet")
+                .setIcon(IconCompat.createWithBitmap(logoBitmap))
+                .build();
+        Date date = new Date();
+        NotificationCompat.MessagingStyle.Message messageStyle = new NotificationCompat.MessagingStyle.Message(
+                message,
+                date.getTime(),
+                user
+        );
+
+        NotificationCompat.MessagingStyle messagingStyle = new NotificationCompat.MessagingStyle(user);
+        messagingStyle.addMessage(messageStyle);
+        messagingStyle.setConversationTitle(title);
+
+        Intent detailIntent = new Intent(this, WorkflowDetailActivity.class);
+
+        detailIntent.putExtra(WorkflowDetailActivity.INTENT_EXTRA_ID, id);
+
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addNextIntentWithParentStack(detailIntent);
+        PendingIntent detailPendingIntent = stackBuilder.getPendingIntent(
+                0,
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
+        NotificationCompat.Builder notifyBuilder = new NotificationCompat.Builder(
+                this,
+                NotificationChannels.WORKFLOW_COMMENTS_CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(title)
+                .setContentIntent(detailPendingIntent)
+                .setSmallIcon(R.drawable.ic_message_black_24dp)
+                .setLargeIcon(logoBitmap)
+                .setStyle(messagingStyle)
+                .setAutoCancel(true)
+                // priority and defaults need to be set together
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .setPriority(NotificationCompat.PRIORITY_MAX);
 
 
-
-
-
+        viewModel.notifyMessage(notifyBuilder);
     }
 
     private void subscribeForLogin() {

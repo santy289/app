@@ -783,7 +783,14 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    private void prepareNotification(String title, String message) {
+    /**
+     * Preparing the notification that we are about to display. Making sure that we are passing a
+     * WorflowDb id, and this way the user can click on the notification to open this workflow.
+     * @param id
+     * @param title
+     * @param message
+     */
+    private void prepareNotification(String id, String title, String message) {
         Bitmap logoBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_round);
 
         Person user = new Person.Builder()

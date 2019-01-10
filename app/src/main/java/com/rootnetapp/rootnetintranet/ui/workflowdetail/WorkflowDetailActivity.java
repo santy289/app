@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Spinner;
@@ -71,21 +72,41 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         showLoading(true);
 
         WorkflowListItem mWorkflowListItem = getIntent().getParcelableExtra(EXTRA_WORKFLOW_LIST_ITEM);
-
-        String workflowId;
         if (mWorkflowListItem == null) {
+            String workflowId;
             workflowId = getIntent().getStringExtra(INTENT_EXTRA_ID);
+            workflowDetailViewModel.initWithId(token, workflowId);
+            subscribeForIdInit();
+        } else {
+            workflowDetailViewModel.initWithDetails(token, mWorkflowListItem);
         }
-
-        workflowDetailViewModel.initDetails(token, mWorkflowListItem);
     }
 
+    /**
+     * Method will initialize the UI using an WorkflowListItem object coming from the user selection
+     * in workflow list.
+     *
+     * @param workflowListItem
+     */
     private void initUiWith(WorkflowListItem workflowListItem) {
         setActionBar(workflowListItem);
         setupViewPager(workflowListItem);
         workflowDetailViewModel.getObservableWorflowListItem().removeObservers(this);
     }
 
+    /**
+     * Subscription used only if we are receiving an id as the data to initialize the Details screen.
+     * For instance, we get an id when a user opens this activity through a notification tap
+     * action.
+     */
+    private void subscribeForIdInit() {
+        workflowDetailViewModel.getObservableHandleRepoWorkflowRequest().observe(
+                this,
+                workflowDb -> {
+                    Log.d(TAG, "subscribeForIdInit: we got a workflow");
+                    workflowDetailViewModel.getObservableHandleRepoWorkflowRequest().removeObservers(this);
+                });
+    }
 
     private void setActionBar(WorkflowListItem workflowListItem) {
         setSupportActionBar(mBinding.toolbar);

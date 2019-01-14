@@ -17,6 +17,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductJsonValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
@@ -33,6 +34,7 @@ import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import androidx.collection.ArrayMap;
@@ -291,6 +293,8 @@ public class FormSettings {
             return;
         }
 
+        boolean isMultiple = formItem instanceof MultipleChoiceFormItem;
+
         switch (typeInfo.getValueType()) {
             case FormSettings.VALUE_BOOLEAN:
                 handleBoolean(typeInfo, metaData, value);
@@ -341,7 +345,11 @@ public class FormSettings {
 
                 }
 
-                handleSingleSelection((SingleChoiceFormItem) formItem, metaData, value);
+                if (isMultiple) {
+                    handleMultipleSelection((MultipleChoiceFormItem) formItem, metaData);
+                } else {
+                    handleSingleSelection((SingleChoiceFormItem) formItem, metaData, value);
+                }
                 break;
             case FormSettings.VALUE_STRING:
                 if (typeInfo.getType().equals(TYPE_PHONE)) {
@@ -486,41 +494,44 @@ public class FormSettings {
             return;
         }
 
-        int id;
-        //todo handle multiple selection
-        /*if (fieldData.isMultipleSelection) {
-            ArrayList<String> matches = new ArrayList<>();
-            String selection;
-            List<String> values = Arrays.asList(value.split("\\s*,\\s*"));
-            for (int i = 0; i < values.size(); i++) {
-                selection = values.get(i);
-                id = findIdByValue(list, selection);
-                if (id == 0) {
-                    continue;
-                }
-                matches.add(String.valueOf(id));
-            }
-            String formattedValue = "";
-            String match;
-            int size = matches.size();
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("[");
-            for (int i = 0; i < size; i++) {
-                match = matches.get(i);
-                stringBuilder.append(match);
-                if (i < size - 1) {
-                    stringBuilder.append(",");
-                }
-            }
-            formattedValue = stringBuilder.append("]").toString();
-            metaData.setValue(formattedValue);
-        } else {
-            id = findIdByValue(list, value);
-            metaData.setValue(String.valueOf(id));
-        }*/
-
-        id = findIdByValue(list, value);
+        int id = findIdByValue(list, value);
         metaData.setValue(String.valueOf(id));
+    }
+
+    /**
+     * Formats and creates the meta data value for the {@link MultipleChoiceFormItem}s.
+     * @param formItem item to format
+     * @param metaData resulting meta data
+     */
+    private void handleMultipleSelection(MultipleChoiceFormItem formItem, WorkflowMetas metaData) {
+        List<Option> list = formItem.getOptions();
+        if (list == null) {
+            return;
+        }
+
+        ArrayList<String> matches = new ArrayList<>();
+        for (int i = 0; i < formItem.getValues().size(); i++) {
+            Option value = formItem.getValues().get(i);
+            int id = findIdByValue(list, value.toString());
+            if (id == 0) {
+                continue;
+            }
+            matches.add(String.valueOf(id));
+        }
+
+        int size = matches.size();
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("[");
+        for (int i = 0; i < size; i++) {
+            String match = matches.get(i);
+            stringBuilder.append(match);
+            if (i < size - 1) {
+                stringBuilder.append(",");
+            }
+        }
+
+        String formattedValue = stringBuilder.append("]").toString();
+        metaData.setValue(formattedValue);
     }
 
     private int findIdByValue(List<Option> options, String value) {

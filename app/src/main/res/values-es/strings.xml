@@ -171,6 +171,7 @@
     <string name="users">Usuarios</string>
     <string name="no_selection">Sin Selección</string>
     <string name="no_selection_hint">- Sin Selección -</string>
+    <string name="multiple_selection_hint">- Seleccione una opción para añadir -</string>
     <string name="form_workflow_type">Tipo de Workflow</string>
     <string name="pick_option">Selecciona uno</string>
     <string name="enter_email">Ingresar Email</string>

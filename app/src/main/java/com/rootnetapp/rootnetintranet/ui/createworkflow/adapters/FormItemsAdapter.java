@@ -14,6 +14,7 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.FormItemBooleanBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemCurrencyBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemDateBinding;
+import com.rootnetapp.rootnetintranet.databinding.FormItemMultipleChoiceBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemSingleChoiceBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemTextInputBinding;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
@@ -21,6 +22,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
@@ -34,6 +36,7 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -93,6 +96,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 return new CurrencyViewHolder(FormItemCurrencyBinding
                         .inflate(layoutInflater, viewGroup, false));
 
+            case FormItemViewType.MULTIPLE_CHOICE:
+                return new MultipleChoiceViewHolder(FormItemMultipleChoiceBinding
+                        .inflate(layoutInflater, viewGroup, false));
+
             default:
                 throw new IllegalStateException("Invalid ViewType");
         }
@@ -126,6 +133,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 populateCurrencyView((CurrencyViewHolder) holder, position);
                 break;
 
+            case FormItemViewType.MULTIPLE_CHOICE:
+                populateMultipleChoiceView((MultipleChoiceViewHolder) holder, position);
+                break;
+
             default:
                 throw new IllegalStateException("Invalid ViewType");
         }
@@ -149,6 +160,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public int getItemCount() {
         return mDataset.size();
     }
+
+    //region Populate Views
 
     /**
      * Handles the view for the {@link TextInputFormItem}. Displays the UI according to the
@@ -463,6 +476,99 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     /**
+     * Handles the view for the {@link MultipleChoiceFormItem}. Displays the UI according to the
+     * visibility, enabled and validation params.
+     *
+     * @param holder   view holder
+     * @param position item position in adapter.
+     */
+    private void populateMultipleChoiceView(MultipleChoiceViewHolder holder, int position) {
+        MultipleChoiceFormItem item = (MultipleChoiceFormItem) getItem(position);
+
+        String title = item.getTitle();
+        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        holder.getBinding().tvTitle.setText(title);
+
+        //creates the selected items adapter
+        MultipleChoiceSelectionsAdapter selectionsAdapter = new MultipleChoiceSelectionsAdapter(
+                item.getValues());
+        holder.getBinding().rvSelectedItems.setLayoutManager(
+                new LinearLayoutManager(mContext, RecyclerView.HORIZONTAL, false));
+        holder.getBinding().rvSelectedItems.setAdapter(selectionsAdapter);
+
+        //creates the options adapter
+        List<Option> options = new ArrayList<>(item.getOptions());
+        String hint = mContext.getString(R.string.multiple_selection_hint);
+        // check whether the hint has already been added
+        if (!options.get(0).getName().equals(hint)) {
+            // add hint as first item
+            options.add(0, new Option(0, hint));
+        }
+
+        holder.getBinding().spInput.setAdapter(
+                new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
+                        options));
+
+        //only creates the listener once.
+        if (holder.getBinding().spInput.getOnItemSelectedListener() == null) {
+            holder.getBinding().spInput
+                    .setSelection(0, false); //workaround so the listener won't be called on init
+            holder.getBinding().spInput.setOnItemSelectedListener(
+                    new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position,
+                                                   long id) {
+                            // the user has selected the hint option
+                            if (position == 0) {
+                                return;
+                            }
+
+                            // the user has selected a valid option
+                            int index = position - 1; // because of the hint option
+                            selectionsAdapter.addItem(item.getOptions().get(index));
+                            holder.getBinding().spInput
+                                    .setSelection(0, false); //clear spinner selection
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+
+                        }
+                    });
+        }
+
+        // verify visibility
+        if (!item.isVisible()) {
+            holder.hide();
+            return;
+        } else {
+            holder.show();
+        }
+
+        // verify enabled param
+        if (!item.isEnabled()) {
+            holder.getBinding().viewSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg_disabled);
+            holder.getBinding().spInput.setEnabled(false);
+            return;
+        } else {
+            holder.getBinding().viewSpinnerBackground.setBackgroundResource(R.drawable.spinner_bg);
+            holder.getBinding().spInput.setEnabled(true);
+        }
+
+        // verify validation
+        if (hasToEvaluateValid && !item.isValid()) {
+            holder.getBinding().viewSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg_error);
+        } else {
+            holder.getBinding().viewSpinnerBackground.setBackgroundResource(R.drawable.spinner_bg);
+        }
+    }
+    //endregion
+
+    //region Retrieve Values
+
+    /**
      * Goes through every item in the adapter, except for {@link SingleChoiceFormItem} and {@link
      * DateFormItem} (because they are already set via listeners), and retrieves the selected value
      * from the View to save it into the class object.
@@ -485,7 +591,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                     continue;
 
                 case FormItemViewType.SINGLE_CHOICE:
-                    //the value is set when the user selects the spinner item
+                case FormItemViewType.MULTIPLE_CHOICE:
+                    //the value(s) is/are saved when the user selects the spinner item(s)
                     continue;
 
                 case FormItemViewType.BOOLEAN:
@@ -508,7 +615,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     /**
-     * Saves the current selected value from the {@link TextInputFormItem} view into the class object.
+     * Saves the current selected value from the {@link TextInputFormItem} view into the class
+     * object.
      *
      * @param holder the view holder.
      * @param item   desired item.
@@ -521,7 +629,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     /**
-     * Saves the current selected value from the {@link BooleanFormItem} view into the class object.
+     * Saves the current selected value from the {@link BooleanFormItem} view into the class
+     * object.
      *
      * @param holder the view holder.
      * @param item   desired item.
@@ -530,4 +639,5 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                                              BooleanFormItem item) {
         item.setValue(holder.getBinding().switchInput.isChecked());
     }
+    //endregion
 }

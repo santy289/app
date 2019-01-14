@@ -21,6 +21,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
@@ -522,8 +523,9 @@ public class CreateWorkflowViewModel extends ViewModel {
     private void buildField(FormFieldsByWorkflowType field) {
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
 
-        //todo support multiple lists.
-        if (field.getFieldConfigObject().getMultiple()) return;
+//        if (field.getFieldConfigObject().getMultiple()) return;
+
+        boolean isMultiple = field.getFieldConfigObject().getMultiple();
 
         switch (typeInfo.getType()) {
 
@@ -568,7 +570,11 @@ public class CreateWorkflowViewModel extends ViewModel {
                 break;
 
             case FormSettings.TYPE_LIST:
-                createCustomListFormItem(field);
+                if (isMultiple) {
+                    createCustomMultipleListFormItem(field);
+                } else {
+                    createCustomListFormItem(field);
+                }
                 break;
             /*
             case FormSettings.TYPE_PHONE:
@@ -905,6 +911,53 @@ public class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
+                }, throwable -> {
+                    showLoading.setValue(false);
+                    Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
+                });
+
+        mDisposables.add(disposable);
+    }
+
+    /**
+     * Creates a custom list form item. Performs a request to the repo to retrieve the options and
+     * then send the form item to the UI.
+     */
+    private void createCustomMultipleListFormItem(FormFieldsByWorkflowType field) {
+        FieldConfig fieldConfig = field.getFieldConfigObject();
+        int listId = fieldConfig.getListInfo().getId();
+
+        Disposable disposable = mRepository
+                .getList(mToken, listId)
+                .subscribe(listsResponse -> {
+                    showLoading.setValue(false);
+
+                    List<ListItem> list = listsResponse.getItems();
+                    if (list == null || list.isEmpty()) return;
+
+                    List<ListItem> listChildren = list.get(0).getChildren();
+
+                    if (listChildren == null || listChildren.isEmpty()) return;
+
+                    List<Option> options = new ArrayList<>();
+                    for (int i = 0; i < listChildren.size(); i++) {
+                        String name = listChildren.get(i).getName();
+                        Integer id = listChildren.get(i).getId();
+
+                        Option option = new Option(id, name);
+                        options.add(option);
+                    }
+
+                    MultipleChoiceFormItem multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
+                            .setTitle(field.getFieldName())
+                            .setRequired(field.isRequired())
+                            .setTag(field.getId())
+                            .setOptions(options)
+                            .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                            .setMachineName(field.getFieldConfigObject().getMachineName())
+                            .build();
+
+                    mAddFormItemLiveData.setValue(multipleChoiceFormItem);
                 }, throwable -> {
                     showLoading.setValue(false);
                     Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());

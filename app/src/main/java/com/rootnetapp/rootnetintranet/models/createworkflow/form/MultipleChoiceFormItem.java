@@ -49,15 +49,15 @@ public class MultipleChoiceFormItem extends BaseFormItem {
     }
 
     public void addValue(Option value){
-        values.add(value);
+        getValues().add(value);
     }
 
     public void removeValue(Option value){
-        values.remove(value);
+        getValues().remove(value);
     }
 
     public void removeValue(int position){
-        values.remove(position);
+        getValues().remove(position);
     }
 
     public List<Option> getOptions() {

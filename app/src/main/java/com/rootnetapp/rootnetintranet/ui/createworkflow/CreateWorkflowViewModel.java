@@ -605,8 +605,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .getProducts(mToken)
                 .subscribe(productsResponse -> {
-                    showLoading.setValue(false);
-
                     if (productsResponse.getCode() != 200) {
                         return;
                     }
@@ -648,7 +646,6 @@ public class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
-                    showLoading.setValue(false);
                     Log.d(TAG, "createProductsFormItem: " + throwable.getMessage());
                 });
 
@@ -663,8 +660,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .getRoles(mToken)
                 .subscribe(roleResponse -> {
-                    showLoading.setValue(false);
-
                     if (roleResponse.getCode() != 200) {
                         return;
                     }
@@ -707,7 +702,6 @@ public class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
-                    showLoading.setValue(false);
                     Log.d(TAG, "createRolesFormItem: " + throwable.getMessage());
                 });
 
@@ -722,8 +716,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .getServices(mToken)
                 .subscribe(servicesResponse -> {
-                    showLoading.setValue(false);
-
                     if (servicesResponse.getCode() != 200) {
                         return;
                     }
@@ -767,7 +759,6 @@ public class CreateWorkflowViewModel extends ViewModel {
                 }, throwable -> {
                     Log.d(TAG,
                             "createServicesFormItem: can't get service: " + throwable.getMessage());
-                    showLoading.setValue(false);
                 });
         mDisposables.add(disposable);
     }
@@ -781,8 +772,6 @@ public class CreateWorkflowViewModel extends ViewModel {
 //        Disposable disposable = mRepository
 //                .getProjects(mToken)
 //                .subscribe(projectResponse -> {
-//                    showLoading.setValue(false);
-//
 //                    if (projectResponse.getCode() != 200) {
 //                        return;
 //                    }
@@ -810,7 +799,6 @@ public class CreateWorkflowViewModel extends ViewModel {
 //
 //                    mAddFormItemLiveData.setValue(singleChoiceFormItem);
 //                }, throwable -> {
-//                    showLoading.setValue(false);
 //                    Log.d(TAG, "handeBuildRoles: " + throwable.getMessage());
 //                });
 //
@@ -863,11 +851,10 @@ public class CreateWorkflowViewModel extends ViewModel {
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(singleChoiceFormItem -> {
-                    showLoading.setValue(false);
-
                     mAddFormItemLiveData.setValue((SingleChoiceFormItem) singleChoiceFormItem);
                 }, throwable -> {
-                    showLoading.setValue(false);
+                    Log.d(TAG,
+                            "createSystemUsersFormItem: can't get users: " + throwable.getMessage());
                 });
         mDisposables.add(disposable);
     }
@@ -883,8 +870,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .getList(mToken, listId)
                 .subscribe(listsResponse -> {
-                    showLoading.setValue(false);
-
                     List<ListItem> list = listsResponse.getItems();
                     if (list == null || list.isEmpty()) return;
 
@@ -912,7 +897,6 @@ public class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
-                    showLoading.setValue(false);
                     Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
                 });
 
@@ -930,8 +914,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .getList(mToken, listId)
                 .subscribe(listsResponse -> {
-                    showLoading.setValue(false);
-
                     List<ListItem> list = listsResponse.getItems();
                     if (list == null || list.isEmpty()) return;
 
@@ -959,7 +941,6 @@ public class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(multipleChoiceFormItem);
                 }, throwable -> {
-                    showLoading.setValue(false);
                     Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
                 });
 
@@ -1059,8 +1040,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .getCurrencyCodes()
                 .subscribe(currencyList -> {
-                    showLoading.setValue(false);
-
                     if (currencyList == null || currencyList.size() < 1) {
                         return;
                     }
@@ -1103,8 +1082,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .getCountryCodes()
                 .subscribe(phoneFieldDataList -> {
-                    showLoading.setValue(false);
-
                     if (phoneFieldDataList == null || phoneFieldDataList.size() < 1) {
                         return;
                     }
@@ -1570,103 +1547,6 @@ public class CreateWorkflowViewModel extends ViewModel {
             return false;
         }
         return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
-    }
-
-    private void handleCurrencyType(FormFieldsByWorkflowType field) {
-        //todo implement
-        FieldConfig fieldConfig = field.getFieldConfigObject();
-        Disposable disposable = mRepository
-                .getCurrencyCodes()
-                .subscribe(currencyFieldData -> {
-                    //list
-                    /*ListField listField = new ListField();
-                    listField.customFieldId = FormSettings.FIELD_CURRENCY_ID;
-                    listField.listType = FormSettings.TYPE_CURRENCY;
-                    listField.resStringId = R.string.currency_type;
-                    ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
-                    CurrencyFieldData currencyData;
-                    String currencyLabel;
-                    for (int i = 0; i < currencyFieldData.size(); i++) {
-                        currencyData = currencyFieldData.get(i);
-                        currencyLabel = currencyData.description + " - " + currencyData.currency;
-                        ListFieldItemMeta item = new ListFieldItemMeta(
-                                currencyData.countryId,
-                                currencyLabel
-                        );
-                        tempList.add(item);
-                    }
-                    listField.children = tempList;
-                    listField.isMultipleSelection = false;
-                    listField.associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
-
-                    if (listField.children.size() < 1) {
-                        return;
-                    }
-
-                    showListField(listField, fieldConfig);
-
-                    FieldData currencyNumberFieldData = new FieldData();
-                    currencyNumberFieldData.label = field.getFieldName();
-                    currencyNumberFieldData.required = field.isRequired();
-                    currencyNumberFieldData.tag = field.getId();
-                    currencyNumberFieldData.escape = escape(field.getFieldConfigObject());
-//                    formSettings.addFieldDataItem(currencyNumberFieldData);
-                    setFieldPhoneWithData.setValue(currencyNumberFieldData);*/
-                }, throwable -> {
-                    showLoading.setValue(false);
-                    Log.d(TAG, "handeBuildRoles: " + throwable.getMessage());
-                });
-
-        mDisposables.add(disposable);
-    }
-
-    private void handleBuildPhone(FormFieldsByWorkflowType field) {
-        //todo implement
-        FieldConfig fieldConfig = field.getFieldConfigObject();
-        Disposable disposable = mRepository
-                .getCountryCodes()
-                .subscribe(phoneFieldData -> {
-                    //list
-                    /*ListField listField = new ListField();
-                    listField.customFieldId = FormSettings.FIELD_CODE_ID;
-                    listField.listType = FormSettings.TYPE_PHONE;
-                    listField.resStringId = R.string.country_code;
-                    ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
-                    PhoneFieldData phoneCode;
-                    String codeLabel;
-                    for (int i = 0; i < phoneFieldData.size(); i++) {
-                        phoneCode = phoneFieldData.get(i);
-                        codeLabel = phoneCode.phoneCode + " - " + phoneCode.description;
-                        ListFieldItemMeta item = new ListFieldItemMeta(
-                                phoneCode.countryId,
-                                codeLabel
-                        );
-                        tempList.add(item);
-                    }
-                    listField.children = tempList;
-                    listField.isMultipleSelection = false;
-                    listField.associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
-
-                    if (listField.children.size() < 1) {
-                        return;
-                    }
-
-                    showListField(listField, fieldConfig);
-
-                    // Normal phone numeric field
-                    FieldData phoneNumberFieldData = new FieldData();
-                    phoneNumberFieldData.label = field.getFieldName();
-                    phoneNumberFieldData.required = field.isRequired();
-                    phoneNumberFieldData.tag = field.getId();
-                    phoneNumberFieldData.escape = escape(field.getFieldConfigObject());
-//                    formSettings.addFieldDataItem(phoneNumberFieldData);
-                    setFieldPhoneWithData.setValue(phoneNumberFieldData);*/
-                }, throwable -> {
-                    showLoading.setValue(false);
-                    Log.d(TAG, "handeBuildRoles: " + throwable.getMessage());
-                });
-
-        mDisposables.add(disposable);
     }
 
     private boolean escape(FieldConfig fieldConfig) {

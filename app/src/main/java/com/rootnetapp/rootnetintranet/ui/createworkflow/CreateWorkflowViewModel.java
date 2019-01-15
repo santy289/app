@@ -477,7 +477,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                 break;
 
             case FormSettings.TYPE_LINK:
-                //value type is "text", does not work for us, so we change it to "link"
+                //server value type is "text", does not work for us, so we change it to "link"
                 typeInfo.setValueType(InputType.LINK);
                 createTextInputFormItem(field);
                 break;
@@ -1208,6 +1208,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                 switch (typeInfo.getType()) {
                     case FormSettings.TYPE_TEXT:
                     case FormSettings.TYPE_TEXT_AREA:
+                    case FormSettings.TYPE_LINK:
                         fillTextInputFormItem(meta);
                         break;
 

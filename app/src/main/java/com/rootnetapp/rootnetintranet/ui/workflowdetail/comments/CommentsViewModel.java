@@ -54,6 +54,9 @@ public class CommentsViewModel extends ViewModel {
 
     protected MutableLiveData<Boolean> showLoading;
 
+    /**
+     * Used to save a file download request when the application prompts the user permissions.
+     */
     private CommentFileResponse mQueuedFile;
 
     private boolean isPrivateComment = false;
@@ -143,11 +146,11 @@ public class CommentsViewModel extends ViewModel {
         mCommentFiles.remove(commentFile);
     }
 
-    public CommentFileResponse getQueuedFile() {
+    private CommentFileResponse getQueuedFile() {
         return mQueuedFile;
     }
 
-    public void setQueuedFile(CommentFileResponse queuedFile) {
+    protected void setQueuedFile(CommentFileResponse queuedFile) {
         this.mQueuedFile = queuedFile;
     }
 

@@ -26,6 +26,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
@@ -528,10 +529,9 @@ public class CreateWorkflowViewModel extends ViewModel {
             case FormSettings.TYPE_PHONE:
                 createPhoneFormItem(field);
                 break;
-            /*
             case FormSettings.TYPE_FILE:
-                handleFile(field);
-                break;*/
+                createFileFormItem(field);
+                break;
             default:
                 Log.d(TAG, "buildField: Not a generic type: " + typeInfo
                         .getType() + " value: " + typeInfo.getValueType());
@@ -1114,6 +1114,27 @@ public class CreateWorkflowViewModel extends ViewModel {
                 });
 
         mDisposables.add(disposable);
+    }
+
+    /**
+     * Creates a custom Boolean/Checkbox item with the specified params and sends the item to the
+     * UI.
+     *
+     * @param field item params.
+     */
+    private void createFileFormItem(FormFieldsByWorkflowType field) {
+        TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
+
+        FileFormItem item = new FileFormItem.Builder()
+                .setTitle(field.getFieldName())
+                .setRequired(field.isRequired())
+                .setTag(field.getId())
+                .setEscaped(escape(field.getFieldConfigObject()))
+                .setMachineName(field.getFieldConfigObject().getMachineName())
+                .setTypeInfo(typeInfo)
+                .build();
+
+        formSettings.getFormItems().add(item);
     }
     //endregion
 

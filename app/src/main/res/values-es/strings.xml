@@ -220,6 +220,7 @@
     <string name="next_status">Próximo Estatus</string>
     <string name="request_successfully">Pedido realizado exitosamente.</string>
     <string name="functionality_not_available">Esta función aún no está disponible.</string>
+    <string name="add_file">Añadir Archivo</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Detalles de Workflow</string>

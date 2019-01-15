@@ -14,6 +14,7 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.FormItemBooleanBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemCurrencyBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemDateBinding;
+import com.rootnetapp.rootnetintranet.databinding.FormItemFileBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemMultipleChoiceBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemPhoneBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemSingleChoiceBinding;
@@ -22,6 +23,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
@@ -108,6 +110,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 return new PhoneViewHolder(FormItemPhoneBinding
                         .inflate(layoutInflater, viewGroup, false));
 
+            case FormItemViewType.FILE:
+                return new FileViewHolder(FormItemFileBinding
+                        .inflate(layoutInflater, viewGroup, false));
+
             default:
                 throw new IllegalStateException("Invalid ViewType");
         }
@@ -147,6 +153,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             case FormItemViewType.PHONE:
                 populatePhoneView((PhoneViewHolder) holder, position);
+                break;
+
+            case FormItemViewType.FILE:
+                populateFileView((FileViewHolder) holder, position);
                 break;
 
             default:
@@ -810,6 +820,43 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.getBinding().etPhone
                     .setBackgroundResource(R.drawable.spinner_bg);
         }
+    }
+
+    /**
+     * Handles the view for the {@link FileFormItem}. Displays the UI according to the visibility
+     * params.
+     *
+     * @param holder   view holder
+     * @param position item position in adapter.
+     */
+    private void populateFileView(FileViewHolder holder, int position) {
+        FileFormItem item = (FileFormItem) getItem(position);
+
+        //set title
+        String title = item.getTitle();
+        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        holder.getBinding().tvTitle.setText(title);
+
+        //todo set value
+
+        //verify visibility
+        if (!item.isVisible()) {
+            holder.hide();
+            return;
+        } else {
+            holder.show();
+        }
+
+        // todo verify validation
+        if (hasToEvaluateValid && !item.isValid()) {
+
+        } else {
+
+        }
+
+        //verify enabled param
+        holder.getBinding().btnAddFile.setEnabled(item.isEnabled());
+        holder.getBinding().chipFile.setEnabled(item.isEnabled());
     }
     //endregion
 

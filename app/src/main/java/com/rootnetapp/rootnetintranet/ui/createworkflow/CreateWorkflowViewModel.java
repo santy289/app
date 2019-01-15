@@ -527,10 +527,6 @@ public class CreateWorkflowViewModel extends ViewModel {
     private void buildField(FormFieldsByWorkflowType field) {
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
 
-//        if (field.getFieldConfigObject().getMultiple()) return;
-
-        boolean isMultiple = field.getFieldConfigObject().getMultiple();
-
         switch (typeInfo.getType()) {
 
             case FormSettings.TYPE_TEXT:
@@ -574,7 +570,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                 break;
 
             case FormSettings.TYPE_LIST:
-                if (isMultiple) {
+                if (field.getFieldConfigObject().getMultiple()) {
                     createCustomMultipleListFormItem(field);
                 } else {
                     createCustomListFormItem(field);
@@ -681,6 +677,20 @@ public class CreateWorkflowViewModel extends ViewModel {
 
                     if (options.isEmpty()) return;
 
+                    //check if multiple selection
+                    if (field.getFieldConfigObject().getMultiple()) {
+                        MultipleChoiceFormItem multipleChoiceFormItem =  new MultipleChoiceFormItem.Builder()
+                                .setTitle(field.getFieldName())
+                                .setRequired(field.isRequired())
+                                .setTag(field.getId())
+                                .setOptions(options)
+                                .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                                .setMachineName(field.getFieldConfigObject().getMachineName())
+                                .build();
+                        mAddFormItemLiveData.setValue(multipleChoiceFormItem);
+                        return;
+                    }
+
                     SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
                             .setTitle(field.getFieldName())
                             .setRequired(field.isRequired())
@@ -726,6 +736,20 @@ public class CreateWorkflowViewModel extends ViewModel {
 
                     if (options.isEmpty()) return;
 
+                    //check if multiple selection
+                    if (field.getFieldConfigObject().getMultiple()) {
+                        MultipleChoiceFormItem multipleChoiceFormItem =  new MultipleChoiceFormItem.Builder()
+                                .setTitle(field.getFieldName())
+                                .setRequired(field.isRequired())
+                                .setTag(field.getId())
+                                .setOptions(options)
+                                .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                                .setMachineName(field.getFieldConfigObject().getMachineName())
+                                .build();
+                        mAddFormItemLiveData.setValue(multipleChoiceFormItem);
+                        return;
+                    }
+
                     SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
                             .setTitle(field.getFieldName())
                             .setRequired(field.isRequired())
@@ -769,6 +793,20 @@ public class CreateWorkflowViewModel extends ViewModel {
                     }
 
                     if (options.isEmpty()) return;
+
+                    //check if multiple selection
+                    if (field.getFieldConfigObject().getMultiple()) {
+                        MultipleChoiceFormItem multipleChoiceFormItem =  new MultipleChoiceFormItem.Builder()
+                                .setTitle(field.getFieldName())
+                                .setRequired(field.isRequired())
+                                .setTag(field.getId())
+                                .setOptions(options)
+                                .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                                .setMachineName(field.getFieldConfigObject().getMachineName())
+                                .build();
+                        mAddFormItemLiveData.setValue(multipleChoiceFormItem);
+                        return;
+                    }
 
                     SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
                             .setTitle(field.getFieldName())
@@ -838,8 +876,6 @@ public class CreateWorkflowViewModel extends ViewModel {
      * then send the form item to the UI.
      */
     private void createSystemUsersFormItem(FormFieldsByWorkflowType field) {
-        TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
-
         Disposable disposable = Observable.fromCallable(() -> {
             List<FormCreateProfile> list = formSettings.getProfiles();
 
@@ -854,6 +890,19 @@ public class CreateWorkflowViewModel extends ViewModel {
 
                 Option option = new Option(id, name);
                 options.add(option);
+            }
+
+            if (options.isEmpty()) return false;
+
+            if (field.getFieldConfigObject().getMultiple()) {
+                return new MultipleChoiceFormItem.Builder()
+                        .setTitle(field.getFieldName())
+                        .setRequired(field.isRequired())
+                        .setTag(field.getId())
+                        .setOptions(options)
+                        .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                        .setMachineName(field.getFieldConfigObject().getMachineName())
+                        .build();
             }
 
             return new SingleChoiceFormItem.Builder()

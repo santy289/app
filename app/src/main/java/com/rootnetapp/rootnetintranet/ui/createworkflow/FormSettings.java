@@ -35,8 +35,10 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.Inf
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
+import com.squareup.moshi.Types;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -316,13 +318,17 @@ public class FormSettings {
                 break;
             case FormSettings.VALUE_LIST:
                 if (typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
-                    String json = getJsonStringForSystemUserType(value);
+                    String json = isMultiple
+                            ? getJsonStringForSystemUserTypeList((MultipleChoiceFormItem) formItem)
+                            : getJsonStringForSystemUserType(value);
                     metaData.setValue(json);
                     break;
                 }
 
                 if (typeInfo.getType().equals(TYPE_PRODUCT)) {
-                    String json = getProductJson(value, (SingleChoiceFormItem) formItem, metaData);
+                    String json = isMultiple
+                            ? getProductListJson((MultipleChoiceFormItem) formItem, metaData)
+                            : getProductJson(value, (SingleChoiceFormItem) formItem, metaData);
                     metaData.setValue(json);
                     break;
                 }
@@ -339,7 +345,7 @@ public class FormSettings {
                 }
                 break;
             case FormSettings.VALUE_STRING:
-                if (typeInfo.getType().equals(TYPE_PHONE)  && formItem instanceof PhoneFormItem) {
+                if (typeInfo.getType().equals(TYPE_PHONE) && formItem instanceof PhoneFormItem) {
                     String json = getJsonForPhoneType((PhoneFormItem) formItem);
                     metaData.setValue(json);
                     break;
@@ -401,6 +407,38 @@ public class FormSettings {
 
         return jsonString;
 
+    }
+
+    /**
+     * Generates the JSON object in String format for the Products {@link
+     * MultipleChoiceFormItem} that will be sent to the server.
+     *
+     * @param formItem item to serialize
+     *
+     * @return JSON string
+     */
+    private String getProductListJson(MultipleChoiceFormItem formItem,
+                                      WorkflowMetas workflowMetas) {
+        List<Option> list = formItem.getOptions();
+        if (list == null) {
+            return "";
+        }
+
+        List<ProductJsonValue> productJsonValueList = new ArrayList<>();
+        for (int i = 0; i < formItem.getValues().size(); i++) {
+            Option value = formItem.getValues().get(i);
+
+            ProductJsonValue productJsonValue = new ProductJsonValue();
+            productJsonValue.setValue(String.valueOf(value.getId()));
+            productJsonValue.setWorkflowTypeFieldId(workflowMetas.getWorkflowTypeFieldId());
+
+            productJsonValueList.add(productJsonValue);
+        }
+
+        Moshi moshi = new Moshi.Builder().build();
+        Type type = Types.newParameterizedType(List.class, ProductJsonValue.class);
+        JsonAdapter<List<ProductJsonValue>> jsonAdapter = moshi.adapter(type);
+        return jsonAdapter.toJson(productJsonValueList);
     }
 
     private String getFileMetaJson() {
@@ -467,6 +505,43 @@ public class FormSettings {
         JsonAdapter<PostSystemUser> jsonAdapter = moshi.adapter(PostSystemUser.class);
         String jsonString = jsonAdapter.toJson(postSystemUser);
         return jsonString;
+    }
+
+    /**
+     * Generates the JSON object in String format for the System Users {@link
+     * MultipleChoiceFormItem} that will be sent to the server.
+     *
+     * @param formItem item to serialize
+     *
+     * @return JSON string
+     */
+    private String getJsonStringForSystemUserTypeList(MultipleChoiceFormItem formItem) {
+        List<Option> list = formItem.getOptions();
+        if (list == null) {
+            return "";
+        }
+
+        List<PostSystemUser> postSystemUserList = new ArrayList<>();
+        for (int i = 0; i < formItem.getValues().size(); i++) {
+            Option value = formItem.getValues().get(i);
+
+            FormCreateProfile profile = getProfileBy(value.getName());
+            if (profile == null) {
+                continue;
+            }
+
+            PostSystemUser postSystemUser = new PostSystemUser();
+            postSystemUser.id = profile.getId();
+            postSystemUser.username = profile.getUsername();
+            postSystemUser.email = profile.getEmail();
+
+            postSystemUserList.add(postSystemUser);
+        }
+
+        Moshi moshi = new Moshi.Builder().build();
+        Type type = Types.newParameterizedType(List.class, PostSystemUser.class);
+        JsonAdapter<List<PostSystemUser>> jsonAdapter = moshi.adapter(type);
+        return jsonAdapter.toJson(postSystemUserList);
     }
 
     private void handleBoolean(TypeInfo typeInfo, WorkflowMetas metaData, String value) {

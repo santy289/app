@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.comments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
@@ -18,11 +19,11 @@ import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.downloadfile.DownloadFileResponse;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -36,6 +37,7 @@ public class CommentsViewModel extends ViewModel {
     private static final String TAG = "CommentsViewModel";
 
     protected static final int REQUEST_FILE_TO_ATTACH = 555;
+    protected static final int REQUEST_EXTERNAL_STORAGE_PERMISSIONS = 700;
 
     private CommentsRepository mRepository;
     private final CompositeDisposable mDisposables = new CompositeDisposable();
@@ -51,6 +53,11 @@ public class CommentsViewModel extends ViewModel {
     private MutableLiveData<AttachmentUiData> mOpenDownloadedAttachmentLiveData;
 
     protected MutableLiveData<Boolean> showLoading;
+
+    /**
+     * Used to save a file download request when the application prompts the user permissions.
+     */
+    private CommentFileResponse mQueuedFile;
 
     private boolean isPrivateComment = false;
 
@@ -116,10 +123,8 @@ public class CommentsViewModel extends ViewModel {
 
                         returnCursor.close();
 
-                        File file = new File(uri.getPath());
-                        byte[] bytes = Utils.fileToByte(file);
+                        byte[] bytes = Utils.fileToByte(context.getContentResolver(), uri);
 
-                        //fixme this actually encodes the file path and not the file content
                         String encodedFile = Base64.encodeToString(bytes, Base64.DEFAULT);
                         String fileType = Utils.getMimeType(data.getData(), context);
 
@@ -139,6 +144,42 @@ public class CommentsViewModel extends ViewModel {
 
     protected void removeCommentAttachment(CommentFile commentFile) {
         mCommentFiles.remove(commentFile);
+    }
+
+    private CommentFileResponse getQueuedFile() {
+        return mQueuedFile;
+    }
+
+    protected void setQueuedFile(CommentFileResponse queuedFile) {
+        this.mQueuedFile = queuedFile;
+    }
+
+    /**
+     * Checks if the requested permissions were granted and then proceed to export the PDF file.
+     *
+     * @param requestCode  to identify the request
+     * @param grantResults array containing the request results.
+     */
+    protected void handleRequestPermissionsResult(int requestCode, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_EXTERNAL_STORAGE_PERMISSIONS: {
+                // check for both permissions
+                if (grantResults.length > 1
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permissions granted
+                    CommentFileResponse commentFileResponse = getQueuedFile();
+                    if (commentFileResponse == null) return; //file was not set
+                    downloadAttachment(commentFileResponse);
+
+                } else {
+                    // at least one permission was denied
+                    mToastMessageLiveData.setValue(
+                            R.string.workflow_detail_activity_permissions_not_granted);
+                }
+            }
+        }
     }
 
     // TODO Remove when we finally have comments List in ViewModel and NOT in Fragment.

@@ -197,8 +197,11 @@ public class CommentsViewModel extends ViewModel {
                         comment,
                         isPrivateComment,
                         mCommentFiles)
-                .subscribe(this::onPostCommentSuccess,
-                        this::onFailure);
+                .subscribe(this::onPostCommentSuccess, error -> {
+                    mEnableCommentButton.setValue(true);
+                    Log.d(TAG, "postComment: error " + error.getMessage());
+                    onFailure(error);
+                });
         mDisposables.add(disposable);
     }
 

@@ -1,20 +1,13 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
-import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import androidx.annotation.IdRes;
 
-import android.graphics.Color;
-import android.os.Build;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.auth0.android.jwt.JWT;
@@ -27,9 +20,6 @@ import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
-import com.rootnetapp.rootnetintranet.notifications.NotificationChannels;
-import com.rootnetapp.rootnetintranet.notifications.NotificationIds;
-import com.rootnetapp.rootnetintranet.services.websocket.WebsocketSecureHandler;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
@@ -61,6 +51,7 @@ public class MainActivityViewModel extends ViewModel {
     private MutableLiveData<Boolean> attemptTokenRefresh;
     private MutableLiveData<String> saveToPreference;
     private MutableLiveData<Boolean> goToDomain;
+    private MutableLiveData<Boolean> startService;
     protected MutableLiveData<Integer> setSearchMenuLayout;
     protected MutableLiveData<Integer> setUploadMenuLayout;
     protected MutableLiveData<List<WorkflowTypeMenu>> setRightDrawerFilterList;
@@ -85,15 +76,9 @@ public class MainActivityViewModel extends ViewModel {
     public MutableLiveData<Integer> messageBaseFilterPositionSelectedToWorkflowList;
     public MutableLiveData<Boolean> invalidateOptionsList;
 
-    // receiving incoming notification from network
-    private LiveData<String[]> receiveIncomingNotification;
-    private NotificationManager notifyManager;
-
     List<WorkflowTypeMenu> filtersList;
     List<WorkflowTypeMenu> optionsList;
 
-    private WebsocketSecureHandler webSocketHandler;
-    private NotificationManager notificationManager;
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     protected final static String IMG_LOGO = "imgLogo";
@@ -126,10 +111,10 @@ public class MainActivityViewModel extends ViewModel {
     @Override
     protected void onCleared() {
         disposables.clear();
-        webSocketHandler.completeClient();
     }
 
     protected void initMainViewModel(SharedPreferences sharedPreferences) {
+        startService.setValue(true);
         String json = sharedPreferences.getString(PreferenceKeys.PREF_DOMAIN, "");
         if (json.isEmpty()) {
             Log.d("test", "onCreate: ALGO PASO");//todo mejorar esta validacion
@@ -142,6 +127,9 @@ public class MainActivityViewModel extends ViewModel {
             ClientResponse domain;
             domain = jsonAdapter.fromJson(json);
             Utils.domain = "https://" + domain.getClient().getApiUrl();
+
+
+
             Utils.setImgDomain(domain.getClient().getApiUrl());
             String[] content = new String[2];
             content[0] = MainActivityViewModel.IMG_LOGO;
@@ -159,58 +147,6 @@ public class MainActivityViewModel extends ViewModel {
         JWT jwt = new JWT(token);
         int id = Integer.parseInt(jwt.getClaim(PreferenceKeys.PREF_PROFILE_ID).asString());
         getUser(id);
-    }
-
-
-    private int notificationCounterId = 0;
-    void initNotifications(SharedPreferences sharedPref, NotificationManager notificationManager) {
-        String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
-        String port = sharedPref.getString(PreferenceKeys.PREF_PORT, "");
-        String token = sharedPref.getString(PreferenceKeys.PREF_TOKEN, "");
-        if (TextUtils.isEmpty(protocol) || TextUtils.isEmpty(port) || TextUtils.isEmpty(token)) {
-            return;
-        }
-
-        webSocketHandler = new WebsocketSecureHandler(protocol, port, token);
-        webSocketHandler.initNotifications();
-
-        receiveIncomingNotification = Transformations.map(
-          webSocketHandler.getObservableIncomingNotification(),
-          notificationArray -> {
-              Log.d(TAG, "initNotifications: test");
-
-              notificationCounterId += 1;
-
-              return notificationArray;
-          }
-        );
-
-        this.notificationManager = notificationManager;
-        createNotificationChannel(this.notificationManager);
-    }
-
-    private void createNotificationChannel(NotificationManager notificationManager) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            return;
-        }
-        NotificationChannel notificationChannel = new NotificationChannel(
-                NotificationChannels.WORKFLOW_COMMENTS_CHANNEL_ID,
-                "Comments",
-                NotificationManager.IMPORTANCE_HIGH
-        );
-        notificationChannel.enableLights(true);
-        notificationChannel.setLightColor(Color.BLUE);
-        notificationChannel.enableVibration(true);
-        notificationChannel.setDescription("Workflow Comments");
-
-        notificationManager.createNotificationChannel(notificationChannel);
-    }
-
-    public void notifyMessage(NotificationCompat.Builder notifyBuilder) {
-        notificationManager.notify(
-                NotificationIds.NOTIFICATION_ID + notificationCounterId,
-                notifyBuilder.build()
-        );
     }
 
     protected void sendFilterClickToWorflowList(int position) {
@@ -436,8 +372,10 @@ public class MainActivityViewModel extends ViewModel {
         return goToDomain;
     }
 
-    LiveData<String[]> getReceiveIncomingNotification() {
-        return receiveIncomingNotification;
+    LiveData<Boolean> getObservableStartService() {
+        if (startService == null) {
+            startService = new MutableLiveData<>();
+        }
+        return startService;
     }
-
 }

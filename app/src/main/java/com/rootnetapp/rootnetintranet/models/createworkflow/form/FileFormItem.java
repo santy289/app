@@ -5,6 +5,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 public class FileFormItem extends BaseFormItem {
 
     private String value;
+    private OnButtonClickedListener onButtonClickedListener;
 
     private FileFormItem() {
         //Constructor is private for Builder pattern
@@ -28,6 +29,14 @@ public class FileFormItem extends BaseFormItem {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public OnButtonClickedListener getOnButtonClickedListener() {
+        return onButtonClickedListener;
+    }
+
+    public void setOnButtonClickedListener(OnButtonClickedListener onButtonClickedListener) {
+        this.onButtonClickedListener = onButtonClickedListener;
     }
 
     public static class Builder {
@@ -120,5 +129,10 @@ public class FileFormItem extends BaseFormItem {
 
             return item;
         }
+    }
+
+    public interface OnButtonClickedListener {
+
+        void onButtonClicked();
     }
 }

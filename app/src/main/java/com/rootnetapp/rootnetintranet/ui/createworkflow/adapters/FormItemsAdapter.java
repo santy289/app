@@ -752,7 +752,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         //only creates the listener once.
         if (holder.getBinding().spCountry.getOnItemSelectedListener() == null) {
             holder.getBinding().spCountry
-                    .setSelection(selection, false); //workaround so the listener won't be called on init
+                    .setSelection(selection,
+                            false); //workaround so the listener won't be called on init
             holder.getBinding().spCountry.setOnItemSelectedListener(
                     new AdapterView.OnItemSelectedListener() {
                         @Override
@@ -836,6 +837,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         String title = item.getTitle();
         if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
         holder.getBinding().tvTitle.setText(title);
+
+        //set button click listener
+        holder.getBinding().btnAddFile.setOnClickListener(
+                v -> item.getOnButtonClickedListener().onButtonClicked());
 
         //todo set value
 

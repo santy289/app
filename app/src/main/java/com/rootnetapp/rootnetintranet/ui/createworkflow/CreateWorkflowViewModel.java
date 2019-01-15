@@ -77,6 +77,9 @@ import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACH
 
 public class CreateWorkflowViewModel extends ViewModel {
 
+    protected static final int REQUEST_FILE_TO_ATTACH = 27;
+    protected static final int REQUEST_EXTERNAL_STORAGE_PERMISSIONS = 72;
+
     private MutableLiveData<WorkflowTypesResponse> mWorkflowsLiveData;
     private MutableLiveData<ListsResponse> mListLiveData;
     private MutableLiveData<ProductsResponse> mProductLiveData;
@@ -1133,6 +1136,13 @@ public class CreateWorkflowViewModel extends ViewModel {
                 .setMachineName(field.getFieldConfigObject().getMachineName())
                 .setTypeInfo(typeInfo)
                 .build();
+
+        item.setOnButtonClickedListener(new FileFormItem.OnButtonClickedListener() {
+            @Override
+            public void onButtonClicked() {
+
+            }
+        });
 
         formSettings.getFormItems().add(item);
     }

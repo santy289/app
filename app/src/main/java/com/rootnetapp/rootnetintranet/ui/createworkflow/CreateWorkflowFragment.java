@@ -1,7 +1,10 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,6 +20,7 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentCreateWorkflowBinding;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.adapters.FormItemsAdapter;
@@ -31,7 +35,9 @@ import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -256,6 +262,11 @@ public class CreateWorkflowFragment extends Fragment {
      */
     @UiThread
     private void addItemToForm(BaseFormItem item) {
+        //check for any FileFormItem
+        if (item instanceof FileFormItem) {
+            createFileFormItemListener((FileFormItem) item);
+        }
+
         mAdapter.addItem(item);
     }
 
@@ -267,7 +278,23 @@ public class CreateWorkflowFragment extends Fragment {
      */
     @UiThread
     private void setItemListToForm(List<BaseFormItem> list) {
+        //check for any FileFormItem
+        for (BaseFormItem item : list) {
+            if (item instanceof FileFormItem) {
+                createFileFormItemListener((FileFormItem) item);
+            }
+        }
+
         mAdapter.setData(list);
+    }
+
+    private void createFileFormItemListener(FileFormItem fileFormItem) {
+        fileFormItem.setOnButtonClickedListener(
+                () -> {
+                    if (checkExternalStoragePermissions()) {
+                        showFileChooser(fileFormItem);
+                    }
+                });
     }
 
     /**
@@ -285,4 +312,61 @@ public class CreateWorkflowFragment extends Fragment {
         //todo maybe show a Toast too
     }
 
+    /**
+     * Displays a native file chooser, the user must select which file they wish to upload. In case
+     * that the file chooser cannot be opened, shows a Toast message.
+     */
+    @UiThread
+    private void showFileChooser(FileFormItem fileFormItem) {
+        //todo set fileFormItem to viewModel
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        try {
+            startActivityForResult(Intent.createChooser(
+                    intent,
+                    getString(R.string.workflow_detail_comments_fragment_select_file)),
+                    CreateWorkflowViewModel.REQUEST_FILE_TO_ATTACH);
+        } catch (android.content.ActivityNotFoundException ex) {
+            // Potentially direct the user to the Market with a Dialog
+            showToastMessage(R.string.workflow_detail_comments_fragment_no_file_manager);
+        }
+    }
+
+    /**
+     * Verify whether the user has granted permissions to read/write the external storage.
+     *
+     * @return whether the permissions are granted.
+     */
+    private boolean checkExternalStoragePermissions() {
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                            Manifest.permission.READ_EXTERNAL_STORAGE},
+                    CreateWorkflowViewModel.REQUEST_EXTERNAL_STORAGE_PERMISSIONS);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        viewModel.handleFileSelectedResult(getContext(), requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @UiThread
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                getContext(),
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
+    }
 }

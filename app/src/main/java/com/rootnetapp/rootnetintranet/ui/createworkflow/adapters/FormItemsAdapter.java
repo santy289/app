@@ -290,7 +290,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         if (item.getValue() != null) {
             for (int i = 0; i < options.size(); i++) {
                 Option option = options.get(i);
-                if (item.getValue() == option) selection = i + 1; //+1 because the first spinner item is a hint
+                if (item.getValue() == option) selection = i;
             }
         }
 

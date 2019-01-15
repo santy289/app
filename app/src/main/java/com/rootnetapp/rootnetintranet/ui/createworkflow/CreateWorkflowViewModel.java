@@ -440,6 +440,12 @@ public class CreateWorkflowViewModel extends ViewModel {
                 continue;
             }
 
+            //does not show the Status field
+            String machineName = fieldConfig.getMachineName();
+            if (machineName != null && machineName.equals("wf_status")) {
+                continue;
+            }
+
             buildField(field);
         }
 

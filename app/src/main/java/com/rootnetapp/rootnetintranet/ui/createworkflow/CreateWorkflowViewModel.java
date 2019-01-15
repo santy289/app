@@ -284,33 +284,11 @@ public class CreateWorkflowViewModel extends ViewModel {
                 .getDatePostFormat(((DateFormItem) formSettings.findItem(startTag)).getValue());
 
         List<WorkflowMetas> metas = new ArrayList<>();
-        WorkflowMetas workflowMetas;
-        String value;
 
         for (int i = 0; i < formItems.size(); i++) {
             BaseFormItem formItem = formItems.get(i);
 
-            /*int fieldId = fieldData.tag;
-            // Check for phone and currency fields
-            if (!hasValidFields(fieldId, baseFormElement.getValue())) {
-                showLoading.setValue(false);
-                return;
-            }
-
-            int customId = baseFormElement.getTag();
-            if (customId == FormSettings.FIELD_CODE_ID) {
-                Log.d(TAG, "postWorkflow: found");
-                formSettings.setCountryCode(baseFormElement.getValue(), fieldData);
-                continue;
-            }
-
-            if (customId == FormSettings.FIELD_CURRENCY_ID) {
-                Log.d(TAG, "postWorkflow: found");
-                formSettings.setCurrencyType(baseFormElement.getValue(), fieldData);
-                continue;
-            }*/
-
-            workflowMetas = createMetaData(formItem);
+            WorkflowMetas workflowMetas = createMetaData(formItem);
             if (workflowMetas == null) {
                 showLoading.setValue(false);
                 return;
@@ -350,48 +328,6 @@ public class CreateWorkflowViewModel extends ViewModel {
             //edit workflow
             patchEditToServer(metas, mWorkflowListItem.getWorkflowId(), title, start, description);
         }
-    }
-
-    private boolean hasValidFields(int fieldId, String value) {
-        //todo check
-//        TypeInfo typeInfo = formSettings.findFieldDataById(fieldId);
-        TypeInfo typeInfo = new TypeInfo();
-        DialogMessage dialogMessage;
-        if (typeInfo != null
-                && typeInfo.getType().equals(FormSettings.TYPE_PHONE)
-                && !TextUtils.isEmpty(value)
-                && !formSettings.hasValidCountryCode()
-                ) {
-            dialogMessage = new DialogMessage();
-            dialogMessage.message = R.string.fill_country_code;
-            dialogMessage.title = R.string.warning;
-            showDialogMessage.setValue(dialogMessage);
-            return false;
-        }
-
-        if (typeInfo != null
-                && typeInfo.getType().equals(FormSettings.TYPE_CURRENCY)
-                && !TextUtils.isEmpty(value)
-//                && !formSettings.hasValidCountryCurrency()
-                ) {
-            dialogMessage = new DialogMessage();
-            dialogMessage.message = R.string.fill_currency_code;
-            dialogMessage.title = R.string.warning;
-            showDialogMessage.setValue(dialogMessage);
-            return false;
-        }
-
-        if (typeInfo != null
-                && typeInfo.getValueType().equals(FormSettings.VALUE_EMAIL)) {
-            // TODO put back this value after debugging
-            if (!TextUtils.isEmpty(value)
-                    && !isValidEmail(value)) {
-                handleInvalidEmail();
-                return false;
-            }
-        }
-
-        return true;
     }
 
     private void postCreateToServer(List<WorkflowMetas> metas, int workflowTypeId, String title,

@@ -18,6 +18,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.FilePostDetail;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PendingFileUpload;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PhoneFieldData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
@@ -25,6 +26,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormIte
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem.InputType;
@@ -581,13 +583,10 @@ public class CreateWorkflowViewModel extends ViewModel {
             case FormSettings.TYPE_CURRENCY:
                 createCurrencyFormItem(field);
                 break;
-            /*
             case FormSettings.TYPE_PHONE:
-                handleBuildPhone(field);
+                createPhoneFormItem(field);
                 break;
-            case FormSettings.TYPE_CURRENCY:
-                handleCurrencyType(field);
-                break;
+            /*
             case FormSettings.TYPE_FILE:
                 handleFile(field);
                 break;*/
@@ -1058,8 +1057,8 @@ public class CreateWorkflowViewModel extends ViewModel {
     }
 
     /**
-     * Creates a custom list form item. Performs a request to the repo to retrieve the options and
-     * then send the form item to the UI.
+     * Creates a currency form item. Performs a request to the repo to retrieve the options and then
+     * send the form item to the UI.
      */
     private void createCurrencyFormItem(FormFieldsByWorkflowType field) {
         Disposable disposable = mRepository
@@ -1094,7 +1093,52 @@ public class CreateWorkflowViewModel extends ViewModel {
                     mAddFormItemLiveData.setValue(currencyFormItem);
                 }, throwable -> {
                     showLoading.setValue(false);
-                    Log.e(TAG, "handleCurrency: problem getting currency list " + throwable.getMessage());
+                    Log.e(TAG, "handleCurrency: problem getting currency list " + throwable
+                            .getMessage());
+                });
+
+        mDisposables.add(disposable);
+    }
+
+    /**
+     * Creates a phone form item. Performs a request to the repo to retrieve the options and then
+     * send the form item to the UI.
+     */
+    private void createPhoneFormItem(FormFieldsByWorkflowType field) {
+        Disposable disposable = mRepository
+                .getCountryCodes()
+                .subscribe(phoneFieldDataList -> {
+                    showLoading.setValue(false);
+
+                    if (phoneFieldDataList == null || phoneFieldDataList.size() < 1) {
+                        return;
+                    }
+
+                    List<Option> options = new ArrayList<>();
+                    for (int i = 0; i < phoneFieldDataList.size(); i++) {
+                        PhoneFieldData phoneFieldData = phoneFieldDataList.get(i);
+                        String name = phoneFieldData.phoneCode + " - " + phoneFieldData.description;
+                        Integer id = phoneFieldData.countryId;
+
+                        Option option = new Option(id, name);
+                        options.add(option);
+                    }
+
+                    PhoneFormItem phoneFormItem = new PhoneFormItem.Builder()
+                            .setTitle(field.getFieldName())
+                            .setRequired(field.isRequired())
+                            .setTag(field.getId())
+                            .setEscaped(escape(field.getFieldConfigObject()))
+                            .setOptions(options)
+                            .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                            .setMachineName(field.getFieldConfigObject().getMachineName())
+                            .build();
+
+                    mAddFormItemLiveData.setValue(phoneFormItem);
+                }, throwable -> {
+                    showLoading.setValue(false);
+                    Log.e(TAG,
+                            "handlePhone: problem getting country list " + throwable.getMessage());
                 });
 
         mDisposables.add(disposable);

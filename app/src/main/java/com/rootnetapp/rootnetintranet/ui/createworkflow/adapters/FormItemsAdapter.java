@@ -15,6 +15,7 @@ import com.rootnetapp.rootnetintranet.databinding.FormItemBooleanBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemCurrencyBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemDateBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemMultipleChoiceBinding;
+import com.rootnetapp.rootnetintranet.databinding.FormItemPhoneBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemSingleChoiceBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemTextInputBinding;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
@@ -24,6 +25,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
@@ -100,6 +102,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 return new MultipleChoiceViewHolder(FormItemMultipleChoiceBinding
                         .inflate(layoutInflater, viewGroup, false));
 
+            case FormItemViewType.PHONE:
+                return new PhoneViewHolder(FormItemPhoneBinding
+                        .inflate(layoutInflater, viewGroup, false));
+
             default:
                 throw new IllegalStateException("Invalid ViewType");
         }
@@ -135,6 +141,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             case FormItemViewType.MULTIPLE_CHOICE:
                 populateMultipleChoiceView((MultipleChoiceViewHolder) holder, position);
+                break;
+
+            case FormItemViewType.PHONE:
+                populatePhoneView((PhoneViewHolder) holder, position);
                 break;
 
             default:
@@ -534,10 +544,12 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.getBinding().viewSpinnerBackground
                     .setBackgroundResource(R.drawable.spinner_bg_disabled);
             holder.getBinding().spCurrency.setEnabled(false);
+            holder.getBinding().etCurrency.setEnabled(false);
             return;
         } else {
             holder.getBinding().viewSpinnerBackground.setBackgroundResource(R.drawable.spinner_bg);
             holder.getBinding().spCurrency.setEnabled(true);
+            holder.getBinding().etCurrency.setEnabled(true);
         }
 
         // verify validation
@@ -642,6 +654,104 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.getBinding().viewSpinnerBackground.setBackgroundResource(R.drawable.spinner_bg);
         }
     }
+
+    private void populatePhoneView(PhoneViewHolder holder, int position) {
+        PhoneFormItem item = (PhoneFormItem) getItem(position);
+
+        String title = item.getTitle();
+        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        holder.getBinding().tvTitle.setText(title);
+
+        //currency value
+        holder.getBinding().etPhone
+                .setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+
+        //currency options
+        List<Option> options = new ArrayList<>(item.getOptions());
+        String hint = mContext.getString(R.string.no_selection_hint);
+        // check whether the hint has already been added
+        if (!options.get(0).getName().equals(hint)) {
+            // add hint as first item
+            options.add(0, new Option(0, hint));
+        }
+
+        //currency adapter
+        holder.getBinding().spCountry.setAdapter(
+                new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
+                        options));
+
+        //only creates the listener once.
+        if (holder.getBinding().spCountry.getOnItemSelectedListener() == null) {
+            holder.getBinding().spCountry
+                    .setSelection(0, false); //workaround so the listener won't be called on init
+            holder.getBinding().spCountry.setOnItemSelectedListener(
+                    new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position,
+                                                   long id) {
+
+                            // this prevents the listener to be triggered by setSelection
+                            Object tag = holder.getBinding().spCountry.getTag();
+                            if (tag == null || (int) tag != position) {
+
+                                // the user has selected the No Selection option
+                                if (position == 0) {
+                                    item.setSelectedOption(null);
+                                    return;
+                                }
+
+                                // the user has selected a valid option
+                                int index = position - 1; // because of the No Selection option
+                                item.setSelectedOption(item.getOptions().get(index));
+                            }
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+
+                        }
+                    });
+        } else {
+            // this prevents the listener to be triggered by setSelection
+            int index = item.getOptions().indexOf(item.getSelectedOption());
+            index++; // because of the No Selection option
+            holder.getBinding().spCountry.setTag(index);
+            holder.getBinding().spCountry.setSelection(index);
+        }
+
+        // verify visibility
+        if (!item.isVisible()) {
+            holder.hide();
+            return;
+        } else {
+            holder.show();
+        }
+
+        // verify enabled param
+        if (!item.isEnabled()) {
+            holder.getBinding().viewSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg_disabled);
+            holder.getBinding().spCountry.setEnabled(false);
+            holder.getBinding().etPhone.setEnabled(false);
+            return;
+        } else {
+            holder.getBinding().viewSpinnerBackground.setBackgroundResource(R.drawable.spinner_bg);
+            holder.getBinding().spCountry.setEnabled(true);
+            holder.getBinding().etPhone.setEnabled(true);
+        }
+
+        // verify validation
+        if (hasToEvaluateValid && !item.isValid()) {
+            holder.getBinding().viewSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg_error);
+            holder.getBinding().etPhone
+                    .setBackgroundResource(R.drawable.spinner_bg_error);
+        } else {
+            holder.getBinding().viewSpinnerBackground.setBackgroundResource(R.drawable.spinner_bg);
+            holder.getBinding().etPhone
+                    .setBackgroundResource(R.drawable.spinner_bg);
+        }
+    }
     //endregion
 
     //region Retrieve Values
@@ -687,6 +797,11 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                             (CurrencyFormItem) item);
                     continue;
 
+                case FormItemViewType.PHONE:
+                    retrieveValueForPhoneView(((PhoneViewHolder) holder),
+                            (PhoneFormItem) item);
+                    continue;
+
                 default:
                     throw new IllegalStateException("Invalid ViewType");
             }
@@ -721,7 +836,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     /**
      * Saves the current selected value from the {@link CurrencyFormItem} view into the class
-     * object.
+     * object. This method only needs to save the currency number value, because the spinner value
+     * is automatically saved upon selection.
      *
      * @param holder the view holder.
      * @param item   desired item.
@@ -730,6 +846,21 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                                               CurrencyFormItem item) {
         Editable text = holder.getBinding().etCurrency.getText();
         Double value = text == null || text.length() == 0 ? null : Double.valueOf(text.toString());
+        item.setValue(value);
+    }
+
+    /**
+     * Saves the current selected value from the {@link PhoneFormItem} view into the class object.
+     * This method only needs to save the phone number value, because the spinner value is
+     * automatically saved upon selection.
+     *
+     * @param holder the view holder.
+     * @param item   desired item.
+     */
+    private void retrieveValueForPhoneView(PhoneViewHolder holder,
+                                           PhoneFormItem item) {
+        Editable text = holder.getBinding().etPhone.getText();
+        String value = text == null ? null : text.toString();
         item.setValue(value);
     }
     //endregion

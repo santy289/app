@@ -14,6 +14,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PendingFileUpload;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCountryCodeAndValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCurrency;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostPhone;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductJsonValue;
@@ -21,6 +22,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.role.Role;
@@ -337,11 +339,12 @@ public class FormSettings {
                 }
                 break;
             case FormSettings.VALUE_STRING:
-                if (typeInfo.getType().equals(TYPE_PHONE)) {
-                    String json = getJsonForPhoneType(value);
+                if (typeInfo.getType().equals(TYPE_PHONE)  && formItem instanceof PhoneFormItem) {
+                    String json = getJsonForPhoneType((PhoneFormItem) formItem);
                     metaData.setValue(json);
                     break;
                 }
+
                 metaData.setValue(value);
                 break;
             case FormSettings.VALUE_TEXT:
@@ -432,19 +435,21 @@ public class FormSettings {
         return jsonAdapter.toJson(postCurrency);
     }
 
-    private String getJsonForPhoneType(String phoneNumber) {
-        if (TextUtils.isEmpty(phoneNumber) || !hasValidCountryCode()) {
-            return "";
-        }
+    private String getJsonForPhoneType(PhoneFormItem formItem) {
+        String phoneValue = formItem.getValue();
+        if (TextUtils.isEmpty(phoneValue)) return "";
 
-        PostCountryCodeAndValue postCountryCodeAndValue = new PostCountryCodeAndValue();
-        postCountryCodeAndValue.countryId = countryCode;
-        postCountryCodeAndValue.value = Integer.valueOf(phoneNumber);
+        Option selectedOption = formItem.getSelectedOption();
+        if (selectedOption == null) return "";
 
-        JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi
-                .adapter(PostCountryCodeAndValue.class);
-        String jsonString = jsonAdapter.toJson(postCountryCodeAndValue);
-        return jsonString;
+        int countryCode = selectedOption.getId();
+
+        PostPhone postPhone = new PostPhone();
+        postPhone.countryId = countryCode;
+        postPhone.value = phoneValue;
+
+        JsonAdapter<PostPhone> jsonAdapter = moshi.adapter(PostPhone.class);
+        return jsonAdapter.toJson(postPhone);
     }
 
     private String getJsonStringForSystemUserType(String username) {

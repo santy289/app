@@ -1027,4 +1027,11 @@ public class FormSettings {
         }
         return null;
     }
+
+    protected Option findOption(List<Option> options, int id) {
+        for (Option option : options) {
+            if (id == option.getId()) return option;
+        }
+        return null;
+    }
 }

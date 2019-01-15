@@ -19,6 +19,8 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PendingFileUpload;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PhoneFieldData;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostCurrency;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostPhone;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
@@ -107,6 +109,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     private String mToken;
     private WorkflowListItem mWorkflowListItem;
     private WorkflowDb mWorkflow;
+    private final Moshi moshi;
 
     protected static final int TAG_WORKFLOW_TYPE = 80;
 
@@ -117,6 +120,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         goBack = new MutableLiveData<>();
         showUploadButton = new MutableLiveData<>();
         chooseFile = new MutableLiveData<>();
+        moshi = new Moshi.Builder().build();
     }
 
     protected void initForm(String token, @Nullable WorkflowListItem item) {
@@ -1170,6 +1174,7 @@ public class CreateWorkflowViewModel extends ViewModel {
      * @param workflow Workflow with info to display on the form.
      */
     private void updateWorkflowInformation(WorkflowDb workflow) {
+        showLoading.setValue(true);
 
         TextInputFormItem titleItem = (TextInputFormItem) formSettings
                 .findItem(FormSettings.MACHINE_NAME_TITLE);
@@ -1226,6 +1231,14 @@ public class CreateWorkflowViewModel extends ViewModel {
                         } else {
                             fillSingleChoiceFormItem(meta);
                         }
+                        break;
+
+                    case FormSettings.TYPE_CURRENCY:
+                        fillCurrencyFormItem(meta);
+                        break;
+
+                    case FormSettings.TYPE_PHONE:
+                        fillPhoneFormItem(meta);
                         break;
 
                     /*case FormSettings.VALUE_EMAIL:
@@ -1409,6 +1422,44 @@ public class CreateWorkflowViewModel extends ViewModel {
             if (value == null) continue;
             multipleChoiceFormItem.addValue(value);
         }
+    }
+
+    private void fillCurrencyFormItem(Meta meta) throws IOException {
+        if (meta.getValue() == null || meta.getValue().isEmpty()) return;
+
+        JsonAdapter<PostCurrency> jsonAdapter = moshi.adapter(PostCurrency.class);
+        PostCurrency postCurrency = jsonAdapter.fromJson(meta.getValue());
+
+        if (postCurrency == null) return;
+
+        CurrencyFormItem currencyFormItem = (CurrencyFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        Option value = formSettings
+                .findOption(currencyFormItem.getOptions(), postCurrency.countryId);
+        if (value == null) return;
+
+        currencyFormItem.setSelectedOption(value);
+        currencyFormItem.setValue(postCurrency.value);
+    }
+
+    private void fillPhoneFormItem(Meta meta) throws IOException {
+        if (meta.getValue() == null || meta.getValue().isEmpty()) return;
+
+        JsonAdapter<PostPhone> jsonAdapter = moshi.adapter(PostPhone.class);
+        PostPhone postPhone = jsonAdapter.fromJson(meta.getValue());
+
+        if (postPhone == null) return;
+
+        PhoneFormItem phoneFormItem = (PhoneFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        Option value = formSettings
+                .findOption(phoneFormItem.getOptions(), postPhone.countryId);
+        if (value == null) return;
+
+        phoneFormItem.setSelectedOption(value);
+        phoneFormItem.setValue(postPhone.value);
     }
     //endregion
 

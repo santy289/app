@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatEditText;
@@ -63,6 +64,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public void setData(List<BaseFormItem> list) {
         mDataset = list;
         notifyDataSetChanged();
+        getItemCount();
     }
 
     public void setHasToEvaluateValid(boolean hasToEvaluateValid) {
@@ -302,7 +304,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         //only creates the listener once.
         if (holder.getBinding().spInput.getOnItemSelectedListener() == null) {
             holder.getBinding().spInput
-                    .setSelection(selection, false); //workaround so the listener won't be called on init
+                    .setSelection(selection,
+                            false); //workaround so the listener won't be called on init
             holder.getBinding().spInput.setOnItemSelectedListener(
                     new AdapterView.OnItemSelectedListener() {
                         @Override
@@ -486,6 +489,12 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
         holder.getBinding().tvTitle.setText(title);
 
+        //fill value
+        if (item.getValue() != null) {
+            holder.getBinding().etCurrency
+                    .setText(String.format(Locale.US, "%.2f", item.getValue()));
+        }
+
         //currency value
         holder.getBinding().etCurrency
                 .setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
@@ -499,6 +508,15 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             options.add(0, new Option(0, hint));
         }
 
+        //check for selection
+        int selection = 0;
+        if (item.getValue() != null) {
+            for (int i = 0; i < options.size(); i++) {
+                Option option = options.get(i);
+                if (item.getSelectedOption() == option) selection = i;
+            }
+        }
+
         //currency adapter
         holder.getBinding().spCurrency.setAdapter(
                 new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
@@ -507,7 +525,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         //only creates the listener once.
         if (holder.getBinding().spCurrency.getOnItemSelectedListener() == null) {
             holder.getBinding().spCurrency
-                    .setSelection(0, false); //workaround so the listener won't be called on init
+                    .setSelection(selection,
+                            false); //workaround so the listener won't be called on init
             holder.getBinding().spCurrency.setOnItemSelectedListener(
                     new AdapterView.OnItemSelectedListener() {
                         @Override
@@ -676,17 +695,31 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
         holder.getBinding().tvTitle.setText(title);
 
-        //currency value
-        holder.getBinding().etPhone
-                .setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        //fill value
+        if (item.getValue() != null) {
+            holder.getBinding().etPhone.setText(item.getValue());
+        }
 
-        //currency options
+        //phone value
+        holder.getBinding().etPhone
+                .setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_CLASS_PHONE);
+
+        //phone options
         List<Option> options = new ArrayList<>(item.getOptions());
         String hint = mContext.getString(R.string.no_selection_hint);
         // check whether the hint has already been added
         if (!options.get(0).getName().equals(hint)) {
             // add hint as first item
             options.add(0, new Option(0, hint));
+        }
+
+        //check for selection
+        int selection = 0;
+        if (item.getValue() != null) {
+            for (int i = 0; i < options.size(); i++) {
+                Option option = options.get(i);
+                if (item.getSelectedOption() == option) selection = i;
+            }
         }
 
         //currency adapter
@@ -697,7 +730,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         //only creates the listener once.
         if (holder.getBinding().spCountry.getOnItemSelectedListener() == null) {
             holder.getBinding().spCountry
-                    .setSelection(0, false); //workaround so the listener won't be called on init
+                    .setSelection(selection, false); //workaround so the listener won't be called on init
             holder.getBinding().spCountry.setOnItemSelectedListener(
                     new AdapterView.OnItemSelectedListener() {
                         @Override

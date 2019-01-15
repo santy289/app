@@ -1,9 +1,11 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.comments;
 
+import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -34,6 +36,7 @@ import javax.inject.Inject;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
@@ -308,8 +311,40 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
      */
     @Override
     public void downloadCommentAttachment(CommentFileResponse commentFileResponse) {
-        //todo permissions
-        commentsViewModel.downloadAttachment(commentFileResponse);
+        if (checkExternalStoragePermissions()) {
+            commentsViewModel.downloadAttachment(commentFileResponse);
+        } else {
+            commentsViewModel.setQueuedFile(commentFileResponse);
+        }
+    }
+
+    /**
+     * Verify whether the user has granted permissions to read/write the external storage.
+     *
+     * @return whether the permissions are granted.
+     */
+    private boolean checkExternalStoragePermissions() {
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                            Manifest.permission.READ_EXTERNAL_STORAGE},
+                    CommentsViewModel.REQUEST_EXTERNAL_STORAGE_PERMISSIONS);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        commentsViewModel.handleRequestPermissionsResult(requestCode, grantResults);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     /**

@@ -52,6 +52,7 @@ public class MainActivityViewModel extends ViewModel {
     private MutableLiveData<String> saveToPreference;
     private MutableLiveData<Boolean> goToDomain;
     private MutableLiveData<Boolean> startService;
+    private MutableLiveData<Boolean> stopService;
     protected MutableLiveData<Integer> setSearchMenuLayout;
     protected MutableLiveData<Integer> setUploadMenuLayout;
     protected MutableLiveData<List<WorkflowTypeMenu>> setRightDrawerFilterList;
@@ -114,6 +115,7 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     protected void initMainViewModel(SharedPreferences sharedPreferences) {
+        stopService.setValue(true);
         startService.setValue(true);
         String json = sharedPreferences.getString(PreferenceKeys.PREF_DOMAIN, "");
         if (json.isEmpty()) {
@@ -377,5 +379,12 @@ public class MainActivityViewModel extends ViewModel {
             startService = new MutableLiveData<>();
         }
         return startService;
+    }
+
+    LiveData<Boolean> getObservableStopService() {
+        if (stopService == null) {
+            stopService = new MutableLiveData<>();
+        }
+        return stopService;
     }
 }

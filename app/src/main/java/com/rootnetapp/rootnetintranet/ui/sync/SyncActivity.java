@@ -77,6 +77,7 @@ public class SyncActivity extends AppCompatActivity {
             }
 
             syncHelper.clearDisposables();
+            syncHelper.getObservableSync().removeObservers(this);
             startActivity(new Intent(this, MainActivity.class));
             finishAffinity();
         });

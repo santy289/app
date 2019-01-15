@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.util.Log;
@@ -12,32 +13,43 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+/**
+ * Not full tested and might have a memory leak.
+ */
 public class WebSocketService extends Service {
 
-    private ServiceHandler serviceHandler;
-    private HandlerThread thread;
+    private volatile ServiceHandler serviceHandler;
+    private volatile Looper looper;
 
     private static final String TAG = "INTRANET";
 
+    private int startId;
+    private int what;
 
     @Override
     public void onCreate() {
-        thread = new HandlerThread(
+        HandlerThread thread = new HandlerThread(
                 "WebSocketHandler",
                 Process.THREAD_PRIORITY_BACKGROUND
         );
         thread.start();
-        serviceHandler = new ServiceHandler(thread.getLooper(), this);
+        looper = thread.getLooper();
+        serviceHandler = new ServiceHandler(looper, this);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand: WEBSCOKET STARTED WITH INTENT: start id " + startId);
-
-        Toast.makeText(getApplicationContext(), "onStartCommand " + startId, Toast.LENGTH_LONG).show();
+        this.startId = startId;
 
         // TODO get from intent the token or some more parameters needed.
         // TODO send to handler a message with all the arguments that we need to share.
+        if (intent == null) {
+            Toast.makeText(getApplicationContext(), "INTENT NULL " + startId, Toast.LENGTH_LONG).show();
+            return START_REDELIVER_INTENT;
+        } else {
+            Log.d(TAG, "onStartCommand: WEBSCOKET STARTED WITH INTENT: start id " + startId);
+            Toast.makeText(getApplicationContext(), "onStartCommand " + startId, Toast.LENGTH_LONG).show();
+        }
 
         String token = intent.getStringExtra(WebsocketSecureHandler.KEY_TOKEN);
         String port = intent.getStringExtra(WebsocketSecureHandler.KEY_PORT);
@@ -51,6 +63,8 @@ public class WebSocketService extends Service {
 
         Message message = serviceHandler.obtainMessage();
 
+        what = message.what;
+
         message.arg1 = startId;
         message.obj = token;
         message.setData(bundle);
@@ -63,19 +77,18 @@ public class WebSocketService extends Service {
         }
 
         return START_REDELIVER_INTENT;
+//        return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        Toast.makeText(getApplicationContext(), "onDestroy Service", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "onDestroy Service " + startId , Toast.LENGTH_LONG).show();
         Log.d(TAG, "onDestroy: SERVICE DESTROYED");
-        thread.quit();
-//        thread.interrupt();
-        thread = null;
+        serviceHandler.stopWebsocket();
+        serviceHandler.removeMessages(what);
+        looper.quit();
         super.onDestroy();
     }
-
-
 
     @Nullable
     @Override

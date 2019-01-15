@@ -22,7 +22,6 @@ import androidx.core.app.Person;
 import androidx.core.graphics.drawable.IconCompat;
 
 public class NotificationHandler {
-
     /**
      * Create a channel depending on the build version. We create one from Android O+.
      *
@@ -52,7 +51,13 @@ public class NotificationHandler {
      * @param title
      * @param message
      */
-    public static void prepareNotification(String id, String title, String message, Service service, NotificationManager notificationManager) {
+    public static void prepareNotification(
+            String id,
+            String title,
+            String message,
+            Service service,
+            NotificationManager notificationManager,
+            int notificationId) {
         Resources resources = service.getResources();
         Bitmap logoBitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher_round);
 
@@ -98,7 +103,7 @@ public class NotificationHandler {
                 .setPriority(NotificationCompat.PRIORITY_MAX);
 
         notificationManager.notify(
-                NotificationIds.NOTIFICATION_ID,
+                notificationId,
                 notifyBuilder.build()
         );
     }

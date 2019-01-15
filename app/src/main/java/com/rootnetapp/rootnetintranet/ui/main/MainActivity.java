@@ -132,33 +132,24 @@ public class MainActivity extends AppCompatActivity
         setupSpeedDialFab();
     }
 
-    private void startWebsocketService() {
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Toast.makeText(this, "activity destroyed", Toast.LENGTH_LONG).show();
+    }
+
+    private void startWebsocketServiceIntent() {
         SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = sharedPref.getString(PreferenceKeys.PREF_TOKEN, "");
         String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
         String port = sharedPref.getString(PreferenceKeys.PREF_PORT, "");
 
-        Intent intent = new Intent(this, WebSocketService.class);
-        intent.putExtra(WebsocketSecureHandler.KEY_TOKEN, token);
-        intent.putExtra(WebsocketSecureHandler.KEY_PORT, port);
-        intent.putExtra(WebsocketSecureHandler.KEY_PROTOCOL, protocol);
-        intent.putExtra(WebsocketSecureHandler.KEY_DOMAIN, Utils.domain);
-        startService(intent);
-    }
-
-    private void startWebsocketServiceIntent(String token, String port, String protocol) {
         Intent intent = new Intent(this, WebSocketIntentService.class);
         intent.putExtra(WebsocketSecureHandler.KEY_TOKEN, token);
         intent.putExtra(WebsocketSecureHandler.KEY_PORT, port);
         intent.putExtra(WebsocketSecureHandler.KEY_PROTOCOL, protocol);
         intent.putExtra(WebsocketSecureHandler.KEY_DOMAIN, Utils.domain);
         startService(intent);
-    }
-
-
-    private void stopWebsocketService() {
-        Intent intent = new Intent(this, WebSocketService.class);
-        stopService(intent);
     }
 
     private void stopWebsocketIntentService() {
@@ -816,13 +807,8 @@ public class MainActivity extends AppCompatActivity
                 .observe(this, this::handleUpdateBaseFilterSelectionUpdateWith);
         viewModel.openRightDrawer.observe(this, this::openRightDrawer);
 
-        viewModel.getObservableStartService().observe(this, result -> {
-            if (result) {
-                startWebsocketService();
-            } else {
-                stopWebsocketService();
-            }
-        });
+        viewModel.getObservableStartService().observe(this, result -> startWebsocketServiceIntent());
+        viewModel.getObservableStopService().observe(this, result -> stopWebsocketIntentService());
     }
 
     private void subscribeForLogin() {

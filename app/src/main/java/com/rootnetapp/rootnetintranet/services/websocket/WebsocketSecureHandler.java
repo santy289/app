@@ -19,6 +19,7 @@ import io.crossbar.autobahn.wamp.types.EventDetails;
 import io.crossbar.autobahn.wamp.types.ExitInfo;
 import io.crossbar.autobahn.wamp.types.SessionDetails;
 import io.crossbar.autobahn.wamp.types.Subscription;
+import io.crossbar.autobahn.wamp.types.TransportOptions;
 
 public class WebsocketSecureHandler {
 
@@ -33,12 +34,13 @@ public class WebsocketSecureHandler {
     private String protocol;
     private String port;
     private String token;
-    private String domain;
+    private String url;
 
     private CompletableFuture<ExitInfo> exitInfoCompletableFuture;
 
     private WebSocketSecureCallback callback;
     private WebSocketErrorCallback errorCallback;
+    private Session session;
 
     private static final String TAG = "WebsocketHandler";
     public static final int INDEX_TITLE = 0;
@@ -54,11 +56,22 @@ public class WebsocketSecureHandler {
     public static final String KEY_PROTOCOL = "intranet.protocol";
     public static final String KEY_DOMAIN = "intranet.domain";
 
+    private final String realm = "master";
+
     public WebsocketSecureHandler(String protocol, String port, String token, String domain) {
         this.protocol = protocol;
         this.port = port;
         this.token = token;
-        this.domain = domain;
+
+        String domainName;
+        try {
+            domainName = getDomainName(domain);
+        } catch (URISyntaxException e) {
+            Log.d(TAG, "initNotifications: Missing websocket settings");
+            return;
+        }
+
+        this.url = protocol + "://" + domainName + ":" + port + "/";
     }
 
     public String getProtocol() {
@@ -77,6 +90,7 @@ public class WebsocketSecureHandler {
      * Calls complete(ExitInfo(true)) for the current exitINfoCompletableFuture created.
      */
     public void completeClient() {
+        session.leave();
         exitInfoCompletableFuture.complete(new ExitInfo(true));
     }
 
@@ -85,6 +99,7 @@ public class WebsocketSecureHandler {
      */
     public void cancelClient() {
         // mayInterruptRunning doesn't affect the method implementation.
+        session.leave();
         exitInfoCompletableFuture.cancel(true);
     }
 
@@ -108,7 +123,7 @@ public class WebsocketSecureHandler {
      */
     private void initNotifications() {
         // Create a session object
-        Session session = new Session();
+        session = new Session();
         // Add all onJoin listeners
         session.addOnJoinListener(this::subscribeToWebsocket);
         session.addOnReadyListener(readySession -> {
@@ -143,21 +158,15 @@ public class WebsocketSecureHandler {
             }
         });
 
-        String domainName;
-        try {
-            domainName = getDomainName(domain);
-        } catch (URISyntaxException e) {
-            Log.d(TAG, "initNotifications: Missing websocket settings");
-            return;
-        }
-
-        String url = protocol + "://" + domainName + ":" + port + "/";
-        String realm = "master";
-
 //         finally, provide everything to a Client and connect
+        connect(session, url, realm, token);
+    }
+
+    private void connect(Session session, String url, String realm, String token) {
         IAuthenticator authenticator = new ChallengeResponseAuth(token);
         Client client = new Client(session, url, realm, authenticator);
-        exitInfoCompletableFuture = client.connect();
+        TransportOptions transportOptions = new TransportOptions();
+        exitInfoCompletableFuture = client.connect(transportOptions);
     }
 
     /**

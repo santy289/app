@@ -10,15 +10,19 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.notifications.NotificationHandler;
+import com.rootnetapp.rootnetintranet.notifications.NotificationIds;
 
 import java.lang.ref.WeakReference;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
 
+/**
+ * Do not use it has a memory leak.
+ */
 public class ServiceHandler extends Handler {
 
     private int startId;
-    private NotificationManager notificationManager;
+    private int counter = 0;
 
     private WebsocketSecureHandler webSocketHandler;
 
@@ -32,12 +36,12 @@ public class ServiceHandler extends Handler {
     @Override
     public void handleMessage(Message msg) {
         Service service = serviceWeakReference.get();
-        notificationManager = (NotificationManager) service.getSystemService(NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) service.getSystemService(NOTIFICATION_SERVICE);
 
         String token = (String) msg.obj;
         startId = msg.arg1;
 
-        //Toast.makeText(service.getApplicationContext(), "handleMessage " + startId, Toast.LENGTH_LONG).show();
+        Toast.makeText(service.getApplicationContext(), "handleMessage " + startId, Toast.LENGTH_LONG).show();
 
         Bundle bundle = msg.getData();
         String protocol = bundle.getString(WebsocketSecureHandler.KEY_PROTOCOL);
@@ -49,10 +53,12 @@ public class ServiceHandler extends Handler {
     }
 
     public void testDebug(Service service) {
+        NotificationManager notificationManager = (NotificationManager) service.getSystemService(NOTIFICATION_SERVICE);
+
         String TAG = "ServiceHandler";
         try {
             Log.d(TAG, "handleMessage: GOING TO SLEEP 30 SEC");
-            Thread.sleep(15 * 1000);
+            Thread.sleep(30 * 1000);
         } catch (InterruptedException e) {
             // Restore interrupt status.
             Thread.currentThread().interrupt();
@@ -60,12 +66,14 @@ public class ServiceHandler extends Handler {
             return;
         }
         Log.d(TAG, "testDebug: ");
+        counter += 1;
         NotificationHandler.prepareNotification(
                 "199",
                 "TITLE Alive" ,
                 "ALIVE ALIve " + startId,
                 service,
-                notificationManager
+                notificationManager,
+                counter
         );
     }
 
@@ -79,14 +87,19 @@ public class ServiceHandler extends Handler {
      * @param token
      */
     void initWebsocket(String protocol, String port, String token, String domain) {
+        Service service = serviceWeakReference.get();
+        NotificationManager notificationManager = (NotificationManager) service.getSystemService(NOTIFICATION_SERVICE);
+
         webSocketHandler = new WebsocketSecureHandler(protocol, port, token, domain);
         webSocketHandler.initNotificationsWithCallback(messageArray -> {
+            counter += 1;
             NotificationHandler.prepareNotification(
                     messageArray[WebsocketSecureHandler.INDEX_ID],
                     messageArray[WebsocketSecureHandler.INDEX_TITLE],
                     messageArray[WebsocketSecureHandler.INDEX_MESSAGE],
-                    serviceWeakReference.get(),
-                    notificationManager
+                    service,
+                    notificationManager,
+                    NotificationIds.NOTIFICATION_ID + counter
             );
         }, errorMessage -> {
             // TODO if it disconnects try to connect again. Check if dosconnected message is given.
@@ -96,5 +109,12 @@ public class ServiceHandler extends Handler {
 
             serviceWeakReference.get().stopSelf(startId);
         });
+    }
+
+    public void stopWebsocket() {
+        if (webSocketHandler == null) {
+            return;
+        }
+        webSocketHandler.cancelClient();
     }
 }

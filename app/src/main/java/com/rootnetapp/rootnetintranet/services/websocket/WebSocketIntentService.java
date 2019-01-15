@@ -15,7 +15,7 @@ public class WebSocketIntentService extends IntentService {
 
     private WebsocketSecureHandler webSocketHandler;
 
-    private NotificationManager notificationManager;
+    private int counter = 0;
 
     private static final String TAG = "WebsocketIntentService";
 
@@ -30,34 +30,26 @@ public class WebSocketIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-
         String token = intent.getStringExtra(WebsocketSecureHandler.KEY_TOKEN);
         String port = intent.getStringExtra(WebsocketSecureHandler.KEY_PORT);
         String protocol = intent.getStringExtra(WebsocketSecureHandler.KEY_PROTOCOL);
         String domain = intent.getStringExtra(WebsocketSecureHandler.KEY_DOMAIN);
 
-        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-        initWebsocket(protocol, port, token, domain);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         NotificationHandler.createNotificationChannel(notificationManager);
-
-
-        testDebug(this);
-
-        stopSelf();
-
-        testDebug(this);
-
+        initWebsocket(protocol, port, token, domain);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        cancelWebsocket();
         Log.d(TAG, "onDestroy: ");
         Toast.makeText(getApplicationContext(), "Service Destroyed", Toast.LENGTH_LONG).show();
     }
 
     public void testDebug(Service service) {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         try {
             Log.i(TAG, "handleMessage: GOING TO SLEEP 30 SEC");
             Thread.sleep(30 * 1000);
@@ -71,7 +63,18 @@ public class WebSocketIntentService extends IntentService {
         // Stop the service using the startId, so that we don't stop
         // the service in the middle of handling another job
 //            prepareNotification("199", "alive", "aLIVE ALIVE service");
-        NotificationHandler.prepareNotification("199", "TITLE Alive" , "ALIVE ALIve ", service, notificationManager);
+        NotificationHandler.prepareNotification("199", "TITLE Alive" , "ALIVE ALIve ", service, notificationManager, 0);
+    }
+
+    /**
+     * If WebSocketHandler is not null this method will proceed and cancel the WebSocket.
+     */
+    private void cancelWebsocket() {
+        if (webSocketHandler == null) {
+            return;
+        }
+        webSocketHandler.cancelClient();
+        webSocketHandler = null;
     }
 
     /**
@@ -84,14 +87,18 @@ public class WebSocketIntentService extends IntentService {
      * @param token
      */
     void initWebsocket(String protocol, String port, String token, String domain) {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         webSocketHandler = new WebsocketSecureHandler(protocol, port, token, domain);
         webSocketHandler.initNotificationsWithCallback(messageArray -> {
+            counter += 1;
             NotificationHandler.prepareNotification(
                     messageArray[WebsocketSecureHandler.INDEX_ID],
                     messageArray[WebsocketSecureHandler.INDEX_TITLE],
                     messageArray[WebsocketSecureHandler.INDEX_MESSAGE],
                     this,
-                    notificationManager
+                    notificationManager,
+                    counter
+
             );
         }, errorMessage -> {
 

@@ -76,6 +76,7 @@ public class AndroidWebSocket implements ITransport {
         webSocketOptions.setAutoPingInterval(options.getAutoPingInterval());
         webSocketOptions.setAutoPingTimeout(options.getAutoPingTimeout());
         webSocketOptions.setMaxFramePayloadSize(options.getMaxFramePayloadSize());
+        webSocketOptions.setReconnectInterval(10);
 
         mConnection.connect(mUri, getSerializers(), new WebSocketConnectionHandler() {
 

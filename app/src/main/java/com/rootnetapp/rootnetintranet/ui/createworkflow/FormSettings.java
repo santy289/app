@@ -1020,4 +1020,11 @@ public class FormSettings {
 
         return null;
     }
+
+    protected Option findOption(List<Option> options, String stringValue) {
+        for (Option option : options) {
+            if (stringValue.equals(option.getName())) return option;
+        }
+        return null;
+    }
 }

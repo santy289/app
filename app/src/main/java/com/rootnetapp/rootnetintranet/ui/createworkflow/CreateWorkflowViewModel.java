@@ -615,7 +615,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 
                     //check if multiple selection
                     if (field.getFieldConfigObject().getMultiple()) {
-                        MultipleChoiceFormItem multipleChoiceFormItem =  new MultipleChoiceFormItem.Builder()
+                        MultipleChoiceFormItem multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
                                 .setTitle(field.getFieldName())
                                 .setRequired(field.isRequired())
                                 .setTag(field.getId())
@@ -674,7 +674,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 
                     //check if multiple selection
                     if (field.getFieldConfigObject().getMultiple()) {
-                        MultipleChoiceFormItem multipleChoiceFormItem =  new MultipleChoiceFormItem.Builder()
+                        MultipleChoiceFormItem multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
                                 .setTitle(field.getFieldName())
                                 .setRequired(field.isRequired())
                                 .setTag(field.getId())
@@ -732,7 +732,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 
                     //check if multiple selection
                     if (field.getFieldConfigObject().getMultiple()) {
-                        MultipleChoiceFormItem multipleChoiceFormItem =  new MultipleChoiceFormItem.Builder()
+                        MultipleChoiceFormItem multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
                                 .setTitle(field.getFieldName())
                                 .setRequired(field.isRequired())
                                 .setTag(field.getId())
@@ -1213,6 +1213,14 @@ public class CreateWorkflowViewModel extends ViewModel {
                         fillDateFormItem(meta, fieldConfig);
                         break;
 
+                    case FormSettings.TYPE_LIST:
+                        if (fieldConfig.getMultiple()) {
+                            fillMultipleChoiceFormItem(meta);
+                        } else {
+                            fillSingleChoiceFormItem(meta);
+                        }
+                        break;
+
                     /*case FormSettings.VALUE_EMAIL:
                         if (fieldConfig.getMultiple()) {
                             return null;
@@ -1376,6 +1384,36 @@ public class CreateWorkflowViewModel extends ViewModel {
                 .findItem(meta.getWorkflowTypeFieldId());
         Date startDate = Utils.getDateFromString(value, "dd/MM/yyyy");
         startDateItem.setValue(startDate);
+    }
+
+    private void fillSingleChoiceFormItem(Meta meta) {
+        List<String> values = (List<String>) meta.getDisplayValue();
+        if (values == null || values.isEmpty()) return;
+
+        String stringValue = values.get(0);
+
+        SingleChoiceFormItem singleChoiceFormItem = (SingleChoiceFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        Option value = formSettings.findOption(singleChoiceFormItem.getOptions(), stringValue);
+        if (value == null) return;
+
+        singleChoiceFormItem.setValue(value);
+    }
+
+    private void fillMultipleChoiceFormItem(Meta meta) {
+        List<String> values = (List<String>) meta.getDisplayValue();
+        if (values == null || values.isEmpty()) return;
+
+        MultipleChoiceFormItem multipleChoiceFormItem = (MultipleChoiceFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        for (String stringValue : values) {
+            Option value = formSettings
+                    .findOption(multipleChoiceFormItem.getOptions(), stringValue);
+            if (value == null) continue;
+            multipleChoiceFormItem.addValue(value);
+        }
     }
     //endregion
 

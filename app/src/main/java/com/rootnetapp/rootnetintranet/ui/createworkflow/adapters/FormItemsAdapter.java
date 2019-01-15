@@ -276,6 +276,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         holder.getBinding().tvTitle.setText(title);
 
         List<Option> options = new ArrayList<>(item.getOptions());
+
+        //add hint
         String hint = mContext.getString(R.string.no_selection_hint);
         // check whether the hint has already been added
         if (!options.get(0).getName().equals(hint)) {
@@ -283,6 +285,16 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             options.add(0, new Option(0, hint));
         }
 
+        //check for selection
+        int selection = 0;
+        if (item.getValue() != null) {
+            for (int i = 0; i < options.size(); i++) {
+                Option option = options.get(i);
+                if (item.getValue() == option) selection = i + 1; //+1 because the first spinner item is a hint
+            }
+        }
+
+        //create the adapter
         holder.getBinding().spInput.setAdapter(
                 new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
                         options));
@@ -290,7 +302,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         //only creates the listener once.
         if (holder.getBinding().spInput.getOnItemSelectedListener() == null) {
             holder.getBinding().spInput
-                    .setSelection(0, false); //workaround so the listener won't be called on init
+                    .setSelection(selection, false); //workaround so the listener won't be called on init
             holder.getBinding().spInput.setOnItemSelectedListener(
                     new AdapterView.OnItemSelectedListener() {
                         @Override
@@ -586,8 +598,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 new LinearLayoutManager(mContext, RecyclerView.HORIZONTAL, false));
         holder.getBinding().rvSelectedItems.setAdapter(selectionsAdapter);
 
-        //creates the options adapter
         List<Option> options = new ArrayList<>(item.getOptions());
+
+        //adds a hint to the spinner
         String hint = mContext.getString(R.string.multiple_selection_hint);
         // check whether the hint has already been added
         if (!options.get(0).getName().equals(hint)) {
@@ -595,6 +608,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             options.add(0, new Option(0, hint));
         }
 
+        //creates the options adapter
         holder.getBinding().spInput.setAdapter(
                 new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
                         options));

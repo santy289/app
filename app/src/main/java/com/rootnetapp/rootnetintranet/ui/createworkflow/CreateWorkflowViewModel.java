@@ -1208,15 +1208,15 @@ public class CreateWorkflowViewModel extends ViewModel {
                 switch (typeInfo.getType()) {
                     case FormSettings.TYPE_TEXT:
                     case FormSettings.TYPE_TEXT_AREA:
-                        fillTextInputFormItem(meta, fieldConfig);
+                        fillTextInputFormItem(meta);
                         break;
 
                     case FormSettings.TYPE_CHECKBOX:
-                        fillBooleanFormItem(meta, fieldConfig);
+                        fillBooleanFormItem(meta);
                         break;
 
                     case FormSettings.TYPE_DATE:
-                        fillDateFormItem(meta, fieldConfig);
+                        fillDateFormItem(meta);
                         break;
 
                     case FormSettings.TYPE_LIST:
@@ -1354,11 +1354,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         mSetFormItemListLiveData.setValue(formSettings.getFormItems());
     }
 
-    private void fillTextInputFormItem(Meta meta, FieldConfig fieldConfig) {
-        if (fieldConfig.getMultiple()) {
-            return;
-        }
-
+    private void fillTextInputFormItem(Meta meta) {
         String value = String.valueOf(meta.getDisplayValue());
 
         TextInputFormItem textInputFormItem = (TextInputFormItem) formSettings
@@ -1367,11 +1363,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         textInputFormItem.setValue(value);
     }
 
-    private void fillBooleanFormItem(Meta meta, FieldConfig fieldConfig) {
-        if (fieldConfig.getMultiple()) {
-            return;
-        }
-
+    private void fillBooleanFormItem(Meta meta) {
         String value = meta.getValue();
 
         BooleanFormItem booleanFormItem = (BooleanFormItem) formSettings
@@ -1379,11 +1371,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         booleanFormItem.setValue(Boolean.valueOf(value));
     }
 
-    private void fillDateFormItem(Meta meta, FieldConfig fieldConfig) {
-        if (fieldConfig.getMultiple()) {
-            return;
-        }
-
+    private void fillDateFormItem(Meta meta) {
         String value = String.valueOf(meta.getDisplayValue()); // now returns "10/25/2018"
 
         DateFormItem startDateItem = (DateFormItem) formSettings

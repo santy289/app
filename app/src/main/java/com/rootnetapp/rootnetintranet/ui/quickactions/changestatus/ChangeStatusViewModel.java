@@ -46,7 +46,7 @@ public class ChangeStatusViewModel extends ViewModel {
             domain = jsonAdapter.fromJson(json);
 
             String url = "https://" + domain.getClient()
-                    .getDomain() + "/Intranet/workflow/" + workflow.getWorkflowId();
+                    .getDomain() + "/Intranet/workflow/tree/" + workflow.getWorkflowId();
 
             Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", token);

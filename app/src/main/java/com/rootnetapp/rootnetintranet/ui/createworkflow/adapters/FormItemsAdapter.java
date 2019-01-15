@@ -185,7 +185,12 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private void populateTextInputView(TextInputViewHolder holder, int position) {
         TextInputFormItem item = (TextInputFormItem) getItem(position);
 
-        holder.getBinding().tvTitle.setText(item.getTitle());
+        //set title
+        String title = item.getTitle();
+        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        holder.getBinding().tvTitle.setText(title);
+
+        //set value
         holder.getBinding().etInput.setText(item.getValue());
 
         setTextInputParams(holder.getBinding().etInput, item.getInputType());
@@ -385,7 +390,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private void populateBooleanView(BooleanViewHolder holder, int position) {
         BooleanFormItem item = (BooleanFormItem) getItem(position);
 
-        holder.getBinding().switchInput.setText(item.getTitle());
+        String title = item.getTitle();
+        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        holder.getBinding().switchInput.setText(title);
+
         holder.getBinding().switchInput.setChecked(item.getValue());
         holder.getBinding().switchInput.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> item.setValue(isChecked));
@@ -413,6 +421,11 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private void populateDateView(DateViewHolder holder, int position) {
         DateFormItem item = (DateFormItem) getItem(position);
 
+        String title = item.getTitle();
+        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        final String finalTitle = title;
+        holder.getBinding().tvTitle.setText(finalTitle);
+
         holder.getBinding().tvSelectedDate.setOnClickListener(v -> {
             // the style mdtp_ActionButton.Text must be overridden in styles.xml for MaterialComponents
             DatePickerDialog dpd = DatePickerDialog.newInstance(
@@ -426,7 +439,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             );
 
             //region Data
-            dpd.setTitle(item.getTitle());
+            dpd.setTitle(finalTitle);
 
             Calendar calendar = Calendar.getInstance();
             if (item.getMinDate() != null) {
@@ -447,7 +460,6 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             dpd.show(mFragmentManager, String.valueOf(item.getTag()));
         });
 
-        holder.getBinding().tvTitle.setText(item.getTitle());
         if (item.getValue() == null) {
             holder.getBinding().tvSelectedDate.setText(null);
         } else {

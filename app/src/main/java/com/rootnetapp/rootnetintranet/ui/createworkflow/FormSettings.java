@@ -13,10 +13,12 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PendingFileUpload;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCountryCodeAndValue;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostCurrency;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductJsonValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
@@ -34,7 +36,6 @@ import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import androidx.collection.ArrayMap;
@@ -190,10 +191,8 @@ public class FormSettings {
         return false;
     }
 
-    public int countryCurrency;
-
-    public boolean hasValidCountryCurrency() {
-        if (countryCurrency > 0) {
+    protected boolean hasValidCountryCurrency(int currencyCode) {
+        if (currencyCode > 0) {
             return true;
         }
         return false;
@@ -212,22 +211,6 @@ public class FormSettings {
                 continue;
             }
             countryCode = codeMeta.id;
-        }
-    }
-
-    public void setCurrencyType(String fieldValue, FieldData fieldData) {
-        if (TextUtils.isEmpty(fieldValue)) {
-            return;
-        }
-
-        List<ListFieldItemMeta> codeList = fieldData.list;
-        ListFieldItemMeta codeMeta;
-        for (int i = 0; i < codeList.size(); i++) {
-            codeMeta = codeList.get(i);
-            if (!codeMeta.name.equals(fieldValue)) {
-                continue;
-            }
-            countryCurrency = codeMeta.id;
         }
     }
 
@@ -310,8 +293,10 @@ public class FormSettings {
                     metaData.setValue(value);
                     break;
                 }
-                if (typeInfo.getType().equals(TYPE_CURRENCY)) {
-                    String json = getJsonForCurrencyType(value);
+
+                if (typeInfo.getType()
+                        .equals(TYPE_CURRENCY) && formItem instanceof CurrencyFormItem) {
+                    String json = getJsonForCurrencyType((CurrencyFormItem) formItem);
                     metaData.setValue(json);
                     break;
                 }
@@ -430,19 +415,21 @@ public class FormSettings {
         return jsonString;
     }
 
-    private String getJsonForCurrencyType(String currencyNumber) {
-        if (TextUtils.isEmpty(currencyNumber) || !hasValidCountryCurrency()) {
-            return "";
-        }
+    private String getJsonForCurrencyType(CurrencyFormItem formItem) {
+        Double currencyValue = formItem.getValue();
+        if (currencyValue == null || currencyValue == 0) return "";
 
-        PostCountryCodeAndValue postCountryCodeAndValue = new PostCountryCodeAndValue();
-        postCountryCodeAndValue.countryId = countryCurrency;
-        postCountryCodeAndValue.value = Integer.valueOf(currencyNumber);
+        Option selectedOption = formItem.getSelectedOption();
+        if (selectedOption == null) return "";
 
-        JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi
-                .adapter(PostCountryCodeAndValue.class);
-        String jsonString = jsonAdapter.toJson(postCountryCodeAndValue);
-        return jsonString;
+        int currencyCode = selectedOption.getId();
+
+        PostCurrency postCurrency = new PostCurrency();
+        postCurrency.countryId = currencyCode;
+        postCurrency.value = currencyValue;
+
+        JsonAdapter<PostCurrency> jsonAdapter = moshi.adapter(PostCurrency.class);
+        return jsonAdapter.toJson(postCurrency);
     }
 
     private String getJsonForPhoneType(String phoneNumber) {
@@ -500,6 +487,7 @@ public class FormSettings {
 
     /**
      * Formats and creates the meta data value for the {@link MultipleChoiceFormItem}s.
+     *
      * @param formItem item to format
      * @param metaData resulting meta data
      */

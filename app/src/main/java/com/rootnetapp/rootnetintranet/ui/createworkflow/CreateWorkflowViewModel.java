@@ -12,6 +12,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
+import com.rootnetapp.rootnetintranet.models.createworkflow.CurrencyFieldData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePostDetail;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
@@ -20,6 +21,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.PendingFileUpload;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
@@ -368,7 +370,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         if (typeInfo != null
                 && typeInfo.getType().equals(FormSettings.TYPE_CURRENCY)
                 && !TextUtils.isEmpty(value)
-                && !formSettings.hasValidCountryCurrency()
+//                && !formSettings.hasValidCountryCurrency()
                 ) {
             dialogMessage = new DialogMessage();
             dialogMessage.message = R.string.fill_currency_code;
@@ -575,6 +577,9 @@ public class CreateWorkflowViewModel extends ViewModel {
                 } else {
                     createCustomListFormItem(field);
                 }
+                break;
+            case FormSettings.TYPE_CURRENCY:
+                createCurrencyFormItem(field);
                 break;
             /*
             case FormSettings.TYPE_PHONE:
@@ -1049,6 +1054,49 @@ public class CreateWorkflowViewModel extends ViewModel {
                 .build();
 
         formSettings.getFormItems().add(item);
+    }
+
+    /**
+     * Creates a custom list form item. Performs a request to the repo to retrieve the options and
+     * then send the form item to the UI.
+     */
+    private void createCurrencyFormItem(FormFieldsByWorkflowType field) {
+        Disposable disposable = mRepository
+                .getCurrencyCodes()
+                .subscribe(currencyList -> {
+                    showLoading.setValue(false);
+
+                    if (currencyList == null || currencyList.size() < 1) {
+                        return;
+                    }
+
+                    List<Option> options = new ArrayList<>();
+                    for (int i = 0; i < currencyList.size(); i++) {
+                        CurrencyFieldData currencyData = currencyList.get(i);
+                        String name = currencyData.description + " - " + currencyData.currency;
+                        Integer id = currencyData.countryId;
+
+                        Option option = new Option(id, name);
+                        options.add(option);
+                    }
+
+                    CurrencyFormItem currencyFormItem = new CurrencyFormItem.Builder()
+                            .setTitle(field.getFieldName())
+                            .setRequired(field.isRequired())
+                            .setTag(field.getId())
+                            .setEscaped(escape(field.getFieldConfigObject()))
+                            .setOptions(options)
+                            .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                            .setMachineName(field.getFieldConfigObject().getMachineName())
+                            .build();
+
+                    mAddFormItemLiveData.setValue(currencyFormItem);
+                }, throwable -> {
+                    showLoading.setValue(false);
+                    Log.e(TAG, "handleCurrency: problem getting currency list " + throwable.getMessage());
+                });
+
+        mDisposables.add(disposable);
     }
     //endregion
 

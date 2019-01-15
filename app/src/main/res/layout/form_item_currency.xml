@@ -38,14 +38,14 @@
             android:layout_height="match_parent"
             android:spinnerMode="dialog"
             app:layout_constraintEnd_toStartOf="@+id/et_currency"
-            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintHorizontal_weight="2"
             app:layout_constraintStart_toStartOf="@id/tv_title"
             app:layout_constraintTop_toBottomOf="@id/tv_title" />
 
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/et_currency"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_marginStart="8dp"
             android:background="@drawable/spinner_bg"
             android:hint="@string/amount"
@@ -57,7 +57,7 @@
             android:textSize="14sp"
             app:layout_constraintBottom_toBottomOf="@id/sp_currency"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_weight="2"
+            app:layout_constraintHorizontal_weight="1"
             app:layout_constraintStart_toEndOf="@id/sp_currency"
             app:layout_constraintTop_toTopOf="@id/sp_currency" />
 

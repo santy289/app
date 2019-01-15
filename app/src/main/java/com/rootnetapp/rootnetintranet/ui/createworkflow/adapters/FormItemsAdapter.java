@@ -458,13 +458,68 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     private void populateCurrencyView(CurrencyViewHolder holder, int position) {
-        //todo implement
         CurrencyFormItem item = (CurrencyFormItem) getItem(position);
 
-        holder.getBinding().tvTitle.setText(item.getTitle());
+        String title = item.getTitle();
+        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        holder.getBinding().tvTitle.setText(title);
+
+        //currency value
+        holder.getBinding().etCurrency
+                .setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+
+        //currency options
+        List<Option> options = new ArrayList<>(item.getOptions());
+        String hint = mContext.getString(R.string.no_selection_hint);
+        // check whether the hint has already been added
+        if (!options.get(0).getName().equals(hint)) {
+            // add hint as first item
+            options.add(0, new Option(0, hint));
+        }
+
+        //currency adapter
         holder.getBinding().spCurrency.setAdapter(
                 new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
-                        item.getOptions()));
+                        options));
+
+        //only creates the listener once.
+        if (holder.getBinding().spCurrency.getOnItemSelectedListener() == null) {
+            holder.getBinding().spCurrency
+                    .setSelection(0, false); //workaround so the listener won't be called on init
+            holder.getBinding().spCurrency.setOnItemSelectedListener(
+                    new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position,
+                                                   long id) {
+
+                            // this prevents the listener to be triggered by setSelection
+                            Object tag = holder.getBinding().spCurrency.getTag();
+                            if (tag == null || (int) tag != position) {
+
+                                // the user has selected the No Selection option
+                                if (position == 0) {
+                                    item.setSelectedOption(null);
+                                    return;
+                                }
+
+                                // the user has selected a valid option
+                                int index = position - 1; // because of the No Selection option
+                                item.setSelectedOption(item.getOptions().get(index));
+                            }
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+
+                        }
+                    });
+        } else {
+            // this prevents the listener to be triggered by setSelection
+            int index = item.getOptions().indexOf(item.getSelectedOption());
+            index++; // because of the No Selection option
+            holder.getBinding().spCurrency.setTag(index);
+            holder.getBinding().spCurrency.setSelection(index);
+        }
 
         // verify visibility
         if (!item.isVisible()) {
@@ -472,6 +527,29 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             return;
         } else {
             holder.show();
+        }
+
+        // verify enabled param
+        if (!item.isEnabled()) {
+            holder.getBinding().viewSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg_disabled);
+            holder.getBinding().spCurrency.setEnabled(false);
+            return;
+        } else {
+            holder.getBinding().viewSpinnerBackground.setBackgroundResource(R.drawable.spinner_bg);
+            holder.getBinding().spCurrency.setEnabled(true);
+        }
+
+        // verify validation
+        if (hasToEvaluateValid && !item.isValid()) {
+            holder.getBinding().viewSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg_error);
+            holder.getBinding().etCurrency
+                    .setBackgroundResource(R.drawable.spinner_bg_error);
+        } else {
+            holder.getBinding().viewSpinnerBackground.setBackgroundResource(R.drawable.spinner_bg);
+            holder.getBinding().etCurrency
+                    .setBackgroundResource(R.drawable.spinner_bg);
         }
     }
 
@@ -605,7 +683,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                     continue;
 
                 case FormItemViewType.CURRENCY:
-//                    populateCurrencyView((CurrencyViewHolder) holder, i);
+                    retrieveValueForCurrencyView(((CurrencyViewHolder) holder),
+                            (CurrencyFormItem) item);
                     continue;
 
                 default:
@@ -638,6 +717,20 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private void retrieveValueForBooleanView(BooleanViewHolder holder,
                                              BooleanFormItem item) {
         item.setValue(holder.getBinding().switchInput.isChecked());
+    }
+
+    /**
+     * Saves the current selected value from the {@link CurrencyFormItem} view into the class
+     * object.
+     *
+     * @param holder the view holder.
+     * @param item   desired item.
+     */
+    private void retrieveValueForCurrencyView(CurrencyViewHolder holder,
+                                              CurrencyFormItem item) {
+        Editable text = holder.getBinding().etCurrency.getText();
+        Double value = text == null || text.length() == 0 ? null : Double.valueOf(text.toString());
+        item.setValue(value);
     }
     //endregion
 }

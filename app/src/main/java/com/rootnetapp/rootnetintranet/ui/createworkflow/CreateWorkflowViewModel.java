@@ -892,15 +892,16 @@ public class CreateWorkflowViewModel extends ViewModel {
                     showLoading.setValue(false);
 
                     List<ListItem> list = listsResponse.getItems();
+                    if (list == null || list.isEmpty()) return;
 
-                    if (list == null || list.size() < 1) {
-                        return;
-                    }
+                    List<ListItem> listChildren = list.get(0).getChildren();
+
+                    if (listChildren == null || listChildren.isEmpty()) return;
 
                     List<Option> options = new ArrayList<>();
-                    for (int i = 0; i < list.size(); i++) {
-                        String name = list.get(i).getName();
-                        Integer id = list.get(i).getId();
+                    for (int i = 0; i < listChildren.size(); i++) {
+                        String name = listChildren.get(i).getName();
+                        Integer id = listChildren.get(i).getId();
 
                         Option option = new Option(id, name);
                         options.add(option);

@@ -217,6 +217,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.show();
         }
 
+        // verify required indicator
+        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+
         // verify enabled param
         if (!item.isEnabled()) {
             holder.getBinding().etInput.setBackgroundResource(R.drawable.spinner_bg_disabled);
@@ -366,6 +369,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.getBinding().spInput.setSelection(index);
         }
 
+        // verify required indicator
+        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+
         // verify visibility
         if (!item.isVisible()) {
             holder.hide();
@@ -411,6 +417,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         holder.getBinding().switchInput.setChecked(item.getValue());
         holder.getBinding().switchInput.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> item.setValue(isChecked));
+
+        // verify required indicator
+        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
 
         // verify visibility
         if (!item.isVisible()) {
@@ -480,6 +489,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.getBinding().tvSelectedDate
                     .setText(Utils.getFormattedDate(item.getValue(), item.getDateFormat()));
         }
+
+        // verify required indicator
+        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
 
         // verify visibility
         if (!item.isVisible()) {
@@ -588,6 +600,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.getBinding().spCurrency.setSelection(index);
         }
 
+        // verify required indicator
+        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+
         // verify visibility
         if (!item.isVisible()) {
             holder.hide();
@@ -685,6 +700,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                         }
                     });
         }
+
+        // verify required indicator
+        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
 
         // verify visibility
         if (!item.isVisible()) {
@@ -793,6 +811,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.getBinding().spCountry.setSelection(index);
         }
 
+        // verify required indicator
+        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+
         // verify visibility
         if (!item.isVisible()) {
             holder.hide();
@@ -868,6 +889,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             if (fileId == 0) return; //file was not uploaded yet.
             mFragmentInterface.downloadFile(fileId);
         });
+
+        // verify required indicator
+        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
 
         //verify visibility
         if (!item.isVisible()) {

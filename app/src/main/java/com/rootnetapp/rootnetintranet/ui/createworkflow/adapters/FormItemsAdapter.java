@@ -927,6 +927,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                             (PhoneFormItem) item);
                     continue;
 
+                case FormItemViewType.FILE:
+                    //the value is saved when the user selects the file from the FileChooser intent
+                    continue;
+
                 default:
                     throw new IllegalStateException("Invalid ViewType");
             }

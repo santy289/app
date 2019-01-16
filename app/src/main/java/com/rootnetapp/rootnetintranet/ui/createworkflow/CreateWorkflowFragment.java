@@ -7,14 +7,11 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.obsez.android.lib.filechooser.ChooserDialog;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -27,7 +24,6 @@ import com.rootnetapp.rootnetintranet.ui.createworkflow.adapters.FormItemsAdapte
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.ValidateFormDialog;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -121,7 +117,6 @@ public class CreateWorkflowFragment extends Fragment {
     }
 
     private void subscribe() {
-
         viewModel.getObservableToastMessage().observe(this, this::showToastMessage);
         viewModel.getObservableAddWorkflowTypeItem().observe(this, this::addWorkflowTypeItem);
         viewModel.getObservableAddFormItem().observe(this, this::addItemToForm);
@@ -131,11 +126,6 @@ public class CreateWorkflowFragment extends Fragment {
         viewModel.getObservableShowDialogMessage().observe(this, this::showDialog);
         viewModel.getObservableGoBack().observe(this, back -> goBack());
         viewModel.getObservableFileFormItem().observe(this, this::updateFormItemUi);
-
-        viewModel.showUploadButton.observe(this, this::setUploadMenu);
-
-        viewModel.chooseFile.observe(this, choose -> chooseFile());
-
     }
 
     private void setupSubmitButton() {
@@ -161,43 +151,6 @@ public class CreateWorkflowFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         viewModel.onCleared();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_upload:
-                viewModel.showUploadFilePicker();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.workflow_create_menu, menu);
-        uploadMenu = menu.findItem(R.id.menu_upload);
-        uploadMenu.setVisible(false);
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    private void setUploadMenu(Boolean visible) {
-        uploadMenu.setVisible(visible);
-    }
-
-    private void chooseFile() {
-        new ChooserDialog().with(getContext())
-                .withStartFile(FILE_CHOOSER_DIR)
-                .withChosenListener(new ChooserDialog.Result() {
-                    @Override
-                    public void onChoosePath(String path, File pathFile) {
-                        viewModel.selectUploadFile(path, pathFile);
-                        Toast.makeText(getContext(), "FILE: " + path, Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .build()
-                .show();
     }
 
     @UiThread

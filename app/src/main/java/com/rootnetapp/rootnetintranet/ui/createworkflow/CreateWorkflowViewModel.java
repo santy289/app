@@ -22,8 +22,6 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.CurrencyFieldData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePostDetail;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
-import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
-import com.rootnetapp.rootnetintranet.models.createworkflow.PendingFileUpload;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PhoneFieldData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCurrency;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostPhone;
@@ -109,10 +107,6 @@ public class CreateWorkflowViewModel extends ViewModel {
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
-    protected MutableLiveData<FieldData> setFileUploadField;
-    protected MutableLiveData<Boolean> showUploadButton;
-    protected MutableLiveData<Boolean> chooseFile;
-
     private CreateWorkflowRepository mRepository;
 
     private static final String TAG = "CreateViewModel";
@@ -124,6 +118,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     private WorkflowDb mWorkflow;
     private final Moshi moshi;
     private FileFormItem mCurrentRequestingFileFormItem;
+    private List<FileFormItem> mFilesToUpload;
 
     protected static final int TAG_WORKFLOW_TYPE = 80;
 
@@ -132,8 +127,6 @@ public class CreateWorkflowViewModel extends ViewModel {
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.mRepository = createWorkflowRepository;
         goBack = new MutableLiveData<>();
-        showUploadButton = new MutableLiveData<>();
-        chooseFile = new MutableLiveData<>();
         moshi = new Moshi.Builder().build();
     }
 
@@ -180,72 +173,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         return workflowMeta;
     }
 
-    protected void showUploadFilePicker() {
-        chooseFile.setValue(true);
-    }
-
-    protected void selectUploadFile(String path, File file) {
-        if (!Utils.checkFileSize(UPLOAD_FILE_SIZE_LIMIT, file)) {
-            DialogMessage message = new DialogMessage();
-            message.message = R.string.file_too_big;
-            message.title = R.string.warning;
-            showDialogMessage.setValue(message);
-            return;
-        }
-
-        PendingFileUpload pendingFileUpload = formSettings.getPendingFileUpload();
-        pendingFileUpload.fileName = path.substring(path.lastIndexOf("/") + 1);
-        pendingFileUpload.path = path;
-        ListFieldItemMeta field = new ListFieldItemMeta(0, pendingFileUpload.fileName);
-        ArrayList<ListFieldItemMeta> items = new ArrayList<>();
-        items.add(field);
-        pendingFileUpload.fieldData.list = items;
-        pendingFileUpload.file = file;
-
-        setFileUploadField.setValue(pendingFileUpload.fieldData);
-
-        //todo check
-
-//        formSettings.addFieldDataItem(pendingFileUpload.fieldData);
-    }
-
-    private void postFileRequest(String path, String encodedFileString) {
-        FilePostDetail filePostDetail = new FilePostDetail();
-        filePostDetail.setFile(encodedFileString);
-        String extension = path.substring(path.lastIndexOf("."));
-        String fileName = path.substring(path.lastIndexOf("/") + 1);
-        filePostDetail.setType(extension);
-        filePostDetail.setName(fileName);
-        filePostDetail.setFile(encodedFileString);
-
-        FilePost filePost = new FilePost();
-        filePost.setFile(filePostDetail);
-
-        showLoading.setValue(true);
-        Disposable disposable = mRepository.uploadFile(mToken, filePost)
-                .subscribe(fileUploadResponse -> {
-                    showLoading.setValue(false);
-                    successUpload(fileUploadResponse);
-
-                }, throwable -> {
-                    showLoading.setValue(false);
-                    Log.d(TAG, "postFileRequest: file upload failed: " + throwable.getMessage());
-                });
-
-        mDisposables.add(disposable);
-    }
-
-    private void successUpload(FileUploadResponse fileUploadResponse) {
-        //todo implement
-        /*showLoading.setValue(true);
-        ArrayList<FieldData> fieldItems = formSettings.getFormItemsToPost();
-        ArrayMap<String, Integer> baseInfo = formSettings.getBaseMachineNamesAndIds();
-        PendingFileUpload pendingFileUpload = formSettings.getPendingFileUpload();
-        int id = fileUploadResponse.getFileId();
-        pendingFileUpload.fileId = id;
-        startSendingWorkflow(baseInfo, formSettings.getFormBuilder(), fieldItems);*/
-    }
-
     private void postWorkflow() {
         List<BaseFormItem> formItemsForPost = formSettings.getFormItemsToPost();
         ArrayMap<String, Integer> baseInfo = formSettings.getBaseMachineNamesAndIds();
@@ -261,32 +188,8 @@ public class CreateWorkflowViewModel extends ViewModel {
 
         showLoading.setValue(true);
 
-        // TODO check if we have a file to upload first and then continue with the rest.
-        if (formSettings.getPendingFileUpload() == null || formSettings
-                .getPendingFileUpload().file == null) {
-            startSendingWorkflow(baseInfo, formItemsForPost);
-            return;
-        }
-
-        //for using later during actual post.
-        //todo implement
-       /* formSettings.setFormBuilder(formBuilder);
-        PendingFileUpload pendingFileUpload = formSettings.getPendingFileUpload();
-
-        Disposable disposable = Observable.fromCallable(() -> {
-            String fileString = Utils.encodeFileToBase64Binary(pendingFileUpload.file);
-            return fileString;
-        }).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(encodedFileString -> {
-                    showLoading.setValue(false);
-                    postFileRequest(pendingFileUpload.path, encodedFileString);
-                }, throwable -> {
-                    showLoading.setValue(false);
-                    Log.d(TAG, "uploadFile: Error while encoding to Base64");
-                });
-        mDisposables.add(disposable);*/
-
+        //check if we have a file to upload first and then continue with the rest.
+        uploadAllFiles();
     }
 
     private void startSendingWorkflow(ArrayMap<String, Integer> baseInfo,
@@ -435,7 +338,6 @@ public class CreateWorkflowViewModel extends ViewModel {
      * Removes all of the current form items and sends the data to the UI to remove them aswell.
      */
     protected void clearForm() {
-        showUploadButton.setValue(false);
         formSettings.clearFormItems();
         mSetFormItemListLiveData.setValue(formSettings.getFormItems());
     }
@@ -867,7 +769,8 @@ public class CreateWorkflowViewModel extends ViewModel {
                     mAddFormItemLiveData.setValue((SingleChoiceFormItem) singleChoiceFormItem);
                 }, throwable -> {
                     Log.d(TAG,
-                            "createSystemUsersFormItem: can't get users: " + throwable.getMessage());
+                            "createSystemUsersFormItem: can't get users: " + throwable
+                                    .getMessage());
                 });
         mDisposables.add(disposable);
     }
@@ -1558,6 +1461,90 @@ public class CreateWorkflowViewModel extends ViewModel {
                 break;
         }
     }
+
+    /**
+     * Begins to upload every {@link FileFormItem} to the server. This will start a series of
+     * methods that will upload the files one by one until the queue is empty. After everything was
+     * uploaded or the queue is empty, it will begin to send the workflow.
+     */
+    private void uploadAllFiles() {
+        mFilesToUpload = new ArrayList<>();
+        for (BaseFormItem item : formSettings.getFormItems()) {
+            if (item instanceof FileFormItem && ((FileFormItem) item).getValue() != null) {
+                mFilesToUpload.add((FileFormItem) item);
+            }
+        }
+
+        boolean isUploading = uploadFirstFile();
+        if (!isUploading) {
+            List<BaseFormItem> items = formSettings.getFormItemsToPost();
+            ArrayMap<String, Integer> baseInfo = formSettings.getBaseMachineNamesAndIds();
+
+            startSendingWorkflow(baseInfo, items);
+        }
+    }
+
+    /**
+     * Uploads the first index of {@link #mFilesToUpload} array unless it's empty.
+     *
+     * @return false - empty array, no file will be uploaded; true - a file will be uploaded.
+     */
+    private boolean uploadFirstFile() {
+        if (mFilesToUpload.isEmpty()) return false;
+
+        FileFormItem fileToUpload = mFilesToUpload.get(0);
+        setCurrentRequestingFileFormItem(fileToUpload);
+        postFileRequest(fileToUpload);
+        mFilesToUpload.remove(fileToUpload);
+
+        return true;
+    }
+
+    /**
+     * Sends a request to the server to upload the file.
+     *
+     * @param fileFormItem form item containing the file to be uploaded.
+     */
+    private void postFileRequest(FileFormItem fileFormItem) {
+        FilePostDetail filePostDetail = new FilePostDetail();
+        filePostDetail.setFile(fileFormItem.getValue());
+        String path = fileFormItem.getFilePath();
+        String extension = path.substring(path.lastIndexOf("."));
+        String fileName = path.substring(path.lastIndexOf("/") + 1);
+        filePostDetail.setType(extension);
+        filePostDetail.setName(fileName);
+
+        FilePost filePost = new FilePost();
+        filePost.setFile(filePostDetail);
+
+        Disposable disposable = mRepository.uploadFile(mToken, filePost)
+                .subscribe(this::successUpload, throwable -> {
+                    showLoading.setValue(false);
+                    Log.d(TAG, "postFileRequest: file upload failed: " + throwable.getMessage());
+                });
+
+        mDisposables.add(disposable);
+    }
+
+    /**
+     * Called after a successful file upload, it will try to upload the next queued file. If there's
+     * no remaining files to be uploaded, this method will call {@link
+     * #startSendingWorkflow(ArrayMap, List)} to send the workflow.
+     *
+     * @param fileUploadResponse WS response
+     */
+    private void successUpload(FileUploadResponse fileUploadResponse) {
+        List<BaseFormItem> items = formSettings.getFormItemsToPost();
+        ArrayMap<String, Integer> baseInfo = formSettings.getBaseMachineNamesAndIds();
+
+        FileFormItem formItem = getCurrentRequestingFileFormItem();
+        formItem.setFileId(fileUploadResponse.getFileId());
+
+        boolean isUploading = uploadFirstFile();
+        if (!isUploading) {
+            startSendingWorkflow(baseInfo, items);
+        }
+    }
     //endregion
 
     /**
@@ -1589,39 +1576,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         mValidationUiLiveData.setValue(formSettings.findFirstInvalidItem());
 
         return isValid;
-    }
-
-    private void handleFile(FormFieldsByWorkflowType field) {
-        showUploadButton.setValue(true);
-
-        FieldConfig fieldConfig = field.getFieldConfigObject();
-//        int listId = fieldConfig.getTypeInfo().getId();
-        int customFieldId = field.getId();
-        String customLabel = field.getFieldName();
-        int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
-
-        ListField listField = new ListField();
-//        listField.listId = listId;
-        listField.customFieldId = customFieldId;
-        listField.customLabel = customLabel;
-        listField.associatedWorkflowTypeId = associatedWorkflowTypeId;
-        listField.isMultipleSelection = false;
-
-        FieldData fieldData = new FieldData();
-        fieldData.label = customLabel;
-        fieldData.isMultipleSelection = false;
-        fieldData.tag = customFieldId;
-        fieldData.escape = false;
-
-        PendingFileUpload pendingFileUpload = new PendingFileUpload();
-        pendingFileUpload.fieldData = fieldData;
-
-        formSettings.setPendingFileUpload(pendingFileUpload);
-
-//        setListWithData.setValue(fieldData);
-//        buildForm.setValue(true);
-//        showLoading.setValue(false);
-
     }
 
     public void checkForContent(FormBuilder formBuilder) {

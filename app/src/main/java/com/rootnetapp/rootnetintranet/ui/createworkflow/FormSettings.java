@@ -11,7 +11,6 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.Form
 import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
-import com.rootnetapp.rootnetintranet.models.createworkflow.PendingFileUpload;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCountryCodeAndValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCurrency;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostPhone;
@@ -20,6 +19,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductJsonValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
@@ -56,9 +56,6 @@ public class FormSettings {
     private ArrayList<FormCreateProfile> profiles;
     private List<FormFieldsByWorkflowType> fields; // Full info of all fields.
     private Moshi moshi;
-    private String uploadFileName;
-    private String uploadFileExtension;
-    private PendingFileUpload pendingFileUpload;
     private FormBuilder formBuilder;
     private List<BaseFormItem> formItems; //new
 
@@ -116,36 +113,12 @@ public class FormSettings {
         return names;
     }
 
-    public String getUploadFileName() {
-        return uploadFileName;
-    }
-
     public FormBuilder getFormBuilder() {
         return formBuilder;
     }
 
     public void setFormBuilder(FormBuilder formBuilder) {
         this.formBuilder = formBuilder;
-    }
-
-    public void setUploadFileName(String uploadFileName) {
-        this.uploadFileName = uploadFileName;
-    }
-
-    public String getUploadFileExtension() {
-        return uploadFileExtension;
-    }
-
-    public void setUploadFileExtension(String uploadFileExtension) {
-        this.uploadFileExtension = uploadFileExtension;
-    }
-
-    protected PendingFileUpload getPendingFileUpload() {
-        return pendingFileUpload;
-    }
-
-    protected void setPendingFileUpload(PendingFileUpload pendingFileUpload) {
-        this.pendingFileUpload = pendingFileUpload;
     }
 
     public void setName(String name) {
@@ -218,20 +191,6 @@ public class FormSettings {
         format(metaData, typeInfo, formItem);
     }
 
-    public WorkflowMetas formatMetaData(WorkflowMetas metaData, BaseFormItem formItem,
-                                        FieldConfig fieldConfig) {
-        TypeInfo typeInfo = fieldConfig.getTypeInfo();
-        if (typeInfo == null) {
-            return metaData;
-        }
-        //todo check
-        /*boolean rememberRealValue = fieldData.isMultipleSelection;
-        fieldData.isMultipleSelection = true;*/
-        format(metaData, typeInfo, formItem);
-//        fieldData.isMultipleSelection = rememberRealValue;
-        return metaData;
-    }
-
     private void format(WorkflowMetas metaData, TypeInfo typeInfo, BaseFormItem formItem) {
         String value = metaData.getUnformattedValue();
         if (TextUtils.isEmpty(value)) {
@@ -263,8 +222,8 @@ public class FormSettings {
                     break;
                 }
 
-                if (typeInfo.getType().equals(TYPE_FILE)) {
-                    String json = getFileMetaJson();
+                if (typeInfo.getType().equals(TYPE_FILE) && formItem instanceof FileFormItem) {
+                    String json = getFileMetaJson((FileFormItem) formItem);
                     metaData.setValue(json);
                     break;
                 }
@@ -326,7 +285,8 @@ public class FormSettings {
                 || typeInfo.getType().equals(TYPE_SYSTEM_USERS)
                 || typeInfo.getType().equals(TYPE_PHONE)
                 || typeInfo.getType().equals(TYPE_CURRENCY)
-                || typeInfo.getType().equals(TYPE_PRODUCT)) {
+                || typeInfo.getType().equals(TYPE_PRODUCT)
+                || typeInfo.getType().equals(TYPE_FILE)) {
             return;
         }
 
@@ -388,19 +348,18 @@ public class FormSettings {
         return jsonAdapter.toJson(productJsonValueList);
     }
 
-    private String getFileMetaJson() {
-        String name = pendingFileUpload.fileName;
-        int id = pendingFileUpload.fileId;
+    private String getFileMetaJson(FileFormItem formItem) {
+        String name = formItem.getFileName();
+        int id = formItem.getFileId();
         if (id == 0 || TextUtils.isEmpty(name)) {
             return "";
         }
 
         FileMetaData fileMetaData = new FileMetaData();
         fileMetaData.name = name;
-        fileMetaData.value = pendingFileUpload.fileId;
+        fileMetaData.value = id;
         JsonAdapter<FileMetaData> jsonAdapter = moshi.adapter(FileMetaData.class);
-        String jsonString = jsonAdapter.toJson(fileMetaData);
-        return jsonString;
+        return jsonAdapter.toJson(fileMetaData);
     }
 
     private String getJsonForCurrencyType(CurrencyFormItem formItem) {
@@ -968,8 +927,6 @@ public class FormSettings {
     }
 
     protected void clearFormItems() {
-        pendingFileUpload = null;
-
         List<BaseFormItem> formItems = getFormItems();
 
         if (formItems.size() <= 1) {

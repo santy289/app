@@ -5,6 +5,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 public class FileFormItem extends BaseFormItem {
 
     private String value;
+    private int fileId;
     private String filePath;
     private String fileName;
     private String fileType;
@@ -23,8 +24,7 @@ public class FileFormItem extends BaseFormItem {
 
     @Override
     public String getStringValue() {
-        //todo check
-        return null;
+        return getValue();
     }
 
     public String getValue() {
@@ -81,6 +81,14 @@ public class FileFormItem extends BaseFormItem {
         setFileSize(0);
         setFileType(null);
         setFilePath(null);
+    }
+
+    public int getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(int fileId) {
+        this.fileId = fileId;
     }
 
     public static class Builder {

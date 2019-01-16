@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Toast.makeText(this, "activity destroyed", Toast.LENGTH_LONG).show();
+//        Toast.makeText(this, "activity destroyed", Toast.LENGTH_LONG).show();
     }
 
     private void startWebsocketServiceIntent() {

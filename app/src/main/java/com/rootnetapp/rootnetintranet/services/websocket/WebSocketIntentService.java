@@ -45,7 +45,7 @@ public class WebSocketIntentService extends IntentService {
         super.onDestroy();
         cancelWebsocket();
         Log.d(TAG, "onDestroy: ");
-        Toast.makeText(getApplicationContext(), "Service Destroyed", Toast.LENGTH_LONG).show();
+//        Toast.makeText(getApplicationContext(), "Service Destroyed", Toast.LENGTH_LONG).show();
     }
 
     public void testDebug(Service service) {

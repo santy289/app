@@ -220,7 +220,9 @@ public class CreateWorkflowViewModel extends ViewModel {
                 return;
             }
 
-            if (workflowMetas.getValue() != null && !workflowMetas.getValue().isEmpty()) {
+            //we allow the FileFormItem even though the value is null because of the editing mode, when the user tries to delete a file.
+            if ((workflowMetas.getValue() != null && !workflowMetas.getValue().isEmpty())
+                    || formItem instanceof FileFormItem) {
                 metas.add(workflowMetas);
             }
         }
@@ -1272,7 +1274,10 @@ public class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void fillFileFormItem(Meta meta) throws IOException {
-        if (meta.getValue() == null || meta.getValue().isEmpty()) return;
+        if (meta.getValue() == null || meta.getValue().isEmpty()
+                || meta.getValue().equals("\"\"")) {
+            return;
+        }
 
         JsonAdapter<FileMetaData> jsonAdapter = moshi.adapter(FileMetaData.class);
         FileMetaData fileMetaData = jsonAdapter.fromJson(meta.getValue());

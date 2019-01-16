@@ -193,7 +193,8 @@ public class FormSettings {
 
     private void format(WorkflowMetas metaData, TypeInfo typeInfo, BaseFormItem formItem) {
         String value = metaData.getUnformattedValue();
-        if (TextUtils.isEmpty(value)) {
+        //we allow the FileFormItem even though the value is null because of the editing mode, when the user tries to delete a file.
+        if (TextUtils.isEmpty(value) && !(formItem instanceof FileFormItem)) {
             return;
         }
 
@@ -352,7 +353,7 @@ public class FormSettings {
         String name = formItem.getFileName();
         int id = formItem.getFileId();
         if (id == 0 || TextUtils.isEmpty(name)) {
-            return "";
+            return "\"\"";
         }
 
         FileMetaData fileMetaData = new FileMetaData();

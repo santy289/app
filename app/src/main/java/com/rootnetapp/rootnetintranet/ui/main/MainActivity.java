@@ -550,6 +550,11 @@ public class MainActivity extends AppCompatActivity
                 this, mainBinding.drawerLayout, mainBinding.toolbar
                 , R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mainBinding.drawerLayout.addDrawerListener(toggle);
+
+        //disable drawer gestures for the right drawer,
+        //in order to prevent the filters drawer to be opened from any activity by the user
+        mainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
+
         toggle.syncState();
     }
 

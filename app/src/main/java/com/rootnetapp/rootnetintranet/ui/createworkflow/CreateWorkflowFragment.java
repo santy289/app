@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -51,10 +50,8 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     private CreateWorkflowViewModel viewModel;
     private FragmentCreateWorkflowBinding mBinding;
 
-    private static final String TAG = "CreateFragment";
-    private final String FILE_CHOOSER_DIR = "/storage/emulated/legacy";
+    private static final String TAG = "CreateWorkflowFragment";
 
-    private MenuItem uploadMenu;
     private FormItemsAdapter mAdapter;
     private WorkflowListItem mWorkflowListItem;
 

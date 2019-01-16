@@ -1,6 +1,12 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.OpenableColumns;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.util.Patterns;
 
@@ -73,6 +79,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import me.riddhimanadib.formmaster.FormBuilder;
 
+import static android.app.Activity.RESULT_OK;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_TYPE;
 
 public class CreateWorkflowViewModel extends ViewModel {
@@ -80,6 +87,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     protected static final int REQUEST_FILE_TO_ATTACH = 27;
     protected static final int REQUEST_EXTERNAL_STORAGE_PERMISSIONS = 72;
 
+    private MutableLiveData<Integer> mToastMessageLiveData;
     private MutableLiveData<WorkflowTypesResponse> mWorkflowsLiveData;
     private MutableLiveData<ListsResponse> mListLiveData;
     private MutableLiveData<ProductsResponse> mProductLiveData;
@@ -96,6 +104,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<BaseFormItem> mValidationUiLiveData;
     private MutableLiveData<DialogMessage> showDialogMessage;
     private MutableLiveData<Boolean> goBack;
+    private MutableLiveData<FileFormItem> mNewFormItemFileLiveData;
     private List<WorkflowTypeItemMenu> workflowTypeMenuItems;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
@@ -114,6 +123,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     private WorkflowListItem mWorkflowListItem;
     private WorkflowDb mWorkflow;
     private final Moshi moshi;
+    private FileFormItem mCurrentRequestingFileFormItem;
 
     protected static final int TAG_WORKFLOW_TYPE = 80;
 
@@ -1471,6 +1481,85 @@ public class CreateWorkflowViewModel extends ViewModel {
     }
     //endregion
 
+    //region File Upload
+    protected FileFormItem getCurrentRequestingFileFormItem() {
+        return mCurrentRequestingFileFormItem;
+    }
+
+    protected void setCurrentRequestingFileFormItem(FileFormItem currentRequestingFileFormItem) {
+        this.mCurrentRequestingFileFormItem = currentRequestingFileFormItem;
+    }
+
+    /**
+     * Handles the result of the file chooser intent. Retrieves information about the selected file
+     * and sends that info to the UI.
+     *
+     * @param context     used to retrieve the file name and size.
+     * @param requestCode ActivityResult requestCode.
+     * @param resultCode  ActivityResult resultCode.
+     * @param data        the file URI that was selected.
+     */
+    protected void handleFileSelectedResult(Context context, int requestCode, int resultCode,
+                                            Intent data) {
+        switch (requestCode) {
+            case REQUEST_FILE_TO_ATTACH:
+                if (resultCode == RESULT_OK) {
+                    try {
+                        Uri uri = data.getData();
+
+                        if (uri == null) {
+                            mToastMessageLiveData.setValue(R.string.select_file);
+                            return;
+                        }
+
+                        if (!Utils.checkFileSize(UPLOAD_FILE_SIZE_LIMIT, new File(uri.getPath()))) {
+                            DialogMessage message = new DialogMessage();
+                            message.message = R.string.file_too_big;
+                            message.title = R.string.warning;
+                            showDialogMessage.setValue(message);
+                            return;
+                        }
+
+                        Cursor returnCursor = context.getContentResolver()
+                                .query(uri, null, null, null, null);
+
+                        if (returnCursor == null) {
+                            mToastMessageLiveData.setValue(R.string.error_selecting_file);
+                            return;
+                        }
+
+                        returnCursor.moveToFirst();
+
+                        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
+                        int size = (int) returnCursor.getLong(sizeIndex);
+
+                        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                        String fileName = returnCursor.getString(nameIndex);
+
+                        returnCursor.close();
+
+                        byte[] bytes = Utils.fileToByte(context.getContentResolver(), uri);
+
+                        String encodedFile = Base64.encodeToString(bytes, Base64.DEFAULT);
+                        String fileType = Utils.getMimeType(data.getData(), context);
+
+                        FileFormItem formItem = getCurrentRequestingFileFormItem();
+                        formItem.setValue(encodedFile);
+                        formItem.setFileName(fileName);
+                        formItem.setFileSize(size);
+                        formItem.setFileType(fileType);
+                        formItem.setFilePath(uri.getPath());
+
+                        mNewFormItemFileLiveData.setValue(formItem);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
+        }
+    }
+    //endregion
+
     /**
      * This is called by the View when the user submits the form.
      */
@@ -2038,5 +2127,19 @@ public class CreateWorkflowViewModel extends ViewModel {
             mValidationUiLiveData = new MutableLiveData<>();
         }
         return mValidationUiLiveData;
+    }
+
+    protected LiveData<Integer> getObservableToastMessage() {
+        if (mToastMessageLiveData == null) {
+            mToastMessageLiveData = new MutableLiveData<>();
+        }
+        return mToastMessageLiveData;
+    }
+
+    protected LiveData<FileFormItem> getObservableFileFormItem() {
+        if (mNewFormItemFileLiveData == null) {
+            mNewFormItemFileLiveData = new MutableLiveData<>();
+        }
+        return mNewFormItemFileLiveData;
     }
 }

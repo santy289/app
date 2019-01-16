@@ -122,6 +122,7 @@ public class CreateWorkflowFragment extends Fragment {
 
     private void subscribe() {
 
+        viewModel.getObservableToastMessage().observe(this, this::showToastMessage);
         viewModel.getObservableAddWorkflowTypeItem().observe(this, this::addWorkflowTypeItem);
         viewModel.getObservableAddFormItem().observe(this, this::addItemToForm);
         viewModel.getObservableSetFormItemList().observe(this, this::setItemListToForm);
@@ -129,6 +130,7 @@ public class CreateWorkflowFragment extends Fragment {
         viewModel.getObservableShowLoading().observe(this, this::showLoading);
         viewModel.getObservableShowDialogMessage().observe(this, this::showDialog);
         viewModel.getObservableGoBack().observe(this, back -> goBack());
+        viewModel.getObservableFileFormItem().observe(this, this::updateFormItemUi);
 
         viewModel.showUploadButton.observe(this, this::setUploadMenu);
 
@@ -289,12 +291,7 @@ public class CreateWorkflowFragment extends Fragment {
     }
 
     private void createFileFormItemListener(FileFormItem fileFormItem) {
-        fileFormItem.setOnButtonClickedListener(
-                () -> {
-                    if (checkExternalStoragePermissions()) {
-                        showFileChooser(fileFormItem);
-                    }
-                });
+        fileFormItem.setOnButtonClickedListener(() -> showFileChooser(fileFormItem));
     }
 
     /**
@@ -318,7 +315,6 @@ public class CreateWorkflowFragment extends Fragment {
      */
     @UiThread
     private void showFileChooser(FileFormItem fileFormItem) {
-        //todo set fileFormItem to viewModel
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -327,6 +323,9 @@ public class CreateWorkflowFragment extends Fragment {
                     intent,
                     getString(R.string.workflow_detail_comments_fragment_select_file)),
                     CreateWorkflowViewModel.REQUEST_FILE_TO_ATTACH);
+
+            //hold the reference while the user is choosing a file
+            viewModel.setCurrentRequestingFileFormItem(fileFormItem);
         } catch (android.content.ActivityNotFoundException ex) {
             // Potentially direct the user to the Market with a Dialog
             showToastMessage(R.string.workflow_detail_comments_fragment_no_file_manager);
@@ -357,8 +356,13 @@ public class CreateWorkflowFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        viewModel.handleFileSelectedResult(getContext(), requestCode, resultCode, data);
+        viewModel.handleFileSelectedResult(getContext(), requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @UiThread
+    private void updateFormItemUi(FileFormItem fileFormItem){
+        mAdapter.notifyItemChanged(mAdapter.getItemPosition(fileFormItem));
     }
 
     @UiThread

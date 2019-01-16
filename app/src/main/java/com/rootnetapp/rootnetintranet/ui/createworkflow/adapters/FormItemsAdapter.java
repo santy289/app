@@ -842,7 +842,21 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         holder.getBinding().btnAddFile.setOnClickListener(
                 v -> item.getOnButtonClickedListener().onButtonClicked());
 
-        //todo set value
+        //set value
+        if (item.getValue() != null) {
+            holder.getBinding().chipFile.setText(item.getFileName());
+            holder.getBinding().chipFile.setVisibility(View.VISIBLE);
+            holder.getBinding().btnAddFile.setVisibility(View.GONE);
+        } else {
+            holder.getBinding().chipFile.setVisibility(View.GONE);
+            holder.getBinding().btnAddFile.setVisibility(View.VISIBLE);
+        }
+
+        //handle chip close icon
+        holder.getBinding().chipFile.setOnCloseIconClickListener(v -> {
+            item.clearFileValues();
+            notifyItemChanged(getItemPosition(item));
+        });
 
         //verify visibility
         if (!item.isVisible()) {

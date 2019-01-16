@@ -5,6 +5,10 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 public class FileFormItem extends BaseFormItem {
 
     private String value;
+    private String filePath;
+    private String fileName;
+    private String fileType;
+    private int fileSize;
     private OnButtonClickedListener onButtonClickedListener;
 
     private FileFormItem() {
@@ -37,6 +41,46 @@ public class FileFormItem extends BaseFormItem {
 
     public void setOnButtonClickedListener(OnButtonClickedListener onButtonClickedListener) {
         this.onButtonClickedListener = onButtonClickedListener;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public int getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(int fileSize) {
+        this.fileSize = fileSize;
+    }
+
+    public void clearFileValues(){
+        setValue(null);
+        setFileName(null);
+        setFileSize(0);
+        setFileType(null);
+        setFilePath(null);
     }
 
     public static class Builder {

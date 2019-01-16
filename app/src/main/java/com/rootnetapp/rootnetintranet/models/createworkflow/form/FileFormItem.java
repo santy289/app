@@ -18,8 +18,9 @@ public class FileFormItem extends BaseFormItem {
 
     @Override
     public boolean isValid() {
-        //todo check
-        return true;
+        if (!isRequired()) return true;
+
+        return isRequired() && getValue() != null;
     }
 
     @Override

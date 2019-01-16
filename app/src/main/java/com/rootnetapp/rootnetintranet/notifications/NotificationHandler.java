@@ -97,6 +97,8 @@ public class NotificationHandler {
                 .setLargeIcon(logoBitmap)
                 .setStyle(messagingStyle)
                 .setAutoCancel(true)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setColor(resources.getColor(R.color.colorAccent, service.getApplicationContext().getTheme()))
                 // priority and defaults need to be set together
                 .setDefaults(NotificationCompat.DEFAULT_ALL)

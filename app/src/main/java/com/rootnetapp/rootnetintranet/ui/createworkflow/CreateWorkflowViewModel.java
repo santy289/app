@@ -1050,7 +1050,8 @@ public class CreateWorkflowViewModel extends ViewModel {
 
         FileFormItem item = new FileFormItem.Builder()
                 .setTitle(field.getFieldName())
-                .setRequired(field.isRequired())
+//                .setRequired(field.isRequired())
+                .setRequired(true)
                 .setTag(field.getId())
                 .setEscaped(escape(field.getFieldConfigObject()))
                 .setMachineName(field.getFieldConfigObject().getMachineName())

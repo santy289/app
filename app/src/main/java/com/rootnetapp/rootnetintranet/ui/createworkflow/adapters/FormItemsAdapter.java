@@ -928,11 +928,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.show();
         }
 
-        // todo verify validation
         if (hasToEvaluateValid && !item.isValid()) {
-
+            holder.getBinding().tvRequiredMsg.setVisibility(View.VISIBLE);
         } else {
-
+            holder.getBinding().tvRequiredMsg.setVisibility(View.GONE);
         }
 
         //verify enabled param
@@ -1057,6 +1056,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     //endregion
 
     //region OnTouchClickListener
+
     /**
      * This class is used to prevent the spinners, buttons or any other view from losing focus to a
      * TextInputEditText. Detects whether the touch corresponds to a click rather than any movement

@@ -47,6 +47,22 @@
             app:layout_constraintStart_toStartOf="@id/tv_title"
             app:layout_constraintTop_toBottomOf="@id/tv_title" />
 
+        <TextView
+            android:id="@+id/tv_required_msg"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp"
+            android:text="@string/file_form_item_required_msg"
+            android:textColor="@color/red"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/btn_add_file"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btn_add_file"
+            app:layout_constraintTop_toTopOf="@id/btn_add_file"
+            tools:visibility="visible" />
+
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_file"
             style="@style/Widget.MaterialComponents.Chip.Entry"

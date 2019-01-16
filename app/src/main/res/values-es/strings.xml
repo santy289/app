@@ -221,6 +221,7 @@
     <string name="request_successfully">Pedido realizado exitosamente.</string>
     <string name="functionality_not_available">Esta función aún no está disponible.</string>
     <string name="add_file">Añadir Archivo</string>
+    <string name="file_form_item_required_msg">Necesitas añadir un archivo para continuar.</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Detalles de Workflow</string>

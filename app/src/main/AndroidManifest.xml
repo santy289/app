@@ -10,6 +10,9 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <!-- Notification heads up permission -->
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <!-- Doze mode whitelist -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
 
     <application
         android:name=".ui.RootnetApp"
@@ -83,6 +86,11 @@
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
+        </service>
+        <service android:name=".services.websocket.WebSocketService">
+        </service>
+
+        <service android:name=".services.websocket.WebSocketIntentService">
         </service>
 
         <provider

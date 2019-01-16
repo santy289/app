@@ -1,17 +1,16 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,12 +30,14 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
-import com.rootnetapp.rootnetintranet.notifications.NotificationChannels;
-import com.rootnetapp.rootnetintranet.services.background.WorkflowManagerService;
+import com.rootnetapp.rootnetintranet.services.websocket.WebSocketIntentService;
+import com.rootnetapp.rootnetintranet.services.websocket.WebSocketService;
 import com.rootnetapp.rootnetintranet.services.websocket.WebsocketSecureHandler;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
@@ -46,13 +47,11 @@ import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOptionsAdapter;
 
-import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -65,10 +64,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.SearchView;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.Person;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.drawable.IconCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -78,7 +74,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
-import okhttp3.OkHttpClient;
 
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.CHECK;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.INDEX_CHECK;
@@ -99,10 +94,7 @@ public class MainActivity extends AppCompatActivity
     MainActivityViewModel viewModel;
     private ActivityMainBinding mainBinding;
     private FragmentManager fragmentManager;
-    private SharedPreferences sharedPref;
     private MenuItem mSearch = null;
-
-    private OkHttpClient client;
 
     RightDrawerOptionsAdapter rightDrawerOptionsAdapter;
     RightDrawerFiltersAdapter rightDrawerFiltersAdapter;
@@ -115,15 +107,12 @@ public class MainActivity extends AppCompatActivity
         mainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         ((RootnetApp) getApplication()).getAppComponent().inject(this);
         mainBinding.navView.setCheckedItem(R.id.nav_timeline);
-        sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         viewModel = ViewModelProviders
                 .of(this, profileViewModelFactory)
                 .get(MainActivityViewModel.class);
 
-        viewModel.initNotifications(
-                sharedPref,
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE)
-        );
+        dozeModeWhitelist();
 
         fragmentManager = getSupportFragmentManager();
         setActionBar();
@@ -138,10 +127,45 @@ public class MainActivity extends AppCompatActivity
         }
 
         showFragment(TimelineFragment.newInstance(this), false);
-        startBackgroundWorkflowRequest();
         setFilterBoxListeners();
         setupBottomNavigation();
         setupSpeedDialFab();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+//        Toast.makeText(this, "activity destroyed", Toast.LENGTH_LONG).show();
+    }
+
+    private void startWebsocketServiceIntent() {
+        SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        String token = sharedPref.getString(PreferenceKeys.PREF_TOKEN, "");
+        String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
+        String port = sharedPref.getString(PreferenceKeys.PREF_PORT, "");
+
+        Intent intent = new Intent(this, WebSocketIntentService.class);
+        intent.putExtra(WebsocketSecureHandler.KEY_TOKEN, token);
+        intent.putExtra(WebsocketSecureHandler.KEY_PORT, port);
+        intent.putExtra(WebsocketSecureHandler.KEY_PROTOCOL, protocol);
+        intent.putExtra(WebsocketSecureHandler.KEY_DOMAIN, Utils.domain);
+        startService(intent);
+    }
+
+    private void stopWebsocketIntentService() {
+        Intent intent = new Intent(this, WebSocketIntentService.class);
+        stopService(intent);
+    }
+
+    private boolean isMyServiceRunning() {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningServiceInfo> list = manager.getRunningServices(Integer.MAX_VALUE);
+        for (ActivityManager.RunningServiceInfo service : list) {
+            if (WebSocketService.class.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -244,6 +268,20 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void showWorkflow(int id) {
         viewModel.getWorkflow(id);
+    }
+
+    private void dozeModeWhitelist() {
+        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        Intent intent=new Intent();
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        if (powerManager.isIgnoringBatteryOptimizations(getPackageName())) {
+            Log.d(TAG, "dozeModeWhitelist: nothing to do");
+        }
+        else {
+            intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+            intent.setData(Uri.parse("package:" + getPackageName()));
+            startActivity(intent);
+        }
     }
 
     protected void setImageIn(String[] content) {
@@ -505,11 +543,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void startBackgroundWorkflowRequest() {
-        Intent MyIntentService = new Intent(this, WorkflowManagerService.class);
-        startService(MyIntentService);
-    }
-
     private void setActionBar() {
         setSupportActionBar(mainBinding.toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -542,6 +575,7 @@ public class MainActivity extends AppCompatActivity
                 break;
             }
             case R.id.nav_exit: {
+                SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putString("username", "").apply();
                 editor.putString("password", "").apply();
@@ -778,68 +812,8 @@ public class MainActivity extends AppCompatActivity
                 .observe(this, this::handleUpdateBaseFilterSelectionUpdateWith);
         viewModel.openRightDrawer.observe(this, this::openRightDrawer);
 
-
-        viewModel.getReceiveIncomingNotification().observe(this, incomingNotification -> {
-            prepareNotification(
-                    incomingNotification[WebsocketSecureHandler.INDEX_ID],
-                    incomingNotification[WebsocketSecureHandler.INDEX_TITLE],
-                    incomingNotification[WebsocketSecureHandler.INDEX_MESSAGE]
-            );
-        });
-    }
-
-    /**
-     * Preparing the notification that we are about to display. Making sure that we are passing a
-     * WorflowDb id, and this way the user can click on the notification to open this workflow.
-     * @param id
-     * @param title
-     * @param message
-     */
-    private void prepareNotification(String id, String title, String message) {
-        Bitmap logoBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_round);
-
-        Person user = new Person.Builder()
-                .setName("Intranet")
-                .setIcon(IconCompat.createWithBitmap(logoBitmap))
-                .build();
-        Date date = new Date();
-        NotificationCompat.MessagingStyle.Message messageStyle = new NotificationCompat.MessagingStyle.Message(
-                message,
-                date.getTime(),
-                user
-        );
-
-        NotificationCompat.MessagingStyle messagingStyle = new NotificationCompat.MessagingStyle(user);
-        messagingStyle.addMessage(messageStyle);
-        messagingStyle.setConversationTitle(title);
-
-        Intent detailIntent = new Intent(this, WorkflowDetailActivity.class);
-
-        detailIntent.putExtra(WorkflowDetailActivity.INTENT_EXTRA_ID, id);
-
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addNextIntentWithParentStack(detailIntent);
-        PendingIntent detailPendingIntent = stackBuilder.getPendingIntent(
-                0,
-                PendingIntent.FLAG_UPDATE_CURRENT
-        );
-
-        NotificationCompat.Builder notifyBuilder = new NotificationCompat.Builder(
-                this,
-                NotificationChannels.WORKFLOW_COMMENTS_CHANNEL_ID)
-                .setContentTitle(title)
-                .setContentText(title)
-                .setContentIntent(detailPendingIntent)
-                .setSmallIcon(R.drawable.ic_message_black_24dp)
-                .setLargeIcon(logoBitmap)
-                .setStyle(messagingStyle)
-                .setAutoCancel(true)
-                // priority and defaults need to be set together
-                .setDefaults(NotificationCompat.DEFAULT_ALL)
-                .setPriority(NotificationCompat.PRIORITY_MAX);
-
-
-        viewModel.notifyMessage(notifyBuilder);
+        viewModel.getObservableStartService().observe(this, result -> startWebsocketServiceIntent());
+        viewModel.getObservableStopService().observe(this, result -> stopWebsocketIntentService());
     }
 
     private void subscribeForLogin() {

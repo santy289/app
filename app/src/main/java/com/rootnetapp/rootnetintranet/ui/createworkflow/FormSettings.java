@@ -606,8 +606,16 @@ public class FormSettings {
                 }
 
                 if (typeInfo.getType().equals(TYPE_FILE)) {
-                    // TODO handle file.
-                    return null;
+                    JsonAdapter<FileMetaData> jsonAdapter = moshi.adapter(FileMetaData.class);
+                    try {
+                        FileMetaData fileMetaData = jsonAdapter.fromJson(meta.getValue());
+                        information.setDisplayValue(fileMetaData.name);
+                        return information;
+                    } catch (IOException | JsonDataException e) {
+                        e.printStackTrace();
+                        information.setDisplayValue("");
+                        return information;
+                    }
                 }
 
                 return null;

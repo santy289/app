@@ -4,12 +4,6 @@ import com.rootnetapp.rootnetintranet.services.background.WorkflowManagerService
 import com.rootnetapp.rootnetintranet.services.background.WorkflowManagerServiceModule;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowModule;
-import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.CustomCountryPicker;
-import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.CustomSpinner;
-import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.ListSpinner;
-import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.ProductoSpinner;
-import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.ServicioSpinner;
-import com.rootnetapp.rootnetintranet.ui.createworkflow.customviews.UsuariosSpinner;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainModule;
 import com.rootnetapp.rootnetintranet.ui.editprofile.EditProfileActivity;
@@ -116,18 +110,6 @@ public interface AppComponent {
     void inject(WorkflowFragment workflowFragment);
 
     void inject(CreateWorkflowFragment createWorkflowFragment);
-
-    void inject(CustomSpinner customSpinner);
-
-    void inject(ListSpinner listSpinner);
-
-    void inject(ProductoSpinner productoSpinner);
-
-    void inject(ServicioSpinner servicioSpinner);
-
-    void inject(UsuariosSpinner usuariosSpinner);
-
-    void inject(CustomCountryPicker countryPicker);
 
     void inject(WorkflowDetailActivity workflowDetailActivity);
 

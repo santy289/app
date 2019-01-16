@@ -7,7 +7,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/form_items_space"
-        android:layout_marginBottom="@dimen/form_items_space">
+        android:layout_marginBottom="@dimen/form_items_space"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
 
         <TextView
             android:id="@+id/tv_title"
@@ -34,19 +36,19 @@
             app:layout_constraintBottom_toBottomOf="@id/tv_title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/tv_title"
-            tools:visibility="visible"/>
+            tools:visibility="visible" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_selected_items"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:paddingBottom="5dp"
             android:clipToPadding="false"
-            android:paddingEnd="5dp"
             android:paddingStart="0dp"
+            android:paddingEnd="5dp"
+            android:paddingBottom="5dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_title"
-            app:layout_constraintStart_toStartOf="@id/tv_title" />
+            app:layout_constraintStart_toStartOf="@id/tv_title"
+            app:layout_constraintTop_toBottomOf="@id/tv_title" />
 
         <View
             android:id="@+id/view_spinner_background"

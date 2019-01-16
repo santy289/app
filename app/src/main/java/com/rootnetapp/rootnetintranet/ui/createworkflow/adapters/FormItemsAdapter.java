@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.Editable;
 import android.text.InputType;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -353,6 +354,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                                 if (item.getOnSelectedListener() != null) {
                                     item.getOnSelectedListener().onSelected(item);
                                 }
+
+//                                holder.getBinding().spInput.performClick();
+//                                notifyDataSetChanged();
                             }
                         }
 
@@ -361,6 +365,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
                         }
                     });
+
+            //make sure this view has the focus
+            holder.getBinding().spInput
+                    .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
         } else {
             // this prevents the listener to be triggered by setSelection
             int index = item.getOptions().indexOf(item.getValue());
@@ -450,6 +458,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         holder.getBinding().tvTitle.setText(finalTitle);
 
         holder.getBinding().tvSelectedDate.setOnClickListener(v -> {
+            // make sure this view has the focus
+            holder.getBinding().root.requestFocus();
+
             // the style mdtp_ActionButton.Text must be overridden in styles.xml for MaterialComponents
             DatePickerDialog dpd = DatePickerDialog.newInstance(
                     (view, year, monthOfYear, dayOfMonth) -> {
@@ -592,6 +603,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
                         }
                     });
+
+            //make sure this view has the focus
+            holder.getBinding().spCurrency
+                    .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
         } else {
             // this prevents the listener to be triggered by setSelection
             int index = item.getOptions().indexOf(item.getSelectedOption());
@@ -699,6 +714,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
                         }
                     });
+
+            //make sure this view has the focus
+            holder.getBinding().spInput
+                    .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
         }
 
         // verify required indicator
@@ -803,6 +822,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
                         }
                     });
+
+            //make sure this view has the focus
+            holder.getBinding().spCountry
+                    .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
         } else {
             // this prevents the listener to be triggered by setSelection
             int index = item.getOptions().indexOf(item.getSelectedOption());
@@ -889,6 +912,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             if (fileId == 0) return; //file was not uploaded yet.
             mFragmentInterface.downloadFile(fileId);
         });
+
+        //make sure this view has the focus
+        holder.getBinding().btnAddFile
+                .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
 
         // verify required indicator
         holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
@@ -1026,6 +1053,52 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         Editable text = holder.getBinding().etPhone.getText();
         String value = text == null ? null : text.toString();
         item.setValue(value);
+    }
+    //endregion
+
+    //region OnTouchClickListener
+    /**
+     * This class is used to prevent the spinners, buttons or any other view from losing focus to a
+     * TextInputEditText. Detects whether the touch corresponds to a click rather than any movement
+     * event.
+     */
+    private class OnTouchClickListener implements View.OnTouchListener {
+
+        private int CLICK_ACTION_THRESHOLD = 200;
+        private float startX;
+        private float startY;
+        private View viewToFocus;
+
+        OnTouchClickListener(View viewToFocus) {
+            this.viewToFocus = viewToFocus;
+        }
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            //we need to detect whether the user has clicked or dragged before calling performClick()
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    startX = event.getX();
+                    startY = event.getY();
+                    break;
+                case MotionEvent.ACTION_UP:
+                    float endX = event.getX();
+                    float endY = event.getY();
+                    if (isClick(startX, endX, startY, endY)) {
+                        //the user has clicked
+                        v.performClick();
+                        viewToFocus.requestFocus();
+                    }
+                    break;
+            }
+            return true;
+        }
+
+        private boolean isClick(float startX, float endX, float startY, float endY) {
+            float differenceX = Math.abs(startX - endX);
+            float differenceY = Math.abs(startY - endY);
+            return !(differenceX > CLICK_ACTION_THRESHOLD || differenceY > CLICK_ACTION_THRESHOLD);
+        }
     }
     //endregion
 }

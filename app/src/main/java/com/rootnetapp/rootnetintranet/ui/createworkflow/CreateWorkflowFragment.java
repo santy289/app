@@ -1,10 +1,12 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -24,6 +26,7 @@ import com.rootnetapp.rootnetintranet.ui.createworkflow.adapters.FormItemsAdapte
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.ValidateFormDialog;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,13 +37,14 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-public class CreateWorkflowFragment extends Fragment {
+public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFragmentInterface {
 
     @Inject
     CreateWorkflowViewModelFactory createWorkflowViewModelFactory;
@@ -126,6 +130,7 @@ public class CreateWorkflowFragment extends Fragment {
         viewModel.getObservableShowDialogMessage().observe(this, this::showDialog);
         viewModel.getObservableGoBack().observe(this, back -> goBack());
         viewModel.getObservableFileFormItem().observe(this, this::updateFormItemUi);
+        viewModel.getObservableDownloadedFileUiData().observe(this, this::openDownloadedFile);
     }
 
     private void setupSubmitButton() {
@@ -134,7 +139,8 @@ public class CreateWorkflowFragment extends Fragment {
     }
 
     private void setupFormRecycler() {
-        mAdapter = new FormItemsAdapter(getContext(), getChildFragmentManager(), new ArrayList<>());
+        mAdapter = new FormItemsAdapter(getContext(), getChildFragmentManager(), new ArrayList<>(),
+                this);
         mBinding.rvFields.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvFields.setAdapter(mAdapter);
         mBinding.rvFields.setNestedScrollingEnabled(false);
@@ -285,6 +291,32 @@ public class CreateWorkflowFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        viewModel.handleFileSelectedResult(getContext(), requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @UiThread
+    private void updateFormItemUi(FileFormItem fileFormItem) {
+        mAdapter.notifyItemChanged(mAdapter.getItemPosition(fileFormItem));
+    }
+
+    /**
+     * Sends a request to the ViewModel to retrieve the specified file in order to be opened by the
+     * device. Should check WRITE/READ external storage permissions before requesting.
+     *
+     * @param fileId file ID to download.
+     */
+    @Override
+    public void downloadFile(int fileId) {
+        if (checkExternalStoragePermissions()) {
+            viewModel.downloadFile(fileId);
+        } else {
+            viewModel.setQueuedFile(fileId);
+        }
+    }
+
     /**
      * Verify whether the user has granted permissions to read/write the external storage.
      *
@@ -308,14 +340,43 @@ public class CreateWorkflowFragment extends Fragment {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        viewModel.handleFileSelectedResult(getContext(), requestCode, resultCode, data);
-        super.onActivityResult(requestCode, resultCode, data);
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        viewModel.handleRequestPermissionsResult(requestCode, grantResults);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
+    /**
+     * Creates an {@link Intent} chooser the downloaded file. If the device is not suitable to read
+     * the file, will display a {@link Toast} message. Uses a {@link FileProvider} to create the
+     * file URI, instead of using the {@link Uri#fromFile(File)} method.
+     *
+     * @param downloadedFileUiData the file data containing the file to be opened.
+     *
+     * @see <a href="https://developer.android.com/reference/android/support/v4/content/FileProvider">FileProvider</a>
+     */
     @UiThread
-    private void updateFormItemUi(FileFormItem fileFormItem){
-        mAdapter.notifyItemChanged(mAdapter.getItemPosition(fileFormItem));
+    private void openDownloadedFile(DownloadedFileUiData downloadedFileUiData) {
+        if (downloadedFileUiData.getFile() == null) return;
+
+        Intent target = new Intent(Intent.ACTION_VIEW);
+
+        Uri fileUri = FileProvider.getUriForFile(getContext(),
+                getContext().getApplicationContext().getPackageName() + ".fileprovider",
+                downloadedFileUiData.getFile());
+
+        target.setDataAndType(fileUri, downloadedFileUiData.getMimeType());
+        target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        Intent intent = Intent.createChooser(target,
+                getString(R.string.workflow_detail_comments_fragment_open_file));
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            // Instruct the user to install a PDF reader here
+            showToastMessage(R.string.workflow_detail_comments_fragment_cannot_open_file);
+        }
     }
 
     @UiThread

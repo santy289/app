@@ -30,6 +30,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragmentInterface;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import java.util.ArrayList;
@@ -50,12 +51,15 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private FragmentManager mFragmentManager;
     private List<BaseFormItem> mDataset;
     private boolean hasToEvaluateValid;
+    private CreateWorkflowFragmentInterface mFragmentInterface;
 
     public FormItemsAdapter(Context context, FragmentManager fragmentManager,
-                            List<BaseFormItem> dataset) {
+                            List<BaseFormItem> dataset,
+                            CreateWorkflowFragmentInterface fragmentInterface) {
         this.mContext = context;
         this.mFragmentManager = fragmentManager;
         this.mDataset = dataset;
+        this.mFragmentInterface = fragmentInterface;
     }
 
     public void addItem(BaseFormItem item) {
@@ -843,7 +847,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 v -> item.getOnButtonClickedListener().onButtonClicked());
 
         //set value
-        if (item.getValue() != null) {
+        if (item.getFileName() != null) {
             holder.getBinding().chipFile.setText(item.getFileName());
             holder.getBinding().chipFile.setVisibility(View.VISIBLE);
             holder.getBinding().btnAddFile.setVisibility(View.GONE);
@@ -856,6 +860,13 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         holder.getBinding().chipFile.setOnCloseIconClickListener(v -> {
             item.clearFileValues();
             notifyItemChanged(getItemPosition(item));
+        });
+
+        //handle chip on click
+        holder.getBinding().chipFile.setOnClickListener(v -> {
+            int fileId = item.getFileId();
+            if (fileId == 0) return; //file was not uploaded yet.
+            mFragmentInterface.downloadFile(fileId);
         });
 
         //verify visibility

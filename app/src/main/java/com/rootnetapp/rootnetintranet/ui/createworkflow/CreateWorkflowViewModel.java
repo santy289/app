@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
@@ -19,6 +20,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.Form
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
 import com.rootnetapp.rootnetintranet.models.createworkflow.CurrencyFieldData;
+import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePostDetail;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
@@ -42,6 +44,7 @@ import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMet
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
+import com.rootnetapp.rootnetintranet.models.responses.downloadfile.DownloadFileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.role.Role;
 import com.rootnetapp.rootnetintranet.models.responses.services.Service;
@@ -65,6 +68,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.ArrayMap;
 import androidx.lifecycle.LiveData;
@@ -103,6 +107,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<DialogMessage> showDialogMessage;
     private MutableLiveData<Boolean> goBack;
     private MutableLiveData<FileFormItem> mNewFormItemFileLiveData;
+    private MutableLiveData<DownloadedFileUiData> mOpenDownloadedFileLiveData;
     private List<WorkflowTypeItemMenu> workflowTypeMenuItems;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
@@ -119,6 +124,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     private final Moshi moshi;
     private FileFormItem mCurrentRequestingFileFormItem;
     private List<FileFormItem> mFilesToUpload;
+    private int mQueuedFile;
 
     protected static final int TAG_WORKFLOW_TYPE = 80;
 
@@ -1050,13 +1056,6 @@ public class CreateWorkflowViewModel extends ViewModel {
                 .setTypeInfo(typeInfo)
                 .build();
 
-        item.setOnButtonClickedListener(new FileFormItem.OnButtonClickedListener() {
-            @Override
-            public void onButtonClicked() {
-
-            }
-        });
-
         formSettings.getFormItems().add(item);
     }
     //endregion
@@ -1160,6 +1159,10 @@ public class CreateWorkflowViewModel extends ViewModel {
 
                     case FormSettings.TYPE_PHONE:
                         fillPhoneFormItem(meta);
+                        break;
+
+                    case FormSettings.TYPE_FILE:
+                        fillFileFormItem(meta);
                         break;
 
                     /*case FormSettings.VALUE_EMAIL:
@@ -1382,6 +1385,21 @@ public class CreateWorkflowViewModel extends ViewModel {
         phoneFormItem.setSelectedOption(value);
         phoneFormItem.setValue(postPhone.value);
     }
+
+    private void fillFileFormItem(Meta meta) throws IOException {
+        if (meta.getValue() == null || meta.getValue().isEmpty()) return;
+
+        JsonAdapter<FileMetaData> jsonAdapter = moshi.adapter(FileMetaData.class);
+        FileMetaData fileMetaData = jsonAdapter.fromJson(meta.getValue());
+
+        if (fileMetaData == null) return;
+
+        FileFormItem fileFormItem = (FileFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        fileFormItem.setFileName(fileMetaData.name);
+        fileFormItem.setFileId(fileMetaData.value);
+    }
     //endregion
 
     //region File Upload
@@ -1543,6 +1561,88 @@ public class CreateWorkflowViewModel extends ViewModel {
         boolean isUploading = uploadFirstFile();
         if (!isUploading) {
             startSendingWorkflow(baseInfo, items);
+        }
+    }
+    //endregion
+
+    //region File Download
+    public int getQueuedFile() {
+        return mQueuedFile;
+    }
+
+    public void setQueuedFile(int queuedFile) {
+        this.mQueuedFile = queuedFile;
+    }
+
+    /**
+     * Checks if the requested permissions were granted and then proceed to open the file.
+     *
+     * @param requestCode  to identify the request
+     * @param grantResults array containing the request results.
+     */
+    protected void handleRequestPermissionsResult(int requestCode, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_EXTERNAL_STORAGE_PERMISSIONS: {
+                // check for both permissions
+                if (grantResults.length > 1
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permissions granted
+                    int fileId = getQueuedFile();
+                    if (fileId == 0) return; //file was not set
+                    downloadFile(fileId);
+
+                } else {
+                    // at least one permission was denied
+                    mToastMessageLiveData.setValue(
+                            R.string.workflow_detail_activity_permissions_not_granted);
+                }
+            }
+        }
+    }
+
+    /**
+     * Prepares a request to the endpoint for the desired file.
+     *
+     * @param fileId the file ID to download.
+     */
+    protected void downloadFile(int fileId) {
+        showLoading.setValue(true);
+        Disposable disposable = mRepository
+                .downloadFile(mToken, FileUploadResponse.FILE_ENTITY,
+                        fileId)
+                .subscribe(this::onDownloadSuccess, this::onFailure);
+        mDisposables.add(disposable);
+    }
+
+    /**
+     * Callback for the success file download. Converts and saves it to a local file and sends it
+     * back to the UI for displaying purposes.
+     *
+     * @param downloadFileResponse the downloaded file response.
+     */
+    private void onDownloadSuccess(DownloadFileResponse downloadFileResponse) {
+        showLoading.setValue(false);
+
+        // the API will return a base64 string representing the file
+
+        String base64 = downloadFileResponse.getFile().getContent();
+        if (base64 == null || base64.isEmpty()) {
+            mToastMessageLiveData.setValue(R.string.error);
+            return;
+        }
+
+        String fileName = downloadFileResponse.getFile().getFilename();
+        try {
+            DownloadedFileUiData attachmentUiData = new DownloadedFileUiData(
+                    Utils.decodeFileFromBase64Binary(base64, fileName),
+                    downloadFileResponse.getFile().getMime());
+            mOpenDownloadedFileLiveData.setValue(attachmentUiData);
+
+        } catch (IOException e) {
+            Log.e(TAG, "downloadFile: ", e);
+            mToastMessageLiveData.setValue(R.string.error);
         }
     }
     //endregion
@@ -2095,5 +2195,12 @@ public class CreateWorkflowViewModel extends ViewModel {
             mNewFormItemFileLiveData = new MutableLiveData<>();
         }
         return mNewFormItemFileLiveData;
+    }
+
+    protected LiveData<DownloadedFileUiData> getObservableDownloadedFileUiData() {
+        if (mOpenDownloadedFileLiveData == null) {
+            mOpenDownloadedFileLiveData = new MutableLiveData<>();
+        }
+        return mOpenDownloadedFileLiveData;
     }
 }

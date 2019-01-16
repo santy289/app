@@ -16,6 +16,7 @@ import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
+import com.rootnetapp.rootnetintranet.models.responses.downloadfile.DownloadFileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.project.ProjectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.role.RoleResponse;
@@ -157,4 +158,8 @@ public class CreateWorkflowRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    protected Observable<DownloadFileResponse> downloadFile(String auth, String entity, int fileId) {
+        return service.downloadFile(auth, entity, fileId).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
 }

@@ -6,10 +6,10 @@ import com.rootnetapp.rootnetintranet.databinding.FormItemPhoneBinding;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-public class PhoneViewHolder extends RecyclerView.ViewHolder {
+class PhoneViewHolder extends RecyclerView.ViewHolder {
 
     private final FormItemPhoneBinding mBinding;
-    private RecyclerView.LayoutParams mRootParams;
+    private final RecyclerView.LayoutParams mRootParams;
 
     public PhoneViewHolder(FormItemPhoneBinding binding) {
         super(binding.getRoot());

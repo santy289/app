@@ -37,13 +37,13 @@ import io.reactivex.schedulers.Schedulers;
 
 public class CreateWorkflowRepository {
 
-    private ApiInterface service;
-    private AppDatabase database;
-    private WorkflowTypeDbDao workflowTypeDbDao;
-    private UserDao profileDao;
-    private CountryDBDao countryDBDao;
+    private final ApiInterface service;
+    private final AppDatabase database;
+    private final WorkflowTypeDbDao workflowTypeDbDao;
+    private final UserDao profileDao;
+    private final CountryDBDao countryDBDao;
 
-    private LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
+    private final LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
 
     public CreateWorkflowRepository(ApiInterface service, AppDatabase database) {
         this.service = service;

@@ -48,11 +48,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private Context mContext;
-    private FragmentManager mFragmentManager;
+    private final Context mContext;
+    private final FragmentManager mFragmentManager;
     private List<BaseFormItem> mDataset;
     private boolean hasToEvaluateValid;
-    private CreateWorkflowFragmentInterface mFragmentInterface;
+    private final CreateWorkflowFragmentInterface mFragmentInterface;
 
     public FormItemsAdapter(Context context, FragmentManager fragmentManager,
                             List<BaseFormItem> dataset,
@@ -1064,10 +1064,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
      */
     private class OnTouchClickListener implements View.OnTouchListener {
 
-        private int CLICK_ACTION_THRESHOLD = 200;
+        private final int CLICK_ACTION_THRESHOLD = 200;
         private float startX;
         private float startY;
-        private View viewToFocus;
+        private final View viewToFocus;
 
         OnTouchClickListener(View viewToFocus) {
             this.viewToFocus = viewToFocus;

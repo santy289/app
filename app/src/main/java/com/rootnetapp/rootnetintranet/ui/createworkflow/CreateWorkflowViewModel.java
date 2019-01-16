@@ -40,23 +40,16 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormIt
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem.InputType;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
-import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
 import com.rootnetapp.rootnetintranet.models.responses.downloadfile.DownloadFileResponse;
-import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.role.Role;
 import com.rootnetapp.rootnetintranet.models.responses.services.Service;
-import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
-import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
@@ -78,26 +71,21 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import me.riddhimanadib.formmaster.FormBuilder;
 
 import static android.app.Activity.RESULT_OK;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_STATUS;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_TYPE;
 
-public class CreateWorkflowViewModel extends ViewModel {
+class CreateWorkflowViewModel extends ViewModel {
 
     protected static final int REQUEST_FILE_TO_ATTACH = 27;
     protected static final int REQUEST_EXTERNAL_STORAGE_PERMISSIONS = 72;
+    protected static final int TAG_WORKFLOW_TYPE = 80;
+
+    private final int UPLOAD_FILE_SIZE_LIMIT = 10;
 
     private MutableLiveData<Integer> mToastMessageLiveData;
-    private MutableLiveData<WorkflowTypesResponse> mWorkflowsLiveData;
-    private MutableLiveData<ListsResponse> mListLiveData;
-    private MutableLiveData<ProductsResponse> mProductLiveData;
-    private MutableLiveData<ServicesResponse> mServiceLiveData;
-    private MutableLiveData<WorkflowUserResponse> mUserLiveData;
-    private MutableLiveData<CountriesResponse> mCountriesLiveData;
-    private MutableLiveData<CreateWorkflowResponse> mCreateLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
-    private MutableLiveData<Integer> mCreateErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<SingleChoiceFormItem> mAddWorkflowTypeItemLiveData;
     private MutableLiveData<BaseFormItem> mAddFormItemLiveData;
@@ -107,11 +95,10 @@ public class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<Boolean> goBack;
     private MutableLiveData<FileFormItem> mNewFormItemFileLiveData;
     private MutableLiveData<DownloadedFileUiData> mOpenDownloadedFileLiveData;
-    private List<WorkflowTypeItemMenu> workflowTypeMenuItems;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
-    private CreateWorkflowRepository mRepository;
+    private final CreateWorkflowRepository mRepository;
 
     private static final String TAG = "CreateViewModel";
 
@@ -124,10 +111,6 @@ public class CreateWorkflowViewModel extends ViewModel {
     private FileFormItem mCurrentRequestingFileFormItem;
     private List<FileFormItem> mFilesToUpload;
     private int mQueuedFile;
-
-    protected static final int TAG_WORKFLOW_TYPE = 80;
-
-    private final int UPLOAD_FILE_SIZE_LIMIT = 10;
 
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.mRepository = createWorkflowRepository;
@@ -150,36 +133,21 @@ public class CreateWorkflowViewModel extends ViewModel {
         mDisposables.clear();
     }
 
-    private void handleInvalidEmail() {
-        DialogMessage dialog = new DialogMessage();
-        dialog.title = R.string.warning;
-        dialog.message = R.string.form_invalid_email;
-        showDialogMessage.setValue(dialog);
-    }
-
     private WorkflowMetas createMetaData(BaseFormItem formItem) {
-//        int fieldId = fieldData.tag;
-//        TypeInfo typeInfo = formSettings.findFieldDataById(fieldId);
-//        if (typeInfo.getValueType().equals(FormSettings.VALUE_EMAIL)) {
-//            // TODO put back this value after debugging
-//            if(!TextUtils.isEmpty(baseFormElement.getValue())
-//                    && !isValidEmail(baseFormElement.getValue())) {
-//               handleInvalidEmail();
-//               return null;
-//            }
-//        }
-
         WorkflowMetas workflowMeta = new WorkflowMetas();
+
         int workflowTypeFieldId = formItem.getTag();
         String value = formItem.getStringValue();
         workflowMeta.setUnformattedValue(value);
         workflowMeta.setWorkflowTypeFieldId(workflowTypeFieldId);
+
         formSettings.formatMetaData(workflowMeta, formItem);
+
         return workflowMeta;
     }
 
     private void postWorkflow() {
-        List<BaseFormItem> formItemsForPost = formSettings.getFormItemsToPost();
+        formSettings.getFormItemsToPost(); //needed to fill baseInfo, the return value is ignored
         ArrayMap<String, Integer> baseInfo = formSettings.getBaseMachineNamesAndIds();
 
         if (baseInfo.isEmpty()) {
@@ -267,11 +235,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         createRequest.start = start;
         createRequest.description = description;
 
-        // TODO remove this block later only for debugging
-        Moshi moshi = new Moshi.Builder().build();
-        JsonAdapter<CreateRequest> jsonAdapter = moshi.adapter(CreateRequest.class);
-        String jsonString = jsonAdapter.toJson(createRequest);
-
         // Accepts object
         Disposable disposable = mRepository
                 .createWorkflow(mToken, createRequest)
@@ -288,11 +251,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         editRequest.setStart(start);
         editRequest.setDescription(description);
         editRequest.setWorkflowMetas(metas);
-
-        // TODO remove this block later only for debugging
-        Moshi moshi = new Moshi.Builder().build();
-        JsonAdapter<EditRequest> jsonAdapter = moshi.adapter(EditRequest.class);
-        String jsonString = jsonAdapter.toJson(editRequest);
 
         // Accepts object
         Disposable disposable = mRepository
@@ -334,9 +292,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                 .subscribe(formSettings -> {
                     FormSettings settings = (FormSettings) formSettings;
                     showFields(settings);
-                }, throwable -> {
-                    showLoading.setValue(false);
-                });
+                }, throwable -> showLoading.setValue(false));
         mDisposables.add(disposable);
 
     }
@@ -369,7 +325,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 
             //does not show the Status field
             String machineName = fieldConfig.getMachineName();
-            if (machineName != null && machineName.equals("wf_status")) {
+            if (machineName != null && machineName.equals(MACHINE_NAME_STATUS)) {
                 continue;
             }
 
@@ -567,9 +523,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
-                }, throwable -> {
-                    Log.d(TAG, "createProductsFormItem: " + throwable.getMessage());
-                });
+                }, throwable -> Log.d(TAG, "createProductsFormItem: " + throwable.getMessage()));
 
         mDisposables.add(disposable);
     }
@@ -623,9 +577,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
-                }, throwable -> {
-                    Log.d(TAG, "createRolesFormItem: " + throwable.getMessage());
-                });
+                }, throwable -> Log.d(TAG, "createRolesFormItem: " + throwable.getMessage()));
 
         mDisposables.add(disposable);
     }
@@ -678,10 +630,8 @@ public class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
-                }, throwable -> {
-                    Log.d(TAG,
-                            "createServicesFormItem: can't get service: " + throwable.getMessage());
-                });
+                }, throwable -> Log.d(TAG,
+                        "createServicesFormItem: can't get service: " + throwable.getMessage()));
         mDisposables.add(disposable);
     }
 
@@ -772,13 +722,11 @@ public class CreateWorkflowViewModel extends ViewModel {
 
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(singleChoiceFormItem -> {
-                    mAddFormItemLiveData.setValue((SingleChoiceFormItem) singleChoiceFormItem);
-                }, throwable -> {
-                    Log.d(TAG,
-                            "createSystemUsersFormItem: can't get users: " + throwable
-                                    .getMessage());
-                });
+                .subscribe(singleChoiceFormItem -> mAddFormItemLiveData
+                                .setValue((SingleChoiceFormItem) singleChoiceFormItem),
+                        throwable -> Log.d(TAG,
+                                "createSystemUsersFormItem: can't get users: " + throwable
+                                        .getMessage()));
         mDisposables.add(disposable);
     }
 
@@ -819,9 +767,8 @@ public class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
-                }, throwable -> {
-                    Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
-                });
+                }, throwable -> Log
+                        .e(TAG, "handleList: problem getting list " + throwable.getMessage()));
 
         mDisposables.add(disposable);
     }
@@ -863,9 +810,8 @@ public class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddFormItemLiveData.setValue(multipleChoiceFormItem);
-                }, throwable -> {
-                    Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
-                });
+                }, throwable -> Log
+                        .e(TAG, "handleList: problem getting list " + throwable.getMessage()));
 
         mDisposables.add(disposable);
     }
@@ -1050,8 +996,7 @@ public class CreateWorkflowViewModel extends ViewModel {
 
         FileFormItem item = new FileFormItem.Builder()
                 .setTitle(field.getFieldName())
-//                .setRequired(field.isRequired())
-                .setRequired(true)
+                .setRequired(field.isRequired())
                 .setTag(field.getId())
                 .setEscaped(escape(field.getFieldConfigObject()))
                 .setMachineName(field.getFieldConfigObject().getMachineName())
@@ -1569,44 +1514,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         return isValid;
     }
 
-    public void checkForContent(FormBuilder formBuilder) {
-        //todo check (validation)
-        /*List<FieldData> list = formSettings.getFieldItems();
-        FieldData field;
-        BaseFormElement baseFormElement;
-        ArrayList<BaseFormElement> emptyRequiredElements = new ArrayList<>();
-
-        for (int i = 0; i < list.size(); i++) {
-            field = list.get(i);
-            baseFormElement = formBuilder.getFormElement(field.tag);
-            if (baseFormElement.isRequired() && TextUtils.isEmpty(baseFormElement.getValue())) {
-                if (baseFormElement.getTag() != TAG_WORKFLOW_TYPE) {
-                    emptyRequiredElements.add(baseFormElement);
-                }
-            }
-        }
-
-        if (emptyRequiredElements.size() == 0) {
-            return;
-        }
-
-        int size = emptyRequiredElements.size();
-        String[] fieldNames = new String[size];
-        for (int i = 0; i < emptyRequiredElements.size(); i++) {
-            fieldNames[i] = emptyRequiredElements.get(i).getTitle();
-        }
-
-        int title = R.string.required_fields;
-        int message = R.string.complete_form;
-        DialogMessage dialogMessage = new DialogMessage();
-        dialogMessage.list = fieldNames;
-        dialogMessage.title = title;
-        dialogMessage.message = message;
-
-        showDialogMessage.setValue(dialogMessage);*/
-
-    }
-
     private static boolean isValidEmail(CharSequence target) {
         if (target == null) {
             return false;
@@ -1630,75 +1537,6 @@ public class CreateWorkflowViewModel extends ViewModel {
             return true;
         }
         return value.equals(FormSettings.VALUE_LIST) && type.equals(FormSettings.TYPE_SYSTEM_USERS);
-    }
-
-    public void getWorkflowTypes(String auth) {
-        //todo auth2 SOLO TESTING mientras no esta el backend live
-        Log.d("test", "getWorkflowTypes: ");
-        mRepository.getWorkflowTypes(auth)
-                .subscribe(this::onTypesSuccess, this::onFailure);
-    }
-
-    public void getList(String auth, int id) {
-        //todo auth2 SOLO TESTING mientras no esta el backend live
-        mRepository.getList(auth, id).subscribe(this::onListSuccess, this::onFailure);
-    }
-
-    public void getProducts(String auth) {
-        //todo auth2 SOLO TESTING mientras no esta el backend live
-        mRepository.getProducts(auth)
-                .subscribe(this::onProductsSuccess, this::onFailure);
-    }
-
-    public void getServices(String auth) {
-        //todo auth2 SOLO TESTING mientras no esta el backend live
-        mRepository.getServices(auth)
-                .subscribe(this::onServicesSuccess, this::onFailure);
-    }
-
-    public void getUsers(String auth) {
-        //todo auth2 SOLO TESTING mientras no esta el backend live
-        mRepository.getUsers(auth).subscribe(this::onUsersSuccess, this::onFailure);
-    }
-
-    public void getCountries(String auth) {
-        //todo auth2 SOLO TESTING mientras no esta el backend live
-        mRepository.getCountries(auth)
-                .subscribe(this::onCountriesSuccess, this::onFailure);
-    }
-
-    public void createWorkflow(String auth, int workflowTypeId, String title, String workflowMetas,
-                               String start, String description) {
-        //todo auth2 SOLO TESTING mientras no esta el backend live
-        mRepository.createWorkflow(auth, workflowTypeId, title, workflowMetas,
-                start, description).subscribe(this::onCreateSuccess, this::onCreateFailure);
-    }
-
-    private void onTypesSuccess(WorkflowTypesResponse workflowTypesResponse) {
-        for (WorkflowType type : workflowTypesResponse.getList()) {
-            Log.d("test", "onTypesSuccess: " + type.getName());
-        }
-        mWorkflowsLiveData.setValue(workflowTypesResponse);
-    }
-
-    private void onListSuccess(ListsResponse listsResponse) {
-        mListLiveData.setValue(listsResponse);
-    }
-
-    private void onProductsSuccess(ProductsResponse productsResponse) {
-        mProductLiveData.setValue(productsResponse);
-    }
-
-    private void onServicesSuccess(ServicesResponse servicesResponse) {
-        mServiceLiveData.setValue(servicesResponse);
-    }
-
-    private void onUsersSuccess(WorkflowUserResponse workflowUserResponse) {
-        mUserLiveData.setValue(workflowUserResponse);
-    }
-
-    private void onCountriesSuccess(CountriesResponse countriesResponse) {
-        mCountriesLiveData.setValue(countriesResponse);
     }
 
     private void onCreateSuccess(CreateWorkflowResponse createWorkflowResponse) {
@@ -1738,67 +1576,11 @@ public class CreateWorkflowViewModel extends ViewModel {
         Log.d(TAG, "onFailure: " + throwable.getMessage());
     }
 
-    protected LiveData<WorkflowTypesResponse> getObservableWorkflows() {
-        if (mWorkflowsLiveData == null) {
-            mWorkflowsLiveData = new MutableLiveData<>();
-        }
-        return mWorkflowsLiveData;
-    }
-
-    public LiveData<ListsResponse> getObservableList() {
-        if (mListLiveData == null) {
-            mListLiveData = new MutableLiveData<>();
-        }
-        return mListLiveData;
-    }
-
-    public LiveData<ProductsResponse> getObservableProduct() {
-        if (mProductLiveData == null) {
-            mProductLiveData = new MutableLiveData<>();
-        }
-        return mProductLiveData;
-    }
-
-    public LiveData<ServicesResponse> getObservableService() {
-        if (mServiceLiveData == null) {
-            mServiceLiveData = new MutableLiveData<>();
-        }
-        return mServiceLiveData;
-    }
-
-    public LiveData<WorkflowUserResponse> getObservableWorkflowUser() {
-        if (mUserLiveData == null) {
-            mUserLiveData = new MutableLiveData<>();
-        }
-        return mUserLiveData;
-    }
-
-    public LiveData<CountriesResponse> getObservableCountries() {
-        if (mCountriesLiveData == null) {
-            mCountriesLiveData = new MutableLiveData<>();
-        }
-        return mCountriesLiveData;
-    }
-
-    public LiveData<CreateWorkflowResponse> getObservableCreate() {
-        if (mCreateLiveData == null) {
-            mCreateLiveData = new MutableLiveData<>();
-        }
-        return mCreateLiveData;
-    }
-
     protected LiveData<Integer> getObservableError() {
         if (mErrorLiveData == null) {
             mErrorLiveData = new MutableLiveData<>();
         }
         return mErrorLiveData;
-    }
-
-    protected LiveData<Integer> getObservableCreateError() {
-        if (mCreateErrorLiveData == null) {
-            mCreateErrorLiveData = new MutableLiveData<>();
-        }
-        return mCreateErrorLiveData;
     }
 
     protected LiveData<Boolean> getObservableShowLoading() {

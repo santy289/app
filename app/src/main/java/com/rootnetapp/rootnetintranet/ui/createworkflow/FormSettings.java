@@ -15,7 +15,6 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.PostCountryCodeAndVa
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCurrency;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostPhone;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
-import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductJsonValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
@@ -25,8 +24,6 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
-import com.rootnetapp.rootnetintranet.models.responses.role.Role;
-import com.rootnetapp.rootnetintranet.models.responses.services.Service;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
@@ -43,20 +40,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import androidx.collection.ArrayMap;
-import me.riddhimanadib.formmaster.FormBuilder;
 
 public class FormSettings {
 
-    private ArrayList<String> names;
-    private ArrayList<Integer> ids;
+    private final ArrayList<String> names;
+    private final ArrayList<Integer> ids;
     private int workflowTypeIdSelected;
     private String title;
     private String description;
     private long createdTimestamp;
-    private ArrayList<FormCreateProfile> profiles;
+    private final ArrayList<FormCreateProfile> profiles;
     private List<FormFieldsByWorkflowType> fields; // Full info of all fields.
-    private Moshi moshi;
-    private FormBuilder formBuilder;
+    private final Moshi moshi;
     private List<BaseFormItem> formItems; //new
 
     public static final String TYPE_TEXT = "text";
@@ -85,10 +80,7 @@ public class FormSettings {
     public static final String VALUE_ENTITY = "entity";
     public static final String VALUE_COORD = "coords";
 
-    public static final int FIELD_CODE_ID = -999;
-    public static final int FIELD_CURRENCY_ID = -998;
-
-    public static final String TAG = "FormSettings";
+    private static final String TAG = "FormSettings";
 
     public FormSettings() {
         names = new ArrayList<>();
@@ -107,18 +99,6 @@ public class FormSettings {
 
     protected void setWorkflowTypeIdSelected(int workflowTypeIdSelected) {
         this.workflowTypeIdSelected = workflowTypeIdSelected;
-    }
-
-    public ArrayList<String> getNames() {
-        return names;
-    }
-
-    public FormBuilder getFormBuilder() {
-        return formBuilder;
-    }
-
-    public void setFormBuilder(FormBuilder formBuilder) {
-        this.formBuilder = formBuilder;
     }
 
     public void setName(String name) {
@@ -788,71 +768,6 @@ public class FormSettings {
         return listField;
     }
 
-    public ListField addServiceListToForm(List<Service> incomingList, String customLabel,
-                                          int customFieldId, String type) {
-        //todo check
-        ListField listField = new ListField();
-        listField.customFieldId = customFieldId;
-        listField.listType = type;
-        listField.customLabel = customLabel;
-
-        ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
-        for (int i = 0; i < incomingList.size(); i++) {
-            Service newItem = incomingList.get(i);
-            ListFieldItemMeta item = new ListFieldItemMeta(
-                    newItem.getId(),
-                    newItem.getName()
-            );
-            tempList.add(item);
-        }
-        listField.children = tempList;
-//        formLists.add(listField);
-        return listField;
-    }
-
-    public ListField addRolesLisToForm(List<Role> incomingList, String customLabel,
-                                       int customFieldId, String type) {
-        //todo check
-        ListField listField = new ListField();
-        listField.customFieldId = customFieldId;
-        listField.listType = type;
-        listField.customLabel = customLabel;
-        ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
-        for (int i = 0; i < incomingList.size(); i++) {
-            Role newItem = incomingList.get(i);
-            ListFieldItemMeta item = new ListFieldItemMeta(
-                    newItem.getId(),
-                    newItem.getName()
-            );
-            tempList.add(item);
-        }
-        listField.children = tempList;
-//        formLists.add(listField);
-        return listField;
-    }
-
-    public ListField addProductLisToForm(List<ProductFormList> incomingList, String customLabel,
-                                         int customFieldId, String type) {
-        //todo check
-        ListField listField = new ListField();
-        listField.customFieldId = customFieldId;
-        listField.listType = type;
-        listField.customLabel = customLabel;
-        ProductFormList newItem;
-        ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
-        for (int i = 0; i < incomingList.size(); i++) {
-            newItem = incomingList.get(i);
-            ListFieldItemMeta item = new ListFieldItemMeta(
-                    newItem.getId(),
-                    newItem.getName()
-            );
-            tempList.add(item);
-        }
-        listField.children = tempList;
-//        formLists.add(listField);
-        return listField;
-    }
-
     final static String MACHINE_NAME_TITLE = "wf_title";
     final static String MACHINE_NAME_KEY = "wf_key";
     final static String MACHINE_NAME_DESCRIPTION = "wf_description";
@@ -866,7 +781,7 @@ public class FormSettings {
 
     public ArrayList<Integer> idsForBaseFields = new ArrayList<>();
 
-    private ArrayMap<String, Integer> baseMachineNamesAndIds = new ArrayMap<>();
+    private final ArrayMap<String, Integer> baseMachineNamesAndIds = new ArrayMap<>();
 
     public String postTitle = "";
 

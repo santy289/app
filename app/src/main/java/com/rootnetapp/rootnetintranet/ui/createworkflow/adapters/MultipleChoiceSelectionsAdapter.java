@@ -11,12 +11,12 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class MultipleChoiceSelectionsAdapter extends
+class MultipleChoiceSelectionsAdapter extends
         RecyclerView.Adapter<MultipleChoiceSelectionsViewHolder> {
 
-    private List<Option> selectedValues;
+    private final List<Option> selectedValues;
 
-    public MultipleChoiceSelectionsAdapter(List<Option> selectedValues) {
+    MultipleChoiceSelectionsAdapter(List<Option> selectedValues) {
         this.selectedValues = selectedValues;
     }
 
@@ -28,7 +28,7 @@ public class MultipleChoiceSelectionsAdapter extends
      *
      * @return whether the item was added.
      */
-    public boolean addItem(Option value) {
+    boolean addItem(Option value) {
         for (Option selectedValue : selectedValues) {
             if (value == selectedValue) return false;
         }
@@ -39,7 +39,7 @@ public class MultipleChoiceSelectionsAdapter extends
         return true;
     }
 
-    public void removeItem(Option value) {
+    private void removeItem(Option value) {
         int position = selectedValues.indexOf(value);
         selectedValues.remove(value);
         notifyItemRemoved(position);

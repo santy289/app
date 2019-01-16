@@ -6,10 +6,10 @@ import com.rootnetapp.rootnetintranet.databinding.FormItemMultipleChoiceBinding;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-public class MultipleChoiceViewHolder extends RecyclerView.ViewHolder {
+class MultipleChoiceViewHolder extends RecyclerView.ViewHolder {
 
     private final FormItemMultipleChoiceBinding mBinding;
-    private RecyclerView.LayoutParams mRootParams;
+    private final RecyclerView.LayoutParams mRootParams;
 
     public MultipleChoiceViewHolder(FormItemMultipleChoiceBinding binding) {
         super(binding.getRoot());

@@ -6,10 +6,10 @@ import com.rootnetapp.rootnetintranet.databinding.FormItemDateBinding;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-public class DateViewHolder extends RecyclerView.ViewHolder {
+class DateViewHolder extends RecyclerView.ViewHolder {
 
     private final FormItemDateBinding mBinding;
-    private RecyclerView.LayoutParams mRootParams;
+    private final RecyclerView.LayoutParams mRootParams;
 
     public DateViewHolder(FormItemDateBinding binding) {
         super(binding.getRoot());

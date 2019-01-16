@@ -6,10 +6,10 @@ import com.rootnetapp.rootnetintranet.databinding.FormItemFileBinding;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-public class FileViewHolder extends RecyclerView.ViewHolder {
+class FileViewHolder extends RecyclerView.ViewHolder {
 
     private final FormItemFileBinding mBinding;
-    private RecyclerView.LayoutParams mRootParams;
+    private final RecyclerView.LayoutParams mRootParams;
 
     public FileViewHolder(FormItemFileBinding binding) {
         super(binding.getRoot());

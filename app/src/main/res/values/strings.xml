@@ -225,6 +225,7 @@
     <string name="add_file">Add File</string>
     <string name="asterisk" translatable="false">*</string>
     <string name="file_form_item_required_msg">You must add a file in order to continue.</string>
+    <string name="fill_all_form_items">You need to fill out all of the required elements.</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Workflow Details</string>

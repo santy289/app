@@ -260,12 +260,16 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
      */
     @UiThread
     private void updateValidationUi(BaseFormItem firstInvalidItem) {
+        //update item views
         mAdapter.setHasToEvaluateValid(true);
 
+        //show toast error message
+        showToastMessage(R.string.fill_all_form_items);
+
+        //scroll to the first item that is not valid
         if (firstInvalidItem == null) return;
         int firstInvalidPosition = mAdapter.getItemPosition(firstInvalidItem);
         mBinding.rvFields.scrollToPosition(firstInvalidPosition); //todo does not work
-        //todo maybe show a Toast too
     }
 
     /**

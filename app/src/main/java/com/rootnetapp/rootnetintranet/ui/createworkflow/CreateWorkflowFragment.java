@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -154,6 +155,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     public void onDestroyView() {
         super.onDestroyView();
         viewModel.onCleared();
+        hideSoftInputKeyboard();
     }
 
     @UiThread
@@ -183,6 +185,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     private void goBack() {
         if (getFragmentManager() != null) {
             getFragmentManager().popBackStack();
+            hideSoftInputKeyboard();
         }
     }
 
@@ -388,5 +391,15 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
                 getString(messageRes),
                 Toast.LENGTH_SHORT)
                 .show();
+    }
+
+    private void hideSoftInputKeyboard() {
+        // Check if no view has focus:
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity()
+                    .getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 }

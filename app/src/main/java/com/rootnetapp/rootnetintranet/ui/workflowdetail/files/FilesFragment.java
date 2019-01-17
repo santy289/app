@@ -122,6 +122,10 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
     private void showFileChooser() {
 
         if (filesViewModel.getFileRequest() == null) {
+
+            boolean isPresetSelected = filesViewModel.isAnyPresetSelected(mDocumentsAdapter.totalDocuments);
+            if (!isPresetSelected) return;
+
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("*/*");
             intent.addCategory(Intent.CATEGORY_OPENABLE);

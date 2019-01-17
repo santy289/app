@@ -59,6 +59,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder> 
         holder.binding.tvName.setText(item.getName());
         holder.binding.chbxItem.setOnCheckedChangeListener(
                 (compoundButton, b) -> item.setSelected(b));
+        item.setSelected(holder.binding.chbxItem.isChecked());
         if (file != null) {
             holder.binding.imgUploaded.setImageResource(R.drawable.ic_check_accent_24dp);
             holder.binding.imgUploaded

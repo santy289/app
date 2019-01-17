@@ -199,7 +199,7 @@
     <string name="base_filters">Filtros Base</string>
     <string name="all">Todos</string>
     <string name="on_time">A Tiempo</string>
-    <string name="latest">Latest</string>
+    <string name="latest">Últimos</string>
     <string name="dynamic_filters">Filtros Dinámicos</string>
     <string name="public_comment">Público</string>
     <string name="private_comment">Privado</string>

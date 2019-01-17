@@ -2,16 +2,16 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow.adapters;
 
 import android.view.ViewGroup;
 
-import com.rootnetapp.rootnetintranet.databinding.FormItemTextInputBinding;
+import com.rootnetapp.rootnetintranet.databinding.FormItemMultipleChoiceBinding;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-class TextInputViewHolder extends RecyclerView.ViewHolder {
+class MultipleChoiceViewHolder extends RecyclerView.ViewHolder {
 
-    private final FormItemTextInputBinding mBinding;
+    private final FormItemMultipleChoiceBinding mBinding;
     private final RecyclerView.LayoutParams mRootParams;
 
-    public TextInputViewHolder(FormItemTextInputBinding binding) {
+    public MultipleChoiceViewHolder(FormItemMultipleChoiceBinding binding) {
         super(binding.getRoot());
 
         mBinding = binding;
@@ -19,7 +19,7 @@ class TextInputViewHolder extends RecyclerView.ViewHolder {
         mRootParams = (RecyclerView.LayoutParams) mBinding.root.getLayoutParams();
     }
 
-    protected FormItemTextInputBinding getBinding() {
+    protected FormItemMultipleChoiceBinding getBinding() {
         return mBinding;
     }
 

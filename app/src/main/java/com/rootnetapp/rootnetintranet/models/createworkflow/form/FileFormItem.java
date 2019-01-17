@@ -2,17 +2,17 @@ package com.rootnetapp.rootnetintranet.models.createworkflow.form;
 
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 
-import java.util.List;
+public class FileFormItem extends BaseFormItem {
 
-import androidx.annotation.Nullable;
+    private String value;
+    private int fileId;
+    private String filePath;
+    private String fileName;
+    private String fileType;
+    private int fileSize;
+    private OnButtonClickedListener onButtonClickedListener;
 
-public class CurrencyFormItem extends BaseFormItem {
-
-    private @Nullable Double value;
-    private @Nullable Option selectedOption;
-    private List<Option> options;
-
-    private CurrencyFormItem() {
+    private FileFormItem() {
         //Constructor is private for Builder pattern
     }
 
@@ -20,38 +20,76 @@ public class CurrencyFormItem extends BaseFormItem {
     public boolean isValid() {
         if (!isRequired()) return true;
 
-        return isRequired() && getSelectedOption() != null && getValue() != null;
+        return isRequired() && getValue() != null;
     }
 
     @Override
     public String getStringValue() {
-        return getSelectedOption() == null || value == null ? "" : getSelectedOption().getName() + " " + getValue();
+        return getValue();
     }
 
-    public List<Option> getOptions() {
-        return options;
-    }
-
-    public void setOptions(List<Option> options) {
-        this.options = options;
-    }
-
-    @Nullable
-    public Double getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(@Nullable Double value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
-    @Nullable
-    public Option getSelectedOption() {
-        return selectedOption;
+    public OnButtonClickedListener getOnButtonClickedListener() {
+        return onButtonClickedListener;
     }
 
-    public void setSelectedOption(@Nullable Option selectedOption) {
-        this.selectedOption = selectedOption;
+    public void setOnButtonClickedListener(OnButtonClickedListener onButtonClickedListener) {
+        this.onButtonClickedListener = onButtonClickedListener;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public int getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(int fileSize) {
+        this.fileSize = fileSize;
+    }
+
+    public void clearFileValues(){
+        setValue(null);
+        setFileName(null);
+        setFileSize(0);
+        setFileType(null);
+        setFilePath(null);
+    }
+
+    public int getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(int fileId) {
+        this.fileId = fileId;
     }
 
     public static class Builder {
@@ -65,9 +103,7 @@ public class CurrencyFormItem extends BaseFormItem {
         private boolean isVisible = true;
         private TypeInfo typeInfo;
         private String machineName;
-        private Double value;
-        private Option selectedOption;
-        private List<Option> options;
+        private String value;
 
         public Builder setTitle(String title) {
             this.title = title;
@@ -123,26 +159,14 @@ public class CurrencyFormItem extends BaseFormItem {
             return this;
         }
 
-        public Builder setValue(Double value) {
+        public Builder setValue(String value) {
             this.value = value;
 
             return this;
         }
 
-        public Builder setSelectedOption(Option selectedOption) {
-            this.selectedOption = selectedOption;
-
-            return this;
-        }
-
-        public Builder setOptions(List<Option> options) {
-            this.options = options;
-
-            return this;
-        }
-
-        public CurrencyFormItem build() {
-            CurrencyFormItem item = new CurrencyFormItem();
+        public FileFormItem build() {
+            FileFormItem item = new FileFormItem();
 
             item.setTitle(title);
             item.setTitleRes(titleRes);
@@ -154,11 +178,14 @@ public class CurrencyFormItem extends BaseFormItem {
             item.setTypeInfo(typeInfo);
             item.setMachineName(machineName);
             item.setValue(value);
-            item.setSelectedOption(selectedOption);
-            item.setOptions(options);
-            item.setViewType(FormItemViewType.CURRENCY);
+            item.setViewType(FormItemViewType.FILE);
 
             return item;
         }
+    }
+
+    public interface OnButtonClickedListener {
+
+        void onButtonClicked();
     }
 }

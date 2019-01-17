@@ -11,17 +11,19 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.Form
 import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
-import com.rootnetapp.rootnetintranet.models.createworkflow.PendingFileUpload;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCountryCodeAndValue;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostCurrency;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostPhone;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
-import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductJsonValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
-import com.rootnetapp.rootnetintranet.models.responses.role.Role;
-import com.rootnetapp.rootnetintranet.models.responses.services.Service;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
@@ -30,30 +32,26 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.Inf
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
+import com.squareup.moshi.Types;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 import androidx.collection.ArrayMap;
-import me.riddhimanadib.formmaster.FormBuilder;
 
 public class FormSettings {
 
-    private ArrayList<String> names;
-    private ArrayList<Integer> ids;
-    private int indexWorkflowTypeSelected;
+    private final ArrayList<String> names;
+    private final ArrayList<Integer> ids;
     private int workflowTypeIdSelected;
     private String title;
     private String description;
     private long createdTimestamp;
-    private ArrayList<FormCreateProfile> profiles;
+    private final ArrayList<FormCreateProfile> profiles;
     private List<FormFieldsByWorkflowType> fields; // Full info of all fields.
-    private Moshi moshi;
-    private String uploadFileName;
-    private String uploadFileExtension;
-    private PendingFileUpload pendingFileUpload;
-    private FormBuilder formBuilder;
+    private final Moshi moshi;
     private List<BaseFormItem> formItems; //new
 
     public static final String TYPE_TEXT = "text";
@@ -82,65 +80,25 @@ public class FormSettings {
     public static final String VALUE_ENTITY = "entity";
     public static final String VALUE_COORD = "coords";
 
-    public static final int FIELD_CODE_ID = -999;
-    public static final int FIELD_CURRENCY_ID = -998;
-
-    public static final String TAG = "FormSettings";
+    private static final String TAG = "FormSettings";
 
     public FormSettings() {
         names = new ArrayList<>();
         ids = new ArrayList<>();
         profiles = new ArrayList<>();
         fields = new ArrayList<>();
-        indexWorkflowTypeSelected = 0;
         title = "";
         description = "";
         createdTimestamp = 0;
         moshi = new Moshi.Builder().build();
     }
 
-    public int getWorkflowTypeIdSelected() {
+    protected int getWorkflowTypeIdSelected() {
         return workflowTypeIdSelected;
     }
 
-    public void setWorkflowTypeIdSelected(int workflowTypeIdSelected) {
+    protected void setWorkflowTypeIdSelected(int workflowTypeIdSelected) {
         this.workflowTypeIdSelected = workflowTypeIdSelected;
-    }
-
-    public ArrayList<String> getNames() {
-        return names;
-    }
-
-    public String getUploadFileName() {
-        return uploadFileName;
-    }
-
-    public FormBuilder getFormBuilder() {
-        return formBuilder;
-    }
-
-    public void setFormBuilder(FormBuilder formBuilder) {
-        this.formBuilder = formBuilder;
-    }
-
-    public void setUploadFileName(String uploadFileName) {
-        this.uploadFileName = uploadFileName;
-    }
-
-    public String getUploadFileExtension() {
-        return uploadFileExtension;
-    }
-
-    public void setUploadFileExtension(String uploadFileExtension) {
-        this.uploadFileExtension = uploadFileExtension;
-    }
-
-    public PendingFileUpload getPendingFileUpload() {
-        return pendingFileUpload;
-    }
-
-    public void setPendingFileUpload(PendingFileUpload pendingFileUpload) {
-        this.pendingFileUpload = pendingFileUpload;
     }
 
     public void setName(String name) {
@@ -179,57 +137,7 @@ public class FormSettings {
         return idList;
     }
 
-    public int countryCode;
-
-    public boolean hasValidCountryCode() {
-        if (countryCode > 0) {
-            return true;
-        }
-        return false;
-    }
-
-    public int countryCurrency;
-
-    public boolean hasValidCountryCurrency() {
-        if (countryCurrency > 0) {
-            return true;
-        }
-        return false;
-    }
-
-    public void setCountryCode(String fieldValue, FieldData fieldData) {
-        if (TextUtils.isEmpty(fieldValue)) {
-            return;
-        }
-
-        List<ListFieldItemMeta> codeList = fieldData.list;
-        ListFieldItemMeta codeMeta;
-        for (int i = 0; i < codeList.size(); i++) {
-            codeMeta = codeList.get(i);
-            if (!codeMeta.name.equals(fieldValue)) {
-                continue;
-            }
-            countryCode = codeMeta.id;
-        }
-    }
-
-    public void setCurrencyType(String fieldValue, FieldData fieldData) {
-        if (TextUtils.isEmpty(fieldValue)) {
-            return;
-        }
-
-        List<ListFieldItemMeta> codeList = fieldData.list;
-        ListFieldItemMeta codeMeta;
-        for (int i = 0; i < codeList.size(); i++) {
-            codeMeta = codeList.get(i);
-            if (!codeMeta.name.equals(fieldValue)) {
-                continue;
-            }
-            countryCurrency = codeMeta.id;
-        }
-    }
-
-    public FormCreateProfile getProfileBy(String userName) {
+    protected FormCreateProfile getProfileBy(String userName) {
         FormCreateProfile profile;
         for (int i = 0; i < profiles.size(); i++) {
             profile = profiles.get(i);
@@ -240,15 +148,7 @@ public class FormSettings {
         return null;
     }
 
-    public int getIndexWorkflowTypeSelected() {
-        return indexWorkflowTypeSelected;
-    }
-
-    public void setIndexWorkflowTypeSelected(int indexWorkflowTypeSelected) {
-        this.indexWorkflowTypeSelected = indexWorkflowTypeSelected;
-    }
-
-    public int findIdByTypeName(String name) {
+    protected int findIdByTypeName(String name) {
         String typeName;
         int id = 0;
         for (int i = 0; i < names.size(); i++) {
@@ -271,25 +171,14 @@ public class FormSettings {
         format(metaData, typeInfo, formItem);
     }
 
-    public WorkflowMetas formatMetaData(WorkflowMetas metaData, BaseFormItem formItem,
-                                        FieldConfig fieldConfig) {
-        TypeInfo typeInfo = fieldConfig.getTypeInfo();
-        if (typeInfo == null) {
-            return metaData;
-        }
-        //todo check
-        /*boolean rememberRealValue = fieldData.isMultipleSelection;
-        fieldData.isMultipleSelection = true;*/
-        format(metaData, typeInfo, formItem);
-//        fieldData.isMultipleSelection = rememberRealValue;
-        return metaData;
-    }
-
     private void format(WorkflowMetas metaData, TypeInfo typeInfo, BaseFormItem formItem) {
         String value = metaData.getUnformattedValue();
-        if (TextUtils.isEmpty(value)) {
+        //we allow the FileFormItem even though the value is null because of the editing mode, when the user tries to delete a file.
+        if (TextUtils.isEmpty(value) && !(formItem instanceof FileFormItem)) {
             return;
         }
+
+        boolean isMultiple = formItem instanceof MultipleChoiceFormItem;
 
         switch (typeInfo.getValueType()) {
             case FormSettings.VALUE_BOOLEAN:
@@ -306,14 +195,16 @@ public class FormSettings {
                     metaData.setValue(value);
                     break;
                 }
-                if (typeInfo.getType().equals(TYPE_CURRENCY)) {
-                    String json = getJsonForCurrencyType(value);
+
+                if (typeInfo.getType()
+                        .equals(TYPE_CURRENCY) && formItem instanceof CurrencyFormItem) {
+                    String json = getJsonForCurrencyType((CurrencyFormItem) formItem);
                     metaData.setValue(json);
                     break;
                 }
 
-                if (typeInfo.getType().equals(TYPE_FILE)) {
-                    String json = getFileMetaJson();
+                if (typeInfo.getType().equals(TYPE_FILE) && formItem instanceof FileFormItem) {
+                    String json = getFileMetaJson((FileFormItem) formItem);
                     metaData.setValue(json);
                     break;
                 }
@@ -321,17 +212,21 @@ public class FormSettings {
                 metaData.setValue("");
                 break;
             case FormSettings.VALUE_ENTITY:
-                handleSingleSelection((SingleChoiceFormItem) formItem, metaData, value);
+                handleSingleSelection((SingleChoiceFormItem) formItem, metaData);
                 break;
             case FormSettings.VALUE_LIST:
                 if (typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
-                    String json = getJsonStringForSystemUserType(value);
+                    String json = isMultiple
+                            ? getJsonStringForSystemUserTypeList((MultipleChoiceFormItem) formItem)
+                            : getJsonStringForSystemUserType((SingleChoiceFormItem) formItem);
                     metaData.setValue(json);
                     break;
                 }
 
                 if (typeInfo.getType().equals(TYPE_PRODUCT)) {
-                    String json = getProductJson(value, (SingleChoiceFormItem) formItem, metaData);
+                    String json = isMultiple
+                            ? getProductListJson((MultipleChoiceFormItem) formItem, metaData)
+                            : getProductJson((SingleChoiceFormItem) formItem, metaData);
                     metaData.setValue(json);
                     break;
                 }
@@ -341,14 +236,19 @@ public class FormSettings {
 
                 }
 
-                handleSingleSelection((SingleChoiceFormItem) formItem, metaData, value);
+                if (isMultiple) {
+                    handleMultipleSelection((MultipleChoiceFormItem) formItem, metaData);
+                } else {
+                    handleSingleSelection((SingleChoiceFormItem) formItem, metaData);
+                }
                 break;
             case FormSettings.VALUE_STRING:
-                if (typeInfo.getType().equals(TYPE_PHONE)) {
-                    String json = getJsonForPhoneType(value);
+                if (typeInfo.getType().equals(TYPE_PHONE) && formItem instanceof PhoneFormItem) {
+                    String json = getJsonForPhoneType((PhoneFormItem) formItem);
                     metaData.setValue(json);
                     break;
                 }
+
                 metaData.setValue(value);
                 break;
             case FormSettings.VALUE_TEXT:
@@ -366,7 +266,8 @@ public class FormSettings {
                 || typeInfo.getType().equals(TYPE_SYSTEM_USERS)
                 || typeInfo.getType().equals(TYPE_PHONE)
                 || typeInfo.getType().equals(TYPE_CURRENCY)
-                || typeInfo.getType().equals(TYPE_PRODUCT)) {
+                || typeInfo.getType().equals(TYPE_PRODUCT)
+                || typeInfo.getType().equals(TYPE_FILE)) {
             return;
         }
 
@@ -379,84 +280,110 @@ public class FormSettings {
         metaData.setValue(gson.toJson(metaValue));
     }
 
-    private String getProductJson(String value, SingleChoiceFormItem formItem,
+    private String getProductJson(SingleChoiceFormItem formItem,
                                   WorkflowMetas workflowMetas) {
-        List<Option> list = formItem.getOptions();
-        Option item;
-        int id = 0;
-        for (int i = 0; i < list.size(); i++) {
-            item = list.get(i);
-            if (item.getName().equals(value)) {
-                id = item.getId();
-                break;
-            }
-        }
+        Option value = formItem.getValue();
+        if (value == null) return "";
 
-        if (id == 0) {
-            return "";
-        }
+        int id = value.getId();
+        if (id == 0) return "";
 
         ProductJsonValue productJsonValue = new ProductJsonValue();
         productJsonValue.setValue(String.valueOf(id));
         productJsonValue.setWorkflowTypeFieldId(workflowMetas.getWorkflowTypeFieldId());
 
         JsonAdapter<ProductJsonValue> jsonAdapter = moshi.adapter(ProductJsonValue.class);
-        String jsonString = jsonAdapter.toJson(productJsonValue);
 
-        return jsonString;
-
+        return jsonAdapter.toJson(productJsonValue);
     }
 
-    private String getFileMetaJson() {
-        String name = pendingFileUpload.fileName;
-        int id = pendingFileUpload.fileId;
-        if (id == 0 || TextUtils.isEmpty(name)) {
+    /**
+     * Generates the JSON object in String format for the Products {@link MultipleChoiceFormItem}
+     * that will be sent to the server.
+     *
+     * @param formItem item to serialize
+     *
+     * @return JSON string
+     */
+    private String getProductListJson(MultipleChoiceFormItem formItem,
+                                      WorkflowMetas workflowMetas) {
+        List<Option> list = formItem.getOptions();
+        if (list == null) {
             return "";
+        }
+
+        List<ProductJsonValue> productJsonValueList = new ArrayList<>();
+        for (int i = 0; i < formItem.getValues().size(); i++) {
+            Option value = formItem.getValues().get(i);
+
+            ProductJsonValue productJsonValue = new ProductJsonValue();
+            productJsonValue.setValue(String.valueOf(value.getId()));
+            productJsonValue.setWorkflowTypeFieldId(workflowMetas.getWorkflowTypeFieldId());
+
+            productJsonValueList.add(productJsonValue);
+        }
+
+        Moshi moshi = new Moshi.Builder().build();
+        Type type = Types.newParameterizedType(List.class, ProductJsonValue.class);
+        JsonAdapter<List<ProductJsonValue>> jsonAdapter = moshi.adapter(type);
+        return jsonAdapter.toJson(productJsonValueList);
+    }
+
+    private String getFileMetaJson(FileFormItem formItem) {
+        String name = formItem.getFileName();
+        int id = formItem.getFileId();
+        if (id == 0 || TextUtils.isEmpty(name)) {
+            return "\"\"";
         }
 
         FileMetaData fileMetaData = new FileMetaData();
         fileMetaData.name = name;
-        fileMetaData.value = pendingFileUpload.fileId;
+        fileMetaData.value = id;
         JsonAdapter<FileMetaData> jsonAdapter = moshi.adapter(FileMetaData.class);
-        String jsonString = jsonAdapter.toJson(fileMetaData);
-        return jsonString;
+        return jsonAdapter.toJson(fileMetaData);
     }
 
-    private String getJsonForCurrencyType(String currencyNumber) {
-        if (TextUtils.isEmpty(currencyNumber) || !hasValidCountryCurrency()) {
-            return "";
-        }
+    private String getJsonForCurrencyType(CurrencyFormItem formItem) {
+        Double currencyValue = formItem.getValue();
+        if (currencyValue == null || currencyValue == 0) return "";
 
-        PostCountryCodeAndValue postCountryCodeAndValue = new PostCountryCodeAndValue();
-        postCountryCodeAndValue.countryId = countryCurrency;
-        postCountryCodeAndValue.value = Integer.valueOf(currencyNumber);
+        Option selectedOption = formItem.getSelectedOption();
+        if (selectedOption == null) return "";
 
-        JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi
-                .adapter(PostCountryCodeAndValue.class);
-        String jsonString = jsonAdapter.toJson(postCountryCodeAndValue);
-        return jsonString;
+        int currencyCode = selectedOption.getId();
+
+        PostCurrency postCurrency = new PostCurrency();
+        postCurrency.countryId = currencyCode;
+        postCurrency.value = currencyValue;
+
+        JsonAdapter<PostCurrency> jsonAdapter = moshi.adapter(PostCurrency.class);
+        return jsonAdapter.toJson(postCurrency);
     }
 
-    private String getJsonForPhoneType(String phoneNumber) {
-        if (TextUtils.isEmpty(phoneNumber) || !hasValidCountryCode()) {
-            return "";
-        }
+    private String getJsonForPhoneType(PhoneFormItem formItem) {
+        String phoneValue = formItem.getValue();
+        if (TextUtils.isEmpty(phoneValue)) return "";
 
-        PostCountryCodeAndValue postCountryCodeAndValue = new PostCountryCodeAndValue();
-        postCountryCodeAndValue.countryId = countryCode;
-        postCountryCodeAndValue.value = Integer.valueOf(phoneNumber);
+        Option selectedOption = formItem.getSelectedOption();
+        if (selectedOption == null) return "";
 
-        JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi
-                .adapter(PostCountryCodeAndValue.class);
-        String jsonString = jsonAdapter.toJson(postCountryCodeAndValue);
-        return jsonString;
+        int countryCode = selectedOption.getId();
+
+        PostPhone postPhone = new PostPhone();
+        postPhone.countryId = countryCode;
+        postPhone.value = phoneValue;
+
+        JsonAdapter<PostPhone> jsonAdapter = moshi.adapter(PostPhone.class);
+        return jsonAdapter.toJson(postPhone);
     }
 
-    private String getJsonStringForSystemUserType(String username) {
+    private String getJsonStringForSystemUserType(SingleChoiceFormItem formItem) {
+        Option value = formItem.getValue();
+        if (value == null) return "";
+
+        String username = value.getName();
         FormCreateProfile profile = getProfileBy(username);
-        if (profile == null) {
-            return "";
-        }
+        if (profile == null) return "";
 
         PostSystemUser postSystemUser = new PostSystemUser();
         postSystemUser.id = profile.getId();
@@ -465,8 +392,44 @@ public class FormSettings {
 
         Moshi moshi = new Moshi.Builder().build();
         JsonAdapter<PostSystemUser> jsonAdapter = moshi.adapter(PostSystemUser.class);
-        String jsonString = jsonAdapter.toJson(postSystemUser);
-        return jsonString;
+        return jsonAdapter.toJson(postSystemUser);
+    }
+
+    /**
+     * Generates the JSON object in String format for the System Users {@link
+     * MultipleChoiceFormItem} that will be sent to the server.
+     *
+     * @param formItem item to serialize
+     *
+     * @return JSON string
+     */
+    private String getJsonStringForSystemUserTypeList(MultipleChoiceFormItem formItem) {
+        List<Option> list = formItem.getOptions();
+        if (list == null) {
+            return "";
+        }
+
+        List<PostSystemUser> postSystemUserList = new ArrayList<>();
+        for (int i = 0; i < formItem.getValues().size(); i++) {
+            Option value = formItem.getValues().get(i);
+
+            FormCreateProfile profile = getProfileBy(value.getName());
+            if (profile == null) {
+                continue;
+            }
+
+            PostSystemUser postSystemUser = new PostSystemUser();
+            postSystemUser.id = profile.getId();
+            postSystemUser.username = profile.getUsername();
+            postSystemUser.email = profile.getEmail();
+
+            postSystemUserList.add(postSystemUser);
+        }
+
+        Moshi moshi = new Moshi.Builder().build();
+        Type type = Types.newParameterizedType(List.class, PostSystemUser.class);
+        JsonAdapter<List<PostSystemUser>> jsonAdapter = moshi.adapter(type);
+        return jsonAdapter.toJson(postSystemUserList);
     }
 
     private void handleBoolean(TypeInfo typeInfo, WorkflowMetas metaData, String value) {
@@ -479,59 +442,44 @@ public class FormSettings {
         }
     }
 
-    private void handleSingleSelection(SingleChoiceFormItem formItem, WorkflowMetas metaData,
-                                       String value) {
+    private void handleSingleSelection(SingleChoiceFormItem formItem, WorkflowMetas metaData) {
+        Option value = formItem.getValue();
+        if (value == null) return;
+
+        int id = value.getId();
+        if (id == 0) return;
+
+        metaData.setValue(String.valueOf(id));
+    }
+
+    /**
+     * Formats and creates the meta data value for the {@link MultipleChoiceFormItem}s.
+     *
+     * @param formItem item to format
+     * @param metaData resulting meta data
+     */
+    private void handleMultipleSelection(MultipleChoiceFormItem formItem, WorkflowMetas metaData) {
         List<Option> list = formItem.getOptions();
         if (list == null) {
             return;
         }
 
-        int id;
-        //todo handle multiple selection
-        /*if (fieldData.isMultipleSelection) {
-            ArrayList<String> matches = new ArrayList<>();
-            String selection;
-            List<String> values = Arrays.asList(value.split("\\s*,\\s*"));
-            for (int i = 0; i < values.size(); i++) {
-                selection = values.get(i);
-                id = findIdByValue(list, selection);
-                if (id == 0) {
-                    continue;
-                }
-                matches.add(String.valueOf(id));
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("[");
+        for (int i = 0; i < formItem.getValues().size(); i++) {
+            Option value = formItem.getValues().get(i);
+            int id = value.getId();
+            if (id == 0) {
+                continue;
             }
-            String formattedValue = "";
-            String match;
-            int size = matches.size();
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("[");
-            for (int i = 0; i < size; i++) {
-                match = matches.get(i);
-                stringBuilder.append(match);
-                if (i < size - 1) {
-                    stringBuilder.append(",");
-                }
-            }
-            formattedValue = stringBuilder.append("]").toString();
-            metaData.setValue(formattedValue);
-        } else {
-            id = findIdByValue(list, value);
-            metaData.setValue(String.valueOf(id));
-        }*/
 
-        id = findIdByValue(list, value);
-        metaData.setValue(String.valueOf(id));
-    }
-
-    private int findIdByValue(List<Option> options, String value) {
-        Option item;
-        for (int j = 0; j < options.size(); j++) {
-            item = options.get(j);
-            if (value.equals(item.getName())) {
-                return item.getId();
+            stringBuilder.append(String.valueOf(id));
+            if (i < formItem.getValues().size() - 1) {
+                stringBuilder.append(",");
             }
         }
-        return 0;
+        String formattedValue = stringBuilder.append("]").toString();
+        metaData.setValue(formattedValue);
     }
 
     public List<BaseFormItem> getFormItems() {
@@ -639,8 +587,16 @@ public class FormSettings {
                 }
 
                 if (typeInfo.getType().equals(TYPE_FILE)) {
-                    // TODO handle file.
-                    return null;
+                    JsonAdapter<FileMetaData> jsonAdapter = moshi.adapter(FileMetaData.class);
+                    try {
+                        FileMetaData fileMetaData = jsonAdapter.fromJson(meta.getValue());
+                        information.setDisplayValue(fileMetaData.name);
+                        return information;
+                    } catch (IOException | JsonDataException e) {
+                        e.printStackTrace();
+                        information.setDisplayValue("");
+                        return information;
+                    }
                 }
 
                 return null;
@@ -812,71 +768,6 @@ public class FormSettings {
         return listField;
     }
 
-    public ListField addServiceListToForm(List<Service> incomingList, String customLabel,
-                                          int customFieldId, String type) {
-        //todo check
-        ListField listField = new ListField();
-        listField.customFieldId = customFieldId;
-        listField.listType = type;
-        listField.customLabel = customLabel;
-
-        ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
-        for (int i = 0; i < incomingList.size(); i++) {
-            Service newItem = incomingList.get(i);
-            ListFieldItemMeta item = new ListFieldItemMeta(
-                    newItem.getId(),
-                    newItem.getName()
-            );
-            tempList.add(item);
-        }
-        listField.children = tempList;
-//        formLists.add(listField);
-        return listField;
-    }
-
-    public ListField addRolesLisToForm(List<Role> incomingList, String customLabel,
-                                       int customFieldId, String type) {
-        //todo check
-        ListField listField = new ListField();
-        listField.customFieldId = customFieldId;
-        listField.listType = type;
-        listField.customLabel = customLabel;
-        ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
-        for (int i = 0; i < incomingList.size(); i++) {
-            Role newItem = incomingList.get(i);
-            ListFieldItemMeta item = new ListFieldItemMeta(
-                    newItem.getId(),
-                    newItem.getName()
-            );
-            tempList.add(item);
-        }
-        listField.children = tempList;
-//        formLists.add(listField);
-        return listField;
-    }
-
-    public ListField addProductLisToForm(List<ProductFormList> incomingList, String customLabel,
-                                         int customFieldId, String type) {
-        //todo check
-        ListField listField = new ListField();
-        listField.customFieldId = customFieldId;
-        listField.listType = type;
-        listField.customLabel = customLabel;
-        ProductFormList newItem;
-        ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
-        for (int i = 0; i < incomingList.size(); i++) {
-            newItem = incomingList.get(i);
-            ListFieldItemMeta item = new ListFieldItemMeta(
-                    newItem.getId(),
-                    newItem.getName()
-            );
-            tempList.add(item);
-        }
-        listField.children = tempList;
-//        formLists.add(listField);
-        return listField;
-    }
-
     final static String MACHINE_NAME_TITLE = "wf_title";
     final static String MACHINE_NAME_KEY = "wf_key";
     final static String MACHINE_NAME_DESCRIPTION = "wf_description";
@@ -890,7 +781,7 @@ public class FormSettings {
 
     public ArrayList<Integer> idsForBaseFields = new ArrayList<>();
 
-    private ArrayMap<String, Integer> baseMachineNamesAndIds = new ArrayMap<>();
+    private final ArrayMap<String, Integer> baseMachineNamesAndIds = new ArrayMap<>();
 
     public String postTitle = "";
 
@@ -960,8 +851,6 @@ public class FormSettings {
     }
 
     protected void clearFormItems() {
-        pendingFileUpload = null;
-
         List<BaseFormItem> formItems = getFormItems();
 
         if (formItems.size() <= 1) {
@@ -1010,6 +899,20 @@ public class FormSettings {
             }
         }
 
+        return null;
+    }
+
+    protected Option findOption(List<Option> options, String stringValue) {
+        for (Option option : options) {
+            if (stringValue.equals(option.getName())) return option;
+        }
+        return null;
+    }
+
+    protected Option findOption(List<Option> options, int id) {
+        for (Option option : options) {
+            if (id == option.getId()) return option;
+        }
         return null;
     }
 }

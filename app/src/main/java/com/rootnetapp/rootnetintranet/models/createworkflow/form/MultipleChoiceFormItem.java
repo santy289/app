@@ -2,17 +2,15 @@ package com.rootnetapp.rootnetintranet.models.createworkflow.form;
 
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import androidx.annotation.Nullable;
+public class MultipleChoiceFormItem extends BaseFormItem {
 
-public class CurrencyFormItem extends BaseFormItem {
-
-    private @Nullable Double value;
-    private @Nullable Option selectedOption;
+    private List<Option> values;
     private List<Option> options;
 
-    private CurrencyFormItem() {
+    private MultipleChoiceFormItem() {
         //Constructor is private for Builder pattern
     }
 
@@ -20,12 +18,46 @@ public class CurrencyFormItem extends BaseFormItem {
     public boolean isValid() {
         if (!isRequired()) return true;
 
-        return isRequired() && getSelectedOption() != null && getValue() != null;
+        return isRequired() && getValues() != null;
+
     }
 
     @Override
     public String getStringValue() {
-        return getSelectedOption() == null || value == null ? "" : getSelectedOption().getName() + " " + getValue();
+        if (getValues().isEmpty()) return "";
+
+        //create a csv string value
+        char separator = ',';
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Option value : getValues()) {
+            stringBuilder.append(value.toString());
+            stringBuilder.append(separator);
+        }
+        stringBuilder.deleteCharAt(stringBuilder.length() - 1); //delete last separator
+
+        return stringBuilder.toString();
+    }
+
+    public List<Option> getValues() {
+        if (values == null) values = new ArrayList<>();
+
+        return values;
+    }
+
+    public void setValues(List<Option> values) {
+        this.values = values;
+    }
+
+    public void addValue(Option value){
+        getValues().add(value);
+    }
+
+    public void removeValue(Option value){
+        getValues().remove(value);
+    }
+
+    public void removeValue(int position){
+        getValues().remove(position);
     }
 
     public List<Option> getOptions() {
@@ -34,24 +66,6 @@ public class CurrencyFormItem extends BaseFormItem {
 
     public void setOptions(List<Option> options) {
         this.options = options;
-    }
-
-    @Nullable
-    public Double getValue() {
-        return value;
-    }
-
-    public void setValue(@Nullable Double value) {
-        this.value = value;
-    }
-
-    @Nullable
-    public Option getSelectedOption() {
-        return selectedOption;
-    }
-
-    public void setSelectedOption(@Nullable Option selectedOption) {
-        this.selectedOption = selectedOption;
     }
 
     public static class Builder {
@@ -65,8 +79,7 @@ public class CurrencyFormItem extends BaseFormItem {
         private boolean isVisible = true;
         private TypeInfo typeInfo;
         private String machineName;
-        private Double value;
-        private Option selectedOption;
+        private List<Option> values;
         private List<Option> options;
 
         public Builder setTitle(String title) {
@@ -123,14 +136,8 @@ public class CurrencyFormItem extends BaseFormItem {
             return this;
         }
 
-        public Builder setValue(Double value) {
-            this.value = value;
-
-            return this;
-        }
-
-        public Builder setSelectedOption(Option selectedOption) {
-            this.selectedOption = selectedOption;
+        public Builder setValues(List<Option> values) {
+            this.values = values;
 
             return this;
         }
@@ -141,8 +148,8 @@ public class CurrencyFormItem extends BaseFormItem {
             return this;
         }
 
-        public CurrencyFormItem build() {
-            CurrencyFormItem item = new CurrencyFormItem();
+        public MultipleChoiceFormItem build() {
+            MultipleChoiceFormItem item = new MultipleChoiceFormItem();
 
             item.setTitle(title);
             item.setTitleRes(titleRes);
@@ -153,10 +160,9 @@ public class CurrencyFormItem extends BaseFormItem {
             item.setVisible(isVisible);
             item.setTypeInfo(typeInfo);
             item.setMachineName(machineName);
-            item.setValue(value);
-            item.setSelectedOption(selectedOption);
+            item.setValues(values);
             item.setOptions(options);
-            item.setViewType(FormItemViewType.CURRENCY);
+            item.setViewType(FormItemViewType.MULTIPLE_CHOICE);
 
             return item;
         }

@@ -6,10 +6,10 @@ import com.rootnetapp.rootnetintranet.databinding.FormItemCurrencyBinding;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-public class CurrencyViewHolder extends RecyclerView.ViewHolder {
+class CurrencyViewHolder extends RecyclerView.ViewHolder {
 
     private final FormItemCurrencyBinding mBinding;
-    private RecyclerView.LayoutParams mRootParams;
+    private final RecyclerView.LayoutParams mRootParams;
 
     public CurrencyViewHolder(FormItemCurrencyBinding binding) {
         super(binding.getRoot());

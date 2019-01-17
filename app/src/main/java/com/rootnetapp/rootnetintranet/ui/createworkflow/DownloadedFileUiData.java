@@ -2,9 +2,6 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
 import java.io.File;
 
-/**
- * Created by ldemorais on 1/16/19. ldemorais@hypernovalabs.com
- */
 class DownloadedFileUiData {
     private File file;
     private String mimeType;

@@ -299,4 +299,10 @@
     <string name="workflow_search_fragment_search_no_results">Tu búsqueda no ha traído resultados</string>
     <string name="workflow_search_fragment_search_type">Tipo:</string>
     <string name="workflow_search_fragment_search_status">Estatus:</string>
+
+    <!--TimelineFragment-->
+    <string name="timeline_module_workflows">Workflows</string>
+    <string name="timeline_module_workflow_approvals">Aprobaciones de Workflows</string>
+    <string name="timeline_module_workflow_files">Archivos de Workflows</string>
+    <string name="timeline_modules_workflow_comments">Comentarios de Workflows</string>
 </resources>

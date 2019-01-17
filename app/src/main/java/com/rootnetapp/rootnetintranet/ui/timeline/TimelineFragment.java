@@ -38,6 +38,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 public class TimelineFragment extends Fragment implements TimelineInterface {
 
+    private static final String MODULE_ALL = "all";
+    private static final String MODULE_WORKFLOWS = "intranet_workflow_reports";
+    private static final String MODULE_WORKFLOW_APPROVALS = "intranet_workflow_status_approve";
+    private static final String MODULE_WORKFLOW_FILES = "intranet_workflow_file_record";
+    private static final String MODULE_WORKFLOW_COMMENTS = "intranet_workflow_comment";
+
     @Inject
     TimelineViewModelFactory viewModelFactory;
     private TimelineViewModel viewModel;
@@ -95,13 +101,14 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         start = start + "T00:00:00-0000";
         end = end + "T00:00:00-0000";
         users = new ArrayList<>();
+
         modules = new ArrayList<>();
-        //salesforce-status
-        modules.add("crm_sprint_metadata_status");
-        //tracks
-        modules.add("crm_contact_tracking");
-        //accounts
-        modules.add("crm_contact");
+        modules.add(MODULE_ALL);
+        modules.add(MODULE_WORKFLOWS);
+        modules.add(MODULE_WORKFLOW_APPROVALS);
+        modules.add(MODULE_WORKFLOW_FILES);
+        modules.add(MODULE_WORKFLOW_COMMENTS);
+
         binding.imgFilter.setOnClickListener(view1 -> {
             PopupWindow popupwindow_obj = popupMenu();
             popupwindow_obj.showAsDropDown(binding.imgFilter, -40, 18);
@@ -287,20 +294,28 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         popupWindow.setContentView(filtersBinding.getRoot());
 
         for (String string : modules) {
-            if (string.equals("crm_sprint_metadata_status")) {
-                filtersBinding.swchSales.setChecked(true);
+            if (string.equals(MODULE_ALL)) {
+                filtersBinding.switchAllModules.setChecked(true);
             }
-            if (string.equals("crm_contact_tracking")) {
-                filtersBinding.swchTracking.setChecked(true);
+            if (string.equals(MODULE_WORKFLOWS)) {
+                filtersBinding.switchWorkflows.setChecked(true);
             }
-            if (string.equals("crm_contact")) {
-                filtersBinding.swchAccounts.setChecked(true);
+            if (string.equals(MODULE_WORKFLOW_APPROVALS)) {
+                filtersBinding.switchApprovals.setChecked(true);
+            }
+            if (string.equals(MODULE_WORKFLOW_FILES)) {
+                filtersBinding.switchFiles.setChecked(true);
+            }
+            if (string.equals(MODULE_WORKFLOW_COMMENTS)) {
+                filtersBinding.switchComments.setChecked(true);
             }
         }
 
-        filtersBinding.swchSales.setOnClickListener(this::onSwitchClicked);
-        filtersBinding.swchTracking.setOnClickListener(this::onSwitchClicked);
-        filtersBinding.swchAccounts.setOnClickListener(this::onSwitchClicked);
+        filtersBinding.switchAllModules.setOnClickListener(this::onSwitchClicked);
+        filtersBinding.switchWorkflows.setOnClickListener(this::onSwitchClicked);
+        filtersBinding.switchApprovals.setOnClickListener(this::onSwitchClicked);
+        filtersBinding.switchFiles.setOnClickListener(this::onSwitchClicked);
+        filtersBinding.switchComments.setOnClickListener(this::onSwitchClicked);
 
         for (WorkflowUser user : workflowUsers) {
             LayoutInflater vi = (LayoutInflater) getContext()
@@ -353,18 +368,26 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
 
         String type = "";
         switch (view.getId()) {
-            case R.id.swch_sales: {
-                type = "crm_sprint_metadata_status";
+            case R.id.switch_all_modules:
+                type = MODULE_ALL;
                 break;
-            }
-            case R.id.swch_tracking: {
-                type = "crm_contact_tracking";
+
+            case R.id.switch_workflows:
+                type = MODULE_WORKFLOWS;
                 break;
-            }
-            case R.id.swch_accounts: {
-                type = "crm_contact";
+
+            case R.id.switch_approvals:
+                type = MODULE_WORKFLOW_APPROVALS;
                 break;
-            }
+
+            case R.id.switch_files:
+                type = MODULE_WORKFLOW_FILES;
+                break;
+
+            case R.id.switch_comments:
+                type = MODULE_WORKFLOW_COMMENTS;
+                break;
+
         }
         int i = 0;
 
@@ -393,5 +416,4 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
 
         getTimeline();
     }
-
 }

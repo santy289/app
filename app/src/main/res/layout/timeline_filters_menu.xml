@@ -28,7 +28,7 @@
                 android:layout_height="wrap_content">
 
                 <Switch
-                    android:id="@+id/swch_accounts"
+                    android:id="@+id/switch_all_modules"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
@@ -45,8 +45,8 @@
                     android:textColor="@color/selected_filter"
                     android:textStyle="bold"
                     android:textSize="12sp"
-                    android:layout_toStartOf="@id/swch_accounts"
-                    android:text="@string/accounts" />
+                    android:layout_toStartOf="@id/switch_all_modules"
+                    android:text="@string/all" />
 
             </RelativeLayout>
 
@@ -60,7 +60,7 @@
                 android:layout_height="wrap_content">
 
                 <Switch
-                    android:id="@+id/swch_tracking"
+                    android:id="@+id/switch_workflows"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
@@ -77,8 +77,8 @@
                     android:textColor="@color/selected_filter"
                     android:textStyle="bold"
                     android:textSize="12sp"
-                    android:layout_toStartOf="@id/swch_tracking"
-                    android:text="@string/tracking" />
+                    android:layout_toStartOf="@id/switch_workflows"
+                    android:text="@string/timeline_module_workflows" />
 
             </RelativeLayout>
 
@@ -92,7 +92,7 @@
                 android:layout_height="wrap_content">
 
                 <Switch
-                    android:id="@+id/swch_sales"
+                    android:id="@+id/switch_approvals"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
@@ -109,8 +109,72 @@
                     android:textColor="@color/selected_filter"
                     android:textStyle="bold"
                     android:textSize="12sp"
-                    android:layout_toStartOf="@id/swch_sales"
-                    android:text="@string/sales_force" />
+                    android:layout_toStartOf="@id/switch_approvals"
+                    android:text="@string/timeline_module_workflow_approvals" />
+
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/transparent" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Switch
+                    android:id="@+id/switch_files"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_margin="5dp"
+                    android:checked="true"
+                    android:theme="@style/SwitchStyle" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_margin="15dp"
+                    android:textColor="@color/selected_filter"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
+                    android:layout_toStartOf="@id/switch_files"
+                    android:text="@string/timeline_module_workflow_files" />
+
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/transparent" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Switch
+                    android:id="@+id/switch_comments"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_margin="5dp"
+                    android:checked="true"
+                    android:theme="@style/SwitchStyle" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_margin="15dp"
+                    android:textColor="@color/selected_filter"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
+                    android:layout_toStartOf="@id/switch_comments"
+                    android:text="@string/timeline_modules_workflow_comments" />
 
             </RelativeLayout>
 

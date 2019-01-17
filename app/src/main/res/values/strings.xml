@@ -301,4 +301,10 @@
     <string name="workflow_search_fragment_search_no_results">Your search did not find any results</string>
     <string name="workflow_search_fragment_search_type">Type:</string>
     <string name="workflow_search_fragment_search_status">Status:</string>
+
+    <!--TimelineFragment-->
+    <string name="timeline_module_workflows">Workflows</string>
+    <string name="timeline_module_workflow_approvals">Workflow Approvals</string>
+    <string name="timeline_module_workflow_files">Workflow Files</string>
+    <string name="timeline_modules_workflow_comments">Workflow Comments</string>
 </resources>

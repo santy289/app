@@ -1540,8 +1540,7 @@ class CreateWorkflowViewModel extends ViewModel {
         DialogMessage dialogMessage = new DialogMessage();
         dialogMessage.title = R.string.created;
         dialogMessage.message = R.string.workflow_created;
-        dialogMessage.messageAggregate = " " + createWorkflowResponse.getWorkflow()
-                .getWorkflowTypeKey();
+        dialogMessage.messageAggregate = createWorkflowResponse.getWorkflow().getWorkflowTypeKey();
         showDialogMessage.setValue(dialogMessage);
         goBack.setValue(true);
     }

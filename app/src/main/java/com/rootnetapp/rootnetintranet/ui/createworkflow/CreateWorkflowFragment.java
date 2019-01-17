@@ -171,7 +171,9 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         FragmentManager fm = getFragmentManager();
 
         String message = getString(dialogMessage.message);
-        if (dialogMessage.messageAggregate != null) message += dialogMessage.messageAggregate;
+        if (dialogMessage.messageAggregate != null) {
+            message = getString(dialogMessage.message, dialogMessage.messageAggregate);
+        }
 
         ValidateFormDialog dialog = ValidateFormDialog.newInstance(
                 getString(dialogMessage.title),

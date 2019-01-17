@@ -32,6 +32,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.IntentFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
@@ -81,6 +82,7 @@ class CreateWorkflowViewModel extends ViewModel {
     protected static final int REQUEST_FILE_TO_ATTACH = 27;
     protected static final int REQUEST_EXTERNAL_STORAGE_PERMISSIONS = 72;
     protected static final int TAG_WORKFLOW_TYPE = 80;
+    protected static final int TAG_PEOPLE_INVOLVED = 2772;
 
     private final int UPLOAD_FILE_SIZE_LIMIT = 10;
 
@@ -88,6 +90,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<SingleChoiceFormItem> mAddWorkflowTypeItemLiveData;
+    private MutableLiveData<IntentFormItem> mAddPeopleInvolvedItemLiveData;
     private MutableLiveData<BaseFormItem> mAddFormItemLiveData;
     private MutableLiveData<List<BaseFormItem>> mSetFormItemListLiveData;
     private MutableLiveData<BaseFormItem> mValidationUiLiveData;
@@ -312,6 +315,9 @@ class CreateWorkflowViewModel extends ViewModel {
      */
     private void showFields(FormSettings formSettings) {
         List<FormFieldsByWorkflowType> fields = formSettings.getFields();
+
+        createPeopleInvolvedItem();
+
         for (int i = 0; i < fields.size(); i++) {
             FormFieldsByWorkflowType field = fields.get(i);
             if (!field.isShowForm()) {
@@ -473,6 +479,25 @@ class CreateWorkflowViewModel extends ViewModel {
                     showLoading.setValue(false);
                 });
         mDisposables.add(disposable);
+    }
+
+    /**
+     * Creates the WorkflowType form item. Performs a request to the repo to retrieve the options
+     * and then send the form item to the UI.
+     */
+    private void createPeopleInvolvedItem() {
+
+        IntentFormItem intentFormItem = new IntentFormItem.Builder()
+                .setTitleRes(R.string.people_involved)
+                .setButtonActionTextRes(R.string.people_involved_action)
+                .setRequired(true) //todo set required based on workflow type config
+                .setVisible(mWorkflowListItem == null) //hide in edit mode
+                .setTag(TAG_PEOPLE_INVOLVED)
+                .build();
+
+//        formSettings.getFormItems().add(intentFormItem);
+
+        mAddPeopleInvolvedItemLiveData.setValue(intentFormItem);
     }
 
     /**
@@ -1609,6 +1634,13 @@ class CreateWorkflowViewModel extends ViewModel {
             mAddWorkflowTypeItemLiveData = new MutableLiveData<>();
         }
         return mAddWorkflowTypeItemLiveData;
+    }
+
+    protected LiveData<IntentFormItem> getObservableAddPeopleInvolvedItem() {
+        if (mAddPeopleInvolvedItemLiveData == null) {
+            mAddPeopleInvolvedItemLiveData = new MutableLiveData<>();
+        }
+        return mAddPeopleInvolvedItemLiveData;
     }
 
     protected LiveData<BaseFormItem> getObservableAddFormItem() {

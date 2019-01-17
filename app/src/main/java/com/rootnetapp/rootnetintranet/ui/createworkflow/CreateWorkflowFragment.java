@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -19,11 +20,13 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.databinding.FragmentCreateWorkflowBinding;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.IntentFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.adapters.FormItemsAdapter;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.ValidateFormDialog;
+import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -120,6 +123,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     private void subscribe() {
         viewModel.getObservableToastMessage().observe(this, this::showToastMessage);
         viewModel.getObservableAddWorkflowTypeItem().observe(this, this::addWorkflowTypeItem);
+        viewModel.getObservableAddPeopleInvolvedItem().observe(this, this::addPeopleInvolvedItem);
         viewModel.getObservableAddFormItem().observe(this, this::addItemToForm);
         viewModel.getObservableSetFormItemList().observe(this, this::setItemListToForm);
         viewModel.getObservableValidationUi().observe(this, this::updateValidationUi);
@@ -133,6 +137,28 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     private void setupSubmitButton() {
         mBinding.btnCreate.setText(
                 mWorkflowListItem == null ? R.string.create_workflow : R.string.edit_workflow);
+    }
+
+    /**
+     * Set the proper animations to the ViewFlipper depending on which direction the movement is.
+     *
+     * @param isNext true - view is on the right of the current view; false - view is on the left of
+     *               the current view.
+     */
+    private void setupViewFlipperAnimations(boolean isNext) {
+        if (isNext) {
+            //next view
+            mBinding.viewFlipper.setInAnimation(
+                    AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_right));
+            mBinding.viewFlipper.setOutAnimation(
+                    AnimationUtils.loadAnimation(getContext(), R.anim.slide_out_left));
+        } else {
+            //previous view
+            mBinding.viewFlipper.setInAnimation(
+                    AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_left));
+            mBinding.viewFlipper.setOutAnimation(
+                    AnimationUtils.loadAnimation(getContext(), R.anim.slide_out_right));
+        }
     }
 
     private void setupFormRecycler() {
@@ -210,6 +236,21 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
             // triggers selection for the items to be created, since we already have a type.
             singleChoiceFormItem.getOnSelectedListener().onSelected(singleChoiceFormItem);
         }
+    }
+
+    /**
+     * Inserts the People Involved form item to the RecyclerView.
+     *
+     * @param intentFormItem form item containing the people involved action
+     */
+    @UiThread
+    private void addPeopleInvolvedItem(IntentFormItem intentFormItem) {
+        mAdapter.addItem(intentFormItem);
+
+        intentFormItem.setOnButtonClickedListener(() -> {
+            setupViewFlipperAnimations(true);
+            mBinding.viewFlipper.showNext();
+        });
     }
 
     /**
@@ -316,6 +357,26 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         } else {
             viewModel.setQueuedFile(fileId);
         }
+    }
+
+    /**
+     * This intercepts the onBackPressed from the Activity. The Activity must add a condition in
+     * order to allow the Fragment to intercept the callback. See {@link
+     * MainActivity#onBackPressed()} for an example.
+     *
+     * @return true - this Fragment handled the callback; false - the Activity must handle the
+     * callback
+     */
+    @Override
+    public boolean onBackPressed() {
+        if (mBinding.viewFlipper.getDisplayedChild() == 0) {
+            return false; //normal onBackPressed by Activity
+        }
+
+        //this fragment will handle the onBackPressed instead of the activity
+        setupViewFlipperAnimations(false);
+        mBinding.viewFlipper.showPrevious();
+        return true;
     }
 
     /**

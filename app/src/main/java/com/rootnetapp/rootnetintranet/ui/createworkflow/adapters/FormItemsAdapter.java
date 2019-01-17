@@ -16,6 +16,7 @@ import com.rootnetapp.rootnetintranet.databinding.FormItemBooleanBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemCurrencyBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemDateBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemFileBinding;
+import com.rootnetapp.rootnetintranet.databinding.FormItemIntentBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemMultipleChoiceBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemPhoneBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemSingleChoiceBinding;
@@ -26,6 +27,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormIte
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.IntentFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
@@ -119,6 +121,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 return new FileViewHolder(FormItemFileBinding
                         .inflate(layoutInflater, viewGroup, false));
 
+            case FormItemViewType.INTENT:
+                return new IntentViewHolder(FormItemIntentBinding
+                        .inflate(layoutInflater, viewGroup, false));
+
             default:
                 throw new IllegalStateException("Invalid ViewType");
         }
@@ -162,6 +168,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             case FormItemViewType.FILE:
                 populateFileView((FileViewHolder) holder, position);
+                break;
+
+            case FormItemViewType.INTENT:
+                populateIntentView((IntentViewHolder) holder, position);
                 break;
 
             default:
@@ -928,6 +938,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.show();
         }
 
+        //verify validation
         if (hasToEvaluateValid && !item.isValid()) {
             holder.getBinding().tvRequiredMsg.setVisibility(View.VISIBLE);
         } else {
@@ -937,6 +948,59 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         //verify enabled param
         holder.getBinding().btnAddFile.setEnabled(item.isEnabled());
         holder.getBinding().chipFile.setEnabled(item.isEnabled());
+    }
+
+    /**
+     * Handles the view for the {@link IntentFormItem}. Displays the UI according to the visibility
+     * params.
+     *
+     * @param holder   view holder
+     * @param position item position in adapter.
+     */
+    private void populateIntentView(IntentViewHolder holder, int position) {
+        IntentFormItem item = (IntentFormItem) getItem(position);
+
+        //set title
+        String title = item.getTitle();
+        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        holder.getBinding().tvTitle.setText(title);
+
+        //set button text
+        String btnText = item.getButtonActionText();
+        if (item.getButtonActionTextRes() != 0) {
+            btnText = mContext.getString(item.getButtonActionTextRes());
+        }
+        if (btnText == null || btnText.isEmpty()) btnText = mContext.getString(R.string.action);
+        holder.getBinding().btnIntent.setText(btnText);
+
+        //set button click listener
+        holder.getBinding().btnIntent.setOnClickListener(
+                v -> item.getOnButtonClickedListener().onButtonClicked());
+
+        //make sure this view has the focus
+        holder.getBinding().btnIntent
+                .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
+
+        // verify required indicator
+        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+
+        //verify visibility
+        if (!item.isVisible()) {
+            holder.hide();
+            return;
+        } else {
+            holder.show();
+        }
+
+        //verify validation
+        if (hasToEvaluateValid && !item.isValid()) {
+            holder.getBinding().tvRequiredMsg.setVisibility(View.VISIBLE);
+        } else {
+            holder.getBinding().tvRequiredMsg.setVisibility(View.GONE);
+        }
+
+        //verify enabled param
+        holder.getBinding().btnIntent.setEnabled(item.isEnabled());
     }
     //endregion
 
@@ -990,6 +1054,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
                 case FormItemViewType.FILE:
                     //the value is saved when the user selects the file from the FileChooser intent
+                    continue;
+
+                case FormItemViewType.INTENT:
+                    //the value should be saved manually by the developer when the user completes the action
                     continue;
 
                 default:

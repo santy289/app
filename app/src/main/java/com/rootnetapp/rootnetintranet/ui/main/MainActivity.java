@@ -40,6 +40,7 @@ import com.rootnetapp.rootnetintranet.services.websocket.WebSocketIntentService;
 import com.rootnetapp.rootnetintranet.services.websocket.WebSocketService;
 import com.rootnetapp.rootnetintranet.services.websocket.WebsocketSecureHandler;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragmentInterface;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.main.adapters.SearchAdapter;
 import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerFragment;
@@ -233,6 +234,12 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
+        //check if the fragment has priority over the onBackPressed callback
+        if (fragment instanceof CreateWorkflowFragmentInterface && ((CreateWorkflowFragmentInterface) fragment).onBackPressed()) {
+            return;
+        }
+
         DrawerLayout drawer = mainBinding.drawerLayout;
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);

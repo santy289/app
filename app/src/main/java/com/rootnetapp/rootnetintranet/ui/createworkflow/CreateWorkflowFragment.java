@@ -198,12 +198,13 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         singleChoiceFormItem.setOnSelectedListener(item -> {
             if (item.getValue() == null) {
                 viewModel.clearForm();
-                mAdapter.setHasToEvaluateValid(false);
                 return;
             }
 
             String selection = item.getValue().getName();
             viewModel.generateFieldsByType(selection);
+
+            mAdapter.setHasToEvaluateValid(false); //clear validation marks
         });
 
         if (mWorkflowListItem != null) {

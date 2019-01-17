@@ -6,18 +6,19 @@ import java.util.List;
 
 import androidx.annotation.Nullable;
 
-public class CurrencyFormItem extends BaseFormItem {
+public class PhoneFormItem extends BaseFormItem {
 
-    private @Nullable Double value;
+    private @Nullable String value;
     private @Nullable Option selectedOption;
     private List<Option> options;
 
-    private CurrencyFormItem() {
+    private PhoneFormItem() {
         //Constructor is private for Builder pattern
     }
 
     @Override
     public boolean isValid() {
+        //todo validate phone regex
         if (!isRequired()) return true;
 
         return isRequired() && getSelectedOption() != null && getValue() != null;
@@ -37,11 +38,11 @@ public class CurrencyFormItem extends BaseFormItem {
     }
 
     @Nullable
-    public Double getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(@Nullable Double value) {
+    public void setValue(@Nullable String value) {
         this.value = value;
     }
 
@@ -65,7 +66,7 @@ public class CurrencyFormItem extends BaseFormItem {
         private boolean isVisible = true;
         private TypeInfo typeInfo;
         private String machineName;
-        private Double value;
+        private String value;
         private Option selectedOption;
         private List<Option> options;
 
@@ -123,7 +124,7 @@ public class CurrencyFormItem extends BaseFormItem {
             return this;
         }
 
-        public Builder setValue(Double value) {
+        public Builder setValue(String value) {
             this.value = value;
 
             return this;
@@ -141,8 +142,8 @@ public class CurrencyFormItem extends BaseFormItem {
             return this;
         }
 
-        public CurrencyFormItem build() {
-            CurrencyFormItem item = new CurrencyFormItem();
+        public PhoneFormItem build() {
+            PhoneFormItem item = new PhoneFormItem();
 
             item.setTitle(title);
             item.setTitleRes(titleRes);
@@ -156,7 +157,7 @@ public class CurrencyFormItem extends BaseFormItem {
             item.setValue(value);
             item.setSelectedOption(selectedOption);
             item.setOptions(options);
-            item.setViewType(FormItemViewType.CURRENCY);
+            item.setViewType(FormItemViewType.PHONE);
 
             return item;
         }

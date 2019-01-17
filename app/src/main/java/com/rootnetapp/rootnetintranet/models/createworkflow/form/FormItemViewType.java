@@ -10,6 +10,9 @@ import androidx.annotation.IntDef;
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.BOOLEAN;
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.CURRENCY;
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.DATE;
+import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.FILE;
+import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.MULTIPLE_CHOICE;
+import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.PHONE;
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.SINGLE_CHOICE;
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.TEXT_INPUT;
 
@@ -23,7 +26,10 @@ import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItem
         SINGLE_CHOICE,
         BOOLEAN,
         DATE,
-        CURRENCY
+        CURRENCY,
+        MULTIPLE_CHOICE,
+        PHONE,
+        FILE
 })
 public @interface FormItemViewType {
 
@@ -32,4 +38,7 @@ public @interface FormItemViewType {
     int BOOLEAN = 3;
     int DATE = 4;
     int CURRENCY = 5;
+    int MULTIPLE_CHOICE = 6;
+    int PHONE = 7;
+    int FILE = 8;
 }

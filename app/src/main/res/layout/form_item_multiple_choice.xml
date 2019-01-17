@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <layout xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -8,7 +7,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/form_items_space"
-        android:layout_marginBottom="@dimen/form_items_space">
+        android:layout_marginBottom="@dimen/form_items_space"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
 
         <TextView
             android:id="@+id/tv_title"
@@ -35,22 +36,38 @@
             app:layout_constraintBottom_toBottomOf="@id/tv_title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/tv_title"
-            tools:visibility="visible"/>
+            tools:visibility="visible" />
 
-        <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/et_input"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_selected_items"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="@drawable/spinner_bg"
-            android:maxLines="1"
-            android:paddingStart="10dp"
-            android:paddingTop="10dp"
-            android:paddingEnd="10dp"
-            android:paddingBottom="10dp"
-            android:textSize="15sp"
+            android:clipToPadding="false"
+            android:paddingStart="0dp"
+            android:paddingEnd="5dp"
+            android:paddingBottom="5dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/tv_title"
             app:layout_constraintTop_toBottomOf="@id/tv_title" />
+
+        <View
+            android:id="@+id/view_spinner_background"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/spinner_bg"
+            app:layout_constraintBottom_toBottomOf="@+id/sp_input"
+            app:layout_constraintEnd_toEndOf="@+id/sp_input"
+            app:layout_constraintStart_toStartOf="@+id/sp_input"
+            app:layout_constraintTop_toTopOf="@+id/sp_input" />
+
+        <Spinner
+            android:id="@+id/sp_input"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:spinnerMode="dialog"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/rv_selected_items"
+            app:layout_constraintTop_toBottomOf="@id/rv_selected_items" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

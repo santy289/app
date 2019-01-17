@@ -170,6 +170,7 @@
     <string name="users">Users</string>
     <string name="no_selection">No Selection</string>
     <string name="no_selection_hint">- No Selection -</string>
+    <string name="multiple_selection_hint">- Select an option to add -</string>
     <string name="form_workflow_type">Workflow Type</string>
     <string name="pick_option">Pick any item</string>
     <string name="enter_email">Enter Email</string>
@@ -221,6 +222,10 @@
     <string name="next_status">Next Status</string>
     <string name="request_successfully">Request done successfully.</string>
     <string name="functionality_not_available">This functionality is not available yet</string>
+    <string name="add_file">Add File</string>
+    <string name="asterisk" translatable="false">*</string>
+    <string name="file_form_item_required_msg">You must add a file in order to continue.</string>
+    <string name="fill_all_form_items">You need to fill out all of the required elements.</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Workflow Details</string>

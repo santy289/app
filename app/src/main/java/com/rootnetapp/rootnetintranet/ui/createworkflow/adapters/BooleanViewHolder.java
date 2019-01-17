@@ -6,10 +6,10 @@ import com.rootnetapp.rootnetintranet.databinding.FormItemBooleanBinding;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-public class BooleanViewHolder extends RecyclerView.ViewHolder {
+class BooleanViewHolder extends RecyclerView.ViewHolder {
 
     private final FormItemBooleanBinding mBinding;
-    private RecyclerView.LayoutParams mRootParams;
+    private final RecyclerView.LayoutParams mRootParams;
 
     public BooleanViewHolder(FormItemBooleanBinding binding) {
         super(binding.getRoot());

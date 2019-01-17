@@ -16,6 +16,7 @@ import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
+import com.rootnetapp.rootnetintranet.models.responses.downloadfile.DownloadFileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.project.ProjectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.role.RoleResponse;
@@ -36,13 +37,13 @@ import io.reactivex.schedulers.Schedulers;
 
 public class CreateWorkflowRepository {
 
-    private ApiInterface service;
-    private AppDatabase database;
-    private WorkflowTypeDbDao workflowTypeDbDao;
-    private UserDao profileDao;
-    private CountryDBDao countryDBDao;
+    private final ApiInterface service;
+    private final AppDatabase database;
+    private final WorkflowTypeDbDao workflowTypeDbDao;
+    private final UserDao profileDao;
+    private final CountryDBDao countryDBDao;
 
-    private LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
+    private final LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
 
     public CreateWorkflowRepository(ApiInterface service, AppDatabase database) {
         this.service = service;
@@ -157,4 +158,8 @@ public class CreateWorkflowRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    protected Observable<DownloadFileResponse> downloadFile(String auth, String entity, int fileId) {
+        return service.downloadFile(auth, entity, fileId).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
 }

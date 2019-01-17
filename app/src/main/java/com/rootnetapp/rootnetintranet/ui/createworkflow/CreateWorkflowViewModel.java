@@ -1498,17 +1498,15 @@ class CreateWorkflowViewModel extends ViewModel {
      * @return whether all of the form items are valid.
      */
     private boolean validateFormItems() {
-        boolean isValid = true;
-
         for (BaseFormItem item : formSettings.getFormItems()) {
             if (!item.isValid()) {
-                isValid = false;
+                //at least one item is not valid
+                mValidationUiLiveData.setValue(formSettings.findFirstInvalidItem());
+                return false;
             }
         }
 
-        mValidationUiLiveData.setValue(formSettings.findFirstInvalidItem());
-
-        return isValid;
+        return true;
     }
 
     private static boolean isValidEmail(CharSequence target) {

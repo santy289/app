@@ -42,6 +42,10 @@ public class WorkflowTypeDb {
     @Json(name = "category")
     private int category;
 
+    @ColumnInfo(name = "define_roles")
+    @Json(name = "define_roles")
+    private boolean defineRoles;
+
     @Ignore
     @Json(name = "status")
     private List<Status> status = null;
@@ -108,6 +112,14 @@ public class WorkflowTypeDb {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean isDefineRoles() {
+        return defineRoles;
+    }
+
+    public void setDefineRoles(boolean defineRoles) {
+        this.defineRoles = defineRoles;
     }
 
     public List<Status> getStatus() {

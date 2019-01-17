@@ -16,6 +16,7 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
@@ -292,10 +293,7 @@ class CreateWorkflowViewModel extends ViewModel {
             return formSettings;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(formSettings -> {
-                    FormSettings settings = (FormSettings) formSettings;
-                    showFields(settings);
-                }, throwable -> showLoading.setValue(false));
+                .subscribe(ignored -> createPeopleInvolvedItem(), throwable -> showLoading.setValue(false));
         mDisposables.add(disposable);
 
     }
@@ -315,8 +313,6 @@ class CreateWorkflowViewModel extends ViewModel {
      */
     private void showFields(FormSettings formSettings) {
         List<FormFieldsByWorkflowType> fields = formSettings.getFields();
-
-        createPeopleInvolvedItem();
 
         for (int i = 0; i < fields.size(); i++) {
             FormFieldsByWorkflowType field = fields.get(i);
@@ -482,22 +478,28 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     /**
-     * Creates the WorkflowType form item. Performs a request to the repo to retrieve the options
+     * Creates the People Involved form item. Performs a request to the repo to retrieve the workflow type
      * and then send the form item to the UI.
      */
     private void createPeopleInvolvedItem() {
+        Disposable disposable = Observable.fromCallable(() -> {
+            WorkflowTypeDb workflowTypeDbSingle = mRepository
+                    .getWorklowType(formSettings.getWorkflowTypeIdSelected());
 
-        IntentFormItem intentFormItem = new IntentFormItem.Builder()
-                .setTitleRes(R.string.people_involved)
-                .setButtonActionTextRes(R.string.people_involved_action)
-                .setRequired(true) //todo set required based on workflow type config
-                .setVisible(mWorkflowListItem == null) //hide in edit mode
-                .setTag(TAG_PEOPLE_INVOLVED)
-                .build();
-
-//        formSettings.getFormItems().add(intentFormItem);
-
-        mAddPeopleInvolvedItemLiveData.setValue(intentFormItem);
+            return new IntentFormItem.Builder()
+                    .setTitleRes(R.string.people_involved)
+                    .setButtonActionTextRes(R.string.people_involved_action)
+                    .setRequired(workflowTypeDbSingle.isDefineRoles())
+                    .setVisible(mWorkflowListItem == null) //hide in edit mode
+                    .setTag(TAG_PEOPLE_INVOLVED)
+                    .build();
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(intentFormItem -> {
+                    mAddPeopleInvolvedItemLiveData.setValue(intentFormItem);
+                    showFields(formSettings);
+                }, throwable -> Log.d(TAG, "createPeopleInvolvedItem: error " + throwable.getMessage()));
+        mDisposables.add(disposable);
     }
 
     /**

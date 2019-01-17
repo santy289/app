@@ -4,6 +4,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDBDao;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.user.UserDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
@@ -60,6 +61,10 @@ public class CreateWorkflowRepository {
 
     public List<WorkflowTypeItemMenu> getWorklowTypeNames() {
         return workflowTypeDbDao.getListOfWorkflowNames();
+    }
+
+    public WorkflowTypeDb getWorklowType(int workflowId) {
+        return workflowTypeDbDao.getWorkflowTypeBy(workflowId);
     }
 
     public List<FormCreateProfile> getProfiles() {

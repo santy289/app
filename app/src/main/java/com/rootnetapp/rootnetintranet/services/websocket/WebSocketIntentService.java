@@ -41,6 +41,13 @@ public class WebSocketIntentService extends IntentService {
     }
 
     @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        Toast.makeText(getApplicationContext(), "onTaskRemoved", Toast.LENGTH_LONG).show();
+        Log.d(TAG, "onTaskRemoved: onTaskRemoved");
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         cancelWebsocket();
@@ -63,7 +70,7 @@ public class WebSocketIntentService extends IntentService {
         // Stop the service using the startId, so that we don't stop
         // the service in the middle of handling another job
 //            prepareNotification("199", "alive", "aLIVE ALIVE service");
-        NotificationHandler.prepareNotification("199", "TITLE Alive" , "ALIVE ALIve ", service, notificationManager, 0);
+        NotificationHandler.prepareNotification("199", "TITLE Alive" , "ALIVE ALIve ", "test name", service, notificationManager, 0);
     }
 
     /**
@@ -95,22 +102,76 @@ public class WebSocketIntentService extends IntentService {
                     messageArray[WebsocketSecureHandler.INDEX_ID],
                     messageArray[WebsocketSecureHandler.INDEX_TITLE],
                     messageArray[WebsocketSecureHandler.INDEX_MESSAGE],
+                    messageArray[WebsocketSecureHandler.INDEX_NAME],
                     this,
                     notificationManager,
                     counter
 
             );
         }, errorMessage -> {
+            switch (errorMessage) {
+                case "thruway.error.authentication_failure":
+                    break;
+                case "wamp.close.normal":
+                    restartWebSocket(protocol, port, token, domain);
+                    return;
+                default:
+                    Log.d(TAG, "websocket disconnected: not managed leave resason");
+            }
 
             // TODO if it disconnects try to connect again. Check if dosconnected message is given.
             if (webSocketHandler != null) {
                 webSocketHandler.completeClient();
             }
 
-            //stopSelf(startId);
             stopSelf();
-
         });
+    }
+
+    private void restartWebSocket(String protocol, String port, String token, String domain) {
+        counter = 0;
+        if (webSocketHandler != null) {
+            webSocketHandler.completeClient();
+        }
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        webSocketHandler = new WebsocketSecureHandler(protocol, port, token, domain);
+        webSocketHandler.initNotificationsWithCallback(messageArray -> {
+            counter += 1;
+            NotificationHandler.prepareNotification(
+                    messageArray[WebsocketSecureHandler.INDEX_ID],
+                    messageArray[WebsocketSecureHandler.INDEX_TITLE],
+                    messageArray[WebsocketSecureHandler.INDEX_MESSAGE],
+                    messageArray[WebsocketSecureHandler.INDEX_NAME],
+                    this,
+                    notificationManager,
+                    counter
+
+            );
+        }, errorMessage -> {
+            switch (errorMessage) {
+                case "thruway.error.authentication_failure":
+                    break;
+                case "wamp.close.normal":
+                    break;
+                default:
+
+                    Log.d(TAG, "initNotifications: not managed leave resason");
+            }
+
+            // TODO if it disconnects try to connect again. Check if dosconnected message is given.
+            if (webSocketHandler != null) {
+                webSocketHandler.completeClient();
+            }
+
+            stopSelf();
+        });
+
+    }
+
+    private void showNotification(String[] messageArray) {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
     }
 
 }

@@ -92,11 +92,12 @@
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
-        <service android:name=".services.websocket.WebSocketService">
-        </service>
 
-        <service android:name=".services.websocket.WebSocketIntentService">
-        </service>
+        <service android:name=".services.websocket.WebSocketService" />
+
+        <service
+            android:name=".services.websocket.WebSocketIntentService"
+            android:stopWithTask="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

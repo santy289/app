@@ -1,6 +1,5 @@
 package com.rootnetapp.rootnetintranet.services.websocket;
 
-import android.net.Uri;
 import android.util.Log;
 
 import java.net.URI;
@@ -46,6 +45,7 @@ public class WebsocketSecureHandler {
     public static final int INDEX_TITLE = 0;
     public static final int INDEX_MESSAGE = 1;
     public static final int INDEX_ID = 2;
+    public static final int INDEX_NAME = 3;
 
     public static final int ERROR_AUTHENTICATION = 100;
     public static final int ERROR_SUBSCRIBING = 101;
@@ -131,7 +131,7 @@ public class WebsocketSecureHandler {
         });
         session.addOnDisconnectListener((sessionDisconnect, clean) -> {
             Log.d(TAG, "initNotifications: On Disconnect");
-            if (callback == null) {
+            if (errorCallback == null) {
                 Log.d(TAG, "initNotifications: Needs a callback, callback can't be null");
             } else {
                 errorCallback.onError("Error Disconnect");
@@ -145,16 +145,20 @@ public class WebsocketSecureHandler {
             Log.d(TAG, "2 initNotifications: on Join");
         });
         session.addOnLeaveListener((sessionLeave, details) -> {
-            if (details.reason.equals("thruway.error.authentication_failure")) {
-                Log.d(TAG, "initNotifications: failure");
-                if (errorCallback == null) {
-                    Log.d(TAG, "initNotifications: Needs a errorCallback, callback can't be null");
-                } else {
-                    errorCallback.onError("thruway.error.authentication_failure");
-                }
-                // TODO log to analytics tool and send to server
-            } else {
-                Log.d(TAG, "initNotifications: something else");
+            if (errorCallback == null) {
+                return;
+            }
+
+            switch (details.reason) {
+                case "thruway.error.authentication_failure":
+                    errorCallback.onError(details.reason);
+                    break;
+                case "wamp.close.normal":
+                    errorCallback.onError(details.reason);
+                    break;
+                default:
+                    errorCallback.onError(details.reason);
+                    Log.d(TAG, "initNotifications: not managed leave resason");
             }
         });
 
@@ -215,34 +219,28 @@ public class WebsocketSecureHandler {
 
         String keyMessage = "message";
         String keyTitle = "title";
-        String keyId = "url";
+        String keyProperty = "properties";
+        String keyWorkflowId = "id";
+        String keyName = "author";
+
+        LinkedHashMap properties = (LinkedHashMap) incomingMessage.get(keyProperty);
+
         String message = (String) incomingMessage.get(keyMessage);
         String title = (String) incomingMessage.get(keyTitle);
-        String id = (String) incomingMessage.get(keyId);
+        String name = (String) properties.get(keyName);
+        Integer id = (Integer) properties.get(keyWorkflowId);
 
-        id = getIdFromUrl(id);
-
-        String[] notificationMessage = new String[3];
+        String[] notificationMessage = new String[4];
         notificationMessage[INDEX_TITLE] = title;
         notificationMessage[INDEX_MESSAGE] = message;
-        notificationMessage[INDEX_ID] = id;
+        notificationMessage[INDEX_ID] = String.valueOf(id);
+        notificationMessage[INDEX_NAME] = name;
 
         if (callback == null) {
             Log.d(TAG, "initNotifications: Needs a callback, callback can't be null");
         } else {
             callback.onMessageRecieved(notificationMessage);
         }
-    }
-
-    /**
-     * Helper method to get the last segment on some uri path.
-     *
-     * @param url
-     * @return
-     */
-    private String getIdFromUrl(String url) {
-        Uri uri = Uri.parse(url);
-        return uri.getLastPathSegment();
     }
 
     /**

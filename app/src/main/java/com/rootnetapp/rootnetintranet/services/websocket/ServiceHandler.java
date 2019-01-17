@@ -71,6 +71,7 @@ public class ServiceHandler extends Handler {
                 "199",
                 "TITLE Alive" ,
                 "ALIVE ALIve " + startId,
+                "Name test",
                 service,
                 notificationManager,
                 counter
@@ -97,6 +98,7 @@ public class ServiceHandler extends Handler {
                     messageArray[WebsocketSecureHandler.INDEX_ID],
                     messageArray[WebsocketSecureHandler.INDEX_TITLE],
                     messageArray[WebsocketSecureHandler.INDEX_MESSAGE],
+                    messageArray[WebsocketSecureHandler.INDEX_NAME],
                     service,
                     notificationManager,
                     NotificationIds.NOTIFICATION_ID + counter

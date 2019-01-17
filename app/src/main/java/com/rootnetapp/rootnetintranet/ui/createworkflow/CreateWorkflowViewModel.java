@@ -1041,8 +1041,6 @@ class CreateWorkflowViewModel extends ViewModel {
      * @param workflow Workflow with info to display on the form.
      */
     private void updateWorkflowInformation(WorkflowDb workflow) {
-        showLoading.setValue(true);
-
         TextInputFormItem titleItem = (TextInputFormItem) formSettings
                 .findItem(FormSettings.MACHINE_NAME_TITLE);
         titleItem.setValue(workflow.getTitle());
@@ -1121,7 +1119,6 @@ class CreateWorkflowViewModel extends ViewModel {
             }
         }
 
-        showLoading.setValue(false);
         mSetFormItemListLiveData.setValue(formSettings.getFormItems());
     }
 

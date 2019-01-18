@@ -5,12 +5,13 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MultipleChoiceFormItem extends BaseFormItem {
+public class DoubleMultipleChoiceFormItem extends BaseFormItem {
 
     private List<BaseOption> values;
-    private List<Option> options;
+    private List<Option> firstOptions;
+    private List<Option> secondOptions;
 
-    private MultipleChoiceFormItem() {
+    private DoubleMultipleChoiceFormItem() {
         //Constructor is private for Builder pattern
     }
 
@@ -48,11 +49,11 @@ public class MultipleChoiceFormItem extends BaseFormItem {
         this.values = values;
     }
 
-    public void addValue(Option value){
+    public void addValue(DoubleOption value){
         getValues().add(value);
     }
 
-    public void removeValue(Option value){
+    public void removeValue(DoubleOption value){
         getValues().remove(value);
     }
 
@@ -60,12 +61,22 @@ public class MultipleChoiceFormItem extends BaseFormItem {
         getValues().remove(position);
     }
 
-    public List<Option> getOptions() {
-        return options;
+    public List<Option> getFirstOptions() {
+        return firstOptions;
     }
 
-    public void setOptions(List<Option> options) {
-        this.options = options;
+    public void setFirstOptions(
+            List<Option> firstOptions) {
+        this.firstOptions = firstOptions;
+    }
+
+    public List<Option> getSecondOptions() {
+        return secondOptions;
+    }
+
+    public void setSecondOptions(
+            List<Option> secondOptions) {
+        this.secondOptions = secondOptions;
     }
 
     public static class Builder {
@@ -80,7 +91,8 @@ public class MultipleChoiceFormItem extends BaseFormItem {
         private TypeInfo typeInfo;
         private String machineName;
         private List<BaseOption> values;
-        private List<Option> options;
+        private List<Option> firstOptions;
+        private List<Option> secondOptions;
 
         public Builder setTitle(String title) {
             this.title = title;
@@ -142,14 +154,20 @@ public class MultipleChoiceFormItem extends BaseFormItem {
             return this;
         }
 
-        public Builder setOptions(List<Option> options) {
-            this.options = options;
+        public Builder setFirstOptions(List<Option> firstOptions) {
+            this.firstOptions = firstOptions;
 
             return this;
         }
 
-        public MultipleChoiceFormItem build() {
-            MultipleChoiceFormItem item = new MultipleChoiceFormItem();
+        public Builder setSecondOptions(List<Option> secondOptions) {
+            this.secondOptions = secondOptions;
+
+            return this;
+        }
+
+        public DoubleMultipleChoiceFormItem build() {
+            DoubleMultipleChoiceFormItem item = new DoubleMultipleChoiceFormItem();
 
             item.setTitle(title);
             item.setTitleRes(titleRes);
@@ -161,8 +179,9 @@ public class MultipleChoiceFormItem extends BaseFormItem {
             item.setTypeInfo(typeInfo);
             item.setMachineName(machineName);
             item.setValues(values);
-            item.setOptions(options);
-            item.setViewType(FormItemViewType.MULTIPLE_CHOICE);
+            item.setFirstOptions(firstOptions);
+            item.setSecondOptions(secondOptions);
+            item.setViewType(FormItemViewType.DOUBLE_MULTIPLE_CHOICE);
 
             return item;
         }

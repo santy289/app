@@ -15,6 +15,7 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.FormItemBooleanBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemCurrencyBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemDateBinding;
+import com.rootnetapp.rootnetintranet.databinding.FormItemDoubleMultipleChoiceBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemFileBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemIntentBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemMultipleChoiceBinding;
@@ -25,6 +26,8 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.DoubleMultipleChoiceFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.DoubleOption;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.IntentFormItem;
@@ -125,6 +128,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 return new IntentViewHolder(FormItemIntentBinding
                         .inflate(layoutInflater, viewGroup, false));
 
+            case FormItemViewType.DOUBLE_MULTIPLE_CHOICE:
+                return new DoubleMultipleChoiceViewHolder(FormItemDoubleMultipleChoiceBinding
+                        .inflate(layoutInflater, viewGroup, false));
+
             default:
                 throw new IllegalStateException("Invalid ViewType");
         }
@@ -172,6 +179,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             case FormItemViewType.INTENT:
                 populateIntentView((IntentViewHolder) holder, position);
+                break;
+
+            case FormItemViewType.DOUBLE_MULTIPLE_CHOICE:
+                populateDoubleMultipleChoiceView((DoubleMultipleChoiceViewHolder) holder, position);
                 break;
 
             default:
@@ -1002,6 +1013,127 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         //verify enabled param
         holder.getBinding().btnIntent.setEnabled(item.isEnabled());
     }
+
+    /**
+     * Handles the view for the {@link DoubleMultipleChoiceFormItem}. Displays the UI according to
+     * the visibility, enabled and validation params.
+     *
+     * @param holder   view holder
+     * @param position item position in adapter.
+     */
+    private void populateDoubleMultipleChoiceView(DoubleMultipleChoiceViewHolder holder,
+                                                  int position) {
+        DoubleMultipleChoiceFormItem item = (DoubleMultipleChoiceFormItem) getItem(position);
+
+        String title = item.getTitle();
+        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        holder.getBinding().tvTitle.setText(title);
+
+        //creates the selected items adapter
+        MultipleChoiceSelectionsAdapter selectionsAdapter = new MultipleChoiceSelectionsAdapter(
+                item.getValues());
+        holder.getBinding().rvSelectedItems.setLayoutManager(
+                new LinearLayoutManager(mContext, RecyclerView.HORIZONTAL, false));
+        holder.getBinding().rvSelectedItems.setAdapter(selectionsAdapter);
+
+        //adds a hint to the spinners
+        String hint = mContext.getString(R.string.no_selection);
+
+        //region First Spinner
+        List<Option> firstOptions = new ArrayList<>(item.getFirstOptions());
+        // check whether the hint has already been added
+        if (!firstOptions.get(0).getName().equals(hint)) {
+            // add hint as first item
+            firstOptions.add(0, new Option(0, hint));
+        }
+
+        //creates the options adapter
+        holder.getBinding().spFirstInput.setAdapter(
+                new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
+                        firstOptions));
+
+        //make sure this view has the focus
+        holder.getBinding().spFirstInput
+                .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
+        //endregion
+
+        //region Second Spinner
+        List<Option> secondOptions = new ArrayList<>(item.getSecondOptions());
+        // check whether the hint has already been added
+        if (!secondOptions.get(0).getName().equals(hint)) {
+            // add hint as first item
+            secondOptions.add(0, new Option(0, hint));
+        }
+
+        //creates the options adapter
+        holder.getBinding().spSecondInput.setAdapter(
+                new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
+                        secondOptions));
+
+        //make sure this view has the focus
+        holder.getBinding().spSecondInput
+                .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
+        //endregion
+
+        //set button click listener
+        holder.getBinding().btnAdd.setOnClickListener(v -> {
+            int firstSelectionPosition = holder.getBinding().spFirstInput.getSelectedItemPosition();
+            if (firstSelectionPosition == 0) return; //no selection
+            int firstIndex = firstSelectionPosition - 1; // because of the hint option
+            Option firstOption = item.getFirstOptions().get(firstIndex);
+
+            int secondSelectionPosition = holder.getBinding().spSecondInput
+                    .getSelectedItemPosition();
+            if (secondSelectionPosition == 0) return; //no selection
+            int secondIndex = secondSelectionPosition - 1; // because of the hint option
+            Option secondOption = item.getSecondOptions().get(secondIndex);
+
+            DoubleOption doubleOption = new DoubleOption(firstOption, secondOption);
+            selectionsAdapter.addItem(doubleOption);
+        });
+
+        // verify required indicator
+        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+
+        // verify visibility
+        if (!item.isVisible()) {
+            holder.hide();
+            return;
+        } else {
+            holder.show();
+        }
+
+        // verify enabled param
+        if (!item.isEnabled()) {
+            holder.getBinding().viewFirstSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg_disabled);
+            holder.getBinding().spFirstInput.setEnabled(false);
+            holder.getBinding().viewSecondSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg_disabled);
+            holder.getBinding().spSecondInput.setEnabled(false);
+            return;
+        } else {
+            holder.getBinding().viewFirstSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg);
+            holder.getBinding().spFirstInput.setEnabled(true);
+            holder.getBinding().viewSecondSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg);
+            holder.getBinding().spSecondInput.setEnabled(true);
+        }
+
+        // verify validation
+        if (hasToEvaluateValid && !item.isValid()) {
+            holder.getBinding().viewFirstSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg_error);
+            holder.getBinding().viewSecondSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg_error);
+        } else {
+            holder.getBinding().viewFirstSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg);
+            holder.getBinding().viewSecondSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg);
+        }
+    }
     //endregion
 
     //region Retrieve Values
@@ -1030,6 +1162,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
                 case FormItemViewType.SINGLE_CHOICE:
                 case FormItemViewType.MULTIPLE_CHOICE:
+                case FormItemViewType.DOUBLE_MULTIPLE_CHOICE:
                     //the value(s) is/are saved when the user selects the spinner item(s)
                     continue;
 

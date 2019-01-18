@@ -2,7 +2,7 @@ package com.rootnetapp.rootnetintranet.models.createworkflow.form;
 
 import androidx.annotation.NonNull;
 
-public class Option {
+public class Option implements BaseOption {
 
     private int id;
     private String name;

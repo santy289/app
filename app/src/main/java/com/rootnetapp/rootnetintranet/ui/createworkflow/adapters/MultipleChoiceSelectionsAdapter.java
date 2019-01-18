@@ -4,7 +4,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.rootnetapp.rootnetintranet.databinding.FormMultipleChoiceSelectionItemBinding;
-import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseOption;
 
 import java.util.List;
 
@@ -14,9 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 class MultipleChoiceSelectionsAdapter extends
         RecyclerView.Adapter<MultipleChoiceSelectionsViewHolder> {
 
-    private final List<Option> selectedValues;
+    private final List<BaseOption> selectedValues;
 
-    MultipleChoiceSelectionsAdapter(List<Option> selectedValues) {
+    MultipleChoiceSelectionsAdapter(List<BaseOption> selectedValues) {
         this.selectedValues = selectedValues;
     }
 
@@ -28,8 +28,8 @@ class MultipleChoiceSelectionsAdapter extends
      *
      * @return whether the item was added.
      */
-    boolean addItem(Option value) {
-        for (Option selectedValue : selectedValues) {
+    boolean addItem(BaseOption value) {
+        for (BaseOption selectedValue : selectedValues) {
             if (value == selectedValue) return false;
         }
 
@@ -39,7 +39,7 @@ class MultipleChoiceSelectionsAdapter extends
         return true;
     }
 
-    private void removeItem(Option value) {
+    private void removeItem(BaseOption value) {
         int position = selectedValues.indexOf(value);
         selectedValues.remove(value);
         notifyItemRemoved(position);
@@ -59,12 +59,11 @@ class MultipleChoiceSelectionsAdapter extends
 
     @Override
     public void onBindViewHolder(@NonNull MultipleChoiceSelectionsViewHolder holder, int i) {
-        Option item = getItem(i);
+        BaseOption item = getItem(i);
 
-        holder.binding.chip.setText(item.getName());
+        holder.binding.chip.setText(item.toString());
         holder.binding.chip.setOnCloseIconClickListener(view -> {
             // Handle the click on the close icon.
-//            onRemovedListener.onRemoved(item);
             removeItem(item);
         });
     }
@@ -74,7 +73,7 @@ class MultipleChoiceSelectionsAdapter extends
         return selectedValues.size();
     }
 
-    private Option getItem(int position) {
+    private BaseOption getItem(int position) {
         return selectedValues.get(position);
     }
 }

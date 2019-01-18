@@ -315,7 +315,7 @@ public class FormSettings {
 
         List<ProductJsonValue> productJsonValueList = new ArrayList<>();
         for (int i = 0; i < formItem.getValues().size(); i++) {
-            Option value = formItem.getValues().get(i);
+            Option value = (Option) formItem.getValues().get(i);
 
             ProductJsonValue productJsonValue = new ProductJsonValue();
             productJsonValue.setValue(String.valueOf(value.getId()));
@@ -412,7 +412,7 @@ public class FormSettings {
 
         List<PostSystemUser> postSystemUserList = new ArrayList<>();
         for (int i = 0; i < formItem.getValues().size(); i++) {
-            Option value = formItem.getValues().get(i);
+            Option value = (Option) formItem.getValues().get(i);
 
             FormCreateProfile profile = getProfileBy(value.getName());
             if (profile == null) {
@@ -468,7 +468,7 @@ public class FormSettings {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("[");
         for (int i = 0; i < formItem.getValues().size(); i++) {
-            Option value = formItem.getValues().get(i);
+            Option value = (Option) formItem.getValues().get(i);
             int id = value.getId();
             if (id == 0) {
                 continue;

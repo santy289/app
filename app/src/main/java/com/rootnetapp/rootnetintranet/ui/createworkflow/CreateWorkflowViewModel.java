@@ -35,6 +35,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.DoubleMultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.IntentFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
@@ -54,6 +55,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
@@ -92,6 +94,7 @@ class CreateWorkflowViewModel extends ViewModel {
     protected static final int TAG_OWNER = 2773;
     protected static final int TAG_ADDITIONAL_PROFILES = 2774;
     protected static final int TAG_GLOBAL_APPROVERS = 2775;
+    protected static final int TAG_SPECIFIC_APPROVERS = 2776;
     protected static final int FORM_BASE_INFO = 1;
     protected static final int FORM_PEOPLE_INVOLVED = 2;
 
@@ -1546,22 +1549,21 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void onWorkflowTypeSuccess(WorkflowTypeResponse workflowTypeResponse) {
-        showPeopleInvolvedFields();
+        showPeopleInvolvedFields(workflowTypeResponse.getWorkflowType());
     }
 
     /**
      * Creates all of the people involved form items according to their params. Sends each form item
      * to the UI.
      */
-    private void showPeopleInvolvedFields() {
-        createProfilesFormItems();
+    private void showPeopleInvolvedFields(WorkflowTypeDb workflowTypeDb) {
+        createProfilesFormItems(workflowTypeDb);
 
-        mSetPeopleInvolvedFormItemListLiveData.setValue(formSettings.getPeopleInvolvedFormItems());
-
-        showLoading.setValue(false);
+//        mSetPeopleInvolvedFormItemListLiveData.setValue(formSettings.getPeopleInvolvedFormItems());
     }
 
-    private void createProfilesFormItems() {
+    private void createProfilesFormItems(WorkflowTypeDb workflowTypeDb) {
+
         Disposable disposable = mRepository
                 .getProfiles(mToken, true)
                 .subscribe(profileResponse -> {
@@ -1580,6 +1582,7 @@ class CreateWorkflowViewModel extends ViewModel {
                         if (option.getId() == mUserId) selection = option;
                     }
 
+                    //Owner
                     SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
                             .setTitleRes(R.string.owner)
                             .setRequired(true)
@@ -1591,6 +1594,7 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddPeopleInvolvedFormItemLiveData.setValue(singleChoiceFormItem);
 
+                    //Additional People Involved
                     MultipleChoiceFormItem multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
                             .setTitleRes(R.string.additional_profiles)
                             .setRequired(false)
@@ -1600,6 +1604,7 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddPeopleInvolvedFormItemLiveData.setValue(multipleChoiceFormItem);
 
+                    //Global Approvers
                     multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
                             .setTitleRes(R.string.global_approvers_form)
                             .setRequired(false)
@@ -1608,6 +1613,31 @@ class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddPeopleInvolvedFormItemLiveData.setValue(multipleChoiceFormItem);
+
+                    //Specific Approvers
+                    List<Status> statuses = workflowTypeDb.getStatus();
+                    if (statuses == null || statuses.isEmpty()) return;
+
+                    List<Option> statusOptions = new ArrayList<>();
+                    for (int i = 0; i < statuses.size(); i++) {
+                        String name = statuses.get(i).getName();
+                        Integer id = statuses.get(i).getId();
+
+                        Option option = new Option(id, name);
+                        statusOptions.add(option);
+                    }
+
+                    DoubleMultipleChoiceFormItem doubleMultipleChoiceFormItem = new DoubleMultipleChoiceFormItem.Builder()
+                            .setTitleRes(R.string.specific_approvers_form)
+                            .setRequired(false)
+                            .setTag(TAG_SPECIFIC_APPROVERS)
+                            .setFirstOptions(options)
+                            .setSecondOptions(statusOptions)
+                            .build();
+
+                    mAddPeopleInvolvedFormItemLiveData.setValue(doubleMultipleChoiceFormItem);
+
+                    showLoading.setValue(false);
                 }, throwable -> Log
                         .e(TAG, "createProfilesFormItems: error " + throwable.getMessage()));
 

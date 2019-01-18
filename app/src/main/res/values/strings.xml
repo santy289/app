@@ -231,6 +231,7 @@
     <string name="action">Action</string>
     <string name="people_involved_action">Configure</string>
     <string name="additional_profiles">Additional Profiles</string>
+    <string name="global_approvers_form">People that can approve any status</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Workflow Details</string>

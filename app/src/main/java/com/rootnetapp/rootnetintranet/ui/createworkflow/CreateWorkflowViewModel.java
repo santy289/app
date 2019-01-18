@@ -91,6 +91,7 @@ class CreateWorkflowViewModel extends ViewModel {
     protected static final int TAG_PEOPLE_INVOLVED = 2772;
     protected static final int TAG_OWNER = 2773;
     protected static final int TAG_ADDITIONAL_PROFILES = 2774;
+    protected static final int TAG_GLOBAL_APPROVERS = 2775;
     protected static final int FORM_BASE_INFO = 1;
     protected static final int FORM_PEOPLE_INVOLVED = 2;
 
@@ -1594,6 +1595,15 @@ class CreateWorkflowViewModel extends ViewModel {
                             .setTitleRes(R.string.additional_profiles)
                             .setRequired(false)
                             .setTag(TAG_ADDITIONAL_PROFILES)
+                            .setOptions(options)
+                            .build();
+
+                    mAddPeopleInvolvedFormItemLiveData.setValue(multipleChoiceFormItem);
+
+                    multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
+                            .setTitleRes(R.string.global_approvers_form)
+                            .setRequired(false)
+                            .setTag(TAG_GLOBAL_APPROVERS)
                             .setOptions(options)
                             .build();
 

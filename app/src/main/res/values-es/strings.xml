@@ -228,6 +228,7 @@
     <string name="action">Acción</string>
     <string name="people_involved_action">Configurar</string>
     <string name="additional_profiles">Personas Adicionales</string>
+    <string name="global_approvers_form">Usuarios que pueden aprobar cualquier estatus</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Detalles de Workflow</string>

@@ -1684,6 +1684,31 @@ class CreateWorkflowViewModel extends ViewModel {
 
         mDisposables.add(disposable);
     }
+
+    /**
+     * Performs the validation for every form item present in the People Involved form. Each item's method
+     * is in charge of handling the validation, here we simply check whether one of them is invalid
+     * to prevent the action from being completed.
+     *
+     * @return whether all of the form items are valid.
+     */
+    protected boolean validatePeopleInvolvedFormItems() {
+        boolean isValid = true;
+
+        for (BaseFormItem item : formSettings.getPeopleInvolvedFormItems()) {
+            if (!item.isValid()) {
+                isValid = false;
+            }
+        }
+
+        if (isValid) {
+            //every item inside the People Involved form are valid, so we set the item to completed
+            BaseFormItem item = formSettings.findItem(TAG_PEOPLE_INVOLVED);
+            ((IntentFormItem) item).setCompleted(true);
+        }
+
+        return isValid;
+    }
     //endregion
 
     /**

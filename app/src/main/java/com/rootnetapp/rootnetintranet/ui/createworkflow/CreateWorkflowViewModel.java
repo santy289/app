@@ -11,8 +11,11 @@ import android.util.Base64;
 import android.util.Log;
 import android.util.Patterns;
 
+import com.auth0.android.jwt.JWT;
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.Profile;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -52,6 +55,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowRespons
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
@@ -75,6 +79,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static android.app.Activity.RESULT_OK;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_OWNER;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_STATUS;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_TYPE;
 
@@ -84,6 +89,9 @@ class CreateWorkflowViewModel extends ViewModel {
     protected static final int REQUEST_EXTERNAL_STORAGE_PERMISSIONS = 72;
     protected static final int TAG_WORKFLOW_TYPE = 80;
     protected static final int TAG_PEOPLE_INVOLVED = 2772;
+    protected static final int TAG_OWNER = 2773;
+    protected static final int FORM_BASE_INFO = 1;
+    protected static final int FORM_PEOPLE_INVOLVED = 2;
 
     private final int UPLOAD_FILE_SIZE_LIMIT = 10;
 
@@ -94,6 +102,8 @@ class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<IntentFormItem> mAddPeopleInvolvedItemLiveData;
     private MutableLiveData<BaseFormItem> mAddFormItemLiveData;
     private MutableLiveData<List<BaseFormItem>> mSetFormItemListLiveData;
+    private MutableLiveData<BaseFormItem> mAddPeopleInvolvedFormItemLiveData;
+    private MutableLiveData<List<BaseFormItem>> mSetPeopleInvolvedFormItemListLiveData;
     private MutableLiveData<BaseFormItem> mValidationUiLiveData;
     private MutableLiveData<DialogMessage> showDialogMessage;
     private MutableLiveData<Boolean> goBack;
@@ -115,6 +125,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private FileFormItem mCurrentRequestingFileFormItem;
     private List<FileFormItem> mFilesToUpload;
     private int mQueuedFile;
+    private int mUserId;
 
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.mRepository = createWorkflowRepository;
@@ -129,6 +140,10 @@ class CreateWorkflowViewModel extends ViewModel {
         }
         this.mToken = token;
         this.mWorkflowListItem = item;
+
+        JWT jwt = new JWT(token.replace("Bearer ", ""));
+        String userId = jwt.getClaim(PreferenceKeys.PREF_PROFILE_ID).asString();
+        if (userId != null && !userId.isEmpty()) mUserId = Integer.parseInt(userId);
 
         createWorkflowTypeItem();
     }
@@ -293,7 +308,8 @@ class CreateWorkflowViewModel extends ViewModel {
             return formSettings;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(ignored -> createPeopleInvolvedItem(), throwable -> showLoading.setValue(false));
+                .subscribe(ignored -> createPeopleInvolvedItem(),
+                        throwable -> showLoading.setValue(false));
         mDisposables.add(disposable);
 
     }
@@ -304,6 +320,7 @@ class CreateWorkflowViewModel extends ViewModel {
     protected void clearForm() {
         formSettings.clearFormItems();
         mSetFormItemListLiveData.setValue(formSettings.getFormItems());
+        mSetPeopleInvolvedFormItemListLiveData.setValue(formSettings.getPeopleInvolvedFormItems());
     }
 
     /**
@@ -338,7 +355,6 @@ class CreateWorkflowViewModel extends ViewModel {
 
         if (mWorkflowListItem == null) {
             showLoading.setValue(false);
-            mSetFormItemListLiveData.setValue(formSettings.getFormItems());
             return;
         }
 
@@ -478,8 +494,8 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     /**
-     * Creates the People Involved form item. Performs a request to the repo to retrieve the workflow type
-     * and then send the form item to the UI.
+     * Creates the People Involved form item. Performs a request to the repo to retrieve the
+     * workflow type and then send the form item to the UI.
      */
     private void createPeopleInvolvedItem() {
         Disposable disposable = Observable.fromCallable(() -> {
@@ -498,7 +514,8 @@ class CreateWorkflowViewModel extends ViewModel {
                 .subscribe(intentFormItem -> {
                     mAddPeopleInvolvedItemLiveData.setValue(intentFormItem);
                     showFields(formSettings);
-                }, throwable -> Log.d(TAG, "createPeopleInvolvedItem: error " + throwable.getMessage()));
+                }, throwable -> Log
+                        .d(TAG, "createPeopleInvolvedItem: error " + throwable.getMessage()));
         mDisposables.add(disposable);
     }
 
@@ -1510,6 +1527,74 @@ class CreateWorkflowViewModel extends ViewModel {
     }
     //endregion
 
+    //region People Involved Form
+    protected void getWorkflowTypeInfo() {
+        //check if the form has already been created
+        if (!formSettings.getPeopleInvolvedFormItems().isEmpty()) return;
+
+        showLoading.setValue(true);
+
+        int workflowTypeId = formSettings.getWorkflowTypeIdSelected();
+
+        Disposable disposable = mRepository
+                .getWorkflowType(mToken, workflowTypeId)
+                .subscribe(this::onWorkflowTypeSuccess, this::onFailure);
+
+        mDisposables.add(disposable);
+    }
+
+    private void onWorkflowTypeSuccess(WorkflowTypeResponse workflowTypeResponse) {
+        showPeopleInvolvedFields();
+    }
+
+    /**
+     * Creates all of the people involved form items according to their params. Sends each form item
+     * to the UI.
+     */
+    private void showPeopleInvolvedFields() {
+        createOwnerFormItem();
+
+        mSetPeopleInvolvedFormItemListLiveData.setValue(formSettings.getPeopleInvolvedFormItems());
+
+        showLoading.setValue(false);
+    }
+
+    private void createOwnerFormItem() {
+        Disposable disposable = mRepository
+                .getProfiles(mToken, true)
+                .subscribe(profileResponse -> {
+                    List<Profile> list = profileResponse.getProfiles();
+                    if (list == null || list.isEmpty()) return;
+
+                    Option selection = null; //check for current user (default owner)
+                    List<Option> options = new ArrayList<>();
+                    for (int i = 0; i < list.size(); i++) {
+                        String name = list.get(i).getFullName();
+                        Integer id = list.get(i).getId();
+
+                        Option option = new Option(id, name);
+                        options.add(option);
+
+                        if (option.getId() == mUserId) selection = option;
+                    }
+
+                    SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
+                            .setTitleRes(R.string.owner)
+                            .setRequired(true)
+                            .setTag(TAG_OWNER)
+                            .setOptions(options)
+                            .setValue(selection)
+                            .setMachineName(MACHINE_NAME_OWNER)
+                            .build();
+
+                    mAddPeopleInvolvedFormItemLiveData.setValue(singleChoiceFormItem);
+                }, throwable -> Log
+                        .e(TAG, "createOwnerFormItem: error " + throwable.getMessage()));
+
+        mDisposables.add(disposable);
+    }
+    //endregion
+
     /**
      * This is called by the View when the user submits the form.
      */
@@ -1657,6 +1742,20 @@ class CreateWorkflowViewModel extends ViewModel {
             mSetFormItemListLiveData = new MutableLiveData<>();
         }
         return mSetFormItemListLiveData;
+    }
+
+    protected LiveData<BaseFormItem> getObservableAddPeopleInvolvedFormItem() {
+        if (mAddPeopleInvolvedFormItemLiveData == null) {
+            mAddPeopleInvolvedFormItemLiveData = new MutableLiveData<>();
+        }
+        return mAddPeopleInvolvedFormItemLiveData;
+    }
+
+    protected LiveData<List<BaseFormItem>> getObservableSetPeopleInvolvedFormItemList() {
+        if (mSetPeopleInvolvedFormItemListLiveData == null) {
+            mSetPeopleInvolvedFormItemListLiveData = new MutableLiveData<>();
+        }
+        return mSetPeopleInvolvedFormItemListLiveData;
     }
 
     protected LiveData<BaseFormItem> getObservableValidationUi() {

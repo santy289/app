@@ -56,6 +56,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     private static final String TAG = "CreateWorkflowFragment";
 
     private FormItemsAdapter mAdapter;
+    private FormItemsAdapter mPeopleInvolvedAdapter;
     private WorkflowListItem mWorkflowListItem;
 
     public CreateWorkflowFragment() { }
@@ -113,6 +114,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         setupSubmitButton();
         setOnClickListeners();
         setupFormRecycler();
+        setupPeopleInvolvedRecycler();
         subscribe();
 
         viewModel.initForm(token, mWorkflowListItem);
@@ -126,6 +128,10 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         viewModel.getObservableAddPeopleInvolvedItem().observe(this, this::addPeopleInvolvedItem);
         viewModel.getObservableAddFormItem().observe(this, this::addItemToForm);
         viewModel.getObservableSetFormItemList().observe(this, this::setItemListToForm);
+        viewModel.getObservableAddPeopleInvolvedFormItem()
+                .observe(this, this::addItemToPeopleInvolvedForm);
+        viewModel.getObservableSetPeopleInvolvedFormItemList()
+                .observe(this, this::setItemListToPeopleInvolvedForm);
         viewModel.getObservableValidationUi().observe(this, this::updateValidationUi);
         viewModel.getObservableShowLoading().observe(this, this::showLoading);
         viewModel.getObservableShowDialogMessage().observe(this, this::showDialog);
@@ -174,6 +180,8 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
             mAdapter.retrieveValuesFromViews(mBinding.rvFields);
             viewModel.handleCreateWorkflowAction();
         });
+
+        mBinding.btnBack.setOnClickListener(v -> onBackPressed());
     }
 
     @Override
@@ -191,6 +199,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         }
     }
 
+    @UiThread
     private void showDialog(DialogMessage dialogMessage) {
         FragmentManager fm = getFragmentManager();
 
@@ -204,6 +213,15 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         );
 
         dialog.show(fm, "validate_dialog");
+    }
+
+    @UiThread
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                getContext(),
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
     }
 
     private void goBack() {
@@ -250,6 +268,8 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         intentFormItem.setOnButtonClickedListener(() -> {
             setupViewFlipperAnimations(true);
             mBinding.viewFlipper.showNext();
+
+            viewModel.getWorkflowTypeInfo();
         });
     }
 
@@ -441,12 +461,36 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         }
     }
 
-    @UiThread
-    private void showToastMessage(@StringRes int messageRes) {
-        Toast.makeText(
-                getContext(),
-                getString(messageRes),
-                Toast.LENGTH_SHORT)
-                .show();
+    //region People Involved Form
+    private void setupPeopleInvolvedRecycler() {
+        mPeopleInvolvedAdapter = new FormItemsAdapter(getContext(), getChildFragmentManager(),
+                new ArrayList<>(),
+                this);
+        mBinding.rvPeopleInvolvedFields.setLayoutManager(new LinearLayoutManager(getContext()));
+        mBinding.rvPeopleInvolvedFields.setAdapter(mPeopleInvolvedAdapter);
+        mBinding.rvPeopleInvolvedFields.setNestedScrollingEnabled(false);
     }
+
+    /**
+     * Inserts a single form item to the RecyclerView. This will refresh the UI with the added
+     * item.
+     *
+     * @param item item to insert.
+     */
+    @UiThread
+    private void addItemToPeopleInvolvedForm(BaseFormItem item) {
+        mPeopleInvolvedAdapter.addItem(item);
+    }
+
+    /**
+     * Inserts multiple form items to the RecyclerView. This will refresh the UI with the added
+     * items.
+     *
+     * @param list items to insert.
+     */
+    @UiThread
+    private void setItemListToPeopleInvolvedForm(List<BaseFormItem> list) {
+        mPeopleInvolvedAdapter.setData(list);
+    }
+    //endregion
 }

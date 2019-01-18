@@ -53,6 +53,7 @@ public class FormSettings {
     private List<FormFieldsByWorkflowType> fields; // Full info of all fields.
     private final Moshi moshi;
     private List<BaseFormItem> formItems; //new
+    private List<BaseFormItem> peopleInvolvedFormItems; //new
 
     public static final String TYPE_TEXT = "text";
     public static final String TYPE_TEXT_AREA = "textarea";
@@ -482,15 +483,26 @@ public class FormSettings {
         metaData.setValue(formattedValue);
     }
 
-    public List<BaseFormItem> getFormItems() {
+    protected List<BaseFormItem> getFormItems() {
         if (formItems == null) {
             formItems = new ArrayList<>();
         }
         return formItems;
     }
 
-    public void setFormItems(List<BaseFormItem> formItems) {
+    protected void setFormItems(List<BaseFormItem> formItems) {
         this.formItems = formItems;
+    }
+
+    protected List<BaseFormItem> getPeopleInvolvedFormItems() {
+        if (peopleInvolvedFormItems == null) {
+            peopleInvolvedFormItems = new ArrayList<>();
+        }
+        return peopleInvolvedFormItems;
+    }
+
+    protected void setPeopleInvolvedFormItems(List<BaseFormItem> formItems) {
+        this.peopleInvolvedFormItems = formItems;
     }
 
     /**
@@ -790,7 +802,7 @@ public class FormSettings {
     }
 
     protected List<BaseFormItem> getFormItemsToPost() {
-
+        //todo check people involved
         List<BaseFormItem> formItemsToPost = new ArrayList<>(getFormItems());
         BaseFormItem formItem;
         int tag;
@@ -851,6 +863,8 @@ public class FormSettings {
     }
 
     protected void clearFormItems() {
+        getPeopleInvolvedFormItems().clear();
+
         List<BaseFormItem> formItems = getFormItems();
 
         if (formItems.size() <= 1) {
@@ -869,6 +883,7 @@ public class FormSettings {
      * @return the first item that is not valid, index-based. Null if all of the items are valid.
      */
     protected BaseFormItem findFirstInvalidItem() {
+        //todo check people involved
         for (BaseFormItem item : getFormItems()) {
             if (!item.isValid()) return item;
         }
@@ -884,6 +899,7 @@ public class FormSettings {
      * @return the form item matching the tag. Null if none was found.
      */
     protected BaseFormItem findItem(int tag) {
+        //todo check people involved
         for (BaseFormItem item : getFormItems()) {
             if (item.getTag() == tag) return item;
         }

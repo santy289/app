@@ -105,6 +105,12 @@ public interface ApiInterface {
     @GET("profiles?enabled=all")
     Observable<ProfileResponse> getProfiles(@Header("Authorization") String authorization);
 
+
+    @Headers({"Domain-Name: api"})
+    @GET("profiles?")
+    Observable<ProfileResponse> getProfiles(@Header("Authorization") String authorization,
+                                            @Query("enabled") boolean enabled);
+
     @Headers({"Domain-Name: api"})
     @PATCH("profiles/{id}")
     @FormUrlEncoded

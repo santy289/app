@@ -22,6 +22,7 @@ import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse
 import com.rootnetapp.rootnetintranet.models.responses.project.ProjectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.role.RoleResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
@@ -63,8 +64,8 @@ public class CreateWorkflowRepository {
         return workflowTypeDbDao.getListOfWorkflowNames();
     }
 
-    public WorkflowTypeDb getWorklowType(int workflowId) {
-        return workflowTypeDbDao.getWorkflowTypeBy(workflowId);
+    public WorkflowTypeDb getWorklowType(int workflowTypeId) {
+        return workflowTypeDbDao.getWorkflowTypeBy(workflowTypeId);
     }
 
     public List<FormCreateProfile> getProfiles() {
@@ -165,6 +166,11 @@ public class CreateWorkflowRepository {
 
     protected Observable<DownloadFileResponse> downloadFile(String auth, String entity, int fileId) {
         return service.downloadFile(auth, entity, fileId).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<ProfileResponse> getProfiles(String auth, boolean enabled) {
+        return service.getProfiles(auth, enabled).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 }

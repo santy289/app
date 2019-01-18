@@ -53,6 +53,7 @@ import com.rootnetapp.rootnetintranet.models.responses.role.Role;
 import com.rootnetapp.rootnetintranet.models.responses.services.Service;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
@@ -97,6 +98,7 @@ class CreateWorkflowViewModel extends ViewModel {
     protected static final int TAG_SPECIFIC_APPROVERS = 2776;
     protected static final int FORM_BASE_INFO = 1;
     protected static final int FORM_PEOPLE_INVOLVED = 2;
+    private static final String ENTITY_ROLE = "role";
 
     private final int UPLOAD_FILE_SIZE_LIMIT = 10;
 
@@ -1564,17 +1566,18 @@ class CreateWorkflowViewModel extends ViewModel {
 
     private void createProfilesFormItems(WorkflowTypeDb workflowTypeDb) {
 
-        Disposable disposable = mRepository
+        Disposable disposable;
+        disposable = mRepository
                 .getProfiles(mToken, true)
                 .subscribe(profileResponse -> {
-                    List<Profile> list = profileResponse.getProfiles();
-                    if (list == null || list.isEmpty()) return;
+                    List<Profile> profiles = profileResponse.getProfiles();
+                    if (profiles == null || profiles.isEmpty()) return;
 
                     Option selection = null; //check for current user (default owner)
                     List<Option> options = new ArrayList<>();
-                    for (int i = 0; i < list.size(); i++) {
-                        String name = list.get(i).getFullName();
-                        Integer id = list.get(i).getId();
+                    for (int i = 0; i < profiles.size(); i++) {
+                        String name = profiles.get(i).getFullName();
+                        Integer id = profiles.get(i).getId();
 
                         Option option = new Option(id, name);
                         options.add(option);
@@ -1636,6 +1639,44 @@ class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddPeopleInvolvedFormItemLiveData.setValue(doubleMultipleChoiceFormItem);
+
+                    //Approvers
+                    for (Approver approver : workflowTypeDb.getDistinctApprovers()) {
+                        //only add items for roles
+                        if (!approver.entityType.equalsIgnoreCase(ENTITY_ROLE)) continue;
+
+                        List<Integer> profileIds = workflowTypeDb
+                                .getRoleApproverProfileIds(approver.entityId);
+
+                        if (profileIds == null || profileIds.isEmpty()) continue;
+
+                        //get options for each role
+                        List<Option> approverOptions = new ArrayList<>();
+                        for (int i = 0; i < profileIds.size(); i++) {
+                            int profileId = profileIds.get(i);
+                            Profile profile = Profile.getProfileByIdFromList(profiles, profileId);
+
+                            if (profile == null) continue;
+
+                            String name = profile.getFullName();
+                            Integer id = profile.getId();
+
+                            Option option = new Option(id, name);
+                            approverOptions.add(option);
+                        }
+
+                        //ignore item if there are no options
+                        if (approverOptions.isEmpty()) continue;
+
+                        singleChoiceFormItem = new SingleChoiceFormItem.Builder()
+                                .setTitle(approver.entityName)
+                                .setRequired(workflowTypeDb.isDefineRoles())
+                                .setTag(approver.id)
+                                .setOptions(approverOptions)
+                                .build();
+
+                        mAddPeopleInvolvedFormItemLiveData.setValue(singleChoiceFormItem);
+                    }
 
                     showLoading.setValue(false);
                 }, throwable -> Log

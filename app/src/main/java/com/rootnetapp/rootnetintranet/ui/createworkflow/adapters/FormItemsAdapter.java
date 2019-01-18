@@ -223,7 +223,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         //set title
         String title = item.getTitle();
-        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
         holder.getBinding().tvTitle.setText(title);
 
         //set value
@@ -318,7 +320,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         SingleChoiceFormItem item = (SingleChoiceFormItem) getItem(position);
 
         String title = item.getTitle();
-        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
         holder.getBinding().tvTitle.setText(title);
 
         List<Option> options = new ArrayList<>(item.getOptions());
@@ -440,7 +444,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         BooleanFormItem item = (BooleanFormItem) getItem(position);
 
         String title = item.getTitle();
-        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
         holder.getBinding().switchInput.setText(title);
 
         holder.getBinding().switchInput.setChecked(item.getValue());
@@ -474,7 +480,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         DateFormItem item = (DateFormItem) getItem(position);
 
         String title = item.getTitle();
-        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
         final String finalTitle = title;
         holder.getBinding().tvTitle.setText(finalTitle);
 
@@ -556,7 +564,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         CurrencyFormItem item = (CurrencyFormItem) getItem(position);
 
         String title = item.getTitle();
-        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
         holder.getBinding().tvTitle.setText(title);
 
         //fill value
@@ -684,7 +694,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         MultipleChoiceFormItem item = (MultipleChoiceFormItem) getItem(position);
 
         String title = item.getTitle();
-        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
         holder.getBinding().tvTitle.setText(title);
 
         //creates the selected items adapter
@@ -776,7 +788,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         PhoneFormItem item = (PhoneFormItem) getItem(position);
 
         String title = item.getTitle();
-        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
         holder.getBinding().tvTitle.setText(title);
 
         //fill value
@@ -904,7 +918,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         //set title
         String title = item.getTitle();
-        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
         holder.getBinding().tvTitle.setText(title);
 
         //set button click listener
@@ -973,7 +989,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         //set title
         String title = item.getTitle();
-        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
         holder.getBinding().tvTitle.setText(title);
 
         //set button text
@@ -1026,7 +1044,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         DoubleMultipleChoiceFormItem item = (DoubleMultipleChoiceFormItem) getItem(position);
 
         String title = item.getTitle();
-        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
         holder.getBinding().tvTitle.setText(title);
 
         //creates the selected items adapter

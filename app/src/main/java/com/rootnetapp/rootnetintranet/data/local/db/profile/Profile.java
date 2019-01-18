@@ -1,13 +1,16 @@
 package com.rootnetapp.rootnetintranet.data.local.db.profile;
 
+import com.squareup.moshi.Json;
+
+import java.util.List;
+
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import com.squareup.moshi.Json;
-
 @Entity
 public class Profile {
+
     @PrimaryKey
     @ColumnInfo(name = "id")
     @Json(name = "id")
@@ -91,5 +94,13 @@ public class Profile {
 
     public void setPicture(String picture) {
         this.picture = picture;
+    }
+
+    public static Profile getProfileByIdFromList(List<Profile> profiles, int profileId) {
+        for (Profile profile : profiles) {
+            if (profile.getId() == profileId) return profile;
+        }
+
+        return null;
     }
 }

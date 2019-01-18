@@ -4,7 +4,7 @@ import java.util.Locale;
 
 import androidx.annotation.NonNull;
 
-public class DoubleOption implements BaseOption{
+public class DoubleOption implements BaseOption {
 
     private Option firstOption;
     private Option secondOption;
@@ -44,5 +44,23 @@ public class DoubleOption implements BaseOption{
         }
 
         return String.format(Locale.US, "%s %s", firstOptionName, secondOptionName).trim();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DoubleOption that = (DoubleOption) o;
+
+        if (!firstOption.equals(that.firstOption)) return false;
+        return secondOption.equals(that.secondOption);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = firstOption.hashCode();
+        result = 31 * result + secondOption.hashCode();
+        return result;
     }
 }

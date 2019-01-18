@@ -33,4 +33,22 @@ public class Option implements BaseOption {
     public String toString() {
         return getName() == null ? "" : getName();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Option option = (Option) o;
+
+        if (id != option.id) return false;
+        return name.equals(option.name);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + name.hashCode();
+        return result;
+    }
 }

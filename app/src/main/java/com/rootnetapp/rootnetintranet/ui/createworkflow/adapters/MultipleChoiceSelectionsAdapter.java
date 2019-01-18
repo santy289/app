@@ -30,7 +30,7 @@ class MultipleChoiceSelectionsAdapter extends
      */
     boolean addItem(BaseOption value) {
         for (BaseOption selectedValue : selectedValues) {
-            if (value == selectedValue) return false;
+            if (value.equals(selectedValue)) return false;
         }
 
         selectedValues.add(value);

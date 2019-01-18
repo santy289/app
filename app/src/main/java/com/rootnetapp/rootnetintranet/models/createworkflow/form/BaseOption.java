@@ -6,4 +6,6 @@ public interface BaseOption {
 
     @NonNull
     String toString();
+
+    boolean equals(Object o);
 }

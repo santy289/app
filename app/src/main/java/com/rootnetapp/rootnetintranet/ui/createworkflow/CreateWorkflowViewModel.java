@@ -90,6 +90,7 @@ class CreateWorkflowViewModel extends ViewModel {
     protected static final int TAG_WORKFLOW_TYPE = 80;
     protected static final int TAG_PEOPLE_INVOLVED = 2772;
     protected static final int TAG_OWNER = 2773;
+    protected static final int TAG_ADDITIONAL_PROFILES = 2774;
     protected static final int FORM_BASE_INFO = 1;
     protected static final int FORM_PEOPLE_INVOLVED = 2;
 
@@ -1552,14 +1553,14 @@ class CreateWorkflowViewModel extends ViewModel {
      * to the UI.
      */
     private void showPeopleInvolvedFields() {
-        createOwnerFormItem();
+        createProfilesFormItems();
 
         mSetPeopleInvolvedFormItemListLiveData.setValue(formSettings.getPeopleInvolvedFormItems());
 
         showLoading.setValue(false);
     }
 
-    private void createOwnerFormItem() {
+    private void createProfilesFormItems() {
         Disposable disposable = mRepository
                 .getProfiles(mToken, true)
                 .subscribe(profileResponse -> {
@@ -1588,8 +1589,17 @@ class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddPeopleInvolvedFormItemLiveData.setValue(singleChoiceFormItem);
+
+                    MultipleChoiceFormItem multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
+                            .setTitleRes(R.string.additional_profiles)
+                            .setRequired(false)
+                            .setTag(TAG_ADDITIONAL_PROFILES)
+                            .setOptions(options)
+                            .build();
+
+                    mAddPeopleInvolvedFormItemLiveData.setValue(multipleChoiceFormItem);
                 }, throwable -> Log
-                        .e(TAG, "createOwnerFormItem: error " + throwable.getMessage()));
+                        .e(TAG, "createProfilesFormItems: error " + throwable.getMessage()));
 
         mDisposables.add(disposable);
     }

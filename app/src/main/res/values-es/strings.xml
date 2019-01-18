@@ -227,6 +227,7 @@
     <string name="fill_all_form_items">Necesitas llenar todos los elementos requeridos.</string>
     <string name="action">Acción</string>
     <string name="people_involved_action">Configurar</string>
+    <string name="additional_profiles">Personas Adicionales</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Detalles de Workflow</string>

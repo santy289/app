@@ -22,7 +22,6 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
-import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
 import com.rootnetapp.rootnetintranet.models.createworkflow.CurrencyFieldData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
@@ -31,11 +30,14 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.PhoneFieldData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCurrency;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostPhone;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
+import com.rootnetapp.rootnetintranet.models.createworkflow.StatusSpecific;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseOption;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DoubleMultipleChoiceFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.DoubleOption;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.IntentFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
@@ -67,7 +69,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -203,6 +207,50 @@ class CreateWorkflowViewModel extends ViewModel {
         String start = Utils
                 .getDatePostFormat(((DateFormItem) formSettings.findItem(startTag)).getValue());
 
+        SingleChoiceFormItem ownerFormItem = (SingleChoiceFormItem) formSettings
+                .findItem(TAG_OWNER);
+        Option ownerValue = ownerFormItem == null ? null : ownerFormItem.getValue();
+        Integer owner = ownerValue == null ? null : ownerValue.getId();
+
+        List<Integer> profilesInvolved = new ArrayList<>();
+        MultipleChoiceFormItem profileInvolvedFormItem = (MultipleChoiceFormItem) formSettings
+                .findItem(TAG_ADDITIONAL_PROFILES);
+        List<BaseOption> selectedProfileInvolvedValues = profileInvolvedFormItem == null ? new ArrayList<>() : profileInvolvedFormItem
+                .getValues();
+        for (BaseOption option : selectedProfileInvolvedValues) {
+            profilesInvolved.add(((Option) option).getId());
+        }
+
+        List<Integer> globalApprovers = new ArrayList<>();
+        MultipleChoiceFormItem globalApproversFormItem = (MultipleChoiceFormItem) formSettings
+                .findItem(TAG_GLOBAL_APPROVERS);
+        List<BaseOption> selectedGlobalApproversValues = globalApproversFormItem == null ? new ArrayList<>() : globalApproversFormItem
+                .getValues();
+        for (BaseOption option : selectedGlobalApproversValues) {
+            globalApprovers.add(((Option) option).getId());
+        }
+
+        List<StatusSpecific> specificApprovers = new ArrayList<>();
+        DoubleMultipleChoiceFormItem specificApprovesFormItem = (DoubleMultipleChoiceFormItem) formSettings
+                .findItem(TAG_SPECIFIC_APPROVERS);
+        List<BaseOption> selectedSpecificApproversValues = specificApprovesFormItem == null ? new ArrayList<>() : specificApprovesFormItem
+                .getValues();
+        for (BaseOption option : selectedSpecificApproversValues) {
+            DoubleOption doubleOption = (DoubleOption) option;
+
+            StatusSpecific statusSpecific = new StatusSpecific();
+            statusSpecific.user = doubleOption.getFirstOption().getId();
+            statusSpecific.status = doubleOption.getSecondOption().getId();
+
+            specificApprovers.add(statusSpecific);
+        }
+
+        Map<String, Object> roleApprovers = new HashMap<>();
+        for (BaseFormItem formItem : formSettings.getRoleApproversFormItems()) {
+            Option roleApprover = ((SingleChoiceFormItem) formItem).getValue();
+            roleApprovers.put(String.valueOf(formItem.getTag()), roleApprover.getId());
+        }
+
         List<WorkflowMetas> metas = new ArrayList<>();
 
         for (int i = 0; i < formItems.size(); i++) {
@@ -244,7 +292,8 @@ class CreateWorkflowViewModel extends ViewModel {
 
         if (mWorkflowListItem == null) {
             // new workflow
-            postCreateToServer(metas, workflowTypeId, title, start, description);
+            postCreateToServer(metas, workflowTypeId, title, start, description, owner,
+                    profilesInvolved, globalApprovers, specificApprovers, roleApprovers);
 
         } else {
             //edit workflow
@@ -253,17 +302,33 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void postCreateToServer(List<WorkflowMetas> metas, int workflowTypeId, String title,
-                                    String start, String description) {
-        CreateRequest createRequest = new CreateRequest();
-        createRequest.workflowTypeId = workflowTypeId;
-        createRequest.title = title;
-        createRequest.metas = metas;
-        createRequest.start = start;
-        createRequest.description = description;
+                                    String start, String description, Integer owner,
+                                    List<Integer> profilesInvolved, List<Integer> globalApprovers,
+                                    List<StatusSpecific> specificApprovers,
+                                    Map<String, Object> roleApprovers) {
+
+        //we cannot use a POJO for this request because the role approvers is an object with dynamic fields.
+        Map<String, Object> mapBody = new HashMap<>();
+        mapBody.put("workflow_type_id", workflowTypeId);
+        mapBody.put("title", title);
+        mapBody.put("workflow_metas", metas);
+        mapBody.put("start", start);
+        mapBody.put("description", description);
+        if (owner != null) {
+            mapBody.put("owner", owner);
+        }
+        mapBody.put("profilesInvolved", profilesInvolved);
+
+        Map<String, Object> specificApproversMap = new HashMap<>();
+        specificApproversMap.put("global", globalApprovers);
+        specificApproversMap.put("statusSpecific", specificApprovers);
+        specificApproversMap.put("role", roleApprovers);
+
+        mapBody.put("specific_approvers", specificApproversMap);
 
         // Accepts object
         Disposable disposable = mRepository
-                .createWorkflow(mToken, createRequest)
+                .createWorkflow(mToken, mapBody)
                 .subscribe(this::onCreateSuccess, this::onCreateFailure);
 
         mDisposables.add(disposable);
@@ -1671,9 +1736,12 @@ class CreateWorkflowViewModel extends ViewModel {
                         singleChoiceFormItem = new SingleChoiceFormItem.Builder()
                                 .setTitle(approver.entityName)
                                 .setRequired(workflowTypeDb.isDefineRoles())
-                                .setTag(approver.id)
+                                .setTag(approver.entityId)
                                 .setOptions(approverOptions)
                                 .build();
+
+                        //we need to keep these separated
+                        formSettings.getRoleApproversFormItems().add(singleChoiceFormItem);
 
                         mAddPeopleInvolvedFormItemLiveData.setValue(singleChoiceFormItem);
                     }
@@ -1686,9 +1754,9 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     /**
-     * Performs the validation for every form item present in the People Involved form. Each item's method
-     * is in charge of handling the validation, here we simply check whether one of them is invalid
-     * to prevent the action from being completed.
+     * Performs the validation for every form item present in the People Involved form. Each item's
+     * method is in charge of handling the validation, here we simply check whether one of them is
+     * invalid to prevent the action from being completed.
      *
      * @return whether all of the form items are valid.
      */

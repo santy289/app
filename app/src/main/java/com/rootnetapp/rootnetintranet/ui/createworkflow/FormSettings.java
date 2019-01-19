@@ -54,6 +54,7 @@ public class FormSettings {
     private final Moshi moshi;
     private List<BaseFormItem> formItems; //new
     private List<BaseFormItem> peopleInvolvedFormItems; //new
+    private List<BaseFormItem> roleApproversFormItems; //these are also included in peopleInvolvedFormItems
 
     public static final String TYPE_TEXT = "text";
     public static final String TYPE_TEXT_AREA = "textarea";
@@ -505,6 +506,17 @@ public class FormSettings {
         this.peopleInvolvedFormItems = formItems;
     }
 
+    protected List<BaseFormItem> getRoleApproversFormItems() {
+        if (roleApproversFormItems == null) {
+            roleApproversFormItems = new ArrayList<>();
+        }
+        return roleApproversFormItems;
+    }
+
+    protected void setRoleApproversFormItems(List<BaseFormItem> formItems) {
+        this.roleApproversFormItems = formItems;
+    }
+
     /**
      * Interface for a ViewModel that we help FormSettings in completed an Information object by
      * requesting to a Repository for data in the network. Eventually this function will also
@@ -899,8 +911,11 @@ public class FormSettings {
      * @return the form item matching the tag. Null if none was found.
      */
     protected BaseFormItem findItem(int tag) {
-        //todo check people involved
         for (BaseFormItem item : getFormItems()) {
+            if (item.getTag() == tag) return item;
+        }
+
+        for (BaseFormItem item : getPeopleInvolvedFormItems()) {
             if (item.getTag() == tag) return item;
         }
 

@@ -30,6 +30,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTyp
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 
 import java.util.List;
+import java.util.Map;
 
 import androidx.lifecycle.LiveData;
 import io.reactivex.Observable;
@@ -145,6 +146,11 @@ public class CreateWorkflowRepository {
     }
 
     public Observable<CreateWorkflowResponse> createWorkflow(String token, CreateRequest body) {
+        return service.createWorkflow(token, body).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<CreateWorkflowResponse> createWorkflow(String token, Map<String, Object> body) {
         return service.createWorkflow(token, body).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }

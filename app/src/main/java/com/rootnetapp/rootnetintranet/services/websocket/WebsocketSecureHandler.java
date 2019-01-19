@@ -55,6 +55,11 @@ public class WebsocketSecureHandler {
     public static final String KEY_PORT = "intranet.port";
     public static final String KEY_PROTOCOL = "intranet.protocol";
     public static final String KEY_DOMAIN = "intranet.domain";
+    public static final String KEY_BACKGROUND = "intranet.background";
+
+    public static final String REASON_AUTH_FAILURE = "thruway.error.authentication_failure";
+    public static final String REASON_CLOSE = "wamp.close.normal";
+    public static final String REASON_GOODBYE = "wamp.error.goodbye_and_out";
 
     private final String realm = "master";
 
@@ -90,6 +95,9 @@ public class WebsocketSecureHandler {
      * Calls complete(ExitInfo(true)) for the current exitINfoCompletableFuture created.
      */
     public void completeClient() {
+        if (!session.isConnected()) {
+            return;
+        }
         session.leave();
         exitInfoCompletableFuture.complete(new ExitInfo(true));
     }
@@ -150,10 +158,13 @@ public class WebsocketSecureHandler {
             }
 
             switch (details.reason) {
-                case "thruway.error.authentication_failure":
+                case REASON_AUTH_FAILURE:
                     errorCallback.onError(details.reason);
                     break;
-                case "wamp.close.normal":
+                case REASON_CLOSE:
+                    errorCallback.onError(details.reason);
+                    break;
+                case REASON_GOODBYE:
                     errorCallback.onError(details.reason);
                     break;
                 default:

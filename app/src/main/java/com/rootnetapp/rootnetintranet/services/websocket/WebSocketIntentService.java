@@ -15,6 +15,10 @@ public class WebSocketIntentService extends IntentService {
 
     private WebsocketSecureHandler webSocketHandler;
 
+    private static boolean isRunning = false;
+
+    private volatile String token, port, protocol, domain;
+
     private int counter = 0;
 
     private static final String TAG = "WebsocketIntentService";
@@ -38,6 +42,8 @@ public class WebSocketIntentService extends IntentService {
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         NotificationHandler.createNotificationChannel(notificationManager);
         initWebsocket(protocol, port, token, domain);
+
+        isRunning = true;
     }
 
     @Override
@@ -49,10 +55,35 @@ public class WebSocketIntentService extends IntentService {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
-        cancelWebsocket();
+//        if (isBackground) {
+//            restartService();
+//        }
+
+        if (!isRunning) {
+            super.onDestroy();
+            return;
+        }
+
+//        cancelWebsocket();
+//        restartService();
+
+//        stopSelf();
         Log.d(TAG, "onDestroy: ");
-//        Toast.makeText(getApplicationContext(), "Service Destroyed", Toast.LENGTH_LONG).show();
+    }
+
+    private void restartService() {
+        Intent broadcastIntent = createIntent(RestartWebsocketReceiver.class, token, port, protocol, domain);
+        broadcastIntent.setAction("restartservice");
+        sendBroadcast(broadcastIntent);
+    }
+
+    private Intent createIntent(Class<?> className, String token, String port, String protocol, String domain) {
+        Intent intent = new Intent(getApplicationContext(), className);
+        intent.putExtra(WebsocketSecureHandler.KEY_TOKEN, token);
+        intent.putExtra(WebsocketSecureHandler.KEY_PORT, port);
+        intent.putExtra(WebsocketSecureHandler.KEY_PROTOCOL, protocol);
+        intent.putExtra(WebsocketSecureHandler.KEY_DOMAIN, domain);
+        return intent;
     }
 
     public void testDebug(Service service) {
@@ -97,6 +128,7 @@ public class WebSocketIntentService extends IntentService {
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         webSocketHandler = new WebsocketSecureHandler(protocol, port, token, domain);
         webSocketHandler.initNotificationsWithCallback(messageArray -> {
+            Toast.makeText(getApplicationContext(), "message incoming", Toast.LENGTH_LONG).show();
             counter += 1;
             NotificationHandler.prepareNotification(
                     messageArray[WebsocketSecureHandler.INDEX_ID],
@@ -109,6 +141,7 @@ public class WebSocketIntentService extends IntentService {
 
             );
         }, errorMessage -> {
+            Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
             switch (errorMessage) {
                 case "thruway.error.authentication_failure":
                     break;

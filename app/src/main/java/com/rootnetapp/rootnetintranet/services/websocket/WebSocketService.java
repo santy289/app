@@ -11,11 +11,9 @@ import android.os.Process;
 import android.util.Log;
 import android.widget.Toast;
 
+
 import androidx.annotation.Nullable;
 
-/**
- * Not full tested and might have a memory leak.
- */
 public class WebSocketService extends Service {
 
     private volatile ServiceHandler serviceHandler;
@@ -23,11 +21,14 @@ public class WebSocketService extends Service {
 
     private static final String TAG = "INTRANET";
 
+    private static String token, port, protocol, domain;
+
     private int startId;
     private int what;
 
     @Override
     public void onCreate() {
+        super.onCreate();
         HandlerThread thread = new HandlerThread(
                 "WebSocketHandler",
                 Process.THREAD_PRIORITY_BACKGROUND
@@ -51,23 +52,15 @@ public class WebSocketService extends Service {
             Toast.makeText(getApplicationContext(), "onStartCommand " + startId, Toast.LENGTH_LONG).show();
         }
 
-        String token = intent.getStringExtra(WebsocketSecureHandler.KEY_TOKEN);
-        String port = intent.getStringExtra(WebsocketSecureHandler.KEY_PORT);
-        String protocol = intent.getStringExtra(WebsocketSecureHandler.KEY_PROTOCOL);
-        String domain = intent.getStringExtra(WebsocketSecureHandler.KEY_DOMAIN);
-
-        Bundle bundle = new Bundle();
-        bundle.putString(WebsocketSecureHandler.KEY_PORT, port);
-        bundle.putString(WebsocketSecureHandler.KEY_PROTOCOL, protocol);
-        bundle.putString(WebsocketSecureHandler.KEY_DOMAIN, domain);
+        token = intent.getStringExtra(WebsocketSecureHandler.KEY_TOKEN);
+        port = intent.getStringExtra(WebsocketSecureHandler.KEY_PORT);
+        protocol = intent.getStringExtra(WebsocketSecureHandler.KEY_PROTOCOL);
+        domain = intent.getStringExtra(WebsocketSecureHandler.KEY_DOMAIN);
 
         Message message = serviceHandler.obtainMessage();
-
         what = message.what;
-
         message.arg1 = startId;
-        message.obj = token;
-        message.setData(bundle);
+        message.obj = intent;
 
         boolean wasSentToThread = serviceHandler.sendMessage(message);
         if (!wasSentToThread) {
@@ -77,7 +70,6 @@ public class WebSocketService extends Service {
         }
 
         return START_REDELIVER_INTENT;
-//        return START_STICKY;
     }
 
     @Override
@@ -86,7 +78,9 @@ public class WebSocketService extends Service {
         Log.d(TAG, "onDestroy: SERVICE DESTROYED");
         serviceHandler.stopWebsocket();
         serviceHandler.removeMessages(what);
+        stopSelf(startId);
         looper.quit();
+        sendBroadcastWebsocket();
         super.onDestroy();
     }
 
@@ -94,6 +88,21 @@ public class WebSocketService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    private void sendBroadcastWebsocket() {
+        Intent broadcastIntent = createIntent(RestartWebsocketReceiver.class, token, port, protocol, domain);
+        broadcastIntent.setAction("restartservice");
+        sendBroadcast(broadcastIntent);
+    }
+
+    private Intent createIntent(Class<?> className, String token, String port, String protocol, String domain) {
+        Intent intent = new Intent(getApplicationContext(), className);
+        intent.putExtra(WebsocketSecureHandler.KEY_TOKEN, token);
+        intent.putExtra(WebsocketSecureHandler.KEY_PORT, port);
+        intent.putExtra(WebsocketSecureHandler.KEY_PROTOCOL, protocol);
+        intent.putExtra(WebsocketSecureHandler.KEY_DOMAIN, domain);
+        return intent;
     }
 
 }

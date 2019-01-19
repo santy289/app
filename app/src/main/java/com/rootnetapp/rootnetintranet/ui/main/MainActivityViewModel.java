@@ -129,9 +129,6 @@ public class MainActivityViewModel extends ViewModel {
             ClientResponse domain;
             domain = jsonAdapter.fromJson(json);
             Utils.domain = "https://" + domain.getClient().getApiUrl();
-
-
-
             Utils.setImgDomain(domain.getClient().getApiUrl());
             String[] content = new String[2];
             content[0] = MainActivityViewModel.IMG_LOGO;

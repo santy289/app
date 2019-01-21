@@ -205,7 +205,7 @@ public class CommentsViewModel extends ViewModel {
         setCommentsTabCounter(commentsCounter);
         mCommentLiveData.setValue(commentResponse.getResponse());
 
-        mCommentFiles.clear();
+        if (mCommentFiles != null) mCommentFiles.clear();
         mClearAttachments.setValue(true);
 
         showLoading.setValue(false);

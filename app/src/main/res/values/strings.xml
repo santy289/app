@@ -188,7 +188,7 @@
     <string name="country_code">Country Code</string>
     <string name="currency_type">Currency Type</string>
     <string name="created">Created</string>
-    <string name="workflow_created">You have created the workflow:</string>
+    <string name="workflow_created">The workflow %s has been created.</string>
     <string name="edited">Edited</string>
     <string name="workflow_edit">You have edited the workflow:</string>
     <string name="error">Error</string>

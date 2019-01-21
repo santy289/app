@@ -183,7 +183,8 @@ public class MainActivity extends AppCompatActivity
 
     private boolean isMyServiceRunning() {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningServiceInfo> list = manager.getRunningServices(Integer.MAX_VALUE);
+        List<ActivityManager.RunningServiceInfo> list = manager
+                .getRunningServices(Integer.MAX_VALUE);
         for (ActivityManager.RunningServiceInfo service : list) {
             if (WebSocketService.class.getName().equals(service.service.getClassName())) {
                 return true;
@@ -253,6 +254,7 @@ public class MainActivity extends AppCompatActivity
             transaction.addToBackStack(tag);
         }
         transaction.commit();
+        hideSoftInputKeyboard();
     }
 
     @Override
@@ -296,12 +298,11 @@ public class MainActivity extends AppCompatActivity
 
     private void dozeModeWhitelist() {
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        Intent intent=new Intent();
+        Intent intent = new Intent();
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         if (powerManager.isIgnoringBatteryOptimizations(getPackageName())) {
             Log.d(TAG, "dozeModeWhitelist: nothing to do");
-        }
-        else {
+        } else {
             intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
             intent.setData(Uri.parse("package:" + getPackageName()));
             startActivity(intent);
@@ -577,7 +578,8 @@ public class MainActivity extends AppCompatActivity
 
         //disable drawer gestures for the right drawer,
         //in order to prevent the filters drawer to be opened from any activity by the user
-        mainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
+        mainBinding.drawerLayout
+                .setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
 
         toggle.syncState();
     }
@@ -599,7 +601,8 @@ public class MainActivity extends AppCompatActivity
                 break;
             }
             case R.id.nav_exit: {
-                SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+                SharedPreferences sharedPref = getSharedPreferences("Sessions",
+                        Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putString("username", "").apply();
                 editor.putString("password", "").apply();
@@ -836,6 +839,8 @@ public class MainActivity extends AppCompatActivity
                 .observe(this, this::handleUpdateBaseFilterSelectionUpdateWith);
         viewModel.openRightDrawer.observe(this, this::openRightDrawer);
 
+
+
 //        viewModel.getObservableStartService().observe(this, result -> startWebsocketServiceIntent());
 
         viewModel.getObservableStartService().observe(this, result -> sendBroadcastWebsocket());
@@ -853,4 +858,13 @@ public class MainActivity extends AppCompatActivity
         viewModel.getObservableGoToDomain().observe(this, goToDomainObserver);
     }
 
+    private void hideSoftInputKeyboard() {
+        // Check if no view has focus:
+        View view = getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(
+                    Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
 }

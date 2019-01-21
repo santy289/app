@@ -133,6 +133,9 @@ public class MainActivity extends AppCompatActivity
         setupSpeedDialFab();
     }
 
+    /**
+     * Used to send some intent with token, protocol, port values to a service.
+     */
     private void sendBroadcastWebsocket() {
         SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = sharedPref.getString(PreferenceKeys.PREF_TOKEN, "");
@@ -143,6 +146,17 @@ public class MainActivity extends AppCompatActivity
         sendBroadcast(broadcastIntent);
     }
 
+    /**
+     * Used to create an intent based on the class name passed on. This will be used to call a
+     * service.
+     *
+     * @param className
+     * @param token
+     * @param port
+     * @param protocol
+     * @param domain
+     * @return
+     */
     private Intent createIntent(Class<?> className, String token, String port, String protocol, String domain) {
         Intent intent = new Intent(getApplicationContext(), className);
         intent.putExtra(WebsocketSecureHandler.KEY_TOKEN, token);

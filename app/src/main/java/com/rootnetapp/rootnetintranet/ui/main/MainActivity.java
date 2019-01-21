@@ -133,13 +133,6 @@ public class MainActivity extends AppCompatActivity
         setupSpeedDialFab();
     }
 
-    @Override
-    protected void onDestroy() {
-//        stopWebsocketService();
-        super.onDestroy();
-//        Toast.makeText(this, "activity destroyed", Toast.LENGTH_LONG).show();
-    }
-
     private void sendBroadcastWebsocket() {
         SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = sharedPref.getString(PreferenceKeys.PREF_TOKEN, "");

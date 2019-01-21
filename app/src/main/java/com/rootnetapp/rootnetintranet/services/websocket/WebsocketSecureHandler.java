@@ -1,5 +1,6 @@
 package com.rootnetapp.rootnetintranet.services.websocket;
 
+import android.net.Uri;
 import android.util.Log;
 
 import java.net.URI;
@@ -239,6 +240,27 @@ public class WebsocketSecureHandler {
 
         LinkedHashMap properties = (LinkedHashMap) incomingMessage.get(keyProperty);
 
+        if (properties == null) {
+            String keyUrl = "url";
+            String url = (String) incomingMessage.get(keyUrl);
+            String id = getIdFromUrl(url);
+            String title = (String) incomingMessage.get(keyTitle);
+            String message = (String) incomingMessage.get(keyMessage);
+
+            String[] notificationMessage = new String[4];
+            notificationMessage[INDEX_TITLE] = message;
+            notificationMessage[INDEX_MESSAGE] = title;
+            notificationMessage[INDEX_ID] = id;
+            notificationMessage[INDEX_NAME] = message;
+
+            if (callback == null) {
+                Log.d(TAG, "initNotifications: Needs a callback, callback can't be null");
+            } else {
+                callback.onMessageRecieved(notificationMessage);
+            }
+            return;
+        }
+
         String message = (String) incomingMessage.get(keyMessage);
         String title = (String) incomingMessage.get(keyTitle);
         String name = (String) properties.get(keyName);
@@ -255,6 +277,17 @@ public class WebsocketSecureHandler {
         } else {
             callback.onMessageRecieved(notificationMessage);
         }
+    }
+
+    /**
+     * Helper method to get the last segment on some uri path.
+     *
+     * @param url
+     * @return
+     */
+    private String getIdFromUrl(String url) {
+        Uri uri = Uri.parse(url);
+        return uri.getLastPathSegment();
     }
 
     /**

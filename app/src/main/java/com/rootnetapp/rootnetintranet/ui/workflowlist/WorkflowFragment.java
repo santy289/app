@@ -44,7 +44,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-public class WorkflowFragment extends Fragment implements WorkflowFragmentInterface, SwipeRefreshLayout.OnRefreshListener {
+public class WorkflowFragment extends Fragment implements WorkflowFragmentInterface,
+        SwipeRefreshLayout.OnRefreshListener {
 
     @Inject
     WorkflowViewModelFactory workflowViewModelFactory;
@@ -157,12 +158,18 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         fragmentWorkflowBinding.inputSearch.setOnKeyListener((v, keyCode, event) -> {
             if ((event
                     .getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                String searchText = fragmentWorkflowBinding.inputSearch.getText().toString();
-                workflowViewModel.filterBySearchText(searchText, this);
+                performSearch();
                 return true;
             }
             return false;
         });
+
+        fragmentWorkflowBinding.imgSearch.setOnClickListener(v -> performSearch());
+    }
+
+    private void performSearch() {
+        String searchText = fragmentWorkflowBinding.inputSearch.getText().toString();
+        workflowViewModel.filterBySearchText(searchText, this);
     }
 
     private void setupWorkflowRecyclerView() {

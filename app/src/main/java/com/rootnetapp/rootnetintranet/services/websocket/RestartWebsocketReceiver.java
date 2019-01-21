@@ -53,4 +53,8 @@ public class RestartWebsocketReceiver extends BroadcastReceiver {
     public static void resetReceiverRunningIndicator() {
         running = false;
     }
+
+    public static boolean getRunningIndicator() {
+        return running;
+    }
 }

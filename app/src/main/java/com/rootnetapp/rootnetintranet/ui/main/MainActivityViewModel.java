@@ -20,6 +20,7 @@ import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
+import com.rootnetapp.rootnetintranet.services.websocket.RestartWebsocketReceiver;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
@@ -115,8 +116,10 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     protected void initMainViewModel(SharedPreferences sharedPreferences) {
-        stopService.setValue(true);
-        startService.setValue(true);
+        if (!RestartWebsocketReceiver.getRunningIndicator()) {
+            startService.setValue(true);
+        }
+
         String json = sharedPreferences.getString(PreferenceKeys.PREF_DOMAIN, "");
         if (json.isEmpty()) {
             Log.d("test", "onCreate: ALGO PASO");//todo mejorar esta validacion

@@ -106,6 +106,9 @@ public class WebsocketSecureHandler {
      * It will cancel the Future and cuts off any ongoing action.
      */
     public void cancelClient() {
+        if (!session.isConnected()) {
+            return;
+        }
         // mayInterruptRunning doesn't affect the method implementation.
         session.leave();
         exitInfoCompletableFuture.cancel(true);

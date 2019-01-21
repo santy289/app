@@ -76,11 +76,7 @@ public class WebSocketService extends Service {
     public void onDestroy() {
         Toast.makeText(getApplicationContext(), "onDestroy Service " + startId , Toast.LENGTH_LONG).show();
         Log.d(TAG, "onDestroy: SERVICE DESTROYED");
-        serviceHandler.stopWebsocket();
-        serviceHandler.removeMessages(what);
-        stopSelf(startId);
-        looper.quit();
-        sendBroadcastWebsocket();
+        serviceCleanup();
         super.onDestroy();
     }
 
@@ -88,6 +84,15 @@ public class WebSocketService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    private void serviceCleanup() {
+        RestartWebsocketReceiver.resetReceiverRunningIndicator();
+        serviceHandler.stopWebsocket();
+        serviceHandler.removeMessages(what);
+        stopSelf(startId);
+        looper.quit();
+//        sendBroadcastWebsocket();
     }
 
     private void sendBroadcastWebsocket() {

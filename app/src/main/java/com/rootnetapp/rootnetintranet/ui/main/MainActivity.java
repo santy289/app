@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        stopWebsocketIntentService();
+//        stopWebsocketService();
         super.onDestroy();
 //        Toast.makeText(this, "activity destroyed", Toast.LENGTH_LONG).show();
     }
@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity
         startService(intent);
     }
 
-    private void stopWebsocketIntentService() {
+    private void stopWebsocketService() {
 //        Intent intent = new Intent(getApplicationContext(), WebSocketIntentService.class);
         Intent intent = new Intent(getApplicationContext(), WebSocketService.class);
 
@@ -845,7 +845,7 @@ public class MainActivity extends AppCompatActivity
 
         viewModel.getObservableStartService().observe(this, result -> sendBroadcastWebsocket());
 
-        viewModel.getObservableStopService().observe(this, result -> stopWebsocketIntentService());
+        viewModel.getObservableStopService().observe(this, result -> stopWebsocketService());
     }
 
     private void subscribeForLogin() {

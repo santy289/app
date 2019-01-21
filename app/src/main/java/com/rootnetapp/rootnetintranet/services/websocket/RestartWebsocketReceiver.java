@@ -10,15 +10,18 @@ import android.widget.Toast;
 
 public class RestartWebsocketReceiver extends BroadcastReceiver {
 
-    private static int counter = 0;
+    private static boolean running = false;
+
+    private static final String TAG = "RestartReceiver";
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d("Broadcast Listened", "Service tried to stop");
-//        counter += 1;
-//        if (counter > 1) {
-//            return;
-//        }
+        if (running || intent == null) {
+            Log.d(TAG, "onReceive: Websocket still running or intent is null.");
+            return;
+        }
+        running = true;
+
         Toast.makeText(context, "Service restarted", Toast.LENGTH_SHORT).show();
 
         String token = intent.getStringExtra(WebsocketSecureHandler.KEY_TOKEN);
@@ -45,5 +48,9 @@ public class RestartWebsocketReceiver extends BroadcastReceiver {
 
             context.startService(reloadedIntent);
 //        }
+    }
+
+    public static void resetReceiverRunningIndicator() {
+        running = false;
     }
 }

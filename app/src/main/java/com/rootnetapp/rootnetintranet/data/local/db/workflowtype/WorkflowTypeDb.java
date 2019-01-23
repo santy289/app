@@ -42,6 +42,10 @@ public class WorkflowTypeDb {
     @Json(name = "category")
     private int category;
 
+    @ColumnInfo(name = "version")
+    @Json(name = "version")
+    private int version;
+
     @Ignore
     @Json(name = "status")
     private List<Status> status = null;
@@ -140,5 +144,13 @@ public class WorkflowTypeDb {
 
     public void setPresets(List<Preset> presets) {
         this.presets = presets;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

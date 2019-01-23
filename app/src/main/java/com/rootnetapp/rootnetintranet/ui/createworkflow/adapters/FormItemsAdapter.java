@@ -335,72 +335,57 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             options.add(0, new Option(0, hint));
         }
 
-        //check for selection
-        int selection = 0;
-        if (item.getValue() != null) {
-            for (int i = 0; i < options.size(); i++) {
-                Option option = options.get(i);
-                if (item.getValue() == option) selection = i;
-            }
-        }
-
         //create the adapter
         holder.getBinding().spInput.setAdapter(
                 new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
                         options));
 
-        //only creates the listener once.
-        if (holder.getBinding().spInput.getOnItemSelectedListener() == null) {
-            holder.getBinding().spInput
-                    .setSelection(selection,
-                            false); //workaround so the listener won't be called on init
-            holder.getBinding().spInput.setOnItemSelectedListener(
-                    new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> parent, View view, int position,
-                                                   long id) {
+        //workaround so the listener won't be called on init
+        holder.getBinding().spInput.setSelection(0, false);
 
-                            // this prevents the listener to be triggered by setSelection
-                            Object tag = holder.getBinding().spInput.getTag();
-                            if (tag == null || (int) tag != position) {
+        // this prevents the listener to be triggered by setSelection
+        int index = item.getOptions().indexOf(item.getValue());
+        index++; // because of the No Selection option
+        holder.getBinding().spInput.setTag(index);
+        holder.getBinding().spInput.setSelection(index);
 
-                                // the user has selected the No Selection option
-                                if (position == 0) {
-                                    item.setValue(null);
-                                    if (item.getOnSelectedListener() != null) {
-                                        item.getOnSelectedListener().onSelected(item);
-                                    }
-                                    return;
-                                }
+        holder.getBinding().spInput.setOnItemSelectedListener(
+                new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position,
+                                               long id) {
 
-                                // the user has selected a valid option
-                                int index = position - 1; // because of the No Selection option
-                                item.setValue(item.getOptions().get(index));
+                        // this prevents the listener to be triggered by setSelection
+                        Object tag = holder.getBinding().spInput.getTag();
+                        if (tag == null || (int) tag != position) {
+
+                            // the user has selected the No Selection option
+                            if (position == 0) {
+                                item.setValue(null);
                                 if (item.getOnSelectedListener() != null) {
                                     item.getOnSelectedListener().onSelected(item);
                                 }
+                                return;
+                            }
 
-//                                holder.getBinding().spInput.performClick();
-//                                notifyDataSetChanged();
+                            // the user has selected a valid option
+                            int index = position - 1; // because of the No Selection option
+                            item.setValue(item.getOptions().get(index));
+                            if (item.getOnSelectedListener() != null) {
+                                item.getOnSelectedListener().onSelected(item);
                             }
                         }
+                    }
 
-                        @Override
-                        public void onNothingSelected(AdapterView<?> parent) {
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
 
-                        }
-                    });
+                    }
+                });
 
-            //make sure this view has the focus
-            holder.getBinding().spInput
-                    .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
-        } else {
-            // this prevents the listener to be triggered by setSelection
-            int index = item.getOptions().indexOf(item.getValue());
-            index++; // because of the No Selection option
-            holder.getBinding().spInput.setTag(index);
-            holder.getBinding().spInput.setSelection(index);
-        }
+        //make sure this view has the focus
+        holder.getBinding().spInput
+                .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
 
         // verify required indicator
         holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);

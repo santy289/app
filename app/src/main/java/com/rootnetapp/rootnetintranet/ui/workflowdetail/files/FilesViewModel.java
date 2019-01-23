@@ -262,6 +262,23 @@ public class FilesViewModel extends ViewModel {
         return mFileRequest;
     }
 
+    protected boolean isAnyPresetSelected(List<Preset> presetsList) {
+        List<Integer> presets = new ArrayList<>();
+
+        for (Preset preset : presetsList) {
+            if (preset.isSelected()) {
+                presets.add(preset.getId());
+            }
+        }
+
+        if (presets.isEmpty()) {
+            mToastMessageLiveData.setValue(R.string.select_preset);
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * Creates the object that will be sent to the endpoint to upload a file. For this to be
      * completed, the user must have selected a preset.

@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
@@ -188,6 +189,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     public void onDestroyView() {
         super.onDestroyView();
         viewModel.onCleared();
+        hideSoftInputKeyboard();
     }
 
     @UiThread
@@ -204,7 +206,9 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         FragmentManager fm = getFragmentManager();
 
         String message = getString(dialogMessage.message);
-        if (dialogMessage.messageAggregate != null) message += dialogMessage.messageAggregate;
+        if (dialogMessage.messageAggregate != null) {
+            message = getString(dialogMessage.message, dialogMessage.messageAggregate);
+        }
 
         ValidateFormDialog dialog = ValidateFormDialog.newInstance(
                 getString(dialogMessage.title),
@@ -227,6 +231,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     private void goBack() {
         if (getFragmentManager() != null) {
             getFragmentManager().popBackStack();
+            hideSoftInputKeyboard();
         }
     }
 
@@ -242,12 +247,13 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         singleChoiceFormItem.setOnSelectedListener(item -> {
             if (item.getValue() == null) {
                 viewModel.clearForm();
-                mAdapter.setHasToEvaluateValid(false);
                 return;
             }
 
             String selection = item.getValue().getName();
             viewModel.generateFieldsByType(selection);
+
+            mAdapter.setHasToEvaluateValid(false); //clear validation marks
         });
 
         if (mWorkflowListItem != null) {
@@ -498,4 +504,14 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         mPeopleInvolvedAdapter.setData(list);
     }
     //endregion
+
+    private void hideSoftInputKeyboard() {
+        // Check if no view has focus:
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity()
+                    .getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
 }

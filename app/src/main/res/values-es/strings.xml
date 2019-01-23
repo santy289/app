@@ -188,7 +188,7 @@
     <string name="country_code">Código del País</string>
     <string name="currency_type">Tipo de Moneda</string>
     <string name="created">Creado</string>
-    <string name="workflow_created">Has creado el workflow:</string>
+    <string name="workflow_created">El workflow %s ha sido creado.</string>
     <string name="edited">Actualizado</string>
     <string name="workflow_edit">Has actualizado el workflow:</string>
     <string name="error">Error</string>
@@ -201,7 +201,7 @@
     <string name="base_filters">Filtros Base</string>
     <string name="all">Todos</string>
     <string name="on_time">A Tiempo</string>
-    <string name="latest">Latest</string>
+    <string name="latest">Últimos</string>
     <string name="dynamic_filters">Filtros Dinámicos</string>
     <string name="public_comment">Público</string>
     <string name="private_comment">Privado</string>

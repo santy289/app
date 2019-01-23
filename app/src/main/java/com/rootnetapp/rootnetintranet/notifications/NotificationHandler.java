@@ -17,6 +17,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 
 import java.util.Date;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.Person;
 import androidx.core.graphics.drawable.IconCompat;
@@ -52,17 +53,18 @@ public class NotificationHandler {
      * @param message
      */
     public static void prepareNotification(
-            String id,
-            String title,
-            String message,
-            Service service,
-            NotificationManager notificationManager,
+            @NonNull String id,
+            @NonNull String title,
+            @NonNull String message,
+            @NonNull String name,
+            @NonNull Service service,
+            @NonNull NotificationManager notificationManager,
             int notificationId) {
         Resources resources = service.getResources();
         Bitmap logoBitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher_round);
 
         Person user = new Person.Builder()
-                .setName("Intranet")
+                .setName(name)
                 .setIcon(IconCompat.createWithBitmap(logoBitmap))
                 .build();
         Date date = new Date();

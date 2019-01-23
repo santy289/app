@@ -1157,8 +1157,6 @@ class CreateWorkflowViewModel extends ViewModel {
      * @param workflow Workflow with info to display on the form.
      */
     private void updateWorkflowInformation(WorkflowDb workflow) {
-        showLoading.setValue(true);
-
         TextInputFormItem titleItem = (TextInputFormItem) formSettings
                 .findItem(FormSettings.MACHINE_NAME_TITLE);
         titleItem.setValue(workflow.getTitle());
@@ -1237,7 +1235,6 @@ class CreateWorkflowViewModel extends ViewModel {
             }
         }
 
-        showLoading.setValue(false);
         mSetFormItemListLiveData.setValue(formSettings.getFormItems());
     }
 
@@ -1797,17 +1794,15 @@ class CreateWorkflowViewModel extends ViewModel {
      * @return whether all of the form items are valid.
      */
     private boolean validateFormItems() {
-        boolean isValid = true;
-
         for (BaseFormItem item : formSettings.getFormItems()) {
             if (!item.isValid()) {
-                isValid = false;
+                //at least one item is not valid
+                mValidationUiLiveData.setValue(formSettings.findFirstInvalidItem());
+                return false;
             }
         }
 
-        mValidationUiLiveData.setValue(formSettings.findFirstInvalidItem());
-
-        return isValid;
+        return true;
     }
 
     private static boolean isValidEmail(CharSequence target) {
@@ -1841,8 +1836,7 @@ class CreateWorkflowViewModel extends ViewModel {
         DialogMessage dialogMessage = new DialogMessage();
         dialogMessage.title = R.string.created;
         dialogMessage.message = R.string.workflow_created;
-        dialogMessage.messageAggregate = " " + createWorkflowResponse.getWorkflow()
-                .getWorkflowTypeKey();
+        dialogMessage.messageAggregate = createWorkflowResponse.getWorkflow().getWorkflowTypeKey();
         showDialogMessage.setValue(dialogMessage);
         goBack.setValue(true);
     }

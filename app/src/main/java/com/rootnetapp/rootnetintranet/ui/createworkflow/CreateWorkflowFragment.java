@@ -399,10 +399,8 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
             return false; //normal onBackPressed by Activity
         }
 
-        //validate People Involved item
-        if (viewModel.validatePeopleInvolvedFormItems()) {
-
-        }
+        //validate People Involved item (check if completed)
+        viewModel.validatePeopleInvolvedFormItems();
 
         //this fragment will handle the onBackPressed instead of the activity
         setupViewFlipperAnimations(false);

@@ -83,6 +83,7 @@ public class Utils {
             progress = new ProgressDialog(ctx);
         } else {
             if (progress.getContext() != ctx) {
+                progress.dismiss();
                 progress = new ProgressDialog(ctx);
             }
         }

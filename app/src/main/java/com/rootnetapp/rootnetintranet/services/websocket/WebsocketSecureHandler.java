@@ -46,6 +46,7 @@ public class WebsocketSecureHandler {
     public static final int INDEX_TITLE = 0;
     public static final int INDEX_MESSAGE = 1;
     public static final int INDEX_ID = 2;
+    public static final int INDEX_NAME = 3;
 
     public static final int ERROR_AUTHENTICATION = 100;
     public static final int ERROR_SUBSCRIBING = 101;
@@ -55,6 +56,11 @@ public class WebsocketSecureHandler {
     public static final String KEY_PORT = "intranet.port";
     public static final String KEY_PROTOCOL = "intranet.protocol";
     public static final String KEY_DOMAIN = "intranet.domain";
+    public static final String KEY_BACKGROUND = "intranet.background";
+
+    public static final String REASON_AUTH_FAILURE = "thruway.error.authentication_failure";
+    public static final String REASON_CLOSE = "wamp.close.normal";
+    public static final String REASON_GOODBYE = "wamp.error.goodbye_and_out";
 
     private final String realm = "master";
 
@@ -90,6 +96,9 @@ public class WebsocketSecureHandler {
      * Calls complete(ExitInfo(true)) for the current exitINfoCompletableFuture created.
      */
     public void completeClient() {
+        if (!session.isConnected()) {
+            return;
+        }
         session.leave();
         exitInfoCompletableFuture.complete(new ExitInfo(true));
     }
@@ -98,6 +107,9 @@ public class WebsocketSecureHandler {
      * It will cancel the Future and cuts off any ongoing action.
      */
     public void cancelClient() {
+        if (!session.isConnected()) {
+            return;
+        }
         // mayInterruptRunning doesn't affect the method implementation.
         session.leave();
         exitInfoCompletableFuture.cancel(true);
@@ -131,7 +143,7 @@ public class WebsocketSecureHandler {
         });
         session.addOnDisconnectListener((sessionDisconnect, clean) -> {
             Log.d(TAG, "initNotifications: On Disconnect");
-            if (callback == null) {
+            if (errorCallback == null) {
                 Log.d(TAG, "initNotifications: Needs a callback, callback can't be null");
             } else {
                 errorCallback.onError("Error Disconnect");
@@ -145,16 +157,23 @@ public class WebsocketSecureHandler {
             Log.d(TAG, "2 initNotifications: on Join");
         });
         session.addOnLeaveListener((sessionLeave, details) -> {
-            if (details.reason.equals("thruway.error.authentication_failure")) {
-                Log.d(TAG, "initNotifications: failure");
-                if (errorCallback == null) {
-                    Log.d(TAG, "initNotifications: Needs a errorCallback, callback can't be null");
-                } else {
-                    errorCallback.onError("thruway.error.authentication_failure");
-                }
-                // TODO log to analytics tool and send to server
-            } else {
-                Log.d(TAG, "initNotifications: something else");
+            if (errorCallback == null) {
+                return;
+            }
+
+            switch (details.reason) {
+                case REASON_AUTH_FAILURE:
+                    errorCallback.onError(details.reason);
+                    break;
+                case REASON_CLOSE:
+                    errorCallback.onError(details.reason);
+                    break;
+                case REASON_GOODBYE:
+                    errorCallback.onError(details.reason);
+                    break;
+                default:
+                    errorCallback.onError(details.reason);
+                    Log.d(TAG, "initNotifications: not managed leave resason");
             }
         });
 
@@ -215,17 +234,43 @@ public class WebsocketSecureHandler {
 
         String keyMessage = "message";
         String keyTitle = "title";
-        String keyId = "url";
+        String keyProperty = "properties";
+        String keyWorkflowId = "id";
+        String keyName = "author";
+
+        LinkedHashMap properties = (LinkedHashMap) incomingMessage.get(keyProperty);
+
+        if (properties == null) {
+            String keyUrl = "url";
+            String url = (String) incomingMessage.get(keyUrl);
+            String id = getIdFromUrl(url);
+            String title = (String) incomingMessage.get(keyTitle);
+            String message = (String) incomingMessage.get(keyMessage);
+
+            String[] notificationMessage = new String[4];
+            notificationMessage[INDEX_TITLE] = message;
+            notificationMessage[INDEX_MESSAGE] = title;
+            notificationMessage[INDEX_ID] = id;
+            notificationMessage[INDEX_NAME] = message;
+
+            if (callback == null) {
+                Log.d(TAG, "initNotifications: Needs a callback, callback can't be null");
+            } else {
+                callback.onMessageRecieved(notificationMessage);
+            }
+            return;
+        }
+
         String message = (String) incomingMessage.get(keyMessage);
         String title = (String) incomingMessage.get(keyTitle);
-        String id = (String) incomingMessage.get(keyId);
+        String name = (String) properties.get(keyName);
+        Integer id = (Integer) properties.get(keyWorkflowId);
 
-        id = getIdFromUrl(id);
-
-        String[] notificationMessage = new String[3];
+        String[] notificationMessage = new String[4];
         notificationMessage[INDEX_TITLE] = title;
         notificationMessage[INDEX_MESSAGE] = message;
-        notificationMessage[INDEX_ID] = id;
+        notificationMessage[INDEX_ID] = String.valueOf(id);
+        notificationMessage[INDEX_NAME] = name;
 
         if (callback == null) {
             Log.d(TAG, "initNotifications: Needs a callback, callback can't be null");

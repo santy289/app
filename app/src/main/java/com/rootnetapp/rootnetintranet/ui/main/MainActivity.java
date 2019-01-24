@@ -36,6 +36,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
+import com.rootnetapp.rootnetintranet.services.websocket.RestartWebsocketReceiver;
 import com.rootnetapp.rootnetintranet.services.websocket.WebSocketIntentService;
 import com.rootnetapp.rootnetintranet.services.websocket.WebSocketService;
 import com.rootnetapp.rootnetintranet.services.websocket.WebsocketSecureHandler;
@@ -132,10 +133,37 @@ public class MainActivity extends AppCompatActivity
         setupSpeedDialFab();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-//        Toast.makeText(this, "activity destroyed", Toast.LENGTH_LONG).show();
+    /**
+     * Used to send some intent with token, protocol, port values to a service.
+     */
+    private void sendBroadcastWebsocket() {
+        SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        String token = sharedPref.getString(PreferenceKeys.PREF_TOKEN, "");
+        String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
+        String port = sharedPref.getString(PreferenceKeys.PREF_PORT, "");
+        Intent broadcastIntent = createIntent(RestartWebsocketReceiver.class, token, port, protocol, Utils.domain);
+        broadcastIntent.setAction("restartservice");
+        sendBroadcast(broadcastIntent);
+    }
+
+    /**
+     * Used to create an intent based on the class name passed on. This will be used to call a
+     * service.
+     *
+     * @param className
+     * @param token
+     * @param port
+     * @param protocol
+     * @param domain
+     * @return
+     */
+    private Intent createIntent(Class<?> className, String token, String port, String protocol, String domain) {
+        Intent intent = new Intent(getApplicationContext(), className);
+        intent.putExtra(WebsocketSecureHandler.KEY_TOKEN, token);
+        intent.putExtra(WebsocketSecureHandler.KEY_PORT, port);
+        intent.putExtra(WebsocketSecureHandler.KEY_PROTOCOL, protocol);
+        intent.putExtra(WebsocketSecureHandler.KEY_DOMAIN, domain);
+        return intent;
     }
 
     private void startWebsocketServiceIntent() {
@@ -144,16 +172,19 @@ public class MainActivity extends AppCompatActivity
         String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
         String port = sharedPref.getString(PreferenceKeys.PREF_PORT, "");
 
-        Intent intent = new Intent(this, WebSocketIntentService.class);
+        Intent intent = new Intent(getApplicationContext(), WebSocketIntentService.class);
         intent.putExtra(WebsocketSecureHandler.KEY_TOKEN, token);
         intent.putExtra(WebsocketSecureHandler.KEY_PORT, port);
         intent.putExtra(WebsocketSecureHandler.KEY_PROTOCOL, protocol);
         intent.putExtra(WebsocketSecureHandler.KEY_DOMAIN, Utils.domain);
+        intent.putExtra(WebsocketSecureHandler.KEY_BACKGROUND, false);
         startService(intent);
     }
 
-    private void stopWebsocketIntentService() {
-        Intent intent = new Intent(this, WebSocketIntentService.class);
+    private void stopWebsocketService() {
+//        Intent intent = new Intent(getApplicationContext(), WebSocketIntentService.class);
+        Intent intent = new Intent(getApplicationContext(), WebSocketService.class);
+
         stopService(intent);
     }
 
@@ -815,9 +846,13 @@ public class MainActivity extends AppCompatActivity
                 .observe(this, this::handleUpdateBaseFilterSelectionUpdateWith);
         viewModel.openRightDrawer.observe(this, this::openRightDrawer);
 
-        viewModel.getObservableStartService()
-                .observe(this, result -> startWebsocketServiceIntent());
-        viewModel.getObservableStopService().observe(this, result -> stopWebsocketIntentService());
+
+
+//        viewModel.getObservableStartService().observe(this, result -> startWebsocketServiceIntent());
+
+        viewModel.getObservableStartService().observe(this, result -> sendBroadcastWebsocket());
+
+        viewModel.getObservableStopService().observe(this, result -> stopWebsocketService());
     }
 
     private void subscribeForLogin() {

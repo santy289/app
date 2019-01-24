@@ -48,6 +48,17 @@ public class Utils {
     public static final String SERVER_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
     public static final String STANDARD_DATE_DISPLAY_FORMAT = "MMMM dd, yyyy";
 
+    public static final String[] ALLOWED_MIME_TYPES = {
+            "text/*",
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/vnd.ms-excel",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/mspowerpoint",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    };
+
     public static String getImgDomain() {
         return imgDomain;
     }

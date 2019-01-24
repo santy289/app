@@ -39,24 +39,15 @@
                 app:layout_constraintStart_toEndOf="@id/tv_title_files"
                 app:layout_constraintTop_toTopOf="@id/tv_title_files" />
 
-            <CheckBox
-                android:id="@+id/cb_header"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:buttonTint="@color/colorPrimary"
-                app:layout_constraintHorizontal_weight="1"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_title_files" />
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_files"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:padding="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cb_header" />
+                app:layout_constraintTop_toBottomOf="@id/tv_title_files" />
 
             <TextView
                 android:id="@+id/tv_no_files"
@@ -69,7 +60,7 @@
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cb_header"
+                app:layout_constraintTop_toBottomOf="@id/tv_title_files"
                 tools:visibility="visible" />
 
             <Button

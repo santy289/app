@@ -13,6 +13,12 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.databinding.ActivityChangeStatusBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+
 import javax.inject.Inject;
 
 import androidx.annotation.UiThread;
@@ -30,6 +36,7 @@ public class ChangeStatusActivity extends AppCompatActivity {
     ChangeStatusViewModelFactory changeStatusViewModelFactory;
     private ChangeStatusViewModel changeStatusViewModel;
     private ActivityChangeStatusBinding mBinding;
+    private String mToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,13 +47,13 @@ public class ChangeStatusActivity extends AppCompatActivity {
                 .of(this, changeStatusViewModelFactory)
                 .get(ChangeStatusViewModel.class);
         SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String token = "Bearer " + prefs.getString("token", "");
+        mToken = "Bearer " + prefs.getString("token", "");
         WorkflowListItem item = getIntent().getParcelableExtra(EXTRA_WORKFLOW_LIST_ITEM);
 
         setActionBar();
         subscribe();
 
-        changeStatusViewModel.init(prefs, token, item);
+        changeStatusViewModel.init(prefs, mToken, item);
     }
 
     private void subscribe() {
@@ -86,6 +93,29 @@ public class ChangeStatusActivity extends AppCompatActivity {
         ws.setAppCacheEnabled(true);
         Log.d(TAG, "Enabled HTML5-Features");
 
+        String authScript = "localStorage.setItem('jwt','" + mToken + "');";
+        String injection = "<html><head><script type='javascript'>"
+                + authScript
+                + "window.location.replace('"
+                + data.getUrl()
+                + "');</script></head><body></body></html>";
+
+        String fileName = "change-status-web-view-data.html";
+        getApplicationContext().deleteFile(fileName);
+        Writer output;
+        File dir = getApplicationContext().getFilesDir();
+        File file = new File(dir.getAbsolutePath() + File.separator + fileName);
+        try {
+            file.createNewFile();
+            output = new BufferedWriter(new FileWriter(file));
+            output.write(injection);
+            output.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        mBinding.webView.loadUrl("file:///" + getApplicationContext().getFilesDir() + fileName);
+
         //fixme this should save on the browser localStorage and load the user session
         /*mBinding.webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -95,17 +125,20 @@ public class ChangeStatusActivity extends AppCompatActivity {
 
                 Moshi moshi = new Moshi.Builder().build();
 
-                JsonAdapter<ClientResponse> clientResponseJsonAdapter = moshi.adapter(ClientResponse.class);
+                JsonAdapter<ClientResponse> clientResponseJsonAdapter = moshi
+                        .adapter(ClientResponse.class);
                 String globalJson = clientResponseJsonAdapter.toJson(data.getClientResponse());
                 String globalScript = "localStorage.setItem('global','" + globalJson + "');";
                 webView.evaluateJavascript(globalScript, null);
 
                 JsonAdapter<Client> clientJsonAdapter = moshi.adapter(Client.class);
-                String clientJson = clientJsonAdapter.toJson(data.getClientResponse().getClient());
+                String clientJson = clientJsonAdapter
+                        .toJson(data.getClientResponse().getClient());
                 String clientScript = "localStorage.setItem('client','" + clientJson + "');";
                 webView.evaluateJavascript(clientScript, null);
             }
         });*/
+
         mBinding.webView.loadUrl(data.getUrl(), data.getHeaders());
     }
 

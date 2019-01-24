@@ -283,6 +283,10 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     private void showFileChooser(FileFormItem fileFormItem) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
+
+        //specify multiple MIME types
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, Utils.ALLOWED_MIME_TYPES);
+
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         try {
             startActivityForResult(Intent.createChooser(

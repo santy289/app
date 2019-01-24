@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -20,11 +21,13 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.databinding.FragmentCreateWorkflowBinding;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.IntentFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.adapters.FormItemsAdapter;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.ValidateFormDialog;
+import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -54,6 +57,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     private static final String TAG = "CreateWorkflowFragment";
 
     private FormItemsAdapter mAdapter;
+    private FormItemsAdapter mPeopleInvolvedAdapter;
     private WorkflowListItem mWorkflowListItem;
 
     public CreateWorkflowFragment() { }
@@ -111,6 +115,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         setupSubmitButton();
         setOnClickListeners();
         setupFormRecycler();
+        setupPeopleInvolvedRecycler();
         subscribe();
 
         viewModel.initForm(token, mWorkflowListItem);
@@ -121,8 +126,13 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     private void subscribe() {
         viewModel.getObservableToastMessage().observe(this, this::showToastMessage);
         viewModel.getObservableAddWorkflowTypeItem().observe(this, this::addWorkflowTypeItem);
+        viewModel.getObservableAddPeopleInvolvedItem().observe(this, this::addPeopleInvolvedItem);
         viewModel.getObservableAddFormItem().observe(this, this::addItemToForm);
         viewModel.getObservableSetFormItemList().observe(this, this::setItemListToForm);
+        viewModel.getObservableAddPeopleInvolvedFormItem()
+                .observe(this, this::addItemToPeopleInvolvedForm);
+        viewModel.getObservableSetPeopleInvolvedFormItemList()
+                .observe(this, this::setItemListToPeopleInvolvedForm);
         viewModel.getObservableValidationUi().observe(this, this::updateValidationUi);
         viewModel.getObservableShowLoading().observe(this, this::showLoading);
         viewModel.getObservableShowDialogMessage().observe(this, this::showDialog);
@@ -134,6 +144,28 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     private void setupSubmitButton() {
         mBinding.btnCreate.setText(
                 mWorkflowListItem == null ? R.string.create_workflow : R.string.edit_workflow);
+    }
+
+    /**
+     * Set the proper animations to the ViewFlipper depending on which direction the movement is.
+     *
+     * @param isNext true - view is on the right of the current view; false - view is on the left of
+     *               the current view.
+     */
+    private void setupViewFlipperAnimations(boolean isNext) {
+        if (isNext) {
+            //next view
+            mBinding.viewFlipper.setInAnimation(
+                    AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_right));
+            mBinding.viewFlipper.setOutAnimation(
+                    AnimationUtils.loadAnimation(getContext(), R.anim.slide_out_left));
+        } else {
+            //previous view
+            mBinding.viewFlipper.setInAnimation(
+                    AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_left));
+            mBinding.viewFlipper.setOutAnimation(
+                    AnimationUtils.loadAnimation(getContext(), R.anim.slide_out_right));
+        }
     }
 
     private void setupFormRecycler() {
@@ -149,6 +181,8 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
             mAdapter.retrieveValuesFromViews(mBinding.rvFields);
             viewModel.handleCreateWorkflowAction();
         });
+
+        mBinding.btnBack.setOnClickListener(v -> onBackPressed());
     }
 
     @Override
@@ -167,6 +201,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         }
     }
 
+    @UiThread
     private void showDialog(DialogMessage dialogMessage) {
         FragmentManager fm = getFragmentManager();
 
@@ -182,6 +217,15 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         );
 
         dialog.show(fm, "validate_dialog");
+    }
+
+    @UiThread
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                getContext(),
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
     }
 
     private void goBack() {
@@ -216,6 +260,23 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
             // triggers selection for the items to be created, since we already have a type.
             singleChoiceFormItem.getOnSelectedListener().onSelected(singleChoiceFormItem);
         }
+    }
+
+    /**
+     * Inserts the People Involved form item to the RecyclerView.
+     *
+     * @param intentFormItem form item containing the people involved action
+     */
+    @UiThread
+    private void addPeopleInvolvedItem(IntentFormItem intentFormItem) {
+        mAdapter.addItem(intentFormItem);
+
+        intentFormItem.setOnButtonClickedListener(() -> {
+            setupViewFlipperAnimations(true);
+            mBinding.viewFlipper.showNext();
+
+            viewModel.getWorkflowTypeInfo();
+        });
     }
 
     /**
@@ -283,6 +344,10 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     private void showFileChooser(FileFormItem fileFormItem) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
+
+        //specify multiple MIME types
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, Utils.ALLOWED_MIME_TYPES);
+
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         try {
             startActivityForResult(Intent.createChooser(
@@ -322,6 +387,29 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         } else {
             viewModel.setQueuedFile(fileId);
         }
+    }
+
+    /**
+     * This intercepts the onBackPressed from the Activity. The Activity must add a condition in
+     * order to allow the Fragment to intercept the callback. See {@link
+     * MainActivity#onBackPressed()} for an example.
+     *
+     * @return true - this Fragment handled the callback; false - the Activity must handle the
+     * callback
+     */
+    @Override
+    public boolean onBackPressed() {
+        if (mBinding.viewFlipper.getDisplayedChild() == 0) {
+            return false; //normal onBackPressed by Activity
+        }
+
+        //validate People Involved item (check if completed)
+        viewModel.validatePeopleInvolvedFormItems();
+
+        //this fragment will handle the onBackPressed instead of the activity
+        setupViewFlipperAnimations(false);
+        mBinding.viewFlipper.showPrevious();
+        return true;
     }
 
     /**
@@ -386,14 +474,38 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         }
     }
 
-    @UiThread
-    private void showToastMessage(@StringRes int messageRes) {
-        Toast.makeText(
-                getContext(),
-                getString(messageRes),
-                Toast.LENGTH_SHORT)
-                .show();
+    //region People Involved Form
+    private void setupPeopleInvolvedRecycler() {
+        mPeopleInvolvedAdapter = new FormItemsAdapter(getContext(), getChildFragmentManager(),
+                new ArrayList<>(),
+                this);
+        mBinding.rvPeopleInvolvedFields.setLayoutManager(new LinearLayoutManager(getContext()));
+        mBinding.rvPeopleInvolvedFields.setAdapter(mPeopleInvolvedAdapter);
+        mBinding.rvPeopleInvolvedFields.setNestedScrollingEnabled(false);
     }
+
+    /**
+     * Inserts a single form item to the RecyclerView. This will refresh the UI with the added
+     * item.
+     *
+     * @param item item to insert.
+     */
+    @UiThread
+    private void addItemToPeopleInvolvedForm(BaseFormItem item) {
+        mPeopleInvolvedAdapter.addItem(item);
+    }
+
+    /**
+     * Inserts multiple form items to the RecyclerView. This will refresh the UI with the added
+     * items.
+     *
+     * @param list items to insert.
+     */
+    @UiThread
+    private void setItemListToPeopleInvolvedForm(List<BaseFormItem> list) {
+        mPeopleInvolvedAdapter.setData(list);
+    }
+    //endregion
 
     private void hideSoftInputKeyboard() {
         // Check if no view has focus:

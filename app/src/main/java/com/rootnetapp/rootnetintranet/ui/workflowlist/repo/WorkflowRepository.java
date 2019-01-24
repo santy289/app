@@ -1,12 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist.repo;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.paging.DataSource;
-import androidx.paging.LivePagedListBuilder;
-import androidx.paging.PagedList;
-import androidx.sqlite.db.SimpleSQLiteQuery;
-import androidx.sqlite.db.SupportSQLiteQuery;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -26,6 +19,13 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsRespon
 import java.util.List;
 import java.util.Map;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.paging.DataSource;
+import androidx.paging.LivePagedListBuilder;
+import androidx.paging.PagedList;
+import androidx.sqlite.db.SimpleSQLiteQuery;
+import androidx.sqlite.db.SupportSQLiteQuery;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -35,8 +35,8 @@ import io.reactivex.schedulers.Schedulers;
 
 public class WorkflowRepository implements IncomingWorkflowsCallback {
 
-    public static int ENDPOINT_PAGE_SIZE = 20;
-    private static int LIST_PAGE_SIZE = 20;
+    public static int ENDPOINT_PAGE_SIZE = 30;
+    private static int LIST_PAGE_SIZE = 30;
     public final static String WORKFLOWID = "workflowdb.id";
     public final static String WORKFLOW_CREATED = "workflowdb.created_at";
     public final static String WORKFLOW_UPDATED = "workflowdb.updated_at";

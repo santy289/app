@@ -1,7 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist.repo;
 
-import androidx.paging.PagedList;
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -12,6 +10,8 @@ import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowRespons
 
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.paging.PagedList;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -64,6 +64,7 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
             return;
         }
         callback.showLoadingMore(true);
+        updateIsLoading(true);
         Disposable disposable;
         if (TextUtils.isEmpty(id)) {
             disposable = service
@@ -97,7 +98,10 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
                             this::saveInDatabase,
-                            throwable -> Log.d(TAG, "WorkflowListBoundaryCallback: Cant get workflows from network - " + throwable.getMessage())
+                            throwable -> {
+                                Log.d(TAG, "WorkflowListBoundaryCallback: Cant get workflows from network - " + throwable.getMessage());
+                                callback.showLoadingMore(false);
+                            }
                     );
         }
 
@@ -117,6 +121,7 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
     }
 
     private void saveInDatabase(WorkflowResponseDb workflowsResponse) {
+        callback.showLoadingMore(false);
         List<WorkflowDb> workflowDbs = workflowsResponse.getList();
         if (workflowDbs == null || workflowDbs.size() < 1) {
             return;

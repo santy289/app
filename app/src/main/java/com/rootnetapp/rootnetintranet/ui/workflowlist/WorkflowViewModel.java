@@ -60,6 +60,7 @@ import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SW
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.UNCHECK;
 
 public class WorkflowViewModel extends ViewModel {
+
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<PagedList<WorkflowListItem>> updateWithSortedList;
@@ -74,11 +75,9 @@ public class WorkflowViewModel extends ViewModel {
     protected MutableLiveData<Boolean> clearFilters;
     private LiveData<PagedList<WorkflowListItem>> liveWorkflows;
 
-
     //
     private MutableLiveData<List<WorkflowTypeMenu>> workflowTypeMenuItems;
     private List<WorkflowTypeItemMenu> workflowTypeForMenu;
-
 
     // TODO en development
 
@@ -93,7 +92,6 @@ public class WorkflowViewModel extends ViewModel {
 
     protected MutableLiveData<OptionsList> messageMainBaseFilters;
     protected MutableLiveData<Integer> messageMainBaseFilterSelectionToFilterList;
-
 
     // MOVED TO FILTERSETTINGS
     //protected List<WorkflowTypeMenu> rightDrawerFilters;
@@ -161,8 +159,6 @@ public class WorkflowViewModel extends ViewModel {
         liveWorkflows = workflowRepository.getAllWorkflows();
     }
 
-
-
     protected void swipeToRefresh(LifecycleOwner lifecycleOwner) {
         int id = filterSettings.getWorkflowTypeId();
         if (id > 0) {
@@ -177,14 +173,15 @@ public class WorkflowViewModel extends ViewModel {
         workflowRepository.insertWorkflow(workflow);
     }
 
-    protected void initWorkflowList(SharedPreferences sharedPreferences, LifecycleOwner lifecycleOwner) {
+    protected void initWorkflowList(SharedPreferences sharedPreferences,
+                                    LifecycleOwner lifecycleOwner) {
         if (!TextUtils.isEmpty(token)) {
             showLoading.setValue(true);
             int baseFilterId = filterSettings.getBaseFilterSelectedId();
             loadWorkflowsByBaseFilters(baseFilterId, filterSettings, lifecycleOwner);
             return;
         }
-        token = "Bearer "+ sharedPreferences.getString("token","");
+        token = "Bearer " + sharedPreferences.getString("token", "");
         userId = sharedPreferences.getString(PreferenceKeys.PREF_PROFILE_ID, "");
         categoryId = sharedPreferences.getInt("category_id", 0);
         setWorkflowListNoFilters(token);
@@ -204,12 +201,13 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     /**
-     * This function will check if we already have a Filter List populated, and if not it will
-     * go to create a new Workflow Type Menu item for the filter list and send a message back to
-     * the Main Activity to render the content on the UI.
+     * This function will check if we already have a Filter List populated, and if not it will go to
+     * create a new Workflow Type Menu item for the filter list and send a message back to the Main
+     * Activity to render the content on the UI.
      */
     private void initRightDrawerFilterList() {
-        if (filterSettings.hasIdinFilterDrawerList(FilterSettings.RIGHT_DRAWER_FILTER_TYPE_ITEM_ID)) {
+        if (filterSettings
+                .hasIdinFilterDrawerList(FilterSettings.RIGHT_DRAWER_FILTER_TYPE_ITEM_ID)) {
             // Update UI
             rightDrawerFilterMenus.setValue(filterSettings.getFilterDrawerList());
             invalidateDrawerOptionsList.setValue(true);
@@ -235,10 +233,9 @@ public class WorkflowViewModel extends ViewModel {
     public static final int BASE_FILTER_PENDING_BY_ME_ID = 47;
     public static final int BASE_FILTER_LATEST_ID = 48;
 
-
     /**
-     * Creates a new list of base filter options only if FilterSettings.baseFilterOptionsList
-     * is empty.
+     * Creates a new list of base filter options only if FilterSettings.baseFilterOptionsList is
+     * empty.
      */
     private void initBaseFilters() {
         if (filterSettings.getSizeBseFilterOptionList() > 0) {
@@ -295,7 +292,7 @@ public class WorkflowViewModel extends ViewModel {
         showLoading.setValue(true);
         Disposable disposable = workflowRepository
                 .getCategoryList(token, id)
-                .subscribe( listsResponse -> {
+                .subscribe(listsResponse -> {
                     showLoading.setValue(false);
                     List<ListItem> list = listsResponse.getItems();
                     if (list.size() < 1) {
@@ -371,7 +368,6 @@ public class WorkflowViewModel extends ViewModel {
             }
         }
 
-
         if (!noCategory.isEmpty()) {
             result.put(WorkflowTypeSpinnerAdapter.NO_CATEGORY_LABEL, noCategory);
         }
@@ -401,7 +397,8 @@ public class WorkflowViewModel extends ViewModel {
                 WorkflowTypeSpinnerAdapter.NO_SELECTION
         );
         spinnerMenuArray.add(0, noSelection);
-        filterSettings.saveOptionsListFor(FilterSettings.RIGHT_DRAWER_FILTER_TYPE_ITEM_ID, spinnerMenuArray);
+        filterSettings.saveOptionsListFor(FilterSettings.RIGHT_DRAWER_FILTER_TYPE_ITEM_ID,
+                spinnerMenuArray);
     }
 
     @Deprecated
@@ -431,9 +428,10 @@ public class WorkflowViewModel extends ViewModel {
     /**
      * Request for filtered data to workflow repository. This function handles all the different
      * filtering scenarios. It handles cases with base filters, meta data, workflow type filters.
+     *
      * @param selectedBaseFilterId Id of selected base filter.
-     * @param filterSettings Instance of FilterSettings.
-     * @param lifecycleOwner Fragment with observer that we need to remove.
+     * @param filterSettings       Instance of FilterSettings.
+     * @param lifecycleOwner       Fragment with observer that we need to remove.
      */
     private void loadWorkflowsByBaseFilters(
             int selectedBaseFilterId,
@@ -478,10 +476,11 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     /**
-     * Handles a position tapped on the List of BaseFilters. This function will update FilterSettings
-     * with the latest position selected and make a network call to update the database with the selected
-     * base filter.
-     * @param position Selection done by the user on the list of base filters.
+     * Handles a position tapped on the List of BaseFilters. This function will update
+     * FilterSettings with the latest position selected and make a network call to update the
+     * database with the selected base filter.
+     *
+     * @param position       Selection done by the user on the list of base filters.
      * @param lifecycleOwner Fragment has an observer that we need to remove and use a new one.
      */
     protected void handleBaseFieldPositionSelected(int position, LifecycleOwner lifecycleOwner) {
@@ -502,7 +501,8 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     /**
-     * When a filter is selected use this handler to populate the options list for the selected filter.
+     * When a filter is selected use this handler to populate the options list for the selected
+     * filter.
      *
      * @param position Index of the position selected in the UI ListView.
      */
@@ -521,9 +521,11 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     private final int DRAWER_FILTER_LIST_INDEX_TYPE = 0;
+
     protected void handleOptionSelected(int position, LifecycleOwner lifecycleOwner) {
         showLoading.setValue(true);
         List<WorkflowTypeMenu> menuList = filterSettings.getOptionsListAtSelectedFilterIndex();
+        if (menuList.isEmpty()) return;
         WorkflowTypeMenu menu = menuList.get(position);
 
         // Selecting workflow type no need to update other items.
@@ -574,7 +576,6 @@ public class WorkflowViewModel extends ViewModel {
         updateSelectedMenuItem(menu);
 //            filterSettings.updateFilterListItemSelected(menu);
 
-
         // Allowing single selection on the UI for this list.
         invalidateDrawerOptionsList.setValue(true);
 
@@ -586,8 +587,10 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     private FormSettings formSettings;
+
     // TODO USE TO CREATE GET REQUEST FOR FILTERING
-    private WorkflowMetas createMetaData(FieldData fieldData, String valueSelected, int workflowTypeFieldId, FieldConfig fieldConfig) {
+    private WorkflowMetas createMetaData(FieldData fieldData, String valueSelected,
+                                         int workflowTypeFieldId, FieldConfig fieldConfig) {
         WorkflowMetas workflowMeta = new WorkflowMetas();
         workflowMeta.setUnformattedValue(valueSelected);
         workflowMeta.setWorkflowTypeFieldId(workflowTypeFieldId);
@@ -601,7 +604,8 @@ public class WorkflowViewModel extends ViewModel {
 
     private void findDynamicFieldsBy(int workflowTypeId) {
         Disposable disposable = Observable.fromCallable(() -> {
-            List<FormFieldsByWorkflowType> fields = workflowRepository.getFiedsByWorkflowType(workflowTypeId);
+            List<FormFieldsByWorkflowType> fields = workflowRepository
+                    .getFiedsByWorkflowType(workflowTypeId);
             if (fields == null || fields.size() < 1) {
                 return false;
             }
@@ -618,17 +622,18 @@ public class WorkflowViewModel extends ViewModel {
             return formSettings;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe( dynamicFieldsSettings -> {
+                .subscribe(dynamicFieldsSettings -> {
                     Log.d(TAG, "findDynamicFieldsBy: ");
                     FormSettings settings = formSettings;
                     showFields(settings);
                 }, throwable -> {
                     showLoading.postValue(false);
-                    Log.d(TAG, "findDynamicFieldsBy: Something went wrong getting fields" + throwable.getMessage());
+                    Log.d(TAG,
+                            "findDynamicFieldsBy: Something went wrong getting fields" + throwable
+                                    .getMessage());
                 });
         disposables.add(disposable);
     }
-
 
     private void showFields(FormSettings formSettings) {
         List<FormFieldsByWorkflowType> fields = formSettings.getFields();
@@ -699,7 +704,8 @@ public class WorkflowViewModel extends ViewModel {
 //                handleBuildTextArea(field);
 //                break;
             default:
-                Log.d(TAG, "buildField: Not a generic type: " + typeInfo.getType() + " value: " + typeInfo.getValueType());
+                Log.d(TAG, "buildField: Not a generic type: " + typeInfo
+                        .getType() + " value: " + typeInfo.getValueType());
                 break;
         }
     }
@@ -734,13 +740,14 @@ public class WorkflowViewModel extends ViewModel {
         int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
 
         if (fieldType.equals(FormSettings.TYPE_SYSTEM_USERS)) {
-            createSystemUserFieldasCustomField(field, listId, customFieldId, customLabel, associatedWorkflowTypeId);
+            createSystemUserFieldasCustomField(field, listId, customFieldId, customLabel,
+                    associatedWorkflowTypeId);
             return;
         }
 
         Disposable disposable = workflowRepository
                 .getList(token, listId)
-                .subscribe( listsResponse -> {
+                .subscribe(listsResponse -> {
                     List<ListItem> listItems = listsResponse.getItems();
                     ListItem listItem;
                     ListField listField = null;
@@ -808,7 +815,7 @@ public class WorkflowViewModel extends ViewModel {
             return listField;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe( listField -> {
+                .subscribe(listField -> {
                     ListField fieldData = (ListField) listField;
                     showListField(fieldData, field.getFieldConfigObject());
 
@@ -816,7 +823,6 @@ public class WorkflowViewModel extends ViewModel {
 
                     // TODO update filter list with new fields
 //                    buildForm.setValue(true);
-
 
                 }, throwable -> {
                     showLoading.setValue(false);
@@ -871,7 +877,6 @@ public class WorkflowViewModel extends ViewModel {
             fieldListSettings.required = true;
             fieldListSettings.tag = field.getId();
 
-
             FieldConfig fieldConfig = field.getFieldConfigObject();
             boolean isMultipleSelection = fieldConfig.getMultiple();
             String customLabel = field.getFieldName();
@@ -891,7 +896,7 @@ public class WorkflowViewModel extends ViewModel {
             }
             FieldData fieldData = new FieldData();
             fieldData.label = customLabel;
-            fieldData.list =  listData;
+            fieldData.list = listData;
             fieldData.tag = field.getId();
             fieldData.isMultipleSelection = isMultipleSelection;
             fieldData.escape = escape(fieldConfig);
@@ -900,7 +905,7 @@ public class WorkflowViewModel extends ViewModel {
             return fieldListSettings;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe( fieldListSettings -> {
+                .subscribe(fieldListSettings -> {
                     FieldListSettings settings = (FieldListSettings) fieldListSettings;
 
                     // TODO update FILTERSETTINGS
@@ -948,29 +953,33 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     private void subscribe(LifecycleOwner lifecycleOwner) {
-        final Observer<Boolean> handleRepoErrorObserver = ( error -> {
+        final Observer<Boolean> handleRepoErrorObserver = (error -> {
             showLoading.postValue(false);
         });
-        final Observer<Boolean> handleRepoSuccessObserver = ( success -> {
+        final Observer<Boolean> handleRepoSuccessObserver = (success -> {
             showLoading.postValue(false);
             // TODO change data source to new query pointing ONLY to my profile id.
             applyFilters(filterSettings, userId);
         });
-        final Observer<Boolean> handleRepoSuccessNoFilterObserver = ( success -> {
-           showLoading.postValue(false);
-           applyFilters(filterSettings);
+        final Observer<Boolean> handleRepoSuccessNoFilterObserver = (success -> {
+            showLoading.postValue(false);
+            applyFilters(filterSettings);
         });
 
-        workflowRepository.getObservableHandleRepoError().observe(lifecycleOwner, handleRepoErrorObserver);
-        workflowRepository.getObservableHandleRepoSuccess().observe(lifecycleOwner, handleRepoSuccessObserver);
-        workflowRepository.getObservableHandleRepoSuccessNoFilter().observe(lifecycleOwner, handleRepoSuccessNoFilterObserver);
+        workflowRepository.getObservableHandleRepoError()
+                .observe(lifecycleOwner, handleRepoErrorObserver);
+        workflowRepository.getObservableHandleRepoSuccess()
+                .observe(lifecycleOwner, handleRepoSuccessObserver);
+        workflowRepository.getObservableHandleRepoSuccessNoFilter()
+                .observe(lifecycleOwner, handleRepoSuccessNoFilterObserver);
     }
 
     protected LiveData<Boolean> getObservableLoadMore() {
         return workflowRepository.showLoadMore;
     }
 
-    private void updateFilterBoxSettings(int workflowTypeId, int typeIdPositionInArray, boolean isCheckedMyPendings, boolean isCheckedStatus) {
+    private void updateFilterBoxSettings(int workflowTypeId, int typeIdPositionInArray,
+                                         boolean isCheckedMyPendings, boolean isCheckedStatus) {
         filterSettings.setCheckedMyPending(isCheckedMyPendings);
         filterSettings.setWorkflowTypeId(workflowTypeId);
         filterSettings.setCheckedStatus(isCheckedStatus);
@@ -984,7 +993,8 @@ public class WorkflowViewModel extends ViewModel {
             boolean isCheckedMyPendings,
             boolean isCheckedStatus) {
         WorkflowTypeMenu menu = spinnerMenuArray.get(typeIdPositionInArray);
-        updateFilterBoxSettings(menu.getWorkflowTypeId(), typeIdPositionInArray, isCheckedMyPendings, isCheckedStatus);
+        updateFilterBoxSettings(menu.getWorkflowTypeId(), typeIdPositionInArray,
+                isCheckedMyPendings, isCheckedStatus);
         liveWorkflows.removeObservers(lifecycleOwner);
         applyFilters(filterSettings);
     }
@@ -1110,6 +1120,7 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     ArrayList<WorkflowTypeMenu> spinnerMenuArray;
+
     private void initWorkflowtypeMenu() {
         //init workflow type filter
         ListItem category;
@@ -1161,7 +1172,6 @@ public class WorkflowViewModel extends ViewModel {
                 noCategory.add(menu);
             }
         }
-
 
         if (!noCategory.isEmpty()) {
             result.put(WorkflowTypeSpinnerAdapter.NO_CATEGORY_LABEL, noCategory);
@@ -1240,7 +1250,6 @@ public class WorkflowViewModel extends ViewModel {
         }
         handleRadioButtonClicked(isChecked, viewId);
     }
-
 
     protected void handleRadioButtonClicked(boolean isChecked, @IdRes int viewId) {
         switch (viewId) {
@@ -1360,7 +1369,7 @@ public class WorkflowViewModel extends ViewModel {
             showList.setValue(false);
             return;
         }
-        if(listWorkflows.size() < 1){
+        if (listWorkflows.size() < 1) {
             showList.setValue(false);
             return;
         }

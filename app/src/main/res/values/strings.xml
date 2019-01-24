@@ -240,13 +240,13 @@
     <string name="workflow_detail_status_fragment_status_summary_next_status">Next Statuses</string>
     <string name="workflow_detail_status_fragment_status_summary_tied_status">Tied</string>
     <string name="workflow_detail_status_fragment_status_summary_tied_status_message">The current status is tied</string>
-    <string name="workflow_detail_status_fragment_next_step">Choose Next Step</string>
-    <string name="workflow_detail_status_fragment_next_step_approvers">Next step approvers:</string>
+    <string name="workflow_detail_status_fragment_next_step">Choose Next Status</string>
+    <string name="workflow_detail_status_fragment_next_step_approvers">Next status approvers:</string>
     <string name="workflow_detail_status_fragment_next_step_mass_approval">Mass approval</string>
     <string name="workflow_detail_status_fragment_approve">Approve</string>
     <string name="workflow_detail_status_fragment_reject">Reject</string>
-    <string name="workflow_detail_status_fragment_spinner_title">- Select Step -</string>
-    <string name="workflow_detail_status_fragment_must_select_step">You must select a step first</string>
+    <string name="workflow_detail_status_fragment_spinner_title">- Select Status -</string>
+    <string name="workflow_detail_status_fragment_must_select_step">You must select a status first</string>
     <string name="workflow_detail_status_fragment_export_pdf">Export PDF</string>
     <!--InformationFragment-->
     <string name="workflow_detail_information_fragment_title">@string/workflow_detail_information_fragment_information</string>

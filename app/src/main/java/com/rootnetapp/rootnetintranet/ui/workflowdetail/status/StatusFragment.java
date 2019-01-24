@@ -89,6 +89,8 @@ public class StatusFragment extends Fragment {
         statusViewModel.getObservableError().observe(this, errorObserver);
         statusViewModel.getObservableShowToastMessage().observe(this, this::showToastMessage);
         statusViewModel.getObservableTieStatus().observe(this, this::showTieStatusLabel);
+        statusViewModel.getObservableEnableApproveRejectButtons()
+                .observe(this, this::enableApproveRejectButtons);
 
         statusViewModel.showLoading.observe(this, this::showLoading);
         statusViewModel.handleShowLoadingByRepo.observe(this, this::showLoading);
@@ -129,6 +131,19 @@ public class StatusFragment extends Fragment {
         } else {
             Utils.hideLoading();
         }
+    }
+
+    /**
+     * Enables or disabled the approve and reject buttons. This is used whenever a user makes a
+     * request to approve/reject a status to disable the buttons. When said request is done, the
+     * buttons should be enabled again. This avoids multiple undesired calls in a row.
+     *
+     * @param enable true - enable both buttons; false - disable both buttons.
+     */
+    @UiThread
+    private void enableApproveRejectButtons(boolean enable) {
+        mBinding.includeNextStep.btnApprove.setEnabled(enable);
+        mBinding.includeNextStep.btnReject.setEnabled(enable);
     }
 
     @UiThread

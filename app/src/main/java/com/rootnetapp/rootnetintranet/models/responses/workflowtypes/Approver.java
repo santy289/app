@@ -32,4 +32,27 @@ public class Approver {
 
     public Boolean approved;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Approver approver = (Approver) o;
+
+        if (entityId != approver.entityId) return false;
+        if (entityType != null ? !entityType
+                .equals(approver.entityType) : approver.entityType != null) {
+            return false;
+        }
+        return entityName != null ? entityName
+                .equals(approver.entityName) : approver.entityName == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = entityType != null ? entityType.hashCode() : 0;
+        result = 31 * result + entityId;
+        result = 31 * result + (entityName != null ? entityName.hashCode() : 0);
+        return result;
+    }
 }

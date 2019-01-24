@@ -4,6 +4,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDBDao;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.user.UserDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
@@ -21,6 +22,7 @@ import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse
 import com.rootnetapp.rootnetintranet.models.responses.project.ProjectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.role.RoleResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
@@ -28,6 +30,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTyp
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 
 import java.util.List;
+import java.util.Map;
 
 import androidx.lifecycle.LiveData;
 import io.reactivex.Observable;
@@ -60,6 +63,10 @@ public class CreateWorkflowRepository {
 
     public List<WorkflowTypeItemMenu> getWorklowTypeNames() {
         return workflowTypeDbDao.getListOfWorkflowNames();
+    }
+
+    public WorkflowTypeDb getWorklowType(int workflowTypeId) {
+        return workflowTypeDbDao.getWorkflowTypeBy(workflowTypeId);
     }
 
     public List<FormCreateProfile> getProfiles() {
@@ -143,6 +150,11 @@ public class CreateWorkflowRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    public Observable<CreateWorkflowResponse> createWorkflow(String token, Map<String, Object> body) {
+        return service.createWorkflow(token, body).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     public Observable<CreateWorkflowResponse> editWorkflow(String token, EditRequest request) {
         return service.editWorkflow(token, request.getWorkflowId(), request).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
@@ -160,6 +172,11 @@ public class CreateWorkflowRepository {
 
     protected Observable<DownloadFileResponse> downloadFile(String auth, String entity, int fileId) {
         return service.downloadFile(auth, entity, fileId).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<ProfileResponse> getProfiles(String auth, boolean enabled) {
+        return service.getProfiles(auth, enabled).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 }

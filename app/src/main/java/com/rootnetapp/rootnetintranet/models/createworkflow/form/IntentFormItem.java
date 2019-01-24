@@ -2,15 +2,14 @@ package com.rootnetapp.rootnetintranet.models.createworkflow.form;
 
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 
-import java.util.ArrayList;
-import java.util.List;
+public class IntentFormItem extends BaseFormItem {
 
-public class MultipleChoiceFormItem extends BaseFormItem {
+    private boolean isCompleted;
+    private String btnActionText;
+    private int btnActionTextRes;
+    private OnButtonClickedListener onButtonClickedListener;
 
-    private List<BaseOption> values;
-    private List<Option> options;
-
-    private MultipleChoiceFormItem() {
+    private IntentFormItem() {
         //Constructor is private for Builder pattern
     }
 
@@ -18,54 +17,44 @@ public class MultipleChoiceFormItem extends BaseFormItem {
     public boolean isValid() {
         if (!isRequired()) return true;
 
-        return isRequired() && getValues() != null;
-
+        return isRequired() && isCompleted();
     }
 
     @Override
     public String getStringValue() {
-        if (getValues().isEmpty()) return "";
-
-        //create a csv string value
-        char separator = ',';
-        StringBuilder stringBuilder = new StringBuilder();
-        for (BaseOption value : getValues()) {
-            stringBuilder.append(value.toString());
-            stringBuilder.append(separator);
-        }
-        stringBuilder.deleteCharAt(stringBuilder.length() - 1); //delete last separator
-
-        return stringBuilder.toString();
+        return isCompleted() ? "true" : "false";
     }
 
-    public List<BaseOption> getValues() {
-        if (values == null) values = new ArrayList<>();
-
-        return values;
+    public boolean isCompleted() {
+        return isCompleted;
     }
 
-    public void setValues(List<BaseOption> values) {
-        this.values = values;
+    public void setCompleted(boolean isCompleted) {
+        this.isCompleted = isCompleted;
     }
 
-    public void addValue(Option value){
-        getValues().add(value);
+    public String getButtonActionText() {
+        return btnActionText;
     }
 
-    public void removeValue(Option value){
-        getValues().remove(value);
+    public void setButtonActionText(String btnActionText) {
+        this.btnActionText = btnActionText;
     }
 
-    public void removeValue(int position){
-        getValues().remove(position);
+    public int getButtonActionTextRes() {
+        return btnActionTextRes;
     }
 
-    public List<Option> getOptions() {
-        return options;
+    public void setButtonActionTextRes(int btnActionTextRes) {
+        this.btnActionTextRes = btnActionTextRes;
     }
 
-    public void setOptions(List<Option> options) {
-        this.options = options;
+    public OnButtonClickedListener getOnButtonClickedListener() {
+        return onButtonClickedListener;
+    }
+
+    public void setOnButtonClickedListener(OnButtonClickedListener onButtonClickedListener) {
+        this.onButtonClickedListener = onButtonClickedListener;
     }
 
     public static class Builder {
@@ -79,8 +68,9 @@ public class MultipleChoiceFormItem extends BaseFormItem {
         private boolean isVisible = true;
         private TypeInfo typeInfo;
         private String machineName;
-        private List<BaseOption> values;
-        private List<Option> options;
+        private boolean isCompleted;
+        private String btnActionText;
+        private int btnActionTextRes;
 
         public Builder setTitle(String title) {
             this.title = title;
@@ -136,20 +126,26 @@ public class MultipleChoiceFormItem extends BaseFormItem {
             return this;
         }
 
-        public Builder setValues(List<BaseOption> values) {
-            this.values = values;
+        public Builder setCompleted(Boolean isCompleted) {
+            this.isCompleted = isCompleted;
 
             return this;
         }
 
-        public Builder setOptions(List<Option> options) {
-            this.options = options;
+        public Builder setButtonActionText(String btnActionText) {
+            this.btnActionText = btnActionText;
 
             return this;
         }
 
-        public MultipleChoiceFormItem build() {
-            MultipleChoiceFormItem item = new MultipleChoiceFormItem();
+        public Builder setButtonActionTextRes(int btnActionTextRes) {
+            this.btnActionTextRes = btnActionTextRes;
+
+            return this;
+        }
+
+        public IntentFormItem build() {
+            IntentFormItem item = new IntentFormItem();
 
             item.setTitle(title);
             item.setTitleRes(titleRes);
@@ -160,11 +156,17 @@ public class MultipleChoiceFormItem extends BaseFormItem {
             item.setVisible(isVisible);
             item.setTypeInfo(typeInfo);
             item.setMachineName(machineName);
-            item.setValues(values);
-            item.setOptions(options);
-            item.setViewType(FormItemViewType.MULTIPLE_CHOICE);
+            item.setCompleted(isCompleted);
+            item.setButtonActionText(btnActionText);
+            item.setButtonActionTextRes(btnActionTextRes);
+            item.setViewType(FormItemViewType.INTENT);
 
             return item;
         }
+    }
+
+    public interface OnButtonClickedListener {
+
+        void onButtonClicked();
     }
 }

@@ -53,6 +53,8 @@ public class FormSettings {
     private List<FormFieldsByWorkflowType> fields; // Full info of all fields.
     private final Moshi moshi;
     private List<BaseFormItem> formItems; //new
+    private List<BaseFormItem> peopleInvolvedFormItems; //new
+    private List<BaseFormItem> roleApproversFormItems; //these are also included in peopleInvolvedFormItems
 
     public static final String TYPE_TEXT = "text";
     public static final String TYPE_TEXT_AREA = "textarea";
@@ -314,7 +316,7 @@ public class FormSettings {
 
         List<ProductJsonValue> productJsonValueList = new ArrayList<>();
         for (int i = 0; i < formItem.getValues().size(); i++) {
-            Option value = formItem.getValues().get(i);
+            Option value = (Option) formItem.getValues().get(i);
 
             ProductJsonValue productJsonValue = new ProductJsonValue();
             productJsonValue.setValue(String.valueOf(value.getId()));
@@ -411,7 +413,7 @@ public class FormSettings {
 
         List<PostSystemUser> postSystemUserList = new ArrayList<>();
         for (int i = 0; i < formItem.getValues().size(); i++) {
-            Option value = formItem.getValues().get(i);
+            Option value = (Option) formItem.getValues().get(i);
 
             FormCreateProfile profile = getProfileBy(value.getName());
             if (profile == null) {
@@ -467,7 +469,7 @@ public class FormSettings {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("[");
         for (int i = 0; i < formItem.getValues().size(); i++) {
-            Option value = formItem.getValues().get(i);
+            Option value = (Option) formItem.getValues().get(i);
             int id = value.getId();
             if (id == 0) {
                 continue;
@@ -482,15 +484,37 @@ public class FormSettings {
         metaData.setValue(formattedValue);
     }
 
-    public List<BaseFormItem> getFormItems() {
+    protected List<BaseFormItem> getFormItems() {
         if (formItems == null) {
             formItems = new ArrayList<>();
         }
         return formItems;
     }
 
-    public void setFormItems(List<BaseFormItem> formItems) {
+    protected void setFormItems(List<BaseFormItem> formItems) {
         this.formItems = formItems;
+    }
+
+    protected List<BaseFormItem> getPeopleInvolvedFormItems() {
+        if (peopleInvolvedFormItems == null) {
+            peopleInvolvedFormItems = new ArrayList<>();
+        }
+        return peopleInvolvedFormItems;
+    }
+
+    protected void setPeopleInvolvedFormItems(List<BaseFormItem> formItems) {
+        this.peopleInvolvedFormItems = formItems;
+    }
+
+    protected List<BaseFormItem> getRoleApproversFormItems() {
+        if (roleApproversFormItems == null) {
+            roleApproversFormItems = new ArrayList<>();
+        }
+        return roleApproversFormItems;
+    }
+
+    protected void setRoleApproversFormItems(List<BaseFormItem> formItems) {
+        this.roleApproversFormItems = formItems;
     }
 
     /**
@@ -790,7 +814,7 @@ public class FormSettings {
     }
 
     protected List<BaseFormItem> getFormItemsToPost() {
-
+        //todo check people involved
         List<BaseFormItem> formItemsToPost = new ArrayList<>(getFormItems());
         BaseFormItem formItem;
         int tag;
@@ -851,6 +875,8 @@ public class FormSettings {
     }
 
     protected void clearFormItems() {
+        getPeopleInvolvedFormItems().clear();
+
         List<BaseFormItem> formItems = getFormItems();
 
         if (formItems.size() <= 1) {
@@ -869,6 +895,7 @@ public class FormSettings {
      * @return the first item that is not valid, index-based. Null if all of the items are valid.
      */
     protected BaseFormItem findFirstInvalidItem() {
+        //todo check people involved
         for (BaseFormItem item : getFormItems()) {
             if (!item.isValid()) return item;
         }
@@ -885,6 +912,10 @@ public class FormSettings {
      */
     protected BaseFormItem findItem(int tag) {
         for (BaseFormItem item : getFormItems()) {
+            if (item.getTag() == tag) return item;
+        }
+
+        for (BaseFormItem item : getPeopleInvolvedFormItems()) {
             if (item.getTag() == tag) return item;
         }
 

@@ -12,7 +12,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
-import io.reactivex.Single;
+
 
 @Dao
 public interface WorkflowTypeDbDao {
@@ -61,5 +61,5 @@ public interface WorkflowTypeDbDao {
     public List<FormFieldsByWorkflowType> getFields(int byId);
 
     @Query("SELECT * FROM workflowtypedb WHERE id = :workflowTypeId")
-    public Single<WorkflowTypeDb> getWorkflowTypeBy(int workflowTypeId);
+    public WorkflowTypeDb getWorkflowTypeBy(int workflowTypeId);
 }

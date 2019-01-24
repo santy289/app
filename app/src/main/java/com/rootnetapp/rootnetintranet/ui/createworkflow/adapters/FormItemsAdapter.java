@@ -15,7 +15,9 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.FormItemBooleanBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemCurrencyBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemDateBinding;
+import com.rootnetapp.rootnetintranet.databinding.FormItemDoubleMultipleChoiceBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemFileBinding;
+import com.rootnetapp.rootnetintranet.databinding.FormItemIntentBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemMultipleChoiceBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemPhoneBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemSingleChoiceBinding;
@@ -24,8 +26,11 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.DoubleMultipleChoiceFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.DoubleOption;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.IntentFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
@@ -119,6 +124,14 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 return new FileViewHolder(FormItemFileBinding
                         .inflate(layoutInflater, viewGroup, false));
 
+            case FormItemViewType.INTENT:
+                return new IntentViewHolder(FormItemIntentBinding
+                        .inflate(layoutInflater, viewGroup, false));
+
+            case FormItemViewType.DOUBLE_MULTIPLE_CHOICE:
+                return new DoubleMultipleChoiceViewHolder(FormItemDoubleMultipleChoiceBinding
+                        .inflate(layoutInflater, viewGroup, false));
+
             default:
                 throw new IllegalStateException("Invalid ViewType");
         }
@@ -164,6 +177,14 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 populateFileView((FileViewHolder) holder, position);
                 break;
 
+            case FormItemViewType.INTENT:
+                populateIntentView((IntentViewHolder) holder, position);
+                break;
+
+            case FormItemViewType.DOUBLE_MULTIPLE_CHOICE:
+                populateDoubleMultipleChoiceView((DoubleMultipleChoiceViewHolder) holder, position);
+                break;
+
             default:
                 throw new IllegalStateException("Invalid ViewType");
         }
@@ -202,7 +223,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         //set title
         String title = item.getTitle();
-        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
         holder.getBinding().tvTitle.setText(title);
 
         //set value
@@ -297,7 +320,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         SingleChoiceFormItem item = (SingleChoiceFormItem) getItem(position);
 
         String title = item.getTitle();
-        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
         holder.getBinding().tvTitle.setText(title);
 
         List<Option> options = new ArrayList<>(item.getOptions());
@@ -310,72 +335,57 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             options.add(0, new Option(0, hint));
         }
 
-        //check for selection
-        int selection = 0;
-        if (item.getValue() != null) {
-            for (int i = 0; i < options.size(); i++) {
-                Option option = options.get(i);
-                if (item.getValue() == option) selection = i;
-            }
-        }
-
         //create the adapter
         holder.getBinding().spInput.setAdapter(
                 new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
                         options));
 
-        //only creates the listener once.
-        if (holder.getBinding().spInput.getOnItemSelectedListener() == null) {
-            holder.getBinding().spInput
-                    .setSelection(selection,
-                            false); //workaround so the listener won't be called on init
-            holder.getBinding().spInput.setOnItemSelectedListener(
-                    new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> parent, View view, int position,
-                                                   long id) {
+        //workaround so the listener won't be called on init
+        holder.getBinding().spInput.setSelection(0, false);
 
-                            // this prevents the listener to be triggered by setSelection
-                            Object tag = holder.getBinding().spInput.getTag();
-                            if (tag == null || (int) tag != position) {
+        // this prevents the listener to be triggered by setSelection
+        int index = item.getOptions().indexOf(item.getValue());
+        index++; // because of the No Selection option
+        holder.getBinding().spInput.setTag(index);
+        holder.getBinding().spInput.setSelection(index);
 
-                                // the user has selected the No Selection option
-                                if (position == 0) {
-                                    item.setValue(null);
-                                    if (item.getOnSelectedListener() != null) {
-                                        item.getOnSelectedListener().onSelected(item);
-                                    }
-                                    return;
-                                }
+        holder.getBinding().spInput.setOnItemSelectedListener(
+                new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position,
+                                               long id) {
 
-                                // the user has selected a valid option
-                                int index = position - 1; // because of the No Selection option
-                                item.setValue(item.getOptions().get(index));
+                        // this prevents the listener to be triggered by setSelection
+                        Object tag = holder.getBinding().spInput.getTag();
+                        if (tag == null || (int) tag != position) {
+
+                            // the user has selected the No Selection option
+                            if (position == 0) {
+                                item.setValue(null);
                                 if (item.getOnSelectedListener() != null) {
                                     item.getOnSelectedListener().onSelected(item);
                                 }
+                                return;
+                            }
 
-//                                holder.getBinding().spInput.performClick();
-//                                notifyDataSetChanged();
+                            // the user has selected a valid option
+                            int index = position - 1; // because of the No Selection option
+                            item.setValue(item.getOptions().get(index));
+                            if (item.getOnSelectedListener() != null) {
+                                item.getOnSelectedListener().onSelected(item);
                             }
                         }
+                    }
 
-                        @Override
-                        public void onNothingSelected(AdapterView<?> parent) {
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
 
-                        }
-                    });
+                    }
+                });
 
-            //make sure this view has the focus
-            holder.getBinding().spInput
-                    .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
-        } else {
-            // this prevents the listener to be triggered by setSelection
-            int index = item.getOptions().indexOf(item.getValue());
-            index++; // because of the No Selection option
-            holder.getBinding().spInput.setTag(index);
-            holder.getBinding().spInput.setSelection(index);
-        }
+        //make sure this view has the focus
+        holder.getBinding().spInput
+                .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
 
         // verify required indicator
         holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
@@ -419,7 +429,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         BooleanFormItem item = (BooleanFormItem) getItem(position);
 
         String title = item.getTitle();
-        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
         holder.getBinding().switchInput.setText(title);
 
         holder.getBinding().switchInput.setChecked(item.getValue());
@@ -453,7 +465,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         DateFormItem item = (DateFormItem) getItem(position);
 
         String title = item.getTitle();
-        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
         final String finalTitle = title;
         holder.getBinding().tvTitle.setText(finalTitle);
 
@@ -535,7 +549,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         CurrencyFormItem item = (CurrencyFormItem) getItem(position);
 
         String title = item.getTitle();
-        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
         holder.getBinding().tvTitle.setText(title);
 
         //fill value
@@ -663,7 +679,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         MultipleChoiceFormItem item = (MultipleChoiceFormItem) getItem(position);
 
         String title = item.getTitle();
-        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
         holder.getBinding().tvTitle.setText(title);
 
         //creates the selected items adapter
@@ -755,7 +773,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         PhoneFormItem item = (PhoneFormItem) getItem(position);
 
         String title = item.getTitle();
-        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
         holder.getBinding().tvTitle.setText(title);
 
         //fill value
@@ -883,7 +903,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         //set title
         String title = item.getTitle();
-        if (title == null || title.isEmpty()) title = mContext.getString(item.getTitleRes());
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
         holder.getBinding().tvTitle.setText(title);
 
         //set button click listener
@@ -928,6 +950,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.show();
         }
 
+        //verify validation
         if (hasToEvaluateValid && !item.isValid()) {
             holder.getBinding().tvRequiredMsg.setVisibility(View.VISIBLE);
         } else {
@@ -937,6 +960,184 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         //verify enabled param
         holder.getBinding().btnAddFile.setEnabled(item.isEnabled());
         holder.getBinding().chipFile.setEnabled(item.isEnabled());
+    }
+
+    /**
+     * Handles the view for the {@link IntentFormItem}. Displays the UI according to the visibility
+     * params.
+     *
+     * @param holder   view holder
+     * @param position item position in adapter.
+     */
+    private void populateIntentView(IntentViewHolder holder, int position) {
+        IntentFormItem item = (IntentFormItem) getItem(position);
+
+        //set title
+        String title = item.getTitle();
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
+        holder.getBinding().tvTitle.setText(title);
+
+        //set button text
+        String btnText = item.getButtonActionText();
+        if (item.getButtonActionTextRes() != 0) {
+            btnText = mContext.getString(item.getButtonActionTextRes());
+        }
+        if (btnText == null || btnText.isEmpty()) btnText = mContext.getString(R.string.action);
+        holder.getBinding().btnIntent.setText(btnText);
+
+        //set button click listener
+        holder.getBinding().btnIntent.setOnClickListener(
+                v -> item.getOnButtonClickedListener().onButtonClicked());
+
+        //make sure this view has the focus
+        holder.getBinding().btnIntent
+                .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
+
+        // verify required indicator
+        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+
+        //verify visibility
+        if (!item.isVisible()) {
+            holder.hide();
+            return;
+        } else {
+            holder.show();
+        }
+
+        //verify validation
+        if (hasToEvaluateValid && !item.isValid()) {
+            holder.getBinding().tvRequiredMsg.setVisibility(View.VISIBLE);
+        } else {
+            holder.getBinding().tvRequiredMsg.setVisibility(View.GONE);
+        }
+
+        //verify enabled param
+        holder.getBinding().btnIntent.setEnabled(item.isEnabled());
+    }
+
+    /**
+     * Handles the view for the {@link DoubleMultipleChoiceFormItem}. Displays the UI according to
+     * the visibility, enabled and validation params.
+     *
+     * @param holder   view holder
+     * @param position item position in adapter.
+     */
+    private void populateDoubleMultipleChoiceView(DoubleMultipleChoiceViewHolder holder,
+                                                  int position) {
+        DoubleMultipleChoiceFormItem item = (DoubleMultipleChoiceFormItem) getItem(position);
+
+        String title = item.getTitle();
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
+        holder.getBinding().tvTitle.setText(title);
+
+        //creates the selected items adapter
+        MultipleChoiceSelectionsAdapter selectionsAdapter = new MultipleChoiceSelectionsAdapter(
+                item.getValues());
+        holder.getBinding().rvSelectedItems.setLayoutManager(
+                new LinearLayoutManager(mContext, RecyclerView.HORIZONTAL, false));
+        holder.getBinding().rvSelectedItems.setAdapter(selectionsAdapter);
+
+        //adds a hint to the spinners
+        String hint = mContext.getString(R.string.no_selection);
+
+        //region First Spinner
+        List<Option> firstOptions = new ArrayList<>(item.getFirstOptions());
+        // check whether the hint has already been added
+        if (!firstOptions.get(0).getName().equals(hint)) {
+            // add hint as first item
+            firstOptions.add(0, new Option(0, hint));
+        }
+
+        //creates the options adapter
+        holder.getBinding().spFirstInput.setAdapter(
+                new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
+                        firstOptions));
+
+        //make sure this view has the focus
+        holder.getBinding().spFirstInput
+                .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
+        //endregion
+
+        //region Second Spinner
+        List<Option> secondOptions = new ArrayList<>(item.getSecondOptions());
+        // check whether the hint has already been added
+        if (!secondOptions.get(0).getName().equals(hint)) {
+            // add hint as first item
+            secondOptions.add(0, new Option(0, hint));
+        }
+
+        //creates the options adapter
+        holder.getBinding().spSecondInput.setAdapter(
+                new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
+                        secondOptions));
+
+        //make sure this view has the focus
+        holder.getBinding().spSecondInput
+                .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
+        //endregion
+
+        //set button click listener
+        holder.getBinding().btnAdd.setOnClickListener(v -> {
+            int firstSelectionPosition = holder.getBinding().spFirstInput.getSelectedItemPosition();
+            if (firstSelectionPosition == 0) return; //no selection
+            int firstIndex = firstSelectionPosition - 1; // because of the hint option
+            Option firstOption = item.getFirstOptions().get(firstIndex);
+
+            int secondSelectionPosition = holder.getBinding().spSecondInput
+                    .getSelectedItemPosition();
+            if (secondSelectionPosition == 0) return; //no selection
+            int secondIndex = secondSelectionPosition - 1; // because of the hint option
+            Option secondOption = item.getSecondOptions().get(secondIndex);
+
+            DoubleOption doubleOption = new DoubleOption(firstOption, secondOption);
+            selectionsAdapter.addItem(doubleOption);
+        });
+
+        // verify required indicator
+        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+
+        // verify visibility
+        if (!item.isVisible()) {
+            holder.hide();
+            return;
+        } else {
+            holder.show();
+        }
+
+        // verify enabled param
+        if (!item.isEnabled()) {
+            holder.getBinding().viewFirstSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg_disabled);
+            holder.getBinding().spFirstInput.setEnabled(false);
+            holder.getBinding().viewSecondSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg_disabled);
+            holder.getBinding().spSecondInput.setEnabled(false);
+            return;
+        } else {
+            holder.getBinding().viewFirstSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg);
+            holder.getBinding().spFirstInput.setEnabled(true);
+            holder.getBinding().viewSecondSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg);
+            holder.getBinding().spSecondInput.setEnabled(true);
+        }
+
+        // verify validation
+        if (hasToEvaluateValid && !item.isValid()) {
+            holder.getBinding().viewFirstSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg_error);
+            holder.getBinding().viewSecondSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg_error);
+        } else {
+            holder.getBinding().viewFirstSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg);
+            holder.getBinding().viewSecondSpinnerBackground
+                    .setBackgroundResource(R.drawable.spinner_bg);
+        }
     }
     //endregion
 
@@ -966,6 +1167,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
                 case FormItemViewType.SINGLE_CHOICE:
                 case FormItemViewType.MULTIPLE_CHOICE:
+                case FormItemViewType.DOUBLE_MULTIPLE_CHOICE:
                     //the value(s) is/are saved when the user selects the spinner item(s)
                     continue;
 
@@ -990,6 +1192,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
                 case FormItemViewType.FILE:
                     //the value is saved when the user selects the file from the FileChooser intent
+                    continue;
+
+                case FormItemViewType.INTENT:
+                    //the value should be saved manually by the developer when the user completes the action
                     continue;
 
                 default:

@@ -47,7 +47,7 @@ public class RightDrawerOptionsAdapter extends BaseAdapter {
     @Override
     public boolean isEnabled(int position) {
         WorkflowTypeMenu menu = menus.get(position);
-        int type =  menu.getRowType();
+        int type = menu.getRowType();
         return type == TYPE || type == NO_SELECTION;
     }
 
@@ -61,20 +61,28 @@ public class RightDrawerOptionsAdapter extends BaseAdapter {
 
         switch (itemRowType) {
             case TYPE:
-                convertView = inflater.inflate(R.layout.right_drawer_filter_item, null);
+                convertView = inflater
+                        .inflate(R.layout.right_drawer_filter_workflow_type_item, null);
                 textView = convertView.findViewById(R.id.right_drawer_item_title);
                 checkImage = convertView.findViewById(R.id.right_drawer_image_checkmark);
                 if (menu.isSelected()) {
                     checkImage.setVisibility(View.VISIBLE);
                     textView.setTextColor(resources.getColor(R.color.colorAccent));
                 } else {
-                    checkImage.setVisibility(View.GONE);
+                    checkImage.setVisibility(View.INVISIBLE); //INVISIBLE - for constraints
                     textView.setTextColor(resources.getColor(R.color.black));
                 }
                 if (TextUtils.isEmpty(menu.getLabel())) {
                     textView.setText(resources.getString(menu.getResLabel()));
                 } else {
                     textView.setText(menu.getLabel());
+                }
+                TextView workflowCount = convertView.findViewById(R.id.right_drawer_workflow_count);
+                if (menu.getWorkflowCount() != null) {
+                    workflowCount.setVisibility(View.VISIBLE);
+                    workflowCount.setText(String.valueOf(menu.getWorkflowCount()));
+                } else {
+                    workflowCount.setVisibility(View.GONE);
                 }
                 break;
             case CATEGORY:

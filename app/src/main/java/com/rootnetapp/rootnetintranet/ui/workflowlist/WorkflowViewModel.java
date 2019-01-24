@@ -344,6 +344,7 @@ public class WorkflowViewModel extends ViewModel {
                             WorkflowTypeSpinnerAdapter.TYPE,
                             typeMenu.getId()
                     );
+                    menu.setWorkflowCount(typeMenu.getWorkflowCount());
                     tempMenus.add(menu);
                 }
             }
@@ -365,6 +366,7 @@ public class WorkflowViewModel extends ViewModel {
                         WorkflowTypeSpinnerAdapter.TYPE,
                         typeMenu.getId()
                 );
+                menu.setWorkflowCount(typeMenu.getWorkflowCount());
                 noCategory.add(menu);
             }
         }

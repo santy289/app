@@ -1,5 +1,10 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflowtype;
 
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
+
+import java.util.List;
+
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -8,11 +13,6 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import io.reactivex.Single;
-
-import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
-import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
-
-import java.util.List;
 
 @Dao
 public interface WorkflowTypeDbDao {
@@ -43,13 +43,13 @@ public interface WorkflowTypeDbDao {
     @Query("SELECT * FROM workflowtypedb")
     public LiveData<List<WorkflowTypeDb>> getObservableWorkflowTypes();
 
-    @Query("SELECT id, name, category FROM workflowtypedb")
+    @Query("SELECT id, name, category, workflow_count FROM workflowtypedb")
     public LiveData<List<WorkflowTypeItemMenu>> getObservableTypesForMenu();
 
-    @Query("SELECT id, name, category FROM workflowtypedb")
+    @Query("SELECT id, name, category, workflow_count FROM workflowtypedb")
     public List<WorkflowTypeItemMenu> getTypesForMenu();
 
-    @Query("SELECT id, name, category FROM workflowtypedb")
+    @Query("SELECT id, name, category, workflow_count FROM workflowtypedb")
     public List<WorkflowTypeItemMenu> getListOfWorkflowNames();
 
     @Query("SELECT field.id AS id, field.field_id AS fieldId, workflowtypedb.id AS workflowTypeId, " +

@@ -1,9 +1,9 @@
 package com.rootnetapp.rootnetintranet.models.workflowlist;
 
-import androidx.annotation.StringRes;
-
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
+
+import androidx.annotation.StringRes;
 
 public class WorkflowTypeMenu extends ListFieldItemMeta {
     private int id;
@@ -13,6 +13,7 @@ public class WorkflowTypeMenu extends ListFieldItemMeta {
     private int rowType;
     private int workflowTypeId;
     private boolean selected;
+    private Integer workflowCount;
 
     public WorkflowTypeMenu(int id, String label, int rowType, int workflowTypeId) {
         this.id = id;
@@ -106,5 +107,13 @@ public class WorkflowTypeMenu extends ListFieldItemMeta {
 
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    public Integer getWorkflowCount() {
+        return workflowCount;
+    }
+
+    public void setWorkflowCount(Integer workflowCount) {
+        this.workflowCount = workflowCount;
     }
 }

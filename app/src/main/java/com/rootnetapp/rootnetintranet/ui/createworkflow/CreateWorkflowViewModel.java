@@ -1670,6 +1670,7 @@ class CreateWorkflowViewModel extends ViewModel {
                             .setTag(TAG_OWNER)
                             .setOptions(userOptions)
                             .setValue(selection)
+                            .setEnabled(mWorkflow == null) //disable for edit mode, cannot edit the owner
                             .setMachineName(MACHINE_NAME_OWNER)
                             .build();
 

@@ -46,7 +46,6 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem.InputType;
-import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
@@ -294,10 +293,10 @@ class CreateWorkflowViewModel extends ViewModel {
             // new workflow
             postCreateToServer(metas, workflowTypeId, title, start, description, owner,
                     profilesInvolved, globalApprovers, specificApprovers, roleApprovers);
-
         } else {
             //edit workflow
-            patchEditToServer(metas, mWorkflowListItem.getWorkflowId(), title, start, description);
+            patchEditToServer(metas, mWorkflowListItem.getWorkflowId(), title, start, description,
+                    owner, profilesInvolved, globalApprovers, specificApprovers, roleApprovers);
         }
     }
 
@@ -335,17 +334,31 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void patchEditToServer(List<WorkflowMetas> metas, int workflowId, String title,
-                                   String start, String description) {
-        EditRequest editRequest = new EditRequest();
-        editRequest.setWorkflowId(workflowId);
-        editRequest.setTitle(title);
-        editRequest.setStart(start);
-        editRequest.setDescription(description);
-        editRequest.setWorkflowMetas(metas);
+                                   String start, String description, Integer owner,
+                                   List<Integer> profilesInvolved, List<Integer> globalApprovers,
+                                   List<StatusSpecific> specificApprovers,
+                                   Map<String, Object> roleApprovers) {
+        Map<String, Object> mapBody = new HashMap<>();
+        mapBody.put("workflow_id", workflowId);
+        mapBody.put("title", title);
+        mapBody.put("workflow_metas", metas);
+        mapBody.put("start", start);
+        mapBody.put("description", description);
+        if (owner != null) {
+            mapBody.put("owner", owner);
+        }
+        mapBody.put("profilesInvolved", profilesInvolved);
+
+        Map<String, Object> specificApproversMap = new HashMap<>();
+        specificApproversMap.put("global", globalApprovers);
+        specificApproversMap.put("statusSpecific", specificApprovers);
+        specificApproversMap.put("role", roleApprovers);
+
+        mapBody.put("specific_approvers", specificApproversMap);
 
         // Accepts object
         Disposable disposable = mRepository
-                .editWorkflow(mToken, editRequest)
+                .editWorkflow(mToken, workflowId, mapBody)
                 .subscribe(this::onEditSuccess, this::onFailure);
 
         mDisposables.add(disposable);
@@ -578,7 +591,7 @@ class CreateWorkflowViewModel extends ViewModel {
                     .setTitleRes(R.string.people_involved)
                     .setButtonActionTextRes(R.string.people_involved_action)
                     .setRequired(workflowTypeDbSingle.isDefineRoles())
-                    .setVisible(mWorkflowListItem == null) //hide in edit mode
+//                    .setVisible(mWorkflowListItem == null) //hide in edit mode
                     .setTag(TAG_PEOPLE_INVOLVED)
                     .build();
         }).subscribeOn(Schedulers.newThread())
@@ -1614,6 +1627,7 @@ class CreateWorkflowViewModel extends ViewModel {
 
     private void onWorkflowTypeSuccess(WorkflowTypeResponse workflowTypeResponse) {
         showPeopleInvolvedFields(workflowTypeResponse.getWorkflowType());
+        fillPeopleInvolvedFields(workflowTypeResponse.getWorkflowType());
     }
 
     /**
@@ -1636,52 +1650,96 @@ class CreateWorkflowViewModel extends ViewModel {
                     if (profiles == null || profiles.isEmpty()) return;
 
                     Option selection = null; //check for current user (default owner)
-                    List<Option> options = new ArrayList<>();
+                    List<Option> userOptions = new ArrayList<>();
                     for (int i = 0; i < profiles.size(); i++) {
                         String name = profiles.get(i).getFullName();
                         Integer id = profiles.get(i).getId();
 
                         Option option = new Option(id, name);
-                        options.add(option);
+                        userOptions.add(option);
 
                         if (option.getId() == mUserId) selection = option;
                     }
 
-                    //Owner
+                    //region Owner
                     SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
                             .setTitleRes(R.string.owner)
                             .setRequired(true)
                             .setTag(TAG_OWNER)
-                            .setOptions(options)
+                            .setOptions(userOptions)
                             .setValue(selection)
                             .setMachineName(MACHINE_NAME_OWNER)
                             .build();
 
                     mAddPeopleInvolvedFormItemLiveData.setValue(singleChoiceFormItem);
+                    //endregion
 
-                    //Additional People Involved
+                    //region Additional People Involved
+                    //verify selected values
+                    List<BaseOption> peopleInvolvedValues = new ArrayList<>();
+                    for (Integer id : mWorkflow.getProfilesInvolved()) {
+                        Profile profile = Profile.getProfileByIdFromList(profiles, id);
+
+                        if (profile == null) continue;
+
+                        Option option = new Option(id, profile.getFullName());
+                        peopleInvolvedValues.add(option);
+                    }
+
                     MultipleChoiceFormItem multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
                             .setTitleRes(R.string.additional_profiles)
                             .setRequired(false)
                             .setTag(TAG_ADDITIONAL_PROFILES)
-                            .setOptions(options)
+                            .setOptions(userOptions)
+                            .setValues(peopleInvolvedValues)
                             .build();
 
                     mAddPeopleInvolvedFormItemLiveData.setValue(multipleChoiceFormItem);
+                    //endregion
 
-                    //Global Approvers
+                    //region Global Approvers
+                    //verify selected values
+                    List<BaseOption> globalApproversValues = new ArrayList<>();
+                    for (Integer id : mWorkflow.getSpecificApprovers().global) {
+                        Profile profile = Profile.getProfileByIdFromList(profiles, id);
+
+                        if (profile == null) continue;
+
+                        Option option = new Option(id, profile.getFullName());
+                        globalApproversValues.add(option);
+                    }
+
                     multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
                             .setTitleRes(R.string.global_approvers_form)
                             .setRequired(false)
                             .setTag(TAG_GLOBAL_APPROVERS)
-                            .setOptions(options)
+                            .setOptions(userOptions)
+                            .setValues(globalApproversValues)
                             .build();
 
                     mAddPeopleInvolvedFormItemLiveData.setValue(multipleChoiceFormItem);
+                    //endregion
 
-                    //Specific Approvers
+                    //region Specific Approvers
                     List<Status> statuses = workflowTypeDb.getStatus();
                     if (statuses == null || statuses.isEmpty()) return;
+
+                    //verify selected values
+                    List<BaseOption> specificApproversValues = new ArrayList<>();
+                    for (StatusSpecific statusSpecific : mWorkflow
+                            .getSpecificApprovers().statusSpecific) {
+                        Profile profile = Profile
+                                .getProfileByIdFromList(profiles, statusSpecific.user);
+                        Status status = Status
+                                .getStatusByIdFromList(statuses, statusSpecific.status);
+
+                        if (profile == null || status == null) continue;
+
+                        Option userOption = new Option(profile.getId(), profile.getFullName());
+                        Option statusOption = new Option(status.getId(), status.getName());
+                        DoubleOption doubleOption = new DoubleOption(userOption, statusOption);
+                        specificApproversValues.add(doubleOption);
+                    }
 
                     List<Option> statusOptions = new ArrayList<>();
                     for (int i = 0; i < statuses.size(); i++) {
@@ -1696,13 +1754,15 @@ class CreateWorkflowViewModel extends ViewModel {
                             .setTitleRes(R.string.specific_approvers_form)
                             .setRequired(false)
                             .setTag(TAG_SPECIFIC_APPROVERS)
-                            .setFirstOptions(options)
+                            .setFirstOptions(userOptions)
                             .setSecondOptions(statusOptions)
+                            .setValues(specificApproversValues)
                             .build();
 
                     mAddPeopleInvolvedFormItemLiveData.setValue(doubleMultipleChoiceFormItem);
+                    //endregion
 
-                    //Approvers
+                    //region Approvers by Role
                     for (Approver approver : workflowTypeDb.getDistinctApprovers()) {
                         //only add items for roles
                         if (!approver.entityType.equalsIgnoreCase(ENTITY_ROLE)) continue;
@@ -1742,6 +1802,7 @@ class CreateWorkflowViewModel extends ViewModel {
 
                         mAddPeopleInvolvedFormItemLiveData.setValue(singleChoiceFormItem);
                     }
+                    //endregion
 
                     showLoading.setValue(false);
                 }, throwable -> Log
@@ -1773,6 +1834,10 @@ class CreateWorkflowViewModel extends ViewModel {
         }
 
         return isValid;
+    }
+
+    private void fillPeopleInvolvedFields(WorkflowTypeDb workflowType) {
+
     }
     //endregion
 

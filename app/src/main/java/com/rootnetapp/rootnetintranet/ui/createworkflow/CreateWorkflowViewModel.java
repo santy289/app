@@ -1731,7 +1731,7 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     //region Specific Approvers
                     List<Status> statuses = workflowTypeDb.getStatus();
-                    if (statuses != null && statuses.isEmpty()) {
+                    if (statuses != null && !statuses.isEmpty()) {
                         //verify selected values
                         List<BaseOption> specificApproversValues = null;
                         if (mWorkflow != null) {

@@ -1636,10 +1636,13 @@ class CreateWorkflowViewModel extends ViewModel {
      */
     private void showPeopleInvolvedFields(WorkflowTypeDb workflowTypeDb) {
         createProfilesFormItems(workflowTypeDb);
-
-//        mSetPeopleInvolvedFormItemListLiveData.setValue(formSettings.getPeopleInvolvedFormItems());
     }
 
+    /**
+     * Generates every field that belongs to the People Involved form.
+     *
+     * @param workflowTypeDb object containing the WorkflowType info.
+     */
     private void createProfilesFormItems(WorkflowTypeDb workflowTypeDb) {
 
         Disposable disposable;
@@ -1670,7 +1673,8 @@ class CreateWorkflowViewModel extends ViewModel {
                             .setTag(TAG_OWNER)
                             .setOptions(userOptions)
                             .setValue(selection)
-                            .setEnabled(mWorkflow == null) //disable for edit mode, cannot edit the owner
+                            .setEnabled(
+                                    mWorkflow == null) //disable for edit mode, cannot edit the owner
                             .setMachineName(MACHINE_NAME_OWNER)
                             .build();
 
@@ -1793,7 +1797,9 @@ class CreateWorkflowViewModel extends ViewModel {
                                     .get(String.valueOf(approver.entityId));
 
                             //sometimes it returns a Double value
-                            if (profileId instanceof Double) profileId = ((Double) profileId).intValue();
+                            if (profileId instanceof Double) {
+                                profileId = ((Double) profileId).intValue();
+                            }
 
                             //check if the id is an integer
                             if (profileId instanceof Integer) {

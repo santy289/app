@@ -6,7 +6,10 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.webkit.ValueCallback;
 import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -30,6 +33,7 @@ public class ChangeStatusActivity extends AppCompatActivity {
     ChangeStatusViewModelFactory changeStatusViewModelFactory;
     private ChangeStatusViewModel changeStatusViewModel;
     private ActivityChangeStatusBinding mBinding;
+    private int loadCounter, localStorageCount, localStorageCompleted;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,8 +75,6 @@ public class ChangeStatusActivity extends AppCompatActivity {
     @UiThread
     @SuppressLint("SetJavaScriptEnabled")
     private void setupWebView(WebViewData data) {
-        // TODO check session, the bearer token is not enough to open the active session.
-        // For the first load, the website will prompt the login page. After that, consecutively, it will display the proper page.
         WebSettings ws = mBinding.webView.getSettings();
 
         ws.setJavaScriptEnabled(true);
@@ -81,32 +83,53 @@ public class ChangeStatusActivity extends AppCompatActivity {
         Log.d(TAG, "Enabling HTML5-Features");
         ws.setDomStorageEnabled(true);
         ws.setDatabaseEnabled(true);
-        ws.setAppCachePath(
-                getFilesDir().getPath() + getFilesDir().getPath() + getPackageName() + "/cache/");
+        ws.setAppCachePath(getFilesDir().getPath() + getPackageName() + "/cache/");
         ws.setAppCacheEnabled(true);
         Log.d(TAG, "Enabled HTML5-Features");
 
-        //fixme this should save on the browser localStorage and load the user session
-        /*mBinding.webView.setWebViewClient(new WebViewClient() {
+        loadCounter = localStorageCount = localStorageCompleted = 0;
+
+        //create a listener that will execute several JavaScript scripts once the page loads
+        mBinding.webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView webView, String url) {
-                String authScript = "localStorage.setItem('jwt','" + mToken + "');";
-                webView.evaluateJavascript(authScript, null);
+                //this callback is fired after the scripts run
 
-                Moshi moshi = new Moshi.Builder().build();
+                if (loadCounter == 0) {
+                    //execute this block only once
+                    loadCounter++;
 
-                JsonAdapter<ClientResponse> clientResponseJsonAdapter = moshi.adapter(ClientResponse.class);
-                String globalJson = clientResponseJsonAdapter.toJson(data.getClientResponse());
-                String globalScript = "localStorage.setItem('global','" + globalJson + "');";
-                webView.evaluateJavascript(globalScript, null);
+                    //check for the jwt token in the localStorage
+                    String scriptGetJwt = changeStatusViewModel.getScriptGetLocalStorageItem("jwt");
+                    webView.evaluateJavascript(scriptGetJwt, token -> {
+                        Log.d("", "");
 
-                JsonAdapter<Client> clientJsonAdapter = moshi.adapter(Client.class);
-                String clientJson = clientJsonAdapter.toJson(data.getClientResponse().getClient());
-                String clientScript = "localStorage.setItem('client','" + clientJson + "');";
-                webView.evaluateJavascript(clientScript, null);
+                        //check if the Android WebView needs a new jwt token
+                        if (changeStatusViewModel.isTokenInvalid(token)) {
+
+                            ValueCallback<String> callback = value -> {
+                                localStorageCompleted++;
+
+                                //check if all of the scripts were completed
+                                if (localStorageCompleted >= localStorageCount) {
+                                    String reloadScript = data.getReloadScript();
+                                    //reload the page so the new localStorage items are used
+                                    webView.evaluateJavascript(reloadScript, null);
+                                }
+                            };
+
+                            for (String script : data.getLocalStorageScripts()) {
+                                localStorageCount++;
+                                webView.evaluateJavascript(script, callback);
+                            }
+                        }
+                    });
+                }
             }
-        });*/
-        mBinding.webView.loadUrl(data.getUrl(), data.getHeaders());
+        });
+
+        //load the page
+        mBinding.webView.loadUrl(data.getUrl());
     }
 
     @Override

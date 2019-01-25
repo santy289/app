@@ -1680,7 +1680,6 @@ class CreateWorkflowViewModel extends ViewModel {
                     //verify selected values
                     List<BaseOption> peopleInvolvedValues = null;
                     if (mWorkflow != null) {
-                        int idad = mWorkflow.getId();
                         peopleInvolvedValues = new ArrayList<>();
                         for (Integer id : mWorkflow.getProfilesInvolved()) {
                             Profile profile = Profile.getProfileByIdFromList(profiles, id);
@@ -1786,6 +1785,25 @@ class CreateWorkflowViewModel extends ViewModel {
 
                         if (profileIds == null || profileIds.isEmpty()) continue;
 
+                        Option value = null;
+                        if (mWorkflow != null) {
+                            //verify selected values
+                            Object profileId = mWorkflow.getSpecificApprovers().getRole()
+                                    .get(String.valueOf(approver.entityId));
+
+                            //sometimes it returns a Double value
+                            if (profileId instanceof Double) profileId = ((Double) profileId).intValue();
+
+                            //check if the id is an integer
+                            if (profileId instanceof Integer) {
+                                Profile profile = Profile
+                                        .getProfileByIdFromList(profiles, (Integer) profileId);
+                                if (profile != null) {
+                                    value = new Option(profile.getId(), profile.getFullName());
+                                }
+                            }
+                        }
+
                         //get options for each role
                         List<Option> approverOptions = new ArrayList<>();
                         for (int i = 0; i < profileIds.size(); i++) {
@@ -1809,6 +1827,7 @@ class CreateWorkflowViewModel extends ViewModel {
                                 .setRequired(workflowTypeDb.isDefineRoles())
                                 .setTag(approver.entityId)
                                 .setOptions(approverOptions)
+                                .setValue(value)
                                 .build();
 
                         //we need to keep these separated

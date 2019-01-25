@@ -9,8 +9,8 @@ import androidx.annotation.Nullable;
 public class CurrencyFormItem extends BaseFormItem {
 
     private @Nullable Double value;
-    private @Nullable String selectedOption;
-    private List<String> options;
+    private @Nullable Option selectedOption;
+    private List<Option> options;
 
     private CurrencyFormItem() {
         //Constructor is private for Builder pattern
@@ -18,21 +18,21 @@ public class CurrencyFormItem extends BaseFormItem {
 
     @Override
     public boolean isValid() {
-        //todo add validation
-        return false;
+        if (!isRequired()) return true;
+
+        return isRequired() && getSelectedOption() != null && getValue() != null;
     }
 
     @Override
     public String getStringValue() {
-        //todo string value
-        return null;
+        return getSelectedOption() == null || value == null ? "" : getSelectedOption().getName() + " " + getValue();
     }
 
-    public List<String> getOptions() {
+    public List<Option> getOptions() {
         return options;
     }
 
-    public void setOptions(List<String> options) {
+    public void setOptions(List<Option> options) {
         this.options = options;
     }
 
@@ -46,11 +46,11 @@ public class CurrencyFormItem extends BaseFormItem {
     }
 
     @Nullable
-    public String getSelectedOption() {
+    public Option getSelectedOption() {
         return selectedOption;
     }
 
-    public void setSelectedOption(@Nullable String selectedOption) {
+    public void setSelectedOption(@Nullable Option selectedOption) {
         this.selectedOption = selectedOption;
     }
 
@@ -66,8 +66,8 @@ public class CurrencyFormItem extends BaseFormItem {
         private TypeInfo typeInfo;
         private String machineName;
         private Double value;
-        private String selectedOption;
-        private List<String> options;
+        private Option selectedOption;
+        private List<Option> options;
 
         public Builder setTitle(String title) {
             this.title = title;
@@ -129,13 +129,13 @@ public class CurrencyFormItem extends BaseFormItem {
             return this;
         }
 
-        public Builder setSelectedOption(String selectedOption) {
+        public Builder setSelectedOption(Option selectedOption) {
             this.selectedOption = selectedOption;
 
             return this;
         }
 
-        public Builder setOptions(List<String> options) {
+        public Builder setOptions(List<Option> options) {
             this.options = options;
 
             return this;

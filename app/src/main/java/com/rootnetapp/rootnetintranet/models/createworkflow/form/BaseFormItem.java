@@ -17,6 +17,7 @@ public abstract class BaseFormItem {
     private @FormItemViewType int viewType;
     private TypeInfo typeInfo; //server type
     private String machineName;
+    private int formId;
 
     public abstract boolean isValid();
     public abstract String getStringValue();
@@ -100,5 +101,13 @@ public abstract class BaseFormItem {
 
     public void setMachineName(String machineName) {
         this.machineName = machineName;
+    }
+
+    public int getFormId() {
+        return formId;
+    }
+
+    public void setFormId(int formId) {
+        this.formId = formId;
     }
 }

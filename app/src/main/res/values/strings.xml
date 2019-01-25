@@ -170,9 +170,11 @@
     <string name="users">Users</string>
     <string name="no_selection">No Selection</string>
     <string name="no_selection_hint">- No Selection -</string>
+    <string name="multiple_selection_hint">- Select an option to add -</string>
     <string name="form_workflow_type">Workflow Type</string>
     <string name="pick_option">Pick any item</string>
     <string name="enter_email">Enter Email</string>
+    <string name="next_step">Next Step</string>
     <string name="create_workflow">Create Workflow</string>
     <string name="edit_workflow">Edit Workflow</string>
     <string name="yes">Yes</string>
@@ -187,7 +189,7 @@
     <string name="country_code">Country Code</string>
     <string name="currency_type">Currency Type</string>
     <string name="created">Created</string>
-    <string name="workflow_created">You have created the workflow:</string>
+    <string name="workflow_created">The workflow %s has been created.</string>
     <string name="edited">Edited</string>
     <string name="workflow_edit">You have edited the workflow:</string>
     <string name="error">Error</string>
@@ -221,6 +223,17 @@
     <string name="next_status">Next Status</string>
     <string name="request_successfully">Request done successfully.</string>
     <string name="functionality_not_available">This functionality is not available yet</string>
+    <string name="add_file">Add File</string>
+    <string name="asterisk" translatable="false">*</string>
+    <string name="file_form_item_required_msg">You must add a file in order to continue.</string>
+    <string name="intent_form_item_required_msg">You must complete this in order to continue.</string>
+    <string name="fill_all_form_items">You need to fill out all of the required elements.</string>
+    <string name="action">Action</string>
+    <string name="people_involved_action">Configure</string>
+    <string name="additional_profiles">Additional Profiles</string>
+    <string name="global_approvers_form">People that can approve any status</string>
+    <string name="specific_approvers_form">People that can approve a specific status</string>
+    <string name="people_involved_form_return_button">Go Back</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Workflow Details</string>

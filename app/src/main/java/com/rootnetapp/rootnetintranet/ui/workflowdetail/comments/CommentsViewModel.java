@@ -205,7 +205,7 @@ public class CommentsViewModel extends ViewModel {
         setCommentsTabCounter(commentsCounter);
         mCommentLiveData.setValue(commentResponse.getResponse());
 
-        mCommentFiles.clear();
+        if (mCommentFiles != null) mCommentFiles.clear();
         mClearAttachments.setValue(true);
 
         showLoading.setValue(false);
@@ -238,8 +238,11 @@ public class CommentsViewModel extends ViewModel {
                         comment,
                         isPrivateComment,
                         mCommentFiles)
-                .subscribe(this::onPostCommentSuccess,
-                        this::onFailure);
+                .subscribe(this::onPostCommentSuccess, error -> {
+                    mEnableCommentButton.setValue(true);
+                    Log.d(TAG, "postComment: error " + error.getMessage());
+                    onFailure(error);
+                });
         mDisposables.add(disposable);
     }
 

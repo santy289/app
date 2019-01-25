@@ -1,48 +1,66 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.OpenableColumns;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.util.Patterns;
 
+import com.auth0.android.jwt.JWT;
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.Profile;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
-import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
+import com.rootnetapp.rootnetintranet.models.createworkflow.CurrencyFieldData;
+import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePostDetail;
-import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
-import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
-import com.rootnetapp.rootnetintranet.models.createworkflow.PendingFileUpload;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PhoneFieldData;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostCurrency;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostPhone;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
+import com.rootnetapp.rootnetintranet.models.createworkflow.StatusSpecific;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseOption;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.DoubleMultipleChoiceFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.DoubleOption;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.IntentFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem.InputType;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
-import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
-import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.downloadfile.DownloadFileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.role.Role;
 import com.rootnetapp.rootnetintranet.models.responses.services.Service;
-import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
-import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
@@ -51,8 +69,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.ArrayMap;
 import androidx.lifecycle.LiveData;
@@ -63,37 +84,46 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import me.riddhimanadib.formmaster.FormBuilder;
 
+import static android.app.Activity.RESULT_OK;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_OWNER;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_STATUS;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_TYPE;
 
-public class CreateWorkflowViewModel extends ViewModel {
+class CreateWorkflowViewModel extends ViewModel {
 
-    private MutableLiveData<WorkflowTypesResponse> mWorkflowsLiveData;
-    private MutableLiveData<ListsResponse> mListLiveData;
-    private MutableLiveData<ProductsResponse> mProductLiveData;
-    private MutableLiveData<ServicesResponse> mServiceLiveData;
-    private MutableLiveData<WorkflowUserResponse> mUserLiveData;
-    private MutableLiveData<CountriesResponse> mCountriesLiveData;
-    private MutableLiveData<CreateWorkflowResponse> mCreateLiveData;
+    protected static final int REQUEST_FILE_TO_ATTACH = 27;
+    protected static final int REQUEST_EXTERNAL_STORAGE_PERMISSIONS = 72;
+    protected static final int TAG_WORKFLOW_TYPE = 80;
+    protected static final int TAG_PEOPLE_INVOLVED = 2772;
+    protected static final int TAG_OWNER = 2773;
+    protected static final int TAG_ADDITIONAL_PROFILES = 2774;
+    protected static final int TAG_GLOBAL_APPROVERS = 2775;
+    protected static final int TAG_SPECIFIC_APPROVERS = 2776;
+    protected static final int FORM_BASE_INFO = 1;
+    protected static final int FORM_PEOPLE_INVOLVED = 2;
+    private static final String ENTITY_ROLE = "role";
+
+    private final int UPLOAD_FILE_SIZE_LIMIT = 10;
+
+    private MutableLiveData<Integer> mToastMessageLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
-    private MutableLiveData<Integer> mCreateErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<SingleChoiceFormItem> mAddWorkflowTypeItemLiveData;
+    private MutableLiveData<IntentFormItem> mAddPeopleInvolvedItemLiveData;
     private MutableLiveData<BaseFormItem> mAddFormItemLiveData;
     private MutableLiveData<List<BaseFormItem>> mSetFormItemListLiveData;
+    private MutableLiveData<BaseFormItem> mAddPeopleInvolvedFormItemLiveData;
+    private MutableLiveData<List<BaseFormItem>> mSetPeopleInvolvedFormItemListLiveData;
     private MutableLiveData<BaseFormItem> mValidationUiLiveData;
     private MutableLiveData<DialogMessage> showDialogMessage;
     private MutableLiveData<Boolean> goBack;
-    private List<WorkflowTypeItemMenu> workflowTypeMenuItems;
+    private MutableLiveData<FileFormItem> mNewFormItemFileLiveData;
+    private MutableLiveData<DownloadedFileUiData> mOpenDownloadedFileLiveData;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
-    protected MutableLiveData<FieldData> setFileUploadField;
-    protected MutableLiveData<Boolean> showUploadButton;
-    protected MutableLiveData<Boolean> chooseFile;
-
-    private CreateWorkflowRepository mRepository;
+    private final CreateWorkflowRepository mRepository;
 
     private static final String TAG = "CreateViewModel";
 
@@ -102,16 +132,16 @@ public class CreateWorkflowViewModel extends ViewModel {
     private String mToken;
     private WorkflowListItem mWorkflowListItem;
     private WorkflowDb mWorkflow;
-
-    protected static final int TAG_WORKFLOW_TYPE = 80;
-
-    private final int UPLOAD_FILE_SIZE_LIMIT = 10;
+    private final Moshi moshi;
+    private FileFormItem mCurrentRequestingFileFormItem;
+    private List<FileFormItem> mFilesToUpload;
+    private int mQueuedFile;
+    private int mUserId;
 
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.mRepository = createWorkflowRepository;
         goBack = new MutableLiveData<>();
-        showUploadButton = new MutableLiveData<>();
-        chooseFile = new MutableLiveData<>();
+        moshi = new Moshi.Builder().build();
     }
 
     protected void initForm(String token, @Nullable WorkflowListItem item) {
@@ -122,6 +152,10 @@ public class CreateWorkflowViewModel extends ViewModel {
         this.mToken = token;
         this.mWorkflowListItem = item;
 
+        JWT jwt = new JWT(token.replace("Bearer ", ""));
+        String userId = jwt.getClaim(PreferenceKeys.PREF_PROFILE_ID).asString();
+        if (userId != null && !userId.isEmpty()) mUserId = Integer.parseInt(userId);
+
         createWorkflowTypeItem();
     }
 
@@ -129,102 +163,21 @@ public class CreateWorkflowViewModel extends ViewModel {
         mDisposables.clear();
     }
 
-    private void handleInvalidEmail() {
-        DialogMessage dialog = new DialogMessage();
-        dialog.title = R.string.warning;
-        dialog.message = R.string.form_invalid_email;
-        showDialogMessage.setValue(dialog);
-    }
-
     private WorkflowMetas createMetaData(BaseFormItem formItem) {
-//        int fieldId = fieldData.tag;
-//        TypeInfo typeInfo = formSettings.findFieldDataById(fieldId);
-//        if (typeInfo.getValueType().equals(FormSettings.VALUE_EMAIL)) {
-//            // TODO put back this value after debugging
-//            if(!TextUtils.isEmpty(baseFormElement.getValue())
-//                    && !isValidEmail(baseFormElement.getValue())) {
-//               handleInvalidEmail();
-//               return null;
-//            }
-//        }
-
         WorkflowMetas workflowMeta = new WorkflowMetas();
+
         int workflowTypeFieldId = formItem.getTag();
         String value = formItem.getStringValue();
         workflowMeta.setUnformattedValue(value);
         workflowMeta.setWorkflowTypeFieldId(workflowTypeFieldId);
+
         formSettings.formatMetaData(workflowMeta, formItem);
+
         return workflowMeta;
     }
 
-    protected void showUploadFilePicker() {
-        chooseFile.setValue(true);
-    }
-
-    protected void selectUploadFile(String path, File file) {
-        if (!Utils.checkFileSize(UPLOAD_FILE_SIZE_LIMIT, file)) {
-            DialogMessage message = new DialogMessage();
-            message.message = R.string.file_too_big;
-            message.title = R.string.warning;
-            showDialogMessage.setValue(message);
-            return;
-        }
-
-        PendingFileUpload pendingFileUpload = formSettings.getPendingFileUpload();
-        pendingFileUpload.fileName = path.substring(path.lastIndexOf("/") + 1);
-        pendingFileUpload.path = path;
-        ListFieldItemMeta field = new ListFieldItemMeta(0, pendingFileUpload.fileName);
-        ArrayList<ListFieldItemMeta> items = new ArrayList<>();
-        items.add(field);
-        pendingFileUpload.fieldData.list = items;
-        pendingFileUpload.file = file;
-
-        setFileUploadField.setValue(pendingFileUpload.fieldData);
-
-        //todo check
-
-//        formSettings.addFieldDataItem(pendingFileUpload.fieldData);
-    }
-
-    private void postFileRequest(String path, String encodedFileString) {
-        FilePostDetail filePostDetail = new FilePostDetail();
-        filePostDetail.setFile(encodedFileString);
-        String extension = path.substring(path.lastIndexOf("."));
-        String fileName = path.substring(path.lastIndexOf("/") + 1);
-        filePostDetail.setType(extension);
-        filePostDetail.setName(fileName);
-        filePostDetail.setFile(encodedFileString);
-
-        FilePost filePost = new FilePost();
-        filePost.setFile(filePostDetail);
-
-        showLoading.setValue(true);
-        Disposable disposable = mRepository.uploadFile(mToken, filePost)
-                .subscribe(fileUploadResponse -> {
-                    showLoading.setValue(false);
-                    successUpload(fileUploadResponse);
-
-                }, throwable -> {
-                    showLoading.setValue(false);
-                    Log.d(TAG, "postFileRequest: file upload failed: " + throwable.getMessage());
-                });
-
-        mDisposables.add(disposable);
-    }
-
-    private void successUpload(FileUploadResponse fileUploadResponse) {
-        //todo implement
-        /*showLoading.setValue(true);
-        ArrayList<FieldData> fieldItems = formSettings.getFormItemsToPost();
-        ArrayMap<String, Integer> baseInfo = formSettings.getBaseMachineNamesAndIds();
-        PendingFileUpload pendingFileUpload = formSettings.getPendingFileUpload();
-        int id = fileUploadResponse.getFileId();
-        pendingFileUpload.fileId = id;
-        startSendingWorkflow(baseInfo, formSettings.getFormBuilder(), fieldItems);*/
-    }
-
     private void postWorkflow() {
-        List<BaseFormItem> formItemsForPost = formSettings.getFormItemsToPost();
+        formSettings.getFormItemsToPost(); //needed to fill baseInfo, the return value is ignored
         ArrayMap<String, Integer> baseInfo = formSettings.getBaseMachineNamesAndIds();
 
         if (baseInfo.isEmpty()) {
@@ -238,32 +191,8 @@ public class CreateWorkflowViewModel extends ViewModel {
 
         showLoading.setValue(true);
 
-        // TODO check if we have a file to upload first and then continue with the rest.
-        if (formSettings.getPendingFileUpload() == null || formSettings
-                .getPendingFileUpload().file == null) {
-            startSendingWorkflow(baseInfo, formItemsForPost);
-            return;
-        }
-
-        //for using later during actual post.
-        //todo implement
-       /* formSettings.setFormBuilder(formBuilder);
-        PendingFileUpload pendingFileUpload = formSettings.getPendingFileUpload();
-
-        Disposable disposable = Observable.fromCallable(() -> {
-            String fileString = Utils.encodeFileToBase64Binary(pendingFileUpload.file);
-            return fileString;
-        }).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(encodedFileString -> {
-                    showLoading.setValue(false);
-                    postFileRequest(pendingFileUpload.path, encodedFileString);
-                }, throwable -> {
-                    showLoading.setValue(false);
-                    Log.d(TAG, "uploadFile: Error while encoding to Base64");
-                });
-        mDisposables.add(disposable);*/
-
+        //check if we have a file to upload first and then continue with the rest.
+        uploadAllFiles();
     }
 
     private void startSendingWorkflow(ArrayMap<String, Integer> baseInfo,
@@ -278,40 +207,64 @@ public class CreateWorkflowViewModel extends ViewModel {
         String start = Utils
                 .getDatePostFormat(((DateFormItem) formSettings.findItem(startTag)).getValue());
 
+        SingleChoiceFormItem ownerFormItem = (SingleChoiceFormItem) formSettings
+                .findItem(TAG_OWNER);
+        Option ownerValue = ownerFormItem == null ? null : ownerFormItem.getValue();
+        Integer owner = ownerValue == null ? null : ownerValue.getId();
+
+        List<Integer> profilesInvolved = new ArrayList<>();
+        MultipleChoiceFormItem profileInvolvedFormItem = (MultipleChoiceFormItem) formSettings
+                .findItem(TAG_ADDITIONAL_PROFILES);
+        List<BaseOption> selectedProfileInvolvedValues = profileInvolvedFormItem == null ? new ArrayList<>() : profileInvolvedFormItem
+                .getValues();
+        for (BaseOption option : selectedProfileInvolvedValues) {
+            profilesInvolved.add(((Option) option).getId());
+        }
+
+        List<Integer> globalApprovers = new ArrayList<>();
+        MultipleChoiceFormItem globalApproversFormItem = (MultipleChoiceFormItem) formSettings
+                .findItem(TAG_GLOBAL_APPROVERS);
+        List<BaseOption> selectedGlobalApproversValues = globalApproversFormItem == null ? new ArrayList<>() : globalApproversFormItem
+                .getValues();
+        for (BaseOption option : selectedGlobalApproversValues) {
+            globalApprovers.add(((Option) option).getId());
+        }
+
+        List<StatusSpecific> specificApprovers = new ArrayList<>();
+        DoubleMultipleChoiceFormItem specificApprovesFormItem = (DoubleMultipleChoiceFormItem) formSettings
+                .findItem(TAG_SPECIFIC_APPROVERS);
+        List<BaseOption> selectedSpecificApproversValues = specificApprovesFormItem == null ? new ArrayList<>() : specificApprovesFormItem
+                .getValues();
+        for (BaseOption option : selectedSpecificApproversValues) {
+            DoubleOption doubleOption = (DoubleOption) option;
+
+            StatusSpecific statusSpecific = new StatusSpecific();
+            statusSpecific.user = doubleOption.getFirstOption().getId();
+            statusSpecific.status = doubleOption.getSecondOption().getId();
+
+            specificApprovers.add(statusSpecific);
+        }
+
+        Map<String, Object> roleApprovers = new HashMap<>();
+        for (BaseFormItem formItem : formSettings.getRoleApproversFormItems()) {
+            Option roleApprover = ((SingleChoiceFormItem) formItem).getValue();
+            roleApprovers.put(String.valueOf(formItem.getTag()), roleApprover.getId());
+        }
+
         List<WorkflowMetas> metas = new ArrayList<>();
-        WorkflowMetas workflowMetas;
-        String value;
 
         for (int i = 0; i < formItems.size(); i++) {
             BaseFormItem formItem = formItems.get(i);
 
-            /*int fieldId = fieldData.tag;
-            // Check for phone and currency fields
-            if (!hasValidFields(fieldId, baseFormElement.getValue())) {
-                showLoading.setValue(false);
-                return;
-            }
-
-            int customId = baseFormElement.getTag();
-            if (customId == FormSettings.FIELD_CODE_ID) {
-                Log.d(TAG, "postWorkflow: found");
-                formSettings.setCountryCode(baseFormElement.getValue(), fieldData);
-                continue;
-            }
-
-            if (customId == FormSettings.FIELD_CURRENCY_ID) {
-                Log.d(TAG, "postWorkflow: found");
-                formSettings.setCurrencyType(baseFormElement.getValue(), fieldData);
-                continue;
-            }*/
-
-            workflowMetas = createMetaData(formItem);
+            WorkflowMetas workflowMetas = createMetaData(formItem);
             if (workflowMetas == null) {
                 showLoading.setValue(false);
                 return;
             }
 
-            if (workflowMetas.getValue() != null && !workflowMetas.getValue().isEmpty()) {
+            //we allow the FileFormItem even though the value is null because of the editing mode, when the user tries to delete a file.
+            if ((workflowMetas.getValue() != null && !workflowMetas.getValue().isEmpty())
+                    || formItem instanceof FileFormItem) {
                 metas.add(workflowMetas);
             }
         }
@@ -339,7 +292,8 @@ public class CreateWorkflowViewModel extends ViewModel {
 
         if (mWorkflowListItem == null) {
             // new workflow
-            postCreateToServer(metas, workflowTypeId, title, start, description);
+            postCreateToServer(metas, workflowTypeId, title, start, description, owner,
+                    profilesInvolved, globalApprovers, specificApprovers, roleApprovers);
 
         } else {
             //edit workflow
@@ -347,65 +301,34 @@ public class CreateWorkflowViewModel extends ViewModel {
         }
     }
 
-    private boolean hasValidFields(int fieldId, String value) {
-        //todo check
-//        TypeInfo typeInfo = formSettings.findFieldDataById(fieldId);
-        TypeInfo typeInfo = new TypeInfo();
-        DialogMessage dialogMessage;
-        if (typeInfo != null
-                && typeInfo.getType().equals(FormSettings.TYPE_PHONE)
-                && !TextUtils.isEmpty(value)
-                && !formSettings.hasValidCountryCode()
-                ) {
-            dialogMessage = new DialogMessage();
-            dialogMessage.message = R.string.fill_country_code;
-            dialogMessage.title = R.string.warning;
-            showDialogMessage.setValue(dialogMessage);
-            return false;
-        }
-
-        if (typeInfo != null
-                && typeInfo.getType().equals(FormSettings.TYPE_CURRENCY)
-                && !TextUtils.isEmpty(value)
-                && !formSettings.hasValidCountryCurrency()
-                ) {
-            dialogMessage = new DialogMessage();
-            dialogMessage.message = R.string.fill_currency_code;
-            dialogMessage.title = R.string.warning;
-            showDialogMessage.setValue(dialogMessage);
-            return false;
-        }
-
-        if (typeInfo != null
-                && typeInfo.getValueType().equals(FormSettings.VALUE_EMAIL)) {
-            // TODO put back this value after debugging
-            if (!TextUtils.isEmpty(value)
-                    && !isValidEmail(value)) {
-                handleInvalidEmail();
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     private void postCreateToServer(List<WorkflowMetas> metas, int workflowTypeId, String title,
-                                    String start, String description) {
-        CreateRequest createRequest = new CreateRequest();
-        createRequest.workflowTypeId = workflowTypeId;
-        createRequest.title = title;
-        createRequest.metas = metas;
-        createRequest.start = start;
-        createRequest.description = description;
+                                    String start, String description, Integer owner,
+                                    List<Integer> profilesInvolved, List<Integer> globalApprovers,
+                                    List<StatusSpecific> specificApprovers,
+                                    Map<String, Object> roleApprovers) {
 
-        // TODO remove this block later only for debugging
-        Moshi moshi = new Moshi.Builder().build();
-        JsonAdapter<CreateRequest> jsonAdapter = moshi.adapter(CreateRequest.class);
-        String jsonString = jsonAdapter.toJson(createRequest);
+        //we cannot use a POJO for this request because the role approvers is an object with dynamic fields.
+        Map<String, Object> mapBody = new HashMap<>();
+        mapBody.put("workflow_type_id", workflowTypeId);
+        mapBody.put("title", title);
+        mapBody.put("workflow_metas", metas);
+        mapBody.put("start", start);
+        mapBody.put("description", description);
+        if (owner != null) {
+            mapBody.put("owner", owner);
+        }
+        mapBody.put("profilesInvolved", profilesInvolved);
+
+        Map<String, Object> specificApproversMap = new HashMap<>();
+        specificApproversMap.put("global", globalApprovers);
+        specificApproversMap.put("statusSpecific", specificApprovers);
+        specificApproversMap.put("role", roleApprovers);
+
+        mapBody.put("specific_approvers", specificApproversMap);
 
         // Accepts object
         Disposable disposable = mRepository
-                .createWorkflow(mToken, createRequest)
+                .createWorkflow(mToken, mapBody)
                 .subscribe(this::onCreateSuccess, this::onCreateFailure);
 
         mDisposables.add(disposable);
@@ -419,11 +342,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         editRequest.setStart(start);
         editRequest.setDescription(description);
         editRequest.setWorkflowMetas(metas);
-
-        // TODO remove this block later only for debugging
-        Moshi moshi = new Moshi.Builder().build();
-        JsonAdapter<EditRequest> jsonAdapter = moshi.adapter(EditRequest.class);
-        String jsonString = jsonAdapter.toJson(editRequest);
 
         // Accepts object
         Disposable disposable = mRepository
@@ -462,12 +380,8 @@ public class CreateWorkflowViewModel extends ViewModel {
             return formSettings;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(formSettings -> {
-                    FormSettings settings = (FormSettings) formSettings;
-                    showFields(settings);
-                }, throwable -> {
-                    showLoading.setValue(false);
-                });
+                .subscribe(ignored -> createPeopleInvolvedItem(),
+                        throwable -> showLoading.setValue(false));
         mDisposables.add(disposable);
 
     }
@@ -476,9 +390,9 @@ public class CreateWorkflowViewModel extends ViewModel {
      * Removes all of the current form items and sends the data to the UI to remove them aswell.
      */
     protected void clearForm() {
-        showUploadButton.setValue(false);
         formSettings.clearFormItems();
         mSetFormItemListLiveData.setValue(formSettings.getFormItems());
+        mSetPeopleInvolvedFormItemListLiveData.setValue(formSettings.getPeopleInvolvedFormItems());
     }
 
     /**
@@ -488,6 +402,7 @@ public class CreateWorkflowViewModel extends ViewModel {
      */
     private void showFields(FormSettings formSettings) {
         List<FormFieldsByWorkflowType> fields = formSettings.getFields();
+
         for (int i = 0; i < fields.size(); i++) {
             FormFieldsByWorkflowType field = fields.get(i);
             if (!field.isShowForm()) {
@@ -499,6 +414,12 @@ public class CreateWorkflowViewModel extends ViewModel {
                 continue;
             }
 
+            //does not show the Status field
+            String machineName = fieldConfig.getMachineName();
+            if (machineName != null && machineName.equals(MACHINE_NAME_STATUS)) {
+                continue;
+            }
+
             buildField(field);
         }
 
@@ -506,7 +427,6 @@ public class CreateWorkflowViewModel extends ViewModel {
 
         if (mWorkflowListItem == null) {
             showLoading.setValue(false);
-            mSetFormItemListLiveData.setValue(formSettings.getFormItems());
             return;
         }
 
@@ -522,9 +442,6 @@ public class CreateWorkflowViewModel extends ViewModel {
     private void buildField(FormFieldsByWorkflowType field) {
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
 
-        //todo support multiple lists.
-        if (field.getFieldConfigObject().getMultiple()) return;
-
         switch (typeInfo.getType()) {
 
             case FormSettings.TYPE_TEXT:
@@ -533,7 +450,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                 break;
 
             case FormSettings.TYPE_LINK:
-                //value type is "text", does not work for us, so we change it to "link"
+                //server value type is "text", does not work for us, so we change it to "link"
                 typeInfo.setValueType(InputType.LINK);
                 createTextInputFormItem(field);
                 break;
@@ -568,18 +485,21 @@ public class CreateWorkflowViewModel extends ViewModel {
                 break;
 
             case FormSettings.TYPE_LIST:
-                createCustomListFormItem(field);
-                break;
-            /*
-            case FormSettings.TYPE_PHONE:
-                handleBuildPhone(field);
+                if (field.getFieldConfigObject().getMultiple()) {
+                    createCustomMultipleListFormItem(field);
+                } else {
+                    createCustomListFormItem(field);
+                }
                 break;
             case FormSettings.TYPE_CURRENCY:
-                handleCurrencyType(field);
+                createCurrencyFormItem(field);
+                break;
+            case FormSettings.TYPE_PHONE:
+                createPhoneFormItem(field);
                 break;
             case FormSettings.TYPE_FILE:
-                handleFile(field);
-                break;*/
+                createFileFormItem(field);
+                break;
             default:
                 Log.d(TAG, "buildField: Not a generic type: " + typeInfo
                         .getType() + " value: " + typeInfo.getValueType());
@@ -646,6 +566,32 @@ public class CreateWorkflowViewModel extends ViewModel {
     }
 
     /**
+     * Creates the People Involved form item. Performs a request to the repo to retrieve the
+     * workflow type and then send the form item to the UI.
+     */
+    private void createPeopleInvolvedItem() {
+        Disposable disposable = Observable.fromCallable(() -> {
+            WorkflowTypeDb workflowTypeDbSingle = mRepository
+                    .getWorklowType(formSettings.getWorkflowTypeIdSelected());
+
+            return new IntentFormItem.Builder()
+                    .setTitleRes(R.string.people_involved)
+                    .setButtonActionTextRes(R.string.people_involved_action)
+                    .setRequired(workflowTypeDbSingle.isDefineRoles())
+                    .setVisible(mWorkflowListItem == null) //hide in edit mode
+                    .setTag(TAG_PEOPLE_INVOLVED)
+                    .build();
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(intentFormItem -> {
+                    mAddPeopleInvolvedItemLiveData.setValue(intentFormItem);
+                    showFields(formSettings);
+                }, throwable -> Log
+                        .d(TAG, "createPeopleInvolvedItem: error " + throwable.getMessage()));
+        mDisposables.add(disposable);
+    }
+
+    /**
      * Creates the Products form item. Performs a request to the repo to retrieve the options and
      * then send the form item to the UI.
      */
@@ -653,8 +599,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .getProducts(mToken)
                 .subscribe(productsResponse -> {
-                    showLoading.setValue(false);
-
                     if (productsResponse.getCode() != 200) {
                         return;
                     }
@@ -671,6 +615,20 @@ public class CreateWorkflowViewModel extends ViewModel {
 
                     if (options.isEmpty()) return;
 
+                    //check if multiple selection
+                    if (field.getFieldConfigObject().getMultiple()) {
+                        MultipleChoiceFormItem multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
+                                .setTitle(field.getFieldName())
+                                .setRequired(field.isRequired())
+                                .setTag(field.getId())
+                                .setOptions(options)
+                                .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                                .setMachineName(field.getFieldConfigObject().getMachineName())
+                                .build();
+                        mAddFormItemLiveData.setValue(multipleChoiceFormItem);
+                        return;
+                    }
+
                     SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
                             .setTitle(field.getFieldName())
                             .setRequired(field.isRequired())
@@ -681,10 +639,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
-                }, throwable -> {
-                    showLoading.setValue(false);
-                    Log.d(TAG, "createProductsFormItem: " + throwable.getMessage());
-                });
+                }, throwable -> Log.d(TAG, "createProductsFormItem: " + throwable.getMessage()));
 
         mDisposables.add(disposable);
     }
@@ -697,8 +652,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .getRoles(mToken)
                 .subscribe(roleResponse -> {
-                    showLoading.setValue(false);
-
                     if (roleResponse.getCode() != 200) {
                         return;
                     }
@@ -716,6 +669,20 @@ public class CreateWorkflowViewModel extends ViewModel {
 
                     if (options.isEmpty()) return;
 
+                    //check if multiple selection
+                    if (field.getFieldConfigObject().getMultiple()) {
+                        MultipleChoiceFormItem multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
+                                .setTitle(field.getFieldName())
+                                .setRequired(field.isRequired())
+                                .setTag(field.getId())
+                                .setOptions(options)
+                                .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                                .setMachineName(field.getFieldConfigObject().getMachineName())
+                                .build();
+                        mAddFormItemLiveData.setValue(multipleChoiceFormItem);
+                        return;
+                    }
+
                     SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
                             .setTitle(field.getFieldName())
                             .setRequired(field.isRequired())
@@ -726,10 +693,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
-                }, throwable -> {
-                    showLoading.setValue(false);
-                    Log.d(TAG, "createRolesFormItem: " + throwable.getMessage());
-                });
+                }, throwable -> Log.d(TAG, "createRolesFormItem: " + throwable.getMessage()));
 
         mDisposables.add(disposable);
     }
@@ -742,8 +706,6 @@ public class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .getServices(mToken)
                 .subscribe(servicesResponse -> {
-                    showLoading.setValue(false);
-
                     if (servicesResponse.getCode() != 200) {
                         return;
                     }
@@ -760,6 +722,20 @@ public class CreateWorkflowViewModel extends ViewModel {
 
                     if (options.isEmpty()) return;
 
+                    //check if multiple selection
+                    if (field.getFieldConfigObject().getMultiple()) {
+                        MultipleChoiceFormItem multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
+                                .setTitle(field.getFieldName())
+                                .setRequired(field.isRequired())
+                                .setTag(field.getId())
+                                .setOptions(options)
+                                .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                                .setMachineName(field.getFieldConfigObject().getMachineName())
+                                .build();
+                        mAddFormItemLiveData.setValue(multipleChoiceFormItem);
+                        return;
+                    }
+
                     SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
                             .setTitle(field.getFieldName())
                             .setRequired(field.isRequired())
@@ -770,11 +746,8 @@ public class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
-                }, throwable -> {
-                    Log.d(TAG,
-                            "createServicesFormItem: can't get service: " + throwable.getMessage());
-                    showLoading.setValue(false);
-                });
+                }, throwable -> Log.d(TAG,
+                        "createServicesFormItem: can't get service: " + throwable.getMessage()));
         mDisposables.add(disposable);
     }
 
@@ -787,8 +760,6 @@ public class CreateWorkflowViewModel extends ViewModel {
 //        Disposable disposable = mRepository
 //                .getProjects(mToken)
 //                .subscribe(projectResponse -> {
-//                    showLoading.setValue(false);
-//
 //                    if (projectResponse.getCode() != 200) {
 //                        return;
 //                    }
@@ -816,7 +787,6 @@ public class CreateWorkflowViewModel extends ViewModel {
 //
 //                    mAddFormItemLiveData.setValue(singleChoiceFormItem);
 //                }, throwable -> {
-//                    showLoading.setValue(false);
 //                    Log.d(TAG, "handeBuildRoles: " + throwable.getMessage());
 //                });
 //
@@ -828,8 +798,6 @@ public class CreateWorkflowViewModel extends ViewModel {
      * then send the form item to the UI.
      */
     private void createSystemUsersFormItem(FormFieldsByWorkflowType field) {
-        TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
-
         Disposable disposable = Observable.fromCallable(() -> {
             List<FormCreateProfile> list = formSettings.getProfiles();
 
@@ -846,6 +814,19 @@ public class CreateWorkflowViewModel extends ViewModel {
                 options.add(option);
             }
 
+            if (options.isEmpty()) return false;
+
+            if (field.getFieldConfigObject().getMultiple()) {
+                return new MultipleChoiceFormItem.Builder()
+                        .setTitle(field.getFieldName())
+                        .setRequired(field.isRequired())
+                        .setTag(field.getId())
+                        .setOptions(options)
+                        .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                        .setMachineName(field.getFieldConfigObject().getMachineName())
+                        .build();
+            }
+
             return new SingleChoiceFormItem.Builder()
                     .setTitle(field.getFieldName())
                     .setRequired(field.isRequired())
@@ -857,13 +838,11 @@ public class CreateWorkflowViewModel extends ViewModel {
 
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(singleChoiceFormItem -> {
-                    showLoading.setValue(false);
-
-                    mAddFormItemLiveData.setValue((SingleChoiceFormItem) singleChoiceFormItem);
-                }, throwable -> {
-                    showLoading.setValue(false);
-                });
+                .subscribe(singleChoiceFormItem -> mAddFormItemLiveData
+                                .setValue((SingleChoiceFormItem) singleChoiceFormItem),
+                        throwable -> Log.d(TAG,
+                                "createSystemUsersFormItem: can't get users: " + throwable
+                                        .getMessage()));
         mDisposables.add(disposable);
     }
 
@@ -878,18 +857,17 @@ public class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .getList(mToken, listId)
                 .subscribe(listsResponse -> {
-                    showLoading.setValue(false);
-
                     List<ListItem> list = listsResponse.getItems();
+                    if (list == null || list.isEmpty()) return;
 
-                    if (list == null || list.size() < 1) {
-                        return;
-                    }
+                    List<ListItem> listChildren = list.get(0).getChildren();
+
+                    if (listChildren == null || listChildren.isEmpty()) return;
 
                     List<Option> options = new ArrayList<>();
-                    for (int i = 0; i < list.size(); i++) {
-                        String name = list.get(i).getName();
-                        Integer id = list.get(i).getId();
+                    for (int i = 0; i < listChildren.size(); i++) {
+                        String name = listChildren.get(i).getName();
+                        Integer id = listChildren.get(i).getId();
 
                         Option option = new Option(id, name);
                         options.add(option);
@@ -905,10 +883,51 @@ public class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
-                }, throwable -> {
-                    showLoading.setValue(false);
-                    Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
-                });
+                }, throwable -> Log
+                        .e(TAG, "handleList: problem getting list " + throwable.getMessage()));
+
+        mDisposables.add(disposable);
+    }
+
+    /**
+     * Creates a custom list form item. Performs a request to the repo to retrieve the options and
+     * then send the form item to the UI.
+     */
+    private void createCustomMultipleListFormItem(FormFieldsByWorkflowType field) {
+        FieldConfig fieldConfig = field.getFieldConfigObject();
+        int listId = fieldConfig.getListInfo().getId();
+
+        Disposable disposable = mRepository
+                .getList(mToken, listId)
+                .subscribe(listsResponse -> {
+                    List<ListItem> list = listsResponse.getItems();
+                    if (list == null || list.isEmpty()) return;
+
+                    List<ListItem> listChildren = list.get(0).getChildren();
+
+                    if (listChildren == null || listChildren.isEmpty()) return;
+
+                    List<Option> options = new ArrayList<>();
+                    for (int i = 0; i < listChildren.size(); i++) {
+                        String name = listChildren.get(i).getName();
+                        Integer id = listChildren.get(i).getId();
+
+                        Option option = new Option(id, name);
+                        options.add(option);
+                    }
+
+                    MultipleChoiceFormItem multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
+                            .setTitle(field.getFieldName())
+                            .setRequired(field.isRequired())
+                            .setTag(field.getId())
+                            .setOptions(options)
+                            .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                            .setMachineName(field.getFieldConfigObject().getMachineName())
+                            .build();
+
+                    mAddFormItemLiveData.setValue(multipleChoiceFormItem);
+                }, throwable -> Log
+                        .e(TAG, "handleList: problem getting list " + throwable.getMessage()));
 
         mDisposables.add(disposable);
     }
@@ -997,6 +1016,111 @@ public class CreateWorkflowViewModel extends ViewModel {
 
         formSettings.getFormItems().add(item);
     }
+
+    /**
+     * Creates a currency form item. Performs a request to the repo to retrieve the options and then
+     * send the form item to the UI.
+     */
+    private void createCurrencyFormItem(FormFieldsByWorkflowType field) {
+        Disposable disposable = mRepository
+                .getCurrencyCodes()
+                .subscribe(currencyList -> {
+                    if (currencyList == null || currencyList.size() < 1) {
+                        return;
+                    }
+
+                    List<Option> options = new ArrayList<>();
+                    for (int i = 0; i < currencyList.size(); i++) {
+                        CurrencyFieldData currencyData = currencyList.get(i);
+                        String name = currencyData.description + " - " + currencyData.currency;
+                        Integer id = currencyData.countryId;
+
+                        Option option = new Option(id, name);
+                        options.add(option);
+                    }
+
+                    CurrencyFormItem currencyFormItem = new CurrencyFormItem.Builder()
+                            .setTitle(field.getFieldName())
+                            .setRequired(field.isRequired())
+                            .setTag(field.getId())
+                            .setEscaped(escape(field.getFieldConfigObject()))
+                            .setOptions(options)
+                            .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                            .setMachineName(field.getFieldConfigObject().getMachineName())
+                            .build();
+
+                    mAddFormItemLiveData.setValue(currencyFormItem);
+                }, throwable -> {
+                    showLoading.setValue(false);
+                    Log.e(TAG, "handleCurrency: problem getting currency list " + throwable
+                            .getMessage());
+                });
+
+        mDisposables.add(disposable);
+    }
+
+    /**
+     * Creates a phone form item. Performs a request to the repo to retrieve the options and then
+     * send the form item to the UI.
+     */
+    private void createPhoneFormItem(FormFieldsByWorkflowType field) {
+        Disposable disposable = mRepository
+                .getCountryCodes()
+                .subscribe(phoneFieldDataList -> {
+                    if (phoneFieldDataList == null || phoneFieldDataList.size() < 1) {
+                        return;
+                    }
+
+                    List<Option> options = new ArrayList<>();
+                    for (int i = 0; i < phoneFieldDataList.size(); i++) {
+                        PhoneFieldData phoneFieldData = phoneFieldDataList.get(i);
+                        String name = phoneFieldData.phoneCode + " - " + phoneFieldData.description;
+                        Integer id = phoneFieldData.countryId;
+
+                        Option option = new Option(id, name);
+                        options.add(option);
+                    }
+
+                    PhoneFormItem phoneFormItem = new PhoneFormItem.Builder()
+                            .setTitle(field.getFieldName())
+                            .setRequired(field.isRequired())
+                            .setTag(field.getId())
+                            .setEscaped(escape(field.getFieldConfigObject()))
+                            .setOptions(options)
+                            .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                            .setMachineName(field.getFieldConfigObject().getMachineName())
+                            .build();
+
+                    mAddFormItemLiveData.setValue(phoneFormItem);
+                }, throwable -> {
+                    showLoading.setValue(false);
+                    Log.e(TAG,
+                            "handlePhone: problem getting country list " + throwable.getMessage());
+                });
+
+        mDisposables.add(disposable);
+    }
+
+    /**
+     * Creates a custom Boolean/Checkbox item with the specified params and sends the item to the
+     * UI.
+     *
+     * @param field item params.
+     */
+    private void createFileFormItem(FormFieldsByWorkflowType field) {
+        TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
+
+        FileFormItem item = new FileFormItem.Builder()
+                .setTitle(field.getFieldName())
+                .setRequired(field.isRequired())
+                .setTag(field.getId())
+                .setEscaped(escape(field.getFieldConfigObject()))
+                .setMachineName(field.getFieldConfigObject().getMachineName())
+                .setTypeInfo(typeInfo)
+                .build();
+
+        formSettings.getFormItems().add(item);
+    }
     //endregion
 
     //region Fill Data
@@ -1033,7 +1157,6 @@ public class CreateWorkflowViewModel extends ViewModel {
      * @param workflow Workflow with info to display on the form.
      */
     private void updateWorkflowInformation(WorkflowDb workflow) {
-
         TextInputFormItem titleItem = (TextInputFormItem) formSettings
                 .findItem(FormSettings.MACHINE_NAME_TITLE);
         titleItem.setValue(workflow.getTitle());
@@ -1071,130 +1194,37 @@ public class CreateWorkflowViewModel extends ViewModel {
                 switch (typeInfo.getType()) {
                     case FormSettings.TYPE_TEXT:
                     case FormSettings.TYPE_TEXT_AREA:
-                        fillTextInputFormItem(meta, fieldConfig);
+                    case FormSettings.TYPE_LINK:
+                        fillTextInputFormItem(meta);
                         break;
 
                     case FormSettings.TYPE_CHECKBOX:
-                        fillBooleanFormItem(meta, fieldConfig);
+                        fillBooleanFormItem(meta);
                         break;
 
                     case FormSettings.TYPE_DATE:
-                        fillDateFormItem(meta, fieldConfig);
+                        fillDateFormItem(meta);
                         break;
 
-                    /*case FormSettings.VALUE_EMAIL:
+                    case FormSettings.TYPE_LIST:
                         if (fieldConfig.getMultiple()) {
-                            return null;
+                            fillMultipleChoiceFormItem(meta);
+                        } else {
+                            fillSingleChoiceFormItem(meta);
                         }
-                        if (!(meta.getDisplayValue() instanceof String)) {
-                            information.setDisplayValue("");
-                            return information;
-                        }
+                        break;
 
-                        information.setDisplayValue((String) meta.getDisplayValue());
-                        return information;
-                    case FormSettings.VALUE_INTEGER:
+                    case FormSettings.TYPE_CURRENCY:
+                        fillCurrencyFormItem(meta);
+                        break;
 
-                        if (fieldConfig.getMultiple()) {
-                            return null;
-                        }
+                    case FormSettings.TYPE_PHONE:
+                        fillPhoneFormItem(meta);
+                        break;
 
-                        if (typeInfo.getType().equals(TYPE_TEXT)) {
-                            if (!(meta.getDisplayValue() instanceof String)) {
-                                information.setDisplayValue("");
-                                return information;
-                            }
-                            information.setDisplayValue((String) meta.getDisplayValue());
-                            return information;
-                        }
-
-                        if (typeInfo.getType().equals(TYPE_CURRENCY)) {
-                            PostCountryCodeAndValue currency;
-                            JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi
-                                    .adapter(PostCountryCodeAndValue.class);
-                            try {
-                                currency = jsonAdapter.fromJson(meta.getValue());
-                                information.setDisplayValue(String.valueOf(currency.value));
-                                return information;
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                information.setDisplayValue("");
-                                return information;
-                            } catch (JsonDataException e) {
-                                e.printStackTrace();
-                                information.setDisplayValue("");
-                                return information;
-                            }
-                        }
-
-                        if (typeInfo.getType().equals(TYPE_FILE)) {
-                            // TODO handle file.
-                            return null;
-                        }
-
-                        return null;
-                    case FormSettings.VALUE_ENTITY:
-                        if (typeInfo.getType().equals(TYPE_ROLE)) {
-                            String displayValue = getLabelFrom(meta);
-                            information.setDisplayValue(displayValue);
-                            return information;
-                        }
-
-                        return null;
-                    case FormSettings.VALUE_LIST:
-                        if (typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
-                            // TODO implement system user field
-//                    if (fieldConfig.getMultiple()) {
-//                        // {"id":50,"username":"jhonny Garzon","status":true,"email":"jgarzon600@gmail.com"}
-//                    } else {
-//
-//                    }
-
-                            Moshi moshi = new Moshi.Builder().build();
-                            JsonAdapter<PostSystemUser> jsonAdapter = moshi.adapter(PostSystemUser.class);
-                            try {
-                                PostSystemUser systemUser = jsonAdapter.fromJson(meta.getValue());
-                                information.setDisplayValue(systemUser.username);
-                                return information;
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                information.setDisplayValue("");
-                                return information;
-                            }
-                        }
-
-                        String displayValue = getLabelFrom(meta);
-                        information.setDisplayValue(displayValue);
-                        return information;
-                    case FormSettings.VALUE_STRING:
-                        // Until now phone type can only be single and not multiple
-                        if (typeInfo.getType().equals(TYPE_PHONE)) {
-                            PostCountryCodeAndValue phone;
-                            JsonAdapter<PostCountryCodeAndValue> jsonAdapter = moshi
-                                    .adapter(PostCountryCodeAndValue.class);
-                            try {
-                                phone = jsonAdapter.fromJson(meta.getValue());
-                                information.setDisplayValue(String.valueOf(phone.value));
-                                return information;
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                information.setDisplayValue("");
-                                return information;
-                            } catch (JsonDataException e) {
-                                e.printStackTrace();
-                                information.setDisplayValue("");
-                                return information;
-                            }
-                        }
-
-                        if (!(meta.getDisplayValue() instanceof String)) {
-                            information.setDisplayValue("");
-                            return information;
-                        }
-
-                        information.setDisplayValue((String) meta.getDisplayValue());
-                        return information;*/
-
+                    case FormSettings.TYPE_FILE:
+                        fillFileFormItem(meta);
+                        break;
                     default:
                         Log.d(TAG, "format: invalid type. Not Known.");
                 }
@@ -1205,15 +1235,10 @@ public class CreateWorkflowViewModel extends ViewModel {
             }
         }
 
-        showLoading.setValue(false);
         mSetFormItemListLiveData.setValue(formSettings.getFormItems());
     }
 
-    private void fillTextInputFormItem(Meta meta, FieldConfig fieldConfig) {
-        if (fieldConfig.getMultiple()) {
-            return;
-        }
-
+    private void fillTextInputFormItem(Meta meta) {
         String value = String.valueOf(meta.getDisplayValue());
 
         TextInputFormItem textInputFormItem = (TextInputFormItem) formSettings
@@ -1222,11 +1247,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         textInputFormItem.setValue(value);
     }
 
-    private void fillBooleanFormItem(Meta meta, FieldConfig fieldConfig) {
-        if (fieldConfig.getMultiple()) {
-            return;
-        }
-
+    private void fillBooleanFormItem(Meta meta) {
         String value = meta.getValue();
 
         BooleanFormItem booleanFormItem = (BooleanFormItem) formSettings
@@ -1234,17 +1255,524 @@ public class CreateWorkflowViewModel extends ViewModel {
         booleanFormItem.setValue(Boolean.valueOf(value));
     }
 
-    private void fillDateFormItem(Meta meta, FieldConfig fieldConfig) {
-        if (fieldConfig.getMultiple()) {
-            return;
-        }
-
+    private void fillDateFormItem(Meta meta) {
         String value = String.valueOf(meta.getDisplayValue()); // now returns "10/25/2018"
 
         DateFormItem startDateItem = (DateFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
         Date startDate = Utils.getDateFromString(value, "dd/MM/yyyy");
         startDateItem.setValue(startDate);
+    }
+
+    private void fillSingleChoiceFormItem(Meta meta) {
+        List<String> values = (List<String>) meta.getDisplayValue();
+        if (values == null || values.isEmpty()) return;
+
+        String stringValue = values.get(0);
+
+        SingleChoiceFormItem singleChoiceFormItem = (SingleChoiceFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        Option value = formSettings.findOption(singleChoiceFormItem.getOptions(), stringValue);
+        if (value == null) return;
+
+        singleChoiceFormItem.setValue(value);
+    }
+
+    private void fillMultipleChoiceFormItem(Meta meta) {
+        List<String> values = (List<String>) meta.getDisplayValue();
+        if (values == null || values.isEmpty()) return;
+
+        MultipleChoiceFormItem multipleChoiceFormItem = (MultipleChoiceFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        for (String stringValue : values) {
+            Option value = formSettings
+                    .findOption(multipleChoiceFormItem.getOptions(), stringValue);
+            if (value == null) continue;
+            multipleChoiceFormItem.addValue(value);
+        }
+    }
+
+    private void fillCurrencyFormItem(Meta meta) throws IOException {
+        if (meta.getValue() == null || meta.getValue().isEmpty()) return;
+
+        JsonAdapter<PostCurrency> jsonAdapter = moshi.adapter(PostCurrency.class);
+        PostCurrency postCurrency = jsonAdapter.fromJson(meta.getValue());
+
+        if (postCurrency == null) return;
+
+        CurrencyFormItem currencyFormItem = (CurrencyFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        Option value = formSettings
+                .findOption(currencyFormItem.getOptions(), postCurrency.countryId);
+        if (value == null) return;
+
+        currencyFormItem.setSelectedOption(value);
+        currencyFormItem.setValue(postCurrency.value);
+    }
+
+    private void fillPhoneFormItem(Meta meta) throws IOException {
+        if (meta.getValue() == null || meta.getValue().isEmpty()) return;
+
+        JsonAdapter<PostPhone> jsonAdapter = moshi.adapter(PostPhone.class);
+        PostPhone postPhone = jsonAdapter.fromJson(meta.getValue());
+
+        if (postPhone == null) return;
+
+        PhoneFormItem phoneFormItem = (PhoneFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        Option value = formSettings
+                .findOption(phoneFormItem.getOptions(), postPhone.countryId);
+        if (value == null) return;
+
+        phoneFormItem.setSelectedOption(value);
+        phoneFormItem.setValue(postPhone.value);
+    }
+
+    private void fillFileFormItem(Meta meta) throws IOException {
+        if (meta.getValue() == null || meta.getValue().isEmpty()
+                || meta.getValue().equals("\"\"")) {
+            return;
+        }
+
+        JsonAdapter<FileMetaData> jsonAdapter = moshi.adapter(FileMetaData.class);
+        FileMetaData fileMetaData = jsonAdapter.fromJson(meta.getValue());
+
+        if (fileMetaData == null) return;
+
+        FileFormItem fileFormItem = (FileFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        fileFormItem.setFileName(fileMetaData.name);
+        fileFormItem.setFileId(fileMetaData.value);
+    }
+    //endregion
+
+    //region File Upload
+    protected FileFormItem getCurrentRequestingFileFormItem() {
+        return mCurrentRequestingFileFormItem;
+    }
+
+    protected void setCurrentRequestingFileFormItem(FileFormItem currentRequestingFileFormItem) {
+        this.mCurrentRequestingFileFormItem = currentRequestingFileFormItem;
+    }
+
+    /**
+     * Handles the result of the file chooser intent. Retrieves information about the selected file
+     * and sends that info to the UI.
+     *
+     * @param context     used to retrieve the file name and size.
+     * @param requestCode ActivityResult requestCode.
+     * @param resultCode  ActivityResult resultCode.
+     * @param data        the file URI that was selected.
+     */
+    protected void handleFileSelectedResult(Context context, int requestCode, int resultCode,
+                                            Intent data) {
+        switch (requestCode) {
+            case REQUEST_FILE_TO_ATTACH:
+                if (resultCode == RESULT_OK) {
+                    try {
+                        Uri uri = data.getData();
+
+                        if (uri == null) {
+                            mToastMessageLiveData.setValue(R.string.select_file);
+                            return;
+                        }
+
+                        if (!Utils.checkFileSize(UPLOAD_FILE_SIZE_LIMIT, new File(uri.getPath()))) {
+                            DialogMessage message = new DialogMessage();
+                            message.message = R.string.file_too_big;
+                            message.title = R.string.warning;
+                            showDialogMessage.setValue(message);
+                            return;
+                        }
+
+                        Cursor returnCursor = context.getContentResolver()
+                                .query(uri, null, null, null, null);
+
+                        if (returnCursor == null) {
+                            mToastMessageLiveData.setValue(R.string.error_selecting_file);
+                            return;
+                        }
+
+                        returnCursor.moveToFirst();
+
+                        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
+                        int size = (int) returnCursor.getLong(sizeIndex);
+
+                        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                        String fileName = returnCursor.getString(nameIndex);
+
+                        returnCursor.close();
+
+                        byte[] bytes = Utils.fileToByte(context.getContentResolver(), uri);
+
+                        String encodedFile = Base64.encodeToString(bytes, Base64.DEFAULT);
+                        String fileType = Utils.getMimeType(data.getData(), context);
+
+                        FileFormItem formItem = getCurrentRequestingFileFormItem();
+                        formItem.setValue(encodedFile);
+                        formItem.setFileName(fileName);
+                        formItem.setFileSize(size);
+                        formItem.setFileType(fileType);
+                        formItem.setFilePath(uri.getPath());
+
+                        mNewFormItemFileLiveData.setValue(formItem);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
+        }
+    }
+
+    /**
+     * Begins to upload every {@link FileFormItem} to the server. This will start a series of
+     * methods that will upload the files one by one until the queue is empty. After everything was
+     * uploaded or the queue is empty, it will begin to send the workflow.
+     */
+    private void uploadAllFiles() {
+        mFilesToUpload = new ArrayList<>();
+        for (BaseFormItem item : formSettings.getFormItems()) {
+            if (item instanceof FileFormItem && ((FileFormItem) item).getValue() != null) {
+                mFilesToUpload.add((FileFormItem) item);
+            }
+        }
+
+        boolean isUploading = uploadFirstFile();
+        if (!isUploading) {
+            List<BaseFormItem> items = formSettings.getFormItemsToPost();
+            ArrayMap<String, Integer> baseInfo = formSettings.getBaseMachineNamesAndIds();
+
+            startSendingWorkflow(baseInfo, items);
+        }
+    }
+
+    /**
+     * Uploads the first index of {@link #mFilesToUpload} array unless it's empty.
+     *
+     * @return false - empty array, no file will be uploaded; true - a file will be uploaded.
+     */
+    private boolean uploadFirstFile() {
+        if (mFilesToUpload.isEmpty()) return false;
+
+        FileFormItem fileToUpload = mFilesToUpload.get(0);
+        setCurrentRequestingFileFormItem(fileToUpload);
+        postFileRequest(fileToUpload);
+        mFilesToUpload.remove(fileToUpload);
+
+        return true;
+    }
+
+    /**
+     * Sends a request to the server to upload the file.
+     *
+     * @param fileFormItem form item containing the file to be uploaded.
+     */
+    private void postFileRequest(FileFormItem fileFormItem) {
+        FilePostDetail filePostDetail = new FilePostDetail();
+        filePostDetail.setFile(fileFormItem.getValue());
+        String path = fileFormItem.getFilePath();
+        String extension = path.substring(path.lastIndexOf("."));
+        String fileName = path.substring(path.lastIndexOf("/") + 1);
+        filePostDetail.setType(extension);
+        filePostDetail.setName(fileName);
+
+        FilePost filePost = new FilePost();
+        filePost.setFile(filePostDetail);
+
+        Disposable disposable = mRepository.uploadFile(mToken, filePost)
+                .subscribe(this::successUpload, throwable -> {
+                    showLoading.setValue(false);
+                    Log.d(TAG, "postFileRequest: file upload failed: " + throwable.getMessage());
+                });
+
+        mDisposables.add(disposable);
+    }
+
+    /**
+     * Called after a successful file upload, it will try to upload the next queued file. If there's
+     * no remaining files to be uploaded, this method will call {@link
+     * #startSendingWorkflow(ArrayMap, List)} to send the workflow.
+     *
+     * @param fileUploadResponse WS response
+     */
+    private void successUpload(FileUploadResponse fileUploadResponse) {
+        List<BaseFormItem> items = formSettings.getFormItemsToPost();
+        ArrayMap<String, Integer> baseInfo = formSettings.getBaseMachineNamesAndIds();
+
+        FileFormItem formItem = getCurrentRequestingFileFormItem();
+        formItem.setFileId(fileUploadResponse.getFileId());
+
+        boolean isUploading = uploadFirstFile();
+        if (!isUploading) {
+            startSendingWorkflow(baseInfo, items);
+        }
+    }
+    //endregion
+
+    //region File Download
+    public int getQueuedFile() {
+        return mQueuedFile;
+    }
+
+    public void setQueuedFile(int queuedFile) {
+        this.mQueuedFile = queuedFile;
+    }
+
+    /**
+     * Checks if the requested permissions were granted and then proceed to open the file.
+     *
+     * @param requestCode  to identify the request
+     * @param grantResults array containing the request results.
+     */
+    protected void handleRequestPermissionsResult(int requestCode, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_EXTERNAL_STORAGE_PERMISSIONS: {
+                // check for both permissions
+                if (grantResults.length > 1
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permissions granted
+                    int fileId = getQueuedFile();
+                    if (fileId == 0) return; //file was not set
+                    downloadFile(fileId);
+
+                } else {
+                    // at least one permission was denied
+                    mToastMessageLiveData.setValue(
+                            R.string.workflow_detail_activity_permissions_not_granted);
+                }
+            }
+        }
+    }
+
+    /**
+     * Prepares a request to the endpoint for the desired file.
+     *
+     * @param fileId the file ID to download.
+     */
+    protected void downloadFile(int fileId) {
+        showLoading.setValue(true);
+        Disposable disposable = mRepository
+                .downloadFile(mToken, FileUploadResponse.FILE_ENTITY,
+                        fileId)
+                .subscribe(this::onDownloadSuccess, this::onFailure);
+        mDisposables.add(disposable);
+    }
+
+    /**
+     * Callback for the success file download. Converts and saves it to a local file and sends it
+     * back to the UI for displaying purposes.
+     *
+     * @param downloadFileResponse the downloaded file response.
+     */
+    private void onDownloadSuccess(DownloadFileResponse downloadFileResponse) {
+        showLoading.setValue(false);
+
+        // the API will return a base64 string representing the file
+
+        String base64 = downloadFileResponse.getFile().getContent();
+        if (base64 == null || base64.isEmpty()) {
+            mToastMessageLiveData.setValue(R.string.error);
+            return;
+        }
+
+        String fileName = downloadFileResponse.getFile().getFilename();
+        try {
+            DownloadedFileUiData attachmentUiData = new DownloadedFileUiData(
+                    Utils.decodeFileFromBase64Binary(base64, fileName),
+                    downloadFileResponse.getFile().getMime());
+            mOpenDownloadedFileLiveData.setValue(attachmentUiData);
+
+        } catch (IOException e) {
+            Log.e(TAG, "downloadFile: ", e);
+            mToastMessageLiveData.setValue(R.string.error);
+        }
+    }
+    //endregion
+
+    //region People Involved Form
+    protected void getWorkflowTypeInfo() {
+        //check if the form has already been created
+        if (!formSettings.getPeopleInvolvedFormItems().isEmpty()) return;
+
+        showLoading.setValue(true);
+
+        int workflowTypeId = formSettings.getWorkflowTypeIdSelected();
+
+        Disposable disposable = mRepository
+                .getWorkflowType(mToken, workflowTypeId)
+                .subscribe(this::onWorkflowTypeSuccess, this::onFailure);
+
+        mDisposables.add(disposable);
+    }
+
+    private void onWorkflowTypeSuccess(WorkflowTypeResponse workflowTypeResponse) {
+        showPeopleInvolvedFields(workflowTypeResponse.getWorkflowType());
+    }
+
+    /**
+     * Creates all of the people involved form items according to their params. Sends each form item
+     * to the UI.
+     */
+    private void showPeopleInvolvedFields(WorkflowTypeDb workflowTypeDb) {
+        createProfilesFormItems(workflowTypeDb);
+
+//        mSetPeopleInvolvedFormItemListLiveData.setValue(formSettings.getPeopleInvolvedFormItems());
+    }
+
+    private void createProfilesFormItems(WorkflowTypeDb workflowTypeDb) {
+
+        Disposable disposable;
+        disposable = mRepository
+                .getProfiles(mToken, true)
+                .subscribe(profileResponse -> {
+                    List<Profile> profiles = profileResponse.getProfiles();
+                    if (profiles == null || profiles.isEmpty()) return;
+
+                    Option selection = null; //check for current user (default owner)
+                    List<Option> options = new ArrayList<>();
+                    for (int i = 0; i < profiles.size(); i++) {
+                        String name = profiles.get(i).getFullName();
+                        Integer id = profiles.get(i).getId();
+
+                        Option option = new Option(id, name);
+                        options.add(option);
+
+                        if (option.getId() == mUserId) selection = option;
+                    }
+
+                    //Owner
+                    SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
+                            .setTitleRes(R.string.owner)
+                            .setRequired(true)
+                            .setTag(TAG_OWNER)
+                            .setOptions(options)
+                            .setValue(selection)
+                            .setMachineName(MACHINE_NAME_OWNER)
+                            .build();
+
+                    mAddPeopleInvolvedFormItemLiveData.setValue(singleChoiceFormItem);
+
+                    //Additional People Involved
+                    MultipleChoiceFormItem multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
+                            .setTitleRes(R.string.additional_profiles)
+                            .setRequired(false)
+                            .setTag(TAG_ADDITIONAL_PROFILES)
+                            .setOptions(options)
+                            .build();
+
+                    mAddPeopleInvolvedFormItemLiveData.setValue(multipleChoiceFormItem);
+
+                    //Global Approvers
+                    multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
+                            .setTitleRes(R.string.global_approvers_form)
+                            .setRequired(false)
+                            .setTag(TAG_GLOBAL_APPROVERS)
+                            .setOptions(options)
+                            .build();
+
+                    mAddPeopleInvolvedFormItemLiveData.setValue(multipleChoiceFormItem);
+
+                    //Specific Approvers
+                    List<Status> statuses = workflowTypeDb.getStatus();
+                    if (statuses == null || statuses.isEmpty()) return;
+
+                    List<Option> statusOptions = new ArrayList<>();
+                    for (int i = 0; i < statuses.size(); i++) {
+                        String name = statuses.get(i).getName();
+                        Integer id = statuses.get(i).getId();
+
+                        Option option = new Option(id, name);
+                        statusOptions.add(option);
+                    }
+
+                    DoubleMultipleChoiceFormItem doubleMultipleChoiceFormItem = new DoubleMultipleChoiceFormItem.Builder()
+                            .setTitleRes(R.string.specific_approvers_form)
+                            .setRequired(false)
+                            .setTag(TAG_SPECIFIC_APPROVERS)
+                            .setFirstOptions(options)
+                            .setSecondOptions(statusOptions)
+                            .build();
+
+                    mAddPeopleInvolvedFormItemLiveData.setValue(doubleMultipleChoiceFormItem);
+
+                    //Approvers
+                    for (Approver approver : workflowTypeDb.getDistinctApprovers()) {
+                        //only add items for roles
+                        if (!approver.entityType.equalsIgnoreCase(ENTITY_ROLE)) continue;
+
+                        List<Integer> profileIds = workflowTypeDb
+                                .getRoleApproverProfileIds(approver.entityId);
+
+                        if (profileIds == null || profileIds.isEmpty()) continue;
+
+                        //get options for each role
+                        List<Option> approverOptions = new ArrayList<>();
+                        for (int i = 0; i < profileIds.size(); i++) {
+                            int profileId = profileIds.get(i);
+                            Profile profile = Profile.getProfileByIdFromList(profiles, profileId);
+
+                            if (profile == null) continue;
+
+                            String name = profile.getFullName();
+                            Integer id = profile.getId();
+
+                            Option option = new Option(id, name);
+                            approverOptions.add(option);
+                        }
+
+                        //ignore item if there are no options
+                        if (approverOptions.isEmpty()) continue;
+
+                        singleChoiceFormItem = new SingleChoiceFormItem.Builder()
+                                .setTitle(approver.entityName)
+                                .setRequired(workflowTypeDb.isDefineRoles())
+                                .setTag(approver.entityId)
+                                .setOptions(approverOptions)
+                                .build();
+
+                        //we need to keep these separated
+                        formSettings.getRoleApproversFormItems().add(singleChoiceFormItem);
+
+                        mAddPeopleInvolvedFormItemLiveData.setValue(singleChoiceFormItem);
+                    }
+
+                    showLoading.setValue(false);
+                }, throwable -> Log
+                        .e(TAG, "createProfilesFormItems: error " + throwable.getMessage()));
+
+        mDisposables.add(disposable);
+    }
+
+    /**
+     * Performs the validation for every form item present in the People Involved form. Each item's
+     * method is in charge of handling the validation, here we simply check whether one of them is
+     * invalid to prevent the action from being completed.
+     *
+     * @return whether all of the form items are valid.
+     */
+    protected boolean validatePeopleInvolvedFormItems() {
+        boolean isValid = true;
+
+        for (BaseFormItem item : formSettings.getPeopleInvolvedFormItems()) {
+            if (!item.isValid()) {
+                isValid = false;
+            }
+        }
+
+        if (isValid) {
+            //every item inside the People Involved form are valid, so we set the item to completed
+            BaseFormItem item = formSettings.findItem(TAG_PEOPLE_INVOLVED);
+            ((IntentFormItem) item).setCompleted(true);
+        }
+
+        return isValid;
     }
     //endregion
 
@@ -1266,88 +1794,15 @@ public class CreateWorkflowViewModel extends ViewModel {
      * @return whether all of the form items are valid.
      */
     private boolean validateFormItems() {
-        boolean isValid = true;
-
         for (BaseFormItem item : formSettings.getFormItems()) {
             if (!item.isValid()) {
-                isValid = false;
+                //at least one item is not valid
+                mValidationUiLiveData.setValue(formSettings.findFirstInvalidItem());
+                return false;
             }
         }
 
-        mValidationUiLiveData.setValue(formSettings.findFirstInvalidItem());
-
-        return isValid;
-    }
-
-    private void handleFile(FormFieldsByWorkflowType field) {
-        showUploadButton.setValue(true);
-
-        FieldConfig fieldConfig = field.getFieldConfigObject();
-//        int listId = fieldConfig.getTypeInfo().getId();
-        int customFieldId = field.getId();
-        String customLabel = field.getFieldName();
-        int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
-
-        ListField listField = new ListField();
-//        listField.listId = listId;
-        listField.customFieldId = customFieldId;
-        listField.customLabel = customLabel;
-        listField.associatedWorkflowTypeId = associatedWorkflowTypeId;
-        listField.isMultipleSelection = false;
-
-        FieldData fieldData = new FieldData();
-        fieldData.label = customLabel;
-        fieldData.isMultipleSelection = false;
-        fieldData.tag = customFieldId;
-        fieldData.escape = false;
-
-        PendingFileUpload pendingFileUpload = new PendingFileUpload();
-        pendingFileUpload.fieldData = fieldData;
-
-        formSettings.setPendingFileUpload(pendingFileUpload);
-
-//        setListWithData.setValue(fieldData);
-//        buildForm.setValue(true);
-//        showLoading.setValue(false);
-
-    }
-
-    public void checkForContent(FormBuilder formBuilder) {
-        //todo check (validation)
-        /*List<FieldData> list = formSettings.getFieldItems();
-        FieldData field;
-        BaseFormElement baseFormElement;
-        ArrayList<BaseFormElement> emptyRequiredElements = new ArrayList<>();
-
-        for (int i = 0; i < list.size(); i++) {
-            field = list.get(i);
-            baseFormElement = formBuilder.getFormElement(field.tag);
-            if (baseFormElement.isRequired() && TextUtils.isEmpty(baseFormElement.getValue())) {
-                if (baseFormElement.getTag() != TAG_WORKFLOW_TYPE) {
-                    emptyRequiredElements.add(baseFormElement);
-                }
-            }
-        }
-
-        if (emptyRequiredElements.size() == 0) {
-            return;
-        }
-
-        int size = emptyRequiredElements.size();
-        String[] fieldNames = new String[size];
-        for (int i = 0; i < emptyRequiredElements.size(); i++) {
-            fieldNames[i] = emptyRequiredElements.get(i).getTitle();
-        }
-
-        int title = R.string.required_fields;
-        int message = R.string.complete_form;
-        DialogMessage dialogMessage = new DialogMessage();
-        dialogMessage.list = fieldNames;
-        dialogMessage.title = title;
-        dialogMessage.message = message;
-
-        showDialogMessage.setValue(dialogMessage);*/
-
+        return true;
     }
 
     private static boolean isValidEmail(CharSequence target) {
@@ -1355,103 +1810,6 @@ public class CreateWorkflowViewModel extends ViewModel {
             return false;
         }
         return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
-    }
-
-    private void handleCurrencyType(FormFieldsByWorkflowType field) {
-        //todo implement
-        FieldConfig fieldConfig = field.getFieldConfigObject();
-        Disposable disposable = mRepository
-                .getCurrencyCodes()
-                .subscribe(currencyFieldData -> {
-                    //list
-                    /*ListField listField = new ListField();
-                    listField.customFieldId = FormSettings.FIELD_CURRENCY_ID;
-                    listField.listType = FormSettings.TYPE_CURRENCY;
-                    listField.resStringId = R.string.currency_type;
-                    ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
-                    CurrencyFieldData currencyData;
-                    String currencyLabel;
-                    for (int i = 0; i < currencyFieldData.size(); i++) {
-                        currencyData = currencyFieldData.get(i);
-                        currencyLabel = currencyData.description + " - " + currencyData.currency;
-                        ListFieldItemMeta item = new ListFieldItemMeta(
-                                currencyData.countryId,
-                                currencyLabel
-                        );
-                        tempList.add(item);
-                    }
-                    listField.children = tempList;
-                    listField.isMultipleSelection = false;
-                    listField.associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
-
-                    if (listField.children.size() < 1) {
-                        return;
-                    }
-
-                    showListField(listField, fieldConfig);
-
-                    FieldData currencyNumberFieldData = new FieldData();
-                    currencyNumberFieldData.label = field.getFieldName();
-                    currencyNumberFieldData.required = field.isRequired();
-                    currencyNumberFieldData.tag = field.getId();
-                    currencyNumberFieldData.escape = escape(field.getFieldConfigObject());
-//                    formSettings.addFieldDataItem(currencyNumberFieldData);
-                    setFieldPhoneWithData.setValue(currencyNumberFieldData);*/
-                }, throwable -> {
-                    showLoading.setValue(false);
-                    Log.d(TAG, "handeBuildRoles: " + throwable.getMessage());
-                });
-
-        mDisposables.add(disposable);
-    }
-
-    private void handleBuildPhone(FormFieldsByWorkflowType field) {
-        //todo implement
-        FieldConfig fieldConfig = field.getFieldConfigObject();
-        Disposable disposable = mRepository
-                .getCountryCodes()
-                .subscribe(phoneFieldData -> {
-                    //list
-                    /*ListField listField = new ListField();
-                    listField.customFieldId = FormSettings.FIELD_CODE_ID;
-                    listField.listType = FormSettings.TYPE_PHONE;
-                    listField.resStringId = R.string.country_code;
-                    ArrayList<ListFieldItemMeta> tempList = new ArrayList<>();
-                    PhoneFieldData phoneCode;
-                    String codeLabel;
-                    for (int i = 0; i < phoneFieldData.size(); i++) {
-                        phoneCode = phoneFieldData.get(i);
-                        codeLabel = phoneCode.phoneCode + " - " + phoneCode.description;
-                        ListFieldItemMeta item = new ListFieldItemMeta(
-                                phoneCode.countryId,
-                                codeLabel
-                        );
-                        tempList.add(item);
-                    }
-                    listField.children = tempList;
-                    listField.isMultipleSelection = false;
-                    listField.associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
-
-                    if (listField.children.size() < 1) {
-                        return;
-                    }
-
-                    showListField(listField, fieldConfig);
-
-                    // Normal phone numeric field
-                    FieldData phoneNumberFieldData = new FieldData();
-                    phoneNumberFieldData.label = field.getFieldName();
-                    phoneNumberFieldData.required = field.isRequired();
-                    phoneNumberFieldData.tag = field.getId();
-                    phoneNumberFieldData.escape = escape(field.getFieldConfigObject());
-//                    formSettings.addFieldDataItem(phoneNumberFieldData);
-                    setFieldPhoneWithData.setValue(phoneNumberFieldData);*/
-                }, throwable -> {
-                    showLoading.setValue(false);
-                    Log.d(TAG, "handeBuildRoles: " + throwable.getMessage());
-                });
-
-        mDisposables.add(disposable);
     }
 
     private boolean escape(FieldConfig fieldConfig) {
@@ -1472,307 +1830,13 @@ public class CreateWorkflowViewModel extends ViewModel {
         return value.equals(FormSettings.VALUE_LIST) && type.equals(FormSettings.TYPE_SYSTEM_USERS);
     }
 
-    private void handleBuildEntity(FormFieldsByWorkflowType field) {
-        String valueType = field.getFieldConfigObject().getTypeInfo().getValueType();
-        switch (valueType) {
-            case FormSettings.VALUE_ENTITY:
-                // TODO list
-                break;
-            default:
-                Log.d(TAG, "handleBuildProject: Not recognized " + valueType);
-        }
-    }
-
-    @Deprecated
-    private void showListField(ListField listField, FieldConfig fieldConfig) {
-        //todo check
-       /* FieldData fieldData = new FieldData();
-        fieldData.label = listField.customLabel;
-        fieldData.list = listField.children;
-        fieldData.resLabel = listField.resStringId;
-        fieldData.isMultipleSelection = listField.isMultipleSelection;
-        fieldData.tag = listField.customFieldId;
-        fieldData.escape = escape(fieldConfig);
-        setListWithData.setValue(fieldData);
-        buildForm.setValue(true);
-        showLoading.setValue(false);
-        formSettings.addFieldDataItem(fieldData);*/
-    }
-
-    @Deprecated
-    private void handleList(FormFieldsByWorkflowType field, String fieldType) {
-        //todo check
-        /*FieldConfig fieldConfig = field.getFieldConfigObject();
-        String valueType = fieldConfig.getTypeInfo().getValueType();
-        if (!valueType.equals(FormSettings.VALUE_LIST)) {
-            return;
-        }
-
-        boolean isMultipleSelection;
-        if (fieldType.equals(FormSettings.TYPE_SYSTEM_USERS)) {
-            isMultipleSelection = false;
-        } else {
-            isMultipleSelection = fieldConfig.getMultiple();
-        }
-
-        ListInfo listInfo = fieldConfig.getListInfo();
-        if (listInfo == null) {
-            if (fieldConfig.getTypeInfo().getType().equals(FormSettings.TYPE_SYSTEM_USERS)) {
-                setTeamList(field);
-            }
-            return;
-        }
-
-        // It is not a base list of type system user and we have other custom fields at this point.
-
-        int listId = fieldConfig.getListInfo().getId();
-        int customFieldId = field.getId();
-        String customLabel = field.getFieldName();
-        int associatedWorkflowTypeId = fieldConfig.getAssociatedWorkflowTypedId();
-
-        if (fieldType.equals(FormSettings.TYPE_SYSTEM_USERS)) {
-            createSystemUserFieldasCustomField(field, listId, customFieldId, customLabel,
-                    associatedWorkflowTypeId);
-            return;
-        }
-
-        Disposable disposable = mRepository
-                .getList(mToken, listId)
-                .subscribe(listsResponse -> {
-                    List<ListItem> listItems = listsResponse.getItems();
-                    ListItem listItem;
-                    ListField listField = null;
-                    int id;
-                    for (int i = 0; i < listItems.size(); i++) {
-                        listItem = listItems.get(i);
-                        id = listItem.getListId();
-                        if (id != listId) {
-                            continue;
-                        }
-                        listField = formSettings.addListToForm(
-                                listItem,
-                                customLabel,
-                                customFieldId,
-                                FormSettings.TYPE_LIST
-                        );
-                        listField.isMultipleSelection = isMultipleSelection;
-                        listField.associatedWorkflowTypeId = associatedWorkflowTypeId;
-                        break;
-                    }
-
-                    if (listField == null || listField.children.size() < 1) {
-                        return;
-                    }
-                    showListField(listField, fieldConfig);
-                }, throwable -> {
-                    showLoading.setValue(false);
-                    Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
-                });
-
-        mDisposables.add(disposable);*/
-    }
-
-    @Deprecated
-    private void saveTypeToFormSettings(FieldListSettings fieldListSettings) {
-        //todo check
-        /*int customLabel = fieldListSettings.labelRes;
-
-        ArrayList<String> stringListItems = fieldListSettings.items;
-        ArrayList<ListFieldItemMeta> listData = new ArrayList<>();
-        String name;
-        ListFieldItemMeta itemMeta;
-
-        for (int i = 0; i < stringListItems.size(); i++) {
-            name = stringListItems.get(i);
-            itemMeta = new ListFieldItemMeta(
-                    TAG_WORKFLOW_TYPE,
-                    name
-            );
-            listData.add(itemMeta);
-        }
-        FieldData fieldData = new FieldData();
-        fieldData.resLabel = customLabel;
-        fieldData.list = listData;
-        fieldData.tag = TAG_WORKFLOW_TYPE;
-        fieldData.isMultipleSelection = false;
-        fieldData.escape = false; // workflow types are not send in meta data.
-        formSettings.addFieldDataItem(fieldData);*/
-    }
-
-    private void setBaseFields() {
-        //todo check
-        /*int[] settingsDataTitle = new int[2];
-        settingsDataTitle[INDEX_RES_STRING] = R.string.title;
-        settingsDataTitle[INDEX_REQUIRED] = REQUIRED;
-        setTextField.postValue(settingsDataTitle);
-        int[] settingDataMulti = new int[2];
-        settingDataMulti[INDEX_RES_STRING] = R.string.description;
-        settingDataMulti[INDEX_REQUIRED] = REQUIRED;
-        setTextFieldMultiLine.postValue(settingDataMulti);
-        int[] settingDatePicker = new int[2];
-        settingDatePicker[INDEX_RES_STRING] = R.string.start_date;
-        settingDatePicker[INDEX_REQUIRED] = REQUIRED;
-        setDatePicker.postValue(settingDatePicker);
-        setFormHeader.postValue(R.string.workflow_team);
-        //setTeamList();*/
-    }
-
-    @Deprecated
-    private void setTeamList(FormFieldsByWorkflowType field) {
-        //todo check
-        /*Disposable disposable = Observable.fromCallable(() -> {
-            List<FormCreateProfile> profiles = mRepository.getProfiles();
-            if (profiles == null || profiles.size() < 1) {
-                return false;
-            }
-            for (int i = 0; i < profiles.size(); i++) {
-                formSettings.setProfile(profiles.get(i));
-            }
-            formSettings.getProfileNames();
-            ArrayList<String> stringListItems = formSettings.getProfileNames();
-            ArrayList<Integer> idList = formSettings.getProfileIds();
-            FieldListSettings fieldListSettings = new FieldListSettings();
-            fieldListSettings.items = stringListItems;
-            fieldListSettings.labelRes = R.string.owner;
-            fieldListSettings.required = true;
-            fieldListSettings.tag = field.getId();
-
-            FieldConfig fieldConfig = field.getFieldConfigObject();
-            boolean isMultipleSelection = fieldConfig.getMultiple();
-            String customLabel = field.getFieldName();
-            int customFieldId = field.getId();
-
-            ArrayList<ListFieldItemMeta> listData = new ArrayList<>();
-            String name;
-            int id;
-            for (int i = 0; i < stringListItems.size(); i++) {
-                name = stringListItems.get(i);
-                id = idList.get(i);
-                ListFieldItemMeta itemMeta = new ListFieldItemMeta(
-                        id,
-                        name
-                );
-                listData.add(itemMeta);
-            }
-            FieldData fieldData = new FieldData();
-            fieldData.label = customLabel;
-            fieldData.list = listData;
-            fieldData.tag = field.getId();
-            fieldData.isMultipleSelection = isMultipleSelection;
-            fieldData.escape = escape(fieldConfig);
-            formSettings.addFieldDataItem(fieldData);
-            //setFieldList.postValue(fieldListSettings);
-            return fieldListSettings;
-        }).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(fieldListSettings -> {
-                    FieldListSettings settings = (FieldListSettings) fieldListSettings;
-                    setFieldList.setValue(settings);
-                    showLoading.setValue(false);
-                    buildForm.setValue(true);
-                }, throwable -> {
-                    showLoading.setValue(false);
-                    buildForm.setValue(true);
-                });
-        mDisposables.add(disposable);*/
-    }
-
-    private String formatUiDateToPostDate(String uiDateFormat) {
-        //todo check
-        /*SimpleDateFormat dateFormat = new SimpleDateFormat(
-                "dd-MM-yyyy",
-                Locale.getDefault());
-        String metaDateString = "";
-        try {
-            Date convertedDate = dateFormat.parse(uiDateFormat);
-            SimpleDateFormat serverFormat = new SimpleDateFormat(
-                    "yyyy-MM-dd",
-                    Locale.getDefault());
-            metaDateString = serverFormat.format(convertedDate);
-        } catch (ParseException e) {
-            Log.d(TAG, "StringDateToTimestamp: e = " + e.getMessage());
-        }
-        return metaDateString;*/
-        return null;
-    }
-
-    public void getWorkflowTypes(String auth) {
-        //todo auth2 SOLO TESTING mientras no esta el backend live
-        Log.d("test", "getWorkflowTypes: ");
-        mRepository.getWorkflowTypes(auth)
-                .subscribe(this::onTypesSuccess, this::onFailure);
-    }
-
-    public void getList(String auth, int id) {
-        //todo auth2 SOLO TESTING mientras no esta el backend live
-        mRepository.getList(auth, id).subscribe(this::onListSuccess, this::onFailure);
-    }
-
-    public void getProducts(String auth) {
-        //todo auth2 SOLO TESTING mientras no esta el backend live
-        mRepository.getProducts(auth)
-                .subscribe(this::onProductsSuccess, this::onFailure);
-    }
-
-    public void getServices(String auth) {
-        //todo auth2 SOLO TESTING mientras no esta el backend live
-        mRepository.getServices(auth)
-                .subscribe(this::onServicesSuccess, this::onFailure);
-    }
-
-    public void getUsers(String auth) {
-        //todo auth2 SOLO TESTING mientras no esta el backend live
-        mRepository.getUsers(auth).subscribe(this::onUsersSuccess, this::onFailure);
-    }
-
-    public void getCountries(String auth) {
-        //todo auth2 SOLO TESTING mientras no esta el backend live
-        mRepository.getCountries(auth)
-                .subscribe(this::onCountriesSuccess, this::onFailure);
-    }
-
-    public void createWorkflow(String auth, int workflowTypeId, String title, String workflowMetas,
-                               String start, String description) {
-        //todo auth2 SOLO TESTING mientras no esta el backend live
-        mRepository.createWorkflow(auth, workflowTypeId, title, workflowMetas,
-                start, description).subscribe(this::onCreateSuccess, this::onCreateFailure);
-    }
-
-    private void onTypesSuccess(WorkflowTypesResponse workflowTypesResponse) {
-        for (WorkflowType type : workflowTypesResponse.getList()) {
-            Log.d("test", "onTypesSuccess: " + type.getName());
-        }
-        mWorkflowsLiveData.setValue(workflowTypesResponse);
-    }
-
-    private void onListSuccess(ListsResponse listsResponse) {
-        mListLiveData.setValue(listsResponse);
-    }
-
-    private void onProductsSuccess(ProductsResponse productsResponse) {
-        mProductLiveData.setValue(productsResponse);
-    }
-
-    private void onServicesSuccess(ServicesResponse servicesResponse) {
-        mServiceLiveData.setValue(servicesResponse);
-    }
-
-    private void onUsersSuccess(WorkflowUserResponse workflowUserResponse) {
-        mUserLiveData.setValue(workflowUserResponse);
-    }
-
-    private void onCountriesSuccess(CountriesResponse countriesResponse) {
-        mCountriesLiveData.setValue(countriesResponse);
-    }
-
     private void onCreateSuccess(CreateWorkflowResponse createWorkflowResponse) {
         //mCreateLiveData.setValue(createWorkflowResponse);
         showLoading.setValue(false);
         DialogMessage dialogMessage = new DialogMessage();
         dialogMessage.title = R.string.created;
         dialogMessage.message = R.string.workflow_created;
-        dialogMessage.messageAggregate = " " + createWorkflowResponse.getWorkflow()
-                .getWorkflowTypeKey();
+        dialogMessage.messageAggregate = createWorkflowResponse.getWorkflow().getWorkflowTypeKey();
         showDialogMessage.setValue(dialogMessage);
         goBack.setValue(true);
     }
@@ -1802,67 +1866,11 @@ public class CreateWorkflowViewModel extends ViewModel {
         Log.d(TAG, "onFailure: " + throwable.getMessage());
     }
 
-    protected LiveData<WorkflowTypesResponse> getObservableWorkflows() {
-        if (mWorkflowsLiveData == null) {
-            mWorkflowsLiveData = new MutableLiveData<>();
-        }
-        return mWorkflowsLiveData;
-    }
-
-    public LiveData<ListsResponse> getObservableList() {
-        if (mListLiveData == null) {
-            mListLiveData = new MutableLiveData<>();
-        }
-        return mListLiveData;
-    }
-
-    public LiveData<ProductsResponse> getObservableProduct() {
-        if (mProductLiveData == null) {
-            mProductLiveData = new MutableLiveData<>();
-        }
-        return mProductLiveData;
-    }
-
-    public LiveData<ServicesResponse> getObservableService() {
-        if (mServiceLiveData == null) {
-            mServiceLiveData = new MutableLiveData<>();
-        }
-        return mServiceLiveData;
-    }
-
-    public LiveData<WorkflowUserResponse> getObservableWorkflowUser() {
-        if (mUserLiveData == null) {
-            mUserLiveData = new MutableLiveData<>();
-        }
-        return mUserLiveData;
-    }
-
-    public LiveData<CountriesResponse> getObservableCountries() {
-        if (mCountriesLiveData == null) {
-            mCountriesLiveData = new MutableLiveData<>();
-        }
-        return mCountriesLiveData;
-    }
-
-    public LiveData<CreateWorkflowResponse> getObservableCreate() {
-        if (mCreateLiveData == null) {
-            mCreateLiveData = new MutableLiveData<>();
-        }
-        return mCreateLiveData;
-    }
-
     protected LiveData<Integer> getObservableError() {
         if (mErrorLiveData == null) {
             mErrorLiveData = new MutableLiveData<>();
         }
         return mErrorLiveData;
-    }
-
-    protected LiveData<Integer> getObservableCreateError() {
-        if (mCreateErrorLiveData == null) {
-            mCreateErrorLiveData = new MutableLiveData<>();
-        }
-        return mCreateErrorLiveData;
     }
 
     protected LiveData<Boolean> getObservableShowLoading() {
@@ -1893,6 +1901,13 @@ public class CreateWorkflowViewModel extends ViewModel {
         return mAddWorkflowTypeItemLiveData;
     }
 
+    protected LiveData<IntentFormItem> getObservableAddPeopleInvolvedItem() {
+        if (mAddPeopleInvolvedItemLiveData == null) {
+            mAddPeopleInvolvedItemLiveData = new MutableLiveData<>();
+        }
+        return mAddPeopleInvolvedItemLiveData;
+    }
+
     protected LiveData<BaseFormItem> getObservableAddFormItem() {
         if (mAddFormItemLiveData == null) {
             mAddFormItemLiveData = new MutableLiveData<>();
@@ -1907,10 +1922,45 @@ public class CreateWorkflowViewModel extends ViewModel {
         return mSetFormItemListLiveData;
     }
 
+    protected LiveData<BaseFormItem> getObservableAddPeopleInvolvedFormItem() {
+        if (mAddPeopleInvolvedFormItemLiveData == null) {
+            mAddPeopleInvolvedFormItemLiveData = new MutableLiveData<>();
+        }
+        return mAddPeopleInvolvedFormItemLiveData;
+    }
+
+    protected LiveData<List<BaseFormItem>> getObservableSetPeopleInvolvedFormItemList() {
+        if (mSetPeopleInvolvedFormItemListLiveData == null) {
+            mSetPeopleInvolvedFormItemListLiveData = new MutableLiveData<>();
+        }
+        return mSetPeopleInvolvedFormItemListLiveData;
+    }
+
     protected LiveData<BaseFormItem> getObservableValidationUi() {
         if (mValidationUiLiveData == null) {
             mValidationUiLiveData = new MutableLiveData<>();
         }
         return mValidationUiLiveData;
+    }
+
+    protected LiveData<Integer> getObservableToastMessage() {
+        if (mToastMessageLiveData == null) {
+            mToastMessageLiveData = new MutableLiveData<>();
+        }
+        return mToastMessageLiveData;
+    }
+
+    protected LiveData<FileFormItem> getObservableFileFormItem() {
+        if (mNewFormItemFileLiveData == null) {
+            mNewFormItemFileLiveData = new MutableLiveData<>();
+        }
+        return mNewFormItemFileLiveData;
+    }
+
+    protected LiveData<DownloadedFileUiData> getObservableDownloadedFileUiData() {
+        if (mOpenDownloadedFileLiveData == null) {
+            mOpenDownloadedFileLiveData = new MutableLiveData<>();
+        }
+        return mOpenDownloadedFileLiveData;
     }
 }

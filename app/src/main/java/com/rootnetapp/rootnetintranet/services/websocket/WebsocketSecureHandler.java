@@ -3,8 +3,6 @@ package com.rootnetapp.rootnetintranet.services.websocket;
 import android.net.Uri;
 import android.util.Log;
 
-import com.rootnetapp.rootnetintranet.commons.Utils;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
@@ -12,8 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+import androidx.annotation.NonNull;
 import io.crossbar.autobahn.wamp.Client;
 import io.crossbar.autobahn.wamp.Session;
 import io.crossbar.autobahn.wamp.auth.ChallengeResponseAuth;
@@ -22,32 +19,65 @@ import io.crossbar.autobahn.wamp.types.EventDetails;
 import io.crossbar.autobahn.wamp.types.ExitInfo;
 import io.crossbar.autobahn.wamp.types.SessionDetails;
 import io.crossbar.autobahn.wamp.types.Subscription;
+import io.crossbar.autobahn.wamp.types.TransportOptions;
 
 public class WebsocketSecureHandler {
+
+    public interface WebSocketSecureCallback {
+        void onMessageRecieved(String[] messageArray);
+    }
+
+    public interface WebSocketErrorCallback {
+        void onError(String errorMessage);
+    }
 
     private String protocol;
     private String port;
     private String token;
+    private String url;
 
     private CompletableFuture<ExitInfo> exitInfoCompletableFuture;
 
-    private MutableLiveData<String[]> incomingNotification;
-    private MutableLiveData<Integer> onErrorInWebsocket;
+    private WebSocketSecureCallback callback;
+    private WebSocketErrorCallback errorCallback;
+    private Session session;
 
     private static final String TAG = "WebsocketHandler";
     public static final int INDEX_TITLE = 0;
     public static final int INDEX_MESSAGE = 1;
     public static final int INDEX_ID = 2;
+    public static final int INDEX_NAME = 3;
 
     public static final int ERROR_AUTHENTICATION = 100;
     public static final int ERROR_SUBSCRIBING = 101;
+    public static final int ERROR_DISCONNECT = 102;
 
-    public WebsocketSecureHandler(String protocol, String port, String token) {
+    public static final String KEY_TOKEN = "intranet.token";
+    public static final String KEY_PORT = "intranet.port";
+    public static final String KEY_PROTOCOL = "intranet.protocol";
+    public static final String KEY_DOMAIN = "intranet.domain";
+    public static final String KEY_BACKGROUND = "intranet.background";
+
+    public static final String REASON_AUTH_FAILURE = "thruway.error.authentication_failure";
+    public static final String REASON_CLOSE = "wamp.close.normal";
+    public static final String REASON_GOODBYE = "wamp.error.goodbye_and_out";
+
+    private final String realm = "master";
+
+    public WebsocketSecureHandler(String protocol, String port, String token, String domain) {
         this.protocol = protocol;
         this.port = port;
         this.token = token;
-        this.incomingNotification = new MutableLiveData<>();
-        this.onErrorInWebsocket = new MutableLiveData<>();
+
+        String domainName;
+        try {
+            domainName = getDomainName(domain);
+        } catch (URISyntaxException e) {
+            Log.d(TAG, "initNotifications: Missing websocket settings");
+            return;
+        }
+
+        this.url = protocol + "://" + domainName + ":" + port + "/";
     }
 
     public String getProtocol() {
@@ -62,18 +92,50 @@ public class WebsocketSecureHandler {
         return token;
     }
 
+    /**
+     * Calls complete(ExitInfo(true)) for the current exitINfoCompletableFuture created.
+     */
     public void completeClient() {
+        if (!session.isConnected()) {
+            return;
+        }
+        session.leave();
         exitInfoCompletableFuture.complete(new ExitInfo(true));
     }
 
+    /**
+     * It will cancel the Future and cuts off any ongoing action.
+     */
     public void cancelClient() {
+        if (!session.isConnected()) {
+            return;
+        }
         // mayInterruptRunning doesn't affect the method implementation.
+        session.leave();
         exitInfoCompletableFuture.cancel(true);
     }
 
-    public void initNotifications() {
+    /**
+     * This method will take callbacks instead of relying on observables. Passing callbacks will
+     * set them as default and any attempt to use LiveData will be ignored and callbacks will be
+     * used instead.
+     *
+     * @param callback
+     * @param errorCallback
+     */
+    public void initNotificationsWithCallback(@NonNull WebSocketSecureCallback callback, @NonNull WebSocketErrorCallback errorCallback) {
+        this.callback = callback;
+        this.errorCallback = errorCallback;
+        initNotifications();
+    }
+
+    /**
+     * This method will initiate a new session and this session will listen for new actions coming
+     * fom the webSocket.
+     */
+    private void initNotifications() {
         // Create a session object
-        Session session = new Session();
+        session = new Session();
         // Add all onJoin listeners
         session.addOnJoinListener(this::subscribeToWebsocket);
         session.addOnReadyListener(readySession -> {
@@ -81,6 +143,11 @@ public class WebsocketSecureHandler {
         });
         session.addOnDisconnectListener((sessionDisconnect, clean) -> {
             Log.d(TAG, "initNotifications: On Disconnect");
+            if (errorCallback == null) {
+                Log.d(TAG, "initNotifications: Needs a callback, callback can't be null");
+            } else {
+                errorCallback.onError("Error Disconnect");
+            }
         });
 
         session.addOnConnectListener(sessionConnect -> {
@@ -90,32 +157,42 @@ public class WebsocketSecureHandler {
             Log.d(TAG, "2 initNotifications: on Join");
         });
         session.addOnLeaveListener((sessionLeave, details) -> {
-            if (details.reason.equals("thruway.error.authentication_failure")) {
-                Log.d(TAG, "initNotifications: failure");
-                onErrorInWebsocket.postValue(ERROR_AUTHENTICATION);
-                // TODO log to analytics tool and send to server
-            } else {
-                Log.d(TAG, "initNotifications: something else");
+            if (errorCallback == null) {
+                return;
+            }
+
+            switch (details.reason) {
+                case REASON_AUTH_FAILURE:
+                    errorCallback.onError(details.reason);
+                    break;
+                case REASON_CLOSE:
+                    errorCallback.onError(details.reason);
+                    break;
+                case REASON_GOODBYE:
+                    errorCallback.onError(details.reason);
+                    break;
+                default:
+                    errorCallback.onError(details.reason);
+                    Log.d(TAG, "initNotifications: not managed leave resason");
             }
         });
 
-        String domain;
-        try {
-            domain = getDomainName(Utils.domain);
-        } catch (URISyntaxException e) {
-            Log.d(TAG, "initNotifications: Missing websocket settings");
-            return;
-        }
-
-        String url = protocol + "://" + domain + ":" + port + "/";
-        String realm = "master";
-
 //         finally, provide everything to a Client and connect
-        IAuthenticator authenticator = new ChallengeResponseAuth(token);
-        Client client = new Client(session, url, realm, authenticator);
-        exitInfoCompletableFuture = client.connect();
+        connect(session, url, realm, token);
     }
 
+    private void connect(Session session, String url, String realm, String token) {
+        IAuthenticator authenticator = new ChallengeResponseAuth(token);
+        Client client = new Client(session, url, realm, authenticator);
+        TransportOptions transportOptions = new TransportOptions();
+        exitInfoCompletableFuture = client.connect(transportOptions);
+    }
+
+    /**
+     * Subscription to some topic in the web server.
+     * @param session
+     * @param details
+     */
     private void subscribeToWebsocket(Session session, SessionDetails details) {
 //         Subscribe to topic to receive its events.
         CompletableFuture<Subscription> subFuture = session.subscribe("master.notification",
@@ -127,11 +204,22 @@ public class WebsocketSecureHandler {
             } else {
                 // Something went bad.
                 throwable.printStackTrace();
-                onErrorInWebsocket.postValue(ERROR_SUBSCRIBING);
+
+                if (errorCallback == null) {
+                    Log.d(TAG, "initNotifications: Needs a errorCallback, callback can't be null");
+                } else {
+                    errorCallback.onError(throwable.getMessage());
+                }
             }
         });
     }
 
+    /**
+     * On coming messages will be listen by onEvent. It will only listen to master.notifications.
+     * @param args
+     * @param kwargs
+     * @param details
+     */
     private void onEvent(List<Object> args, Map<String, Object> kwargs, EventDetails details) {
         String topic = details.topic;
         if (!topic.equals("master.notification")) {
@@ -146,36 +234,72 @@ public class WebsocketSecureHandler {
 
         String keyMessage = "message";
         String keyTitle = "title";
-        String keyId = "url";
+        String keyProperty = "properties";
+        String keyWorkflowId = "id";
+        String keyName = "author";
+
+        LinkedHashMap properties = (LinkedHashMap) incomingMessage.get(keyProperty);
+
+        if (properties == null) {
+            String keyUrl = "url";
+            String url = (String) incomingMessage.get(keyUrl);
+            String id = getIdFromUrl(url);
+            String title = (String) incomingMessage.get(keyTitle);
+            String message = (String) incomingMessage.get(keyMessage);
+
+            String[] notificationMessage = new String[4];
+            notificationMessage[INDEX_TITLE] = message;
+            notificationMessage[INDEX_MESSAGE] = title;
+            notificationMessage[INDEX_ID] = id;
+            notificationMessage[INDEX_NAME] = message;
+
+            if (callback == null) {
+                Log.d(TAG, "initNotifications: Needs a callback, callback can't be null");
+            } else {
+                callback.onMessageRecieved(notificationMessage);
+            }
+            return;
+        }
+
         String message = (String) incomingMessage.get(keyMessage);
         String title = (String) incomingMessage.get(keyTitle);
-        String id = (String) incomingMessage.get(keyId);
+        String name = (String) properties.get(keyName);
+        Integer id = (Integer) properties.get(keyWorkflowId);
 
-        id = getIdFromUrl(id);
-
-        String[] notificationMessage = new String[3];
+        String[] notificationMessage = new String[4];
         notificationMessage[INDEX_TITLE] = title;
         notificationMessage[INDEX_MESSAGE] = message;
-        notificationMessage[INDEX_ID] = id;
-        incomingNotification.postValue(notificationMessage);
+        notificationMessage[INDEX_ID] = String.valueOf(id);
+        notificationMessage[INDEX_NAME] = name;
+
+        if (callback == null) {
+            Log.d(TAG, "initNotifications: Needs a callback, callback can't be null");
+        } else {
+            callback.onMessageRecieved(notificationMessage);
+        }
     }
 
+    /**
+     * Helper method to get the last segment on some uri path.
+     *
+     * @param url
+     * @return
+     */
     private String getIdFromUrl(String url) {
         Uri uri = Uri.parse(url);
         return uri.getLastPathSegment();
     }
 
+    /**
+     * Gets a domain from some URL string.
+     *
+     * @param url
+     * @return
+     * @throws URISyntaxException
+     */
     private static String getDomainName(String url) throws URISyntaxException {
         URI uri = new URI(url);
         String domain = uri.getHost();
         return domain.startsWith("www.") ? domain.substring(4) : domain;
-    }
-
-    public LiveData<String[]> getObservableIncomingNotification() {
-        return incomingNotification;
-    }
-
-    public LiveData<Integer> getObservableOnErrorInWebsocket() {
-        return onErrorInWebsocket;
     }
 }

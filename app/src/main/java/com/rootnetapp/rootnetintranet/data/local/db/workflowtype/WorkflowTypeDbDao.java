@@ -1,5 +1,10 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflowtype;
 
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
+
+import java.util.List;
+
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -7,12 +12,6 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
-import io.reactivex.Single;
-
-import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
-import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
-
-import java.util.List;
 
 @Dao
 public interface WorkflowTypeDbDao {
@@ -61,5 +60,5 @@ public interface WorkflowTypeDbDao {
     public List<FormFieldsByWorkflowType> getFields(int byId);
 
     @Query("SELECT * FROM workflowtypedb WHERE id = :workflowTypeId")
-    public Single<WorkflowTypeDb> getWorkflowTypeBy(int workflowTypeId);
+    public WorkflowTypeDb getWorkflowTypeBy(int workflowTypeId);
 }

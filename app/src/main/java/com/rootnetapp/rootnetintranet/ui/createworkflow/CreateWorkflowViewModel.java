@@ -1646,6 +1646,8 @@ class CreateWorkflowViewModel extends ViewModel {
         disposable = mRepository
                 .getProfiles(mToken, true)
                 .subscribe(profileResponse -> {
+                    showLoading.setValue(false);
+
                     List<Profile> profiles = profileResponse.getProfiles();
                     if (profiles == null || profiles.isEmpty()) return;
 
@@ -1676,14 +1678,18 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     //region Additional People Involved
                     //verify selected values
-                    List<BaseOption> peopleInvolvedValues = new ArrayList<>();
-                    for (Integer id : mWorkflow.getProfilesInvolved()) {
-                        Profile profile = Profile.getProfileByIdFromList(profiles, id);
+                    List<BaseOption> peopleInvolvedValues = null;
+                    if (mWorkflow != null) {
+                        int idad = mWorkflow.getId();
+                        peopleInvolvedValues = new ArrayList<>();
+                        for (Integer id : mWorkflow.getProfilesInvolved()) {
+                            Profile profile = Profile.getProfileByIdFromList(profiles, id);
 
-                        if (profile == null) continue;
+                            if (profile == null) continue;
 
-                        Option option = new Option(id, profile.getFullName());
-                        peopleInvolvedValues.add(option);
+                            Option option = new Option(id, profile.getFullName());
+                            peopleInvolvedValues.add(option);
+                        }
                     }
 
                     MultipleChoiceFormItem multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
@@ -1699,14 +1705,17 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     //region Global Approvers
                     //verify selected values
-                    List<BaseOption> globalApproversValues = new ArrayList<>();
-                    for (Integer id : mWorkflow.getSpecificApprovers().global) {
-                        Profile profile = Profile.getProfileByIdFromList(profiles, id);
+                    List<BaseOption> globalApproversValues = null;
+                    if (mWorkflow != null) {
+                        globalApproversValues = new ArrayList<>();
+                        for (Integer id : mWorkflow.getSpecificApprovers().global) {
+                            Profile profile = Profile.getProfileByIdFromList(profiles, id);
 
-                        if (profile == null) continue;
+                            if (profile == null) continue;
 
-                        Option option = new Option(id, profile.getFullName());
-                        globalApproversValues.add(option);
+                            Option option = new Option(id, profile.getFullName());
+                            globalApproversValues.add(option);
+                        }
                     }
 
                     multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
@@ -1722,44 +1731,49 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     //region Specific Approvers
                     List<Status> statuses = workflowTypeDb.getStatus();
-                    if (statuses == null || statuses.isEmpty()) return;
+                    if (statuses != null && statuses.isEmpty()) {
+                        //verify selected values
+                        List<BaseOption> specificApproversValues = null;
+                        if (mWorkflow != null) {
+                            specificApproversValues = new ArrayList<>();
+                            for (StatusSpecific statusSpecific : mWorkflow
+                                    .getSpecificApprovers().statusSpecific) {
+                                Profile profile = Profile
+                                        .getProfileByIdFromList(profiles, statusSpecific.user);
+                                Status status = Status
+                                        .getStatusByIdFromList(statuses, statusSpecific.status);
 
-                    //verify selected values
-                    List<BaseOption> specificApproversValues = new ArrayList<>();
-                    for (StatusSpecific statusSpecific : mWorkflow
-                            .getSpecificApprovers().statusSpecific) {
-                        Profile profile = Profile
-                                .getProfileByIdFromList(profiles, statusSpecific.user);
-                        Status status = Status
-                                .getStatusByIdFromList(statuses, statusSpecific.status);
+                                if (profile == null || status == null) continue;
 
-                        if (profile == null || status == null) continue;
+                                Option userOption = new Option(profile.getId(),
+                                        profile.getFullName());
+                                Option statusOption = new Option(status.getId(), status.getName());
+                                DoubleOption doubleOption = new DoubleOption(userOption,
+                                        statusOption);
+                                specificApproversValues.add(doubleOption);
+                            }
+                        }
 
-                        Option userOption = new Option(profile.getId(), profile.getFullName());
-                        Option statusOption = new Option(status.getId(), status.getName());
-                        DoubleOption doubleOption = new DoubleOption(userOption, statusOption);
-                        specificApproversValues.add(doubleOption);
+                        List<Option> statusOptions = new ArrayList<>();
+                        for (int i = 0; i < statuses.size(); i++) {
+                            String name = statuses.get(i).getName();
+                            Integer id = statuses.get(i).getId();
+
+                            Option option = new Option(id, name);
+                            statusOptions.add(option);
+                        }
+
+                        DoubleMultipleChoiceFormItem doubleMultipleChoiceFormItem = new DoubleMultipleChoiceFormItem.Builder()
+                                .setTitleRes(R.string.specific_approvers_form)
+                                .setRequired(false)
+                                .setTag(TAG_SPECIFIC_APPROVERS)
+                                .setFirstOptions(userOptions)
+                                .setSecondOptions(statusOptions)
+                                .setValues(specificApproversValues)
+                                .build();
+
+                        mAddPeopleInvolvedFormItemLiveData.setValue(doubleMultipleChoiceFormItem);
                     }
-
-                    List<Option> statusOptions = new ArrayList<>();
-                    for (int i = 0; i < statuses.size(); i++) {
-                        String name = statuses.get(i).getName();
-                        Integer id = statuses.get(i).getId();
-
-                        Option option = new Option(id, name);
-                        statusOptions.add(option);
-                    }
-
-                    DoubleMultipleChoiceFormItem doubleMultipleChoiceFormItem = new DoubleMultipleChoiceFormItem.Builder()
-                            .setTitleRes(R.string.specific_approvers_form)
-                            .setRequired(false)
-                            .setTag(TAG_SPECIFIC_APPROVERS)
-                            .setFirstOptions(userOptions)
-                            .setSecondOptions(statusOptions)
-                            .setValues(specificApproversValues)
-                            .build();
-
-                    mAddPeopleInvolvedFormItemLiveData.setValue(doubleMultipleChoiceFormItem);
                     //endregion
 
                     //region Approvers by Role
@@ -1803,8 +1817,6 @@ class CreateWorkflowViewModel extends ViewModel {
                         mAddPeopleInvolvedFormItemLiveData.setValue(singleChoiceFormItem);
                     }
                     //endregion
-
-                    showLoading.setValue(false);
                 }, throwable -> Log
                         .e(TAG, "createProfilesFormItems: error " + throwable.getMessage()));
 

@@ -160,6 +160,11 @@ public class CreateWorkflowRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    public Observable<CreateWorkflowResponse> editWorkflow(String token, int workflowId, Map<String, Object> body) {
+        return service.editWorkflow(token, workflowId, body).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     public Observable<FileUploadResponse> uploadFile(String token, FilePost body) {
         return service.uploadFile(token, body).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());

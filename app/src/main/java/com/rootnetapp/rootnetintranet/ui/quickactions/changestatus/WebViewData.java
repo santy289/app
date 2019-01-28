@@ -1,27 +1,16 @@
 package com.rootnetapp.rootnetintranet.ui.quickactions.changestatus;
 
-import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
-
-import java.util.Map;
+import java.util.List;
+import java.util.Locale;
 
 class WebViewData {
 
-    private Map<String, String> headers;
     private String url;
-    private ClientResponse clientResponse;
+    private List<String> localStorageScripts;
 
-    public WebViewData(Map<String, String> headers, String url, ClientResponse clientResponse) {
-        this.headers = headers;
+    WebViewData(String url, List<String> localStorageScripts) {
         this.url = url;
-        this.clientResponse = clientResponse;
-    }
-
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-
-    public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
+        this.localStorageScripts = localStorageScripts;
     }
 
     public String getUrl() {
@@ -32,12 +21,15 @@ class WebViewData {
         this.url = url;
     }
 
-    public ClientResponse getClientResponse() {
-        return clientResponse;
+    public List<String> getLocalStorageScripts() {
+        return localStorageScripts;
     }
 
-    public void setClientResponse(
-            ClientResponse clientResponse) {
-        this.clientResponse = clientResponse;
+    public void setLocalStorageScripts(List<String> localStorageScripts) {
+        this.localStorageScripts = localStorageScripts;
+    }
+
+    public String getReloadScript() {
+        return String.format(Locale.US, "window.location = '%s';", getUrl());
     }
 }

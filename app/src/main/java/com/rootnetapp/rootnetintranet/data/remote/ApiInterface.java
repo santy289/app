@@ -274,6 +274,12 @@ public interface ApiInterface {
                                                     @Path("id") int workflowId,
                                                     @Body EditRequest body);
 
+    @Headers({"Domain-Name: api", "Content-Type: application/json;charset=UTF-8"})
+    @PATCH("intranet/workflows/{id}")
+    Observable<CreateWorkflowResponse> editWorkflow(@Header("Authorization") String authorization,
+                                                    @Path("id") int workflowId,
+                                                    @Body Map<String, Object> body);
+
     @Headers({"Domain-Name: api"})
     @POST("upload/file")
     Observable<FileUploadResponse> uploadFile(@Header("Authorization") String authorization,

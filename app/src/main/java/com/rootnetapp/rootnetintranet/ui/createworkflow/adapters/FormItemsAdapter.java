@@ -1042,7 +1042,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         holder.getBinding().rvSelectedItems.setAdapter(selectionsAdapter);
 
         //adds a hint to the spinners
-        String hint = mContext.getString(R.string.no_selection);
+        String hint = mContext.getString(R.string.no_selection_hint);
 
         //region First Spinner
         List<Option> firstOptions = new ArrayList<>(item.getFirstOptions());

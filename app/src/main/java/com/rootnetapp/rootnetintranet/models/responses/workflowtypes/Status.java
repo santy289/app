@@ -135,4 +135,12 @@ public class Status {
     public void setApproversList(List<Approver> approversList) {
         this.approversList = approversList;
     }
+
+    public static Status getStatusByIdFromList(List<Status> statuses, int statusId) {
+        for (Status status : statuses) {
+            if (status.getId() == statusId) return status;
+        }
+
+        return null;
+    }
 }

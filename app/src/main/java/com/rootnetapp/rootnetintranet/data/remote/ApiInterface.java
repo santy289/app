@@ -182,7 +182,6 @@ public interface ApiInterface {
                                                            @Query("open") boolean open,
                                                            @Query("page") int page,
                                                            @Query("workflow_type") boolean showTypeDetails,
-                                                           @Query("responsible_id") int profileId,
                                                            @Query("workflow_metadata") String metaData,
                                                            @Query("workflow_type_id") int workflowTypeId);
 

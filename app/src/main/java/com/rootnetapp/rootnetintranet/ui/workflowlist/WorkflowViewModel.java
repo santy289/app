@@ -162,7 +162,7 @@ public class WorkflowViewModel extends ViewModel {
     protected void swipeToRefresh(LifecycleOwner lifecycleOwner) {
         int id = filterSettings.getWorkflowTypeId();
         if (id > 0) {
-            workflowRepository.getWorkflowsByType(token, id);
+            workflowRepository.getWorkflowsByType(token, id, true);
         } else {
             workflowRepository.getAllWorkflowsNoFilters(token);
         }
@@ -409,7 +409,7 @@ public class WorkflowViewModel extends ViewModel {
         if (typeId == NO_TYPE_SELECTED) {
             workflowRepository.getAllWorkflowsNoFilters(token);
         } else {
-            workflowRepository.getWorkflowsByType(token, typeId);
+            workflowRepository.getWorkflowsByType(token, typeId, false);
         }
         liveWorkflows.removeObservers(lifecycleOwner);
     }
@@ -420,7 +420,7 @@ public class WorkflowViewModel extends ViewModel {
         if (typeId == NO_TYPE_SELECTED) {
             workflowRepository.getAllWorkflowsNoFilters(token);
         } else {
-            workflowRepository.getWorkflowsByType(token, typeId);
+            workflowRepository.getWorkflowsByType(token, typeId, false);
         }
         liveWorkflows.removeObservers(lifecycleOwner);
     }
@@ -571,16 +571,34 @@ public class WorkflowViewModel extends ViewModel {
 
         // Filter List Update with new selection
         filterSettings.updateWorkflowTypeListFilterItem(menu);
+
+
+        // TODO
         // Update Drawer Options List
         filterSettings.updateRightDrawerOptionListWithSelected(menu, false);
+
+
+
+
+
+
+
         updateSelectedMenuItem(menu);
 //            filterSettings.updateFilterListItemSelected(menu);
 
         // Allowing single selection on the UI for this list.
         invalidateDrawerOptionsList.setValue(true);
 
+
+
+        // TODO
         liveWorkflows.removeObservers(lifecycleOwner);
         applyFilters(filterSettings);
+
+
+
+
+
         int workflowTypeId = menu.getWorkflowTypeId();
         findDynamicFieldsBy(workflowTypeId);
 
@@ -966,12 +984,18 @@ public class WorkflowViewModel extends ViewModel {
             applyFilters(filterSettings);
         });
 
+        final Observer<Boolean> handleRestSuccessWithNoApplyFilter = (success -> {
+           showLoading.postValue(false);
+        });
+
         workflowRepository.getObservableHandleRepoError()
                 .observe(lifecycleOwner, handleRepoErrorObserver);
         workflowRepository.getObservableHandleRepoSuccess()
                 .observe(lifecycleOwner, handleRepoSuccessObserver);
         workflowRepository.getObservableHandleRepoSuccessNoFilter()
                 .observe(lifecycleOwner, handleRepoSuccessNoFilterObserver);
+        workflowRepository.getObservableHandleRestSuccessWithNoApplyFilter()
+                .observe(lifecycleOwner, handleRestSuccessWithNoApplyFilter);
     }
 
     protected LiveData<Boolean> getObservableLoadMore() {
@@ -1027,7 +1051,17 @@ public class WorkflowViewModel extends ViewModel {
                             id,
                             filterSettings.getSearchText());
                 }
+
+
+
+                // TODO
                 reloadWorkflowsList();
+
+
+
+
+
+
                 break;
             }
             case BYNUMBER: {

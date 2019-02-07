@@ -21,6 +21,10 @@ public class WorkflowTypeDb {
     @Json(name = "id")
     private int id;
 
+    @Json(name = "original_id")
+    @ColumnInfo(name = "original_id")
+    private int originalId;
+
     @Json(name = "name")
     private String name;
 
@@ -79,6 +83,14 @@ public class WorkflowTypeDb {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getOriginalId() {
+        return originalId;
+    }
+
+    public void setOriginalId(int originalId) {
+        this.originalId = originalId;
     }
 
     public String getName() {

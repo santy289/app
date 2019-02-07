@@ -199,7 +199,7 @@ public interface ApiInterface {
     Observable<WorkflowTypesResponse> getWorkflowTypes(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows/types?all_versions=true")
+    @GET("intranet/workflows/types?all_versions=true&filter_counter_status=true")
     Observable<WorkflowTypeDbResponse> getWorkflowTypesDb(@Header("Authorization") String authorization);
 
 

@@ -592,8 +592,7 @@ public class WorkflowViewModel extends ViewModel {
 
         // Choosing some workflow type from the filter Workflow Type.
         // Update Filter Settings with new workflow type id.
-        filterSettings.setWorkflowTypeId(menu.getWorkflowTypeId());
-
+        filterSettings.setWorkflowTypeId(menu.getOriginalId());
         loadWorkflowsByType(menu, lifecycleOwner);
 
         // clear any selected items if any
@@ -602,16 +601,8 @@ public class WorkflowViewModel extends ViewModel {
         // Filter List Update with new selection
         filterSettings.updateWorkflowTypeListFilterItem(menu);
 
-
-        // TODO
         // Update Drawer Options List
         filterSettings.updateRightDrawerOptionListWithSelected(menu, false);
-
-
-
-
-
-
 
         updateSelectedMenuItem(menu);
 //            filterSettings.updateFilterListItemSelected(menu);
@@ -619,19 +610,12 @@ public class WorkflowViewModel extends ViewModel {
         // Allowing single selection on the UI for this list.
         invalidateDrawerOptionsList.setValue(true);
 
-
-
-        // TODO
+        // TODO double check if we need this removeObservers() we call already in loadWorkflowByType() something similar.
         liveWorkflows.removeObservers(lifecycleOwner);
         applyFilters(filterSettings);
 
-
-
-
-
         int workflowTypeId = menu.getWorkflowTypeId();
         findDynamicFieldsBy(workflowTypeId);
-
     }
 
     private FormSettings formSettings;

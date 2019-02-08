@@ -83,7 +83,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 "workflowtypedb.name AS workflowTypeName, workflowdb.title, workflowdb.workflow_type_key, " +
                 "workflowdb.full_name, workflowdb.current_status_name, workflowdb.created_at, workflowdb.updated_at, " +
                 "workflowdb.start, workflowdb.status, workflowdb.current_status, workflowdb.`end` " +
-                "FROM workflowtypedb INNER JOIN workflowdb " +
+                "FROM workflowdb LEFT JOIN workflowtypedb " +
                 "ON workflowdb.workflow_type_id = workflowtypedb.id ";
     }
 
@@ -152,6 +152,14 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 .build();
     }
 
+    /**
+     * Method uses a raw query for querying workflows by status or by a search term on the title.
+     *
+     * @param status
+     * @param token
+     * @param id
+     * @param searchText
+     */
     public void rawQueryWorkflowListByFilters(boolean status, String token, String id, String searchText) {
         Object[] objects;
         String queryString;
@@ -171,42 +179,62 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         startRawQuery(queryString, token, objects, id);
     }
 
-    public void rawQueryWorkflowListByFilters(boolean status, int workflowTypeId, String token, String id, String searchText) {
+    /**
+     * Method uses a raw query for querying workflows by original workflow type id, by status
+     * or by a search term on the title.
+     * @param status
+     * @param originalTypeId
+     * @param token
+     * @param id
+     * @param searchText
+     */
+    public void rawQueryWorkflowListByFilters(boolean status, int originalTypeId, String token, String id, String searchText) {
         Object[] objects;
         String queryString;
         if (TextUtils.isEmpty(searchText)) {
             queryString = baseWorkflowListQuery +
-                    "WHERE workflowdb.status = ? " +
-                    "AND workflowdb.workflow_type_id = ? " +
+                    "WHERE (workflowtypedb.original_id = ? OR workflowtypedb.id = ?)" +
+                    "AND workflowdb.status = ? " +
                     "ORDER BY workflowdb.created_at DESC";
-            objects = new Object[]{status, workflowTypeId};
+            objects = new Object[]{originalTypeId, originalTypeId, status};
         } else {
             queryString = baseWorkflowListQuery +
-                    "WHERE workflowdb.status = ? " +
-                    "AND workflowdb.workflow_type_id = ? " +
+                    "WHERE (workflowtypedb.original_id = ? OR workflowtypedb.id = ?)" +
+                    "AND workflowdb.status = ? " +
                     "AND workflowdb.title LIKE '%' || ? || '%'" +
                     "ORDER BY workflowdb.created_at DESC";
-            objects = new Object[]{status, workflowTypeId, searchText};
+            objects = new Object[]{originalTypeId, originalTypeId, status, searchText};
         }
         // TODO pass the workflowTypeId as well we need it later. and modify the other functions too.
-        startRawQuery(queryString, token, objects, id, workflowTypeId);
+        startRawQuery(queryString, token, objects, id, originalTypeId);
     }
 
-    public void rawQueryWorkflowListByFilters(boolean status, int workflowTypeId, String column, boolean isDescending, String token, String id, String searchText) {
+    /**
+     * Method uses a raw query for querying workflows by original workflow type id, by status
+     * or by a search term on the title. And by specifying a column as descending or ascending orders.
+     * @param status
+     * @param originalTypeId
+     * @param column
+     * @param isDescending
+     * @param token
+     * @param id
+     * @param searchText
+     */
+    public void rawQueryWorkflowListByFilters(boolean status, int originalTypeId, String column, boolean isDescending, String token, String id, String searchText) {
         String queryString;
         Object[] objects;
 
         if (TextUtils.isEmpty(searchText)) {
             queryString = baseWorkflowListQuery +
-                    "WHERE workflowdb.status = ? " +
-                    "AND workflowdb.workflow_type_id = ? ";
-            objects = new Object[]{status, workflowTypeId};
+                    "WHERE (workflowtypedb.original_id = ? OR workflowtypedb.id = ?)" +
+                    "AND workflowdb.status = ? ";
+            objects = new Object[]{originalTypeId, originalTypeId, status};
         } else {
             queryString = baseWorkflowListQuery +
-                    "WHERE workflowdb.status = ? " +
-                    "AND workflowdb.workflow_type_id = ? " +
+                    "WHERE (workflowtypedb.original_id = ? OR workflowtypedb.id = ?)" +
+                    "AND workflowdb.status = ? " +
                     "AND workflowdb.title LIKE '%' || ? || '%'";
-            objects = new Object[]{status, workflowTypeId, searchText};
+            objects = new Object[]{originalTypeId, originalTypeId, status, searchText};
         }
         if (isDescending) {
             queryString += "ORDER BY " + column + " DESC";
@@ -217,6 +245,16 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         startRawQuery(queryString, token, objects, id);
     }
 
+    /**
+     * Method uses a raw query for querying workflows by status
+     * or by a search term on the title. And by specifying a column as descending or ascending orders.
+     * @param status
+     * @param column
+     * @param isDescending
+     * @param token
+     * @param id
+     * @param searchText
+     */
     public void rawQueryWorkflowListByFilters(boolean status, String column, boolean isDescending, String token, String id, String searchText) {
         String queryString;
         Object[] objects;
@@ -250,12 +288,20 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     }
 
 
+    /**
+     * Method generates a DataSource factory for a ListAdapter. Also it verifies that a boundary
+     * callback is not already initiated with some background thread work, if we have something
+     * already running on the boundary callback this method will dispose any background work. It
+     * will also set a Boundary Callback for the appropriate scenario. This could be a workflow
+     * list request without filters or with some kind of filters, such as original workflow  type
+     * @param token
+     * @param query
+     * @param id
+     * @param workflowTypeId
+     */
     private void getWorkflowsByFilters(String token, SupportSQLiteQuery query, String id, int workflowTypeId) {
         DataSource.Factory<Integer, WorkflowListItem> factory = workflowDbDao.getWorkflowsWithFilter(query);
 
-
-        // TODO stop and dispose any disoposables in callback. The callback is in memory so we have
-        // TODO access to an instance. Stop any if possible. We don't want to trigger any callbacks when doing something else.
         if (callback != null) {
             callback.clearDisposables();
         }

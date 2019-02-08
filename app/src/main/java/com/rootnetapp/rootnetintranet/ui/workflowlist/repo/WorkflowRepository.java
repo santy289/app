@@ -460,7 +460,10 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     }
 
     /**
-     *
+     * This method will receive a response from the network, and insert the incoming workflows
+     * without deleting any previous workflows. Any content duplicates will be replaced with the
+     * new incoming workflow. This method will eventually call a live data that will handle the
+     * success response back to the view model.
      * @param workflowsResponse
      */
     private void workflowDbSuccessWithoutDeletingData(WorkflowResponseDb workflowsResponse) {
@@ -471,27 +474,8 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(success -> {
                     Log.d(TAG, "workflowDbSuccess: ");
-
-
-
-
-
-
-
                     // No apply filters
                     handleRestSuccessWithNoApplyFilter.postValue(true);
-
-
-
-
-
-
-
-
-
-
-
-
                     }, throwable -> {
                     Log.d(TAG, "getWorkflowDbSuccess: error " + throwable.getMessage());
                     handleRepoError.postValue(true);

@@ -123,11 +123,16 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
 
         if (filesViewModel.getFileRequest() == null) {
 
-            boolean isPresetSelected = filesViewModel.isAnyPresetSelected(mDocumentsAdapter.totalDocuments);
+            boolean isPresetSelected = filesViewModel
+                    .isAnyPresetSelected(mDocumentsAdapter.totalDocuments);
             if (!isPresetSelected) return;
 
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("*/*");
+
+            //specify multiple MIME types
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, Utils.ALLOWED_MIME_TYPES);
+
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             try {
                 startActivityForResult(Intent.createChooser(

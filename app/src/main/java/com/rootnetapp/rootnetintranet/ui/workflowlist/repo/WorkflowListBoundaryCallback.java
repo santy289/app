@@ -1,7 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist.repo;
 
-import androidx.paging.PagedList;
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -12,6 +10,8 @@ import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowRespons
 
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.paging.PagedList;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -26,17 +26,21 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
     private int currentPage;
     private int lastPage;
     private String id;
+    private int workflowTypeId;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     private static final String TAG = "ListBoundaryCallback";
+
+    public static final int NO_WORKFLOW_TYPE = -999;
 
     public WorkflowListBoundaryCallback(
             ApiInterface service,
             String token,
             int currentPage,
             IncomingWorkflowsCallback workflowsCallback,
-            String id) {
+            String id,
+            int workflowTypeId) {
         this.service = service;
         this.token = token;
         this.currentPage = currentPage;
@@ -44,6 +48,7 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
         this.isLoading = false;
         this.lastPage = 2;
         this.id = id;
+        this.workflowTypeId = workflowTypeId;
     }
 
     public WorkflowListBoundaryCallback(
@@ -51,7 +56,7 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
             String token,
             int currentPage,
             IncomingWorkflowsCallback workflowsCallback) {
-        this(service, token, currentPage, workflowsCallback, "");
+        this(service, token, currentPage, workflowsCallback, "", NO_WORKFLOW_TYPE);
     }
 
     @Override
@@ -64,7 +69,32 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
             return;
         }
         callback.showLoadingMore(true);
+        updateIsLoading(true);
         Disposable disposable;
+
+        if (this.workflowTypeId != NO_WORKFLOW_TYPE) {
+            disposable = service
+                    .getMyPendingWorkflowsDbByWorkflowType(
+                            token,
+                            WorkflowRepository.ENDPOINT_PAGE_SIZE,
+                            true,
+                            nextPage,
+                            false,
+                            null,
+                            workflowTypeId)
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            this::saveInDatabase,
+                            throwable -> {
+                                Log.d(TAG, "onItemAtEndLoaded: ");
+                                callback.showLoadingMore(false);
+                            }
+                    );
+            disposables.add(disposable);
+            return;
+        }
+
         if (TextUtils.isEmpty(id)) {
             disposable = service
                     .getWorkflowsDb(
@@ -82,25 +112,29 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
                                 callback.showLoadingMore(false);
                             }
                     );
-        } else {
-            int userId = Integer.valueOf(id);
-            disposable = service
-                    .getMyPendingWorkflowsDb(
-                            token,
-                            WorkflowRepository.ENDPOINT_PAGE_SIZE,
-                            true,
-                            nextPage,
-                            false,
-                            userId,
-                            null)
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(
-                            this::saveInDatabase,
-                            throwable -> Log.d(TAG, "WorkflowListBoundaryCallback: Cant get workflows from network - " + throwable.getMessage())
-                    );
+            disposables.add(disposable);
+            return;
         }
 
+        int userId = Integer.valueOf(id);
+        disposable = service
+                .getMyPendingWorkflowsDb(
+                        token,
+                        WorkflowRepository.ENDPOINT_PAGE_SIZE,
+                        true,
+                        nextPage,
+                        false,
+                        userId,
+                        null)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        this::saveInDatabase,
+                        throwable -> {
+                            Log.d(TAG, "WorkflowListBoundaryCallback: Cant get workflows from network - " + throwable.getMessage());
+                            callback.showLoadingMore(false);
+                        }
+                );
         disposables.add(disposable);
     }
 
@@ -117,6 +151,7 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
     }
 
     private void saveInDatabase(WorkflowResponseDb workflowsResponse) {
+        callback.showLoadingMore(false);
         List<WorkflowDb> workflowDbs = workflowsResponse.getList();
         if (workflowDbs == null || workflowDbs.size() < 1) {
             return;

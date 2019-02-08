@@ -14,6 +14,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
@@ -37,6 +38,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<Integer> mFilesTabCounter;
     private MutableLiveData<Integer> mShowToastMessage;
     private MutableLiveData<WorkflowListItem> initUiWithWorkflowListItem;
+    private MutableLiveData<String> mWorkflowTypeVersionLiveData;
     private LiveData<WorkflowListItem> handleRepoWorkflowRequest;
 
     protected MutableLiveData<Boolean> showLoading;
@@ -272,6 +274,10 @@ public class WorkflowDetailViewModel extends ViewModel {
         showLoading.setValue(false);
         mWorkflow = workflowResponse.getWorkflow();
         updateStatusUiData(mWorkflow.isOpen(), false);
+
+        int version = mWorkflow.getWorkflowType().getVersion();
+        String versionString = String.format(Locale.US, "v%d", version);
+        mWorkflowTypeVersionLiveData.setValue(versionString);
     }
 
     /**
@@ -323,6 +329,13 @@ public class WorkflowDetailViewModel extends ViewModel {
             mFilesTabCounter = new MutableLiveData<>();
         }
         return mFilesTabCounter;
+    }
+
+    protected LiveData<String> getObservableWorkflowTypeVersion() {
+        if (mWorkflowTypeVersionLiveData == null) {
+            mWorkflowTypeVersionLiveData = new MutableLiveData<>();
+        }
+        return mWorkflowTypeVersionLiveData;
     }
 
     protected LiveData<WorkflowListItem> getObservableWorflowListItem() {

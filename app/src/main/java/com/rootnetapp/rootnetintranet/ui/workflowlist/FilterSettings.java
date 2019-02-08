@@ -22,7 +22,11 @@ public class FilterSettings {
     private boolean isCheckedMyPending;
     private boolean isCheckedStatus;
     private int typeIdPositionInArray;
+
+    // Todo for now we are using the naming workflowTypeId, but we should change it to originalTypeId.
+    // todo this is because we are using original_id property from our WorkflowTypeDB in this variable.
     private int workflowTypeId;
+
     private String searchText;
     private boolean onTime;
     private boolean latest;

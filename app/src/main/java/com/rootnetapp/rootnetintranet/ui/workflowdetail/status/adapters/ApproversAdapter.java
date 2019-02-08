@@ -17,6 +17,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class ApproversAdapter extends RecyclerView.Adapter<ApproversViewholder> {
@@ -65,12 +66,20 @@ public class ApproversAdapter extends RecyclerView.Adapter<ApproversViewholder> 
 
         viewholder.binding.detailApproverName.setText(currentApprover.entityName);
 
-        if (currentApprover.approved) {
-            viewholder.binding.detailApproverState.setText(context.getString(R.string.approved));
-            viewholder.binding.detailApproverState.setTextColor(context.getResources().getColor(R.color.green));
+        if (currentApprover.approved != null) {
+            if (currentApprover.approved) {
+                viewholder.binding.detailApproverState
+                        .setText(context.getString(R.string.approved));
+                viewholder.binding.detailApproverState
+                        .setTextColor(ContextCompat.getColor(context, R.color.green));
+            } else {
+                viewholder.binding.detailApproverState
+                        .setText(context.getString(R.string.rejected));
+                viewholder.binding.detailApproverState
+                        .setTextColor(ContextCompat.getColor(context, R.color.red));
+            }
         } else {
-            viewholder.binding.detailApproverState.setText(context.getString(R.string.rejected));
-            viewholder.binding.detailApproverState.setTextColor(context.getResources().getColor(R.color.red));
+            viewholder.binding.detailApproverState.setText(null);
         }
 
         viewholder.binding.executePendingBindings();

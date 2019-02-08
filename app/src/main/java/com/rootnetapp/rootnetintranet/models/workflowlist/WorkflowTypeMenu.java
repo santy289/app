@@ -12,6 +12,7 @@ public class WorkflowTypeMenu extends ListFieldItemMeta {
     private String subTitle;
     private int rowType;
     private int workflowTypeId;
+    private int originalId;
     private boolean selected;
     private Integer workflowCount;
 
@@ -20,6 +21,15 @@ public class WorkflowTypeMenu extends ListFieldItemMeta {
         this.label = label;
         this.rowType = rowType;
         this.workflowTypeId = workflowTypeId;
+        this.selected = false;
+    }
+
+    public WorkflowTypeMenu(int id, String label, int rowType, int workflowTypeId, int originalId) {
+        this.id = id;
+        this.label = label;
+        this.rowType = rowType;
+        this.workflowTypeId = workflowTypeId;
+        this.originalId = originalId;
         this.selected = false;
     }
 
@@ -99,6 +109,14 @@ public class WorkflowTypeMenu extends ListFieldItemMeta {
 
     public void setWorkflowTypeId(int workflowTypeId) {
         this.workflowTypeId = workflowTypeId;
+    }
+
+    public int getOriginalId() {
+        return originalId;
+    }
+
+    public void setOriginalId(int originalId) {
+        this.originalId = originalId;
     }
 
     public boolean isSelected() {

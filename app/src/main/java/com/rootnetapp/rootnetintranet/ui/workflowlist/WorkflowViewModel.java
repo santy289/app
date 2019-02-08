@@ -319,6 +319,9 @@ public class WorkflowViewModel extends ViewModel {
         ListItem category;
         WorkflowTypeItemMenu typeMenu;
 
+        // Organize all workflows in a result ArrayMap where the key is the Category name, and the
+        // values are lists of our workflow types.
+
         ArrayMap<String, List<WorkflowTypeMenu>> result = new ArrayMap<>();
 
         String categoryName;
@@ -329,17 +332,18 @@ public class WorkflowViewModel extends ViewModel {
         for (int i = 0; i < categoryList.size(); i++) {
             category = categoryList.get(i);
             categoryName = category.getName();
+            catId = category.getId();
             for (int j = 0; j < workflowTypeForMenu.size(); j++) {
                 typeMenu = workflowTypeForMenu.get(j);
                 idCat = typeMenu.getCategory();
-                catId = category.getId();
-                if (idCat == catId) {
+                if (idCat == catId && !isOriginalIdInList(typeMenu.getOriginalId(), tempMenus)) {
                     String menuLabel = typeMenu.getName();
                     WorkflowTypeMenu menu = new WorkflowTypeMenu(
                             typeMenu.id,
                             menuLabel,
                             WorkflowTypeSpinnerAdapter.TYPE,
-                            typeMenu.getId()
+                            typeMenu.getId(),
+                            typeMenu.getOriginalId()
                     );
                     menu.setWorkflowCount(typeMenu.getWorkflowCount());
                     tempMenus.add(menu);
@@ -352,6 +356,7 @@ public class WorkflowViewModel extends ViewModel {
             tempMenus = new ArrayList<>();
         }
 
+        // Find workflow types that have no category related to them.
         for (int i = 0; i < workflowTypeForMenu.size(); i++) {
             typeMenu = workflowTypeForMenu.get(i);
             idCat = typeMenu.getCategory();
@@ -372,6 +377,8 @@ public class WorkflowViewModel extends ViewModel {
             result.put(WorkflowTypeSpinnerAdapter.NO_CATEGORY_LABEL, noCategory);
         }
 
+        // Create one single ArrayList that will keep all the workflow types and categories in order.
+        // This spinnerMenuArray is the reference of how the UI will display the list of worklfow types.
         spinnerMenuArray = new ArrayList<>();
 
         String key;
@@ -399,6 +406,29 @@ public class WorkflowViewModel extends ViewModel {
         spinnerMenuArray.add(0, noSelection);
         filterSettings.saveOptionsListFor(FilterSettings.RIGHT_DRAWER_FILTER_TYPE_ITEM_ID,
                 spinnerMenuArray);
+    }
+
+    /**
+     * Finds out if the originalId is already saved on the WorkflowTypeMenu list.
+     * @param originalId
+     * @param types
+     * @return
+     */
+    private boolean isOriginalIdInList(int originalId, List<WorkflowTypeMenu> types) {
+        if (types == null || types.size() < 1) {
+            return false;
+        }
+
+        WorkflowTypeMenu targetType;
+        for (int i = 0; i < types.size(); i++) {
+            targetType = types.get(i);
+            if (targetType.getOriginalId() == originalId) {
+                return true;
+            }
+
+        }
+
+        return false;
     }
 
     @Deprecated

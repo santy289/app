@@ -313,6 +313,10 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         callback.clearDisposables();
     }
 
+    /**
+     * Inserts workflows without deleting any workflows previously created.
+     * @param worflows
+     */
     public void insertWorkflows(List<WorkflowDb> worflows) {
         Disposable disposable = Observable.fromCallable(() -> {
 //            WorkflowDbDao workflowDbDao = database.workflowDbDao();
@@ -345,6 +349,13 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         disposables.add(disposable);
     }
 
+    /**
+     * This method will find workflow types from the network. DeletePreviousData is a boolean that
+     * will handle the response in different ways.
+     * @param token
+     * @param typeId
+     * @param deletePreviousData Boolean to determine if we want to delete before saving our results.
+     */
     public void getWorkflowsByType(String token, int typeId, boolean deletePreviousData) {
         currentPage = 1;
 
@@ -402,6 +413,10 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         disposables.add(disposable);
     }
 
+    /**
+     *
+     * @param workflowsResponse
+     */
     private void workflowDbSuccessWithoutDeletingData(WorkflowResponseDb workflowsResponse) {
         Disposable disposable = Observable.fromCallable(() -> {
             workflowDbDao.insertWorkflows(workflowsResponse.getList());

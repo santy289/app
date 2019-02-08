@@ -23,6 +23,7 @@ import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.WorkflowDetailViewPagerAdapter;
 
 import java.io.File;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -71,7 +72,8 @@ public class WorkflowDetailActivity extends AppCompatActivity {
 
         showLoading(true);
 
-        WorkflowListItem mWorkflowListItem = getIntent().getParcelableExtra(EXTRA_WORKFLOW_LIST_ITEM);
+        WorkflowListItem mWorkflowListItem = getIntent()
+                .getParcelableExtra(EXTRA_WORKFLOW_LIST_ITEM);
         if (mWorkflowListItem == null) {
             String workflowId;
             workflowId = getIntent().getStringExtra(INTENT_EXTRA_ID);
@@ -95,8 +97,8 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Subscription used only if we are receiving an id as the data to initialize the Details screen.
-     * For instance, we get an id when a user opens this activity through a notification tap
+     * Subscription used only if we are receiving an id as the data to initialize the Details
+     * screen. For instance, we get an id when a user opens this activity through a notification tap
      * action.
      */
     private void subscribeForIdInit() {
@@ -104,7 +106,8 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 this,
                 workflowDb -> {
                     Log.d(TAG, "subscribeForIdInit: we got a workflow");
-                    workflowDetailViewModel.getObservableHandleRepoWorkflowRequest().removeObservers(this);
+                    workflowDetailViewModel.getObservableHandleRepoWorkflowRequest()
+                            .removeObservers(this);
                 });
     }
 
@@ -155,6 +158,8 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         workflowDetailViewModel.handleSetWorkflowIsOpenByRepo
                 .observe(this, this::updateWorkflowStatus);
         workflowDetailViewModel.getObservableWorflowListItem().observe(this, this::initUiWith);
+        workflowDetailViewModel.getObservableWorkflowTypeVersion()
+                .observe(this, this::updateToolbarSubtitleWithWorkflowVersion);
 
         workflowDetailViewModel.showLoading.observe(this, this::showLoading);
         workflowDetailViewModel.setWorkflowIsOpen.observe(this, this::updateWorkflowStatus);
@@ -234,6 +239,15 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     private void updateFilesTabCounter(Integer count) {
         mViewPagerAdapter.setFilesCounter(count);
         mViewPagerAdapter.notifyDataSetChanged();
+    }
+
+    @UiThread
+    private void updateToolbarSubtitleWithWorkflowVersion(String versionString) {
+        if (getSupportActionBar() == null) return;
+
+        String currentSubtitle = (String) getSupportActionBar().getSubtitle();
+        currentSubtitle = String.format(Locale.US, "%s (%s)", currentSubtitle, versionString);
+        getSupportActionBar().setSubtitle(currentSubtitle);
     }
 
     /**

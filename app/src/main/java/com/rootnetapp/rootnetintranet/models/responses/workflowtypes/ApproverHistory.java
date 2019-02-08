@@ -63,7 +63,7 @@ public class ApproverHistory {
      * @return the first match for the status and approver specified, true for approved, false for
      * rejected.
      */
-    public static boolean getApprovalStateForStatusAndApprover(List<ApproverHistory> list,
+    public static Boolean getApprovalStateForStatusAndApprover(List<ApproverHistory> list,
                                                                int statusId, int approverId) {
         for (ApproverHistory obj : list) {
             if (obj.status.getId() == statusId && obj.approverId == approverId) {
@@ -71,6 +71,6 @@ public class ApproverHistory {
             }
         }
 
-        return false;
+        return null;
     }
 }

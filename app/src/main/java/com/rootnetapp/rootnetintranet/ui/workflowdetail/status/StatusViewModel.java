@@ -52,6 +52,7 @@ public class StatusViewModel extends ViewModel {
     protected MutableLiveData<Boolean> hideApproveSpinnerOnEmptyData;
     protected MutableLiveData<Boolean> hideApproverListOnEmptyData;
     protected MutableLiveData<Boolean> setWorkflowIsOpen;
+    protected MutableLiveData<Boolean> mEnableApproveRejectButtonsLiveData;
     protected MutableLiveData<String[]> updateStatusUi;
     protected LiveData<String[]> updateStatusUiFromUserAction;
     protected LiveData<Boolean> handleShowLoadingByRepo;
@@ -98,6 +99,7 @@ public class StatusViewModel extends ViewModel {
                 approvalResponse -> {
                     // transform WorkflowApproveRejectResponse to String[]
 
+                    mEnableApproveRejectButtonsLiveData.setValue(true);
                     showLoading.setValue(false);
 
                     //WorkflowDb incomingWorkflow = approvalResponse.getWorkflow();
@@ -118,6 +120,7 @@ public class StatusViewModel extends ViewModel {
         handleShowLoadingByRepo = Transformations.map(
                 mRepository.getErrorShowLoading(),
                 show -> {
+                    mEnableApproveRejectButtonsLiveData.setValue(true);
                     showLoading.setValue(false);
                     showToastMessage.setValue(R.string.error);
                     return show;
@@ -287,7 +290,9 @@ public class StatusViewModel extends ViewModel {
      * Calls /approve endpoint and does a Post request to either approve or reject a workflow.
      */
     private void handleApproveOrRejectAction(int selectedItemIndex, boolean approve) {
+        mEnableApproveRejectButtonsLiveData.setValue(false);
         showLoading.setValue(true);
+
         List<Integer> nextStatusIds = mWorkflow.getCurrentStatusRelations();
         int nextStatusId = nextStatusIds.get(selectedItemIndex);
         mRepository.approveWorkflow(mToken, mWorkflow.getId(), approve, nextStatusId);
@@ -559,5 +564,12 @@ public class StatusViewModel extends ViewModel {
             mTieStatusLiveData = new MutableLiveData<>();
         }
         return mTieStatusLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableEnableApproveRejectButtons() {
+        if (mEnableApproveRejectButtonsLiveData == null) {
+            mEnableApproveRejectButtonsLiveData = new MutableLiveData<>();
+        }
+        return mEnableApproveRejectButtonsLiveData;
     }
 }

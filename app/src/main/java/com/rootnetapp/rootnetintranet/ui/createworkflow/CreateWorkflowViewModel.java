@@ -176,18 +176,6 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void postWorkflow() {
-        formSettings.getFormItemsToPost(); //needed to fill baseInfo, the return value is ignored
-        ArrayMap<String, Integer> baseInfo = formSettings.getBaseMachineNamesAndIds();
-
-        if (baseInfo.isEmpty()) {
-            Log.d(TAG, "postWorkflow: Need to initalize baseInfo");
-            DialogMessage dialogMessage = new DialogMessage();
-            dialogMessage.message = R.string.choose_a_workflow;
-            dialogMessage.title = R.string.required_fields;
-            showDialogMessage.setValue(dialogMessage);
-            return;
-        }
-
         showLoading.setValue(true);
 
         //check if we have a file to upload first and then continue with the rest.
@@ -196,15 +184,28 @@ class CreateWorkflowViewModel extends ViewModel {
 
     private void startSendingWorkflow(ArrayMap<String, Integer> baseInfo,
                                       List<BaseFormItem> formItems) {
-        int titleTag = baseInfo.get(FormSettings.MACHINE_NAME_TITLE);
-        int descriptionTag = baseInfo.get(FormSettings.MACHINE_NAME_DESCRIPTION);
-        int startTag = baseInfo.get(FormSettings.MACHINE_NAME_START_DATE);
+        String title = null;
+        String description = null;
+        String start = null;
+        if (baseInfo != null) {
+            Integer titleTag = baseInfo.get(FormSettings.MACHINE_NAME_TITLE);
+            Integer descriptionTag = baseInfo.get(FormSettings.MACHINE_NAME_DESCRIPTION);
+            Integer startTag = baseInfo.get(FormSettings.MACHINE_NAME_START_DATE);
+
+            if (titleTag != null) {
+                title = ((TextInputFormItem) formSettings.findItem(titleTag)).getValue();
+            }
+            if (descriptionTag != null) {
+                description = ((TextInputFormItem) formSettings.findItem(descriptionTag))
+                        .getValue();
+            }
+            if (startTag != null) {
+                start = Utils.getDatePostFormat(
+                        ((DateFormItem) formSettings.findItem(startTag)).getValue());
+            }
+        }
 
         int workflowTypeId = formSettings.getWorkflowTypeIdSelected();
-        String title = ((TextInputFormItem) formSettings.findItem(titleTag)).getValue();
-        String description = ((TextInputFormItem) formSettings.findItem(descriptionTag)).getValue();
-        String start = Utils
-                .getDatePostFormat(((DateFormItem) formSettings.findItem(startTag)).getValue());
 
         SingleChoiceFormItem ownerFormItem = (SingleChoiceFormItem) formSettings
                 .findItem(TAG_OWNER);

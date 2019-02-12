@@ -91,6 +91,12 @@ public class SyncHelper {
         //getProfiles(token);
     }
 
+    /**
+     * It switches Retrofit domain request to BuildConfig.BASE_URL once it is done getting country
+     * data it switches Retrofit domain request back to Utils.domain.
+     *
+     * @param token
+     */
     private void getCountryData(String token) {
         String base = BuildConfig.BASE_URL + "v1/";
         RetrofitUrlManager.getInstance().putDomain("api", base);

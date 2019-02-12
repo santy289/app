@@ -22,11 +22,11 @@ public class RestartWebsocketReceiver extends BroadcastReceiver {
         }
         running = true;
 
-        Toast.makeText(context, "Service restarted", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(context, "Service restarted", Toast.LENGTH_SHORT).show();
 
         String token = intent.getStringExtra(WebsocketSecureHandler.KEY_TOKEN);
         String protocol = intent.getStringExtra(WebsocketSecureHandler.KEY_PROTOCOL);
-        Toast.makeText(context, protocol, Toast.LENGTH_LONG).show();
+//        Toast.makeText(context, protocol, Toast.LENGTH_LONG).show();
         String port = intent.getStringExtra(WebsocketSecureHandler.KEY_PORT);
         String domain = intent.getStringExtra(WebsocketSecureHandler.KEY_DOMAIN);
 

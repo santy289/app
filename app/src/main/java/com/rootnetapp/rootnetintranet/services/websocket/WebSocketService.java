@@ -45,11 +45,11 @@ public class WebSocketService extends Service {
         // TODO get from intent the token or some more parameters needed.
         // TODO send to handler a message with all the arguments that we need to share.
         if (intent == null) {
-            Toast.makeText(getApplicationContext(), "INTENT NULL " + startId, Toast.LENGTH_LONG).show();
+//            Toast.makeText(getApplicationContext(), "INTENT NULL " + startId, Toast.LENGTH_LONG).show();
             return START_REDELIVER_INTENT;
         } else {
             Log.d(TAG, "onStartCommand: WEBSCOKET STARTED WITH INTENT: start id " + startId);
-            Toast.makeText(getApplicationContext(), "onStartCommand " + startId, Toast.LENGTH_LONG).show();
+//            Toast.makeText(getApplicationContext(), "onStartCommand " + startId, Toast.LENGTH_LONG).show();
         }
 
         token = intent.getStringExtra(WebsocketSecureHandler.KEY_TOKEN);
@@ -74,7 +74,7 @@ public class WebSocketService extends Service {
 
     @Override
     public void onDestroy() {
-        Toast.makeText(getApplicationContext(), "onDestroy Service " + startId , Toast.LENGTH_LONG).show();
+//        Toast.makeText(getApplicationContext(), "onDestroy Service " + startId , Toast.LENGTH_LONG).show();
         Log.d(TAG, "onDestroy: SERVICE DESTROYED");
         serviceCleanup();
         super.onDestroy();

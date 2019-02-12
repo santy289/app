@@ -49,7 +49,6 @@ public class WebSocketIntentService extends IntentService {
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
-        Toast.makeText(getApplicationContext(), "onTaskRemoved", Toast.LENGTH_LONG).show();
         Log.d(TAG, "onTaskRemoved: onTaskRemoved");
     }
 
@@ -68,7 +67,6 @@ public class WebSocketIntentService extends IntentService {
 //        restartService();
 
 //        stopSelf();
-        Log.d(TAG, "onDestroy: ");
     }
 
     private void restartService() {
@@ -128,7 +126,7 @@ public class WebSocketIntentService extends IntentService {
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         webSocketHandler = new WebsocketSecureHandler(protocol, port, token, domain);
         webSocketHandler.initNotificationsWithCallback(messageArray -> {
-            Toast.makeText(getApplicationContext(), "message incoming", Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(), "message incoming", Toast.LENGTH_LONG).show();
             counter += 1;
             NotificationHandler.prepareNotification(
                     messageArray[WebsocketSecureHandler.INDEX_ID],
@@ -141,7 +139,7 @@ public class WebSocketIntentService extends IntentService {
 
             );
         }, errorMessage -> {
-            Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
             switch (errorMessage) {
                 case "thruway.error.authentication_failure":
                     break;

@@ -15,15 +15,14 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowManagerBinding;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.manager.adapters.PendingWorkflowsAdapter;
 import com.rootnetapp.rootnetintranet.ui.timeline.SelectDateDialog;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -43,9 +42,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
 
     private FragmentWorkflowManagerBinding binding;
     private MainActivityInterface anInterface;
-    private String start, end;
-    private int page = 0;
-    private List<WorkflowDb> workflows;
+    private PendingWorkflowsAdapter mWorkflowsAdapter;
 
     public WorkflowManagerFragment() {
         // Required empty public constructor
@@ -77,21 +74,17 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
-        binding.recPendingworkflows.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recPendingworkflows.setNestedScrollingEnabled(false);
 
-        start = Utils.getMonthDay(0, 1);
-        end = Utils.getMonthDay(0, 30);
-        binding.tvSelecteddates.setText("(" + start + " - " + end + ")");
-        binding.tvSelecteddatetitle.setText(getString(R.string.current_month));
-        start = start + "T00:00:00-0000";
-        end = end + "T00:00:00-0000";
-        workflows = new ArrayList<>();
+        String start = Utils.getMonthDay(0, 1);
+        String end = Utils.getMonthDay(0, 30);
+
+        updateSelectedDatesUi(start, end);
+        updateSelectedDateTitle(R.string.current_month);
 
         subscribe();
         setOnClickListeners();
+        setupRecycler();
         viewModel.init(token, start, end);
-        getWorkflows();
         return view;
     }
 
@@ -107,78 +100,73 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         viewModel.getObservablePendingCount().observe(this, this::updatePendingWorkflowsCount);
         viewModel.getObservableOpenCount().observe(this, this::updateOpenWorkflowsCount);
         viewModel.getObservableClosedCount().observe(this, this::updateClosedWorkflowsCount);
+        viewModel.getObservableHideMoreButton().observe(this, this::hideMoreButton);
+        viewModel.getObservableHideWorkflowList().observe(this, this::hideWorkflowList);
     }
 
-    private void setOnClickListeners(){
-        binding.btnMonth.setOnClickListener(this::filterClicked);
-        binding.btnWeek.setOnClickListener(this::filterClicked);
-        binding.btnDay.setOnClickListener(this::filterClicked);
-        binding.btnSelectdates.setOnClickListener(this::selectDates);
-        binding.btnPendingapproval.setOnClickListener(this::showWorkflowsDialog);
-        binding.btnWorkflows.setOnClickListener(this::showWorkflowsDialog);
-        binding.btnOutoftime.setOnClickListener(this::showWorkflowsDialog);
-        binding.btnUpdated.setOnClickListener(this::showWorkflowsDialog);
-        binding.btnShowmore.setOnClickListener(this::showMoreClicked);
+    private void setOnClickListeners() {
+        binding.btnMonth.setOnClickListener(v -> filterMonthClicked());
+        binding.btnWeek.setOnClickListener(v -> filterWeekClicked());
+        binding.btnDay.setOnClickListener(v -> filterDayClicked());
+        binding.btnSelectdates.setOnClickListener(v -> selectDates());
+        binding.btnPendingapproval.setOnClickListener(v -> showMyPendingWorkflowsDialog());
+        binding.btnWorkflows.setOnClickListener(v -> showMyOpenWorkflowsDialog());
+        binding.btnOutoftime.setOnClickListener(v -> showOutOfTimeWorkflowsDialog());
+        binding.btnUpdated.setOnClickListener(v -> showUpdatedWorkflowsDialog());
+        binding.btnShowmore.setOnClickListener(v -> showMoreClicked());
     }
 
-    private void getWorkflows() {
-        Utils.showLoading(getContext());
-        viewModel.getWorkflows(page);
+    private void setupRecycler() {
+        binding.recPendingworkflows.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recPendingworkflows.setNestedScrollingEnabled(false);
     }
 
-    private void selectDates(View view) {
+    private void selectDates() {
         anInterface.showDialog(SelectDateDialog.newInstance(this));
     }
 
-    private void showMoreClicked(View view) {
-        page++;
-        getWorkflows();
+    private void showMoreClicked() {
+        viewModel.incrementCurrentPage();
+        viewModel.getWorkflows();
     }
 
-    private void filterClicked(View view) {
-        switch (view.getId()) {
-            case R.id.btn_month: {
-                selectMonthButton(true);
-                selectWeekButton(false);
-                selectDayButton(false);
+    private void filterMonthClicked(){
+        selectMonthButton(true);
+        selectWeekButton(false);
+        selectDayButton(false);
 
-                start = Utils.getMonthDay(0, 1);
-                end = Utils.getMonthDay(0, 30);
-                binding.tvSelecteddates.setText("(" + start + " - " + end + ")");
-                binding.tvSelecteddatetitle.setText(getString(R.string.current_month));
-                start = start + "T00:00:00-0000";
-                end = end + "T00:00:00-0000";
-                break;
-            }
-            case R.id.btn_week: {
-                selectMonthButton(false);
-                selectWeekButton(true);
-                selectDayButton(false);
+        String start = Utils.getMonthDay(0, 1);
+        String end = Utils.getMonthDay(0, 30);
+        updateSelectedDatesUi(start, end);
+        updateSelectedDateTitle(R.string.current_month);
 
-                start = Utils.getWeekStart();
-                end = Utils.getWeekEnd();
-                binding.tvSelecteddates.setText("(" + start + " - " + end + ")");
-                binding.tvSelecteddatetitle.setText(getString(R.string.current_week));
-                start = start + "T00:00:00-0000";
-                end = end + "T00:00:00-0000";
-                break;
-            }
-            case R.id.btn_day: {
-                selectMonthButton(false);
-                selectWeekButton(false);
-                selectDayButton(true);
+        viewModel.updateDashboard(start, end);
+    }
 
-                start = Utils.getCurrentDate();
-                binding.tvSelecteddates.setText("(" + start + ")");
-                binding.tvSelecteddatetitle.setText(getString(R.string.today));
-                start = start + "T00:00:00-0000";
-                end = Utils.getCurrentDate() + "T23:59:59-0000";
-                break;
-            }
-        }
-        workflows = new ArrayList<>();
-        page = 0;
-        getWorkflows();
+    private void filterWeekClicked(){
+        selectMonthButton(false);
+        selectWeekButton(true);
+        selectDayButton(false);
+
+        String start = Utils.getWeekStart();
+        String end = Utils.getWeekEnd();
+        updateSelectedDatesUi(start, end);
+        updateSelectedDateTitle(R.string.current_week);
+
+        viewModel.updateDashboard(start, end);
+    }
+
+    private void filterDayClicked(){
+        selectMonthButton(false);
+        selectWeekButton(false);
+        selectDayButton(true);
+
+        String start = Utils.getCurrentDate();
+        String end = Utils.getTomorrowDate();
+        updateSelectedDatesUi(start);
+        updateSelectedDateTitle(R.string.today);
+
+        viewModel.updateDashboard(start, end);
     }
 
     @UiThread
@@ -188,7 +176,8 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
                     .valueOf(ContextCompat.getColor(getContext(), R.color.selected_filter)));
             binding.btnMonth.setTextColor(getResources().getColor(R.color.white));
         } else {
-            binding.btnMonth.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.unselected_filter)));
+            binding.btnMonth.setBackgroundTintList(ColorStateList
+                    .valueOf(ContextCompat.getColor(getContext(), R.color.unselected_filter)));
             binding.btnMonth.setTextColor(getResources().getColor(R.color.unselected_filter_text));
         }
     }
@@ -200,7 +189,8 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
                     .valueOf(ContextCompat.getColor(getContext(), R.color.selected_filter)));
             binding.btnWeek.setTextColor(getResources().getColor(R.color.white));
         } else {
-            binding.btnWeek.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.unselected_filter)));
+            binding.btnWeek.setBackgroundTintList(ColorStateList
+                    .valueOf(ContextCompat.getColor(getContext(), R.color.unselected_filter)));
             binding.btnWeek.setTextColor(getResources().getColor(R.color.unselected_filter_text));
         }
     }
@@ -212,21 +202,19 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
                     .valueOf(ContextCompat.getColor(getContext(), R.color.selected_filter)));
             binding.btnDay.setTextColor(getResources().getColor(R.color.white));
         } else {
-            binding.btnDay.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.unselected_filter)));
+            binding.btnDay.setBackgroundTintList(ColorStateList
+                    .valueOf(ContextCompat.getColor(getContext(), R.color.unselected_filter)));
             binding.btnDay.setTextColor(getResources().getColor(R.color.unselected_filter_text));
         }
     }
 
     @Override
     public void setDate(String start, String end) {
-        binding.tvSelecteddates.setText("(" + start + " - " + end + ")");
-        binding.tvSelecteddatetitle.setText(getString(R.string.selected_period));
-        this.start = start + "T00:00:00-0000";
-        this.end = end + "T00:00:00-0000";
-        workflows = new ArrayList<>();
-        page = 0;
-        getWorkflows();
-        viewModel.updateDashboard(this.start, this.end);
+        updateSelectedDatesUi(start, end);
+        updateSelectedDateTitle(R.string.selected_period);
+
+        viewModel.resetCurrentPage();
+        viewModel.updateDashboard(start, end);
     }
 
     @Override
@@ -236,91 +224,120 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         anInterface.showActivity(intent);
     }
 
-    private void showWorkflowsDialog(View view) {
-        switch (view.getId()) {
-            case R.id.btn_pendingapproval: {
-                anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                        ManagerWorkflowsDialog.DialogTypes.PENDING, workflows));
-                break;
-            }
-            case R.id.btn_workflows: {
-                anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                        ManagerWorkflowsDialog.DialogTypes.WORKFLOWS, workflows));
-                break;
-            }
-            case R.id.btn_outoftime: {
-                anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                        ManagerWorkflowsDialog.DialogTypes.OUT_OF_TIME, viewModel.getOutOfTimeWorkflows()));
-                break;
-            }
-            case R.id.btn_updated: {
-                anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                        ManagerWorkflowsDialog.DialogTypes.UPDATED, workflows));
-                break;
-            }
+    private void showMyPendingWorkflowsDialog(){
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogTypes.PENDING,
+                viewModel.getOutOfTimeWorkflows()));
+    }
+
+    private void showMyOpenWorkflowsDialog(){
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogTypes.WORKFLOWS,
+                viewModel.getOutOfTimeWorkflows()));
+    }
+
+    private void showMyClosedWorkflowsDialog(){
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogTypes.WORKFLOWS,
+                viewModel.getOutOfTimeWorkflows()));
+    }
+
+    private void showOutOfTimeWorkflowsDialog(){
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogTypes.OUT_OF_TIME,
+                viewModel.getOutOfTimeWorkflows()));
+    }
+
+    private void showUpdatedWorkflowsDialog(){
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogTypes.UPDATED,
+                viewModel.getOutOfTimeWorkflows()));
+    }
+
+    @UiThread
+    private void populatePendingWorkflows(List<WorkflowDb> workflowList) {
+        if (workflowList == null) return;
+
+        if (mWorkflowsAdapter == null) {
+            mWorkflowsAdapter = new PendingWorkflowsAdapter(workflowList, this);
+            binding.recPendingworkflows.setAdapter(mWorkflowsAdapter);
+        }
+
+        mWorkflowsAdapter.addData(workflowList);
+    }
+
+    @UiThread
+    private void hideMoreButton(boolean hide) {
+        if (hide) {
+            binding.btnShowmore.setVisibility(View.GONE);
+        } else {
+            binding.btnShowmore.setVisibility(View.VISIBLE);
         }
     }
 
     @UiThread
-    private void populatePendingWorkflows(WorkflowResponseDb workflowResponseDb){
-        Utils.hideLoading();
-        if (workflowResponseDb != null) {
-            workflows.addAll(workflowResponseDb.getList());
-
-            if (workflowResponseDb.getPager().isIsLastPage()) {
-                binding.btnShowmore.setVisibility(View.GONE);
-            } else {
-                binding.btnShowmore.setVisibility(View.VISIBLE);
-            }
-            if (workflows.size() != 0) {
-                binding.lytNoworkflows.setVisibility(View.GONE);
-                binding.recPendingworkflows.setVisibility(View.VISIBLE);
-                binding.recPendingworkflows
-                        .setAdapter(new PendingWorkflowsAdapter(workflows, this));
-            } else {
-                binding.recPendingworkflows.setVisibility(View.GONE);
-                binding.lytNoworkflows.setVisibility(View.VISIBLE);
-            }
+    private void hideWorkflowList(boolean hide) {
+        if (hide) {
+            binding.lytNoworkflows.setVisibility(View.GONE);
+            binding.recPendingworkflows.setVisibility(View.VISIBLE);
+        } else {
+            binding.recPendingworkflows.setVisibility(View.GONE);
+            binding.lytNoworkflows.setVisibility(View.VISIBLE);
         }
     }
 
     @UiThread
-    private void updateMyPendingWorkflowsCount(int count){
+    private void updateSelectedDatesUi(String startDate) {
+        binding.tvSelectedDates.setText(String.format(Locale.US, "(%s)", startDate));
+    }
+
+    @UiThread
+    private void updateSelectedDatesUi(String startDate, String endDate) {
+        binding.tvSelectedDates.setText(String.format(Locale.US, "(%s - %s)", startDate, endDate));
+    }
+
+    @UiThread
+    private void updateSelectedDateTitle(int titleRes) {
+        binding.tvSelectedDateTitle.setText(getString(titleRes));
+    }
+
+    @UiThread
+    private void updateMyPendingWorkflowsCount(int count) {
         binding.tvMyPendingCount.setText(String.valueOf(count));
     }
 
     @UiThread
-    private void updateMyOpenWorkflowsCount(int count){
+    private void updateMyOpenWorkflowsCount(int count) {
         binding.tvMyOpenCount.setText(String.valueOf(count));
     }
 
     @UiThread
-    private void updateMyClosedWorkflowsCount(int count){
+    private void updateMyClosedWorkflowsCount(int count) {
         binding.tvMyClosedCount.setText(String.valueOf(count));
     }
 
     @UiThread
-    private void updateOutOfTimeWorkflowsCount(int count){
+    private void updateOutOfTimeWorkflowsCount(int count) {
         binding.tvOutOfTimeCount.setText(String.valueOf(count));
     }
 
     @UiThread
-    private void updateUpdatedWorkflowsCount(int count){
+    private void updateUpdatedWorkflowsCount(int count) {
         binding.tvUpdatedCount.setText(String.valueOf(count));
     }
 
     @UiThread
-    private void updatePendingWorkflowsCount(int count){
+    private void updatePendingWorkflowsCount(int count) {
         binding.tvPendingCount.setText(String.valueOf(count));
     }
 
     @UiThread
-    private void updateOpenWorkflowsCount(int count){
+    private void updateOpenWorkflowsCount(int count) {
         binding.tvOpenCount.setText(String.valueOf(count));
     }
 
     @UiThread
-    private void updateClosedWorkflowsCount(int count){
+    private void updateClosedWorkflowsCount(int count) {
         binding.tvClosedCount.setText(String.valueOf(count));
     }
 

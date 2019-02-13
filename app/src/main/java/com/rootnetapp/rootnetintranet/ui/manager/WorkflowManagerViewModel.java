@@ -26,7 +26,7 @@ public class WorkflowManagerViewModel extends ViewModel {
 
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
-    private MutableLiveData<WorkflowResponseDb> mWorkflowsLiveData;
+    private MutableLiveData<List<WorkflowDb>> mWorkflowListLiveData;
     private MutableLiveData<Integer> mMyPendingCountLiveData;
     private MutableLiveData<Integer> mMyOpenCountLiveData;
     private MutableLiveData<Integer> mMyClosedCountLiveData;
@@ -35,6 +35,8 @@ public class WorkflowManagerViewModel extends ViewModel {
     private MutableLiveData<Integer> mPendingCountLiveData;
     private MutableLiveData<Integer> mOpenCountLiveData;
     private MutableLiveData<Integer> mClosedCountLiveData;
+    private MutableLiveData<Boolean> mHideMoreButtonLiveData;
+    private MutableLiveData<Boolean> mHideWorkflowListLiveData;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
@@ -42,6 +44,8 @@ public class WorkflowManagerViewModel extends ViewModel {
     private String mToken;
     private List<WorkflowDb> mOutOfTimeWorkflows;
     private String mStartDate, mEndDate;
+    private int mCurrentPage;
+    private int mWebCount, mWebCompleted;
 
     public WorkflowManagerViewModel(WorkflowManagerRepository repository) {
         this.mRepository = repository;
@@ -50,22 +54,65 @@ public class WorkflowManagerViewModel extends ViewModel {
     public void init(String token, String startDate, String endDate) {
         mToken = token;
         updateDashboard(startDate, endDate);
+        fetchOutOfTimeWorkflows();
     }
 
+    //region Dashboard Update
     protected void updateDashboard(String startDate, String endDate){
+        mWebCount = mWebCompleted = 0;
+        showLoading.setValue(true);
+
         setStartDate(startDate);
         setEndDate(endDate);
-        fetchOutOfTimeWorkflows();
+
+        resetCurrentPage();
+
+        getWorkflows();
+        mWebCount++;
+
         getOverviewWorkflowsCount();
+        mWebCount++;
     }
 
-    protected void getWorkflows(int page) {
+    protected void updateCompleted(){
+        mWebCompleted++;
+
+        if (mWebCompleted >= mWebCount) {
+            showLoading.setValue(false);
+
+            mWebCount = mWebCompleted = 0;
+        }
+    }
+    //endregion
+
+    //region Workflows
+    protected void resetCurrentPage() {
+        this.mCurrentPage = 0;
+    }
+
+    protected void incrementCurrentPage(){
+        mCurrentPage++;
+    }
+
+    protected void getWorkflows() {
         showLoading.setValue(true);
-        Disposable disposable = mRepository.getPendingWorkflows(mToken, page)
+
+        Disposable disposable = mRepository.getPendingWorkflows(mToken, mCurrentPage)
                 .subscribe(this::onWorkflowsSuccess, this::onFailure);
 
         mDisposables.add(disposable);
     }
+
+    private void onWorkflowsSuccess(WorkflowResponseDb workflowResponseDb) {
+        updateCompleted();
+
+        List<WorkflowDb> workflowList = workflowResponseDb.getList();
+
+        mHideMoreButtonLiveData.setValue(workflowResponseDb.getPager().isIsLastPage());
+        mHideWorkflowListLiveData.setValue(workflowList.isEmpty());
+        mWorkflowListLiveData.setValue(workflowList);
+    }
+    //endregion
 
     //region Out of time
     protected List<WorkflowDb> getOutOfTimeWorkflows() {
@@ -113,7 +160,7 @@ public class WorkflowManagerViewModel extends ViewModel {
     }
 
     private void onOverviewSuccess(WorkflowOverviewResponse overviewResponse) {
-        showLoading.setValue(false);
+        updateCompleted();
 
         mMyPendingCountLiveData.setValue(Integer.valueOf(
                 overviewResponse.getOverview().getMyWorkflows().getPending().getCount()));
@@ -140,8 +187,11 @@ public class WorkflowManagerViewModel extends ViewModel {
         return mStartDate;
     }
 
-    protected void setStartDate(String startDate) {
-        startDate = Utils.getFormattedDate(startDate, Utils.SERVER_DATE_FORMAT, "yyyy-MM-dd");
+    protected String getFormattedStartDate(){
+        return Utils.getFormattedDate(getStartDate(), Utils.SERVER_DATE_FORMAT, "yyyy-MM-dd");
+    }
+
+    private void setStartDate(String startDate) {
         this.mStartDate = startDate;
     }
 
@@ -149,27 +199,25 @@ public class WorkflowManagerViewModel extends ViewModel {
         return mEndDate;
     }
 
-    protected void setEndDate(String endDate) {
-        endDate = Utils.getFormattedDate(endDate, Utils.SERVER_DATE_FORMAT, "yyyy-MM-dd");
+    protected String getFormattedEndDate(){
+        return Utils.getFormattedDate(getEndDate(), Utils.SERVER_DATE_FORMAT, "yyyy-MM-dd");
+    }
+
+    private void setEndDate(String endDate) {
         this.mEndDate = endDate;
     }
     //endregion
-
-    private void onWorkflowsSuccess(WorkflowResponseDb workflowResponseDb) {
-        showLoading.setValue(false);
-        mWorkflowsLiveData.setValue(workflowResponseDb);
-    }
 
     private void onFailure(Throwable throwable) {
         showLoading.setValue(false);
         mErrorLiveData.setValue(R.string.failure_connect);
     }
 
-    protected LiveData<WorkflowResponseDb> getObservableWorkflows() {
-        if (mWorkflowsLiveData == null) {
-            mWorkflowsLiveData = new MutableLiveData<>();
+    protected LiveData<List<WorkflowDb>> getObservableWorkflows() {
+        if (mWorkflowListLiveData == null) {
+            mWorkflowListLiveData = new MutableLiveData<>();
         }
-        return mWorkflowsLiveData;
+        return mWorkflowListLiveData;
     }
 
     protected LiveData<Integer> getObservableMyPendingCount() {
@@ -226,6 +274,20 @@ public class WorkflowManagerViewModel extends ViewModel {
             mClosedCountLiveData = new MutableLiveData<>();
         }
         return mClosedCountLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableHideMoreButton() {
+        if (mHideMoreButtonLiveData == null) {
+            mHideMoreButtonLiveData = new MutableLiveData<>();
+        }
+        return mHideMoreButtonLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableHideWorkflowList() {
+        if (mHideWorkflowListLiveData == null) {
+            mHideWorkflowListLiveData = new MutableLiveData<>();
+        }
+        return mHideWorkflowListLiveData;
     }
 
     protected LiveData<Integer> getObservableError() {

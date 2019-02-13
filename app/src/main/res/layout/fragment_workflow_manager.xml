@@ -65,7 +65,7 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/tv_selecteddatetitle"
+                            android:id="@+id/tv_selected_date_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
@@ -75,7 +75,7 @@
                             android:textSize="12sp" />
 
                         <TextView
-                            android:id="@+id/tv_selecteddates"
+                            android:id="@+id/tv_selected_dates"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
@@ -816,6 +816,10 @@
                 android:backgroundTint="@color/colorPrimary"
                 android:text="@string/show_more"
                 android:textColor="@color/white" />
+
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="60dp" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

@@ -33,6 +33,23 @@ public class PendingWorkflowsAdapter  extends RecyclerView.Adapter<PendingWorkfl
         this.anInterface = anInterface;
     }
 
+    public void setData(List<WorkflowDb> list){
+        this.workflows = list;
+        notifyDataSetChanged();
+        getItemCount();
+    }
+
+    public void addData(List<WorkflowDb> list){
+        int positionStart = this.workflows.size();
+
+        this.workflows.addAll(list);
+
+        int positionEnd = this.workflows.size() - 1;
+
+        notifyItemRangeInserted(positionStart, positionEnd);
+        getItemCount();
+    }
+
     @Override
     public PendingWorkflowsViewholder onCreateViewHolder(ViewGroup viewGroup, int i) {
         LayoutInflater layoutInflater =

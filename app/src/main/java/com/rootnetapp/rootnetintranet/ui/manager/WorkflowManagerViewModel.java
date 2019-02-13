@@ -49,6 +49,7 @@ public class WorkflowManagerViewModel extends ViewModel {
 
     public WorkflowManagerViewModel(WorkflowManagerRepository repository) {
         this.mRepository = repository;
+        mCurrentPage = 1;
     }
 
     public void init(String token, String startDate, String endDate) {
@@ -87,7 +88,7 @@ public class WorkflowManagerViewModel extends ViewModel {
 
     //region Workflows
     protected void resetCurrentPage() {
-        this.mCurrentPage = 0;
+        this.mCurrentPage = 1;
     }
 
     protected void incrementCurrentPage(){
@@ -97,7 +98,7 @@ public class WorkflowManagerViewModel extends ViewModel {
     protected void getWorkflows() {
         showLoading.setValue(true);
 
-        Disposable disposable = mRepository.getPendingWorkflows(mToken, mCurrentPage)
+        Disposable disposable = mRepository.getWorkflows(mToken, mCurrentPage)
                 .subscribe(this::onWorkflowsSuccess, this::onFailure);
 
         mDisposables.add(disposable);

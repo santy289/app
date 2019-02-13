@@ -120,6 +120,11 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         binding.recPendingworkflows.setNestedScrollingEnabled(false);
     }
 
+    private void updateDashboard(String startDate, String endDate) {
+        mWorkflowsAdapter = null; //reset the adapter
+        viewModel.updateDashboard(startDate, endDate);
+    }
+
     private void selectDates() {
         anInterface.showDialog(SelectDateDialog.newInstance(this));
     }
@@ -129,7 +134,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         viewModel.getWorkflows();
     }
 
-    private void filterMonthClicked(){
+    private void filterMonthClicked() {
         selectMonthButton(true);
         selectWeekButton(false);
         selectDayButton(false);
@@ -139,10 +144,9 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         updateSelectedDatesUi(start, end);
         updateSelectedDateTitle(R.string.current_month);
 
-        viewModel.updateDashboard(start, end);
     }
 
-    private void filterWeekClicked(){
+    private void filterWeekClicked() {
         selectMonthButton(false);
         selectWeekButton(true);
         selectDayButton(false);
@@ -152,10 +156,10 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         updateSelectedDatesUi(start, end);
         updateSelectedDateTitle(R.string.current_week);
 
-        viewModel.updateDashboard(start, end);
+        updateDashboard(start, end);
     }
 
-    private void filterDayClicked(){
+    private void filterDayClicked() {
         selectMonthButton(false);
         selectWeekButton(false);
         selectDayButton(true);
@@ -165,39 +169,48 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         updateSelectedDatesUi(start);
         updateSelectedDateTitle(R.string.today);
 
-        viewModel.updateDashboard(start, end);
+        updateDashboard(start, end);
     }
 
     @UiThread
     private void selectMonthButton(boolean select) {
         if (select) {
-            binding.tvMonth.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.selected_filter));
+            binding.tvMonth.setBackgroundColor(
+                    ContextCompat.getColor(getContext(), R.color.selected_filter));
             binding.tvMonth.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
         } else {
-            binding.tvMonth.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.unselected_filter));
-            binding.tvMonth.setTextColor(ContextCompat.getColor(getContext(), R.color.unselected_filter_text));
+            binding.tvMonth.setBackgroundColor(
+                    ContextCompat.getColor(getContext(), R.color.unselected_filter));
+            binding.tvMonth.setTextColor(
+                    ContextCompat.getColor(getContext(), R.color.unselected_filter_text));
         }
     }
 
     @UiThread
     private void selectWeekButton(boolean select) {
         if (select) {
-            binding.tvWeek.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.selected_filter));
+            binding.tvWeek.setBackgroundColor(
+                    ContextCompat.getColor(getContext(), R.color.selected_filter));
             binding.tvWeek.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
         } else {
-            binding.tvWeek.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.unselected_filter));
-            binding.tvWeek.setTextColor(ContextCompat.getColor(getContext(), R.color.unselected_filter_text));
+            binding.tvWeek.setBackgroundColor(
+                    ContextCompat.getColor(getContext(), R.color.unselected_filter));
+            binding.tvWeek.setTextColor(
+                    ContextCompat.getColor(getContext(), R.color.unselected_filter_text));
         }
     }
 
     @UiThread
     private void selectDayButton(boolean select) {
         if (select) {
-            binding.tvDay.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.selected_filter));
+            binding.tvDay.setBackgroundColor(
+                    ContextCompat.getColor(getContext(), R.color.selected_filter));
             binding.tvDay.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
         } else {
-            binding.tvDay.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.unselected_filter));
-            binding.tvDay.setTextColor(ContextCompat.getColor(getContext(), R.color.unselected_filter_text));
+            binding.tvDay.setBackgroundColor(
+                    ContextCompat.getColor(getContext(), R.color.unselected_filter));
+            binding.tvDay.setTextColor(
+                    ContextCompat.getColor(getContext(), R.color.unselected_filter_text));
         }
     }
 
@@ -206,7 +219,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         updateSelectedDatesUi(start, end);
         updateSelectedDateTitle(R.string.selected_period);
 
-        viewModel.updateDashboard(start, end);
+        updateDashboard(start, end);
     }
 
     @Override
@@ -216,31 +229,31 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         anInterface.showActivity(intent);
     }
 
-    private void showMyPendingWorkflowsDialog(){
+    private void showMyPendingWorkflowsDialog() {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
                 ManagerWorkflowsDialog.DialogTypes.PENDING,
                 viewModel.getOutOfTimeWorkflows()));
     }
 
-    private void showMyOpenWorkflowsDialog(){
+    private void showMyOpenWorkflowsDialog() {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
                 ManagerWorkflowsDialog.DialogTypes.WORKFLOWS,
                 viewModel.getOutOfTimeWorkflows()));
     }
 
-    private void showMyClosedWorkflowsDialog(){
+    private void showMyClosedWorkflowsDialog() {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
                 ManagerWorkflowsDialog.DialogTypes.WORKFLOWS,
                 viewModel.getOutOfTimeWorkflows()));
     }
 
-    private void showOutOfTimeWorkflowsDialog(){
+    private void showOutOfTimeWorkflowsDialog() {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
                 ManagerWorkflowsDialog.DialogTypes.OUT_OF_TIME,
                 viewModel.getOutOfTimeWorkflows()));
     }
 
-    private void showUpdatedWorkflowsDialog(){
+    private void showUpdatedWorkflowsDialog() {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
                 ManagerWorkflowsDialog.DialogTypes.UPDATED,
                 viewModel.getOutOfTimeWorkflows()));
@@ -251,11 +264,13 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         if (workflowList == null) return;
 
         if (mWorkflowsAdapter == null) {
+            //create a new adapter
             mWorkflowsAdapter = new PendingWorkflowsAdapter(workflowList, this);
             binding.recPendingworkflows.setAdapter(mWorkflowsAdapter);
+        } else {
+            //append a list to the current adapter
+            mWorkflowsAdapter.addData(workflowList);
         }
-
-        mWorkflowsAdapter.addData(workflowList);
     }
 
     @UiThread

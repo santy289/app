@@ -25,7 +25,7 @@ public class WorkflowManagerRepository {
         this.service = service;
     }
 
-    protected Observable<WorkflowResponseDb> getPendingWorkflows(String auth, int page) {
+    protected Observable<WorkflowResponseDb> getWorkflows(String auth, int page) {
         return service.getWorkflowsDb(auth, 10, true, page, true)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());

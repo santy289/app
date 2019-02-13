@@ -49,6 +49,7 @@ public class WorkflowManagerViewModel extends ViewModel {
     private String mStartDate, mEndDate;
     private int mCurrentPage;
     private int mWebCount, mWebCompleted;
+    private WorkflowOverviewResponse workflowOverviewResponse;
 
     public WorkflowManagerViewModel(WorkflowManagerRepository repository) {
         this.mRepository = repository;
@@ -129,6 +130,12 @@ public class WorkflowManagerViewModel extends ViewModel {
 
     //region My Pending Workflows
     protected void getMyPendingWorkflows() {
+        if (Integer.parseInt(workflowOverviewResponse.getOverview().getMyWorkflows().getPending()
+                .getCount()) == 0) {
+            //do not request if there is no data
+            return;
+        }
+
         Map<String, Object> options = getStandardFilters();
 
         options.put("profile_related", 1);
@@ -154,6 +161,12 @@ public class WorkflowManagerViewModel extends ViewModel {
 
     //region My Open Workflows
     protected void getMyOpenWorkflows() {
+        if (Integer.parseInt(workflowOverviewResponse.getOverview().getMyWorkflows().getOpen()
+                .getCount()) == 0) {
+            //do not request if there is no data
+            return;
+        }
+
         Map<String, Object> options = getStandardFilters();
 
         options.put("profile_related", 1);
@@ -178,6 +191,12 @@ public class WorkflowManagerViewModel extends ViewModel {
 
     //region My Pending Workflows
     protected void getMyClosedWorkflows() {
+        if (Integer.parseInt(workflowOverviewResponse.getOverview().getMyWorkflows().getClosed()
+                .getCount()) == 0) {
+            //do not request if there is no data
+            return;
+        }
+
         Map<String, Object> options = getStandardFilters();
 
         options.put("profile_related", 1);
@@ -202,6 +221,12 @@ public class WorkflowManagerViewModel extends ViewModel {
 
     //region Out of Time Workflows
     protected void getOutOfTimeWorkflows() {
+        if (workflowOverviewResponse.getOverview().getMyWorkflows().getOutOfTime()
+                .getCount() == 0) {
+            //do not request if there is no data
+            return;
+        }
+
         Map<String, Object> options = getStandardFilters();
 
         options.put("profile_related", 1);
@@ -227,6 +252,12 @@ public class WorkflowManagerViewModel extends ViewModel {
 
     //region Updated Workflows
     protected void getUpdatedWorkflows() {
+        if (Integer.parseInt(workflowOverviewResponse.getOverview().getMyWorkflows().getUpdated()
+                .getCount()) == 0) {
+            //do not request if there is no data
+            return;
+        }
+
         Map<String, Object> options = getStandardFilters();
 
         options.put("profile_related", 1);
@@ -263,6 +294,8 @@ public class WorkflowManagerViewModel extends ViewModel {
 
     private void onOverviewSuccess(WorkflowOverviewResponse overviewResponse) {
         updateCompleted();
+
+        workflowOverviewResponse = overviewResponse;
 
         mMyPendingCountLiveData.setValue(Integer.valueOf(
                 overviewResponse.getOverview().getMyWorkflows().getPending().getCount()));

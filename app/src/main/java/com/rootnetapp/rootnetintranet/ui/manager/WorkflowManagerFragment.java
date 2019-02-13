@@ -151,6 +151,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         updateSelectedDatesUi(start, end);
         updateSelectedDateTitle(R.string.current_month);
 
+        updateDashboard(start, end);
     }
 
     private void filterWeekClicked() {

@@ -118,7 +118,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         binding.llMyClosedWorkflows.setOnClickListener(v -> getMyClosedWorkflows());
         binding.btnOutOfTime.setOnClickListener(v -> getOutOfTimeWorkflows());
         binding.btnUpdated.setOnClickListener(v -> getUpdatedWorkflows());
-        binding.btnShowmore.setOnClickListener(v -> showMoreClicked());
+        binding.btnShowMore.setOnClickListener(v -> showMoreClicked());
     }
 
     private void setupRecycler() {
@@ -306,9 +306,9 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     @UiThread
     private void hideMoreButton(boolean hide) {
         if (hide) {
-            binding.btnShowmore.setVisibility(View.GONE);
+            binding.btnShowMore.setVisibility(View.GONE);
         } else {
-            binding.btnShowmore.setVisibility(View.VISIBLE);
+            binding.btnShowMore.setVisibility(View.VISIBLE);
         }
     }
 

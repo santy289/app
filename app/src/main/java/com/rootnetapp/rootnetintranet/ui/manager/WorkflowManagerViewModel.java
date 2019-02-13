@@ -28,7 +28,13 @@ public class WorkflowManagerViewModel extends ViewModel {
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<WorkflowResponseDb> mWorkflowsLiveData;
     private MutableLiveData<Integer> mMyPendingCountLiveData;
+    private MutableLiveData<Integer> mMyOpenCountLiveData;
+    private MutableLiveData<Integer> mMyClosedCountLiveData;
     private MutableLiveData<Integer> mOutOfTimeCountLiveData;
+    private MutableLiveData<Integer> mUpdatedCountLiveData;
+    private MutableLiveData<Integer> mPendingCountLiveData;
+    private MutableLiveData<Integer> mOpenCountLiveData;
+    private MutableLiveData<Integer> mClosedCountLiveData;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
@@ -43,6 +49,10 @@ public class WorkflowManagerViewModel extends ViewModel {
 
     public void init(String token, String startDate, String endDate) {
         mToken = token;
+        updateDashboard(startDate, endDate);
+    }
+
+    protected void updateDashboard(String startDate, String endDate){
         setStartDate(startDate);
         setEndDate(endDate);
         fetchOutOfTimeWorkflows();
@@ -105,10 +115,23 @@ public class WorkflowManagerViewModel extends ViewModel {
     private void onOverviewSuccess(WorkflowOverviewResponse overviewResponse) {
         showLoading.setValue(false);
 
-        mOutOfTimeCountLiveData.setValue(
-                overviewResponse.getOverview().getMyWorkflows().getOutOfTime().getCount());
         mMyPendingCountLiveData.setValue(Integer.valueOf(
                 overviewResponse.getOverview().getMyWorkflows().getPending().getCount()));
+        mMyOpenCountLiveData.setValue(Integer.valueOf(
+                overviewResponse.getOverview().getMyWorkflows().getOpen().getCount()));
+        mMyClosedCountLiveData.setValue(Integer.valueOf(
+                overviewResponse.getOverview().getMyWorkflows().getClosed().getCount()));
+        mOutOfTimeCountLiveData.setValue(
+                overviewResponse.getOverview().getMyWorkflows().getOutOfTime().getCount());
+        mUpdatedCountLiveData.setValue(Integer.valueOf(
+                overviewResponse.getOverview().getMyWorkflows().getUpdated().getCount()));
+
+        mPendingCountLiveData.setValue(Integer.valueOf(
+                overviewResponse.getOverview().getCompanyWorkflows().getPending().getCount()));
+        mOpenCountLiveData.setValue(Integer.valueOf(
+                overviewResponse.getOverview().getCompanyWorkflows().getOpen().getCount()));
+        mClosedCountLiveData.setValue(Integer.valueOf(
+                overviewResponse.getOverview().getCompanyWorkflows().getClosed().getCount()));
     }
     //endregion
 
@@ -156,11 +179,53 @@ public class WorkflowManagerViewModel extends ViewModel {
         return mMyPendingCountLiveData;
     }
 
+    protected LiveData<Integer> getObservableMyOpenCount() {
+        if (mMyOpenCountLiveData == null) {
+            mMyOpenCountLiveData = new MutableLiveData<>();
+        }
+        return mMyOpenCountLiveData;
+    }
+
+    protected LiveData<Integer> getObservableMyClosedCount() {
+        if (mMyClosedCountLiveData == null) {
+            mMyClosedCountLiveData = new MutableLiveData<>();
+        }
+        return mMyClosedCountLiveData;
+    }
+
     protected LiveData<Integer> getObservableOutOfTimeCount() {
         if (mOutOfTimeCountLiveData == null) {
             mOutOfTimeCountLiveData = new MutableLiveData<>();
         }
         return mOutOfTimeCountLiveData;
+    }
+
+    protected LiveData<Integer> getObservableUpdatedCount() {
+        if (mUpdatedCountLiveData == null) {
+            mUpdatedCountLiveData = new MutableLiveData<>();
+        }
+        return mUpdatedCountLiveData;
+    }
+
+    protected LiveData<Integer> getObservablePendingCount() {
+        if (mPendingCountLiveData == null) {
+            mPendingCountLiveData = new MutableLiveData<>();
+        }
+        return mPendingCountLiveData;
+    }
+
+    protected LiveData<Integer> getObservableOpenCount() {
+        if (mOpenCountLiveData == null) {
+            mOpenCountLiveData = new MutableLiveData<>();
+        }
+        return mOpenCountLiveData;
+    }
+
+    protected LiveData<Integer> getObservableClosedCount() {
+        if (mClosedCountLiveData == null) {
+            mClosedCountLiveData = new MutableLiveData<>();
+        }
+        return mClosedCountLiveData;
     }
 
     protected LiveData<Integer> getObservableError() {

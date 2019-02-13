@@ -99,8 +99,14 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         viewModel.getObservableShowLoading().observe(this, this::showLoading);
         viewModel.getObservableError().observe(this, this::showToastMessage);
         viewModel.getObservableWorkflows().observe(this, this::populatePendingWorkflows);
-        viewModel.getObservableOutOfTimeCount().observe(this, this::updateOutOfTimeWorkflowsCount);
         viewModel.getObservableMyPendingCount().observe(this, this::updateMyPendingWorkflowsCount);
+        viewModel.getObservableMyOpenCount().observe(this, this::updateMyOpenWorkflowsCount);
+        viewModel.getObservableMyClosedCount().observe(this, this::updateMyClosedWorkflowsCount);
+        viewModel.getObservableOutOfTimeCount().observe(this, this::updateOutOfTimeWorkflowsCount);
+        viewModel.getObservableUpdatedCount().observe(this, this::updateUpdatedWorkflowsCount);
+        viewModel.getObservablePendingCount().observe(this, this::updatePendingWorkflowsCount);
+        viewModel.getObservableOpenCount().observe(this, this::updateOpenWorkflowsCount);
+        viewModel.getObservableClosedCount().observe(this, this::updateClosedWorkflowsCount);
     }
 
     private void setOnClickListeners(){
@@ -220,6 +226,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         workflows = new ArrayList<>();
         page = 0;
         getWorkflows();
+        viewModel.updateDashboard(this.start, this.end);
     }
 
     @Override
@@ -278,13 +285,43 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     }
 
     @UiThread
+    private void updateMyPendingWorkflowsCount(int count){
+        binding.tvMyPendingCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void updateMyOpenWorkflowsCount(int count){
+        binding.tvMyOpenCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void updateMyClosedWorkflowsCount(int count){
+        binding.tvMyClosedCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
     private void updateOutOfTimeWorkflowsCount(int count){
         binding.tvOutOfTimeCount.setText(String.valueOf(count));
     }
 
     @UiThread
-    private void updateMyPendingWorkflowsCount(int count){
-        binding.tvMyPendingCount.setText(String.valueOf(count));
+    private void updateUpdatedWorkflowsCount(int count){
+        binding.tvUpdatedCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void updatePendingWorkflowsCount(int count){
+        binding.tvPendingCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void updateOpenWorkflowsCount(int count){
+        binding.tvOpenCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void updateClosedWorkflowsCount(int count){
+        binding.tvClosedCount.setText(String.valueOf(count));
     }
 
     @UiThread

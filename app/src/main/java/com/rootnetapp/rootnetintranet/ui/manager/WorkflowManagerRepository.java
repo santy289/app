@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.manager;
 
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
+import com.rootnetapp.rootnetintranet.models.responses.workflowoverview.WorkflowOverviewResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 
@@ -24,7 +25,7 @@ public class WorkflowManagerRepository {
         this.service = service;
     }
 
-    public Observable<WorkflowResponseDb> getPendingWorkflows(String auth, int page) {
+    protected Observable<WorkflowResponseDb> getPendingWorkflows(String auth, int page) {
         return service.getWorkflowsDb(auth, 10, true, page, true)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
@@ -35,7 +36,7 @@ public class WorkflowManagerRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(String token,
+    protected Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(String token,
                                                                     Map<String, Object> options) {
         return service.getWorkflowsByBaseFilters(
                 token,
@@ -44,6 +45,16 @@ public class WorkflowManagerRepository {
                 1,
                 false,
                 options).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<WorkflowOverviewResponse> getOverviewWorkflowsCount(String token, String startDate, String endDate) {
+        return service.getOverviewWorkflowsCount(
+                token,
+                startDate,
+                endDate,
+                true,
+                true).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 }

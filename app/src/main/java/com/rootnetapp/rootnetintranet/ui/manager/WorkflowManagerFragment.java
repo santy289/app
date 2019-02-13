@@ -80,10 +80,6 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         binding.recPendingworkflows.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recPendingworkflows.setNestedScrollingEnabled(false);
 
-        subscribe();
-        setOnClickListeners();
-        viewModel.init(token);
-
         start = Utils.getMonthDay(0, 1);
         end = Utils.getMonthDay(0, 30);
         binding.tvSelecteddates.setText("(" + start + " - " + end + ")");
@@ -91,6 +87,10 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         start = start + "T00:00:00-0000";
         end = end + "T00:00:00-0000";
         workflows = new ArrayList<>();
+
+        subscribe();
+        setOnClickListeners();
+        viewModel.init(token, start, end);
         getWorkflows();
         return view;
     }
@@ -100,6 +100,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         viewModel.getObservableError().observe(this, this::showToastMessage);
         viewModel.getObservableWorkflows().observe(this, this::populatePendingWorkflows);
         viewModel.getObservableOutOfTimeCount().observe(this, this::updateOutOfTimeWorkflowsCount);
+        viewModel.getObservableMyPendingCount().observe(this, this::updateMyPendingWorkflowsCount);
     }
 
     private void setOnClickListeners(){
@@ -279,6 +280,11 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     @UiThread
     private void updateOutOfTimeWorkflowsCount(int count){
         binding.tvOutOfTimeCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void updateMyPendingWorkflowsCount(int count){
+        binding.tvMyPendingCount.setText(String.valueOf(count));
     }
 
     @UiThread

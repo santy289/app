@@ -230,22 +230,22 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         switch (view.getId()) {
             case R.id.btn_pendingapproval: {
                 anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                        ManagerWorkflowsDialog.DialogTypes.PENDING, null));
+                        ManagerWorkflowsDialog.DialogTypes.PENDING, workflows));
                 break;
             }
             case R.id.btn_workflows: {
                 anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                        ManagerWorkflowsDialog.DialogTypes.WORKFLOWS, null));
+                        ManagerWorkflowsDialog.DialogTypes.WORKFLOWS, workflows));
                 break;
             }
             case R.id.btn_outoftime: {
                 anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                        ManagerWorkflowsDialog.DialogTypes.OUT_OF_TIME, null));
+                        ManagerWorkflowsDialog.DialogTypes.OUT_OF_TIME, workflows));
                 break;
             }
             case R.id.btn_updated: {
                 anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                        ManagerWorkflowsDialog.DialogTypes.UPDATED, null));
+                        ManagerWorkflowsDialog.DialogTypes.UPDATED, workflows));
                 break;
             }
         }

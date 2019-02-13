@@ -13,6 +13,7 @@ import com.rootnetapp.rootnetintranet.ui.manager.adapters.ManagerDialogAdapter;
 
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -29,7 +30,7 @@ public class ManagerWorkflowsDialog extends DialogFragment {
     private List<WorkflowDb> workflows;
 
     public static ManagerWorkflowsDialog newInstance(ManagerInterface anInterface, DialogTypes type,
-                                                     List<WorkflowDb> workflows) {
+                                                     @NonNull List<WorkflowDb> workflows) {
         ManagerWorkflowsDialog fragment = new ManagerWorkflowsDialog();
         fragment.anInterface = anInterface;
         fragment.type = type;

@@ -74,7 +74,7 @@ public class WorkflowManagerViewModel extends ViewModel {
         mWebCount++;
     }
 
-    protected void updateCompleted(){
+    private void updateCompleted(){
         mWebCompleted++;
 
         if (mWebCompleted >= mWebCount) {

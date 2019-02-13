@@ -3,7 +3,6 @@ package com.rootnetapp.rootnetintranet.ui.manager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -105,9 +104,9 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     }
 
     private void setOnClickListeners() {
-        binding.btnMonth.setOnClickListener(v -> filterMonthClicked());
-        binding.btnWeek.setOnClickListener(v -> filterWeekClicked());
-        binding.btnDay.setOnClickListener(v -> filterDayClicked());
+        binding.tvMonth.setOnClickListener(v -> filterMonthClicked());
+        binding.tvWeek.setOnClickListener(v -> filterWeekClicked());
+        binding.tvDay.setOnClickListener(v -> filterDayClicked());
         binding.btnSelectdates.setOnClickListener(v -> selectDates());
         binding.btnPendingapproval.setOnClickListener(v -> showMyPendingWorkflowsDialog());
         binding.btnWorkflows.setOnClickListener(v -> showMyOpenWorkflowsDialog());
@@ -172,39 +171,33 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     @UiThread
     private void selectMonthButton(boolean select) {
         if (select) {
-            binding.btnMonth.setBackgroundTintList(ColorStateList
-                    .valueOf(ContextCompat.getColor(getContext(), R.color.selected_filter)));
-            binding.btnMonth.setTextColor(getResources().getColor(R.color.white));
+            binding.tvMonth.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.selected_filter));
+            binding.tvMonth.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
         } else {
-            binding.btnMonth.setBackgroundTintList(ColorStateList
-                    .valueOf(ContextCompat.getColor(getContext(), R.color.unselected_filter)));
-            binding.btnMonth.setTextColor(getResources().getColor(R.color.unselected_filter_text));
+            binding.tvMonth.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.unselected_filter));
+            binding.tvMonth.setTextColor(ContextCompat.getColor(getContext(), R.color.unselected_filter_text));
         }
     }
 
     @UiThread
     private void selectWeekButton(boolean select) {
         if (select) {
-            binding.btnWeek.setBackgroundTintList(ColorStateList
-                    .valueOf(ContextCompat.getColor(getContext(), R.color.selected_filter)));
-            binding.btnWeek.setTextColor(getResources().getColor(R.color.white));
+            binding.tvWeek.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.selected_filter));
+            binding.tvWeek.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
         } else {
-            binding.btnWeek.setBackgroundTintList(ColorStateList
-                    .valueOf(ContextCompat.getColor(getContext(), R.color.unselected_filter)));
-            binding.btnWeek.setTextColor(getResources().getColor(R.color.unselected_filter_text));
+            binding.tvWeek.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.unselected_filter));
+            binding.tvWeek.setTextColor(ContextCompat.getColor(getContext(), R.color.unselected_filter_text));
         }
     }
 
     @UiThread
     private void selectDayButton(boolean select) {
         if (select) {
-            binding.btnDay.setBackgroundTintList(ColorStateList
-                    .valueOf(ContextCompat.getColor(getContext(), R.color.selected_filter)));
-            binding.btnDay.setTextColor(getResources().getColor(R.color.white));
+            binding.tvDay.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.selected_filter));
+            binding.tvDay.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
         } else {
-            binding.btnDay.setBackgroundTintList(ColorStateList
-                    .valueOf(ContextCompat.getColor(getContext(), R.color.unselected_filter)));
-            binding.btnDay.setTextColor(getResources().getColor(R.color.unselected_filter_text));
+            binding.tvDay.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.unselected_filter));
+            binding.tvDay.setTextColor(ContextCompat.getColor(getContext(), R.color.unselected_filter_text));
         }
     }
 
@@ -213,7 +206,6 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         updateSelectedDatesUi(start, end);
         updateSelectedDateTitle(R.string.selected_period);
 
-        viewModel.resetCurrentPage();
         viewModel.updateDashboard(start, end);
     }
 
@@ -278,22 +270,22 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     @UiThread
     private void hideWorkflowList(boolean hide) {
         if (hide) {
-            binding.lytNoworkflows.setVisibility(View.GONE);
-            binding.recPendingworkflows.setVisibility(View.VISIBLE);
-        } else {
             binding.recPendingworkflows.setVisibility(View.GONE);
             binding.lytNoworkflows.setVisibility(View.VISIBLE);
+        } else {
+            binding.recPendingworkflows.setVisibility(View.VISIBLE);
+            binding.lytNoworkflows.setVisibility(View.GONE);
         }
     }
 
     @UiThread
     private void updateSelectedDatesUi(String startDate) {
-        binding.tvSelectedDates.setText(String.format(Locale.US, "(%s)", startDate));
+        binding.tvSelectedDate.setText(String.format(Locale.US, "(%s)", startDate));
     }
 
     @UiThread
     private void updateSelectedDatesUi(String startDate, String endDate) {
-        binding.tvSelectedDates.setText(String.format(Locale.US, "(%s - %s)", startDate, endDate));
+        binding.tvSelectedDate.setText(String.format(Locale.US, "(%s - %s)", startDate, endDate));
     }
 
     @UiThread

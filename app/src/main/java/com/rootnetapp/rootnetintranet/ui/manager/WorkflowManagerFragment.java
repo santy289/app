@@ -1,23 +1,25 @@
 package com.rootnetapp.rootnetintranet.ui.manager;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowManagerBinding;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.manager.adapters.PendingWorkflowsAdapter;
 import com.rootnetapp.rootnetintranet.ui.timeline.SelectDateDialog;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +44,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     private MainActivityInterface anInterface;
     private String start, end, token;
     private int page = 0;
-    private List<Workflow> workflows;
+    private List<WorkflowDb> workflows;
 
     public WorkflowManagerFragment() {
         // Required empty public constructor
@@ -103,27 +105,6 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     }
 
     private void subscribe() {
-        final Observer<WorkflowsResponse> workflowsObserver = ((WorkflowsResponse data) -> {
-            Utils.hideLoading();
-            if (null != data) {
-                workflows.addAll(data.getList());
-                if (data.getPager().isIsLastPage()) {
-                    binding.btnShowmore.setVisibility(View.GONE);
-                } else {
-                    binding.btnShowmore.setVisibility(View.VISIBLE);
-                }
-                if (workflows.size() != 0) {
-                    binding.lytNoworkflows.setVisibility(View.GONE);
-                    binding.recPendingworkflows.setVisibility(View.VISIBLE);
-                    binding.recPendingworkflows
-                            .setAdapter(new PendingWorkflowsAdapter(workflows, this));
-                } else {
-                    binding.recPendingworkflows.setVisibility(View.GONE);
-                    binding.lytNoworkflows.setVisibility(View.VISIBLE);
-                }
-            }
-        });
-
         final Observer<Integer> errorObserver = ((Integer data) -> {
             if (null != data) {
                 //TODO mejorar toast
@@ -132,7 +113,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
             }
         });
 
-        viewModel.getObservableWorkflows().observe(this, workflowsObserver);
+        viewModel.getObservableWorkflows().observe(this, this::populatePendingWorkflows);
         viewModel.getObservableError().observe(this, errorObserver);
     }
 
@@ -239,8 +220,10 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     }
 
     @Override
-    public void showWorkflow(int id) {
-        anInterface.showWorkflow(id);
+    public void showWorkflow(WorkflowListItem workflowListItem) {
+        Intent intent = new Intent(getActivity(), WorkflowDetailActivity.class);
+        intent.putExtra(WorkflowDetailActivity.EXTRA_WORKFLOW_LIST_ITEM, workflowListItem);
+        anInterface.showActivity(intent);
     }
 
     private void showWorkflowsDialog(View view) {
@@ -268,4 +251,26 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         }
     }
 
+    @UiThread
+    private void populatePendingWorkflows(WorkflowResponseDb workflowResponseDb){
+        Utils.hideLoading();
+        if (workflowResponseDb != null) {
+            workflows.addAll(workflowResponseDb.getList());
+
+            if (workflowResponseDb.getPager().isIsLastPage()) {
+                binding.btnShowmore.setVisibility(View.GONE);
+            } else {
+                binding.btnShowmore.setVisibility(View.VISIBLE);
+            }
+            if (workflows.size() != 0) {
+                binding.lytNoworkflows.setVisibility(View.GONE);
+                binding.recPendingworkflows.setVisibility(View.VISIBLE);
+                binding.recPendingworkflows
+                        .setAdapter(new PendingWorkflowsAdapter(workflows, this));
+            } else {
+                binding.recPendingworkflows.setVisibility(View.GONE);
+                binding.lytNoworkflows.setVisibility(View.VISIBLE);
+            }
+        }
+    }
 }

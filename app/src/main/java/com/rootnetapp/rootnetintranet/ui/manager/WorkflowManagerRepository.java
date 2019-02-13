@@ -1,7 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.manager;
 
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -19,8 +19,8 @@ public class WorkflowManagerRepository {
         this.service = service;
     }
 
-    public Observable<WorkflowsResponse> getPendingWorkflows(String auth, int page) {
-        return service.getWorkflows(auth, 10, true, page, true).subscribeOn(Schedulers.newThread())
+    public Observable<WorkflowResponseDb> getPendingWorkflows(String auth, int page) {
+        return service.getWorkflowsDb(auth, 10, true, page, true).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 

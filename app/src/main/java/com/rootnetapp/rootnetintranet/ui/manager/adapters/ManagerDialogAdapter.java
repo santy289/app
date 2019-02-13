@@ -1,16 +1,18 @@
 package com.rootnetapp.rootnetintranet.ui.manager.adapters;
 
 import android.content.Context;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.ManagerDialogItemBinding;
 import com.rootnetapp.rootnetintranet.ui.manager.ManagerInterface;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Created by root on 20/04/18.
@@ -20,11 +22,11 @@ public class ManagerDialogAdapter extends RecyclerView.Adapter<ManagerDialogView
 
     //todo SOLO TESTING mientras no hay backend
     private List<Integer> testWorkflows;
-    private List<Workflow> workflows;
+    private List<WorkflowDb> workflows;
     private ManagerInterface anInterface;
     private Context context;
 
-    public ManagerDialogAdapter(List<Workflow> workflows, ManagerInterface anInterface) {
+    public ManagerDialogAdapter(List<WorkflowDb> workflows, ManagerInterface anInterface) {
         if (workflows != null) {
             this.workflows = workflows;
         } else {
@@ -50,14 +52,21 @@ public class ManagerDialogAdapter extends RecyclerView.Adapter<ManagerDialogView
     public void onBindViewHolder(ManagerDialogViewholder holder, int i) {
 
         if (workflows != null) {
-            Workflow item = workflows.get(i);
+            WorkflowDb item = workflows.get(i);
             holder.binding.tvWorkflowid.setText(String.valueOf(item.getId()));
-            holder.binding.tvActualstate.setText(item.getWorkflowStateInfo().getName());
+            holder.binding.tvActualstate.setText(item.getCurrentStatusName());
             holder.binding.tvWorkflowtype.setText(item.getWorkflowType().getName());
-            holder.binding.lytHeader.setOnClickListener(view ->
-                    anInterface.showWorkflow(item.getId()));
+            holder.binding.lytHeader.setOnClickListener(v -> {
+                int position = holder.getAdapterPosition();
+                WorkflowDb selectedItem = getItem(position);
+                anInterface.showWorkflow(new WorkflowListItem(selectedItem));
+            });
         }
 
+    }
+
+    private WorkflowDb getItem(int position){
+        return workflows.get(position);
     }
 
     @Override

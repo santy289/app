@@ -1,20 +1,21 @@
 package com.rootnetapp.rootnetintranet.ui.manager;
 
-import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import androidx.fragment.app.DialogFragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.databinding.DialogWorkflowManagerBinding;
 import com.rootnetapp.rootnetintranet.ui.manager.adapters.ManagerDialogAdapter;
 
 import java.util.List;
+
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 /**
  * Created by root on 19/04/18.
@@ -25,10 +26,10 @@ public class ManagerWorkflowsDialog extends DialogFragment {
     private DialogWorkflowManagerBinding binding;
     private ManagerInterface anInterface;
     private DialogTypes type;
-    private List<Workflow> workflows;
+    private List<WorkflowDb> workflows;
 
     public static ManagerWorkflowsDialog newInstance(ManagerInterface anInterface, DialogTypes type,
-                                                     List<Workflow> workflows) {
+                                                     List<WorkflowDb> workflows) {
         ManagerWorkflowsDialog fragment = new ManagerWorkflowsDialog();
         fragment.anInterface = anInterface;
         fragment.type = type;

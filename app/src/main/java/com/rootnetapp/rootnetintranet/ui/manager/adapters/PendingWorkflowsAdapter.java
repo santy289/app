@@ -7,12 +7,14 @@ import android.view.ViewGroup;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowManagerItemBinding;
 import com.rootnetapp.rootnetintranet.ui.manager.ManagerInterface;
 
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,11 +24,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class PendingWorkflowsAdapter  extends RecyclerView.Adapter<PendingWorkflowsViewholder>{
 
-    private List<Workflow> workflows;
+    private List<WorkflowDb> workflows;
     private Context context;
     private ManagerInterface anInterface;
 
-    public PendingWorkflowsAdapter(List<Workflow> workflows, ManagerInterface anInterface) {
+    public PendingWorkflowsAdapter(List<WorkflowDb> workflows, ManagerInterface anInterface) {
         this.workflows = workflows;
         this.anInterface = anInterface;
     }
@@ -42,11 +44,13 @@ public class PendingWorkflowsAdapter  extends RecyclerView.Adapter<PendingWorkfl
     }
 
     @Override
-    public void onBindViewHolder(PendingWorkflowsViewholder holder, int i) {
+    public void onBindViewHolder(@NonNull PendingWorkflowsViewholder holder, int i) {
 
-        Workflow item = workflows.get(i);
+        WorkflowDb item = getItem(i);
         holder.binding.tvHeadername.setText(item.getWorkflowTypeKey());
         holder.binding.tvHeaderowner.setText(item.getAuthor().getFullName());
+
+        holder.binding.tvWorkflowType.setText(item.getWorkflowType().getName());
 
         String startDate = item.getStart();
         String formattedDate = Utils.getFormattedDate(
@@ -78,6 +82,16 @@ public class PendingWorkflowsAdapter  extends RecyclerView.Adapter<PendingWorkfl
             }
         });
 
+        holder.binding.btnDetail.setOnClickListener(view -> {
+            int position = holder.getAdapterPosition();
+            WorkflowDb selectedItem = getItem(position);
+            anInterface.showWorkflow(new WorkflowListItem(selectedItem));
+        });
+
+    }
+
+    private WorkflowDb getItem(int position){
+        return workflows.get(position);
     }
 
     @Override

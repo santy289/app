@@ -1,11 +1,11 @@
 package com.rootnetapp.rootnetintranet.ui.manager;
 
+import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-
-import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
 
 /**
  * Created by root on 27/04/18.
@@ -13,7 +13,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsRespon
 
 public class WorkflowManagerViewModel extends ViewModel {
 
-    private MutableLiveData<WorkflowsResponse> mWorkflowsLiveData;
+    private MutableLiveData<WorkflowResponseDb> mWorkflowsLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
     private WorkflowManagerRepository repository;
 
@@ -27,15 +27,15 @@ public class WorkflowManagerViewModel extends ViewModel {
                 .subscribe(this::onWorkflowsSuccess, this::onFailure);
     }
 
-    private void onWorkflowsSuccess(WorkflowsResponse workflowsResponse) {
-        mWorkflowsLiveData.setValue(workflowsResponse);
+    private void onWorkflowsSuccess(WorkflowResponseDb workflowResponseDb) {
+        mWorkflowsLiveData.setValue(workflowResponseDb);
     }
 
     private void onFailure(Throwable throwable) {
         mErrorLiveData.setValue(R.string.failure_connect);
     }
 
-    public LiveData<WorkflowsResponse> getObservableWorkflows() {
+    public LiveData<WorkflowResponseDb> getObservableWorkflows() {
         if (mWorkflowsLiveData == null) {
             mWorkflowsLiveData = new MutableLiveData<>();
         }

@@ -405,6 +405,7 @@
                             </FrameLayout>
 
                             <TextView
+                                android:id="@+id/tv_out_of_time_count"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="00"
@@ -708,7 +709,7 @@
                     android:layout_centerVertical="true"
                     android:paddingTop="10dp"
                     android:paddingBottom="10dp"
-                    android:text="@string/pending_workflows"
+                    android:text="@string/workflows"
                     android:textAllCaps="true"
                     android:textColor="@color/colorPrimaryDark"
                     android:textSize="18sp"

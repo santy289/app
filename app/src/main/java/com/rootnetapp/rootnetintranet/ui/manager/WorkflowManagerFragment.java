@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -26,11 +27,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -42,7 +43,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
 
     private FragmentWorkflowManagerBinding binding;
     private MainActivityInterface anInterface;
-    private String start, end, token;
+    private String start, end;
     private int page = 0;
     private List<WorkflowDb> workflows;
 
@@ -75,12 +76,13 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         //TODO preferences inyectadas con Dagger
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        token = "Bearer " + prefs.getString("token", "");
+        String token = "Bearer " + prefs.getString("token", "");
         binding.recPendingworkflows.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recPendingworkflows.setNestedScrollingEnabled(false);
 
         subscribe();
         setOnClickListeners();
+        viewModel.init(token);
 
         start = Utils.getMonthDay(0, 1);
         end = Utils.getMonthDay(0, 30);
@@ -89,21 +91,15 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         start = start + "T00:00:00-0000";
         end = end + "T00:00:00-0000";
         workflows = new ArrayList<>();
-        getPendingWorkflows();
+        getWorkflows();
         return view;
     }
 
     private void subscribe() {
-        final Observer<Integer> errorObserver = ((Integer data) -> {
-            if (null != data) {
-                //TODO mejorar toast
-                Utils.hideLoading();
-//                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
-            }
-        });
-
+        viewModel.getObservableShowLoading().observe(this, this::showLoading);
+        viewModel.getObservableError().observe(this, this::showToastMessage);
         viewModel.getObservableWorkflows().observe(this, this::populatePendingWorkflows);
-        viewModel.getObservableError().observe(this, errorObserver);
+        viewModel.getObservableOutOfTimeCount().observe(this, this::updateOutOfTimeWorkflowsCount);
     }
 
     private void setOnClickListeners(){
@@ -118,9 +114,9 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         binding.btnShowmore.setOnClickListener(this::showMoreClicked);
     }
 
-    public void getPendingWorkflows() {
+    private void getWorkflows() {
         Utils.showLoading(getContext());
-        viewModel.getPendingWorkflows(token, page);
+        viewModel.getWorkflows(page);
     }
 
     private void selectDates(View view) {
@@ -129,7 +125,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
 
     private void showMoreClicked(View view) {
         page++;
-        getPendingWorkflows();
+        getWorkflows();
     }
 
     private void filterClicked(View view) {
@@ -175,7 +171,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         }
         workflows = new ArrayList<>();
         page = 0;
-        getPendingWorkflows();
+        getWorkflows();
     }
 
     @UiThread
@@ -222,7 +218,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         this.end = end + "T00:00:00-0000";
         workflows = new ArrayList<>();
         page = 0;
-        getPendingWorkflows();
+        getWorkflows();
     }
 
     @Override
@@ -246,7 +242,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
             }
             case R.id.btn_outoftime: {
                 anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                        ManagerWorkflowsDialog.DialogTypes.OUT_OF_TIME, workflows));
+                        ManagerWorkflowsDialog.DialogTypes.OUT_OF_TIME, viewModel.getOutOfTimeWorkflows()));
                 break;
             }
             case R.id.btn_updated: {
@@ -278,5 +274,28 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
                 binding.lytNoworkflows.setVisibility(View.VISIBLE);
             }
         }
+    }
+
+    @UiThread
+    private void updateOutOfTimeWorkflowsCount(int count){
+        binding.tvOutOfTimeCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void showLoading(Boolean show) {
+        if (show) {
+            Utils.showLoading(getContext());
+        } else {
+            Utils.hideLoading();
+        }
+    }
+
+    @UiThread
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                getContext(),
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
     }
 }

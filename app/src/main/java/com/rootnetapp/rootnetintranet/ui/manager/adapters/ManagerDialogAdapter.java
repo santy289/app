@@ -27,6 +27,12 @@ public class ManagerDialogAdapter extends RecyclerView.Adapter<ManagerDialogView
         this.anInterface = anInterface;
     }
 
+    public void setData(List<WorkflowDb> list) {
+        workflows = list;
+        notifyDataSetChanged();
+        getItemCount();
+    }
+
     @Override
     public ManagerDialogViewholder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         LayoutInflater layoutInflater =
@@ -41,7 +47,9 @@ public class ManagerDialogAdapter extends RecyclerView.Adapter<ManagerDialogView
         WorkflowDb item = workflows.get(i);
         holder.binding.tvWorkflowTypeKey.setText(item.getWorkflowTypeKey());
         holder.binding.tvCurrentStatus.setText(item.getCurrentStatusName());
-        holder.binding.tvWorkflowType.setText(item.getWorkflowType().getName());
+        if (item.getWorkflowType() != null) {
+            holder.binding.tvWorkflowType.setText(item.getWorkflowType().getName());
+        }
         holder.binding.lytHeader.setOnClickListener(v -> {
             int position = holder.getAdapterPosition();
             WorkflowDb selectedItem = getItem(position);

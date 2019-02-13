@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,10 +15,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/white"
-            android:paddingBottom="10dp"
-            android:paddingEnd="10dp"
             android:paddingStart="10dp"
-            android:paddingTop="10dp">
+            android:paddingTop="10dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="10dp">
 
             <TextView
                 android:id="@+id/tv_headername"
@@ -27,8 +28,8 @@
                 android:layout_centerVertical="true"
                 android:layout_toStartOf="@+id/tv_headerowner"
                 android:padding="10dp"
-                android:text="PLACEHOLDER"
-                android:textColor="@color/colorPrimary" />
+                android:textColor="@color/colorPrimary"
+                tools:text="PLACEHOLDER" />
 
             <ImageView
                 android:id="@+id/btn_arrow"
@@ -47,8 +48,8 @@
                 android:layout_centerVertical="true"
                 android:layout_toStartOf="@id/btn_arrow"
                 android:padding="10dp"
-                android:text="x days"
-                android:textColor="@color/selected_filter" />
+                android:textColor="@color/selected_filter"
+                tools:text="x days" />
 
             <TextView
                 android:id="@+id/tv_headerowner"
@@ -57,9 +58,9 @@
                 android:layout_centerVertical="true"
                 android:layout_toStartOf="@id/tv_headerdate"
                 android:padding="10dp"
-                android:text="Jon Doe"
                 android:textColor="@color/selected_filter"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:text="Jon Doe" />
 
         </RelativeLayout>
 
@@ -68,8 +69,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/unselected_filter"
-            android:visibility="gone"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -84,8 +85,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:paddingEnd="10dp"
                     android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
                     android:text="@string/date"
                     android:textAllCaps="true"
                     android:textColor="@color/colorPrimaryDark"
@@ -96,11 +97,11 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:paddingEnd="10dp"
                     android:paddingStart="10dp"
-                    android:text="LOREM"
+                    android:paddingEnd="10dp"
                     android:textColor="@color/colorPrimary"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    tools:text="LOREM" />
             </LinearLayout>
 
             <LinearLayout
@@ -116,8 +117,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:paddingEnd="10dp"
                     android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
                     android:text="@string/title"
                     android:textAllCaps="true"
                     android:textColor="@color/colorPrimaryDark"
@@ -128,11 +129,11 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:paddingEnd="10dp"
                     android:paddingStart="10dp"
-                    android:text="LOREM"
+                    android:paddingEnd="10dp"
                     android:textColor="@color/colorPrimary"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    tools:text="LOREM" />
             </LinearLayout>
 
             <LinearLayout
@@ -147,8 +148,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:paddingEnd="10dp"
                     android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
                     android:text="@string/author"
                     android:textAllCaps="true"
                     android:textColor="@color/colorPrimaryDark"
@@ -159,11 +160,11 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:paddingEnd="10dp"
                     android:paddingStart="10dp"
-                    android:text="LOREM"
+                    android:paddingEnd="10dp"
                     android:textColor="@color/colorPrimary"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    tools:text="LOREM" />
             </LinearLayout>
 
             <LinearLayout
@@ -179,8 +180,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:paddingEnd="10dp"
                     android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
                     android:text="@string/days_open"
                     android:textAllCaps="true"
                     android:textColor="@color/colorPrimaryDark"
@@ -191,11 +192,11 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:paddingEnd="10dp"
                     android:paddingStart="10dp"
-                    android:text="LOREM"
+                    android:paddingEnd="10dp"
                     android:textColor="@color/colorPrimary"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    tools:text="LOREM" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

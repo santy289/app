@@ -1,18 +1,20 @@
 package com.rootnetapp.rootnetintranet.ui.manager.adapters;
 
 import android.content.Context;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowManagerItemBinding;
 import com.rootnetapp.rootnetintranet.ui.manager.ManagerInterface;
 
 import java.util.List;
+
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Created by root on 18/04/18.
@@ -46,9 +48,13 @@ public class PendingWorkflowsAdapter  extends RecyclerView.Adapter<PendingWorkfl
         holder.binding.tvHeadername.setText(item.getWorkflowTypeKey());
         holder.binding.tvHeaderowner.setText(item.getAuthor().getFullName());
 
-        String date = item.getStart().split("T")[0];
-        String hour = (item.getStart().split("T")[1]).split("-")[0];
-        holder.binding.tvDate.setText(date + " - " + hour);
+        String startDate = item.getStart();
+        String formattedDate = Utils.getFormattedDate(
+                startDate,
+                Utils.SERVER_DATE_FORMAT,
+                Utils.STANDARD_DATE_DISPLAY_FORMAT
+        );
+        holder.binding.tvDate.setText(formattedDate);
         holder.binding.tvTitle.setText(item.getTitle());
         holder.binding.tvAuthor.setText(item.getAuthor().getFullName());
 

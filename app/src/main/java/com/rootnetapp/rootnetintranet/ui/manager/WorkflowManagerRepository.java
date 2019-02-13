@@ -43,21 +43,14 @@ public class WorkflowManagerRepository {
                 50,
                 open,
                 1,
-                false,
+                true,
                 options).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     protected Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(String token,
                                                                     Map<String, Object> options) {
-        return service.getWorkflowsByBaseFilters(
-                token,
-                50,
-                true,
-                1,
-                false,
-                options).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread());
+        return getWorkflowsByBaseFilters(token, true, options);
     }
 
     protected Observable<WorkflowOverviewResponse> getOverviewWorkflowsCount(String token, String startDate, String endDate) {

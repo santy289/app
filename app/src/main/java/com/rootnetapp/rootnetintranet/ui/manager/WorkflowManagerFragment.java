@@ -78,16 +78,10 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         token = "Bearer " + prefs.getString("token", "");
         binding.recPendingworkflows.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recPendingworkflows.setNestedScrollingEnabled(false);
+
         subscribe();
-        binding.btnMonth.setOnClickListener(this::filterClicked);
-        binding.btnWeek.setOnClickListener(this::filterClicked);
-        binding.btnDay.setOnClickListener(this::filterClicked);
-        binding.btnSelectdates.setOnClickListener(this::selectDates);
-        binding.btnPendingapproval.setOnClickListener(this::showWorkflowsDialog);
-        binding.btnWorkflows.setOnClickListener(this::showWorkflowsDialog);
-        binding.btnOutoftime.setOnClickListener(this::showWorkflowsDialog);
-        binding.btnUpdated.setOnClickListener(this::showWorkflowsDialog);
-        binding.btnShowmore.setOnClickListener(this::showMoreClicked);
+        setOnClickListeners();
+
         start = Utils.getMonthDay(0, 1);
         end = Utils.getMonthDay(0, 30);
         binding.tvSelecteddates.setText("(" + start + " - " + end + ")");
@@ -97,11 +91,6 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         workflows = new ArrayList<>();
         getPendingWorkflows();
         return view;
-    }
-
-    public void getPendingWorkflows() {
-        Utils.showLoading(getContext());
-        viewModel.getPendingWorkflows(token, page);
     }
 
     private void subscribe() {
@@ -115,6 +104,23 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
 
         viewModel.getObservableWorkflows().observe(this, this::populatePendingWorkflows);
         viewModel.getObservableError().observe(this, errorObserver);
+    }
+
+    private void setOnClickListeners(){
+        binding.btnMonth.setOnClickListener(this::filterClicked);
+        binding.btnWeek.setOnClickListener(this::filterClicked);
+        binding.btnDay.setOnClickListener(this::filterClicked);
+        binding.btnSelectdates.setOnClickListener(this::selectDates);
+        binding.btnPendingapproval.setOnClickListener(this::showWorkflowsDialog);
+        binding.btnWorkflows.setOnClickListener(this::showWorkflowsDialog);
+        binding.btnOutoftime.setOnClickListener(this::showWorkflowsDialog);
+        binding.btnUpdated.setOnClickListener(this::showWorkflowsDialog);
+        binding.btnShowmore.setOnClickListener(this::showMoreClicked);
+    }
+
+    public void getPendingWorkflows() {
+        Utils.showLoading(getContext());
+        viewModel.getPendingWorkflows(token, page);
     }
 
     private void selectDates(View view) {

@@ -8,7 +8,6 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflowoverview.WorkflowOverviewResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +26,11 @@ public class WorkflowManagerViewModel extends ViewModel {
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<List<WorkflowDb>> mWorkflowListLiveData;
+    private MutableLiveData<List<WorkflowDb>> mMyPendingWorkflowsListLiveData;
+    private MutableLiveData<List<WorkflowDb>> mMyOpenWorkflowsListLiveData;
+    private MutableLiveData<List<WorkflowDb>> mMyClosedWorkflowsListLiveData;
+    private MutableLiveData<List<WorkflowDb>> mOutOfTimeWorkflowsListLiveData;
+    private MutableLiveData<List<WorkflowDb>> mUpdatedWorkflowsListLiveData;
     private MutableLiveData<Integer> mMyPendingCountLiveData;
     private MutableLiveData<Integer> mMyOpenCountLiveData;
     private MutableLiveData<Integer> mMyClosedCountLiveData;
@@ -42,7 +46,6 @@ public class WorkflowManagerViewModel extends ViewModel {
 
     private WorkflowManagerRepository mRepository;
     private String mToken;
-    private List<WorkflowDb> mOutOfTimeWorkflows;
     private String mStartDate, mEndDate;
     private int mCurrentPage;
     private int mWebCount, mWebCompleted;
@@ -55,11 +58,10 @@ public class WorkflowManagerViewModel extends ViewModel {
     public void init(String token, String startDate, String endDate) {
         mToken = token;
         updateDashboard(startDate, endDate);
-        fetchOutOfTimeWorkflows();
     }
 
     //region Dashboard Update
-    protected void updateDashboard(String startDate, String endDate){
+    protected void updateDashboard(String startDate, String endDate) {
         mWebCount = mWebCompleted = 0;
         showLoading.setValue(true);
 
@@ -75,7 +77,7 @@ public class WorkflowManagerViewModel extends ViewModel {
         mWebCount++;
     }
 
-    private void updateCompleted(){
+    private void updateCompleted() {
         mWebCompleted++;
 
         if (mWebCompleted >= mWebCount) {
@@ -86,12 +88,12 @@ public class WorkflowManagerViewModel extends ViewModel {
     }
     //endregion
 
-    //region Workflows
+    //region All Workflows
     protected void resetCurrentPage() {
         this.mCurrentPage = 1;
     }
 
-    protected void incrementCurrentPage(){
+    protected void incrementCurrentPage() {
         mCurrentPage++;
     }
 
@@ -115,20 +117,94 @@ public class WorkflowManagerViewModel extends ViewModel {
     }
     //endregion
 
-    //region Out of time
-    protected List<WorkflowDb> getOutOfTimeWorkflows() {
-        if (mOutOfTimeWorkflows == null) mOutOfTimeWorkflows = new ArrayList<>();
-
-        return mOutOfTimeWorkflows;
-    }
-
-    protected void setOutOfTimeWorkflows(List<WorkflowDb> outOfTimeWorkflows) {
-        this.mOutOfTimeWorkflows = outOfTimeWorkflows;
-    }
-
-    private void fetchOutOfTimeWorkflows() {
+    //region Filtered Workflows
+    private Map<String, Object> getStandardFilters() {
         Map<String, Object> options = new ArrayMap<>();
 
+        options.put("start", getStartDate());
+        options.put("end", getEndDate());
+
+        return options;
+    }
+
+    //region My Pending Workflows
+    protected void getMyPendingWorkflows() {
+        Map<String, Object> options = getStandardFilters();
+
+        options.put("profile_related", 1);
+        options.put("pending", true);
+
+        showLoading.setValue(true);
+        Disposable disposable = mRepository
+                .getWorkflowsByBaseFilters(mToken, options)
+                .subscribe(this::onMyPendingSuccess, this::onFailure);
+
+        mDisposables.add(disposable);
+    }
+
+    private void onMyPendingSuccess(WorkflowResponseDb workflowResponseDb) {
+        showLoading.setValue(false);
+
+        List<WorkflowDb> list = workflowResponseDb.getList();
+        if (list == null) return;
+
+        mMyPendingWorkflowsListLiveData.setValue(list);
+    }
+    //endregion
+
+    //region My Open Workflows
+    protected void getMyOpenWorkflows() {
+        Map<String, Object> options = getStandardFilters();
+
+        options.put("profile_related", 1);
+
+        showLoading.setValue(true);
+        Disposable disposable = mRepository
+                .getWorkflowsByBaseFilters(mToken, true, options)
+                .subscribe(this::onMyOpenSuccess, this::onFailure);
+
+        mDisposables.add(disposable);
+    }
+
+    private void onMyOpenSuccess(WorkflowResponseDb workflowResponseDb) {
+        showLoading.setValue(false);
+
+        List<WorkflowDb> list = workflowResponseDb.getList();
+        if (list == null) return;
+
+        mMyOpenWorkflowsListLiveData.setValue(list);
+    }
+    //endregion
+
+    //region My Pending Workflows
+    protected void getMyClosedWorkflows() {
+        Map<String, Object> options = getStandardFilters();
+
+        options.put("profile_related", 1);
+
+        showLoading.setValue(true);
+        Disposable disposable = mRepository
+                .getWorkflowsByBaseFilters(mToken, false, options)
+                .subscribe(this::onMyClosedSuccess, this::onFailure);
+
+        mDisposables.add(disposable);
+    }
+
+    private void onMyClosedSuccess(WorkflowResponseDb workflowResponseDb) {
+        showLoading.setValue(false);
+
+        List<WorkflowDb> list = workflowResponseDb.getList();
+        if (list == null) return;
+
+        mMyClosedWorkflowsListLiveData.setValue(list);
+    }
+    //endregion
+
+    //region Out of Time Workflows
+    protected void getOutOfTimeWorkflows() {
+        Map<String, Object> options = getStandardFilters();
+
+        options.put("profile_related", 1);
         options.put("out_of_time", true);
 
         showLoading.setValue(true);
@@ -145,9 +221,34 @@ public class WorkflowManagerViewModel extends ViewModel {
         List<WorkflowDb> list = workflowResponseDb.getList();
         if (list == null) return;
 
-        setOutOfTimeWorkflows(list);
-        mOutOfTimeCountLiveData.setValue(list.size());
+        mOutOfTimeWorkflowsListLiveData.setValue(list);
     }
+    //endregion
+
+    //region Updated Workflows
+    protected void getUpdatedWorkflows() {
+        Map<String, Object> options = getStandardFilters();
+
+        options.put("profile_related", 1);
+        options.put("latest", true);
+
+        showLoading.setValue(true);
+        Disposable disposable = mRepository
+                .getWorkflowsByBaseFilters(mToken, options)
+                .subscribe(this::onUpdatedSuccess, this::onFailure);
+
+        mDisposables.add(disposable);
+    }
+
+    private void onUpdatedSuccess(WorkflowResponseDb workflowResponseDb) {
+        showLoading.setValue(false);
+
+        List<WorkflowDb> list = workflowResponseDb.getList();
+        if (list == null) return;
+
+        mUpdatedWorkflowsListLiveData.setValue(list);
+    }
+    //endregion
     //endregion
 
     //region Workflows Count
@@ -188,7 +289,7 @@ public class WorkflowManagerViewModel extends ViewModel {
         return mStartDate;
     }
 
-    protected String getFormattedStartDate(){
+    protected String getFormattedStartDate() {
         return Utils.getFormattedDate(getStartDate(), Utils.SERVER_DATE_FORMAT, "yyyy-MM-dd");
     }
 
@@ -200,7 +301,7 @@ public class WorkflowManagerViewModel extends ViewModel {
         return mEndDate;
     }
 
-    protected String getFormattedEndDate(){
+    protected String getFormattedEndDate() {
         return Utils.getFormattedDate(getEndDate(), Utils.SERVER_DATE_FORMAT, "yyyy-MM-dd");
     }
 
@@ -219,6 +320,41 @@ public class WorkflowManagerViewModel extends ViewModel {
             mWorkflowListLiveData = new MutableLiveData<>();
         }
         return mWorkflowListLiveData;
+    }
+
+    protected LiveData<List<WorkflowDb>> getObservableMyPendingWorkflows() {
+        if (mMyPendingWorkflowsListLiveData == null) {
+            mMyPendingWorkflowsListLiveData = new MutableLiveData<>();
+        }
+        return mMyPendingWorkflowsListLiveData;
+    }
+
+    protected LiveData<List<WorkflowDb>> getObservableMyOpenWorkflows() {
+        if (mMyOpenWorkflowsListLiveData == null) {
+            mMyOpenWorkflowsListLiveData = new MutableLiveData<>();
+        }
+        return mMyOpenWorkflowsListLiveData;
+    }
+
+    protected LiveData<List<WorkflowDb>> getObservableMyClosedWorkflows() {
+        if (mMyClosedWorkflowsListLiveData == null) {
+            mMyClosedWorkflowsListLiveData = new MutableLiveData<>();
+        }
+        return mMyClosedWorkflowsListLiveData;
+    }
+
+    protected LiveData<List<WorkflowDb>> getObservableOutOfTimeWorkflows() {
+        if (mOutOfTimeWorkflowsListLiveData == null) {
+            mOutOfTimeWorkflowsListLiveData = new MutableLiveData<>();
+        }
+        return mOutOfTimeWorkflowsListLiveData;
+    }
+
+    protected LiveData<List<WorkflowDb>> getObservableUpdatedWorkflows() {
+        if (mUpdatedWorkflowsListLiveData == null) {
+            mUpdatedWorkflowsListLiveData = new MutableLiveData<>();
+        }
+        return mUpdatedWorkflowsListLiveData;
     }
 
     protected LiveData<Integer> getObservableMyPendingCount() {

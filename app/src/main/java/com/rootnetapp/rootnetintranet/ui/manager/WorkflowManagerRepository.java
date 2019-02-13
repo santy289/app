@@ -36,6 +36,18 @@ public class WorkflowManagerRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    protected Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(String token, boolean open,
+                                                                    Map<String, Object> options) {
+        return service.getWorkflowsByBaseFilters(
+                token,
+                50,
+                open,
+                1,
+                false,
+                options).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     protected Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(String token,
                                                                     Map<String, Object> options) {
         return service.getWorkflowsByBaseFilters(

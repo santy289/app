@@ -101,17 +101,23 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         viewModel.getObservableClosedCount().observe(this, this::updateClosedWorkflowsCount);
         viewModel.getObservableHideMoreButton().observe(this, this::hideMoreButton);
         viewModel.getObservableHideWorkflowList().observe(this, this::hideWorkflowList);
+        viewModel.getObservableMyPendingWorkflows().observe(this, this::showMyPendingWorkflowsDialog);
+        viewModel.getObservableMyOpenWorkflows().observe(this, this::showMyOpenWorkflowsDialog);
+        viewModel.getObservableMyClosedWorkflows().observe(this, this::showMyClosedWorkflowsDialog);
+        viewModel.getObservableOutOfTimeWorkflows().observe(this, this::showOutOfTimeWorkflowsDialog);
+        viewModel.getObservableUpdatedWorkflows().observe(this, this::showUpdatedWorkflowsDialog);
     }
 
     private void setOnClickListeners() {
         binding.tvMonth.setOnClickListener(v -> filterMonthClicked());
         binding.tvWeek.setOnClickListener(v -> filterWeekClicked());
         binding.tvDay.setOnClickListener(v -> filterDayClicked());
-        binding.btnSelectdates.setOnClickListener(v -> selectDates());
-        binding.btnPendingapproval.setOnClickListener(v -> showMyPendingWorkflowsDialog());
-        binding.btnWorkflows.setOnClickListener(v -> showMyOpenWorkflowsDialog());
-        binding.btnOutoftime.setOnClickListener(v -> showOutOfTimeWorkflowsDialog());
-        binding.btnUpdated.setOnClickListener(v -> showUpdatedWorkflowsDialog());
+        binding.btnSelectDates.setOnClickListener(v -> selectDates());
+        binding.btnPendingApproval.setOnClickListener(v -> getMyPendingWorkflows());
+        binding.llMyOpenWorkflows.setOnClickListener(v -> getMyOpenWorkflows());
+        binding.llMyClosedWorkflows.setOnClickListener(v -> getMyClosedWorkflows());
+        binding.btnOutOfTime.setOnClickListener(v -> getOutOfTimeWorkflows());
+        binding.btnUpdated.setOnClickListener(v -> getUpdatedWorkflows());
         binding.btnShowmore.setOnClickListener(v -> showMoreClicked());
     }
 
@@ -134,6 +140,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         viewModel.getWorkflows();
     }
 
+    //region Date Filters
     private void filterMonthClicked() {
         selectMonthButton(true);
         selectWeekButton(false);
@@ -221,6 +228,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
 
         updateDashboard(start, end);
     }
+    //endregion
 
     @Override
     public void showWorkflow(WorkflowListItem workflowListItem) {
@@ -229,35 +237,57 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         anInterface.showActivity(intent);
     }
 
-    private void showMyPendingWorkflowsDialog() {
+    //region Workflows Dialog
+    private void getMyPendingWorkflows(){
+        viewModel.getMyPendingWorkflows();
+    }
+
+    private void getMyOpenWorkflows(){
+        viewModel.getMyOpenWorkflows();
+    }
+
+    private void getMyClosedWorkflows(){
+        viewModel.getMyClosedWorkflows();
+    }
+
+    private void getOutOfTimeWorkflows(){
+        viewModel.getOutOfTimeWorkflows();
+    }
+
+    private void getUpdatedWorkflows(){
+        viewModel.getUpdatedWorkflows();
+    }
+
+    private void showMyPendingWorkflowsDialog(List<WorkflowDb> workflowList) {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
                 ManagerWorkflowsDialog.DialogTypes.PENDING,
-                viewModel.getOutOfTimeWorkflows()));
+                workflowList));
     }
 
-    private void showMyOpenWorkflowsDialog() {
+    private void showMyOpenWorkflowsDialog(List<WorkflowDb> workflowList) {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
                 ManagerWorkflowsDialog.DialogTypes.WORKFLOWS,
-                viewModel.getOutOfTimeWorkflows()));
+                workflowList));
     }
 
-    private void showMyClosedWorkflowsDialog() {
+    private void showMyClosedWorkflowsDialog(List<WorkflowDb> workflowList) {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
                 ManagerWorkflowsDialog.DialogTypes.WORKFLOWS,
-                viewModel.getOutOfTimeWorkflows()));
+                workflowList));
     }
 
-    private void showOutOfTimeWorkflowsDialog() {
+    private void showOutOfTimeWorkflowsDialog(List<WorkflowDb> workflowList) {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
                 ManagerWorkflowsDialog.DialogTypes.OUT_OF_TIME,
-                viewModel.getOutOfTimeWorkflows()));
+                workflowList));
     }
 
-    private void showUpdatedWorkflowsDialog() {
+    private void showUpdatedWorkflowsDialog(List<WorkflowDb> workflowList) {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
                 ManagerWorkflowsDialog.DialogTypes.UPDATED,
-                viewModel.getOutOfTimeWorkflows()));
+                workflowList));
     }
+    //endregion
 
     @UiThread
     private void populatePendingWorkflows(List<WorkflowDb> workflowList) {

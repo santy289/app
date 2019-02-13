@@ -40,7 +40,7 @@
                 android:paddingEnd="15dp">
 
                 <LinearLayout
-                    android:id="@+id/btn_selectdates"
+                    android:id="@+id/btn_select_dates"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
@@ -264,7 +264,7 @@
                     android:weightSum="2">
 
                     <androidx.cardview.widget.CardView
-                        android:id="@+id/btn_pendingapproval"
+                        android:id="@+id/btn_pending_approval"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_margin="3dp"
@@ -381,6 +381,7 @@
                                     android:paddingEnd="5dp"/>
 
                                 <LinearLayout
+                                    android:id="@+id/ll_my_open_workflows"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_toStartOf="@id/separator3"
@@ -405,6 +406,7 @@
                                 </LinearLayout>
 
                                 <LinearLayout
+                                    android:id="@+id/ll_my_closed_workflows"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_toEndOf="@id/separator3"
@@ -440,7 +442,7 @@
                     android:weightSum="2">
 
                     <androidx.cardview.widget.CardView
-                        android:id="@+id/btn_outoftime"
+                        android:id="@+id/btn_out_of_time"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_margin="3dp"

@@ -17,7 +17,9 @@ import io.reactivex.schedulers.Schedulers;
 
 public class WorkflowManagerRepository {
 
-    private final static String TAG = "WorkflowManagerRepository";
+    private static final String TAG = "WorkflowManagerRepository";
+    private static final int ALL_WORKFLOWS_PAGE_LIMIT = 10;
+    private static final int WORKFLOWS_DIALOG_PAGE_LIMIT = 50;
 
     private ApiInterface service;
 
@@ -25,27 +27,30 @@ public class WorkflowManagerRepository {
         this.service = service;
     }
 
-    protected Observable<WorkflowResponseDb> getWorkflows(String auth, int page) {
-        return service.getWorkflowsDb(auth, 10, true, page, true)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
-
     protected Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {
         return service.getWorkflow(auth, workflowId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    protected Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(String token, boolean open,
+    protected Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(String token, boolean open, int page, int limit,
                                                                     Map<String, Object> options) {
         return service.getWorkflowsByBaseFilters(
                 token,
-                50,
+                limit,
                 open,
-                1,
+                page,
                 true,
                 options).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(String token, int page, Map<String, Object> options) {
+        return getWorkflowsByBaseFilters(token, true, page, ALL_WORKFLOWS_PAGE_LIMIT, options);
+    }
+
+    protected Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(String token, boolean open,
+                                                                    Map<String, Object> options) {
+        return getWorkflowsByBaseFilters(token, open, 1, WORKFLOWS_DIALOG_PAGE_LIMIT, options);
     }
 
     protected Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(String token,

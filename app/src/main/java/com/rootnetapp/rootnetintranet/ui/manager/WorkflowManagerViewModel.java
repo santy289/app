@@ -90,6 +90,15 @@ public class WorkflowManagerViewModel extends ViewModel {
     //endregion
 
     //region All Workflows
+    private Map<String, Object> getCommonFilters() {
+        Map<String, Object> options = new ArrayMap<>();
+
+        options.put("start", getStartDate());
+        options.put("end", getEndDate());
+
+        return options;
+    }
+
     protected void resetCurrentPage() {
         this.mCurrentPage = 1;
     }
@@ -101,7 +110,7 @@ public class WorkflowManagerViewModel extends ViewModel {
     protected void getWorkflows() {
         showLoading.setValue(true);
 
-        Disposable disposable = mRepository.getWorkflows(mToken, mCurrentPage)
+        Disposable disposable = mRepository.getWorkflowsByBaseFilters(mToken, mCurrentPage, getCommonFilters())
                 .subscribe(this::onWorkflowsSuccess, this::onFailure);
 
         mDisposables.add(disposable);
@@ -118,16 +127,6 @@ public class WorkflowManagerViewModel extends ViewModel {
     }
     //endregion
 
-    //region Filtered Workflows
-    private Map<String, Object> getStandardFilters() {
-        Map<String, Object> options = new ArrayMap<>();
-
-        options.put("start", getStartDate());
-        options.put("end", getEndDate());
-
-        return options;
-    }
-
     //region My Pending Workflows
     protected void getMyPendingWorkflows() {
         if (Integer.parseInt(workflowOverviewResponse.getOverview().getMyWorkflows().getPending()
@@ -136,7 +135,7 @@ public class WorkflowManagerViewModel extends ViewModel {
             return;
         }
 
-        Map<String, Object> options = getStandardFilters();
+        Map<String, Object> options = getCommonFilters();
 
         options.put("profile_related", 1);
         options.put("pending", true);
@@ -167,7 +166,7 @@ public class WorkflowManagerViewModel extends ViewModel {
             return;
         }
 
-        Map<String, Object> options = getStandardFilters();
+        Map<String, Object> options = getCommonFilters();
 
         options.put("profile_related", 1);
 
@@ -197,7 +196,7 @@ public class WorkflowManagerViewModel extends ViewModel {
             return;
         }
 
-        Map<String, Object> options = getStandardFilters();
+        Map<String, Object> options = getCommonFilters();
 
         options.put("profile_related", 1);
 
@@ -227,7 +226,7 @@ public class WorkflowManagerViewModel extends ViewModel {
             return;
         }
 
-        Map<String, Object> options = getStandardFilters();
+        Map<String, Object> options = getCommonFilters();
 
         options.put("profile_related", 1);
         options.put("out_of_time", true);
@@ -258,7 +257,7 @@ public class WorkflowManagerViewModel extends ViewModel {
             return;
         }
 
-        Map<String, Object> options = getStandardFilters();
+        Map<String, Object> options = getCommonFilters();
 
         options.put("profile_related", 1);
         options.put("latest", true);
@@ -279,7 +278,6 @@ public class WorkflowManagerViewModel extends ViewModel {
 
         mUpdatedWorkflowsListLiveData.setValue(list);
     }
-    //endregion
     //endregion
 
     //region Workflows Count

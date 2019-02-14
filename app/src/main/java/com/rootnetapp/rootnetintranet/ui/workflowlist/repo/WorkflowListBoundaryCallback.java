@@ -105,6 +105,7 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
                             this::saveInDatabase,
                             throwable -> {
                                 Log.d(TAG, "onItemAtEndLoaded: ");
+                                updateIsLoading(false);
                                 callback.showLoadingMore(false);
                             }
                     );
@@ -126,6 +127,7 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
                             this::saveInDatabase,
                             throwable -> {
                                 Log.d(TAG, "WorkflowListBoundaryCallback: Cant get workflows from network - " + throwable.getMessage());
+                                updateIsLoading(false);
                                 callback.showLoadingMore(false);
                             }
                     );
@@ -149,6 +151,7 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
                         this::saveInDatabase,
                         throwable -> {
                             Log.d(TAG, "WorkflowListBoundaryCallback: Cant get workflows from network - " + throwable.getMessage());
+                            updateIsLoading(false);
                             callback.showLoadingMore(false);
                         }
                 );

@@ -106,7 +106,7 @@ public class WorkflowSearchViewModel extends ViewModel {
     }
 
     /**
-     *ƒtart observing DataSource from repo which is not filtered,
+     * Start observing DataSource from repo which is not filtered,
      * or not a search query.
      */
     private void subscribeViewModelForUnfilteredList() {

@@ -58,6 +58,7 @@ public class WorkflowSearchBoundaryCallback
         if (nextPage > lastPage) {
             return;
         }
+        updateIsLoading(true);
         messageLoadingMoreToUi.setValue(true);
         Disposable disposable = service
                 .getWorkflowsDb(
@@ -72,6 +73,7 @@ public class WorkflowSearchBoundaryCallback
                         this::saveInDatabase,
                         throwable -> {
                             Log.d(TAG, "WorkflowSearchBoundaryCallback: Cant get workflows from network - " + throwable.getMessage());
+                            updateIsLoading(false);
                             messageLoadingMoreToUi.setValue(false);
                         }
                 );

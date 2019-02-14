@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,15 +21,12 @@ import com.rootnetapp.rootnetintranet.ui.quickactions.changestatus.ChangeStatusA
 import com.rootnetapp.rootnetintranet.ui.quickactions.performaction.PerformActionFragment;
 import com.rootnetapp.rootnetintranet.ui.quickactions.workflowsearch.adapters.WorkflowListAdapter;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.core.content.ContextCompat;
-import androidx.core.widget.NestedScrollView;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
@@ -243,7 +239,9 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
         mQuickActionsInterface.showFragment(PerformActionFragment.newInstance(item, mAction), true);
     }
 
-    // Used when we have a general workflow.
+    /**
+     * Used when we have a general workflow.
+     */
     final Observer<PagedList<WorkflowListItem>> getAllWorkflowsObserver = (listWorkflows -> {
 //        fragmentWorkflowBinding.swipeRefreshLayout.setRefreshing(false);
         if (mAdapter == null) {

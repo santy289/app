@@ -137,6 +137,16 @@ public interface ApiInterface {
                                                   @Query("open") boolean open,
                                                   @Query("page") int page,
                                                   @Query("workflow_type") boolean showTypeDetails);
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?")
+    Observable<WorkflowResponseDb> searchWorkflowsDb(@Header("Authorization") String authorization,
+                                                  @Query("limit") int limit,
+                                                  @Query("open") boolean open,
+                                                  @Query("page") int page,
+                                                  @Query("workflow_type") boolean showTypeDetails,
+                                                  @Query("query") String searchText);
+
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?order=%7B%22desc%22:true,%22column%22:%22updated%22%7D")
     Observable<WorkflowResponseDb> getWorkflowsBySearchQuery(@Header("Authorization") String authorization,

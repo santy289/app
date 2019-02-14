@@ -29,7 +29,7 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
     private static final String TAG = "WorkflowSearchRepo";
     protected static final int PAGE_LIMIT = 20;
     public static int ENDPOINT_PAGE_SIZE = 60;
-    private static int LIST_PAGE_SIZE = 60;
+    private static int LIST_PAGE_SIZE = 30;
 
     private MutableLiveData<Boolean> messageErrorToViewModel;
     private MutableLiveData<WorkflowResponseDb> responseWorkflowList;
@@ -53,8 +53,10 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
         this.service = service;
         workflowDbDao = database.workflowDbDao();
         pagedListConfig = (new PagedList.Config.Builder())
-                .setEnablePlaceholders(false)
+                .setEnablePlaceholders(false)// default: true
                 .setPageSize(LIST_PAGE_SIZE)
+//                .setInitialLoadSizeHint(60) // default: page size * 3, request the inital load to be larger, avoids immediate load of pages when you first fetch data.
+                .setPrefetchDistance(20) // default: page size but if we have latency maybe we want lower number than page size.
                 .build();
     }
 
@@ -155,11 +157,13 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
             DataSource.Factory<Integer, WorkflowListItem> factory = workflowDbDao.searchWorkflow(query);
 
             if (queryCallback != null) {
+                // Check if callback exists and if it is NOT null clear disposables.
+                // We are creating a new instance.
                 queryCallback.clearDisposables();
             }
 
 
-            // TODO test if callback exists and if it is NOT null clear disposables. We are creating a new instance.
+
             queryCallback = new WorkflowSearchQueryCallback(
                     service,
                     token,

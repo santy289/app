@@ -181,7 +181,7 @@ public class SyncHelper {
         Disposable disposable = apiInterface
                 .getWorkflowsDb(
                         token,
-                        WorkflowRepository.ENDPOINT_PAGE_SIZE,
+                        100,
                         true,
                         page,
                         false)

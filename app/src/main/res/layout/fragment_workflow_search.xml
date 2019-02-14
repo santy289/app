@@ -4,98 +4,97 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinatorLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.core.widget.NestedScrollView
-            android:id="@+id/scroll_view"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/lyt_workflow_search"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:focusableInTouchMode="true">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/lyt_workflow_search"
-                android:layout_width="match_parent"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_search"
+                style="@style/Widget.MaterialComponents.TextInputEditText.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="34dp"
+                android:layout_margin="16dp"
+                android:background="@drawable/edit_text_bg"
+                android:hint="@string/workflow_search_fragment_search_hint"
+                android:maxLines="1"
+                android:paddingStart="10dp"
+                android:paddingTop="5dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="5dp"
+                android:scrollbars="vertical"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toStartOf="@+id/btn_search"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Button
+                android:id="@+id/btn_search"
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                android:layout_width="35dp"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
-                android:focusableInTouchMode="true">
+                android:layout_marginEnd="16dp"
+                app:backgroundTint="@color/white"
+                app:icon="@drawable/ic_search_black_24dp"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconTint="@color/black"
+                app:layout_constraintBottom_toBottomOf="@+id/et_search"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/et_search"
+                app:layout_constraintTop_toTopOf="@+id/et_search"
+                app:rippleColor="@color/dark_gray" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_search"
-                    style="@style/Widget.MaterialComponents.TextInputEditText.OutlinedBox"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="16dp"
-                    android:background="@drawable/edit_text_bg"
-                    android:hint="@string/workflow_search_fragment_search_hint"
-                    android:maxLines="1"
-                    android:paddingStart="10dp"
-                    android:paddingTop="5dp"
-                    android:paddingEnd="10dp"
-                    android:paddingBottom="5dp"
-                    android:scrollbars="vertical"
-                    android:textSize="16sp"
-                    app:layout_constraintEnd_toStartOf="@+id/btn_search"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="et_search,btn_search"
+                tools:layout_editor_absoluteY="57dp" />
 
-                <Button
-                    android:id="@+id/btn_search"
-                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
-                    android:layout_width="35dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
-                    app:backgroundTint="@color/white"
-                    app:icon="@drawable/ic_search_black_24dp"
-                    app:iconGravity="textStart"
-                    app:iconPadding="0dp"
-                    app:iconTint="@color/black"
-                    app:layout_constraintBottom_toBottomOf="@+id/et_search"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/et_search"
-                    app:layout_constraintTop_toTopOf="@+id/et_search"
-                    app:rippleColor="@color/dark_gray" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_workflows"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/border_bg_workflow_search"
+                android:clipToPadding="false"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tv_no_results" />
 
-                <androidx.constraintlayout.widget.Barrier
-                    android:id="@+id/barrier"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:barrierDirection="bottom"
-                    app:constraint_referenced_ids="et_search,btn_search" />
+            <TextView
+                android:id="@+id/tv_no_results"
+                android:layout_width="0dp"
+                android:layout_height="19dp"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="@string/workflow_search_fragment_search_no_results"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="@id/rv_workflows"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@id/rv_workflows"
+                app:layout_constraintTop_toBottomOf="@id/barrier"
+                tools:visibility="visible" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_workflows"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginBottom="8dp"
-                    android:background="@drawable/border_bg_workflow_search"
-                    android:clipToPadding="false"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/barrier" />
-
-                <TextView
-                    android:id="@+id/tv_no_results"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/workflow_search_fragment_search_no_results"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-                    android:visibility="gone"
-                    app:layout_constraintEnd_toEndOf="@id/rv_workflows"
-                    app:layout_constraintStart_toStartOf="@id/rv_workflows"
-                    app:layout_constraintTop_toBottomOf="@id/barrier"
-                    tools:visibility="visible" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.core.widget.NestedScrollView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- include bottom sheet -->
         <include
             android:id="@+id/include_bottom_sheet"
             layout="@layout/bottom_sheet_loading" />
+
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

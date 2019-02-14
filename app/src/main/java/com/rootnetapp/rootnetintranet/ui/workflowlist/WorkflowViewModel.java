@@ -975,6 +975,17 @@ public class WorkflowViewModel extends ViewModel {
     // TODO END OF DYNAMIC FILTER IMPLEMENTATION
 
     protected void filterBySearchText(String searchText, LifecycleOwner lifecycleOwner) {
+
+
+        // TODO search starts here. Make sure that we can call the endpoint correclty with query parameter.
+        // TODO make sure that database search is also working correctly with the correct search term
+        // DATA source will change to a new data source
+        // Boundary callback will change to a new instance that handles search query.
+
+
+
+
+
         filterSettings.setSearchText(searchText);
         liveWorkflows.removeObservers(lifecycleOwner);
         applyFilters(filterSettings);

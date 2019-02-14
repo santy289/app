@@ -54,6 +54,11 @@ public class WorkflowListAdapter extends PagedListAdapter<WorkflowListItem, Work
 
     @Override
     public void onBindViewHolder(@NonNull WorkflowListViewHolder holder, int i) {
+        int count = getItemCount();
+        if (count < 1) {
+            //TODO handle empty list
+            return;
+        }
         WorkflowListItem item = getItem(i);
 
         holder.binding.getRoot().setOnClickListener(v -> {

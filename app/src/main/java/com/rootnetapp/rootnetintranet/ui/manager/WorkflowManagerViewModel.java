@@ -70,6 +70,12 @@ public class WorkflowManagerViewModel extends ViewModel {
         mCurrentPage = 1;
     }
 
+    /**
+     * Initializes the ViewModel data with pre-selected dates.
+     * @param token auth token.
+     * @param startDate start date filter.
+     * @param endDate end date filter.
+     */
     protected void init(String token, String startDate, String endDate) {
         mToken = token;
         updateDashboard(startDate, endDate);

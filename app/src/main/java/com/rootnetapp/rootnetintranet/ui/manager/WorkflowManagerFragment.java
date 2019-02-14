@@ -82,14 +82,15 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
 
         String start = Utils.getMonthDay(0, 1);
         String end = Utils.getMonthDay(0, 30);
-
         updateSelectedDatesUi(start, end);
         updateSelectedDateTitle(R.string.current_month);
 
         subscribe();
         setOnClickListeners();
         setupRecycler();
+
         viewModel.init(token, start, end);
+
         return view;
     }
 

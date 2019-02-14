@@ -87,6 +87,9 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         return view;
     }
 
+    /**
+     * Performs all of the subscriptions to the ViewModel's observables.
+     */
     private void subscribe() {
         viewModel.getObservableShowLoading().observe(this, this::showLoading);
         viewModel.getObservableError().observe(this, this::showToastMessage);
@@ -101,13 +104,18 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         viewModel.getObservableClosedCount().observe(this, this::updateClosedWorkflowsCount);
         viewModel.getObservableHideMoreButton().observe(this, this::hideMoreButton);
         viewModel.getObservableHideWorkflowList().observe(this, this::hideWorkflowList);
-        viewModel.getObservableMyPendingWorkflows().observe(this, this::showMyPendingWorkflowsDialog);
+        viewModel.getObservableMyPendingWorkflows()
+                .observe(this, this::showMyPendingWorkflowsDialog);
         viewModel.getObservableMyOpenWorkflows().observe(this, this::showMyOpenWorkflowsDialog);
         viewModel.getObservableMyClosedWorkflows().observe(this, this::showMyClosedWorkflowsDialog);
-        viewModel.getObservableOutOfTimeWorkflows().observe(this, this::showOutOfTimeWorkflowsDialog);
+        viewModel.getObservableOutOfTimeWorkflows()
+                .observe(this, this::showOutOfTimeWorkflowsDialog);
         viewModel.getObservableUpdatedWorkflows().observe(this, this::showUpdatedWorkflowsDialog);
     }
 
+    /**
+     * Define the onClick behavior for this View's components.
+     */
     private void setOnClickListeners() {
         binding.tvMonth.setOnClickListener(v -> filterMonthClicked());
         binding.tvWeek.setOnClickListener(v -> filterWeekClicked());
@@ -121,26 +129,47 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         binding.btnShowMore.setOnClickListener(v -> showMoreClicked());
     }
 
+    /**
+     * Initializes the workflows RecyclerView.
+     */
     private void setupRecycler() {
         binding.recPendingworkflows.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recPendingworkflows.setNestedScrollingEnabled(false);
     }
 
+    /**
+     * Resets the workflows adapter and performs a request to the ViewModel to update the dashboard
+     * data.
+     *
+     * @param startDate start date filter
+     * @param endDate   end date filter
+     */
     private void updateDashboard(String startDate, String endDate) {
         mWorkflowsAdapter = null; //reset the adapter
         viewModel.updateDashboard(startDate, endDate);
     }
 
+    /**
+     * Opens the select date dialog.
+     */
     private void selectDates() {
         anInterface.showDialog(SelectDateDialog.newInstance(this));
     }
 
+    /**
+     * Performs a request to the ViewModel to retrieve more workflows.
+     */
     private void showMoreClicked() {
         viewModel.incrementCurrentPage();
         viewModel.getWorkflows();
     }
 
     //region Date Filters
+
+    /**
+     * Updates the UI related to the date filters with the current month and updates the dashboard
+     * data.
+     */
     private void filterMonthClicked() {
         selectMonthButton(true);
         selectWeekButton(false);
@@ -154,6 +183,10 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         updateDashboard(start, end);
     }
 
+    /**
+     * Updates the UI related to the date filters with the current week and updates the dashboard
+     * data.
+     */
     private void filterWeekClicked() {
         selectMonthButton(false);
         selectWeekButton(true);
@@ -167,6 +200,10 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         updateDashboard(start, end);
     }
 
+    /**
+     * Updates the UI related to the date filters with the current day and updates the dashboard
+     * data.
+     */
     private void filterDayClicked() {
         selectMonthButton(false);
         selectWeekButton(false);
@@ -180,6 +217,11 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         updateDashboard(start, end);
     }
 
+    /**
+     * Selects or deselects visually the current month button based on the parameter.
+     *
+     * @param select true - select; false - deselect.
+     */
     @UiThread
     private void selectMonthButton(boolean select) {
         if (select) {
@@ -194,6 +236,11 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         }
     }
 
+    /**
+     * Selects or deselects visually the current week button based on the parameter.
+     *
+     * @param select true - select; false - deselect.
+     */
     @UiThread
     private void selectWeekButton(boolean select) {
         if (select) {
@@ -208,6 +255,11 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         }
     }
 
+    /**
+     * Selects or deselects visually the current day button based on the parameter.
+     *
+     * @param select true - select; false - deselect.
+     */
     @UiThread
     private void selectDayButton(boolean select) {
         if (select) {
@@ -222,6 +274,13 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         }
     }
 
+    /**
+     * Updates the date filter UI and request a dashboard data update. Called from the select date
+     * dialog.
+     *
+     * @param start selected start date.
+     * @param end   selected end date.
+     */
     @Override
     public void setDate(String start, String end) {
         updateSelectedDatesUi(start, end);
@@ -231,6 +290,11 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     }
     //endregion
 
+    /**
+     * Opens the WorkflowDetailActivity for the specified workflow.
+     *
+     * @param workflowListItem workflow to open the details.
+     */
     @Override
     public void showWorkflow(WorkflowListItem workflowListItem) {
         Intent intent = new Intent(getActivity(), WorkflowDetailActivity.class);
@@ -239,50 +303,101 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     }
 
     //region Workflows Dialog
-    private void getMyPendingWorkflows(){
+
+    /**
+     * Sends a request to the ViewModel to retrieve the user's pending workflows. This is invoked by
+     * the user interaction onClick and the flow ends with the dialog display called by {@link
+     * #showMyPendingWorkflowsDialog(List)}.
+     */
+    private void getMyPendingWorkflows() {
         viewModel.getMyPendingWorkflows();
     }
 
-    private void getMyOpenWorkflows(){
+    /**
+     * Sends a request to the ViewModel to retrieve the user's open workflows. This is invoked by
+     * the user interaction onClick and the flow ends with the dialog display called by {@link
+     * #showMyOpenWorkflowsDialog(List)}.
+     */
+    private void getMyOpenWorkflows() {
         viewModel.getMyOpenWorkflows();
     }
 
-    private void getMyClosedWorkflows(){
+    /**
+     * Sends a request to the ViewModel to retrieve the user's closed workflows. This is invoked by
+     * the user interaction onClick and the flow ends with the dialog display called by {@link
+     * #showMyClosedWorkflowsDialog(List)}.
+     */
+    private void getMyClosedWorkflows() {
         viewModel.getMyClosedWorkflows();
     }
 
-    private void getOutOfTimeWorkflows(){
+    /**
+     * Sends a request to the ViewModel to retrieve the user's out of time workflows. This is
+     * invoked by the user interaction onClick and the flow ends with the dialog display called by
+     * {@link #showOutOfTimeWorkflowsDialog(List)}.
+     */
+    private void getOutOfTimeWorkflows() {
         viewModel.getOutOfTimeWorkflows();
     }
 
-    private void getUpdatedWorkflows(){
+    /**
+     * Sends a request to the ViewModel to retrieve the user's updated workflows. This is invoked by
+     * the user interaction onClick and the flow ends with the dialog display called by {@link
+     * #showUpdatedWorkflowsDialog(List)}.
+     */
+    private void getUpdatedWorkflows() {
         viewModel.getUpdatedWorkflows();
     }
 
+    /**
+     * Displays a DialogFragment with a list of the user's pending workflows.
+     *
+     * @param workflowList list of user's pending workflows.
+     */
     private void showMyPendingWorkflowsDialog(List<WorkflowDb> workflowList) {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
                 ManagerWorkflowsDialog.DialogTypes.PENDING,
                 workflowList));
     }
 
+    /**
+     * Displays a DialogFragment with a list of the user's open workflows.
+     *
+     * @param workflowList list of user's open workflows.
+     */
     private void showMyOpenWorkflowsDialog(List<WorkflowDb> workflowList) {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
                 ManagerWorkflowsDialog.DialogTypes.WORKFLOWS,
                 workflowList));
     }
 
+    /**
+     * Displays a DialogFragment with a list of the user's closed workflows.
+     *
+     * @param workflowList list of user's closed workflows.
+     */
     private void showMyClosedWorkflowsDialog(List<WorkflowDb> workflowList) {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
                 ManagerWorkflowsDialog.DialogTypes.WORKFLOWS,
                 workflowList));
     }
 
+    /**
+     * Displays a DialogFragment with a list of the user's out of time workflows.
+     *
+     * @param workflowList list of user's out of time workflows.
+     */
     private void showOutOfTimeWorkflowsDialog(List<WorkflowDb> workflowList) {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
                 ManagerWorkflowsDialog.DialogTypes.OUT_OF_TIME,
                 workflowList));
     }
 
+    /**
+     * Displays a DialogFragment with a list of the user's updated workflows.
+     *
+     * @param workflowList list of user's updated workflows.
+     */
     private void showUpdatedWorkflowsDialog(List<WorkflowDb> workflowList) {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
                 ManagerWorkflowsDialog.DialogTypes.UPDATED,
@@ -290,6 +405,11 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     }
     //endregion
 
+    /**
+     * Adds data to the workflows adapter. Checks whether the adapter needs to be created or not.
+     *
+     * @param workflowList data to add to the adapter.
+     */
     @UiThread
     private void populatePendingWorkflows(List<WorkflowDb> workflowList) {
         if (workflowList == null) return;
@@ -304,6 +424,11 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         }
     }
 
+    /**
+     * Hides or shows the "SHOW MORE" button based on the parameter.
+     *
+     * @param hide true: hide; false: show.
+     */
     @UiThread
     private void hideMoreButton(boolean hide) {
         if (hide) {
@@ -313,6 +438,11 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         }
     }
 
+    /**
+     * Hides or shows the workflow list based on the parameter.
+     *
+     * @param hide true: hide; false: show.
+     */
     @UiThread
     private void hideWorkflowList(boolean hide) {
         if (hide) {

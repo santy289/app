@@ -62,6 +62,14 @@ public class WorkflowManagerViewModel extends ViewModel {
     }
 
     //region Dashboard Update
+
+    /**
+     * Resets every info regarding to the dashboard and perform a request to the server to obtain
+     * the new values.
+     *
+     * @param startDate start date filter.
+     * @param endDate   end date filter.
+     */
     protected void updateDashboard(String startDate, String endDate) {
         mWebCount = mWebCompleted = 0;
         showLoading.setValue(true);
@@ -78,6 +86,10 @@ public class WorkflowManagerViewModel extends ViewModel {
         mWebCount++;
     }
 
+    /**
+     * Verifies whether all of the requested services are completed before dismissing the loading
+     * view.
+     */
     private void updateCompleted() {
         mWebCompleted++;
 
@@ -90,6 +102,13 @@ public class WorkflowManagerViewModel extends ViewModel {
     //endregion
 
     //region All Workflows
+
+    /**
+     * Creates a Map of the common filters. This map is used to be sent as a request parameter to
+     * the server.
+     *
+     * @return common filters.
+     */
     private Map<String, Object> getCommonFilters() {
         Map<String, Object> options = new ArrayMap<>();
 
@@ -99,23 +118,39 @@ public class WorkflowManagerViewModel extends ViewModel {
         return options;
     }
 
+    /**
+     * Resets the current page to its initial value. Called when the dashboard filters change.
+     */
     protected void resetCurrentPage() {
         this.mCurrentPage = 1;
     }
 
+    /**
+     * Increments the current page by one. Called when the user requests more workflows.
+     */
     protected void incrementCurrentPage() {
         mCurrentPage++;
     }
 
+    /**
+     * Performs a request to the server to obtain a list of workflows using the common filters.
+     */
     protected void getWorkflows() {
         showLoading.setValue(true);
 
-        Disposable disposable = mRepository.getWorkflowsByBaseFilters(mToken, mCurrentPage, getCommonFilters())
+        Disposable disposable = mRepository
+                .getWorkflowsByBaseFilters(mToken, mCurrentPage, getCommonFilters())
                 .subscribe(this::onWorkflowsSuccess, this::onFailure);
 
         mDisposables.add(disposable);
     }
 
+    /**
+     * Sets the LiveData that will update the UI regarding the workflows. Callback of the {@link
+     * #getWorkflows()} request when it's successful.
+     *
+     * @param workflowResponseDb server response
+     */
     private void onWorkflowsSuccess(WorkflowResponseDb workflowResponseDb) {
         updateCompleted();
 
@@ -128,6 +163,10 @@ public class WorkflowManagerViewModel extends ViewModel {
     //endregion
 
     //region My Pending Workflows
+
+    /**
+     * Performs a request to the server to obtain the user's pending workflows.
+     */
     protected void getMyPendingWorkflows() {
         if (Integer.parseInt(workflowOverviewResponse.getOverview().getMyWorkflows().getPending()
                 .getCount()) == 0) {
@@ -148,6 +187,13 @@ public class WorkflowManagerViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
+    /**
+     * Sets the LiveData that will update the UI and display a dialog with a list of the user's
+     * pending workflows. Callback of the {@link #getMyPendingWorkflows()} request when it's
+     * successful.
+     *
+     * @param workflowResponseDb server response
+     */
     private void onMyPendingSuccess(WorkflowResponseDb workflowResponseDb) {
         showLoading.setValue(false);
 
@@ -159,6 +205,10 @@ public class WorkflowManagerViewModel extends ViewModel {
     //endregion
 
     //region My Open Workflows
+
+    /**
+     * Performs a request to the server to obtain the user's open workflows.
+     */
     protected void getMyOpenWorkflows() {
         if (Integer.parseInt(workflowOverviewResponse.getOverview().getMyWorkflows().getOpen()
                 .getCount()) == 0) {
@@ -178,6 +228,12 @@ public class WorkflowManagerViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
+    /**
+     * Sets the LiveData that will update the UI and display a dialog with a list of the user's open
+     * workflows. Callback of the {@link #getMyOpenWorkflows()} request when it's successful.
+     *
+     * @param workflowResponseDb server response
+     */
     private void onMyOpenSuccess(WorkflowResponseDb workflowResponseDb) {
         showLoading.setValue(false);
 
@@ -189,6 +245,10 @@ public class WorkflowManagerViewModel extends ViewModel {
     //endregion
 
     //region My Pending Workflows
+
+    /**
+     * Performs a request to the server to obtain the user's closed workflows.
+     */
     protected void getMyClosedWorkflows() {
         if (Integer.parseInt(workflowOverviewResponse.getOverview().getMyWorkflows().getClosed()
                 .getCount()) == 0) {
@@ -208,6 +268,13 @@ public class WorkflowManagerViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
+    /**
+     * Sets the LiveData that will update the UI and display a dialog with a list of the user's
+     * closed workflows. Callback of the {@link #getMyClosedWorkflows()} request when it's
+     * successful.
+     *
+     * @param workflowResponseDb server response
+     */
     private void onMyClosedSuccess(WorkflowResponseDb workflowResponseDb) {
         showLoading.setValue(false);
 
@@ -219,6 +286,10 @@ public class WorkflowManagerViewModel extends ViewModel {
     //endregion
 
     //region Out of Time Workflows
+
+    /**
+     * Performs a request to the server to obtain the user's out of time workflows.
+     */
     protected void getOutOfTimeWorkflows() {
         if (workflowOverviewResponse.getOverview().getMyWorkflows().getOutOfTime()
                 .getCount() == 0) {
@@ -239,6 +310,13 @@ public class WorkflowManagerViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
+    /**
+     * Sets the LiveData that will update the UI and display a dialog with a list of the user's out
+     * of time workflows. Callback of the {@link #getOutOfTimeWorkflows()} request when it's
+     * successful.
+     *
+     * @param workflowResponseDb server response
+     */
     private void onOutOfTimeSuccess(WorkflowResponseDb workflowResponseDb) {
         showLoading.setValue(false);
 
@@ -250,6 +328,10 @@ public class WorkflowManagerViewModel extends ViewModel {
     //endregion
 
     //region Updated Workflows
+
+    /**
+     * Performs a request to the server to obtain the user's updated workflows.
+     */
     protected void getUpdatedWorkflows() {
         if (Integer.parseInt(workflowOverviewResponse.getOverview().getMyWorkflows().getUpdated()
                 .getCount()) == 0) {
@@ -270,6 +352,13 @@ public class WorkflowManagerViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
+    /**
+     * Sets the LiveData that will update the UI and display a dialog with a list of the user's
+     * updated workflows. Callback of the {@link #getUpdatedWorkflows()} request when it's
+     * successful.
+     *
+     * @param workflowResponseDb server response
+     */
     private void onUpdatedSuccess(WorkflowResponseDb workflowResponseDb) {
         showLoading.setValue(false);
 
@@ -281,6 +370,10 @@ public class WorkflowManagerViewModel extends ViewModel {
     //endregion
 
     //region Workflows Count
+
+    /**
+     * Performs a request to the server to obtain the count of each workflow section.
+     */
     protected void getOverviewWorkflowsCount() {
         showLoading.setValue(true);
         Disposable disposable = mRepository
@@ -290,6 +383,12 @@ public class WorkflowManagerViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
+    /**
+     * Sets the LiveData that will update the UI regarding the count of each section. Callback of
+     * the {@link #getOverviewWorkflowsCount()} request when it's successful.
+     *
+     * @param overviewResponse server response
+     */
     private void onOverviewSuccess(WorkflowOverviewResponse overviewResponse) {
         updateCompleted();
 

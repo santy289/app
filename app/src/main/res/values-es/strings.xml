@@ -117,6 +117,7 @@
     <string name="origin">Origen</string>
     <string name="axe">Axe</string>
     <string name="people_involved">PERSONAS INVOLUCRADAS</string>
+    <string name="people_involved_title">Personas Involucradas</string>
     <string name="approval_history">HISTORIAL DE APROBACIONES DE WORKFLOW</string>
     <string name="approved">Aprobado</string>
     <string name="template">TEMPLATE:</string>
@@ -154,15 +155,17 @@
     <string name="last_sync">Último sync:</string>
     <string name="product_not_enabled">Este producto no ha sido asignado para tu domain.</string>
     <string name="pending_workflows">Workflows Pendientes</string>
-    <string name="analytics">Analiticas</string>
+    <string name="analytics">Analíticas</string>
+    <string name="user_analytics">Mis Analíticas</string>
     <string name="company_overview">Informacion de la Compañía</string>
     <string name="date">Fecha</string>
     <string name="title">Título</string>
     <string name="author">Autor</string>
     <string name="days_open">Días abierto</string>
     <string name="pending_approval">Pendiente por Aprobación</string>
+    <string name="pending">Pendiente</string>
     <string name="updated">Actualizar</string>
-    <string name="out_of_time">Fuera de tiempo</string>
+    <string name="out_of_time">Fuera de Tiempo</string>
     <string name="open">Abierto</string>
     <string name="closed">Cerrado</string>
     <string name="show_more">Mostrar Mas</string>
@@ -311,6 +314,19 @@
     <string name="workflow_search_fragment_search_no_results">Tu búsqueda no ha traído resultados</string>
     <string name="workflow_search_fragment_search_type">Tipo:</string>
     <string name="workflow_search_fragment_search_status">Estatus:</string>
+
+    <!--WorkflowManager-->
+    <string name="workflow_manager_user_pending_dialog_title">Mis Workflows Pendientes</string>
+    <string name="workflow_manager_user_open_dialog_title">Mis Workflows Abiertos</string>
+    <string name="workflow_manager_user_closed_dialog_title">Mis Workflows Cerrados</string>
+    <string name="workflow_manager_user_out_of_time_dialog_title">Mis Workflows Fuera de Tiempo</string>
+    <string name="workflow_manager_user_updated_dialog_title">Mis Workflows Actualizados</string>
+
+    <string name="workflow_manager_company_pending_dialog_title">Workflows Pendientes de la Compañía</string>
+    <string name="workflow_manager_company_open_dialog_title">Workflows Abiertos de la Compañía</string>
+    <string name="workflow_manager_company_closed_dialog_title">Workflows Cerrados de la Compañía</string>
+    <string name="workflow_manager_company_out_of_time_dialog_title">Workflows Fuera de Tiempo de la Compañía</string>
+    <string name="workflow_manager_company_updated_dialog_title">Workflows Actualizados de la Compañía</string>
 
     <!--TimelineFragment-->
     <string name="timeline_module_workflows">Workflows</string>

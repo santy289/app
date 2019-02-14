@@ -1,18 +1,23 @@
 package com.rootnetapp.rootnetintranet.ui.manager.adapters;
 
 import android.content.Context;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.WorkflowManagerItemBinding;
 import com.rootnetapp.rootnetintranet.ui.manager.ManagerInterface;
 
 import java.util.List;
+
+import androidx.annotation.ColorRes;
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Created by root on 18/04/18.
@@ -20,13 +25,30 @@ import java.util.List;
 
 public class PendingWorkflowsAdapter  extends RecyclerView.Adapter<PendingWorkflowsViewholder>{
 
-    private List<Workflow> workflows;
+    private List<WorkflowDb> workflows;
     private Context context;
     private ManagerInterface anInterface;
 
-    public PendingWorkflowsAdapter(List<Workflow> workflows, ManagerInterface anInterface) {
+    public PendingWorkflowsAdapter(List<WorkflowDb> workflows, ManagerInterface anInterface) {
         this.workflows = workflows;
         this.anInterface = anInterface;
+    }
+
+    public void setData(List<WorkflowDb> list){
+        this.workflows = list;
+        notifyDataSetChanged();
+        getItemCount();
+    }
+
+    public void addData(List<WorkflowDb> list){
+        int positionStart = this.workflows.size();
+
+        this.workflows.addAll(list);
+
+        int positionEnd = this.workflows.size() - 1;
+
+        notifyItemRangeInserted(positionStart, positionEnd);
+        getItemCount();
     }
 
     @Override
@@ -40,38 +62,56 @@ public class PendingWorkflowsAdapter  extends RecyclerView.Adapter<PendingWorkfl
     }
 
     @Override
-    public void onBindViewHolder(PendingWorkflowsViewholder holder, int i) {
+    public void onBindViewHolder(@NonNull PendingWorkflowsViewholder holder, int i) {
 
-        Workflow item = workflows.get(i);
+        WorkflowDb item = getItem(i);
         holder.binding.tvHeadername.setText(item.getWorkflowTypeKey());
-        holder.binding.tvHeaderowner.setText(item.getAuthor().getFullName());
+        holder.binding.tvHeaderTitle.setText(item.getTitle());
 
-        String date = item.getStart().split("T")[0];
-        String hour = (item.getStart().split("T")[1]).split("-")[0];
-        holder.binding.tvDate.setText(date + " - " + hour);
-        holder.binding.tvTitle.setText(item.getTitle());
+        // Clock
+        @ColorRes
+        int color = item.getRemainingTime() <= 0 ? R.color.red : R.color.green;
+        holder.binding.ivClock.setColorFilter(ContextCompat.getColor(
+                holder.binding.ivClock.getContext(),
+                color
+        ));
+
+        holder.binding.tvWorkflowType.setText(item.getWorkflowType().getName());
+
+        String startDate = item.getStart();
+        String formattedDate = Utils.getFormattedDate(
+                startDate,
+                Utils.SERVER_DATE_FORMAT,
+                Utils.STANDARD_DATE_DISPLAY_FORMAT
+        );
+        holder.binding.tvDate.setText(formattedDate);
         holder.binding.tvAuthor.setText(item.getAuthor().getFullName());
-
-        /*if(i%2==0){
-            holder.binding.tvHeaderdate.setTextColor(ContextCompat.getColor(context, R.color.red));
-        }*/
+        holder.binding.tvCurrentStatus.setText(item.getCurrentStatusName());
 
         holder.binding.lytHeader.setOnClickListener(view -> {
             if (holder.binding.lytDetail.getVisibility() == View.GONE) {
                 holder.binding.btnArrow.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
                 holder.binding.btnArrow.setColorFilter(ContextCompat.getColor(context, R.color.arrow),
                         android.graphics.PorterDuff.Mode.SRC_IN);
-                holder.binding.lytHeader.setBackgroundColor(ContextCompat.getColor(context, R.color.unselected_filter));
                 holder.binding.lytDetail.setVisibility(View.VISIBLE);
             } else {
                 holder.binding.btnArrow.setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
                 holder.binding.btnArrow.setColorFilter(ContextCompat.getColor(context, R.color.transparentArrow),
                         android.graphics.PorterDuff.Mode.SRC_IN);
-                holder.binding.lytHeader.setBackgroundColor(ContextCompat.getColor(context, R.color.white));
                 holder.binding.lytDetail.setVisibility(View.GONE);
             }
         });
 
+        holder.binding.btnDetail.setOnClickListener(view -> {
+            int position = holder.getAdapterPosition();
+            WorkflowDb selectedItem = getItem(position);
+            anInterface.showWorkflow(new WorkflowListItem(selectedItem));
+        });
+
+    }
+
+    private WorkflowDb getItem(int position){
+        return workflows.get(position);
     }
 
     @Override

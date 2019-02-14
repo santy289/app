@@ -217,6 +217,14 @@ public class Utils {
         return df.format(c);
     }
 
+    public static String getTomorrowDate() {
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.DAY_OF_MONTH, 1);
+        Date date = c.getTime();
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        return df.format(date);
+    }
+
     public static String getMonthDay(int month, int day) {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MONTH, month);

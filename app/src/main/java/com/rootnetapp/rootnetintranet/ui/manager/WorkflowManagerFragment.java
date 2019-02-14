@@ -101,24 +101,31 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         viewModel.getObservableShowLoading().observe(this, this::showLoading);
         viewModel.getObservableError().observe(this, this::showToastMessage);
         viewModel.getObservableWorkflows().observe(this, this::populatePendingWorkflows);
+        viewModel.getObservableHideMoreButton().observe(this, this::hideMoreButton);
+        viewModel.getObservableHideWorkflowList().observe(this, this::hideWorkflowList);
+        viewModel.getObservableWorkflowTypeItem().observe(this, this::setupWorkflowTypeFormItem);
+
         viewModel.getObservableMyPendingCount().observe(this, this::updateMyPendingWorkflowsCount);
         viewModel.getObservableMyOpenCount().observe(this, this::updateMyOpenWorkflowsCount);
         viewModel.getObservableMyClosedCount().observe(this, this::updateMyClosedWorkflowsCount);
-        viewModel.getObservableOutOfTimeCount().observe(this, this::updateOutOfTimeWorkflowsCount);
-        viewModel.getObservableUpdatedCount().observe(this, this::updateUpdatedWorkflowsCount);
-        viewModel.getObservablePendingCount().observe(this, this::updatePendingWorkflowsCount);
-        viewModel.getObservableOpenCount().observe(this, this::updateOpenWorkflowsCount);
-        viewModel.getObservableClosedCount().observe(this, this::updateClosedWorkflowsCount);
-        viewModel.getObservableHideMoreButton().observe(this, this::hideMoreButton);
-        viewModel.getObservableHideWorkflowList().observe(this, this::hideWorkflowList);
-        viewModel.getObservableMyPendingWorkflows()
-                .observe(this, this::showMyPendingWorkflowsDialog);
+        viewModel.getObservableMyOutOfTimeCount().observe(this, this::updateMyOutOfTimeWorkflowsCount);
+        viewModel.getObservableMyUpdatedCount().observe(this, this::updateMyUpdatedWorkflowsCount);
+        viewModel.getObservableMyPendingWorkflows().observe(this, this::showMyPendingWorkflowsDialog);
         viewModel.getObservableMyOpenWorkflows().observe(this, this::showMyOpenWorkflowsDialog);
         viewModel.getObservableMyClosedWorkflows().observe(this, this::showMyClosedWorkflowsDialog);
-        viewModel.getObservableOutOfTimeWorkflows()
-                .observe(this, this::showOutOfTimeWorkflowsDialog);
-        viewModel.getObservableUpdatedWorkflows().observe(this, this::showUpdatedWorkflowsDialog);
-        viewModel.getObservableWorkflowTypeItem().observe(this, this::setupWorkflowTypeFormItem);
+        viewModel.getObservableMyOutOfTimeWorkflows().observe(this, this::showMyOutOfTimeWorkflowsDialog);
+        viewModel.getObservableMyUpdatedWorkflows().observe(this, this::showMyUpdatedWorkflowsDialog);
+
+        viewModel.getObservableCompanyPendingCount().observe(this, this::updateCompanyPendingWorkflowsCount);
+        viewModel.getObservableCompanyOpenCount().observe(this, this::updateCompanyOpenWorkflowsCount);
+        viewModel.getObservableCompanyClosedCount().observe(this, this::updateCompanyClosedWorkflowsCount);
+        viewModel.getObservableCompanyOutOfTimeCount().observe(this, this::updateCompanyOutOfTimeWorkflowsCount);
+        viewModel.getObservableCompanyUpdatedCount().observe(this, this::updateCompanyUpdatedWorkflowsCount);
+        viewModel.getObservableCompanyPendingWorkflows().observe(this, this::showCompanyPendingWorkflowsDialog);
+        viewModel.getObservableCompanyOpenWorkflows().observe(this, this::showCompanyOpenWorkflowsDialog);
+        viewModel.getObservableCompanyClosedWorkflows().observe(this, this::showCompanyClosedWorkflowsDialog);
+        viewModel.getObservableCompanyOutOfTimeWorkflows().observe(this, this::showCompanyOutOfTimeWorkflowsDialog);
+        viewModel.getObservableCompanyUpdatedWorkflows().observe(this, this::showCompanyUpdatedWorkflowsDialog);
     }
 
     /**
@@ -129,12 +136,19 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         mBinding.tvWeek.setOnClickListener(v -> filterWeekClicked());
         mBinding.tvDay.setOnClickListener(v -> filterDayClicked());
         mBinding.btnSelectDates.setOnClickListener(v -> selectDates());
-        mBinding.btnPendingApproval.setOnClickListener(v -> getMyPendingWorkflows());
+        mBinding.btnShowMore.setOnClickListener(v -> showMoreClicked());
+
+        mBinding.btnMyPendingApproval.setOnClickListener(v -> getMyPendingWorkflows());
         mBinding.llMyOpenWorkflows.setOnClickListener(v -> getMyOpenWorkflows());
         mBinding.llMyClosedWorkflows.setOnClickListener(v -> getMyClosedWorkflows());
-        mBinding.btnOutOfTime.setOnClickListener(v -> getOutOfTimeWorkflows());
-        mBinding.btnUpdated.setOnClickListener(v -> getUpdatedWorkflows());
-        mBinding.btnShowMore.setOnClickListener(v -> showMoreClicked());
+        mBinding.btnMyOutOfTime.setOnClickListener(v -> getMyOutOfTimeWorkflows());
+        mBinding.btnMyUpdated.setOnClickListener(v -> getMyUpdatedWorkflows());
+
+        mBinding.btnCompanyPendingApproval.setOnClickListener(v -> getCompanyPendingWorkflows());
+        mBinding.llCompanyOpenWorkflows.setOnClickListener(v -> getCompanyOpenWorkflows());
+        mBinding.llCompanyClosedWorkflows.setOnClickListener(v -> getCompanyClosedWorkflows());
+        mBinding.btnCompanyOutOfTime.setOnClickListener(v -> getCompanyOutOfTimeWorkflows());
+        mBinding.btnCompanyUpdated.setOnClickListener(v -> getCompanyUpdatedWorkflows());
     }
 
     /**
@@ -419,6 +433,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
 
     //region Workflows Dialog
 
+    //region User Workflows
     /**
      * Sends a request to the ViewModel to retrieve the user's pending workflows. This is invoked by
      * the user interaction onClick and the flow ends with the dialog display called by {@link
@@ -449,19 +464,19 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     /**
      * Sends a request to the ViewModel to retrieve the user's out of time workflows. This is
      * invoked by the user interaction onClick and the flow ends with the dialog display called by
-     * {@link #showOutOfTimeWorkflowsDialog(List)}.
+     * {@link #showMyOutOfTimeWorkflowsDialog(List)}.
      */
-    private void getOutOfTimeWorkflows() {
-        viewModel.getOutOfTimeWorkflows();
+    private void getMyOutOfTimeWorkflows() {
+        viewModel.getMyOutOfTimeWorkflows();
     }
 
     /**
      * Sends a request to the ViewModel to retrieve the user's updated workflows. This is invoked by
      * the user interaction onClick and the flow ends with the dialog display called by {@link
-     * #showUpdatedWorkflowsDialog(List)}.
+     * #showMyUpdatedWorkflowsDialog(List)}.
      */
-    private void getUpdatedWorkflows() {
-        viewModel.getUpdatedWorkflows();
+    private void getMyUpdatedWorkflows() {
+        viewModel.getMyUpdatedWorkflows();
     }
 
     /**
@@ -471,7 +486,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
      */
     private void showMyPendingWorkflowsDialog(List<WorkflowDb> workflowList) {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                ManagerWorkflowsDialog.DialogTypes.PENDING,
+                ManagerWorkflowsDialog.DialogType.MY_PENDING,
                 workflowList));
     }
 
@@ -482,7 +497,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
      */
     private void showMyOpenWorkflowsDialog(List<WorkflowDb> workflowList) {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                ManagerWorkflowsDialog.DialogTypes.WORKFLOWS,
+                ManagerWorkflowsDialog.DialogType.MY_OPEN,
                 workflowList));
     }
 
@@ -493,7 +508,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
      */
     private void showMyClosedWorkflowsDialog(List<WorkflowDb> workflowList) {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                ManagerWorkflowsDialog.DialogTypes.WORKFLOWS,
+                ManagerWorkflowsDialog.DialogType.MY_CLOSED,
                 workflowList));
     }
 
@@ -502,9 +517,9 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
      *
      * @param workflowList list of user's out of time workflows.
      */
-    private void showOutOfTimeWorkflowsDialog(List<WorkflowDb> workflowList) {
+    private void showMyOutOfTimeWorkflowsDialog(List<WorkflowDb> workflowList) {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                ManagerWorkflowsDialog.DialogTypes.OUT_OF_TIME,
+                ManagerWorkflowsDialog.DialogType.MY_OUT_OF_TIME,
                 workflowList));
     }
 
@@ -513,11 +528,114 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
      *
      * @param workflowList list of user's updated workflows.
      */
-    private void showUpdatedWorkflowsDialog(List<WorkflowDb> workflowList) {
+    private void showMyUpdatedWorkflowsDialog(List<WorkflowDb> workflowList) {
         anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                ManagerWorkflowsDialog.DialogTypes.UPDATED,
+                ManagerWorkflowsDialog.DialogType.MY_UPDATED,
                 workflowList));
     }
+    //endregion
+
+    //region Company Workflows
+    /**
+     * Sends a request to the ViewModel to retrieve the user's pending workflows. This is invoked by
+     * the user interaction onClick and the flow ends with the dialog display called by {@link
+     * #showCompanyPendingWorkflowsDialog(List)}.
+     */
+    private void getCompanyPendingWorkflows() {
+        viewModel.getCompanyPendingWorkflows();
+    }
+
+    /**
+     * Sends a request to the ViewModel to retrieve the user's open workflows. This is invoked by
+     * the user interaction onClick and the flow ends with the dialog display called by {@link
+     * #showCompanyOpenWorkflowsDialog(List)}.
+     */
+    private void getCompanyOpenWorkflows() {
+        viewModel.getCompanyOpenWorkflows();
+    }
+
+    /**
+     * Sends a request to the ViewModel to retrieve the user's closed workflows. This is invoked by
+     * the user interaction onClick and the flow ends with the dialog display called by {@link
+     * #showCompanyClosedWorkflowsDialog(List)}.
+     */
+    private void getCompanyClosedWorkflows() {
+        viewModel.getCompanyClosedWorkflows();
+    }
+
+    /**
+     * Sends a request to the ViewModel to retrieve the user's out of time workflows. This is
+     * invoked by the user interaction onClick and the flow ends with the dialog display called by
+     * {@link #showCompanyOutOfTimeWorkflowsDialog(List)}.
+     */
+    private void getCompanyOutOfTimeWorkflows() {
+        viewModel.getCompanyOutOfTimeWorkflows();
+    }
+
+    /**
+     * Sends a request to the ViewModel to retrieve the user's updated workflows. This is invoked by
+     * the user interaction onClick and the flow ends with the dialog display called by {@link
+     * #showCompanyUpdatedWorkflowsDialog(List)}.
+     */
+    private void getCompanyUpdatedWorkflows() {
+        viewModel.getCompanyUpdatedWorkflows();
+    }
+
+    /**
+     * Displays a DialogFragment with a list of the user's pending workflows.
+     *
+     * @param workflowList list of user's pending workflows.
+     */
+    private void showCompanyPendingWorkflowsDialog(List<WorkflowDb> workflowList) {
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogType.COMPANY_PENDING,
+                workflowList));
+    }
+
+    /**
+     * Displays a DialogFragment with a list of the user's open workflows.
+     *
+     * @param workflowList list of user's open workflows.
+     */
+    private void showCompanyOpenWorkflowsDialog(List<WorkflowDb> workflowList) {
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogType.COMPANY_OPEN,
+                workflowList));
+    }
+
+    /**
+     * Displays a DialogFragment with a list of the user's closed workflows.
+     *
+     * @param workflowList list of user's closed workflows.
+     */
+    private void showCompanyClosedWorkflowsDialog(List<WorkflowDb> workflowList) {
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogType.COMPANY_CLOSED,
+                workflowList));
+    }
+
+    /**
+     * Displays a DialogFragment with a list of the user's out of time workflows.
+     *
+     * @param workflowList list of user's out of time workflows.
+     */
+    private void showCompanyOutOfTimeWorkflowsDialog(List<WorkflowDb> workflowList) {
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogType.COMPANY_OUT_OF_TIME,
+                workflowList));
+    }
+
+    /**
+     * Displays a DialogFragment with a list of the user's updated workflows.
+     *
+     * @param workflowList list of user's updated workflows.
+     */
+    private void showCompanyUpdatedWorkflowsDialog(List<WorkflowDb> workflowList) {
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogType.COMPANY_UPDATED,
+                workflowList));
+    }
+    //endregion
     //endregion
 
     /**
@@ -600,28 +718,38 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     }
 
     @UiThread
-    private void updateOutOfTimeWorkflowsCount(int count) {
-        mBinding.tvOutOfTimeCount.setText(String.valueOf(count));
+    private void updateMyOutOfTimeWorkflowsCount(int count) {
+        mBinding.tvMyOutOfTimeCount.setText(String.valueOf(count));
     }
 
     @UiThread
-    private void updateUpdatedWorkflowsCount(int count) {
-        mBinding.tvUpdatedCount.setText(String.valueOf(count));
+    private void updateMyUpdatedWorkflowsCount(int count) {
+        mBinding.tvMyUpdatedCount.setText(String.valueOf(count));
     }
 
     @UiThread
-    private void updatePendingWorkflowsCount(int count) {
-        mBinding.tvPendingCount.setText(String.valueOf(count));
+    private void updateCompanyPendingWorkflowsCount(int count) {
+        mBinding.tvCompanyPendingCount.setText(String.valueOf(count));
     }
 
     @UiThread
-    private void updateOpenWorkflowsCount(int count) {
-        mBinding.tvOpenCount.setText(String.valueOf(count));
+    private void updateCompanyOpenWorkflowsCount(int count) {
+        mBinding.tvCompanyOpenCount.setText(String.valueOf(count));
     }
 
     @UiThread
-    private void updateClosedWorkflowsCount(int count) {
-        mBinding.tvClosedCount.setText(String.valueOf(count));
+    private void updateCompanyClosedWorkflowsCount(int count) {
+        mBinding.tvCompanyClosedCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void updateCompanyOutOfTimeWorkflowsCount(int count) {
+        mBinding.tvCompanyOutOfTimeCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void updateCompanyUpdatedWorkflowsCount(int count) {
+        mBinding.tvCompanyUpdatedCount.setText(String.valueOf(count));
     }
 
     @UiThread

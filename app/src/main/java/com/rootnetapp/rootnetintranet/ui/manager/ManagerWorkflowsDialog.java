@@ -11,12 +11,26 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.databinding.DialogWorkflowManagerBinding;
 import com.rootnetapp.rootnetintranet.ui.manager.adapters.ManagerDialogAdapter;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
+import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
+import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.COMPANY_CLOSED;
+import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.COMPANY_OPEN;
+import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.COMPANY_OUT_OF_TIME;
+import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.COMPANY_PENDING;
+import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.COMPANY_UPDATED;
+import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.MY_CLOSED;
+import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.MY_OPEN;
+import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.MY_OUT_OF_TIME;
+import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.MY_PENDING;
+import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.MY_UPDATED;
 
 /**
  * Created by root on 19/04/18.
@@ -24,54 +38,88 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 public class ManagerWorkflowsDialog extends DialogFragment {
 
-    private DialogWorkflowManagerBinding binding;
-    private ManagerInterface anInterface;
-    private DialogTypes type;
-    private List<WorkflowDb> workflows;
+    private DialogWorkflowManagerBinding mBinding;
+    private ManagerInterface mManagerInterface;
+    private @DialogType int mDialogType;
+    private List<WorkflowDb> mWorkflowList;
 
-    public static ManagerWorkflowsDialog newInstance(ManagerInterface anInterface, DialogTypes type,
+    public static ManagerWorkflowsDialog newInstance(ManagerInterface anInterface, @DialogType int type,
                                                      @NonNull List<WorkflowDb> workflows) {
         ManagerWorkflowsDialog fragment = new ManagerWorkflowsDialog();
-        fragment.anInterface = anInterface;
-        fragment.type = type;
-        fragment.workflows = workflows;
+        fragment.mManagerInterface = anInterface;
+        fragment.mDialogType = type;
+        fragment.mWorkflowList = workflows;
         return fragment;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding = DataBindingUtil.inflate(LayoutInflater.from(getContext()),
+        mBinding = DataBindingUtil.inflate(LayoutInflater.from(getContext()),
                 R.layout.dialog_workflow_manager, container, false);
         //((RootnetApp) getActivity().getApplication()).getAppComponent().inject(this);
         setCancelable(false);
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-        switch (type) {
-            case PENDING: {
-                binding.square.setText(R.string.pending_workflows);
-                break;
-            }
-            case WORKFLOWS: {
-                binding.square.setText(R.string.workflows);
-                break;
-            }
-            case OUT_OF_TIME: {
-                binding.square.setText(R.string.out_of_time);
-                break;
-            }
-            case UPDATED: {
-                binding.square.setText(R.string.updated);
-                break;
-            }
-        }
-        binding.btnClose.setOnClickListener(view -> dismiss());
-        binding.recWorkflows.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recWorkflows.setAdapter(new ManagerDialogAdapter(workflows, anInterface));
-        return binding.getRoot();
-    }
 
-    public enum DialogTypes {
-        PENDING, WORKFLOWS, OUT_OF_TIME, UPDATED
+        switch (mDialogType) {
+            case MY_PENDING:
+                mBinding.square.setText(R.string.workflow_manager_user_pending_dialog_title);
+                break;
+            case MY_OPEN:
+                mBinding.square.setText(R.string.workflow_manager_user_open_dialog_title);
+                break;
+            case MY_CLOSED:
+                mBinding.square.setText(R.string.workflow_manager_user_closed_dialog_title);
+                break;
+            case MY_OUT_OF_TIME:
+                mBinding.square.setText(R.string.workflow_manager_user_out_of_time_dialog_title);
+                break;
+            case MY_UPDATED:
+                mBinding.square.setText(R.string.workflow_manager_user_updated_dialog_title);
+                break;
+
+            case COMPANY_PENDING:
+                mBinding.square.setText(R.string.workflow_manager_company_pending_dialog_title);
+                break;
+            case COMPANY_OPEN:
+                mBinding.square.setText(R.string.workflow_manager_company_open_dialog_title);
+                break;
+            case COMPANY_CLOSED:
+                mBinding.square.setText(R.string.workflow_manager_company_closed_dialog_title);
+                break;
+            case COMPANY_OUT_OF_TIME:
+                mBinding.square.setText(R.string.workflow_manager_company_out_of_time_dialog_title);
+                break;
+            case COMPANY_UPDATED:
+                mBinding.square.setText(R.string.workflow_manager_company_updated_dialog_title);
+                break;
+        }
+
+        mBinding.btnClose.setOnClickListener(view -> dismiss());
+        mBinding.recWorkflows.setLayoutManager(new LinearLayoutManager(getContext()));
+        mBinding.recWorkflows.setAdapter(new ManagerDialogAdapter(mWorkflowList, mManagerInterface));
+
+        return mBinding.getRoot();
+    }
+    
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            MY_PENDING, MY_OPEN, MY_CLOSED, MY_OUT_OF_TIME, MY_UPDATED,
+            COMPANY_PENDING, COMPANY_OPEN, COMPANY_CLOSED, COMPANY_OUT_OF_TIME, COMPANY_UPDATED
+    })
+    public @interface DialogType {
+
+        int MY_PENDING = 0;
+        int MY_OPEN = 1;
+        int MY_CLOSED = 2;
+        int MY_OUT_OF_TIME = 3;
+        int MY_UPDATED = 4;
+
+        int COMPANY_PENDING = 5;
+        int COMPANY_OPEN = 6;
+        int COMPANY_CLOSED = 7;
+        int COMPANY_OUT_OF_TIME = 8;
+        int COMPANY_UPDATED = 9;
     }
 
 }

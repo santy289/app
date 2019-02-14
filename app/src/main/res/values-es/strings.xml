@@ -312,4 +312,17 @@
     <string name="workflow_search_fragment_search_no_results">Tu búsqueda no ha traído resultados</string>
     <string name="workflow_search_fragment_search_type">Tipo:</string>
     <string name="workflow_search_fragment_search_status">Estatus:</string>
+
+    <!--WorkflowManager-->
+    <string name="workflow_manager_user_pending_dialog_title">Mis Workflows Pendientes</string>
+    <string name="workflow_manager_user_open_dialog_title">Mis Workflows Abiertos</string>
+    <string name="workflow_manager_user_closed_dialog_title">Mis Workflows Cerrados</string>
+    <string name="workflow_manager_user_out_of_time_dialog_title">Mis Workflows Fuera de Tiempo</string>
+    <string name="workflow_manager_user_updated_dialog_title">Mis Workflows Actualizados</string>
+
+    <string name="workflow_manager_company_pending_dialog_title">Workflows Pendientes de la Compañía</string>
+    <string name="workflow_manager_company_open_dialog_title">Workflows Abiertos de la Compañía</string>
+    <string name="workflow_manager_company_closed_dialog_title">Workflows Cerrados de la Compañía</string>
+    <string name="workflow_manager_company_out_of_time_dialog_title">Workflows Fuera de Tiempo de la Compañía</string>
+    <string name="workflow_manager_company_updated_dialog_title">Workflows Actualizados de la Compañía</string>
 </resources>

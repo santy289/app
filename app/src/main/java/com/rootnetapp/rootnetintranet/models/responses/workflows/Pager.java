@@ -2,10 +2,6 @@ package com.rootnetapp.rootnetintranet.models.responses.workflows;
 
 import com.squareup.moshi.Json;
 
-/**
- * Created by Propietario on 15/03/2018.
- */
-
 public class Pager {
 
     @Json(name = "paginate")

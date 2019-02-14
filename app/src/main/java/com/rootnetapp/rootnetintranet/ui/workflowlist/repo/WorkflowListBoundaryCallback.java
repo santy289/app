@@ -34,6 +34,15 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
 
     public static final int NO_WORKFLOW_TYPE = -999;
 
+    /**
+     * Constructor used when we want request a full workflow list request.
+     *
+     * @param service
+     * @param token
+     * @param currentPage
+     * @param workflowsCallback
+     * @param id
+     */
     public WorkflowListBoundaryCallback(
             ApiInterface service,
             String token,
@@ -51,6 +60,14 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
         this.workflowTypeId = workflowTypeId;
     }
 
+    /**
+     * Constructor used when we do a request without some specific id.
+     *
+     * @param service
+     * @param token
+     * @param currentPage
+     * @param workflowsCallback
+     */
     public WorkflowListBoundaryCallback(
             ApiInterface service,
             String token,
@@ -88,6 +105,7 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
                             this::saveInDatabase,
                             throwable -> {
                                 Log.d(TAG, "onItemAtEndLoaded: ");
+                                updateIsLoading(false);
                                 callback.showLoadingMore(false);
                             }
                     );
@@ -109,6 +127,7 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
                             this::saveInDatabase,
                             throwable -> {
                                 Log.d(TAG, "WorkflowListBoundaryCallback: Cant get workflows from network - " + throwable.getMessage());
+                                updateIsLoading(false);
                                 callback.showLoadingMore(false);
                             }
                     );
@@ -132,6 +151,7 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
                         this::saveInDatabase,
                         throwable -> {
                             Log.d(TAG, "WorkflowListBoundaryCallback: Cant get workflows from network - " + throwable.getMessage());
+                            updateIsLoading(false);
                             callback.showLoadingMore(false);
                         }
                 );

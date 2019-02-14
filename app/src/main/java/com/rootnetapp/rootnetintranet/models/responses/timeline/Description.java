@@ -1,10 +1,7 @@
+
 package com.rootnetapp.rootnetintranet.models.responses.timeline;
 
 import com.squareup.moshi.Json;
-
-/**
- * Created by root on 11/04/18.
- */
 
 public class Description {
 

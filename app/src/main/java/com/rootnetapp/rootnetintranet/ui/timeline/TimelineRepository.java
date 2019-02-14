@@ -1,11 +1,11 @@
 package com.rootnetapp.rootnetintranet.ui.timeline;
 
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.InteractionResponse;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.PostCommentResponse;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.PostSubCommentResponse;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.SubCommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.InteractionResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostCommentResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostSubCommentResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.SubCommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 

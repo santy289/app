@@ -1,52 +1,59 @@
-package com.rootnetapp.rootnetintranet.models.responses.timeline;
+
+package com.rootnetapp.rootnetintranet.models.responses.timeline.interaction;
 
 import com.squareup.moshi.Json;
 
 import java.util.List;
 
-/**
- * Created by root on 12/04/18.
- */
-
 public class Comment {
 
     @Json(name = "id")
-    private int id;
+    private Integer id;
     @Json(name = "interactionId")
-    private int interactionId;
+    private Integer interactionId;
+    @Json(name = "associate")
+    private Integer associate;
     @Json(name = "description")
     private String description;
     @Json(name = "author")
-    private int author;
+    private Integer author;
     @Json(name = "level")
-    private int level;
+    private Integer level;
     @Json(name = "createdAt")
     private String createdAt;
     @Json(name = "updatedAt")
     private String updatedAt;
     @Json(name = "count")
-    private int count;
+    private Integer count;
     @Json(name = "thumbUp")
-    private int thumbUp;
+    private Integer thumbUp;
     @Json(name = "thumbDown")
-    private int thumbDown;
+    private Integer thumbDown;
     @Json(name = "comments")
-    private List<Comment> comments = null;
+    private List<Object> comments = null;
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public int getInteractionId() {
+    public Integer getInteractionId() {
         return interactionId;
     }
 
-    public void setInteractionId(int interactionId) {
+    public void setInteractionId(Integer interactionId) {
         this.interactionId = interactionId;
+    }
+
+    public Integer getAssociate() {
+        return associate;
+    }
+
+    public void setAssociate(Integer associate) {
+        this.associate = associate;
     }
 
     public String getDescription() {
@@ -57,19 +64,19 @@ public class Comment {
         this.description = description;
     }
 
-    public int getAuthor() {
+    public Integer getAuthor() {
         return author;
     }
 
-    public void setAuthor(int author) {
+    public void setAuthor(Integer author) {
         this.author = author;
     }
 
-    public int getLevel() {
+    public Integer getLevel() {
         return level;
     }
 
-    public void setLevel(int level) {
+    public void setLevel(Integer level) {
         this.level = level;
     }
 
@@ -89,35 +96,35 @@ public class Comment {
         this.updatedAt = updatedAt;
     }
 
-    public int getCount() {
+    public Integer getCount() {
         return count;
     }
 
-    public void setCount(int count) {
+    public void setCount(Integer count) {
         this.count = count;
     }
 
-    public int getThumbUp() {
+    public Integer getThumbUp() {
         return thumbUp;
     }
 
-    public void setThumbUp(int thumbUp) {
+    public void setThumbUp(Integer thumbUp) {
         this.thumbUp = thumbUp;
     }
 
-    public int getThumbDown() {
+    public Integer getThumbDown() {
         return thumbDown;
     }
 
-    public void setThumbDown(int thumbDown) {
+    public void setThumbDown(Integer thumbDown) {
         this.thumbDown = thumbDown;
     }
 
-    public List<Comment> getComments() {
+    public List<Object> getComments() {
         return comments;
     }
 
-    public void setComments(List<Comment> comments) {
+    public void setComments(java.util.List<Object> comments) {
         this.comments = comments;
     }
 

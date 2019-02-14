@@ -16,8 +16,8 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.databinding.FragmentTimelineBinding;
 import com.rootnetapp.rootnetintranet.databinding.TimelineFiltersMenuBinding;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.ItemComments;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineItem;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Interaction;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
@@ -238,7 +238,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
             }
         });
 
-        final Observer<List<ItemComments>> commentsObserver = ((List<ItemComments> data) -> {
+        final Observer<List<Interaction>> commentsObserver = ((List<Interaction> data) -> {
             Utils.hideLoading();
             if (null != data) {
                 if (timelineItems.size() != 0) {

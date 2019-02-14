@@ -1,82 +1,69 @@
+
 package com.rootnetapp.rootnetintranet.models.responses.timeline;
 
 import com.squareup.moshi.Json;
 
-/**
- * Created by root on 11/04/18.
- */
-
 public class Arguments {
 
-    @Json(name = "companyName")
-    private String companyName;
-    @Json(name = "contactName")
-    private String contactName;
-    @Json(name = "accountId")
-    private int accountId;
-    @Json(name = "Done")
-    private boolean done;
-    @Json(name = "Description")
+    @Json(name = "current_status")
+    private CurrentStatus currentStatus;
+    @Json(name = "remaining_time")
+    private Integer remainingTime;
+    @Json(name = "workflow_type_id")
+    private Integer workflowTypeId;
+    @Json(name = "start")
+    private String start;
+    @Json(name = "description")
     private String description;
-    @Json(name = "Datest")
-    private String datest;
-    @Json(name = "statusName")
-    private String statusName;
-    @Json(name = "guidelineId")
-    private int guidelineId;
-    @Json(name = "guidelineContactTypeId")
-    private int guidelineContactTypeId;
-    @Json(name = "guidelineContactTypeName")
-    private String guidelineContactTypeName;
+    @Json(name = "title")
+    private String title;
     @Json(name = "status")
-    private boolean status;
-    @Json(name = "previousStatus")
-    private int previousStatus;
-    @Json(name = "prevStatusName")
-    private String prevStatusName;
-    @Json(name = "prevGuidelineId")
-    private int prevGuidelineId;
-    @Json(name = "prevGuidelineContactTypeId")
-    private int prevGuidelineContactTypeId;
-    @Json(name = "prevGuidelineContactTypeName")
-    private String prevGuidelineContactTypeName;
-    @Json(name = "sprintName")
-    private String sprintName;
-    @Json(name = "goalName")
-    private String goalName;
-    @Json(name = "Contact")
-    private Contact contact;
+    private String status;
+    @Json(name = "key")
+    private String key;
+    @Json(name = "workflow_type")
+    private WorkflowType workflowType;
+    @Json(name = "name")
+    private String name;
+    @Json(name = "approver")
+    private Approver approver;
+    @Json(name = "next_status")
+    private NextStatus nextStatus;
+    @Json(name = "approved")
+    private Boolean approved;
+    @Json(name = "workflow_id")
+    private Integer workflowId;
 
-    public String getCompanyName() {
-        return companyName;
+    public CurrentStatus getCurrentStatus() {
+        return currentStatus;
     }
 
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
+    public void setCurrentStatus(CurrentStatus currentStatus) {
+        this.currentStatus = currentStatus;
     }
 
-    public String getContactName() {
-        return contactName;
+    public Integer getRemainingTime() {
+        return remainingTime;
     }
 
-    public void setContactName(String contactName) {
-        this.contactName = contactName;
+    public void setRemainingTime(Integer remainingTime) {
+        this.remainingTime = remainingTime;
     }
 
-    public int getAccountId() {
-        return accountId;
+    public Integer getWorkflowTypeId() {
+        return workflowTypeId;
     }
 
-    public void setAccountId(int accountId) {
-        this.accountId = accountId;
+    public void setWorkflowTypeId(Integer workflowTypeId) {
+        this.workflowTypeId = workflowTypeId;
     }
 
-    public boolean isDone() {
-        return done;
+    public String getStart() {
+        return start;
     }
 
-    public void setDone(boolean done) {
-        this.done = done;
+    public void setStart(String start) {
+        this.start = start;
     }
 
     public String getDescription() {
@@ -87,116 +74,76 @@ public class Arguments {
         this.description = description;
     }
 
-    public String getDatest() {
-        return datest;
+    public String getTitle() {
+        return title;
     }
 
-    public void setDatest(String datest) {
-        this.datest = datest;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public String getStatusName() {
-        return statusName;
-    }
-
-    public void setStatusName(String statusName) {
-        this.statusName = statusName;
-    }
-
-    public int getGuidelineId() {
-        return guidelineId;
-    }
-
-    public void setGuidelineId(int guidelineId) {
-        this.guidelineId = guidelineId;
-    }
-
-    public int getGuidelineContactTypeId() {
-        return guidelineContactTypeId;
-    }
-
-    public void setGuidelineContactTypeId(int guidelineContactTypeId) {
-        this.guidelineContactTypeId = guidelineContactTypeId;
-    }
-
-    public String getGuidelineContactTypeName() {
-        return guidelineContactTypeName;
-    }
-
-    public void setGuidelineContactTypeName(String guidelineContactTypeName) {
-        this.guidelineContactTypeName = guidelineContactTypeName;
-    }
-
-    public boolean isStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(boolean status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
-    public int getPreviousStatus() {
-        return previousStatus;
+    public String getKey() {
+        return key;
     }
 
-    public void setPreviousStatus(int previousStatus) {
-        this.previousStatus = previousStatus;
+    public void setKey(String key) {
+        this.key = key;
     }
 
-    public String getPrevStatusName() {
-        return prevStatusName;
+    public WorkflowType getWorkflowType() {
+        return workflowType;
     }
 
-    public void setPrevStatusName(String prevStatusName) {
-        this.prevStatusName = prevStatusName;
+    public void setWorkflowType(WorkflowType workflowType) {
+        this.workflowType = workflowType;
     }
 
-    public int getPrevGuidelineId() {
-        return prevGuidelineId;
+    public String getName() {
+        return name;
     }
 
-    public void setPrevGuidelineId(int prevGuidelineId) {
-        this.prevGuidelineId = prevGuidelineId;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public int getPrevGuidelineContactTypeId() {
-        return prevGuidelineContactTypeId;
+    public Approver getApprover() {
+        return approver;
     }
 
-    public void setPrevGuidelineContactTypeId(int prevGuidelineContactTypeId) {
-        this.prevGuidelineContactTypeId = prevGuidelineContactTypeId;
+    public void setApprover(Approver approver) {
+        this.approver = approver;
     }
 
-    public String getPrevGuidelineContactTypeName() {
-        return prevGuidelineContactTypeName;
+    public NextStatus getNextStatus() {
+        return nextStatus;
     }
 
-    public void setPrevGuidelineContactTypeName(String prevGuidelineContactTypeName) {
-        this.prevGuidelineContactTypeName = prevGuidelineContactTypeName;
+    public void setNextStatus(NextStatus nextStatus) {
+        this.nextStatus = nextStatus;
     }
 
-    public String getSprintName() {
-        return sprintName;
+    public Boolean getApproved() {
+        return approved;
     }
 
-    public void setSprintName(String sprintName) {
-        this.sprintName = sprintName;
+    public void setApproved(Boolean approved) {
+        this.approved = approved;
     }
 
-    public String getGoalName() {
-        return goalName;
+    public Integer getWorkflowId() {
+        return workflowId;
     }
 
-    public void setGoalName(String goalName) {
-        this.goalName = goalName;
-    }
-
-    public Contact getContact() {
-        return contact;
-    }
-
-    public void setContact(Contact contact) {
-        this.contact = contact;
+    public void setWorkflowId(Integer workflowId) {
+        this.workflowId = workflowId;
     }
 
 }

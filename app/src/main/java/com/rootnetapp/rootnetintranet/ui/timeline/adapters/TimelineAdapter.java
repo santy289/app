@@ -1,10 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.timeline.adapters;
 
-import androidx.lifecycle.Observer;
 import android.content.Context;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,10 +11,9 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.databinding.TimelineItemBinding;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.Comment;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.Interaction;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.ItemComments;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineItem;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Comment;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Interaction;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineInterface;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel;
 import com.squareup.picasso.Picasso;
@@ -26,11 +21,16 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
 
     private List<TimelineItem> items;
     private List<User> people;
-    private List<ItemComments> comments;
+    private List<Interaction> comments;
     private TimelineViewModel viewModel;
     private Context context;
     private String token;
@@ -38,7 +38,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
     private TimelineInterface anInterface;
 
     public TimelineAdapter(List<TimelineItem> items, List<User> people,
-                           List<ItemComments> comments, TimelineViewModel viewModel,
+                           List<Interaction> comments, TimelineViewModel viewModel,
                            String token, Fragment parent, TimelineInterface anInterface) {
         this.items = items;
         this.people = people;
@@ -86,17 +86,17 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                 }
             }
 
-            if (item.getDescription().getArguments().getCompanyName() != null) {
-                title = title + " " + item.getDescription().getArguments().getCompanyName();
-            }
+//            if (item.getDescription().getArguments().getCompanyName() != null) {
+//                title = title + " " + item.getDescription().getArguments().getCompanyName();
+//            }
             holder.binding.tvTitle.setText(title);
             if (item.getDescription().getArguments().getDescription() != null) {
                 holder.binding.tvDescription.setText(context.getString(R.string.txt_description) + " "
                         + item.getDescription().getArguments().getDescription());
             }
-            if (item.getDescription().getArguments().getStatusName() != null) {
+            if (item.getDescription().getArguments().getCurrentStatus() != null) {
                 holder.binding.tvDescription.setText(context.getString(R.string.txt_statusname) + " "
-                        + item.getDescription().getArguments().getStatusName());
+                        + item.getDescription().getArguments().getCurrentStatus().getName());
             }
             String date = item.getCreatedAt().split("T")[0];
             holder.binding.tvDate.setText(date);
@@ -108,12 +108,12 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
             List<Comment> theComments = new ArrayList();
             final int interactionId;
             int x = -1;
-            for (ItemComments itemComment : comments) {
-                if (itemComment.getEntity() == item.getEntityId()) {
-                    x = itemComment.getId();
-                    theComments = itemComment.getComments();
-                }
-            }
+//            for (Comment comment : comments) {
+//                if (comment.getEntity() == item.getEntityId()) {
+//                    x = comment.getId();
+//                    theComments = comment.getComments();
+//                }
+//            }
             interactionId = x;
             holder.binding.recComments.setAdapter(new TimelineCommentAdapter(theComments, people,
                     viewModel, token, parent));

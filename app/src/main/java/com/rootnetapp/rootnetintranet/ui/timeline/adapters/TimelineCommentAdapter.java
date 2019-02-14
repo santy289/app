@@ -1,10 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.timeline.adapters;
 
-import androidx.lifecycle.Observer;
 import android.content.Context;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,12 +11,17 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.databinding.TimelineCommentItemBinding;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.Comment;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Comment;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineCommentViewholder> {
 

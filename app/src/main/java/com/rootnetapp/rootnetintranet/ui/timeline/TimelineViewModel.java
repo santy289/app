@@ -1,32 +1,31 @@
 package com.rootnetapp.rootnetintranet.ui.timeline;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
-
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.Comment;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.Interaction;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.InteractionResponse;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.ItemComments;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.PostCommentResponse;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.PostSubCommentResponse;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.SubCommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineItem;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Comment;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Interaction;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.InteractionResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostCommentResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostSubCommentResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.SubCommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 
 import java.util.List;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+
 public class TimelineViewModel extends ViewModel {
 
     private MutableLiveData<List<TimelineItem>> mTypeLiveData;
     private MutableLiveData<List<User>> mUsersLiveData;
     private MutableLiveData<List<WorkflowUser>> mWorkflowUsersLiveData;
-    private MutableLiveData<List<ItemComments>> mCommentsLiveData;
+    private MutableLiveData<List<Interaction>> mCommentsLiveData;
     private MutableLiveData<List<Comment>> mSubCommentsLiveData;
     private MutableLiveData<Interaction> mPostCommentsLiveData;
     private MutableLiveData<Comment> mPostSubCommentsLiveData;
@@ -71,7 +70,7 @@ public class TimelineViewModel extends ViewModel {
     }
 
     private void onTimelineSuccess(TimelineResponse timelineResponse) {
-        this.mTypeLiveData.setValue(timelineResponse.getItems());
+        this.mTypeLiveData.setValue(timelineResponse.getList());
     }
 
     private void onUsersSuccess(UserResponse userResponse) {
@@ -123,7 +122,7 @@ public class TimelineViewModel extends ViewModel {
         return mWorkflowUsersLiveData;
     }
 
-    protected LiveData<List<ItemComments>> getObservableComments() {
+    protected LiveData<List<Interaction>> getObservableComments() {
         if (mCommentsLiveData == null) {
             mCommentsLiveData = new MutableLiveData<>();
         }

@@ -1,27 +1,24 @@
+
 package com.rootnetapp.rootnetintranet.models.responses.timeline;
 
 import com.squareup.moshi.Json;
 
 import java.util.List;
 
-/**
- * Created by root on 11/04/18.
- */
-
 public class TimelineItem {
 
     @Json(name = "id")
-    private int id;
+    private Integer id;
     @Json(name = "sourceUser")
-    private int sourceUser;
+    private Integer sourceUser;
     @Json(name = "author")
-    private int author;
+    private Integer author;
     @Json(name = "action")
     private String action;
     @Json(name = "entity")
     private String entity;
     @Json(name = "entityId")
-    private int entityId;
+    private Integer entityId;
     @Json(name = "createdAt")
     private String createdAt;
     @Json(name = "comments")
@@ -31,27 +28,27 @@ public class TimelineItem {
     @Json(name = "description")
     private Description description;
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public int getSourceUser() {
+    public Integer getSourceUser() {
         return sourceUser;
     }
 
-    public void setSourceUser(int sourceUser) {
+    public void setSourceUser(Integer sourceUser) {
         this.sourceUser = sourceUser;
     }
 
-    public int getAuthor() {
+    public Integer getAuthor() {
         return author;
     }
 
-    public void setAuthor(int author) {
+    public void setAuthor(Integer author) {
         this.author = author;
     }
 
@@ -71,11 +68,11 @@ public class TimelineItem {
         this.entity = entity;
     }
 
-    public int getEntityId() {
+    public Integer getEntityId() {
         return entityId;
     }
 
-    public void setEntityId(int entityId) {
+    public void setEntityId(Integer entityId) {
         this.entityId = entityId;
     }
 

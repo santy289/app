@@ -1,52 +1,48 @@
-package com.rootnetapp.rootnetintranet.models.responses.timeline;
 
-import com.rootnetapp.rootnetintranet.models.responses.workflows.Pager;
+package com.rootnetapp.rootnetintranet.models.responses.timeline.interaction;
+
 import com.squareup.moshi.Json;
 
 import java.util.List;
 
-/**
- * Created by root on 12/04/18.
- */
-
 public class Interaction {
 
     @Json(name = "id")
-    private int id;
+    private Integer id;
     @Json(name = "entity")
-    private int entity;
+    private Integer entity;
     @Json(name = "entityType")
     private String entityType;
     @Json(name = "entityTypeId")
-    private int entityTypeId;
+    private Integer entityTypeId;
     @Json(name = "authorCreated")
-    private int authorCreated;
+    private Integer authorCreated;
     @Json(name = "createdAt")
     private String createdAt;
     @Json(name = "updatedAt")
     private String updatedAt;
     @Json(name = "commentsCount")
-    private int commentsCount;
+    private Integer commentsCount;
     @Json(name = "thumbsCount")
-    private int thumbsCount;
+    private Integer thumbsCount;
     @Json(name = "commentsPager")
-    private Pager commentsPager;
+    private CommentsPager commentsPager;
     @Json(name = "comments")
-    private List<PostedComment> comments = null;
+    private List<Comment> comments = null;
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public int getEntity() {
+    public Integer getEntity() {
         return entity;
     }
 
-    public void setEntity(int entity) {
+    public void setEntity(Integer entity) {
         this.entity = entity;
     }
 
@@ -58,19 +54,19 @@ public class Interaction {
         this.entityType = entityType;
     }
 
-    public int getEntityTypeId() {
+    public Integer getEntityTypeId() {
         return entityTypeId;
     }
 
-    public void setEntityTypeId(int entityTypeId) {
+    public void setEntityTypeId(Integer entityTypeId) {
         this.entityTypeId = entityTypeId;
     }
 
-    public int getAuthorCreated() {
+    public Integer getAuthorCreated() {
         return authorCreated;
     }
 
-    public void setAuthorCreated(int authorCreated) {
+    public void setAuthorCreated(Integer authorCreated) {
         this.authorCreated = authorCreated;
     }
 
@@ -90,35 +86,36 @@ public class Interaction {
         this.updatedAt = updatedAt;
     }
 
-    public int getCommentsCount() {
+    public Integer getCommentsCount() {
         return commentsCount;
     }
 
-    public void setCommentsCount(int commentsCount) {
+    public void setCommentsCount(Integer commentsCount) {
         this.commentsCount = commentsCount;
     }
 
-    public int getThumbsCount() {
+    public Integer getThumbsCount() {
         return thumbsCount;
     }
 
-    public void setThumbsCount(int thumbsCount) {
+    public void setThumbsCount(Integer thumbsCount) {
         this.thumbsCount = thumbsCount;
     }
 
-    public Pager getCommentsPager() {
+    public CommentsPager getCommentsPager() {
         return commentsPager;
     }
 
-    public void setCommentsPager(Pager commentsPager) {
+    public void setCommentsPager(CommentsPager commentsPager) {
         this.commentsPager = commentsPager;
     }
 
-    public List<PostedComment> getComments() {
+    public List<Comment> getComments() {
         return comments;
     }
 
-    public void setComments(List<PostedComment> comments) {
+    public void setComments(List<Comment> comments) {
         this.comments = comments;
     }
+
 }

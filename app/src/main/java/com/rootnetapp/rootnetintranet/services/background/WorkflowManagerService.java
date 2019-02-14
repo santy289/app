@@ -5,11 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
-import androidx.annotation.Nullable;
 
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 
 import javax.inject.Inject;
+
+import androidx.annotation.Nullable;
 
 public class WorkflowManagerService extends IntentService {
 
@@ -43,7 +44,7 @@ public class WorkflowManagerService extends IntentService {
         SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         token = "Bearer "+ prefs.getString("token","");
         /*while(true){
-            repository.getPendingWorkflows(token);
+            repository.getWorkflows(token);
             SystemClock.sleep(30000); //1 minutes
         }*/
 

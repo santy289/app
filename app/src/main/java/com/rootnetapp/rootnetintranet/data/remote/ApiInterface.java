@@ -35,6 +35,7 @@ import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.websocket.WebSocketSettingResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.WorkflowApproveRejectResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowoverview.WorkflowOverviewResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
@@ -194,6 +195,15 @@ public interface ApiInterface {
                                                            @Query("workflow_type") boolean showTypeDetails,
                                                            @Query("workflow_metadata") String metaData,
                                                            @Query("workflow_type_id") int workflowTypeId);
+
+
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflow/overview?")
+    Observable<WorkflowOverviewResponse> getOverviewWorkflowsCount(@Header("Authorization") String authorization,
+                                                                   @Query("open") boolean open,
+                                                                   @Query("status") boolean status,
+                                                                   @QueryMap Map<String, Object> options);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?")

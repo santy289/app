@@ -1,34 +1,41 @@
 package com.rootnetapp.rootnetintranet.ui.manager;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowManagerBinding;
-import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.adapters.OnTouchClickListener;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.manager.adapters.PendingWorkflowsAdapter;
 import com.rootnetapp.rootnetintranet.ui.timeline.SelectDateDialog;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
+import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -38,11 +45,9 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     WorkflowManagerViewModelFactory factory;
     WorkflowManagerViewModel viewModel;
 
-    private FragmentWorkflowManagerBinding binding;
+    private FragmentWorkflowManagerBinding mBinding;
     private MainActivityInterface anInterface;
-    private String start, end, token;
-    private int page = 0;
-    private List<Workflow> workflows;
+    private PendingWorkflowsAdapter mWorkflowsAdapter;
 
     public WorkflowManagerFragment() {
         // Required empty public constructor
@@ -63,9 +68,9 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        binding = DataBindingUtil.inflate(inflater,
+        mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_workflow_manager, container, false);
-        View view = binding.getRoot();
+        View view = mBinding.getRoot();
         ((RootnetApp) getActivity().getApplication()).getAppComponent().inject(this);
         viewModel = ViewModelProviders
                 .of(this, factory)
@@ -73,199 +78,703 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         //TODO preferences inyectadas con Dagger
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        token = "Bearer " + prefs.getString("token", "");
-        binding.recPendingworkflows.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recPendingworkflows.setNestedScrollingEnabled(false);
+        String token = "Bearer " + prefs.getString("token", "");
+
+        String start = Utils.getMonthDay(0, 1);
+        String end = Utils.getMonthDay(0, 30);
+        updateSelectedDatesUi(start, end);
+        updateSelectedDateTitle(R.string.current_month);
+
         subscribe();
-        binding.btnMonth.setOnClickListener(this::filterClicked);
-        binding.btnWeek.setOnClickListener(this::filterClicked);
-        binding.btnDay.setOnClickListener(this::filterClicked);
-        binding.btnSelectdates.setOnClickListener(this::selectDates);
-        binding.btnPendingapproval.setOnClickListener(this::showWorkflowsDialog);
-        binding.btnWorkflows.setOnClickListener(this::showWorkflowsDialog);
-        binding.btnOutoftime.setOnClickListener(this::showWorkflowsDialog);
-        binding.btnUpdated.setOnClickListener(this::showWorkflowsDialog);
-        binding.btnShowmore.setOnClickListener(this::showMoreClicked);
-        start = Utils.getMonthDay(0, 1);
-        end = Utils.getMonthDay(0, 30);
-        binding.tvSelecteddates.setText("(" + start + " - " + end + ")");
-        binding.tvSelecteddatetitle.setText(getString(R.string.current_month));
-        start = start + "T00:00:00-0000";
-        end = end + "T00:00:00-0000";
-        workflows = new ArrayList<>();
-        getPendingWorkflows();
+        setOnClickListeners();
+        setupRecycler();
+
+        viewModel.init(token, start, end);
+
         return view;
     }
 
-    public void getPendingWorkflows() {
-        Utils.showLoading(getContext());
-        viewModel.getPendingWorkflows(token, page);
-    }
-
+    /**
+     * Performs all of the subscriptions to the ViewModel's observables.
+     */
     private void subscribe() {
-        final Observer<WorkflowsResponse> workflowsObserver = ((WorkflowsResponse data) -> {
-            Utils.hideLoading();
-            if (null != data) {
-                workflows.addAll(data.getList());
-                if (data.getPager().isIsLastPage()) {
-                    binding.btnShowmore.setVisibility(View.GONE);
-                } else {
-                    binding.btnShowmore.setVisibility(View.VISIBLE);
-                }
-                if (workflows.size() != 0) {
-                    binding.lytNoworkflows.setVisibility(View.GONE);
-                    binding.recPendingworkflows.setVisibility(View.VISIBLE);
-                    binding.recPendingworkflows
-                            .setAdapter(new PendingWorkflowsAdapter(workflows, this));
-                } else {
-                    binding.recPendingworkflows.setVisibility(View.GONE);
-                    binding.lytNoworkflows.setVisibility(View.VISIBLE);
-                }
-            }
-        });
+        viewModel.getObservableShowLoading().observe(this, this::showLoading);
+        viewModel.getObservableError().observe(this, this::showToastMessage);
+        viewModel.getObservableWorkflows().observe(this, this::populatePendingWorkflows);
+        viewModel.getObservableHideMoreButton().observe(this, this::hideMoreButton);
+        viewModel.getObservableHideWorkflowList().observe(this, this::hideWorkflowList);
+        viewModel.getObservableWorkflowTypeItem().observe(this, this::setupWorkflowTypeFormItem);
 
-        final Observer<Integer> errorObserver = ((Integer data) -> {
-            if (null != data) {
-                //TODO mejorar toast
-                Utils.hideLoading();
-//                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
-            }
-        });
+        viewModel.getObservableUserPendingCount().observe(this, this::updateUserPendingWorkflowsCount);
+        viewModel.getObservableUserOpenCount().observe(this, this::updateUserOpenWorkflowsCount);
+        viewModel.getObservableUserClosedCount().observe(this, this::updateUserClosedWorkflowsCount);
+        viewModel.getObservableUserOutOfTimeCount().observe(this, this::updateUserOutOfTimeWorkflowsCount);
+        viewModel.getObservableUserUpdatedCount().observe(this, this::updateUserUpdatedWorkflowsCount);
+        viewModel.getObservableUserPendingWorkflows().observe(this, this::showUserPendingWorkflowsDialog);
+        viewModel.getObservableUserOpenWorkflows().observe(this, this::showUserOpenWorkflowsDialog);
+        viewModel.getObservableUserClosedWorkflows().observe(this, this::showUserClosedWorkflowsDialog);
+        viewModel.getObservableUserOutOfTimeWorkflows().observe(this, this::showUserOutOfTimeWorkflowsDialog);
+        viewModel.getObservableUserUpdatedWorkflows().observe(this, this::showUserUpdatedWorkflowsDialog);
 
-        viewModel.getObservableWorkflows().observe(this, workflowsObserver);
-        viewModel.getObservableError().observe(this, errorObserver);
+        viewModel.getObservableCompanyPendingCount().observe(this, this::updateCompanyPendingWorkflowsCount);
+        viewModel.getObservableCompanyOpenCount().observe(this, this::updateCompanyOpenWorkflowsCount);
+        viewModel.getObservableCompanyClosedCount().observe(this, this::updateCompanyClosedWorkflowsCount);
+        viewModel.getObservableCompanyOutOfTimeCount().observe(this, this::updateCompanyOutOfTimeWorkflowsCount);
+        viewModel.getObservableCompanyUpdatedCount().observe(this, this::updateCompanyUpdatedWorkflowsCount);
+        viewModel.getObservableCompanyPeopleInvolvedCount().observe(this, this::updateCompanyPeopleInvolvedCount);
+        viewModel.getObservableCompanyPendingWorkflows().observe(this, this::showCompanyPendingWorkflowsDialog);
+        viewModel.getObservableCompanyOpenWorkflows().observe(this, this::showCompanyOpenWorkflowsDialog);
+        viewModel.getObservableCompanyClosedWorkflows().observe(this, this::showCompanyClosedWorkflowsDialog);
+        viewModel.getObservableCompanyOutOfTimeWorkflows().observe(this, this::showCompanyOutOfTimeWorkflowsDialog);
+        viewModel.getObservableCompanyUpdatedWorkflows().observe(this, this::showCompanyUpdatedWorkflowsDialog);
     }
 
-    private void selectDates(View view) {
+    /**
+     * Define the onClick behavior for this View's components.
+     */
+    private void setOnClickListeners() {
+        mBinding.tvMonth.setOnClickListener(v -> filterMonthClicked());
+        mBinding.tvWeek.setOnClickListener(v -> filterWeekClicked());
+        mBinding.tvDay.setOnClickListener(v -> filterDayClicked());
+        mBinding.btnSelectDates.setOnClickListener(v -> selectDates());
+        mBinding.btnShowMore.setOnClickListener(v -> showMoreClicked());
+
+        mBinding.btnUserPendingApproval.setOnClickListener(v -> getUserPendingWorkflows());
+        mBinding.llUserOpenWorkflows.setOnClickListener(v -> getUserOpenWorkflows());
+        mBinding.llUserClosedWorkflows.setOnClickListener(v -> getUserClosedWorkflows());
+        mBinding.btnUserOutOfTime.setOnClickListener(v -> getUserOutOfTimeWorkflows());
+        mBinding.btnUserUpdated.setOnClickListener(v -> getUserUpdatedWorkflows());
+
+        mBinding.btnCompanyPendingApproval.setOnClickListener(v -> getCompanyPendingWorkflows());
+        mBinding.llCompanyOpenWorkflows.setOnClickListener(v -> getCompanyOpenWorkflows());
+        mBinding.llCompanyClosedWorkflows.setOnClickListener(v -> getCompanyClosedWorkflows());
+        mBinding.btnCompanyOutOfTime.setOnClickListener(v -> getCompanyOutOfTimeWorkflows());
+        mBinding.btnCompanyUpdated.setOnClickListener(v -> getCompanyUpdatedWorkflows());
+    }
+
+    /**
+     * Initializes the workflows RecyclerView.
+     */
+    private void setupRecycler() {
+        mBinding.recPendingworkflows.setLayoutManager(new LinearLayoutManager(getContext()));
+        mBinding.recPendingworkflows.setNestedScrollingEnabled(false);
+    }
+
+    /**
+     * Creates and defines the behavior for the Workflow Type filter.
+     *
+     * @param singleChoiceFormItem form item that will work as a filter.
+     */
+    @UiThread
+    private void setupWorkflowTypeFormItem(SingleChoiceFormItem singleChoiceFormItem) {
+
+        String title = singleChoiceFormItem.getTitle();
+        if ((title == null || title.isEmpty()) && singleChoiceFormItem.getTitleRes() != 0) {
+            title = getString(singleChoiceFormItem.getTitleRes());
+        }
+        mBinding.formItemWorkflowType.tvTitle.setText(title);
+
+        List<Option> options = new ArrayList<>(singleChoiceFormItem.getOptions());
+
+        //add hint
+        String hint = getString(R.string.no_selection_hint);
+        // check whether the hint has already been added
+        if (!options.get(0).getName().equals(hint)) {
+            // add hint as first item
+            options.add(0, new Option(0, hint));
+        }
+
+        //create the adapter
+        mBinding.formItemWorkflowType.spInput.setAdapter(
+                new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item,
+                        options));
+
+        //workaround so the listener won't be called on init
+        mBinding.formItemWorkflowType.spInput.setSelection(0, false);
+
+        // this prevents the listener to be triggered by setSelection
+        int index = singleChoiceFormItem.getOptions().indexOf(singleChoiceFormItem.getValue());
+        index++; // because of the No Selection option
+        mBinding.formItemWorkflowType.spInput.setTag(index);
+        mBinding.formItemWorkflowType.spInput.setSelection(index);
+
+        mBinding.formItemWorkflowType.spInput.setOnItemSelectedListener(
+                new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position,
+                                               long id) {
+
+                        // this prevents the listener to be triggered by setSelection
+                        Object tag = mBinding.formItemWorkflowType.spInput.getTag();
+                        if (tag == null || (int) tag != position) {
+
+                            // the user has selected the No Selection option
+                            if (position == 0) {
+                                singleChoiceFormItem.setValue(null);
+                                if (singleChoiceFormItem.getOnSelectedListener() != null) {
+                                    singleChoiceFormItem.getOnSelectedListener()
+                                            .onSelected(singleChoiceFormItem);
+                                }
+                                return;
+                            }
+
+                            // the user has selected a valid option
+                            int index = position - 1; // because of the No Selection option
+                            singleChoiceFormItem
+                                    .setValue(singleChoiceFormItem.getOptions().get(index));
+                            if (singleChoiceFormItem.getOnSelectedListener() != null) {
+                                singleChoiceFormItem.getOnSelectedListener()
+                                        .onSelected(singleChoiceFormItem);
+                            }
+                        }
+
+                        // this prevents the listener to be triggered by setSelection
+                        mBinding.formItemWorkflowType.spInput.setTag(position);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
+
+        //make sure this view gets the focus
+        mBinding.formItemWorkflowType.spInput
+                .setOnTouchListener(new OnTouchClickListener(mBinding.formItemWorkflowType.root));
+
+        //required indicator
+        mBinding.formItemWorkflowType.tvRequired.setVisibility(View.GONE);
+
+        singleChoiceFormItem.setOnSelectedListener(item -> {
+            Integer workflowTypeId = null;
+
+            if (item.getValue() != null) {
+                workflowTypeId = item.getValue().getId();
+            }
+
+            updateDashboard(workflowTypeId);
+        });
+    }
+
+    /**
+     * Resets the workflows adapter and performs a request to the ViewModel to update the dashboard
+     * data with new date filters
+     *
+     * @param startDate start date filter.
+     * @param endDate   end date filter.
+     */
+    private void updateDashboard(String startDate, String endDate) {
+        mWorkflowsAdapter = null; //reset the adapter
+        viewModel.updateDashboard(startDate, endDate);
+    }
+
+    /**
+     * Resets the workflows adapter and performs a request to the ViewModel to update the dashboard
+     * data with new workflow type filters.
+     *
+     * @param workflowTypeId workflow type filter.
+     */
+    private void updateDashboard(Integer workflowTypeId) {
+        mWorkflowsAdapter = null; //reset the adapter
+        viewModel.updateDashboard(workflowTypeId);
+    }
+
+    /**
+     * Opens the select date dialog.
+     */
+    private void selectDates() {
         anInterface.showDialog(SelectDateDialog.newInstance(this));
     }
 
-    private void showMoreClicked(View view) {
-        page++;
-        getPendingWorkflows();
+    /**
+     * Performs a request to the ViewModel to retrieve more workflows.
+     */
+    private void showMoreClicked() {
+        viewModel.incrementCurrentPage();
+        viewModel.getWorkflows();
     }
 
-    private void filterClicked(View view) {
-        switch (view.getId()) {
-            case R.id.btn_month: {
-                selectMonthButton(true);
-                selectWeekButton(false);
-                selectDayButton(false);
+    //region Date Filters
 
-                start = Utils.getMonthDay(0, 1);
-                end = Utils.getMonthDay(0, 30);
-                binding.tvSelecteddates.setText("(" + start + " - " + end + ")");
-                binding.tvSelecteddatetitle.setText(getString(R.string.current_month));
-                start = start + "T00:00:00-0000";
-                end = end + "T00:00:00-0000";
-                break;
-            }
-            case R.id.btn_week: {
-                selectMonthButton(false);
-                selectWeekButton(true);
-                selectDayButton(false);
+    /**
+     * Updates the UI related to the date filters with the current month and updates the dashboard
+     * data.
+     */
+    private void filterMonthClicked() {
+        selectMonthButton(true);
+        selectWeekButton(false);
+        selectDayButton(false);
 
-                start = Utils.getWeekStart();
-                end = Utils.getWeekEnd();
-                binding.tvSelecteddates.setText("(" + start + " - " + end + ")");
-                binding.tvSelecteddatetitle.setText(getString(R.string.current_week));
-                start = start + "T00:00:00-0000";
-                end = end + "T00:00:00-0000";
-                break;
-            }
-            case R.id.btn_day: {
-                selectMonthButton(false);
-                selectWeekButton(false);
-                selectDayButton(true);
+        String start = Utils.getMonthDay(0, 1);
+        String end = Utils.getMonthDay(0, 30);
+        updateSelectedDatesUi(start, end);
+        updateSelectedDateTitle(R.string.current_month);
 
-                start = Utils.getCurrentDate();
-                binding.tvSelecteddates.setText("(" + start + ")");
-                binding.tvSelecteddatetitle.setText(getString(R.string.today));
-                start = start + "T00:00:00-0000";
-                end = Utils.getCurrentDate() + "T23:59:59-0000";
-                break;
-            }
-        }
-        workflows = new ArrayList<>();
-        page = 0;
-        getPendingWorkflows();
+        updateDashboard(start, end);
     }
 
+    /**
+     * Updates the UI related to the date filters with the current week and updates the dashboard
+     * data.
+     */
+    private void filterWeekClicked() {
+        selectMonthButton(false);
+        selectWeekButton(true);
+        selectDayButton(false);
+
+        String start = Utils.getWeekStart();
+        String end = Utils.getWeekEnd();
+        updateSelectedDatesUi(start, end);
+        updateSelectedDateTitle(R.string.current_week);
+
+        updateDashboard(start, end);
+    }
+
+    /**
+     * Updates the UI related to the date filters with the current day and updates the dashboard
+     * data.
+     */
+    private void filterDayClicked() {
+        selectMonthButton(false);
+        selectWeekButton(false);
+        selectDayButton(true);
+
+        String start = Utils.getCurrentDate();
+        String end = Utils.getTomorrowDate();
+        updateSelectedDatesUi(start);
+        updateSelectedDateTitle(R.string.today);
+
+        updateDashboard(start, end);
+    }
+
+    /**
+     * Selects or deselects visually the current month button based on the parameter.
+     *
+     * @param select true - select; false - deselect.
+     */
     @UiThread
     private void selectMonthButton(boolean select) {
         if (select) {
-            binding.btnMonth.setBackgroundTintList(ColorStateList
-                    .valueOf(ContextCompat.getColor(getContext(), R.color.selected_filter)));
-            binding.btnMonth.setTextColor(getResources().getColor(R.color.white));
+            mBinding.tvMonth.setBackgroundColor(
+                    ContextCompat.getColor(getContext(), R.color.selected_filter));
+            mBinding.tvMonth.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
         } else {
-            binding.btnMonth.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.unselected_filter)));
-            binding.btnMonth.setTextColor(getResources().getColor(R.color.unselected_filter_text));
+            mBinding.tvMonth.setBackgroundColor(
+                    ContextCompat.getColor(getContext(), R.color.unselected_filter));
+            mBinding.tvMonth.setTextColor(
+                    ContextCompat.getColor(getContext(), R.color.unselected_filter_text));
         }
     }
 
+    /**
+     * Selects or deselects visually the current week button based on the parameter.
+     *
+     * @param select true - select; false - deselect.
+     */
     @UiThread
     private void selectWeekButton(boolean select) {
         if (select) {
-            binding.btnWeek.setBackgroundTintList(ColorStateList
-                    .valueOf(ContextCompat.getColor(getContext(), R.color.selected_filter)));
-            binding.btnWeek.setTextColor(getResources().getColor(R.color.white));
+            mBinding.tvWeek.setBackgroundColor(
+                    ContextCompat.getColor(getContext(), R.color.selected_filter));
+            mBinding.tvWeek.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
         } else {
-            binding.btnWeek.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.unselected_filter)));
-            binding.btnWeek.setTextColor(getResources().getColor(R.color.unselected_filter_text));
+            mBinding.tvWeek.setBackgroundColor(
+                    ContextCompat.getColor(getContext(), R.color.unselected_filter));
+            mBinding.tvWeek.setTextColor(
+                    ContextCompat.getColor(getContext(), R.color.unselected_filter_text));
+        }
+    }
+
+    /**
+     * Selects or deselects visually the current day button based on the parameter.
+     *
+     * @param select true - select; false - deselect.
+     */
+    @UiThread
+    private void selectDayButton(boolean select) {
+        if (select) {
+            mBinding.tvDay.setBackgroundColor(
+                    ContextCompat.getColor(getContext(), R.color.selected_filter));
+            mBinding.tvDay.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
+        } else {
+            mBinding.tvDay.setBackgroundColor(
+                    ContextCompat.getColor(getContext(), R.color.unselected_filter));
+            mBinding.tvDay.setTextColor(
+                    ContextCompat.getColor(getContext(), R.color.unselected_filter_text));
+        }
+    }
+
+    /**
+     * Updates the date filter UI and request a dashboard data update. Called from the select date
+     * dialog.
+     *
+     * @param start selected start date.
+     * @param end   selected end date.
+     */
+    @Override
+    public void setDate(String start, String end) {
+        updateSelectedDatesUi(start, end);
+        updateSelectedDateTitle(R.string.selected_period);
+
+        updateDashboard(start, end);
+    }
+    //endregion
+
+    /**
+     * Opens the WorkflowDetailActivity for the specified workflow.
+     *
+     * @param workflowListItem workflow to open the details.
+     */
+    @Override
+    public void showWorkflow(WorkflowListItem workflowListItem) {
+        Intent intent = new Intent(getActivity(), WorkflowDetailActivity.class);
+        intent.putExtra(WorkflowDetailActivity.EXTRA_WORKFLOW_LIST_ITEM, workflowListItem);
+        anInterface.showActivity(intent);
+    }
+
+    //region Workflows Dialog
+
+    //region User Workflows
+    /**
+     * Sends a request to the ViewModel to retrieve the user's pending workflows. This is invoked by
+     * the user interaction onClick and the flow ends with the dialog display called by {@link
+     * #showUserPendingWorkflowsDialog(List)}.
+     */
+    private void getUserPendingWorkflows() {
+        viewModel.getUserPendingWorkflows();
+    }
+
+    /**
+     * Sends a request to the ViewModel to retrieve the user's open workflows. This is invoked by
+     * the user interaction onClick and the flow ends with the dialog display called by {@link
+     * #showUserOpenWorkflowsDialog(List)}.
+     */
+    private void getUserOpenWorkflows() {
+        viewModel.getUserOpenWorkflows();
+    }
+
+    /**
+     * Sends a request to the ViewModel to retrieve the user's closed workflows. This is invoked by
+     * the user interaction onClick and the flow ends with the dialog display called by {@link
+     * #showUserClosedWorkflowsDialog(List)}.
+     */
+    private void getUserClosedWorkflows() {
+        viewModel.getUserClosedWorkflows();
+    }
+
+    /**
+     * Sends a request to the ViewModel to retrieve the user's out of time workflows. This is
+     * invoked by the user interaction onClick and the flow ends with the dialog display called by
+     * {@link #showUserOutOfTimeWorkflowsDialog(List)}.
+     */
+    private void getUserOutOfTimeWorkflows() {
+        viewModel.getUserOutOfTimeWorkflows();
+    }
+
+    /**
+     * Sends a request to the ViewModel to retrieve the user's updated workflows. This is invoked by
+     * the user interaction onClick and the flow ends with the dialog display called by {@link
+     * #showUserUpdatedWorkflowsDialog(List)}.
+     */
+    private void getUserUpdatedWorkflows() {
+        viewModel.getUserUpdatedWorkflows();
+    }
+
+    /**
+     * Displays a DialogFragment with a list of the user's pending workflows.
+     *
+     * @param workflowList list of user's pending workflows.
+     */
+    private void showUserPendingWorkflowsDialog(List<WorkflowDb> workflowList) {
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogType.USER_PENDING,
+                workflowList));
+    }
+
+    /**
+     * Displays a DialogFragment with a list of the user's open workflows.
+     *
+     * @param workflowList list of user's open workflows.
+     */
+    private void showUserOpenWorkflowsDialog(List<WorkflowDb> workflowList) {
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogType.USER_OPEN,
+                workflowList));
+    }
+
+    /**
+     * Displays a DialogFragment with a list of the user's closed workflows.
+     *
+     * @param workflowList list of user's closed workflows.
+     */
+    private void showUserClosedWorkflowsDialog(List<WorkflowDb> workflowList) {
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogType.USER_CLOSED,
+                workflowList));
+    }
+
+    /**
+     * Displays a DialogFragment with a list of the user's out of time workflows.
+     *
+     * @param workflowList list of user's out of time workflows.
+     */
+    private void showUserOutOfTimeWorkflowsDialog(List<WorkflowDb> workflowList) {
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogType.USER_OUT_OF_TIME,
+                workflowList));
+    }
+
+    /**
+     * Displays a DialogFragment with a list of the user's updated workflows.
+     *
+     * @param workflowList list of user's updated workflows.
+     */
+    private void showUserUpdatedWorkflowsDialog(List<WorkflowDb> workflowList) {
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogType.USER_UPDATED,
+                workflowList));
+    }
+    //endregion
+
+    //region Company Workflows
+    /**
+     * Sends a request to the ViewModel to retrieve the user's pending workflows. This is invoked by
+     * the user interaction onClick and the flow ends with the dialog display called by {@link
+     * #showCompanyPendingWorkflowsDialog(List)}.
+     */
+    private void getCompanyPendingWorkflows() {
+        viewModel.getCompanyPendingWorkflows();
+    }
+
+    /**
+     * Sends a request to the ViewModel to retrieve the user's open workflows. This is invoked by
+     * the user interaction onClick and the flow ends with the dialog display called by {@link
+     * #showCompanyOpenWorkflowsDialog(List)}.
+     */
+    private void getCompanyOpenWorkflows() {
+        viewModel.getCompanyOpenWorkflows();
+    }
+
+    /**
+     * Sends a request to the ViewModel to retrieve the user's closed workflows. This is invoked by
+     * the user interaction onClick and the flow ends with the dialog display called by {@link
+     * #showCompanyClosedWorkflowsDialog(List)}.
+     */
+    private void getCompanyClosedWorkflows() {
+        viewModel.getCompanyClosedWorkflows();
+    }
+
+    /**
+     * Sends a request to the ViewModel to retrieve the user's out of time workflows. This is
+     * invoked by the user interaction onClick and the flow ends with the dialog display called by
+     * {@link #showCompanyOutOfTimeWorkflowsDialog(List)}.
+     */
+    private void getCompanyOutOfTimeWorkflows() {
+        viewModel.getCompanyOutOfTimeWorkflows();
+    }
+
+    /**
+     * Sends a request to the ViewModel to retrieve the user's updated workflows. This is invoked by
+     * the user interaction onClick and the flow ends with the dialog display called by {@link
+     * #showCompanyUpdatedWorkflowsDialog(List)}.
+     */
+    private void getCompanyUpdatedWorkflows() {
+        viewModel.getCompanyUpdatedWorkflows();
+    }
+
+    /**
+     * Displays a DialogFragment with a list of the user's pending workflows.
+     *
+     * @param workflowList list of user's pending workflows.
+     */
+    private void showCompanyPendingWorkflowsDialog(List<WorkflowDb> workflowList) {
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogType.COMPANY_PENDING,
+                workflowList));
+    }
+
+    /**
+     * Displays a DialogFragment with a list of the user's open workflows.
+     *
+     * @param workflowList list of user's open workflows.
+     */
+    private void showCompanyOpenWorkflowsDialog(List<WorkflowDb> workflowList) {
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogType.COMPANY_OPEN,
+                workflowList));
+    }
+
+    /**
+     * Displays a DialogFragment with a list of the user's closed workflows.
+     *
+     * @param workflowList list of user's closed workflows.
+     */
+    private void showCompanyClosedWorkflowsDialog(List<WorkflowDb> workflowList) {
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogType.COMPANY_CLOSED,
+                workflowList));
+    }
+
+    /**
+     * Displays a DialogFragment with a list of the user's out of time workflows.
+     *
+     * @param workflowList list of user's out of time workflows.
+     */
+    private void showCompanyOutOfTimeWorkflowsDialog(List<WorkflowDb> workflowList) {
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogType.COMPANY_OUT_OF_TIME,
+                workflowList));
+    }
+
+    /**
+     * Displays a DialogFragment with a list of the user's updated workflows.
+     *
+     * @param workflowList list of user's updated workflows.
+     */
+    private void showCompanyUpdatedWorkflowsDialog(List<WorkflowDb> workflowList) {
+        anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
+                ManagerWorkflowsDialog.DialogType.COMPANY_UPDATED,
+                workflowList));
+    }
+    //endregion
+    //endregion
+
+    /**
+     * Adds data to the workflows adapter. Checks whether the adapter needs to be created or not.
+     *
+     * @param workflowList data to add to the adapter.
+     */
+    @UiThread
+    private void populatePendingWorkflows(List<WorkflowDb> workflowList) {
+        if (workflowList == null) return;
+
+        if (mWorkflowsAdapter == null) {
+            //create a new adapter
+            mWorkflowsAdapter = new PendingWorkflowsAdapter(workflowList, this);
+            mBinding.recPendingworkflows.setAdapter(mWorkflowsAdapter);
+        } else {
+            //append a list to the current adapter
+            mWorkflowsAdapter.addData(workflowList);
+        }
+    }
+
+    /**
+     * Hides or shows the "SHOW MORE" button based on the parameter.
+     *
+     * @param hide true: hide; false: show.
+     */
+    @UiThread
+    private void hideMoreButton(boolean hide) {
+        if (hide) {
+            mBinding.btnShowMore.setVisibility(View.GONE);
+        } else {
+            mBinding.btnShowMore.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Hides or shows the workflow list based on the parameter.
+     *
+     * @param hide true: hide; false: show.
+     */
+    @UiThread
+    private void hideWorkflowList(boolean hide) {
+        hideMoreButton(hide);
+
+        if (hide) {
+            mBinding.recPendingworkflows.setVisibility(View.GONE);
+            mBinding.lytNoworkflows.setVisibility(View.VISIBLE);
+        } else {
+            mBinding.recPendingworkflows.setVisibility(View.VISIBLE);
+            mBinding.lytNoworkflows.setVisibility(View.GONE);
         }
     }
 
     @UiThread
-    private void selectDayButton(boolean select) {
-        if (select) {
-            binding.btnDay.setBackgroundTintList(ColorStateList
-                    .valueOf(ContextCompat.getColor(getContext(), R.color.selected_filter)));
-            binding.btnDay.setTextColor(getResources().getColor(R.color.white));
+    private void updateSelectedDatesUi(String startDate) {
+        mBinding.tvSelectedDate.setText(String.format(Locale.US, "(%s)", startDate));
+    }
+
+    @UiThread
+    private void updateSelectedDatesUi(String startDate, String endDate) {
+        mBinding.tvSelectedDate.setText(String.format(Locale.US, "(%s - %s)", startDate, endDate));
+    }
+
+    @UiThread
+    private void updateSelectedDateTitle(int titleRes) {
+        mBinding.tvSelectedDateTitle.setText(getString(titleRes));
+    }
+
+    @UiThread
+    private void updateUserPendingWorkflowsCount(int count) {
+        mBinding.tvUserPendingCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void updateUserOpenWorkflowsCount(int count) {
+        mBinding.tvUserOpenCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void updateUserClosedWorkflowsCount(int count) {
+        mBinding.tvUserClosedCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void updateUserOutOfTimeWorkflowsCount(int count) {
+        mBinding.tvUserOutOfTimeCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void updateUserUpdatedWorkflowsCount(int count) {
+        mBinding.tvUserUpdatedCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void updateCompanyPendingWorkflowsCount(int count) {
+        mBinding.tvCompanyPendingCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void updateCompanyOpenWorkflowsCount(int count) {
+        mBinding.tvCompanyOpenCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void updateCompanyClosedWorkflowsCount(int count) {
+        mBinding.tvCompanyClosedCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void updateCompanyOutOfTimeWorkflowsCount(int count) {
+        mBinding.tvCompanyOutOfTimeCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void updateCompanyUpdatedWorkflowsCount(int count) {
+        mBinding.tvCompanyUpdatedCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void updateCompanyPeopleInvolvedCount(int count) {
+        mBinding.tvCompanyPeopleInvolvedCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void showLoading(Boolean show) {
+        if (show) {
+            Utils.showLoading(getContext());
         } else {
-            binding.btnDay.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.unselected_filter)));
-            binding.btnDay.setTextColor(getResources().getColor(R.color.unselected_filter_text));
+            Utils.hideLoading();
         }
     }
 
-    @Override
-    public void setDate(String start, String end) {
-        binding.tvSelecteddates.setText("(" + start + " - " + end + ")");
-        binding.tvSelecteddatetitle.setText(getString(R.string.selected_period));
-        this.start = start + "T00:00:00-0000";
-        this.end = end + "T00:00:00-0000";
-        workflows = new ArrayList<>();
-        page = 0;
-        getPendingWorkflows();
+    @UiThread
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                getContext(),
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
     }
-
-    @Override
-    public void showWorkflow(int id) {
-        anInterface.showWorkflow(id);
-    }
-
-    private void showWorkflowsDialog(View view) {
-        switch (view.getId()) {
-            case R.id.btn_pendingapproval: {
-                anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                        ManagerWorkflowsDialog.DialogTypes.PENDING, null));
-                break;
-            }
-            case R.id.btn_workflows: {
-                anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                        ManagerWorkflowsDialog.DialogTypes.WORKFLOWS, null));
-                break;
-            }
-            case R.id.btn_outoftime: {
-                anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                        ManagerWorkflowsDialog.DialogTypes.OUT_OF_TIME, null));
-                break;
-            }
-            case R.id.btn_updated: {
-                anInterface.showDialog(ManagerWorkflowsDialog.newInstance(this,
-                        ManagerWorkflowsDialog.DialogTypes.UPDATED, null));
-                break;
-            }
-        }
-    }
-
 }

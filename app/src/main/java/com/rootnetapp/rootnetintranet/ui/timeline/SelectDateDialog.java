@@ -1,8 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.timeline;
 
-import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import androidx.fragment.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,11 +10,16 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.databinding.DialogSelectDateBinding;
 import com.rootnetapp.rootnetintranet.ui.manager.ManagerInterface;
 
+import java.util.Locale;
+
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.DialogFragment;
+
 /**
  * Created by root on 11/04/18.
  */
 
-public class SelectDateDialog extends DialogFragment{
+public class SelectDateDialog extends DialogFragment {
 
     private DialogSelectDateBinding binding;
     private TimelineInterface timeInterface;
@@ -49,16 +52,25 @@ public class SelectDateDialog extends DialogFragment{
     }
 
     private void setDates() {
-        String start = binding.pickerStartdate.getYear()+"-"
-                +(binding.pickerStartdate.getMonth()+1)+"-"
-                +binding.pickerStartdate.getDayOfMonth();
-        String end = binding.pickerEnddate.getYear()+"-"
-                +(binding.pickerStartdate.getMonth()+1)+"-"
-                +binding.pickerEnddate.getDayOfMonth();
+        String start = String.format(
+                Locale.US,
+                "%04d-%02d-%02d",
+                binding.pickerStartdate.getYear(),
+                binding.pickerStartdate.getMonth() + 1,
+                binding.pickerStartdate.getDayOfMonth()
+                );
 
-        if(manInterface!=null){
+        String end = String.format(
+                Locale.US,
+                "%04d-%02d-%02d",
+                binding.pickerEnddate.getYear(),
+                binding.pickerEnddate.getMonth() + 1,
+                binding.pickerEnddate.getDayOfMonth()
+                );
+
+        if (manInterface != null) {
             manInterface.setDate(start, end);
-        }else if(timeInterface!=null){
+        } else if (timeInterface != null) {
             timeInterface.setDate(start, end);
         }
         dismiss();

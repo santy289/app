@@ -58,6 +58,7 @@ public class WorkflowManagerViewModel extends ViewModel {
     private MutableLiveData<Integer> mCompanyClosedCountLiveData;
     private MutableLiveData<Integer> mCompanyOutOfTimeCountLiveData;
     private MutableLiveData<Integer> mCompanyUpdatedCountLiveData;
+    private MutableLiveData<Integer> mCompanyPeopleInvolvedCountLiveData;
     private MutableLiveData<Boolean> mHideMoreButtonLiveData;
     private MutableLiveData<Boolean> mHideWorkflowListLiveData;
     private MutableLiveData<SingleChoiceFormItem> mAddWorkflowTypeItemLiveData;
@@ -674,6 +675,8 @@ public class WorkflowManagerViewModel extends ViewModel {
                 overviewResponse.getOverview().getCompanyWorkflows().getOutOfTime().getCount());
         mCompanyUpdatedCountLiveData.setValue(Integer.valueOf(
                 overviewResponse.getOverview().getCompanyWorkflows().getUpdated().getCount()));
+        mCompanyPeopleInvolvedCountLiveData.setValue(
+                overviewResponse.getOverview().getCompanyWorkflows().getPersonsInvolved());
     }
     //endregion
 
@@ -903,6 +906,13 @@ public class WorkflowManagerViewModel extends ViewModel {
             mCompanyUpdatedCountLiveData = new MutableLiveData<>();
         }
         return mCompanyUpdatedCountLiveData;
+    }
+
+    protected LiveData<Integer> getObservableCompanyPeopleInvolvedCount() {
+        if (mCompanyPeopleInvolvedCountLiveData == null) {
+            mCompanyPeopleInvolvedCountLiveData = new MutableLiveData<>();
+        }
+        return mCompanyPeopleInvolvedCountLiveData;
     }
     //endregion
 

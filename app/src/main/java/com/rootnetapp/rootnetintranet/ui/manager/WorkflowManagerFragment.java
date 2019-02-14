@@ -121,6 +121,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         viewModel.getObservableCompanyClosedCount().observe(this, this::updateCompanyClosedWorkflowsCount);
         viewModel.getObservableCompanyOutOfTimeCount().observe(this, this::updateCompanyOutOfTimeWorkflowsCount);
         viewModel.getObservableCompanyUpdatedCount().observe(this, this::updateCompanyUpdatedWorkflowsCount);
+        viewModel.getObservableCompanyPeopleInvolvedCount().observe(this, this::updateCompanyPeopleInvolvedCount);
         viewModel.getObservableCompanyPendingWorkflows().observe(this, this::showCompanyPendingWorkflowsDialog);
         viewModel.getObservableCompanyOpenWorkflows().observe(this, this::showCompanyOpenWorkflowsDialog);
         viewModel.getObservableCompanyClosedWorkflows().observe(this, this::showCompanyClosedWorkflowsDialog);
@@ -752,6 +753,11 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     @UiThread
     private void updateCompanyUpdatedWorkflowsCount(int count) {
         mBinding.tvCompanyUpdatedCount.setText(String.valueOf(count));
+    }
+
+    @UiThread
+    private void updateCompanyPeopleInvolvedCount(int count) {
+        mBinding.tvCompanyPeopleInvolvedCount.setText(String.valueOf(count));
     }
 
     @UiThread

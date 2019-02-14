@@ -582,7 +582,7 @@
                                 android:layout_height="36dp"
                                 android:layout_margin="10dp"
                                 android:src="@drawable/ic_edit_black_24dp"
-                                android:tint="@color/selected_filter" />
+                                android:tint="@color/colorPrimary" />
 
                             <FrameLayout
                                 android:layout_width="match_parent"
@@ -644,7 +644,7 @@
                                 android:layout_height="36dp"
                                 android:layout_margin="10dp"
                                 android:src="@drawable/ic_view_list_black_24dp"
-                                android:tint="@color/selected_filter" />
+                                android:tint="@color/colorPrimary" />
 
                             <FrameLayout
                                 android:layout_width="match_parent"
@@ -763,7 +763,7 @@
                                 android:layout_height="36dp"
                                 android:layout_margin="10dp"
                                 android:src="@drawable/ic_access_time_black_24dp"
-                                android:tint="@color/selected_filter" />
+                                android:tint="@color/colorPrimary" />
 
                             <FrameLayout
                                 android:layout_width="match_parent"
@@ -819,7 +819,7 @@
                                 android:layout_height="36dp"
                                 android:layout_margin="10dp"
                                 android:src="@drawable/ic_autorenew_black_24dp"
-                                android:tint="@color/selected_filter" />
+                                android:tint="@color/colorPrimary" />
 
                             <FrameLayout
                                 android:layout_width="match_parent"
@@ -848,6 +848,71 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textColor="@color/colorPrimaryDark"
+                                android:textSize="30sp"
+                                android:textStyle="bold"
+                                tools:text="00" />
+
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="155dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:clipToPadding="false"
+                    android:orientation="horizontal">
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/btn_company_people_involved"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_margin="3dp"
+                        android:layout_weight="1"
+                        app:cardCornerRadius="1dp"
+                        app:cardElevation="5dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:layout_margin="10dp"
+                                android:src="@drawable/ic_group_black_24dp"
+                                android:tint="@color/colorPrimary" />
+
+                            <FrameLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <View
+                                    android:layout_width="match_parent"
+                                    android:layout_height="1dp"
+                                    android:layout_gravity="center"
+                                    android:background="@color/transparent" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:background="@drawable/tv_round_bg"
+                                    android:padding="5dp"
+                                    android:text="@string/people_involved_title"
+                                    android:textColor="@color/black"
+                                    android:textStyle="bold" />
+
+                            </FrameLayout>
+
+                            <TextView
+                                android:id="@+id/tv_company_people_involved_count"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/colorPrimary"
                                 android:textSize="30sp"
                                 android:textStyle="bold"
                                 tools:text="00" />

@@ -117,6 +117,7 @@
     <string name="origin">Origen</string>
     <string name="axe">Axe</string>
     <string name="people_involved">PERSONAS INVOLUCRADAS</string>
+    <string name="people_involved_title">Personas Involucradas</string>
     <string name="approval_history">HISTORIAL DE APROBACIONES DE WORKFLOW</string>
     <string name="approved">Aprobado</string>
     <string name="template">TEMPLATE:</string>
@@ -163,7 +164,7 @@
     <string name="pending_approval">Pendiente por Aprobación</string>
     <string name="pending">Pendiente</string>
     <string name="updated">Actualizar</string>
-    <string name="out_of_time">Fuera de tiempo</string>
+    <string name="out_of_time">Fuera de Tiempo</string>
     <string name="open">Abierto</string>
     <string name="closed">Cerrado</string>
     <string name="show_more">Mostrar Mas</string>

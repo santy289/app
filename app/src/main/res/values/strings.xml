@@ -116,6 +116,7 @@
     <string name="origin">Origin</string>
     <string name="axe">Axe</string>
     <string name="people_involved">PEOPLE INVOLVED</string>
+    <string name="people_involved_title">People Involved</string>
     <string name="approval_history">WORKFLOW APPROVAL HISTORY</string>
     <string name="approved">Approved</string>
     <string name="template">TEMPLATE:</string>
@@ -162,7 +163,7 @@
     <string name="pending_approval">Pending for Approval</string>
     <string name="pending">Pending</string>
     <string name="updated">Updated</string>
-    <string name="out_of_time">Out of time</string>
+    <string name="out_of_time">Out of Time</string>
     <string name="open">Open</string>
     <string name="closed">Closed</string>
     <string name="show_more">Show More</string>

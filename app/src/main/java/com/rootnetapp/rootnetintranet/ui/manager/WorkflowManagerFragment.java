@@ -678,6 +678,8 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
      */
     @UiThread
     private void hideWorkflowList(boolean hide) {
+        hideMoreButton(hide);
+
         if (hide) {
             mBinding.recPendingworkflows.setVisibility(View.GONE);
             mBinding.lytNoworkflows.setVisibility(View.VISIBLE);

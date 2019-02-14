@@ -1,5 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.manager;
 
+import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 
 import dagger.Module;
@@ -13,8 +14,8 @@ import dagger.Provides;
 public class WorkflowManagerModule {
 
     @Provides
-    WorkflowManagerRepository provideWorkflowManagerRepository(ApiInterface service) {
-        return new WorkflowManagerRepository(service);
+    WorkflowManagerRepository provideWorkflowManagerRepository(ApiInterface service, AppDatabase database) {
+        return new WorkflowManagerRepository(service, database);
     }
 
     @Provides

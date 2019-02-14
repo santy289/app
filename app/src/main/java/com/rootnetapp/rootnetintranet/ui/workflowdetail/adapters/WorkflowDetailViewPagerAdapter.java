@@ -10,7 +10,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.Approval
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.BaseInformationFragment;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved.PeopleInvolvedFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved.BasePeopleInvolvedFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusFragment;
 
 import androidx.fragment.app.Fragment;
@@ -52,7 +52,7 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
             case 1:
                 return BaseInformationFragment.newInstance(mWorkflowItem);
             case 2:
-                return PeopleInvolvedFragment.newInstance(mWorkflowItem);
+                return BasePeopleInvolvedFragment.newInstance(mWorkflowItem);
             case 3:
                 return ApprovalHistoryFragment.newInstance(mWorkflowItem);
             case 4:

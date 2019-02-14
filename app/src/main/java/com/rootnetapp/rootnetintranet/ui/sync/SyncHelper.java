@@ -3,9 +3,13 @@ package com.rootnetapp.rootnetintranet.ui.sync;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import android.database.sqlite.SQLiteConstraintException;
+import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.BuildConfig;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDB;
@@ -19,6 +23,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbD
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountryDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
+import com.rootnetapp.rootnetintranet.models.responses.websocket.WebSocketSettingResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
@@ -30,6 +35,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -46,7 +52,8 @@ public class SyncHelper {
     private MutableLiveData<Boolean> attemptTokenRefresh;
     private MutableLiveData<Boolean> goToDomain;
     private MutableLiveData<String> saveToPreference;
-    protected MutableLiveData<Integer> saveIdToPreference;
+    MutableLiveData<String[]> saveStringToPreference;
+    MutableLiveData<Integer> saveIdToPreference;
 
     private ApiInterface apiInterface;
     private AppDatabase database;
@@ -58,8 +65,10 @@ public class SyncHelper {
     private int queriesDoneSoFar = 0;
     private String auth;
 
+    public final static int INDEX_KEY_STRING = 0;
+    public final static int INDEX_KEY_VALUE = 1;
     private final static String TAG = "SyncHelper";
-    protected static final int MAX_ENDPOINT_CALLS = 4; // TODO put this back to 2 when done testing.
+    protected static final int MAX_ENDPOINT_CALLS = 5;
 
     public SyncHelper(ApiInterface apiInterface, AppDatabase database) {
         this.apiInterface = apiInterface;
@@ -68,10 +77,13 @@ public class SyncHelper {
         this.workflowDbs = new ArrayList<>();
         this.profiles = new ArrayList<>();
         this.saveIdToPreference = new MutableLiveData<>();
+        this.saveStringToPreference = new MutableLiveData<>();
     }
 
     protected void syncData(String token) {
         this.auth = token;
+
+        getWsSettings(token);
         getUser(token);
         getAllWorkflows(token, 1);
         getWorkflowTypesDb(token);
@@ -79,6 +91,12 @@ public class SyncHelper {
         //getProfiles(token);
     }
 
+    /**
+     * It switches Retrofit domain request to BuildConfig.BASE_URL once it is done getting country
+     * data it switches Retrofit domain request back to Utils.domain.
+     *
+     * @param token
+     */
     private void getCountryData(String token) {
         String base = BuildConfig.BASE_URL + "v1/";
         RetrofitUrlManager.getInstance().putDomain("api", base);
@@ -93,6 +111,53 @@ public class SyncHelper {
                 });
 
         disposables.add(disposable);
+    }
+
+    /**
+     * RxJava implementation to change 2 network requests for obtaining webSocket settings such as
+     * port number and protocol type. Finally it saves to SharedPreferences all these settings.
+     *
+     * @param token
+     *  Token network request.
+     */
+    private void getWsSettings(String token) {
+        Disposable disposable = apiInterface
+                .getWsPort(token)
+                .doOnNext(response -> saveWebsocketSettingsToPreference(response, PreferenceKeys.PREF_PORT))
+                .flatMap(response -> apiInterface.getWsProtocol(token))
+                .doOnNext(response -> saveWebsocketSettingsToPreference(response, PreferenceKeys.PREF_PROTOCOL))
+//                .retryWhen(observable -> Observable.timer(3, TimeUnit.SECONDS))
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(response -> {
+                    success(true);
+                }, throwable -> {
+                    Log.d(TAG, "getWsSettings: " + throwable.getMessage());
+                    if (throwable instanceof UnknownHostException) {
+                        Log.d(TAG, "getWsSettings: network is down probably");
+                    }
+                    failure(throwable);
+                });
+
+        disposables.add(disposable);
+    }
+
+    /**
+     * Validates if response has a correct status "success". Saves response values to SharedPreferences.
+     *
+     * @param response
+     *  Incoming response with values.
+     * @param preferenceKey
+     *  Expecting static variables from class PreferenceKeys.
+     */
+    private void saveWebsocketSettingsToPreference(WebSocketSettingResponse response, String preferenceKey) {
+        String status = response.getStatus();
+        if (TextUtils.isEmpty(status) || !status.equals("success")) {
+            return;
+        }
+        String portNumber = response.getData().getValue();
+        String[] value = new String[]{preferenceKey, portNumber};
+        saveStringToPreference.postValue(value);
     }
 
     private void saveCountriesToDatabase(CountryDbResponse response) {
@@ -229,6 +294,10 @@ public class SyncHelper {
     }
 
     private void worflowDbDaoTransactionsFailure(Throwable throwable) {
+        if (throwable instanceof SQLiteConstraintException) {
+            // TODO log and flag this using some analytics tool and send to server.
+            Log.d(TAG, "SQL Error: " + throwable.getMessage());
+        }
         mSyncLiveData.setValue(false);
     }
 
@@ -324,7 +393,8 @@ public class SyncHelper {
             return true;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::success, this::userfailure);
+                .subscribe(this::success,
+                        this::userfailure);
         disposables.add(disposable);
     }
 
@@ -337,20 +407,20 @@ public class SyncHelper {
     }
 
     private void onWorkflowTypesSuccess(WorkflowTypesResponse response) {
-        Disposable disposable = Observable.fromCallable(() -> {
-            List<WorkflowType> workflowTypes = response.getList();
-            if (workflowTypes == null) {
-                return false;
-            }
-//            database.workflowDao().
-//            database.workflowDao().insertWorkflow(workflowTypes);
-            return true;
-        }).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe( success -> {
-
-                }, this::failure);
-        disposables.add(disposable);
+//        Disposable disposable = Observable.fromCallable(() -> {
+//            List<WorkflowType> workflowTypes = response.getList();
+//            if (workflowTypes == null) {
+//                return false;
+//            }
+////            database.workflowDao().
+////            database.workflowDao().insertWorkflow(workflowTypes);
+//            return true;
+//        }).subscribeOn(Schedulers.newThread())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe( success -> {
+//
+//                }, this::failure);
+//        disposables.add(disposable);
     }
 
     @Deprecated
@@ -365,7 +435,8 @@ public class SyncHelper {
                 return true;
             }).subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::success, this::failure);
+                    .subscribe(this::success,
+                            this::failure);
             disposables.add(disposable);
 //        }
     }

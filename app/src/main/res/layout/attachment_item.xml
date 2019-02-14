@@ -13,9 +13,4 @@
         android:checkable="false"
         app:chipIcon="@drawable/ic_attachment_black_24dp"
         tools:text="file.pdf" />
-
-    <!-- app:chipBackgroundColor="@color/colorPrimary"
-        app:chipIconTint="@color/white"
-        app:closeIconTint="@color/white"-->
-
 </layout>

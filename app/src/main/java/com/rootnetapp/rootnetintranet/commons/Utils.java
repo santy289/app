@@ -21,14 +21,12 @@ import org.threeten.bp.ZonedDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -49,6 +47,17 @@ public class Utils {
 
     public static final String SERVER_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
     public static final String STANDARD_DATE_DISPLAY_FORMAT = "MMMM dd, yyyy";
+
+    public static final String[] ALLOWED_MIME_TYPES = {
+            "text/*",
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/vnd.ms-excel",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/mspowerpoint",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    };
 
     public static String getImgDomain() {
         return imgDomain;
@@ -74,6 +83,7 @@ public class Utils {
             progress = new ProgressDialog(ctx);
         } else {
             if (progress.getContext() != ctx) {
+                progress.dismiss();
                 progress = new ProgressDialog(ctx);
             }
         }
@@ -155,13 +165,36 @@ public class Utils {
                 .withZoneSameInstant(getZoneId());
     }
 
-    public static byte[] fileToByte(File file) throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(bos);
-        oos.writeObject(file);
-        bos.close();
-        oos.close();
-        return bos.toByteArray();
+    /**
+     * Converts a file formed from an URI into an array of bytes.
+     *
+     * @param contentResolver context ContentResolver, this is used to open the correct file.
+     * @param uri             file URI.
+     *
+     * @return array of bytes that represents the file.
+     *
+     * @throws IOException thrown if any reading/writing operation fails.
+     */
+    public static byte[] fileToByte(ContentResolver contentResolver, Uri uri) throws IOException {
+        try (InputStream in = contentResolver.openInputStream(uri)) {
+
+            int size = in.available();
+
+            byte bytes[] = new byte[size];
+            byte tmpBuff[] = new byte[size];
+
+            int read = in.read(bytes, 0, size);
+            if (read < size) {
+                int remain = size - read;
+                while (remain > 0) {
+                    read = in.read(tmpBuff, 0, remain);
+                    System.arraycopy(tmpBuff, 0, bytes, size - remain, read);
+                    remain -= read;
+                }
+            }
+
+            return bytes;
+        }
     }
 
     public static String getMimeType(Uri uri, Context appCtx) {
@@ -413,8 +446,8 @@ public class Utils {
     /**
      * Formats the given date String to the specified format.
      *
-     * @param strDate date in String to format.
-     * @param inputFormat the format that the date is in.
+     * @param strDate      date in String to format.
+     * @param inputFormat  the format that the date is in.
      * @param outputFormat the output format for the given date.
      *
      * @return formatted date.

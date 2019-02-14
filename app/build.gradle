@@ -5,10 +5,10 @@ android {
     buildToolsVersion "28.0.3"
     defaultConfig {
         applicationId "com.rootnetapp.rootnetintranet"
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion 28
-        versionCode 5
-        versionName "1.0"
+        versionCode 14
+        versionName "1.0.1"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -41,25 +41,25 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.annotation:annotation:1.0.0'
+    implementation 'androidx.annotation:annotation:1.0.1'
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'com.google.android.material:material:1.1.0-alpha01'
+    implementation 'com.google.android.material:material:1.1.0-alpha02'
 
     //android arch components
-    implementation 'androidx.lifecycle:lifecycle-runtime:2.0.0'
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
+    implementation "androidx.lifecycle:lifecycle-runtime:$rootProject.archLifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-extensions:$rootProject.archLifecycleVersion"
     implementation "android.arch.work:work-runtime:$rootProject.workManager"
-    implementation 'androidx.lifecycle:lifecycle-common-java8:2.0.0'
-    implementation "androidx.paging:paging-runtime:2.1.0-beta01"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$rootProject.archLifecycleVersion"
+    implementation "androidx.paging:paging-runtime:2.1.0-rc01"
 
     //room
-    implementation 'androidx.room:room-runtime:2.1.0-alpha02'
-    annotationProcessor 'androidx.room:room-compiler:2.1.0-alpha02'
-    implementation 'androidx.room:room-rxjava2:2.1.0-alpha02'
+    implementation "androidx.room:room-runtime:$rootProject.roomVersion"
+    annotationProcessor "androidx.room:room-compiler:$rootProject.roomVersion"
+    implementation "androidx.room:room-rxjava2:$rootProject.roomVersion"
 
     //google
     annotationProcessor "com.google.dagger:dagger-compiler:$rootProject.daggerLibraryVersion"
@@ -85,14 +85,15 @@ dependencies {
     implementation "com.obsez.android.lib.filechooser:filechooser:$rootProject.fileChooser"
 
     implementation 'com.jakewharton.threetenabp:threetenabp:1.1.1'
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.0' //debug API calls
+    //debug API calls
+    implementation "com.squareup.okhttp3:logging-interceptor:$rootProject.okhttp"
     implementation 'com.wdullaer:materialdatetimepicker:4.1.0'
 
     //Test
-    androidTestImplementation 'androidx.test:runner:1.1.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
+    androidTestImplementation 'androidx.test:runner:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
     testImplementation "junit:junit:$rootProject.jUnit"
     implementation 'com.auth0.android:jwtdecode:1.1.1'
     implementation "de.hdodenhof:circleimageview:$rootProject.circleImageViewVersion"
-
+    implementation project(':autobahn')
 }

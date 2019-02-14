@@ -1,9 +1,11 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.comments;
 
+import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -34,6 +36,7 @@ import javax.inject.Inject;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
@@ -119,7 +122,8 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
         commentsViewModel.getObservableNewCommentFile()
                 .observe(this, this::addNewAttachment);
         commentsViewModel.getObservableClearAttachments().observe(this, this::clearAttachmentsList);
-        commentsViewModel.getObservableOpenDownloadedAttachment().observe(this, this::openDownloadedFile);
+        commentsViewModel.getObservableOpenDownloadedAttachment()
+                .observe(this, this::openDownloadedFile);
 
         commentsViewModel.showLoading.observe(this, this::showLoading);
     }
@@ -240,6 +244,10 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
 
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
+
+        //specify multiple MIME types
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, Utils.ALLOWED_MIME_TYPES);
+
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         try {
             startActivityForResult(Intent.createChooser(
@@ -299,10 +307,48 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
         commentsViewModel.removeCommentAttachment(commentFile);
     }
 
+    /**
+     * Sends a request to the ViewModel to retrieve the specified file in order to be opened by the
+     * device. Should check WRITE/READ external storage permissions before requesting.
+     *
+     * @param commentFileResponse file object.
+     */
     @Override
     public void downloadCommentAttachment(CommentFileResponse commentFileResponse) {
-        //todo permissions
-        commentsViewModel.downloadAttachment(commentFileResponse);
+        if (checkExternalStoragePermissions()) {
+            commentsViewModel.downloadAttachment(commentFileResponse);
+        } else {
+            commentsViewModel.setQueuedFile(commentFileResponse);
+        }
+    }
+
+    /**
+     * Verify whether the user has granted permissions to read/write the external storage.
+     *
+     * @return whether the permissions are granted.
+     */
+    private boolean checkExternalStoragePermissions() {
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                            Manifest.permission.READ_EXTERNAL_STORAGE},
+                    CommentsViewModel.REQUEST_EXTERNAL_STORAGE_PERMISSIONS);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        commentsViewModel.handleRequestPermissionsResult(requestCode, grantResults);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     /**

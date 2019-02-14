@@ -3,6 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.main;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import androidx.annotation.IdRes;
@@ -19,6 +20,7 @@ import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
+import com.rootnetapp.rootnetintranet.services.websocket.RestartWebsocketReceiver;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
@@ -50,6 +52,8 @@ public class MainActivityViewModel extends ViewModel {
     private MutableLiveData<Boolean> attemptTokenRefresh;
     private MutableLiveData<String> saveToPreference;
     private MutableLiveData<Boolean> goToDomain;
+    private MutableLiveData<Boolean> startService;
+    private MutableLiveData<Boolean> stopService;
     protected MutableLiveData<Integer> setSearchMenuLayout;
     protected MutableLiveData<Integer> setUploadMenuLayout;
     protected MutableLiveData<List<WorkflowTypeMenu>> setRightDrawerFilterList;
@@ -112,7 +116,11 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     protected void initMainViewModel(SharedPreferences sharedPreferences) {
-        String json = sharedPreferences.getString("domain", "");
+        if (!RestartWebsocketReceiver.getRunningIndicator()) {
+            startService.setValue(true);
+        }
+
+        String json = sharedPreferences.getString(PreferenceKeys.PREF_DOMAIN, "");
         if (json.isEmpty()) {
             Log.d("test", "onCreate: ALGO PASO");//todo mejorar esta validacion
             return;
@@ -137,9 +145,9 @@ public class MainActivityViewModel extends ViewModel {
             Log.d(TAG, "initMainViewModel: error: " + e.getMessage());
         }
 
-        String token = sharedPreferences.getString(PreferenceKeys.PREFERENCE_TOKEN, "");
+        String token = sharedPreferences.getString(PreferenceKeys.PREF_TOKEN, "");
         JWT jwt = new JWT(token);
-        int id = Integer.parseInt(jwt.getClaim(PreferenceKeys.PREFERENCE_PROFILE_ID).asString());
+        int id = Integer.parseInt(jwt.getClaim(PreferenceKeys.PREF_PROFILE_ID).asString());
         getUser(id);
     }
 
@@ -338,31 +346,45 @@ public class MainActivityViewModel extends ViewModel {
         return hideKeyboard;
     }
 
-    protected LiveData<Workflow> getObservableGoToWorkflowDetail() {
+    LiveData<Workflow> getObservableGoToWorkflowDetail() {
         if (goToWorkflowDetail == null) {
             goToWorkflowDetail = new MutableLiveData<>();
         }
         return goToWorkflowDetail;
     }
 
-    public LiveData<String> getObservableSaveToPreference() {
+    LiveData<String> getObservableSaveToPreference() {
         if (saveToPreference == null) {
             saveToPreference = new MutableLiveData<>();
         }
         return saveToPreference;
     }
 
-    public LiveData<Boolean> getObservableAttemptTokenRefresh() {
+    LiveData<Boolean> getObservableAttemptTokenRefresh() {
         if (attemptTokenRefresh == null) {
             attemptTokenRefresh = new MutableLiveData<>();
         }
         return attemptTokenRefresh;
     }
 
-    public LiveData<Boolean> getObservableGoToDomain() {
+    LiveData<Boolean> getObservableGoToDomain() {
         if (goToDomain == null) {
             goToDomain = new MutableLiveData<>();
         }
         return goToDomain;
+    }
+
+    LiveData<Boolean> getObservableStartService() {
+        if (startService == null) {
+            startService = new MutableLiveData<>();
+        }
+        return startService;
+    }
+
+    LiveData<Boolean> getObservableStopService() {
+        if (stopService == null) {
+            stopService = new MutableLiveData<>();
+        }
+        return stopService;
     }
 }

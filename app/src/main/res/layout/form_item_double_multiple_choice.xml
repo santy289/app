@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/form_items_space"
+        android:layout_marginBottom="@dimen/form_items_space"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingBottom="5dp"
+            android:textAllCaps="true"
+            android:textColor="@color/colorPrimaryDark"
+            app:layout_constraintEnd_toStartOf="@+id/tv_required"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="placeholder title" />
+
+        <TextView
+            android:id="@+id/tv_required"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/asterisk"
+            android:textAllCaps="true"
+            android:textColor="@color/red"
+            android:textSize="18sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/tv_title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tv_title"
+            tools:visibility="visible" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_selected_items"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:paddingStart="0dp"
+            android:paddingEnd="5dp"
+            android:paddingBottom="5dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tv_title"
+            app:layout_constraintTop_toBottomOf="@id/tv_title" />
+
+        <View
+            android:id="@+id/view_first_spinner_background"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/spinner_bg"
+            app:layout_constraintBottom_toBottomOf="@+id/sp_first_input"
+            app:layout_constraintEnd_toEndOf="@+id/sp_first_input"
+            app:layout_constraintStart_toStartOf="@+id/sp_first_input"
+            app:layout_constraintTop_toTopOf="@+id/sp_first_input" />
+
+        <Spinner
+            android:id="@+id/sp_first_input"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:spinnerMode="dialog"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_add"
+            app:layout_constraintEnd_toStartOf="@+id/sp_second_input"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/btn_add" />
+
+        <View
+            android:id="@+id/view_second_spinner_background"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/spinner_bg"
+            app:layout_constraintBottom_toBottomOf="@+id/sp_second_input"
+            app:layout_constraintEnd_toEndOf="@+id/sp_second_input"
+            app:layout_constraintStart_toStartOf="@+id/sp_second_input"
+            app:layout_constraintTop_toTopOf="@+id/sp_second_input" />
+
+        <Spinner
+            android:id="@+id/sp_second_input"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:spinnerMode="dialog"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_add"
+            app:layout_constraintEnd_toStartOf="@+id/btn_add"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintStart_toEndOf="@id/sp_first_input"
+            app:layout_constraintTop_toTopOf="@+id/btn_add" />
+
+        <Button
+            android:id="@+id/btn_add"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+            android:layout_width="35dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            app:backgroundTint="@color/white"
+            app:icon="@drawable/ic_add_black_24dp"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="24dp"
+            app:iconTint="@color/green"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintStart_toEndOf="@id/sp_second_input"
+            app:layout_constraintTop_toBottomOf="@id/rv_selected_items"
+            app:rippleColor="@color/dark_gray" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

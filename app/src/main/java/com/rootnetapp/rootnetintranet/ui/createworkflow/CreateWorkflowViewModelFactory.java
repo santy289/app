@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 
 public class CreateWorkflowViewModelFactory implements ViewModelProvider.Factory {
 
-    private CreateWorkflowRepository createWorkflowRepository;
+    private final CreateWorkflowRepository createWorkflowRepository;
 
     public CreateWorkflowViewModelFactory(CreateWorkflowRepository createWorkflowRepository) {
         this.createWorkflowRepository = createWorkflowRepository;

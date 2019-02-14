@@ -1,12 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist.repo;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.paging.DataSource;
-import androidx.paging.LivePagedListBuilder;
-import androidx.paging.PagedList;
-import androidx.sqlite.db.SimpleSQLiteQuery;
-import androidx.sqlite.db.SupportSQLiteQuery;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -26,6 +19,13 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsRespon
 import java.util.List;
 import java.util.Map;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.paging.DataSource;
+import androidx.paging.LivePagedListBuilder;
+import androidx.paging.PagedList;
+import androidx.sqlite.db.SimpleSQLiteQuery;
+import androidx.sqlite.db.SupportSQLiteQuery;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -33,10 +33,12 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowListBoundaryCallback.*;
+
 public class WorkflowRepository implements IncomingWorkflowsCallback {
 
-    public static int ENDPOINT_PAGE_SIZE = 20;
-    private static int LIST_PAGE_SIZE = 20;
+    public static int ENDPOINT_PAGE_SIZE = 30;
+    private static int LIST_PAGE_SIZE = 30;
     public final static String WORKFLOWID = "workflowdb.id";
     public final static String WORKFLOW_CREATED = "workflowdb.created_at";
     public final static String WORKFLOW_UPDATED = "workflowdb.updated_at";
@@ -53,6 +55,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     private MutableLiveData<Boolean> handleRepoError;
     private MutableLiveData<Boolean> handleRepoSuccess;
     private MutableLiveData<Boolean> handleRepoSuccessNoFilters;
+    private MutableLiveData<Boolean> handleRestSuccessWithNoApplyFilter;
     public MutableLiveData<Boolean> showLoadMore;
     private WorkflowListBoundaryCallback callback;
     private PagedList.Config pagedListConfig;
@@ -80,7 +83,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 "workflowtypedb.name AS workflowTypeName, workflowdb.title, workflowdb.workflow_type_key, " +
                 "workflowdb.full_name, workflowdb.current_status_name, workflowdb.created_at, workflowdb.updated_at, " +
                 "workflowdb.start, workflowdb.status, workflowdb.current_status, workflowdb.`end` " +
-                "FROM workflowtypedb INNER JOIN workflowdb " +
+                "FROM workflowdb LEFT JOIN workflowtypedb " +
                 "ON workflowdb.workflow_type_id = workflowtypedb.id ";
     }
 
@@ -149,6 +152,14 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 .build();
     }
 
+    /**
+     * Method uses a raw query for querying workflows by status or by a search term on the title.
+     *
+     * @param status
+     * @param token
+     * @param id
+     * @param searchText
+     */
     public void rawQueryWorkflowListByFilters(boolean status, String token, String id, String searchText) {
         Object[] objects;
         String queryString;
@@ -168,41 +179,62 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         startRawQuery(queryString, token, objects, id);
     }
 
-    public void rawQueryWorkflowListByFilters(boolean status, int workflowTypeId, String token, String id, String searchText) {
+    /**
+     * Method uses a raw query for querying workflows by original workflow type id, by status
+     * or by a search term on the title.
+     * @param status
+     * @param originalTypeId
+     * @param token
+     * @param id
+     * @param searchText
+     */
+    public void rawQueryWorkflowListByFilters(boolean status, int originalTypeId, String token, String id, String searchText) {
         Object[] objects;
         String queryString;
         if (TextUtils.isEmpty(searchText)) {
             queryString = baseWorkflowListQuery +
-                    "WHERE workflowdb.status = ? " +
-                    "AND workflowdb.workflow_type_id = ? " +
+                    "WHERE (workflowtypedb.original_id = ? OR workflowtypedb.id = ?)" +
+                    "AND workflowdb.status = ? " +
                     "ORDER BY workflowdb.created_at DESC";
-            objects = new Object[]{status, workflowTypeId};
+            objects = new Object[]{originalTypeId, originalTypeId, status};
         } else {
             queryString = baseWorkflowListQuery +
-                    "WHERE workflowdb.status = ? " +
-                    "AND workflowdb.workflow_type_id = ? " +
+                    "WHERE (workflowtypedb.original_id = ? OR workflowtypedb.id = ?)" +
+                    "AND workflowdb.status = ? " +
                     "AND workflowdb.title LIKE '%' || ? || '%' " +
                     "ORDER BY workflowdb.created_at DESC";
-            objects = new Object[]{status, workflowTypeId, searchText};
+            objects = new Object[]{originalTypeId, originalTypeId, status, searchText};
         }
-        startRawQuery(queryString, token, objects, id);
+        // TODO pass the workflowTypeId as well we need it later. and modify the other functions too.
+        startRawQuery(queryString, token, objects, id, originalTypeId);
     }
 
-    public void rawQueryWorkflowListByFilters(boolean status, int workflowTypeId, String column, boolean isDescending, String token, String id, String searchText) {
+    /**
+     * Method uses a raw query for querying workflows by original workflow type id, by status
+     * or by a search term on the title. And by specifying a column as descending or ascending orders.
+     * @param status
+     * @param originalTypeId
+     * @param column
+     * @param isDescending
+     * @param token
+     * @param id
+     * @param searchText
+     */
+    public void rawQueryWorkflowListByFilters(boolean status, int originalTypeId, String column, boolean isDescending, String token, String id, String searchText) {
         String queryString;
         Object[] objects;
 
         if (TextUtils.isEmpty(searchText)) {
             queryString = baseWorkflowListQuery +
-                    "WHERE workflowdb.status = ? " +
-                    "AND workflowdb.workflow_type_id = ? ";
-            objects = new Object[]{status, workflowTypeId};
+                    "WHERE (workflowtypedb.original_id = ? OR workflowtypedb.id = ?)" +
+                    "AND workflowdb.status = ? ";
+            objects = new Object[]{originalTypeId, originalTypeId, status};
         } else {
             queryString = baseWorkflowListQuery +
-                    "WHERE workflowdb.status = ? " +
-                    "AND workflowdb.workflow_type_id = ? " +
+                    "WHERE (workflowtypedb.original_id = ? OR workflowtypedb.id = ?)" +
+                    "AND workflowdb.status = ? " +
                     "AND workflowdb.title LIKE '%' || ? || '%' ";
-            objects = new Object[]{status, workflowTypeId, searchText};
+            objects = new Object[]{originalTypeId, originalTypeId, status, searchText};
         }
         if (isDescending) {
             queryString += "ORDER BY " + column + " DESC";
@@ -213,6 +245,16 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         startRawQuery(queryString, token, objects, id);
     }
 
+    /**
+     * Method uses a raw query for querying workflows by status
+     * or by a search term on the title. And by specifying a column as descending or ascending orders.
+     * @param status
+     * @param column
+     * @param isDescending
+     * @param token
+     * @param id
+     * @param searchText
+     */
     public void rawQueryWorkflowListByFilters(boolean status, String column, boolean isDescending, String token, String id, String searchText) {
         String queryString;
         Object[] objects;
@@ -237,12 +279,48 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
 
     private void startRawQuery(String queryString, String token, Object[] objects, String id) {
         SimpleSQLiteQuery sqlQuery = new SimpleSQLiteQuery(queryString, objects);
-        getWorkflowsByFilters(token, sqlQuery, id);
+        getWorkflowsByFilters(token, sqlQuery, id, NO_WORKFLOW_TYPE);
+    }
+
+    private void startRawQuery(String queryString, String token, Object[] objects, String id, int workflowTypeId) {
+        SimpleSQLiteQuery sqlQuery = new SimpleSQLiteQuery(queryString, objects);
+        getWorkflowsByFilters(token, sqlQuery, id, workflowTypeId);
     }
 
 
-    private void getWorkflowsByFilters(String token, SupportSQLiteQuery query, String id) {
+    /**
+     * Method generates a DataSource factory for a ListAdapter. Also it verifies that a boundary
+     * callback is not already initiated with some background thread work, if we have something
+     * already running on the boundary callback this method will dispose any background work. It
+     * will also set a Boundary Callback for the appropriate scenario. This could be a workflow
+     * list request without filters or with some kind of filters, such as original workflow  type
+     * @param token
+     * @param query
+     * @param id
+     * @param workflowTypeId
+     */
+    private void getWorkflowsByFilters(String token, SupportSQLiteQuery query, String id, int workflowTypeId) {
         DataSource.Factory<Integer, WorkflowListItem> factory = workflowDbDao.getWorkflowsWithFilter(query);
+
+        if (callback != null) {
+            callback.clearDisposables();
+        }
+
+        if (workflowTypeId != NO_WORKFLOW_TYPE) {
+            callback = new WorkflowListBoundaryCallback(
+                    service,
+                    token,
+                    currentPage,
+                    this,
+                    "",
+                    workflowTypeId
+            );
+
+            allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)
+                    .setBoundaryCallback(callback)
+                    .build();
+            return;
+        }
 
         if (TextUtils.isEmpty(id)) {
             callback = new WorkflowListBoundaryCallback(
@@ -251,15 +329,21 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                     currentPage,
                     this
             );
-        } else {
-            callback = new WorkflowListBoundaryCallback(
-                    service,
-                    token,
-                    currentPage,
-                    this,
-                    id
-            );
+
+            allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)
+                    .setBoundaryCallback(callback)
+                    .build();
+            return;
         }
+
+        callback = new WorkflowListBoundaryCallback(
+                service,
+                token,
+                currentPage,
+                this,
+                id,
+                NO_WORKFLOW_TYPE
+        );
 
         allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)
                 .setBoundaryCallback(callback)
@@ -275,6 +359,10 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         callback.clearDisposables();
     }
 
+    /**
+     * Inserts workflows without deleting any workflows previously created.
+     * @param worflows
+     */
     public void insertWorkflows(List<WorkflowDb> worflows) {
         Disposable disposable = Observable.fromCallable(() -> {
 //            WorkflowDbDao workflowDbDao = database.workflowDbDao();
@@ -307,26 +395,93 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         disposables.add(disposable);
     }
 
-    public void getWorkflowsByType(String token, int typeId) {
+    /**
+     * This method will find workflow types from the network. DeletePreviousData is a boolean that
+     * will handle the response in different ways.
+     * @param token
+     * @param typeId
+     * @param deletePreviousData Boolean to determine if we want to delete before saving our results.
+     */
+    public void getWorkflowsByType(String token, int typeId, boolean deletePreviousData) {
         currentPage = 1;
-        Disposable disposable = service
-                .getWorkflowsByType(
-                        token,
-                        50,
-                        true,
-                        1,
-                        false,
-                        typeId)
-                .subscribeOn(Schedulers.newThread())
+
+        if (deletePreviousData) {
+            Disposable disposable = service
+                    .getWorkflowsByType(
+                            token,
+                            50,
+                            true,
+                            1,
+                            false,
+                            typeId)
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::workflowDbSuccessNoFilter, throwable -> {
+                        Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
+                        handleRepoError.postValue(true);
+                    });
+            disposables.add(disposable);
+        } else {
+            Disposable disposable = service
+                    .getWorkflowsByType(
+                            token,
+                            50,
+                            true,
+                            1,
+                            false,
+                            typeId)
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::workflowDbSuccessWithoutDeletingData, throwable -> {
+                        Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
+                        handleRepoError.postValue(true);
+                    });
+            disposables.add(disposable);
+        }
+    }
+
+    private void workflowDbSuccessNoFilter(WorkflowResponseDb workflowsResponse) {
+        Disposable disposable = Observable.fromCallable(() -> {
+//            WorkflowDbDao workflowDbDao = database.workflowDbDao();
+            workflowDbDao.deleteAllWorkflows();
+            workflowDbDao.insertWorkflows(workflowsResponse.getList());
+            return true;
+        }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::workflowDbSuccessNoFilter, throwable -> {
-                    Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
+                .subscribe(success -> {
+                    Log.d(TAG, "workflowDbSuccess: ");
+                    handleRepoSuccessNoFilters.postValue(true);
+                }, throwable -> {
+                    Log.d(TAG, "getWorkflowDbSuccess: error " + throwable.getMessage());
+                    handleRepoError.postValue(true);
+                });
+
+        disposables.add(disposable);
+    }
+
+    /**
+     * This method will receive a response from the network, and insert the incoming workflows
+     * without deleting any previous workflows. Any content duplicates will be replaced with the
+     * new incoming workflow. This method will eventually call a live data that will handle the
+     * success response back to the view model.
+     * @param workflowsResponse
+     */
+    private void workflowDbSuccessWithoutDeletingData(WorkflowResponseDb workflowsResponse) {
+        Disposable disposable = Observable.fromCallable(() -> {
+            workflowDbDao.insertWorkflows(workflowsResponse.getList());
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(success -> {
+                    Log.d(TAG, "workflowDbSuccess: ");
+                    // No apply filters
+                    handleRestSuccessWithNoApplyFilter.postValue(true);
+                    }, throwable -> {
+                    Log.d(TAG, "getWorkflowDbSuccess: error " + throwable.getMessage());
                     handleRepoError.postValue(true);
                 });
         disposables.add(disposable);
     }
-
-
 
     public void getWorkflowsByBaseFilters(String token, Map<String, Object> options) {
         Disposable disposable = service
@@ -395,24 +550,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         disposables.add(disposable);
     }
 
-    private void workflowDbSuccessNoFilter(WorkflowResponseDb workflowsResponse) {
-        Disposable disposable = Observable.fromCallable(() -> {
-//            WorkflowDbDao workflowDbDao = database.workflowDbDao();
-            workflowDbDao.deleteAllWorkflows();
-            workflowDbDao.insertWorkflows(workflowsResponse.getList());
-            return true;
-        }).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(success -> {
-                    Log.d(TAG, "workflowDbSuccess: ");
-                    handleRepoSuccessNoFilters.postValue(true);
-                }, throwable -> {
-                    Log.d(TAG, "getWorkflowDbSuccess: error " + throwable.getMessage());
-                    handleRepoError.postValue(true);
-                });
 
-        disposables.add(disposable);
-    }
 
     public List<FormCreateProfile> getProfiles() {
         return profileDao.getAllProfiles();
@@ -442,6 +580,13 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
             handleRepoSuccessNoFilters = new MutableLiveData<>();
         }
         return handleRepoSuccessNoFilters;
+    }
+
+    public LiveData<Boolean> getObservableHandleRestSuccessWithNoApplyFilter() {
+        if (handleRestSuccessWithNoApplyFilter == null) {
+            handleRestSuccessWithNoApplyFilter = new MutableLiveData<>();
+        }
+        return handleRestSuccessWithNoApplyFilter;
     }
 
 }

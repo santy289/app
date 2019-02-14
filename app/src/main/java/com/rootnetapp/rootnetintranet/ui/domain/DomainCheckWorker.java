@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 
+import androidx.work.Result;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -18,17 +19,23 @@ public class DomainCheckWorker extends Worker {
         super(context, workerParams);
     }
 
-
     @NonNull
     @Override
     public Result doWork() {
-
-        Log.d(TAG, "doWork: IN DOWORK FOR DOMAINCHECKWORKER");
-        Context app = getApplicationContext();
-
-
-        return Result.SUCCESS;
+        return null;
     }
+
+
+//    @NonNull
+//    @Override
+//    public Result doWork() {
+//
+//        Log.d(TAG, "doWork: IN DOWORK FOR DOMAINCHECKWORKER");
+//        Context app = getApplicationContext();
+//
+//
+//        return Result.SUCCESS;
+//    }
 
     public void setApiInterface(ApiInterface apiInterface) {
         this.apiInterface = apiInterface;

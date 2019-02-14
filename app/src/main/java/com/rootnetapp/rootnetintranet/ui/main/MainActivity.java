@@ -1,12 +1,16 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,12 +30,18 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
-import com.rootnetapp.rootnetintranet.services.manager.WorkflowManagerService;
+import com.rootnetapp.rootnetintranet.services.websocket.RestartWebsocketReceiver;
+import com.rootnetapp.rootnetintranet.services.websocket.WebSocketIntentService;
+import com.rootnetapp.rootnetintranet.services.websocket.WebSocketService;
+import com.rootnetapp.rootnetintranet.services.websocket.WebsocketSecureHandler;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragmentInterface;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.main.adapters.SearchAdapter;
 import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerFragment;
@@ -86,7 +96,6 @@ public class MainActivity extends AppCompatActivity
     MainActivityViewModel viewModel;
     private ActivityMainBinding mainBinding;
     private FragmentManager fragmentManager;
-    private SharedPreferences sharedPref;
     private MenuItem mSearch = null;
 
     RightDrawerOptionsAdapter rightDrawerOptionsAdapter;
@@ -100,14 +109,17 @@ public class MainActivity extends AppCompatActivity
         mainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         ((RootnetApp) getApplication()).getAppComponent().inject(this);
         mainBinding.navView.setCheckedItem(R.id.nav_timeline);
+        SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         viewModel = ViewModelProviders
                 .of(this, profileViewModelFactory)
                 .get(MainActivityViewModel.class);
+
+        dozeModeWhitelist();
+
         fragmentManager = getSupportFragmentManager();
         setActionBar();
         subscribe();
         initActionListeners();
-        sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         viewModel.initMainViewModel(sharedPref);
 
         String workflowId = getIntent().getStringExtra("goToWorkflow");
@@ -117,10 +129,76 @@ public class MainActivity extends AppCompatActivity
         }
 
         showFragment(TimelineFragment.newInstance(this), false);
-        startBackgroundWorkflowRequest();
         setFilterBoxListeners();
         setupBottomNavigation();
         setupSpeedDialFab();
+    }
+
+    /**
+     * Used to send some intent with token, protocol, port values to a service.
+     */
+    private void sendBroadcastWebsocket() {
+        SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        String token = sharedPref.getString(PreferenceKeys.PREF_TOKEN, "");
+        String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
+        String port = sharedPref.getString(PreferenceKeys.PREF_PORT, "");
+        Intent broadcastIntent = createIntent(RestartWebsocketReceiver.class, token, port, protocol, Utils.domain);
+        broadcastIntent.setAction("restartservice");
+        sendBroadcast(broadcastIntent);
+    }
+
+    /**
+     * Used to create an intent based on the class name passed on. This will be used to call a
+     * service.
+     *
+     * @param className
+     * @param token
+     * @param port
+     * @param protocol
+     * @param domain
+     * @return
+     */
+    private Intent createIntent(Class<?> className, String token, String port, String protocol, String domain) {
+        Intent intent = new Intent(getApplicationContext(), className);
+        intent.putExtra(WebsocketSecureHandler.KEY_TOKEN, token);
+        intent.putExtra(WebsocketSecureHandler.KEY_PORT, port);
+        intent.putExtra(WebsocketSecureHandler.KEY_PROTOCOL, protocol);
+        intent.putExtra(WebsocketSecureHandler.KEY_DOMAIN, domain);
+        return intent;
+    }
+
+    private void startWebsocketServiceIntent() {
+        SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        String token = sharedPref.getString(PreferenceKeys.PREF_TOKEN, "");
+        String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
+        String port = sharedPref.getString(PreferenceKeys.PREF_PORT, "");
+
+        Intent intent = new Intent(getApplicationContext(), WebSocketIntentService.class);
+        intent.putExtra(WebsocketSecureHandler.KEY_TOKEN, token);
+        intent.putExtra(WebsocketSecureHandler.KEY_PORT, port);
+        intent.putExtra(WebsocketSecureHandler.KEY_PROTOCOL, protocol);
+        intent.putExtra(WebsocketSecureHandler.KEY_DOMAIN, Utils.domain);
+        intent.putExtra(WebsocketSecureHandler.KEY_BACKGROUND, false);
+        startService(intent);
+    }
+
+    private void stopWebsocketService() {
+//        Intent intent = new Intent(getApplicationContext(), WebSocketIntentService.class);
+        Intent intent = new Intent(getApplicationContext(), WebSocketService.class);
+
+        stopService(intent);
+    }
+
+    private boolean isMyServiceRunning() {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningServiceInfo> list = manager
+                .getRunningServices(Integer.MAX_VALUE);
+        for (ActivityManager.RunningServiceInfo service : list) {
+            if (WebSocketService.class.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -184,10 +262,17 @@ public class MainActivity extends AppCompatActivity
             transaction.addToBackStack(tag);
         }
         transaction.commit();
+        hideSoftInputKeyboard();
     }
 
     @Override
     public void onBackPressed() {
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
+        //check if the fragment has priority over the onBackPressed callback
+        if (fragment instanceof CreateWorkflowFragmentInterface && ((CreateWorkflowFragmentInterface) fragment).onBackPressed()) {
+            return;
+        }
+
         DrawerLayout drawer = mainBinding.drawerLayout;
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
@@ -223,6 +308,19 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void showWorkflow(int id) {
         viewModel.getWorkflow(id);
+    }
+
+    private void dozeModeWhitelist() {
+        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        Intent intent = new Intent();
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        if (powerManager.isIgnoringBatteryOptimizations(getPackageName())) {
+            Log.d(TAG, "dozeModeWhitelist: nothing to do");
+        } else {
+            intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+            intent.setData(Uri.parse("package:" + getPackageName()));
+            startActivity(intent);
+        }
     }
 
     protected void setImageIn(String[] content) {
@@ -484,11 +582,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void startBackgroundWorkflowRequest() {
-        Intent MyIntentService = new Intent(this, WorkflowManagerService.class);
-        startService(MyIntentService);
-    }
-
     private void setActionBar() {
         setSupportActionBar(mainBinding.toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -496,6 +589,12 @@ public class MainActivity extends AppCompatActivity
                 this, mainBinding.drawerLayout, mainBinding.toolbar
                 , R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mainBinding.drawerLayout.addDrawerListener(toggle);
+
+        //disable drawer gestures for the right drawer,
+        //in order to prevent the filters drawer to be opened from any activity by the user
+        mainBinding.drawerLayout
+                .setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
+
         toggle.syncState();
     }
 
@@ -516,6 +615,8 @@ public class MainActivity extends AppCompatActivity
                 break;
             }
             case R.id.nav_exit: {
+                SharedPreferences sharedPref = getSharedPreferences("Sessions",
+                        Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putString("username", "").apply();
                 editor.putString("password", "").apply();
@@ -751,6 +852,14 @@ public class MainActivity extends AppCompatActivity
         viewModel.receiveMessageBaseFilterSelected
                 .observe(this, this::handleUpdateBaseFilterSelectionUpdateWith);
         viewModel.openRightDrawer.observe(this, this::openRightDrawer);
+
+
+
+//        viewModel.getObservableStartService().observe(this, result -> startWebsocketServiceIntent());
+
+        viewModel.getObservableStartService().observe(this, result -> sendBroadcastWebsocket());
+
+        viewModel.getObservableStopService().observe(this, result -> stopWebsocketService());
     }
 
     private void subscribeForLogin() {
@@ -763,4 +872,13 @@ public class MainActivity extends AppCompatActivity
         viewModel.getObservableGoToDomain().observe(this, goToDomainObserver);
     }
 
+    private void hideSoftInputKeyboard() {
+        // Check if no view has focus:
+        View view = getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(
+                    Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
 }

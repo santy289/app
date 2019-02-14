@@ -25,7 +25,6 @@ import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesRespon
 import com.rootnetapp.rootnetintranet.models.responses.workflows.presets.Preset;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -235,15 +234,13 @@ public class FilesViewModel extends ViewModel {
 
                         returnCursor.close();
 
-                        File file = new File(uri.toString());
-                        byte[] bytes = Utils.fileToByte(file);
+                        byte[] bytes = Utils.fileToByte(context.getContentResolver(), uri);
+
+                        String encodedFile = Base64.encodeToString(bytes, Base64.DEFAULT);
+                        String fileType = Utils.getMimeType(data.getData(), context);
 
                         mUploadedFileNameLiveData.setValue(fileName);
                         mAttachButtonTextLiveData.setValue(R.string.remove_file);
-
-                        //fixme this actually encodes the file path and not the file content
-                        String encodedFile = Base64.encodeToString(bytes, Base64.DEFAULT);
-                        String fileType = Utils.getMimeType(data.getData(), context);
 
                         mFileRequest = new CommentFile(encodedFile, fileType, fileName, size);
                     } catch (IOException e) {
@@ -263,6 +260,23 @@ public class FilesViewModel extends ViewModel {
 
     protected CommentFile getFileRequest() {
         return mFileRequest;
+    }
+
+    protected boolean isAnyPresetSelected(List<Preset> presetsList) {
+        List<Integer> presets = new ArrayList<>();
+
+        for (Preset preset : presetsList) {
+            if (preset.isSelected()) {
+                presets.add(preset.getId());
+            }
+        }
+
+        if (presets.isEmpty()) {
+            mToastMessageLiveData.setValue(R.string.select_preset);
+            return false;
+        }
+
+        return true;
     }
 
     /**

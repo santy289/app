@@ -3,6 +3,8 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.exportpdf.ExportPdfResponse;
@@ -22,11 +24,13 @@ import io.reactivex.schedulers.Schedulers;
 public class WorkflowDetailRepository {
 
     private final ApiInterface service;
+    private final WorkflowDbDao workflowDbDao;
 
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<WorkflowActivationResponse> activationResponseLiveData;
     private MutableLiveData<Boolean> activationFailedLiveData;
     private MutableLiveData<ExportPdfResponse> exportPdfResponseLiveData;
+    private MutableLiveData<WorkflowListItem> retrieveFromDbWorkflow;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
@@ -34,6 +38,7 @@ public class WorkflowDetailRepository {
 
     public WorkflowDetailRepository(ApiInterface service, AppDatabase database) {
         this.service = service;
+        this.workflowDbDao = database.workflowDbDao();
     }
 
     protected void clearDisposables() {
@@ -75,6 +80,34 @@ public class WorkflowDetailRepository {
                     showLoading.setValue(false);
                     activationFailedLiveData.setValue(true);
                 });
+        disposables.add(disposable);
+    }
+
+    /**
+     * This method attempts to first find the workflow type id from the database, then it looks for
+     * data coming from the WorkflowDb and WorkflowTypeDb tables to create a WorkflowListItem
+     * object that is used by WorkflowDetailActivity's UI.
+     *
+     * @param token         Access token.
+     * @param workflowId    Workflow Id to use for querying data.
+     */
+    protected void getWorkflowFromDataSources(String token, int workflowId) {
+        Disposable disposable = workflowDbDao
+                .loadWorkflowTypeId(workflowId)
+                .flatMap(workflowTypeId -> workflowDbDao.getWorkflowDbBy(workflowId, workflowTypeId.getId()))
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(workflowListItem -> {
+                    if (workflowListItem == null) {
+                        // TODO go to network
+                        Log.d(TAG, "getWorkflowFromDataSources: ");
+                    } else {
+                        retrieveFromDbWorkflow.setValue(workflowListItem);
+                    }
+                }, throwable -> {
+                    Log.d(TAG, "Error: " + throwable.getMessage());
+                });
+
         disposables.add(disposable);
     }
 
@@ -124,6 +157,13 @@ public class WorkflowDetailRepository {
             showLoading = new MutableLiveData<>();
         }
         return showLoading;
+    }
+
+    protected LiveData<WorkflowListItem> getObservableRetreiveFromDbWorkflow() {
+        if (retrieveFromDbWorkflow == null) {
+            retrieveFromDbWorkflow = new MutableLiveData<>();
+        }
+        return retrieveFromDbWorkflow;
     }
 
 }

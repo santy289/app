@@ -10,6 +10,34 @@
         android:background="@drawable/border_workflow_detail"
         android:padding="10dp">
 
+        <Button
+            android:id="@+id/btn_edit"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+            android:layout_width="35dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            app:backgroundTint="@color/white"
+            app:icon="@drawable/ic_edit_black_24dp"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="24dp"
+            app:iconTint="@color/colorPrimary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:rippleColor="@color/dark_gray" />
+
+        <View
+            android:id="@+id/view_information"
+            android:layout_width="0dp"
+            android:layout_height="2dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@color/workflow_details_section_title_bar"
+            app:layout_constraintBottom_toBottomOf="@id/btn_edit"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btn_edit"
+            app:layout_constraintTop_toTopOf="@id/btn_edit" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_all_people_involved"
             android:layout_width="0dp"
@@ -19,7 +47,7 @@
             android:layout_marginEnd="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/btn_edit" />
 
         <TextView
             android:id="@+id/no_people_involved"
@@ -35,7 +63,7 @@
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_edit"
             tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

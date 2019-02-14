@@ -6,7 +6,6 @@ import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 
-import androidx.work.Result;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 

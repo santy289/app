@@ -255,7 +255,9 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         final Observer<Boolean> addWorkflowsObserver = (setWorkflows -> addWorkflowsObserver());
 
         // Used when we have some filter operation happening.
-        final Observer<PagedList<WorkflowListItem>> updateWithSortedListObserver = (this::updateAdapterList);
+        final Observer<PagedList<WorkflowListItem>> updateWithSortedListObserver = (list -> {
+            updateAdapterList(list);
+        });
 
         final Observer<int[]> toggleRadioButtonObserver = (toggle -> {
             if (toggle == null || toggle.length < 1) {
@@ -310,7 +312,9 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.getObservableToggleRadioButton().observe(this, toggleRadioButtonObserver);
         workflowViewModel.getObservableToggleSwitch().observe(this, toggleSwitchObserver);
         workflowViewModel.getObservableShowList().observe(this, showListObserver);
-        workflowViewModel.getObservableAddWorkflowObserver().observe(this, addWorkflowsObserver);
+        workflowViewModel.getObservableAddWorkflowObserver().observe(this, aBoolean -> {
+            addWorkflowsObserver();
+        });
         workflowViewModel.getObservableSetAllCheckboxesList()
                 .observe(this, setAllCeckboxesObserver);
         workflowViewModel.getObservableToggleFilterSwitch()

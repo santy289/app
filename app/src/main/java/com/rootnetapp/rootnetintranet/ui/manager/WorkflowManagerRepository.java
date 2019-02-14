@@ -1,10 +1,14 @@
 package com.rootnetapp.rootnetintranet.ui.manager;
 
+import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.workflowoverview.WorkflowOverviewResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 
+import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
@@ -21,20 +25,22 @@ public class WorkflowManagerRepository {
     private static final int ALL_WORKFLOWS_PAGE_LIMIT = 10;
     private static final int WORKFLOWS_DIALOG_PAGE_LIMIT = 50;
 
-    private ApiInterface service;
+    private final ApiInterface mService;
+    private final WorkflowTypeDbDao mWorkflowTypeDbDao;
 
-    public WorkflowManagerRepository(ApiInterface service) {
-        this.service = service;
+    public WorkflowManagerRepository(ApiInterface service, AppDatabase database) {
+        this.mService = service;
+        this.mWorkflowTypeDbDao = database.workflowTypeDbDao();
     }
 
     protected Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {
-        return service.getWorkflow(auth, workflowId).subscribeOn(Schedulers.newThread())
+        return mService.getWorkflow(auth, workflowId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     protected Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(String token, boolean open, int page, int limit,
                                                                     Map<String, Object> options) {
-        return service.getWorkflowsByBaseFilters(
+        return mService.getWorkflowsByBaseFilters(
                 token,
                 limit,
                 open,
@@ -58,13 +64,16 @@ public class WorkflowManagerRepository {
         return getWorkflowsByBaseFilters(token, true, options);
     }
 
-    protected Observable<WorkflowOverviewResponse> getOverviewWorkflowsCount(String token, String startDate, String endDate) {
-        return service.getOverviewWorkflowsCount(
+    protected Observable<WorkflowOverviewResponse> getOverviewWorkflowsCount(String token, Map<String, Object> options) {
+        return mService.getOverviewWorkflowsCount(
                 token,
-                startDate,
-                endDate,
                 true,
-                true).subscribeOn(Schedulers.newThread())
+                true,
+                options).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected List<WorkflowTypeItemMenu> getWorklowTypeNames() {
+        return mWorkflowTypeDbDao.getListOfWorkflowNames();
     }
 }

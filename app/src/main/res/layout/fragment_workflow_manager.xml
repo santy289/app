@@ -169,42 +169,9 @@
                 android:paddingStart="15dp"
                 android:paddingEnd="15dp">
 
-                <ImageView
-                    android:id="@+id/img_filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:background="@drawable/unselectedfilter_bg"
-                    android:padding="15dp"
-                    android:src="@drawable/ic_mail_black_24dp"
-                    android:tint="@color/selected_filter" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_toStartOf="@id/img_filter"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingTop="10dp"
-                        android:paddingBottom="3dp"
-                        android:text="@string/filtered_by"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tv_filtertype"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingTop="3dp"
-                        android:paddingBottom="10dp"
-                        android:text="Filter Type"
-                        android:textColor="@color/colorPrimary" />
-
-                </LinearLayout>
+                <include
+                    android:id="@+id/form_item_workflow_type"
+                    layout="@layout/form_item_single_choice" />
 
             </RelativeLayout>
 
@@ -375,10 +342,10 @@
                                     android:id="@+id/separator3"
                                     android:layout_width="15dp"
                                     android:layout_height="1dp"
-                                    android:layout_centerVertical="true"
                                     android:layout_centerHorizontal="true"
+                                    android:layout_centerVertical="true"
                                     android:paddingStart="5dp"
-                                    android:paddingEnd="5dp"/>
+                                    android:paddingEnd="5dp" />
 
                                 <LinearLayout
                                     android:id="@+id/ll_my_open_workflows"

@@ -191,10 +191,9 @@ public interface ApiInterface {
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflow/overview?")
     Observable<WorkflowOverviewResponse> getOverviewWorkflowsCount(@Header("Authorization") String authorization,
-                                                                   @Query("start") String start,
-                                                                   @Query("end") String end,
                                                                    @Query("open") boolean open,
-                                                                   @Query("status") boolean status);
+                                                                   @Query("status") boolean status,
+                                                                   @QueryMap Map<String, Object> options);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?")

@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -14,12 +16,16 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowManagerBinding;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.adapters.OnTouchClickListener;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.manager.adapters.PendingWorkflowsAdapter;
 import com.rootnetapp.rootnetintranet.ui.timeline.SelectDateDialog;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -39,7 +45,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     WorkflowManagerViewModelFactory factory;
     WorkflowManagerViewModel viewModel;
 
-    private FragmentWorkflowManagerBinding binding;
+    private FragmentWorkflowManagerBinding mBinding;
     private MainActivityInterface anInterface;
     private PendingWorkflowsAdapter mWorkflowsAdapter;
 
@@ -62,9 +68,9 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        binding = DataBindingUtil.inflate(inflater,
+        mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_workflow_manager, container, false);
-        View view = binding.getRoot();
+        View view = mBinding.getRoot();
         ((RootnetApp) getActivity().getApplication()).getAppComponent().inject(this);
         viewModel = ViewModelProviders
                 .of(this, factory)
@@ -111,42 +117,150 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         viewModel.getObservableOutOfTimeWorkflows()
                 .observe(this, this::showOutOfTimeWorkflowsDialog);
         viewModel.getObservableUpdatedWorkflows().observe(this, this::showUpdatedWorkflowsDialog);
+        viewModel.getObservableWorkflowTypeItem().observe(this, this::setupWorkflowTypeFormItem);
     }
 
     /**
      * Define the onClick behavior for this View's components.
      */
     private void setOnClickListeners() {
-        binding.tvMonth.setOnClickListener(v -> filterMonthClicked());
-        binding.tvWeek.setOnClickListener(v -> filterWeekClicked());
-        binding.tvDay.setOnClickListener(v -> filterDayClicked());
-        binding.btnSelectDates.setOnClickListener(v -> selectDates());
-        binding.btnPendingApproval.setOnClickListener(v -> getMyPendingWorkflows());
-        binding.llMyOpenWorkflows.setOnClickListener(v -> getMyOpenWorkflows());
-        binding.llMyClosedWorkflows.setOnClickListener(v -> getMyClosedWorkflows());
-        binding.btnOutOfTime.setOnClickListener(v -> getOutOfTimeWorkflows());
-        binding.btnUpdated.setOnClickListener(v -> getUpdatedWorkflows());
-        binding.btnShowMore.setOnClickListener(v -> showMoreClicked());
+        mBinding.tvMonth.setOnClickListener(v -> filterMonthClicked());
+        mBinding.tvWeek.setOnClickListener(v -> filterWeekClicked());
+        mBinding.tvDay.setOnClickListener(v -> filterDayClicked());
+        mBinding.btnSelectDates.setOnClickListener(v -> selectDates());
+        mBinding.btnPendingApproval.setOnClickListener(v -> getMyPendingWorkflows());
+        mBinding.llMyOpenWorkflows.setOnClickListener(v -> getMyOpenWorkflows());
+        mBinding.llMyClosedWorkflows.setOnClickListener(v -> getMyClosedWorkflows());
+        mBinding.btnOutOfTime.setOnClickListener(v -> getOutOfTimeWorkflows());
+        mBinding.btnUpdated.setOnClickListener(v -> getUpdatedWorkflows());
+        mBinding.btnShowMore.setOnClickListener(v -> showMoreClicked());
     }
 
     /**
      * Initializes the workflows RecyclerView.
      */
     private void setupRecycler() {
-        binding.recPendingworkflows.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recPendingworkflows.setNestedScrollingEnabled(false);
+        mBinding.recPendingworkflows.setLayoutManager(new LinearLayoutManager(getContext()));
+        mBinding.recPendingworkflows.setNestedScrollingEnabled(false);
+    }
+
+    /**
+     * Creates and defines the behavior for the Workflow Type filter.
+     *
+     * @param singleChoiceFormItem form item that will work as a filter.
+     */
+    @UiThread
+    private void setupWorkflowTypeFormItem(SingleChoiceFormItem singleChoiceFormItem) {
+
+        String title = singleChoiceFormItem.getTitle();
+        if ((title == null || title.isEmpty()) && singleChoiceFormItem.getTitleRes() != 0) {
+            title = getString(singleChoiceFormItem.getTitleRes());
+        }
+        mBinding.formItemWorkflowType.tvTitle.setText(title);
+
+        List<Option> options = new ArrayList<>(singleChoiceFormItem.getOptions());
+
+        //add hint
+        String hint = getString(R.string.no_selection_hint);
+        // check whether the hint has already been added
+        if (!options.get(0).getName().equals(hint)) {
+            // add hint as first item
+            options.add(0, new Option(0, hint));
+        }
+
+        //create the adapter
+        mBinding.formItemWorkflowType.spInput.setAdapter(
+                new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item,
+                        options));
+
+        //workaround so the listener won't be called on init
+        mBinding.formItemWorkflowType.spInput.setSelection(0, false);
+
+        // this prevents the listener to be triggered by setSelection
+        int index = singleChoiceFormItem.getOptions().indexOf(singleChoiceFormItem.getValue());
+        index++; // because of the No Selection option
+        mBinding.formItemWorkflowType.spInput.setTag(index);
+        mBinding.formItemWorkflowType.spInput.setSelection(index);
+
+        mBinding.formItemWorkflowType.spInput.setOnItemSelectedListener(
+                new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position,
+                                               long id) {
+
+                        // this prevents the listener to be triggered by setSelection
+                        Object tag = mBinding.formItemWorkflowType.spInput.getTag();
+                        if (tag == null || (int) tag != position) {
+
+                            // the user has selected the No Selection option
+                            if (position == 0) {
+                                singleChoiceFormItem.setValue(null);
+                                if (singleChoiceFormItem.getOnSelectedListener() != null) {
+                                    singleChoiceFormItem.getOnSelectedListener()
+                                            .onSelected(singleChoiceFormItem);
+                                }
+                                return;
+                            }
+
+                            // the user has selected a valid option
+                            int index = position - 1; // because of the No Selection option
+                            singleChoiceFormItem
+                                    .setValue(singleChoiceFormItem.getOptions().get(index));
+                            if (singleChoiceFormItem.getOnSelectedListener() != null) {
+                                singleChoiceFormItem.getOnSelectedListener()
+                                        .onSelected(singleChoiceFormItem);
+                            }
+                        }
+
+                        // this prevents the listener to be triggered by setSelection
+                        mBinding.formItemWorkflowType.spInput.setTag(position);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
+
+        //make sure this view gets the focus
+        mBinding.formItemWorkflowType.spInput
+                .setOnTouchListener(new OnTouchClickListener(mBinding.formItemWorkflowType.root));
+
+        //required indicator
+        mBinding.formItemWorkflowType.tvRequired.setVisibility(View.GONE);
+
+        singleChoiceFormItem.setOnSelectedListener(item -> {
+            Integer workflowTypeId = null;
+
+            if (item.getValue() != null) {
+                workflowTypeId = item.getValue().getId();
+            }
+
+            updateDashboard(workflowTypeId);
+        });
     }
 
     /**
      * Resets the workflows adapter and performs a request to the ViewModel to update the dashboard
-     * data.
+     * data with new date filters
      *
-     * @param startDate start date filter
-     * @param endDate   end date filter
+     * @param startDate start date filter.
+     * @param endDate   end date filter.
      */
     private void updateDashboard(String startDate, String endDate) {
         mWorkflowsAdapter = null; //reset the adapter
         viewModel.updateDashboard(startDate, endDate);
+    }
+
+    /**
+     * Resets the workflows adapter and performs a request to the ViewModel to update the dashboard
+     * data with new workflow type filters.
+     *
+     * @param workflowTypeId workflow type filter.
+     */
+    private void updateDashboard(Integer workflowTypeId) {
+        mWorkflowsAdapter = null; //reset the adapter
+        viewModel.updateDashboard(workflowTypeId);
     }
 
     /**
@@ -225,13 +339,13 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     @UiThread
     private void selectMonthButton(boolean select) {
         if (select) {
-            binding.tvMonth.setBackgroundColor(
+            mBinding.tvMonth.setBackgroundColor(
                     ContextCompat.getColor(getContext(), R.color.selected_filter));
-            binding.tvMonth.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
+            mBinding.tvMonth.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
         } else {
-            binding.tvMonth.setBackgroundColor(
+            mBinding.tvMonth.setBackgroundColor(
                     ContextCompat.getColor(getContext(), R.color.unselected_filter));
-            binding.tvMonth.setTextColor(
+            mBinding.tvMonth.setTextColor(
                     ContextCompat.getColor(getContext(), R.color.unselected_filter_text));
         }
     }
@@ -244,13 +358,13 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     @UiThread
     private void selectWeekButton(boolean select) {
         if (select) {
-            binding.tvWeek.setBackgroundColor(
+            mBinding.tvWeek.setBackgroundColor(
                     ContextCompat.getColor(getContext(), R.color.selected_filter));
-            binding.tvWeek.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
+            mBinding.tvWeek.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
         } else {
-            binding.tvWeek.setBackgroundColor(
+            mBinding.tvWeek.setBackgroundColor(
                     ContextCompat.getColor(getContext(), R.color.unselected_filter));
-            binding.tvWeek.setTextColor(
+            mBinding.tvWeek.setTextColor(
                     ContextCompat.getColor(getContext(), R.color.unselected_filter_text));
         }
     }
@@ -263,13 +377,13 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     @UiThread
     private void selectDayButton(boolean select) {
         if (select) {
-            binding.tvDay.setBackgroundColor(
+            mBinding.tvDay.setBackgroundColor(
                     ContextCompat.getColor(getContext(), R.color.selected_filter));
-            binding.tvDay.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
+            mBinding.tvDay.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
         } else {
-            binding.tvDay.setBackgroundColor(
+            mBinding.tvDay.setBackgroundColor(
                     ContextCompat.getColor(getContext(), R.color.unselected_filter));
-            binding.tvDay.setTextColor(
+            mBinding.tvDay.setTextColor(
                     ContextCompat.getColor(getContext(), R.color.unselected_filter_text));
         }
     }
@@ -417,7 +531,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         if (mWorkflowsAdapter == null) {
             //create a new adapter
             mWorkflowsAdapter = new PendingWorkflowsAdapter(workflowList, this);
-            binding.recPendingworkflows.setAdapter(mWorkflowsAdapter);
+            mBinding.recPendingworkflows.setAdapter(mWorkflowsAdapter);
         } else {
             //append a list to the current adapter
             mWorkflowsAdapter.addData(workflowList);
@@ -432,9 +546,9 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     @UiThread
     private void hideMoreButton(boolean hide) {
         if (hide) {
-            binding.btnShowMore.setVisibility(View.GONE);
+            mBinding.btnShowMore.setVisibility(View.GONE);
         } else {
-            binding.btnShowMore.setVisibility(View.VISIBLE);
+            mBinding.btnShowMore.setVisibility(View.VISIBLE);
         }
     }
 
@@ -446,67 +560,67 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     @UiThread
     private void hideWorkflowList(boolean hide) {
         if (hide) {
-            binding.recPendingworkflows.setVisibility(View.GONE);
-            binding.lytNoworkflows.setVisibility(View.VISIBLE);
+            mBinding.recPendingworkflows.setVisibility(View.GONE);
+            mBinding.lytNoworkflows.setVisibility(View.VISIBLE);
         } else {
-            binding.recPendingworkflows.setVisibility(View.VISIBLE);
-            binding.lytNoworkflows.setVisibility(View.GONE);
+            mBinding.recPendingworkflows.setVisibility(View.VISIBLE);
+            mBinding.lytNoworkflows.setVisibility(View.GONE);
         }
     }
 
     @UiThread
     private void updateSelectedDatesUi(String startDate) {
-        binding.tvSelectedDate.setText(String.format(Locale.US, "(%s)", startDate));
+        mBinding.tvSelectedDate.setText(String.format(Locale.US, "(%s)", startDate));
     }
 
     @UiThread
     private void updateSelectedDatesUi(String startDate, String endDate) {
-        binding.tvSelectedDate.setText(String.format(Locale.US, "(%s - %s)", startDate, endDate));
+        mBinding.tvSelectedDate.setText(String.format(Locale.US, "(%s - %s)", startDate, endDate));
     }
 
     @UiThread
     private void updateSelectedDateTitle(int titleRes) {
-        binding.tvSelectedDateTitle.setText(getString(titleRes));
+        mBinding.tvSelectedDateTitle.setText(getString(titleRes));
     }
 
     @UiThread
     private void updateMyPendingWorkflowsCount(int count) {
-        binding.tvMyPendingCount.setText(String.valueOf(count));
+        mBinding.tvMyPendingCount.setText(String.valueOf(count));
     }
 
     @UiThread
     private void updateMyOpenWorkflowsCount(int count) {
-        binding.tvMyOpenCount.setText(String.valueOf(count));
+        mBinding.tvMyOpenCount.setText(String.valueOf(count));
     }
 
     @UiThread
     private void updateMyClosedWorkflowsCount(int count) {
-        binding.tvMyClosedCount.setText(String.valueOf(count));
+        mBinding.tvMyClosedCount.setText(String.valueOf(count));
     }
 
     @UiThread
     private void updateOutOfTimeWorkflowsCount(int count) {
-        binding.tvOutOfTimeCount.setText(String.valueOf(count));
+        mBinding.tvOutOfTimeCount.setText(String.valueOf(count));
     }
 
     @UiThread
     private void updateUpdatedWorkflowsCount(int count) {
-        binding.tvUpdatedCount.setText(String.valueOf(count));
+        mBinding.tvUpdatedCount.setText(String.valueOf(count));
     }
 
     @UiThread
     private void updatePendingWorkflowsCount(int count) {
-        binding.tvPendingCount.setText(String.valueOf(count));
+        mBinding.tvPendingCount.setText(String.valueOf(count));
     }
 
     @UiThread
     private void updateOpenWorkflowsCount(int count) {
-        binding.tvOpenCount.setText(String.valueOf(count));
+        mBinding.tvOpenCount.setText(String.valueOf(count));
     }
 
     @UiThread
     private void updateClosedWorkflowsCount(int count) {
-        binding.tvClosedCount.setText(String.valueOf(count));
+        mBinding.tvClosedCount.setText(String.valueOf(count));
     }
 
     @UiThread

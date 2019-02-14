@@ -1,27 +1,39 @@
 package com.rootnetapp.rootnetintranet.ui.manager;
 
 import android.util.ArrayMap;
+import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.responses.workflowoverview.WorkflowOverviewResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by root on 27/04/18.
  */
 
 public class WorkflowManagerViewModel extends ViewModel {
+
+    private static final int TAG_WORKFLOW_TYPE = 77;
+    private static final String TAG = "ManagerViewModel";
 
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
@@ -41,12 +53,14 @@ public class WorkflowManagerViewModel extends ViewModel {
     private MutableLiveData<Integer> mClosedCountLiveData;
     private MutableLiveData<Boolean> mHideMoreButtonLiveData;
     private MutableLiveData<Boolean> mHideWorkflowListLiveData;
+    private MutableLiveData<SingleChoiceFormItem> mAddWorkflowTypeItemLiveData;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
     private WorkflowManagerRepository mRepository;
     private String mToken;
     private String mStartDate, mEndDate;
+    private Integer mWorkflowTypeId;
     private int mCurrentPage;
     private int mWebCount, mWebCompleted;
     private WorkflowOverviewResponse workflowOverviewResponse;
@@ -56,9 +70,10 @@ public class WorkflowManagerViewModel extends ViewModel {
         mCurrentPage = 1;
     }
 
-    public void init(String token, String startDate, String endDate) {
+    protected void init(String token, String startDate, String endDate) {
         mToken = token;
         updateDashboard(startDate, endDate);
+        createWorkflowTypeItem();
     }
 
     //region Dashboard Update
@@ -67,15 +82,18 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Resets every info regarding to the dashboard and perform a request to the server to obtain
      * the new values.
      *
-     * @param startDate start date filter.
-     * @param endDate   end date filter.
+     * @param startDate      start date filter.
+     * @param endDate        end date filter.
+     * @param workflowTypeId workflow type filter.
      */
-    protected void updateDashboard(String startDate, String endDate) {
+    private void updateDashboard(String startDate, String endDate,
+                                 @Nullable Integer workflowTypeId) {
         mWebCount = mWebCompleted = 0;
         showLoading.setValue(true);
 
         setStartDate(startDate);
         setEndDate(endDate);
+        setWorkflowTypeId(workflowTypeId);
 
         resetCurrentPage();
 
@@ -84,6 +102,25 @@ public class WorkflowManagerViewModel extends ViewModel {
 
         getOverviewWorkflowsCount();
         mWebCount++;
+    }
+
+    /**
+     * Updates the dashboard with new dates.
+     *
+     * @param startDate start date filter.
+     * @param endDate   end date filter.
+     */
+    protected void updateDashboard(String startDate, String endDate) {
+        updateDashboard(startDate, endDate, getWorkflowTypeId());
+    }
+
+    /**
+     * Updates the dashboard with a new workflow type.
+     *
+     * @param workflowTypeId workflow type filter.
+     */
+    protected void updateDashboard(Integer workflowTypeId) {
+        updateDashboard(getStartDate(), getEndDate(), workflowTypeId);
     }
 
     /**
@@ -114,6 +151,10 @@ public class WorkflowManagerViewModel extends ViewModel {
 
         options.put("start", getStartDate());
         options.put("end", getEndDate());
+
+        if (getWorkflowTypeId() != null) {
+            options.put("workflow_type_id", getWorkflowTypeId());
+        }
 
         return options;
     }
@@ -377,7 +418,7 @@ public class WorkflowManagerViewModel extends ViewModel {
     protected void getOverviewWorkflowsCount() {
         showLoading.setValue(true);
         Disposable disposable = mRepository
-                .getOverviewWorkflowsCount(mToken, getStartDate(), getEndDate())
+                .getOverviewWorkflowsCount(mToken, getCommonFilters())
                 .subscribe(this::onOverviewSuccess, this::onFailure);
 
         mDisposables.add(disposable);
@@ -437,6 +478,53 @@ public class WorkflowManagerViewModel extends ViewModel {
 
     private void setEndDate(String endDate) {
         this.mEndDate = endDate;
+    }
+
+    protected Integer getWorkflowTypeId() {
+        return mWorkflowTypeId;
+    }
+
+    private void setWorkflowTypeId(Integer workflowTypeId) {
+        this.mWorkflowTypeId = workflowTypeId;
+    }
+
+    /**
+     * Creates the WorkflowType form item. Performs a request to the repo to retrieve the options
+     * and then send the form item to the UI.
+     */
+    private void createWorkflowTypeItem() {
+        //used to be setWorkflowTypes
+
+        Disposable disposable = Observable.fromCallable(() -> {
+            List<WorkflowTypeItemMenu> types = mRepository.getWorklowTypeNames();
+            if (types == null || types.size() < 1) {
+                return false;
+            }
+
+            List<Option> options = new ArrayList<>();
+            for (int i = 0; i < types.size(); i++) {
+                String name = types.get(i).getName();
+                Integer id = types.get(i).getId();
+
+                Option option = new Option(id, name);
+                options.add(option);
+            }
+
+            return new SingleChoiceFormItem.Builder()
+                    .setTitleRes(R.string.form_workflow_type)
+                    .setRequired(true)
+                    .setTag(TAG_WORKFLOW_TYPE)
+                    .setOptions(options)
+                    .build();
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(singleChoiceFormItem -> {
+                    mAddWorkflowTypeItemLiveData
+                            .setValue((SingleChoiceFormItem) singleChoiceFormItem);
+                }, throwable -> {
+                    Log.d(TAG, "setWorkflowTypes: error " + throwable.getMessage());
+                });
+        mDisposables.add(disposable);
     }
     //endregion
 
@@ -555,6 +643,13 @@ public class WorkflowManagerViewModel extends ViewModel {
             mHideWorkflowListLiveData = new MutableLiveData<>();
         }
         return mHideWorkflowListLiveData;
+    }
+
+    protected LiveData<SingleChoiceFormItem> getObservableWorkflowTypeItem() {
+        if (mAddWorkflowTypeItemLiveData == null) {
+            mAddWorkflowTypeItemLiveData = new MutableLiveData<>();
+        }
+        return mAddWorkflowTypeItemLiveData;
     }
 
     protected LiveData<Integer> getObservableError() {

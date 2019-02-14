@@ -191,7 +191,7 @@
                     android:layout_centerVertical="true"
                     android:paddingTop="10dp"
                     android:paddingBottom="10dp"
-                    android:text="@string/analytics"
+                    android:text="@string/user_analytics"
                     android:textAllCaps="true"
                     android:textColor="@color/colorPrimaryDark"
                     android:textSize="18sp"
@@ -260,7 +260,7 @@
                                     android:background="@drawable/tv_round_bg"
                                     android:padding="5dp"
                                     android:text="@string/pending"
-                                    android:textColor="@color/text_orange"
+                                    android:textColor="@color/colorPrimary"
                                     android:textStyle="bold" />
 
                             </FrameLayout>
@@ -269,7 +269,7 @@
                                 android:id="@+id/tv_user_pending_count"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textColor="@color/colorPrimaryDark"
+                                android:textColor="@color/colorPrimary"
                                 android:textSize="30sp"
                                 android:textStyle="bold"
                                 tools:text="00" />
@@ -322,7 +322,7 @@
                                     android:background="@drawable/tv_round_bg"
                                     android:padding="5dp"
                                     android:text="@string/workflows"
-                                    android:textColor="@color/text_yellow"
+                                    android:textColor="@color/colorPrimary"
                                     android:textStyle="bold" />
 
                             </FrameLayout>
@@ -361,7 +361,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:text="@string/open"
-                                        android:textColor="@color/selected_filter" />
+                                        android:textColor="@color/colorPrimary" />
 
                                 </LinearLayout>
 
@@ -386,7 +386,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:text="@string/closed"
-                                        android:textColor="@color/selected_filter" />
+                                        android:textColor="@color/colorPrimary" />
 
                                 </LinearLayout>
                             </RelativeLayout>
@@ -441,7 +441,7 @@
                                     android:background="@drawable/tv_round_bg"
                                     android:padding="5dp"
                                     android:text="@string/out_of_time"
-                                    android:textColor="@color/black"
+                                    android:textColor="@color/text_red"
                                     android:textStyle="bold" />
 
                             </FrameLayout>
@@ -497,7 +497,7 @@
                                     android:background="@drawable/tv_round_bg"
                                     android:padding="5dp"
                                     android:text="@string/updated"
-                                    android:textColor="@color/black"
+                                    android:textColor="@color/colorPrimary"
                                     android:textStyle="bold" />
 
                             </FrameLayout>
@@ -506,7 +506,7 @@
                                 android:id="@+id/tv_user_updated_count"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textColor="@color/colorPrimaryDark"
+                                android:textColor="@color/colorPrimary"
                                 android:textSize="30sp"
                                 android:textStyle="bold"
                                 tools:text="00" />
@@ -601,7 +601,7 @@
                                     android:background="@drawable/tv_round_bg"
                                     android:padding="5dp"
                                     android:text="@string/pending"
-                                    android:textColor="@color/text_orange"
+                                    android:textColor="@color/colorPrimary"
                                     android:textStyle="bold" />
 
                             </FrameLayout>
@@ -610,7 +610,7 @@
                                 android:id="@+id/tv_company_pending_count"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textColor="@color/colorPrimaryDark"
+                                android:textColor="@color/colorPrimary"
                                 android:textSize="30sp"
                                 android:textStyle="bold"
                                 tools:text="00" />
@@ -618,7 +618,6 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textColor="@color/selected_filter"
                                 android:visibility="invisible" />
 
                         </LinearLayout>
@@ -663,7 +662,7 @@
                                     android:background="@drawable/tv_round_bg"
                                     android:padding="5dp"
                                     android:text="@string/workflows"
-                                    android:textColor="@color/text_yellow"
+                                    android:textColor="@color/colorPrimary"
                                     android:textStyle="bold" />
 
                             </FrameLayout>
@@ -782,7 +781,7 @@
                                     android:background="@drawable/tv_round_bg"
                                     android:padding="5dp"
                                     android:text="@string/out_of_time"
-                                    android:textColor="@color/black"
+                                    android:textColor="@color/text_red"
                                     android:textStyle="bold" />
 
                             </FrameLayout>
@@ -838,7 +837,7 @@
                                     android:background="@drawable/tv_round_bg"
                                     android:padding="5dp"
                                     android:text="@string/updated"
-                                    android:textColor="@color/black"
+                                    android:textColor="@color/colorPrimary"
                                     android:textStyle="bold" />
 
                             </FrameLayout>
@@ -847,7 +846,7 @@
                                 android:id="@+id/tv_company_updated_count"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textColor="@color/colorPrimaryDark"
+                                android:textColor="@color/colorPrimary"
                                 android:textSize="30sp"
                                 android:textStyle="bold"
                                 tools:text="00" />
@@ -903,7 +902,7 @@
                                     android:background="@drawable/tv_round_bg"
                                     android:padding="5dp"
                                     android:text="@string/people_involved_title"
-                                    android:textColor="@color/black"
+                                    android:textColor="@color/colorPrimary"
                                     android:textStyle="bold" />
 
                             </FrameLayout>

@@ -155,7 +155,8 @@
     <string name="last_sync">Último sync:</string>
     <string name="product_not_enabled">Este producto no ha sido asignado para tu domain.</string>
     <string name="pending_workflows">Workflows Pendientes</string>
-    <string name="analytics">Analiticas</string>
+    <string name="analytics">Analíticas</string>
+    <string name="user_analytics">Mis Analíticas</string>
     <string name="company_overview">Informacion de la Compañía</string>
     <string name="date">Fecha</string>
     <string name="title">Título</string>

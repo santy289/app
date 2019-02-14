@@ -155,6 +155,7 @@
     <string name="product_not_enabled">This product has not been assigned to your domain.</string>
     <string name="pending_workflows">Pending Workflows</string>
     <string name="analytics">Analytics</string>
+    <string name="user_analytics">My Analytics</string>
     <string name="company_overview">Company Overview</string>
     <string name="date">Date</string>
     <string name="title">Title</string>

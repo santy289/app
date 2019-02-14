@@ -13,11 +13,8 @@ import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.databinding.FragmentTimelineBinding;
 import com.rootnetapp.rootnetintranet.databinding.TimelineFiltersMenuBinding;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineItem;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Interaction;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
@@ -25,14 +22,15 @@ import com.rootnetapp.rootnetintranet.ui.timeline.adapters.TimelineAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
+import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -47,15 +45,9 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
     @Inject
     TimelineViewModelFactory viewModelFactory;
     private TimelineViewModel viewModel;
-    private FragmentTimelineBinding binding;
-    private MainActivityInterface anInterface;
-    private String token;
-    private List<TimelineItem> timelineItems;
-    private List<User> timelineUsers;
-    private List<String> users;
-    private List<String> modules;
-    private String start, end;
-    private List<WorkflowUser> workflowUsers;
+    private FragmentTimelineBinding mBinding;
+    private MainActivityInterface mMainInterface;
+    private TimelineAdapter mTimelineAdapter;
 
     public TimelineFragment() {
         // Required empty public constructor
@@ -63,7 +55,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
 
     public static TimelineFragment newInstance(MainActivityInterface anInterface) {
         TimelineFragment fragment = new TimelineFragment();
-        fragment.anInterface = anInterface;
+        fragment.mMainInterface = anInterface;
         return fragment;
     }
 
@@ -76,9 +68,9 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        binding = DataBindingUtil.inflate(inflater,
+        mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_timeline, container, false);
-        View view = binding.getRoot();
+        View view = mBinding.getRoot();
         ((RootnetApp) getActivity().getApplication()).getAppComponent().inject(this);
         viewModel = ViewModelProviders
                 .of(this, viewModelFactory)
@@ -86,200 +78,220 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         //TODO preferences inyectadas con Dagger
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        token = "Bearer " + prefs.getString("token", "");
-        binding.recTimeline.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recTimeline.setNestedScrollingEnabled(false);
-        subscribe();
-        binding.tvMonth.setOnClickListener(this::filterClicked);
-        binding.tvWeek.setOnClickListener(this::filterClicked);
-        binding.tvDay.setOnClickListener(this::filterClicked);
-        binding.btnSelectdates.setOnClickListener(this::selectDates);
-        start = Utils.getMonthDay(0, 1);
-        end = Utils.getMonthDay(0, 30);
-        binding.tvSelecteddates.setText("(" + start + " - " + end + ")");
-        binding.tvSelecteddatetitle.setText(getString(R.string.current_month));
-        start = start + "T00:00:00-0000";
-        end = end + "T00:00:00-0000";
-        users = new ArrayList<>();
+        String token = "Bearer " + prefs.getString("token", "");
 
-        modules = new ArrayList<>();
+        String start = Utils.getMonthDay(0, 1);
+        String end = Utils.getMonthDay(0, 30);
+        updateSelectedDatesUi(start, end);
+        updateSelectedDateTitle(R.string.current_month);
+
+        List<String> modules = new ArrayList<>();
         modules.add(MODULE_ALL);
         modules.add(MODULE_WORKFLOWS);
         modules.add(MODULE_WORKFLOW_APPROVALS);
         modules.add(MODULE_WORKFLOW_FILES);
         modules.add(MODULE_WORKFLOW_COMMENTS);
 
-        binding.imgFilter.setOnClickListener(view1 -> {
-            PopupWindow popupwindow_obj = popupMenu();
-            popupwindow_obj.showAsDropDown(binding.imgFilter, -40, 18);
-        });
-        getTimeline();
+        subscribe();
+        setOnClickListeners();
+        setupRecycler();
+        viewModel.init(token, start, end, modules);
+
         return view;
     }
 
-    private void selectDates(View view) {
-        anInterface.showDialog(SelectDateDialog.newInstance(this));
+    private void subscribe() {
+        viewModel.getObservableShowLoading().observe(this, this::showLoading);
+        viewModel.getObservableTimeline().observe(this, this::populateTimeline);
+        viewModel.getObservableError().observe(this, this::showToastMessage);
     }
 
-    private void filterClicked(View view) {
-        switch (view.getId()) {
-            case R.id.tv_month: {
-                selectMonthButton(true);
-                selectWeekButton(false);
-                selectDayButton(false);
+    /**
+     * Define the onClick behavior for this View's components.
+     */
+    private void setOnClickListeners() {
+        mBinding.tvMonth.setOnClickListener(v -> filterMonthClicked());
+        mBinding.tvWeek.setOnClickListener(v -> filterWeekClicked());
+        mBinding.tvDay.setOnClickListener(v -> filterDayClicked());
+        mBinding.btnSelectDates.setOnClickListener(v -> selectDates());
 
-                start = Utils.getMonthDay(0, 1);
-                end = Utils.getMonthDay(0, 30);
-                binding.tvSelecteddates.setText("(" + start + " - " + end + ")");
-                binding.tvSelecteddatetitle.setText(getString(R.string.current_month));
-                start = start + "T00:00:00-0000";
-                end = end + "T00:00:00-0000";
-                break;
-            }
-            case R.id.tv_week: {
-                selectMonthButton(false);
-                selectWeekButton(true);
-                selectDayButton(false);
-
-                start = Utils.getWeekStart();
-                end = Utils.getWeekEnd();
-                binding.tvSelecteddates.setText("(" + start + " - " + end + ")");
-                binding.tvSelecteddatetitle.setText(getString(R.string.current_week));
-                start = start + "T00:00:00-0000";
-                end = end + "T00:00:00-0000";
-                break;
-            }
-            case R.id.tv_day: {
-                selectMonthButton(false);
-                selectWeekButton(false);
-                selectDayButton(true);
-
-                start = Utils.getCurrentDate();
-                binding.tvSelecteddates.setText("(" + start + ")");
-                binding.tvSelecteddatetitle.setText(getString(R.string.today));
-                start = start + "T00:00:00-0000";
-                end = Utils.getCurrentDate() + "T23:59:59-0000";
-                break;
-            }
-        }
-        getTimeline();
+        mBinding.imgFilter.setOnClickListener(view1 -> {
+            PopupWindow popupwindow_obj = popupMenu();
+            popupwindow_obj.showAsDropDown(mBinding.imgFilter, -40, 18);
+        });
     }
 
+    /**
+     * Initializes the timeline RecyclerView.
+     */
+    private void setupRecycler() {
+        mBinding.recTimeline.setLayoutManager(new LinearLayoutManager(getContext()));
+        mBinding.recTimeline.setNestedScrollingEnabled(false);
+    }
+
+    /**
+     * Resets the timeline adapter and performs a request to the ViewModel to update the timeline
+     * data with new date filters
+     *
+     * @param startDate start date filter.
+     * @param endDate   end date filter.
+     */
+    private void updateTimeline(String startDate, String endDate) {
+//        mWorkflowsAdapter = null; //todo reset the adapter
+        viewModel.updateTimeline(startDate, endDate);
+    }
+
+    private void updateTimeline() {
+//        mWorkflowsAdapter = null; //todo reset the adapter
+        viewModel.updateTimeline();
+    }
+
+    private void updateTimelineWithUsers(List<String> users) {
+//        mWorkflowsAdapter = null; //todo reset the adapter
+        viewModel.updateTimelineWithUsers(users);
+    }
+
+    private void updateTimelineWithModules(List<String> modules) {
+//        mWorkflowsAdapter = null; //todo reset the adapter
+        viewModel.updateTimelineWithModules(modules);
+    }
+
+    //region Date Filters
+
+    /**
+     * Opens the select date dialog.
+     */
+    private void selectDates() {
+        mMainInterface.showDialog(SelectDateDialog.newInstance(this));
+    }
+
+    /**
+     * Updates the UI related to the date filters with the current month and updates the dashboard
+     * data.
+     */
+    private void filterMonthClicked() {
+        selectMonthButton(true);
+        selectWeekButton(false);
+        selectDayButton(false);
+
+        String start = Utils.getMonthDay(0, 1);
+        String end = Utils.getMonthDay(0, 30);
+        updateSelectedDatesUi(start, end);
+        updateSelectedDateTitle(R.string.current_month);
+
+        updateTimeline(start, end);
+    }
+
+    /**
+     * Updates the UI related to the date filters with the current week and updates the dashboard
+     * data.
+     */
+    private void filterWeekClicked() {
+        selectMonthButton(false);
+        selectWeekButton(true);
+        selectDayButton(false);
+
+        String start = Utils.getWeekStart();
+        String end = Utils.getWeekEnd();
+        updateSelectedDatesUi(start, end);
+        updateSelectedDateTitle(R.string.current_week);
+
+        updateTimeline(start, end);
+    }
+
+    /**
+     * Updates the UI related to the date filters with the current day and updates the dashboard
+     * data.
+     */
+    private void filterDayClicked() {
+        selectMonthButton(false);
+        selectWeekButton(false);
+        selectDayButton(true);
+
+        String start = Utils.getCurrentDate();
+        String end = Utils.getTomorrowDate();
+        updateSelectedDatesUi(start);
+        updateSelectedDateTitle(R.string.today);
+
+        updateTimeline(start, end);
+    }
+
+    /**
+     * Selects or deselects visually the current month button based on the parameter.
+     *
+     * @param select true - select; false - deselect.
+     */
     @UiThread
     private void selectMonthButton(boolean select) {
         if (select) {
-            binding.tvMonth.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.selected_filter));
-            binding.tvMonth.setTextColor(getResources().getColor(R.color.white));
+            mBinding.tvMonth.setBackgroundColor(
+                    ContextCompat.getColor(getContext(), R.color.selected_filter));
+            mBinding.tvMonth.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
         } else {
-            binding.tvMonth.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.unselected_filter));
-            binding.tvMonth.setTextColor(getResources().getColor(R.color.unselected_filter_text));
+            mBinding.tvMonth.setBackgroundColor(
+                    ContextCompat.getColor(getContext(), R.color.unselected_filter));
+            mBinding.tvMonth.setTextColor(
+                    ContextCompat.getColor(getContext(), R.color.unselected_filter_text));
         }
     }
 
+    /**
+     * Selects or deselects visually the current week button based on the parameter.
+     *
+     * @param select true - select; false - deselect.
+     */
     @UiThread
     private void selectWeekButton(boolean select) {
         if (select) {
-            binding.tvWeek.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.selected_filter));
-            binding.tvWeek.setTextColor(getResources().getColor(R.color.white));
+            mBinding.tvWeek.setBackgroundColor(
+                    ContextCompat.getColor(getContext(), R.color.selected_filter));
+            mBinding.tvWeek.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
         } else {
-            binding.tvWeek.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.unselected_filter));
-            binding.tvWeek.setTextColor(getResources().getColor(R.color.unselected_filter_text));
+            mBinding.tvWeek.setBackgroundColor(
+                    ContextCompat.getColor(getContext(), R.color.unselected_filter));
+            mBinding.tvWeek.setTextColor(
+                    ContextCompat.getColor(getContext(), R.color.unselected_filter_text));
         }
     }
 
+    /**
+     * Selects or deselects visually the current day button based on the parameter.
+     *
+     * @param select true - select; false - deselect.
+     */
     @UiThread
     private void selectDayButton(boolean select) {
         if (select) {
-            binding.tvDay.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.selected_filter));
-            binding.tvDay.setTextColor(getResources().getColor(R.color.white));
+            mBinding.tvDay.setBackgroundColor(
+                    ContextCompat.getColor(getContext(), R.color.selected_filter));
+            mBinding.tvDay.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
         } else {
-            binding.tvDay.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.unselected_filter));
-            binding.tvDay.setTextColor(getResources().getColor(R.color.unselected_filter_text));
+            mBinding.tvDay.setBackgroundColor(
+                    ContextCompat.getColor(getContext(), R.color.unselected_filter));
+            mBinding.tvDay.setTextColor(
+                    ContextCompat.getColor(getContext(), R.color.unselected_filter_text));
         }
     }
 
-    private void getTimeline() {
-        Utils.showLoading(getContext());
-        viewModel.getUsers(token);
-    }
-
-    private void subscribe() {
-
-        final Observer<List<User>> usersObserver = ((List<User> data) -> {
-            if (null != data) {
-                timelineUsers = data;
-                viewModel.getWorkflowUsers(token);
-            } else {
-                Utils.hideLoading();
-                Toast.makeText(getContext(), "error", Toast.LENGTH_LONG).show();
-            }
-        });
-
-        final Observer<List<WorkflowUser>> workflowUsersObserver = ((List<WorkflowUser> data) -> {
-            if (null != data) {
-                workflowUsers = data;
-                for (WorkflowUser user : data) {
-                    users.add(String.valueOf(user.getId()));
-                }
-                viewModel.getTimeline(token, start, end, users, modules);
-            } else {
-                Utils.hideLoading();
-                Toast.makeText(getContext(), "error", Toast.LENGTH_LONG).show();
-            }
-        });
-
-        final Observer<List<TimelineItem>> timelineObserver = ((List<TimelineItem> data) -> {
-            if (null != data) {
-                timelineItems = data;
-                viewModel.getComments(token);
-            } else {
-                Utils.hideLoading();
-                Toast.makeText(getContext(), "error", Toast.LENGTH_LONG).show();
-            }
-        });
-
-        final Observer<List<Interaction>> commentsObserver = ((List<Interaction> data) -> {
-            Utils.hideLoading();
-            if (null != data) {
-                if (timelineItems.size() != 0) {
-                    binding.lytNotimeline.setVisibility(View.GONE);
-                    binding.recTimeline.setVisibility(View.VISIBLE);
-                    binding.recTimeline.setAdapter(new TimelineAdapter(timelineItems, timelineUsers,
-                            data, viewModel, token, this, this));
-                } else {
-                    binding.recTimeline.setVisibility(View.GONE);
-                    binding.lytNotimeline.setVisibility(View.VISIBLE);
-                }
-            }
-        });
-
-        final Observer<Integer> errorObserver = ((Integer data) -> {
-            if (null != data) {
-                //TODO mejorar toast
-                Utils.hideLoading();
-                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
-            }
-        });
-        viewModel.getObservableTimeline().observe(this, timelineObserver);
-        viewModel.getObservableUsers().observe(this, usersObserver);
-        viewModel.getObservableWorkflowUsers().observe(this, workflowUsersObserver);
-        viewModel.getObservableComments().observe(this, commentsObserver);
-        viewModel.getObservableError().observe(this, errorObserver);
-
-    }
-
+    /**
+     * Updates the date filter UI and request a dashboard data update. Called from the select date
+     * dialog.
+     *
+     * @param start selected start date.
+     * @param end   selected end date.
+     */
     @Override
     public void setDate(String start, String end) {
-        binding.tvSelecteddates.setText("(" + start + " - " + end + ")");
-        binding.tvSelecteddatetitle.setText(getString(R.string.selected_period));
-        this.start = start + "T00:00:00-0000";
-        this.end = end + "T00:00:00-0000";
-        getTimeline();
+        updateSelectedDatesUi(start, end);
+        updateSelectedDateTitle(R.string.selected_period);
+
+        updateTimeline(start, end);
     }
+    //endregion
 
     @Override
     public void reload() {
-        getTimeline();
+        updateTimeline();
     }
 
     private PopupWindow popupMenu() {
@@ -293,6 +305,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         popupWindow.setHeight((int) getResources().getDimension(R.dimen.filters_height));
         popupWindow.setContentView(filtersBinding.getRoot());
 
+        List<String> modules = viewModel.getAllModules();
         for (String string : modules) {
             if (string.equals(MODULE_ALL)) {
                 filtersBinding.switchAllModules.setChecked(true);
@@ -317,6 +330,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         filtersBinding.switchFiles.setOnClickListener(this::onSwitchClicked);
         filtersBinding.switchComments.setOnClickListener(this::onSwitchClicked);
 
+        List<WorkflowUser> workflowUsers = viewModel.getAllWorkflowUsers();
         for (WorkflowUser user : workflowUsers) {
             LayoutInflater vi = (LayoutInflater) getContext()
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -338,6 +352,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         int id = (int) view.getTag();
         int i = 0;
 
+        List<String> users = viewModel.getAllUsers();
         while (i < users.size()) {
             if (users.get(i).equals("undefined")) {
                 users.remove(i);
@@ -361,6 +376,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
             users.add("undefined");
         }
 
+        updateTimelineWithUsers(users);
     }
 
     private void onSwitchClicked(View view) {
@@ -391,6 +407,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         }
         int i = 0;
 
+        List<String> modules = viewModel.getAllModules();
         while (i < modules.size()) {
             if (modules.get(i).equals("undefined")) {
                 modules.remove(i);
@@ -414,6 +431,60 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
             modules.add("undefined");
         }
 
-        getTimeline();
+        updateTimelineWithModules(modules);
+    }
+
+    @UiThread
+    private void populateTimeline(TimelineUiData timelineUiData) {
+        if (timelineUiData.getTimelineItems().size() != 0) {
+            mBinding.lytNotimeline.setVisibility(View.GONE);
+            mBinding.recTimeline.setVisibility(View.VISIBLE);
+
+            mTimelineAdapter = new TimelineAdapter(
+                    timelineUiData.getTimelineItems(),
+                    timelineUiData.getUsers(),
+                    timelineUiData.getInteractionComments(),
+                    viewModel,
+                    this,
+                    this
+            );
+            mBinding.recTimeline.setAdapter(mTimelineAdapter);
+        } else {
+            mBinding.recTimeline.setVisibility(View.GONE);
+            mBinding.lytNotimeline.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @UiThread
+    private void updateSelectedDatesUi(String startDate) {
+        mBinding.tvSelectedDate.setText(String.format(Locale.US, "(%s)", startDate));
+    }
+
+    @UiThread
+    private void updateSelectedDatesUi(String startDate, String endDate) {
+        mBinding.tvSelectedDate.setText(String.format(Locale.US, "(%s - %s)", startDate, endDate));
+    }
+
+    @UiThread
+    private void updateSelectedDateTitle(int titleRes) {
+        mBinding.tvSelectedDateTitle.setText(getString(titleRes));
+    }
+
+    @UiThread
+    private void showLoading(Boolean show) {
+        if (show) {
+            Utils.showLoading(getContext());
+        } else {
+            Utils.hideLoading();
+        }
+    }
+
+    @UiThread
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                getContext(),
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
     }
 }

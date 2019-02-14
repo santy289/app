@@ -33,18 +33,16 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
     private List<Interaction> comments;
     private TimelineViewModel viewModel;
     private Context context;
-    private String token;
     private Fragment parent;
     private TimelineInterface anInterface;
 
-    public TimelineAdapter(List<TimelineItem> items, List<User> people,
-                           List<Interaction> comments, TimelineViewModel viewModel,
-                           String token, Fragment parent, TimelineInterface anInterface) {
+    public TimelineAdapter(List<TimelineItem> items, List<User> people, List<Interaction> comments,
+                           TimelineViewModel viewModel, Fragment parent,
+                           TimelineInterface anInterface) {
         this.items = items;
         this.people = people;
         this.comments = comments;
         this.viewModel = viewModel;
-        this.token = token;
         this.parent = parent;
         this.anInterface = anInterface;
     }
@@ -91,12 +89,15 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
 //            }
             holder.binding.tvTitle.setText(title);
             if (item.getDescription().getArguments().getDescription() != null) {
-                holder.binding.tvDescription.setText(context.getString(R.string.txt_description) + " "
-                        + item.getDescription().getArguments().getDescription());
+                holder.binding.tvDescription
+                        .setText(context.getString(R.string.txt_description) + " "
+                                + item.getDescription().getArguments().getDescription());
             }
             if (item.getDescription().getArguments().getCurrentStatus() != null) {
-                holder.binding.tvDescription.setText(context.getString(R.string.txt_statusname) + " "
-                        + item.getDescription().getArguments().getCurrentStatus().getName());
+                holder.binding.tvDescription
+                        .setText(context.getString(R.string.txt_statusname) + " "
+                                + item.getDescription().getArguments().getCurrentStatus()
+                                .getName());
             }
             String date = item.getCreatedAt().split("T")[0];
             holder.binding.tvDate.setText(date);
@@ -116,7 +117,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
 //            }
             interactionId = x;
             holder.binding.recComments.setAdapter(new TimelineCommentAdapter(theComments, people,
-                    viewModel, token, parent));
+                    viewModel, parent));
             holder.binding.tvComments.setOnClickListener(view -> {
                 if (holder.binding.recComments.getVisibility() == View.GONE) {
                     holder.binding.recComments.setVisibility(View.VISIBLE);
@@ -146,13 +147,14 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                     if (!TextUtils.isEmpty(comment)) {
                         if (finalAuthor != null) {
                             Utils.showLoading(context);
-                            viewModel.postComment(token, interactionId, item.getEntityId(),
+                            viewModel.postComment(interactionId, item.getEntityId(),
                                     item.getEntity(), comment, finalAuthor.getUserId());
                         } else {
                             Toast.makeText(context, "error wth author", Toast.LENGTH_LONG).show();
                         }
                     } else {
-                        Toast.makeText(context, context.getString(R.string.empty_comment), Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, context.getString(R.string.empty_comment),
+                                Toast.LENGTH_LONG).show();
                     }
                 }
             });

@@ -1,8 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.timeline;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.data.local.db.user.User;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineItem;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Comment;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Interaction;
@@ -14,119 +13,313 @@ import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 
 public class TimelineViewModel extends ViewModel {
 
-    private MutableLiveData<List<TimelineItem>> mTypeLiveData;
-    private MutableLiveData<List<User>> mUsersLiveData;
-    private MutableLiveData<List<WorkflowUser>> mWorkflowUsersLiveData;
-    private MutableLiveData<List<Interaction>> mCommentsLiveData;
+    private MutableLiveData<Boolean> showLoading;
+    private MutableLiveData<TimelineUiData> mTimelineLiveData;
     private MutableLiveData<List<Comment>> mSubCommentsLiveData;
     private MutableLiveData<Interaction> mPostCommentsLiveData;
     private MutableLiveData<Comment> mPostSubCommentsLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
-    private TimelineRepository repository;
 
-    public TimelineViewModel(TimelineRepository repository) {
-        this.repository = repository;
+    private final CompositeDisposable mDisposables = new CompositeDisposable();
+
+    private TimelineRepository mRepository;
+    private String mToken;
+    private int mWebCount, mWebCompleted;
+    private String mStartDate, mEndDate;
+    private List<String> mSelectedUsers, mSelectedModules;
+    private List<String> mAllUsers, mAllModules;
+    private TimelineUiData mTimelineUiData;
+
+    protected TimelineViewModel(TimelineRepository repository) {
+        this.mRepository = repository;
     }
 
-    public void getTimeline(String auth, String start, String end,
-                            List<String> users, List<String> modules) {
-        repository.getTimeline(auth, start, end, users, modules).subscribe(this::onTimelineSuccess, this::onFailure);
+    protected void init(String token, String startDate, String endDate, List<String> modules) {
+        mToken = token;
+        setAllModules(modules);
+
+        mWebCount = mWebCompleted = 0;
+        mTimelineUiData = new TimelineUiData();
+
+        showLoading.setValue(true);
+
+        getUsers();
+        mWebCount++;
+
+        getWorkflowUsers();
+        mWebCount++;
+
+        updateTimeline(startDate, endDate, null, modules);
+        mWebCount++;
+        mWebCount++;
     }
 
-    public void getUsers(String auth) {
-        repository.getUsers(auth).subscribe(this::onUsersSuccess, this::onFailure);
+    private void updateTimeline(String startDate, String endDate, List<String> users,
+                                  List<String> modules) {
+        setStartDate(startDate);
+        setEndDate(endDate);
+        setSelectedUsers(users);
+        setSelectedModules(modules);
+
+        getTimeline();
+        getComments(); //todo verify mWebCount
     }
 
-    public void getWorkflowUsers(String auth) {
-        repository.getWorkflowUsers(auth).subscribe(this::onWorkflowUsersSuccess, this::onFailure);
+    protected void updateTimeline(String startDate, String endDate) {
+        updateTimeline(startDate, endDate, getSelectedUsers(), getSelectedModules());
     }
 
-    public void getComments(String auth) {
-        repository.getComments(auth).subscribe(this::onCommentsSuccess, this::onFailure);
+    protected void updateTimelineWithUsers(List<String> users) {
+        updateTimeline(getStartDate(), getEndDate(), users, getSelectedModules());
     }
 
-    public void getSubComment(String auth, int associate, int level) {
-        repository.getSubComment(auth, associate, level).subscribe(this::onSubCommentsSuccess, this::onFailure);
+    protected void updateTimelineWithModules(List<String> modules) {
+        updateTimeline(getStartDate(), getEndDate(), getSelectedUsers(), modules);
     }
 
-    public void postComment(String auth, int interactionId, int entity,
-                            String entityType, String description,
-                            int author) {
-        repository.postComment(auth, interactionId, entity, entityType, description, author).subscribe(this::onPostCommentSuccess, this::onFailure);
+    protected void updateTimeline() {
+        updateTimeline(getStartDate(), getEndDate(), getSelectedUsers(), getSelectedModules());
     }
 
-    public void postSubComment(String auth, int interaction,
-                               int associate, String description,
-                               int author) {
-        repository.postSubComment(auth, interaction, associate, description, author).subscribe(this::onPostSubCommentSuccess, this::onFailure);
+    /**
+     * Verifies whether all of the requested services are completed before dismissing the loading
+     * view.
+     */
+    private void updateCompleted() {
+        mWebCompleted++;
+
+        if (mWebCompleted >= mWebCount) {
+            showLoading.setValue(false);
+
+            mWebCount = mWebCompleted = 0;
+
+            mTimelineLiveData.setValue(mTimelineUiData);
+        }
+    }
+
+    protected List<WorkflowUser> getAllWorkflowUsers(){
+        return mTimelineUiData.getWorkflowUsers();
+    }
+
+    protected List<String> getAllUsers() {
+        if (mAllUsers == null) mAllUsers = new ArrayList<>();
+
+        return mAllUsers;
+    }
+
+    protected void setAllUsers(List<String> allUsers) {
+        this.mAllUsers = allUsers;
+    }
+
+    protected List<String> getAllModules() {
+        if (mAllModules == null) mAllModules = new ArrayList<>();
+
+        return mAllModules;
+    }
+
+    protected void setAllModules(List<String> allModules) {
+        this.mAllModules = allModules;
+    }
+
+    //region Filters
+    protected String getStartDate() {
+        return Utils.getFormattedDate(mStartDate, "yyyy-MM-dd", Utils.SERVER_DATE_FORMAT);
+    }
+
+    private void setStartDate(String startDate) {
+        this.mStartDate = startDate;
+    }
+
+    protected String getEndDate() {
+        return Utils.getFormattedDate(mEndDate, "yyyy-MM-dd", Utils.SERVER_DATE_FORMAT);
+    }
+
+    private void setEndDate(String endDate) {
+        this.mEndDate = endDate;
+    }
+
+    protected List<String> getSelectedUsers() {
+        if (mSelectedUsers == null) mSelectedUsers =  new ArrayList<>();
+
+        return mSelectedUsers;
+    }
+
+    private void setSelectedUsers(List<String> selectedUsers) {
+        this.mSelectedUsers = selectedUsers;
+    }
+
+    protected List<String> getSelectedModules() {
+        if (mSelectedModules == null) mSelectedModules = new ArrayList<>();
+
+        return mSelectedModules;
+    }
+
+    private void setSelectedModules(List<String> selectedModules) {
+        this.mSelectedModules = selectedModules;
+    }
+    //endregion
+
+    //region Repo Calls
+    //region Timeline
+    private void getTimeline() {
+        Disposable disposable = mRepository
+                .getTimeline(mToken, getStartDate(), getEndDate(), getSelectedUsers(),
+                        getSelectedModules())
+                .subscribe(this::onTimelineSuccess, this::onFailure);
+
+        mDisposables.add(disposable);
     }
 
     private void onTimelineSuccess(TimelineResponse timelineResponse) {
-        this.mTypeLiveData.setValue(timelineResponse.getList());
+        if (timelineResponse.getList() == null) {
+            mErrorLiveData.setValue(R.string.error);
+            return;
+        }
+
+        mTimelineUiData.setTimelineItems(timelineResponse.getList());
+
+        updateCompleted();
+    }
+    //endregion
+
+    //region Users
+    private void getUsers() {
+        Disposable disposable = mRepository.getUsers(mToken)
+                .subscribe(this::onUsersSuccess, this::onFailure);
+
+        mDisposables.add(disposable);
+
     }
 
     private void onUsersSuccess(UserResponse userResponse) {
-        mUsersLiveData.setValue(userResponse.getProfiles());
+        if (userResponse.getProfiles() == null) {
+            mErrorLiveData.setValue(R.string.error);
+            return;
+        }
+
+        mTimelineUiData.setUsers(userResponse.getProfiles());
+
+        updateCompleted();
+    }
+    //endregion
+
+    //region Workflow Users
+    private void getWorkflowUsers() {
+        Disposable disposable = mRepository.getWorkflowUsers(mToken)
+                .subscribe(this::onWorkflowUsersSuccess, this::onFailure);
+
+        mDisposables.add(disposable);
     }
 
     private void onWorkflowUsersSuccess(WorkflowUserResponse workflowUserResponse) {
-        mWorkflowUsersLiveData.setValue(workflowUserResponse.getUsers());
+        if (workflowUserResponse.getUsers() == null) {
+            mErrorLiveData.setValue(R.string.error);
+            return;
+        }
+
+        List<WorkflowUser> users = workflowUserResponse.getUsers();
+
+        for (WorkflowUser user : users) {
+            getAllUsers().add(String.valueOf(user.getId()));
+        }
+
+        mTimelineUiData.setWorkflowUsers(users);
+
+        updateCompleted();
+    }
+    //endregion
+
+    //region Comments
+    protected void getComments() {
+        showLoading.setValue(true);
+
+        Disposable disposable = mRepository.getComments(mToken)
+                .subscribe(this::onCommentsSuccess, this::onFailure);
+
+        mDisposables.add(disposable);
     }
 
     private void onCommentsSuccess(InteractionResponse interactionResponse) {
-        mCommentsLiveData.setValue(interactionResponse.getList());
+        mTimelineUiData.setInteractionComments(interactionResponse.getList());
+
+        updateCompleted();
+    }
+    //endregion
+
+    //region Sub-Comment
+    public void getSubComment(int associate, int level) {
+        showLoading.setValue(true);
+
+        Disposable disposable = mRepository.getSubComment(mToken, associate, level)
+                .subscribe(this::onSubCommentsSuccess, this::onFailure);
+
+        mDisposables.add(disposable);
     }
 
     private void onSubCommentsSuccess(SubCommentsResponse subCommentsResponse) {
+        showLoading.setValue(false);
         mSubCommentsLiveData.setValue(subCommentsResponse.getList());
+    }
+    //endregion
+
+    //region Post Comment
+    public void postComment(int interactionId, int entity, String entityType, String description,
+                               int author) {
+        showLoading.setValue(true);
+
+        Disposable disposable = mRepository
+                .postComment(mToken, interactionId, entity, entityType, description, author)
+                .subscribe(this::onPostCommentSuccess, this::onFailure);
+
+        mDisposables.add(disposable);
     }
 
     private void onPostCommentSuccess(PostCommentResponse postCommentResponse) {
+        showLoading.setValue(false);
         mPostCommentsLiveData.setValue(postCommentResponse.getInteraction());
+    }
+    //endregion
+
+    //region Post Sub-Comment
+    public void postSubComment(int interaction, int associate, String description, int author) {
+        showLoading.setValue(true);
+
+        Disposable disposable = mRepository
+                .postSubComment(mToken, interaction, associate, description, author)
+                .subscribe(this::onPostSubCommentSuccess, this::onFailure);
+
+        mDisposables.add(disposable);
     }
 
     private void onPostSubCommentSuccess(PostSubCommentResponse postSubCommentResponse) {
+        showLoading.setValue(false);
         mPostSubCommentsLiveData.setValue(postSubCommentResponse.getComment());
     }
+    //endregion
 
     private void onFailure(Throwable throwable) {
+        showLoading.setValue(false);
         mErrorLiveData.setValue(R.string.failure_connect);
     }
+    //endregion
 
-    protected LiveData<List<TimelineItem>> getObservableTimeline() {
-        if (mTypeLiveData == null) {
-            mTypeLiveData = new MutableLiveData<>();
+    //region LiveData Declarations
+    protected LiveData<TimelineUiData> getObservableTimeline() {
+        if (mTimelineLiveData == null) {
+            mTimelineLiveData = new MutableLiveData<>();
         }
-        return mTypeLiveData;
-    }
-
-    protected LiveData<List<User>> getObservableUsers() {
-        if (mUsersLiveData == null) {
-            mUsersLiveData = new MutableLiveData<>();
-        }
-        return mUsersLiveData;
-    }
-
-    protected LiveData<List<WorkflowUser>> getObservableWorkflowUsers() {
-        if (mWorkflowUsersLiveData == null) {
-            mWorkflowUsersLiveData = new MutableLiveData<>();
-        }
-        return mWorkflowUsersLiveData;
-    }
-
-    protected LiveData<List<Interaction>> getObservableComments() {
-        if (mCommentsLiveData == null) {
-            mCommentsLiveData = new MutableLiveData<>();
-        }
-        return mCommentsLiveData;
+        return mTimelineLiveData;
     }
 
     public LiveData<List<Comment>> getObservableSubComments() {
@@ -157,6 +350,13 @@ public class TimelineViewModel extends ViewModel {
         return mErrorLiveData;
     }
 
+    protected LiveData<Boolean> getObservableShowLoading() {
+        if (showLoading == null) {
+            showLoading = new MutableLiveData<>();
+        }
+        return showLoading;
+    }
+
     public void clearSubComments() {
         mSubCommentsLiveData = new MutableLiveData<>();
     }
@@ -168,4 +368,11 @@ public class TimelineViewModel extends ViewModel {
     public void clearPostSubComments() {
         mPostSubCommentsLiveData = new MutableLiveData<>();
     }
+    //endregion
+
+    @Override
+    protected void onCleared() {
+        mDisposables.clear();
+    }
+
 }

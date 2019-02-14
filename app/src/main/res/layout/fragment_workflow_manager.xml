@@ -197,21 +197,11 @@
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
-                <ImageView
-                    android:id="@+id/img_analytics"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_more_vert_black_24dp"
-                    android:tint="@color/detailsColor" />
-
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_centerVertical="true"
                     android:layout_marginStart="10dp"
-                    android:layout_toStartOf="@id/img_analytics"
                     android:layout_toEndOf="@+id/tv_analytics"
                     android:background="@color/detailsColor" />
 
@@ -219,16 +209,17 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="310dp"
+                android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:orientation="vertical">
 
                 <LinearLayout
-                    android:layout_width="310dp"
+                    android:layout_width="match_parent"
                     android:layout_height="155dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
                     android:clipToPadding="false"
-                    android:orientation="horizontal"
-                    android:weightSum="2">
+                    android:orientation="horizontal">
 
                     <androidx.cardview.widget.CardView
                         android:id="@+id/btn_pending_approval"
@@ -246,9 +237,10 @@
                             android:orientation="vertical">
 
                             <ImageView
-                                android:layout_width="50dp"
-                                android:layout_height="50dp"
-                                android:src="@drawable/ic_access_time_black_24dp"
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:layout_margin="10dp"
+                                android:src="@drawable/ic_edit_black_24dp"
                                 android:tint="@color/selected_filter" />
 
                             <FrameLayout
@@ -267,9 +259,9 @@
                                     android:layout_gravity="center"
                                     android:background="@drawable/tv_round_bg"
                                     android:padding="5dp"
-                                    android:text="@string/pending_approval"
+                                    android:text="@string/pending"
                                     android:textColor="@color/text_orange"
-                                    android:textSize="12sp" />
+                                    android:textStyle="bold" />
 
                             </FrameLayout>
 
@@ -307,9 +299,10 @@
                             android:orientation="vertical">
 
                             <ImageView
-                                android:layout_width="50dp"
-                                android:layout_height="50dp"
-                                android:src="@drawable/ic_access_time_black_24dp"
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:layout_margin="10dp"
+                                android:src="@drawable/ic_view_list_black_24dp"
                                 android:tint="@color/selected_filter" />
 
                             <FrameLayout
@@ -330,7 +323,7 @@
                                     android:padding="5dp"
                                     android:text="@string/workflows"
                                     android:textColor="@color/text_yellow"
-                                    android:textSize="12sp" />
+                                    android:textStyle="bold" />
 
                             </FrameLayout>
 
@@ -402,11 +395,12 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_width="310dp"
+                    android:layout_width="match_parent"
                     android:layout_height="155dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
                     android:clipToPadding="false"
-                    android:orientation="horizontal"
-                    android:weightSum="2">
+                    android:orientation="horizontal">
 
                     <androidx.cardview.widget.CardView
                         android:id="@+id/btn_out_of_time"
@@ -424,8 +418,9 @@
                             android:orientation="vertical">
 
                             <ImageView
-                                android:layout_width="50dp"
-                                android:layout_height="50dp"
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:layout_margin="10dp"
                                 android:src="@drawable/ic_access_time_black_24dp"
                                 android:tint="@color/selected_filter" />
 
@@ -447,7 +442,7 @@
                                     android:padding="5dp"
                                     android:text="@string/out_of_time"
                                     android:textColor="@color/black"
-                                    android:textSize="12sp" />
+                                    android:textStyle="bold" />
 
                             </FrameLayout>
 
@@ -479,9 +474,10 @@
                             android:orientation="vertical">
 
                             <ImageView
-                                android:layout_width="50dp"
-                                android:layout_height="50dp"
-                                android:src="@drawable/ic_access_time_black_24dp"
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:layout_margin="10dp"
+                                android:src="@drawable/ic_autorenew_black_24dp"
                                 android:tint="@color/selected_filter" />
 
                             <FrameLayout
@@ -502,7 +498,7 @@
                                     android:padding="5dp"
                                     android:text="@string/updated"
                                     android:textColor="@color/black"
-                                    android:textSize="12sp" />
+                                    android:textStyle="bold" />
 
                             </FrameLayout>
 
@@ -542,21 +538,11 @@
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
-                <ImageView
-                    android:id="@+id/img_overview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_more_vert_black_24dp"
-                    android:tint="@color/detailsColor" />
-
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_centerVertical="true"
                     android:layout_marginStart="10dp"
-                    android:layout_toStartOf="@id/img_overview"
                     android:layout_toEndOf="@+id/tv_overview"
                     android:background="@color/detailsColor" />
 
@@ -565,8 +551,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
                 android:orientation="horizontal"
                 android:weightSum="2">
 
@@ -599,9 +585,9 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
+                android:layout_marginStart="16dp"
                 android:layout_marginTop="5dp"
-                android:layout_marginEnd="15dp"
+                android:layout_marginEnd="16dp"
                 android:layout_marginBottom="10dp"
                 app:cardCornerRadius="1dp"
                 app:cardElevation="5dp">
@@ -625,9 +611,9 @@
                         android:paddingBottom="30dp">
 
                         <ImageView
-                            android:layout_width="70dp"
-                            android:layout_height="70dp"
-                            android:src="@drawable/ic_access_time_black_24dp" />
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:src="@drawable/ic_edit_black_24dp" />
 
                         <TextView
                             android:id="@+id/tv_pending_count"
@@ -662,21 +648,19 @@
                         android:paddingBottom="30dp">
 
                         <ImageView
-                            android:layout_width="70dp"
-                            android:layout_height="70dp"
-                            android:src="@drawable/ic_access_time_black_24dp" />
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:src="@drawable/ic_view_list_black_24dp" />
 
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content">
 
-                            <View
+                            <Space
                                 android:id="@+id/separator2"
                                 android:layout_width="15dp"
                                 android:layout_height="1dp"
                                 android:layout_centerHorizontal="true"
-                                android:layout_marginTop="27dp"
-                                android:background="@color/transparent"
                                 android:padding="5dp" />
 
                             <LinearLayout
@@ -756,24 +740,13 @@
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
-                <ImageView
-                    android:id="@+id/img_pendingmore"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_more_vert_black_24dp"
-                    android:tint="@color/detailsColor" />
-
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_centerVertical="true"
                     android:layout_marginStart="10dp"
-                    android:layout_toStartOf="@id/img_pendingmore"
                     android:layout_toEndOf="@+id/tv_pendingtitle"
                     android:background="@color/detailsColor" />
-
             </RelativeLayout>
 
             <androidx.recyclerview.widget.RecyclerView

@@ -28,12 +28,10 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
     private final int VIEW_PROG = 0;
 
     private WorkflowFragmentInterface anInterface;
-    private boolean firstLoad;
 
     public WorkflowExpandableAdapter(WorkflowFragmentInterface anInterface) {
         super(WorkflowExpandableAdapter.DIFF_CALLBACK);
         this.anInterface = anInterface;
-        this.firstLoad = true;
         this.expandedItems = new ArrayMap<>();
         this.checkedItems = new ArrayMap<>();
     }

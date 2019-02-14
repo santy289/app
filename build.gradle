@@ -6,7 +6,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.0'
+        classpath 'com.android.tools.build:gradle:3.3.1'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0'
         // NOTE: Do not place your application dependencies here; they belong
@@ -39,8 +39,8 @@ ext {
     retrofitUrlInterceptorVersion   = "1.4.0"
     fileChooser                     = "1.1.10"
     jsonWebTokenVersion             = "1.1.1"
-    roomVersion                     = "2.1.0-alpha03"
-    workManager                     = "1.0.0-alpha12"
+    roomVersion                     = "2.1.0-alpha04"
+    workManager                     = "1.0.0-beta05"
     circleImageViewVersion          = "2.2.0"
     glideVersion                    = "4.7.1"
     picassoVersion                  = '2.71828'

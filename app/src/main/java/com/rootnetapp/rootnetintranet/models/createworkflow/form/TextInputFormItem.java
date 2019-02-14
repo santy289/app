@@ -43,7 +43,7 @@ public class TextInputFormItem extends BaseFormItem {
 
     @Nullable
     public String getValue() {
-        return value;
+        return value == null ? null : value.trim(); //remove whitespaces at the start and at the end
     }
 
     public void setValue(@Nullable String value) {

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.rootnetapp.rootnetintranet">
 
     <!-- Network related permissions -->
@@ -21,10 +22,12 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".ui.main.MainActivity"
             android:label="@string/title_activity_main"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
@@ -59,6 +62,7 @@
         <activity
             android:name=".ui.quickactions.QuickActionsActivity"
             android:label="@string/quick_actions_activity_title"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:theme="@style/AppTheme"
             android:screenOrientation="portrait"/>
         <activity
@@ -69,6 +73,7 @@
         <activity
             android:name=".ui.workflowdetail.WorkflowDetailActivity"
             android:parentActivityName=".ui.main.MainActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:label="@string/title_activity_edit_profile"
             android:theme="@style/AppTheme"
             android:screenOrientation="portrait"/>
@@ -87,11 +92,21 @@
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
-        <service android:name=".services.websocket.WebSocketService">
-        </service>
 
-        <service android:name=".services.websocket.WebSocketIntentService">
-        </service>
+        <service android:name=".services.websocket.WebSocketService" />
+
+        <service
+            android:name=".services.websocket.WebSocketIntentService"
+            android:stopWithTask="false" />
+
+        <receiver
+            android:name=".services.websocket.RestartWebsocketReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="restartservice" />
+            </intent-filter>
+        </receiver>
 
         <provider
             android:name="androidx.core.content.FileProvider"

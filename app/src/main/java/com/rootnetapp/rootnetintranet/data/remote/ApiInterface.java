@@ -3,8 +3,8 @@ package com.rootnetapp.rootnetintranet.data.remote;
 import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.requests.approval.ApprovalRequest;
-import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
 import com.rootnetapp.rootnetintranet.models.requests.comment.PostCommentRequest;
+import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
 import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
@@ -105,6 +105,12 @@ public interface ApiInterface {
     @GET("profiles?enabled=all")
     Observable<ProfileResponse> getProfiles(@Header("Authorization") String authorization);
 
+
+    @Headers({"Domain-Name: api"})
+    @GET("profiles?")
+    Observable<ProfileResponse> getProfiles(@Header("Authorization") String authorization,
+                                            @Query("enabled") boolean enabled);
+
     @Headers({"Domain-Name: api"})
     @PATCH("profiles/{id}")
     @FormUrlEncoded
@@ -125,14 +131,24 @@ public interface ApiInterface {
 
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows?")
+    @GET("intranet/workflows?order=%7B%22desc%22:true,%22column%22:%22updated%22%7D")
     Observable<WorkflowResponseDb> getWorkflowsDb(@Header("Authorization") String authorization,
                                                   @Query("limit") int limit,
                                                   @Query("open") boolean open,
                                                   @Query("page") int page,
                                                   @Query("workflow_type") boolean showTypeDetails);
+
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?")
+    Observable<WorkflowResponseDb> searchWorkflowsDb(@Header("Authorization") String authorization,
+                                                  @Query("limit") int limit,
+                                                  @Query("open") boolean open,
+                                                  @Query("page") int page,
+                                                  @Query("workflow_type") boolean showTypeDetails,
+                                                  @Query("query") String searchText);
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?order=%7B%22desc%22:true,%22column%22:%22updated%22%7D")
     Observable<WorkflowResponseDb> getWorkflowsBySearchQuery(@Header("Authorization") String authorization,
                                                              @Query("limit") int limit,
                                                              @Query("page") int page,
@@ -176,7 +192,6 @@ public interface ApiInterface {
                                                            @Query("open") boolean open,
                                                            @Query("page") int page,
                                                            @Query("workflow_type") boolean showTypeDetails,
-                                                           @Query("responsible_id") int profileId,
                                                            @Query("workflow_metadata") String metaData,
                                                            @Query("workflow_type_id") int workflowTypeId);
 
@@ -194,7 +209,7 @@ public interface ApiInterface {
     Observable<WorkflowTypesResponse> getWorkflowTypes(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows/types?all_versions=true")
+    @GET("intranet/workflows/types?all_versions=true&filter_counter_status=true")
     Observable<WorkflowTypeDbResponse> getWorkflowTypesDb(@Header("Authorization") String authorization);
 
 
@@ -251,6 +266,11 @@ public interface ApiInterface {
     Observable<CreateWorkflowResponse> createWorkflow(@Header("Authorization") String authorization,
                                                       @Body CreateRequest body);
 
+    @Headers({"Domain-Name: api", "Content-Type: application/json;charset=UTF-8"})
+    @POST("intranet/workflows")
+    Observable<CreateWorkflowResponse> createWorkflow(@Header("Authorization") String authorization,
+                                                      @Body Map<String, Object> body);
+
     @Headers({"Domain-Name: api"})
     @POST("intranet/workflows")
     Observable<CreateWorkflowResponse> createWorkflow(@Header("Authorization") String authorization,
@@ -262,6 +282,12 @@ public interface ApiInterface {
     Observable<CreateWorkflowResponse> editWorkflow(@Header("Authorization") String authorization,
                                                     @Path("id") int workflowId,
                                                     @Body EditRequest body);
+
+    @Headers({"Domain-Name: api", "Content-Type: application/json;charset=UTF-8"})
+    @PATCH("intranet/workflows/{id}")
+    Observable<CreateWorkflowResponse> editWorkflow(@Header("Authorization") String authorization,
+                                                    @Path("id") int workflowId,
+                                                    @Body Map<String, Object> body);
 
     @Headers({"Domain-Name: api"})
     @POST("upload/file")

@@ -128,7 +128,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
             if (null != data) {
                 //TODO mejorar toast
                 Utils.hideLoading();
-                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
+//                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
             }
         });
 

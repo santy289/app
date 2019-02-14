@@ -1,9 +1,11 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflowtype;
 
 import com.rootnetapp.rootnetintranet.models.responses.workflows.presets.Preset;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.squareup.moshi.Json;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.room.ColumnInfo;
@@ -14,9 +16,14 @@ import androidx.room.PrimaryKey;
 
 @Entity(indices = {@Index("id")})
 public class WorkflowTypeDb {
+
     @PrimaryKey
     @Json(name = "id")
     private int id;
+
+    @Json(name = "original_id")
+    @ColumnInfo(name = "original_id")
+    private int originalId;
 
     @Json(name = "name")
     private String name;
@@ -42,6 +49,14 @@ public class WorkflowTypeDb {
     @Json(name = "category")
     private int category;
 
+    @ColumnInfo(name = "version")
+    @Json(name = "version")
+    private int version;
+
+    @ColumnInfo(name = "define_roles")
+    @Json(name = "define_roles")
+    private boolean defineRoles;
+
     @Ignore
     @Json(name = "status")
     private List<Status> status = null;
@@ -54,12 +69,28 @@ public class WorkflowTypeDb {
     @Json(name = "presets")
     private List<Preset> presets = null;
 
+    @Ignore
+    @Json(name = "role_approvers")
+    private List<Integer> roleApprovers = null;
+
+    @Ignore
+    @Json(name = "default_role_approvers")
+    private List<DefaultRoleApprover> defaultRoleApprovers = null;
+
     public int getId() {
         return id;
     }
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getOriginalId() {
+        return originalId;
+    }
+
+    public void setOriginalId(int originalId) {
+        this.originalId = originalId;
     }
 
     public String getName() {
@@ -110,6 +141,14 @@ public class WorkflowTypeDb {
         this.active = active;
     }
 
+    public boolean isDefineRoles() {
+        return defineRoles;
+    }
+
+    public void setDefineRoles(boolean defineRoles) {
+        this.defineRoles = defineRoles;
+    }
+
     public List<Status> getStatus() {
         return status;
     }
@@ -140,5 +179,51 @@ public class WorkflowTypeDb {
 
     public void setPresets(List<Preset> presets) {
         this.presets = presets;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
+    public List<Integer> getRoleApprovers() {
+        return roleApprovers;
+    }
+
+    public void setRoleApprovers(List<Integer> roleApprovers) {
+        this.roleApprovers = roleApprovers;
+    }
+
+    public List<DefaultRoleApprover> getDefaultRoleApprovers() {
+        return defaultRoleApprovers;
+    }
+
+    public void setDefaultRoleApprovers(List<DefaultRoleApprover> defaultRoleApprovers) {
+        this.defaultRoleApprovers = defaultRoleApprovers;
+    }
+
+    public List<Approver> getDistinctApprovers() {
+        List<Approver> list = new ArrayList<>();
+
+        for (Status status : getStatus()) {
+            for (Approver approver : status.getApproversList()) {
+                if (!list.contains(approver)) list.add(approver);
+            }
+        }
+
+        return list;
+    }
+
+    public List<Integer> getRoleApproverProfileIds(int roleId){
+        List<Integer> profileIds = new ArrayList<>();
+
+        for (DefaultRoleApprover roleApprover : getDefaultRoleApprovers()) {
+            if (roleApprover.getRoleId() == roleId) profileIds.add(roleApprover.getProfileId());
+        }
+
+        return profileIds;
     }
 }

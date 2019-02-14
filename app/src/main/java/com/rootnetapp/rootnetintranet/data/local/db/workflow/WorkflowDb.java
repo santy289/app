@@ -96,6 +96,10 @@ public class WorkflowDb {
     @Json(name = "workflow_type_id")
     private int workflowTypeId;
 
+    @ColumnInfo(name = "workflow_type_original_id")
+    @Json(name = "workflow_type_original_id")
+    private int workflowTypeOriginalId;
+
 //-----------------
 
     @Ignore
@@ -156,6 +160,14 @@ public class WorkflowDb {
 
     public void setWorkflowType(WorkflowTypeDb workflowType) {
         this.workflowType = workflowType;
+    }
+
+    public int getWorkflowTypeOriginalId() {
+        return workflowTypeOriginalId;
+    }
+
+    public void setWorkflowTypeOriginalId(int workflowTypeOriginalId) {
+        this.workflowTypeOriginalId = workflowTypeOriginalId;
     }
 
     public List<Integer> getPendingApproval() {

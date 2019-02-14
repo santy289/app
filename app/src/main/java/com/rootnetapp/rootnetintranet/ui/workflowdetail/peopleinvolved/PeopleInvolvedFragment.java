@@ -14,6 +14,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.Profi
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailPeopleInvolvedBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved.adapters.PeopleInvolvedAdapter;
 
 import java.util.List;
@@ -35,14 +36,16 @@ public class PeopleInvolvedFragment extends Fragment {
     private PeopleInvolvedViewModel peopleInvolvedViewModel;
     private FragmentWorkflowDetailPeopleInvolvedBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
+    private BasePeopleInvolvedFragmentInterface mBasePeopleInvolvedFragmentInterface;
 
     public PeopleInvolvedFragment() {
         // Required empty public constructor
     }
 
-    public static PeopleInvolvedFragment newInstance(WorkflowListItem item) {
+    public static PeopleInvolvedFragment newInstance(BasePeopleInvolvedFragmentInterface anInterface, WorkflowListItem item) {
         PeopleInvolvedFragment fragment = new PeopleInvolvedFragment();
         fragment.mWorkflowListItem = item;
+        fragment.mBasePeopleInvolvedFragmentInterface = anInterface;
         return fragment;
     }
 
@@ -63,6 +66,7 @@ public class PeopleInvolvedFragment extends Fragment {
         String token = "Bearer " + prefs.getString("token", "");
 
         subscribe();
+        setOnClickListeners();
 
         peopleInvolvedViewModel.initDetails(token, mWorkflowListItem);
 
@@ -77,6 +81,13 @@ public class PeopleInvolvedFragment extends Fragment {
         peopleInvolvedViewModel.updateProfilesInvolved.observe(this, this::updateProfilesInvolved);
         peopleInvolvedViewModel.hideProfilesInvolvedList
                 .observe(this, this::hideProfilesInvolvedList);
+    }
+
+    private void setOnClickListeners() {
+        mBinding.btnEdit.setOnClickListener(v -> {
+            mBasePeopleInvolvedFragmentInterface
+                    .showFragment(CreateWorkflowFragment.newInstance(mWorkflowListItem), true);
+        });
     }
 
     @UiThread

@@ -6,10 +6,10 @@ import com.rootnetapp.rootnetintranet.databinding.FormItemTextInputBinding;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-public class TextInputViewHolder extends RecyclerView.ViewHolder {
+class TextInputViewHolder extends RecyclerView.ViewHolder {
 
     private final FormItemTextInputBinding mBinding;
-    private RecyclerView.LayoutParams mRootParams;
+    private final RecyclerView.LayoutParams mRootParams;
 
     public TextInputViewHolder(FormItemTextInputBinding binding) {
         super(binding.getRoot());

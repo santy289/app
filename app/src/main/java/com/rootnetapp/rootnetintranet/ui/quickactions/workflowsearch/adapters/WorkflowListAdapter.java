@@ -9,39 +9,38 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.databinding.WorkflowSearchItemBinding;
 import com.rootnetapp.rootnetintranet.ui.quickactions.workflowsearch.WorkflowSearchFragmentInterface;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.annotation.Nullable;
+import androidx.paging.PagedList;
+import androidx.paging.PagedListAdapter;
+import androidx.recyclerview.widget.DiffUtil;
 
-public class WorkflowListAdapter extends RecyclerView.Adapter<WorkflowListViewHolder> {
-
-    //todo remove this and replace with WorkflowExpandableAdapter OR add paging
-
-    private List<WorkflowListItem> workflows;
+public class WorkflowListAdapter extends PagedListAdapter<WorkflowListItem, WorkflowListViewHolder> {
     private final WorkflowSearchFragmentInterface mInterface;
 
     public WorkflowListAdapter(WorkflowSearchFragmentInterface anInterface) {
+        super(WorkflowListAdapter.DIFF_CALLBACK);
         this.mInterface = anInterface;
-        workflows = new ArrayList<>();
     }
 
-    public void addData(List<WorkflowListItem> workflows) {
-        int positionStart = this.workflows.size();
-
-        this.workflows.addAll(workflows);
-
-        int positionEnd = this.workflows.size() - 1;
-
-        notifyItemRangeInserted(positionStart, positionEnd);
-        getItemCount();
-    }
-
-    public void clearData(){
-        this.workflows = new ArrayList<>();
-        notifyDataSetChanged();
-    }
+    /**
+     * This DiffUtil implementation is the responsible to check if we already have the upcoming
+     * item in our data set or not. If it is the same the UI wont change but if we have new data
+     * then it will update the recycler view with the appropriate animation and data.
+     */
+    private static final DiffUtil.ItemCallback<WorkflowListItem> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<WorkflowListItem>() {
+                @Override
+                public boolean areItemsTheSame(
+                        @NonNull WorkflowListItem oldItem, @NonNull WorkflowListItem newItem) {
+                    return oldItem.getWorkflowId() == newItem.getWorkflowId();
+                }
+                @Override
+                public boolean areContentsTheSame(
+                        @NonNull WorkflowListItem oldItem, @NonNull WorkflowListItem newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
 
     @NonNull
     @Override
@@ -55,6 +54,11 @@ public class WorkflowListAdapter extends RecyclerView.Adapter<WorkflowListViewHo
 
     @Override
     public void onBindViewHolder(@NonNull WorkflowListViewHolder holder, int i) {
+        int count = getItemCount();
+        if (count < 1) {
+            //TODO handle empty list
+            return;
+        }
         WorkflowListItem item = getItem(i);
 
         holder.binding.getRoot().setOnClickListener(v -> {
@@ -74,14 +78,11 @@ public class WorkflowListAdapter extends RecyclerView.Adapter<WorkflowListViewHo
         } else {
             holder.binding.tvStatus.setText(context.getString(R.string.closed));
         }
+        holder.binding.executePendingBindings();
     }
 
     @Override
-    public int getItemCount() {
-        return workflows.size();
-    }
-
-    private WorkflowListItem getItem(int index) {
-        return workflows.get(index);
+    public void submitList(@Nullable PagedList<WorkflowListItem> pagedList) {
+        super.submitList(pagedList);
     }
 }

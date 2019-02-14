@@ -6,10 +6,10 @@ import com.rootnetapp.rootnetintranet.databinding.FormItemSingleChoiceBinding;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-public class SingleChoiceViewHolder extends RecyclerView.ViewHolder {
+class SingleChoiceViewHolder extends RecyclerView.ViewHolder {
 
     private final FormItemSingleChoiceBinding mBinding;
-    private RecyclerView.LayoutParams mRootParams;
+    private final RecyclerView.LayoutParams mRootParams;
 
     public SingleChoiceViewHolder(FormItemSingleChoiceBinding binding) {
         super(binding.getRoot());

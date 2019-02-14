@@ -71,9 +71,9 @@ public class SyncActivity extends AppCompatActivity {
         subscribeForLogin();
         final Observer<Boolean> syncObserver = ((Boolean data) -> {
             if (data) {
-                Toast.makeText(this, "Success", Toast.LENGTH_LONG).show();
+//                Toast.makeText(this, "Success", Toast.LENGTH_LONG).show();
             } else {
-                Toast.makeText(this, "Failure", Toast.LENGTH_LONG).show();
+//                Toast.makeText(this, "Failure", Toast.LENGTH_LONG).show();
             }
 
             syncHelper.clearDisposables();

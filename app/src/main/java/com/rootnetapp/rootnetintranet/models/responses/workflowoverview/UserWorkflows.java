@@ -3,7 +3,7 @@ package com.rootnetapp.rootnetintranet.models.responses.workflowoverview;
 
 import com.squareup.moshi.Json;
 
-public class MyWorkflows {
+public class UserWorkflows {
 
     @Json(name = "pending")
     private Pending pending;

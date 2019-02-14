@@ -38,21 +38,21 @@ public class WorkflowManagerViewModel extends ViewModel {
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<List<WorkflowDb>> mWorkflowListLiveData;
-    private MutableLiveData<List<WorkflowDb>> mMyPendingWorkflowsListLiveData;
-    private MutableLiveData<List<WorkflowDb>> mMyOpenWorkflowsListLiveData;
-    private MutableLiveData<List<WorkflowDb>> mMyClosedWorkflowsListLiveData;
-    private MutableLiveData<List<WorkflowDb>> mMyOutOfTimeWorkflowsListLiveData;
-    private MutableLiveData<List<WorkflowDb>> mMyUpdatedWorkflowsListLiveData;
+    private MutableLiveData<List<WorkflowDb>> mUserPendingWorkflowsListLiveData;
+    private MutableLiveData<List<WorkflowDb>> mUserOpenWorkflowsListLiveData;
+    private MutableLiveData<List<WorkflowDb>> mUserClosedWorkflowsListLiveData;
+    private MutableLiveData<List<WorkflowDb>> mUserOutOfTimeWorkflowsListLiveData;
+    private MutableLiveData<List<WorkflowDb>> mUserUpdatedWorkflowsListLiveData;
     private MutableLiveData<List<WorkflowDb>> mCompanyPendingWorkflowsListLiveData;
     private MutableLiveData<List<WorkflowDb>> mCompanyOpenWorkflowsListLiveData;
     private MutableLiveData<List<WorkflowDb>> mCompanyClosedWorkflowsListLiveData;
     private MutableLiveData<List<WorkflowDb>> mCompanyOutOfTimeWorkflowsListLiveData;
     private MutableLiveData<List<WorkflowDb>> mCompanyUpdatedWorkflowsListLiveData;
-    private MutableLiveData<Integer> mMyPendingCountLiveData;
-    private MutableLiveData<Integer> mMyOpenCountLiveData;
-    private MutableLiveData<Integer> mMyClosedCountLiveData;
-    private MutableLiveData<Integer> mMyOutOfTimeCountLiveData;
-    private MutableLiveData<Integer> mMyUpdatedCountLiveData;
+    private MutableLiveData<Integer> mUserPendingCountLiveData;
+    private MutableLiveData<Integer> mUserOpenCountLiveData;
+    private MutableLiveData<Integer> mUserClosedCountLiveData;
+    private MutableLiveData<Integer> mUserOutOfTimeCountLiveData;
+    private MutableLiveData<Integer> mUserUpdatedCountLiveData;
     private MutableLiveData<Integer> mCompanyPendingCountLiveData;
     private MutableLiveData<Integer> mCompanyOpenCountLiveData;
     private MutableLiveData<Integer> mCompanyClosedCountLiveData;
@@ -223,8 +223,8 @@ public class WorkflowManagerViewModel extends ViewModel {
     /**
      * Performs a request to the server to obtain the user's pending workflows.
      */
-    protected void getMyPendingWorkflows() {
-        if (Integer.parseInt(workflowOverviewResponse.getOverview().getMyWorkflows().getPending()
+    protected void getUserPendingWorkflows() {
+        if (Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getPending()
                 .getCount()) == 0) {
             //do not request if there is no data
             return;
@@ -238,25 +238,25 @@ public class WorkflowManagerViewModel extends ViewModel {
         showLoading.setValue(true);
         Disposable disposable = mRepository
                 .getWorkflowsByBaseFilters(mToken, options)
-                .subscribe(this::onMyPendingSuccess, this::onFailure);
+                .subscribe(this::onUserPendingSuccess, this::onFailure);
 
         mDisposables.add(disposable);
     }
 
     /**
      * Sets the LiveData that will update the UI and display a dialog with a list of the user's
-     * pending workflows. Callback of the {@link #getMyPendingWorkflows()} request when it's
+     * pending workflows. Callback of the {@link #getUserPendingWorkflows()} request when it's
      * successful.
      *
      * @param workflowResponseDb server response
      */
-    private void onMyPendingSuccess(WorkflowResponseDb workflowResponseDb) {
+    private void onUserPendingSuccess(WorkflowResponseDb workflowResponseDb) {
         showLoading.setValue(false);
 
         List<WorkflowDb> list = workflowResponseDb.getList();
         if (list == null) return;
 
-        mMyPendingWorkflowsListLiveData.setValue(list);
+        mUserPendingWorkflowsListLiveData.setValue(list);
     }
     //endregion
 
@@ -265,8 +265,8 @@ public class WorkflowManagerViewModel extends ViewModel {
     /**
      * Performs a request to the server to obtain the user's open workflows.
      */
-    protected void getMyOpenWorkflows() {
-        if (Integer.parseInt(workflowOverviewResponse.getOverview().getMyWorkflows().getOpen()
+    protected void getUserOpenWorkflows() {
+        if (Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getOpen()
                 .getCount()) == 0) {
             //do not request if there is no data
             return;
@@ -279,24 +279,24 @@ public class WorkflowManagerViewModel extends ViewModel {
         showLoading.setValue(true);
         Disposable disposable = mRepository
                 .getWorkflowsByBaseFilters(mToken, true, options)
-                .subscribe(this::onMyOpenSuccess, this::onFailure);
+                .subscribe(this::onUserOpenSuccess, this::onFailure);
 
         mDisposables.add(disposable);
     }
 
     /**
      * Sets the LiveData that will update the UI and display a dialog with a list of the user's open
-     * workflows. Callback of the {@link #getMyOpenWorkflows()} request when it's successful.
+     * workflows. Callback of the {@link #getUserOpenWorkflows()} request when it's successful.
      *
      * @param workflowResponseDb server response
      */
-    private void onMyOpenSuccess(WorkflowResponseDb workflowResponseDb) {
+    private void onUserOpenSuccess(WorkflowResponseDb workflowResponseDb) {
         showLoading.setValue(false);
 
         List<WorkflowDb> list = workflowResponseDb.getList();
         if (list == null) return;
 
-        mMyOpenWorkflowsListLiveData.setValue(list);
+        mUserOpenWorkflowsListLiveData.setValue(list);
     }
     //endregion
 
@@ -305,8 +305,8 @@ public class WorkflowManagerViewModel extends ViewModel {
     /**
      * Performs a request to the server to obtain the user's closed workflows.
      */
-    protected void getMyClosedWorkflows() {
-        if (Integer.parseInt(workflowOverviewResponse.getOverview().getMyWorkflows().getClosed()
+    protected void getUserClosedWorkflows() {
+        if (Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getClosed()
                 .getCount()) == 0) {
             //do not request if there is no data
             return;
@@ -319,25 +319,25 @@ public class WorkflowManagerViewModel extends ViewModel {
         showLoading.setValue(true);
         Disposable disposable = mRepository
                 .getWorkflowsByBaseFilters(mToken, false, options)
-                .subscribe(this::onMyClosedSuccess, this::onFailure);
+                .subscribe(this::onUserClosedSuccess, this::onFailure);
 
         mDisposables.add(disposable);
     }
 
     /**
      * Sets the LiveData that will update the UI and display a dialog with a list of the user's
-     * closed workflows. Callback of the {@link #getMyClosedWorkflows()} request when it's
+     * closed workflows. Callback of the {@link #getUserClosedWorkflows()} request when it's
      * successful.
      *
      * @param workflowResponseDb server response
      */
-    private void onMyClosedSuccess(WorkflowResponseDb workflowResponseDb) {
+    private void onUserClosedSuccess(WorkflowResponseDb workflowResponseDb) {
         showLoading.setValue(false);
 
         List<WorkflowDb> list = workflowResponseDb.getList();
         if (list == null) return;
 
-        mMyClosedWorkflowsListLiveData.setValue(list);
+        mUserClosedWorkflowsListLiveData.setValue(list);
     }
     //endregion
 
@@ -346,8 +346,8 @@ public class WorkflowManagerViewModel extends ViewModel {
     /**
      * Performs a request to the server to obtain the user's out of time workflows.
      */
-    protected void getMyOutOfTimeWorkflows() {
-        if (workflowOverviewResponse.getOverview().getMyWorkflows().getOutOfTime()
+    protected void getUserOutOfTimeWorkflows() {
+        if (workflowOverviewResponse.getOverview().getUserWorkflows().getOutOfTime()
                 .getCount() == 0) {
             //do not request if there is no data
             return;
@@ -361,25 +361,25 @@ public class WorkflowManagerViewModel extends ViewModel {
         showLoading.setValue(true);
         Disposable disposable = mRepository
                 .getWorkflowsByBaseFilters(mToken, options)
-                .subscribe(this::onMyOutOfTimeSuccess, this::onFailure);
+                .subscribe(this::onUserOutOfTimeSuccess, this::onFailure);
 
         mDisposables.add(disposable);
     }
 
     /**
      * Sets the LiveData that will update the UI and display a dialog with a list of the user's out
-     * of time workflows. Callback of the {@link #getMyOutOfTimeWorkflows()} request when it's
+     * of time workflows. Callback of the {@link #getUserOutOfTimeWorkflows()} request when it's
      * successful.
      *
      * @param workflowResponseDb server response
      */
-    private void onMyOutOfTimeSuccess(WorkflowResponseDb workflowResponseDb) {
+    private void onUserOutOfTimeSuccess(WorkflowResponseDb workflowResponseDb) {
         showLoading.setValue(false);
 
         List<WorkflowDb> list = workflowResponseDb.getList();
         if (list == null) return;
 
-        mMyOutOfTimeWorkflowsListLiveData.setValue(list);
+        mUserOutOfTimeWorkflowsListLiveData.setValue(list);
     }
     //endregion
 
@@ -388,8 +388,8 @@ public class WorkflowManagerViewModel extends ViewModel {
     /**
      * Performs a request to the server to obtain the user's updated workflows.
      */
-    protected void getMyUpdatedWorkflows() {
-        if (Integer.parseInt(workflowOverviewResponse.getOverview().getMyWorkflows().getUpdated()
+    protected void getUserUpdatedWorkflows() {
+        if (Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getUpdated()
                 .getCount()) == 0) {
             //do not request if there is no data
             return;
@@ -403,25 +403,25 @@ public class WorkflowManagerViewModel extends ViewModel {
         showLoading.setValue(true);
         Disposable disposable = mRepository
                 .getWorkflowsByBaseFilters(mToken, options)
-                .subscribe(this::onMyUpdatedSuccess, this::onFailure);
+                .subscribe(this::onUserUpdatedSuccess, this::onFailure);
 
         mDisposables.add(disposable);
     }
 
     /**
      * Sets the LiveData that will update the UI and display a dialog with a list of the user's
-     * updated workflows. Callback of the {@link #getMyUpdatedWorkflows()} request when it's
+     * updated workflows. Callback of the {@link #getUserUpdatedWorkflows()} request when it's
      * successful.
      *
      * @param workflowResponseDb server response
      */
-    private void onMyUpdatedSuccess(WorkflowResponseDb workflowResponseDb) {
+    private void onUserUpdatedSuccess(WorkflowResponseDb workflowResponseDb) {
         showLoading.setValue(false);
 
         List<WorkflowDb> list = workflowResponseDb.getList();
         if (list == null) return;
 
-        mMyUpdatedWorkflowsListLiveData.setValue(list);
+        mUserUpdatedWorkflowsListLiveData.setValue(list);
     }
     //endregion
     //endregion
@@ -653,16 +653,16 @@ public class WorkflowManagerViewModel extends ViewModel {
 
         workflowOverviewResponse = overviewResponse;
 
-        mMyPendingCountLiveData.setValue(Integer.valueOf(
-                overviewResponse.getOverview().getMyWorkflows().getPending().getCount()));
-        mMyOpenCountLiveData.setValue(Integer.valueOf(
-                overviewResponse.getOverview().getMyWorkflows().getOpen().getCount()));
-        mMyClosedCountLiveData.setValue(Integer.valueOf(
-                overviewResponse.getOverview().getMyWorkflows().getClosed().getCount()));
-        mMyOutOfTimeCountLiveData.setValue(
-                overviewResponse.getOverview().getMyWorkflows().getOutOfTime().getCount());
-        mMyUpdatedCountLiveData.setValue(Integer.valueOf(
-                overviewResponse.getOverview().getMyWorkflows().getUpdated().getCount()));
+        mUserPendingCountLiveData.setValue(Integer.valueOf(
+                overviewResponse.getOverview().getUserWorkflows().getPending().getCount()));
+        mUserOpenCountLiveData.setValue(Integer.valueOf(
+                overviewResponse.getOverview().getUserWorkflows().getOpen().getCount()));
+        mUserClosedCountLiveData.setValue(Integer.valueOf(
+                overviewResponse.getOverview().getUserWorkflows().getClosed().getCount()));
+        mUserOutOfTimeCountLiveData.setValue(
+                overviewResponse.getOverview().getUserWorkflows().getOutOfTime().getCount());
+        mUserUpdatedCountLiveData.setValue(Integer.valueOf(
+                overviewResponse.getOverview().getUserWorkflows().getUpdated().getCount()));
 
         mCompanyPendingCountLiveData.setValue(Integer.valueOf(
                 overviewResponse.getOverview().getCompanyWorkflows().getPending().getCount()));
@@ -763,74 +763,74 @@ public class WorkflowManagerViewModel extends ViewModel {
     }
 
     //region User Observables
-    protected LiveData<List<WorkflowDb>> getObservableMyPendingWorkflows() {
-        if (mMyPendingWorkflowsListLiveData == null) {
-            mMyPendingWorkflowsListLiveData = new MutableLiveData<>();
+    protected LiveData<List<WorkflowDb>> getObservableUserPendingWorkflows() {
+        if (mUserPendingWorkflowsListLiveData == null) {
+            mUserPendingWorkflowsListLiveData = new MutableLiveData<>();
         }
-        return mMyPendingWorkflowsListLiveData;
+        return mUserPendingWorkflowsListLiveData;
     }
 
-    protected LiveData<List<WorkflowDb>> getObservableMyOpenWorkflows() {
-        if (mMyOpenWorkflowsListLiveData == null) {
-            mMyOpenWorkflowsListLiveData = new MutableLiveData<>();
+    protected LiveData<List<WorkflowDb>> getObservableUserOpenWorkflows() {
+        if (mUserOpenWorkflowsListLiveData == null) {
+            mUserOpenWorkflowsListLiveData = new MutableLiveData<>();
         }
-        return mMyOpenWorkflowsListLiveData;
+        return mUserOpenWorkflowsListLiveData;
     }
 
-    protected LiveData<List<WorkflowDb>> getObservableMyClosedWorkflows() {
-        if (mMyClosedWorkflowsListLiveData == null) {
-            mMyClosedWorkflowsListLiveData = new MutableLiveData<>();
+    protected LiveData<List<WorkflowDb>> getObservableUserClosedWorkflows() {
+        if (mUserClosedWorkflowsListLiveData == null) {
+            mUserClosedWorkflowsListLiveData = new MutableLiveData<>();
         }
-        return mMyClosedWorkflowsListLiveData;
+        return mUserClosedWorkflowsListLiveData;
     }
 
-    protected LiveData<List<WorkflowDb>> getObservableMyOutOfTimeWorkflows() {
-        if (mMyOutOfTimeWorkflowsListLiveData == null) {
-            mMyOutOfTimeWorkflowsListLiveData = new MutableLiveData<>();
+    protected LiveData<List<WorkflowDb>> getObservableUserOutOfTimeWorkflows() {
+        if (mUserOutOfTimeWorkflowsListLiveData == null) {
+            mUserOutOfTimeWorkflowsListLiveData = new MutableLiveData<>();
         }
-        return mMyOutOfTimeWorkflowsListLiveData;
+        return mUserOutOfTimeWorkflowsListLiveData;
     }
 
-    protected LiveData<List<WorkflowDb>> getObservableMyUpdatedWorkflows() {
-        if (mMyUpdatedWorkflowsListLiveData == null) {
-            mMyUpdatedWorkflowsListLiveData = new MutableLiveData<>();
+    protected LiveData<List<WorkflowDb>> getObservableUserUpdatedWorkflows() {
+        if (mUserUpdatedWorkflowsListLiveData == null) {
+            mUserUpdatedWorkflowsListLiveData = new MutableLiveData<>();
         }
-        return mMyUpdatedWorkflowsListLiveData;
+        return mUserUpdatedWorkflowsListLiveData;
     }
 
-    protected LiveData<Integer> getObservableMyPendingCount() {
-        if (mMyPendingCountLiveData == null) {
-            mMyPendingCountLiveData = new MutableLiveData<>();
+    protected LiveData<Integer> getObservableUserPendingCount() {
+        if (mUserPendingCountLiveData == null) {
+            mUserPendingCountLiveData = new MutableLiveData<>();
         }
-        return mMyPendingCountLiveData;
+        return mUserPendingCountLiveData;
     }
 
-    protected LiveData<Integer> getObservableMyOpenCount() {
-        if (mMyOpenCountLiveData == null) {
-            mMyOpenCountLiveData = new MutableLiveData<>();
+    protected LiveData<Integer> getObservableUserOpenCount() {
+        if (mUserOpenCountLiveData == null) {
+            mUserOpenCountLiveData = new MutableLiveData<>();
         }
-        return mMyOpenCountLiveData;
+        return mUserOpenCountLiveData;
     }
 
-    protected LiveData<Integer> getObservableMyClosedCount() {
-        if (mMyClosedCountLiveData == null) {
-            mMyClosedCountLiveData = new MutableLiveData<>();
+    protected LiveData<Integer> getObservableUserClosedCount() {
+        if (mUserClosedCountLiveData == null) {
+            mUserClosedCountLiveData = new MutableLiveData<>();
         }
-        return mMyClosedCountLiveData;
+        return mUserClosedCountLiveData;
     }
 
-    protected LiveData<Integer> getObservableMyOutOfTimeCount() {
-        if (mMyOutOfTimeCountLiveData == null) {
-            mMyOutOfTimeCountLiveData = new MutableLiveData<>();
+    protected LiveData<Integer> getObservableUserOutOfTimeCount() {
+        if (mUserOutOfTimeCountLiveData == null) {
+            mUserOutOfTimeCountLiveData = new MutableLiveData<>();
         }
-        return mMyOutOfTimeCountLiveData;
+        return mUserOutOfTimeCountLiveData;
     }
 
-    protected LiveData<Integer> getObservableMyUpdatedCount() {
-        if (mMyUpdatedCountLiveData == null) {
-            mMyUpdatedCountLiveData = new MutableLiveData<>();
+    protected LiveData<Integer> getObservableUserUpdatedCount() {
+        if (mUserUpdatedCountLiveData == null) {
+            mUserUpdatedCountLiveData = new MutableLiveData<>();
         }
-        return mMyUpdatedCountLiveData;
+        return mUserUpdatedCountLiveData;
     }
     //endregion
 

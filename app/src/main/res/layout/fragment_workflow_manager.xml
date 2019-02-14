@@ -222,7 +222,7 @@
                     android:orientation="horizontal">
 
                     <androidx.cardview.widget.CardView
-                        android:id="@+id/btn_my_pending_approval"
+                        android:id="@+id/btn_user_pending_approval"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_margin="3dp"
@@ -266,7 +266,7 @@
                             </FrameLayout>
 
                             <TextView
-                                android:id="@+id/tv_my_pending_count"
+                                android:id="@+id/tv_user_pending_count"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textColor="@color/colorPrimaryDark"
@@ -284,7 +284,7 @@
                     </androidx.cardview.widget.CardView>
 
                     <androidx.cardview.widget.CardView
-                        android:id="@+id/btn_my_workflows"
+                        android:id="@+id/btn_user_workflows"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_margin="3dp"
@@ -341,7 +341,7 @@
                                     android:paddingEnd="5dp" />
 
                                 <LinearLayout
-                                    android:id="@+id/ll_my_open_workflows"
+                                    android:id="@+id/ll_user_open_workflows"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_toStartOf="@id/separator3"
@@ -349,7 +349,7 @@
                                     android:orientation="vertical">
 
                                     <TextView
-                                        android:id="@+id/tv_my_open_count"
+                                        android:id="@+id/tv_user_open_count"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:textColor="@color/text_light_green"
@@ -366,7 +366,7 @@
                                 </LinearLayout>
 
                                 <LinearLayout
-                                    android:id="@+id/ll_my_closed_workflows"
+                                    android:id="@+id/ll_user_closed_workflows"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_toEndOf="@id/separator3"
@@ -374,7 +374,7 @@
                                     android:orientation="vertical">
 
                                     <TextView
-                                        android:id="@+id/tv_my_closed_count"
+                                        android:id="@+id/tv_user_closed_count"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:textColor="@color/text_light_red"
@@ -403,7 +403,7 @@
                     android:orientation="horizontal">
 
                     <androidx.cardview.widget.CardView
-                        android:id="@+id/btn_my_out_of_time"
+                        android:id="@+id/btn_user_out_of_time"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_margin="3dp"
@@ -447,7 +447,7 @@
                             </FrameLayout>
 
                             <TextView
-                                android:id="@+id/tv_my_out_of_time_count"
+                                android:id="@+id/tv_user_out_of_time_count"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textColor="@color/text_red"
@@ -459,7 +459,7 @@
                     </androidx.cardview.widget.CardView>
 
                     <androidx.cardview.widget.CardView
-                        android:id="@+id/btn_my_updated"
+                        android:id="@+id/btn_user_updated"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_margin="3dp"
@@ -503,7 +503,7 @@
                             </FrameLayout>
 
                             <TextView
-                                android:id="@+id/tv_my_updated_count"
+                                android:id="@+id/tv_user_updated_count"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textColor="@color/colorPrimaryDark"

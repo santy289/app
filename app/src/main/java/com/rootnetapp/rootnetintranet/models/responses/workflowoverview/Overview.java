@@ -6,16 +6,16 @@ import com.squareup.moshi.Json;
 public class Overview {
 
     @Json(name = "my_workflows")
-    private MyWorkflows myWorkflows;
+    private UserWorkflows userWorkflows;
     @Json(name = "company_workflows")
     private CompanyWorkflows companyWorkflows;
 
-    public MyWorkflows getMyWorkflows() {
-        return myWorkflows;
+    public UserWorkflows getUserWorkflows() {
+        return userWorkflows;
     }
 
-    public void setMyWorkflows(MyWorkflows myWorkflows) {
-        this.myWorkflows = myWorkflows;
+    public void setUserWorkflows(UserWorkflows userWorkflows) {
+        this.userWorkflows = userWorkflows;
     }
 
     public CompanyWorkflows getCompanyWorkflows() {

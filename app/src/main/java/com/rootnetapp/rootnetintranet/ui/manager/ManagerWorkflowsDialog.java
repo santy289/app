@@ -26,11 +26,11 @@ import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.D
 import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.COMPANY_OUT_OF_TIME;
 import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.COMPANY_PENDING;
 import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.COMPANY_UPDATED;
-import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.MY_CLOSED;
-import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.MY_OPEN;
-import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.MY_OUT_OF_TIME;
-import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.MY_PENDING;
-import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.MY_UPDATED;
+import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.USER_CLOSED;
+import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.USER_OPEN;
+import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.USER_OUT_OF_TIME;
+import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.USER_PENDING;
+import static com.rootnetapp.rootnetintranet.ui.manager.ManagerWorkflowsDialog.DialogType.USER_UPDATED;
 
 /**
  * Created by root on 19/04/18.
@@ -62,19 +62,19 @@ public class ManagerWorkflowsDialog extends DialogFragment {
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 
         switch (mDialogType) {
-            case MY_PENDING:
+            case USER_PENDING:
                 mBinding.square.setText(R.string.workflow_manager_user_pending_dialog_title);
                 break;
-            case MY_OPEN:
+            case USER_OPEN:
                 mBinding.square.setText(R.string.workflow_manager_user_open_dialog_title);
                 break;
-            case MY_CLOSED:
+            case USER_CLOSED:
                 mBinding.square.setText(R.string.workflow_manager_user_closed_dialog_title);
                 break;
-            case MY_OUT_OF_TIME:
+            case USER_OUT_OF_TIME:
                 mBinding.square.setText(R.string.workflow_manager_user_out_of_time_dialog_title);
                 break;
-            case MY_UPDATED:
+            case USER_UPDATED:
                 mBinding.square.setText(R.string.workflow_manager_user_updated_dialog_title);
                 break;
 
@@ -104,16 +104,16 @@ public class ManagerWorkflowsDialog extends DialogFragment {
     
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
-            MY_PENDING, MY_OPEN, MY_CLOSED, MY_OUT_OF_TIME, MY_UPDATED,
+            USER_PENDING, USER_OPEN, USER_CLOSED, USER_OUT_OF_TIME, USER_UPDATED,
             COMPANY_PENDING, COMPANY_OPEN, COMPANY_CLOSED, COMPANY_OUT_OF_TIME, COMPANY_UPDATED
     })
     public @interface DialogType {
 
-        int MY_PENDING = 0;
-        int MY_OPEN = 1;
-        int MY_CLOSED = 2;
-        int MY_OUT_OF_TIME = 3;
-        int MY_UPDATED = 4;
+        int USER_PENDING = 0;
+        int USER_OPEN = 1;
+        int USER_CLOSED = 2;
+        int USER_OUT_OF_TIME = 3;
+        int USER_UPDATED = 4;
 
         int COMPANY_PENDING = 5;
         int COMPANY_OPEN = 6;

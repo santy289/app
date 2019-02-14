@@ -35,10 +35,6 @@ public class WorkflowSearchViewModel extends ViewModel {
     private final CompositeDisposable mDisposables = new CompositeDisposable();
     private String mToken;
 
-    private int mPageNumber;
-    private String mQuery;
-    private boolean isLoading;
-
     public WorkflowSearchViewModel(WorkflowSearchRepository repository) {
         this.mRepository = repository;
         this.showLoading = new MutableLiveData<>();
@@ -54,7 +50,6 @@ public class WorkflowSearchViewModel extends ViewModel {
 
     protected void init(String token) {
         this.mToken = token;
-        mPageNumber = 1;
         setWorkflowListNoFilters(token);
     }
 
@@ -68,7 +63,6 @@ public class WorkflowSearchViewModel extends ViewModel {
                 mRepository.getObservableWorkflowList(),
                 workflowResponseDb -> {
                     // transform WorkflowDb list to WorkflowListItem list
-                    isLoading = false;
                     showBottomSheetLoading.setValue(false);
                     showLoading.setValue(false);
 
@@ -87,7 +81,6 @@ public class WorkflowSearchViewModel extends ViewModel {
         handleShowLoadingByRepo = Transformations.map(
                 mRepository.getObservableMessageError(),
                 show -> {
-                    isLoading = false;
                     showBottomSheetLoading.setValue(false);
                     showToastMessage.setValue(R.string.error);
                     return show;
@@ -176,80 +169,13 @@ public class WorkflowSearchViewModel extends ViewModel {
     }
 
     /**
-     * Retrieves the latest workflows without a search query.
-     */
-    private void getRecentWorkflowList() {
-        if (mPageNumber > 1) {
-            showBottomSheetLoading.setValue(true);
-        } else {
-            showLoading.setValue(true);
-        }
-
-        mRepository.getRecentWorkflows(mToken, mPageNumber);
-    }
-
-    /**
-     * Retrieve the workflows that match the text query. If the query is not set, retrieves the list
-     * without filtering.
-     *
-     * @param query text to search.
-     */
-    private void getWorkflowList(String query) {
-        isLoading = true;
-
-        mQuery = query;
-
-        if (mQuery == null || mQuery.isEmpty()) {
-            getRecentWorkflowList();
-            return;
-        }
-
-        if (mPageNumber > 1) {
-            showBottomSheetLoading.setValue(true);
-        } else {
-            showLoading.setValue(true);
-        }
-
-        mRepository.getWorkflowsBySearchQuery(mToken, mPageNumber, query);
-    }
-
-    /**
      * This should be called by the View when the user has commanded a new search action.
      *
      * @param query input by the user.
      */
     protected void performSearch(String query) {
-//        resetPageNumber();
-//        getWorkflowList(query);
-
         subscribeViewModelForQuery();
         mRepository.setQuerySearchList(mToken, query);
-    }
-
-    /**
-     * This should be called every time the RecyclerView or ScrollView detects that it has reached
-     * the bottom, thus it needs to fetch more items.
-     */
-    private void increasePageNumber() {
-        mPageNumber++;
-    }
-
-    /**
-     * This should be called every time that the search query is modified, so we can fetch the first
-     * items for the new query.
-     */
-    private void resetPageNumber() {
-        mPageNumber = 1;
-    }
-
-    /**
-     * The RecyclerView or ScrollView must check for this so they will not perform a request while
-     * another is still being executed.
-     *
-     * @return whether there is a request being processed.
-     */
-    protected boolean isLoading() {
-        return isLoading;
     }
 
     protected LiveData<Boolean> getObservableShowList() {

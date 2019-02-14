@@ -62,7 +62,7 @@ public interface WorkflowDbDao {
             "workflowdb.start, workflowdb.status, workflowdb.current_status, workflowdb.`end` " +
             "FROM workflowdb, workflowtypedb " +
             "WHERE workflowdb.workflow_type_id = workflowtypedb.id " +
-            "AND workflowdb.title LIKE '%' || :query || '%' " +
+            "AND (workflowdb.title LIKE '%' || :query || '%' OR WorkflowTypeDb.name LIKE '%' || :query || '%' OR workflowdb.description LIKE '%' || :query || '%' OR workflowdb.workflow_type_key LIKE '%' || :query || '%' OR workflowdb.full_name LIKE '%' || :query || '%') " +
             "ORDER BY workflowdb.updated_at DESC")
     public DataSource.Factory<Integer, WorkflowListItem> searchWorkflow(String query);
 

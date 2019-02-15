@@ -70,7 +70,6 @@ public class TimelineViewModel extends ViewModel {
         mToken = token;
 
         mWebCount = mWebCompleted = 0;
-        showLoading.setValue(true);
 
         mTimelineUiData = new TimelineUiData();
 
@@ -79,6 +78,8 @@ public class TimelineViewModel extends ViewModel {
         getUsers();
 
         getWorkflowUsers();
+
+        showLoading.setValue(false); //do not show loading on init
     }
 
     private void updateTimeline(String startDate, String endDate, List<String> users,

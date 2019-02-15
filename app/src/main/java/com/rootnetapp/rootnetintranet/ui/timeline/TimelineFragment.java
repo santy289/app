@@ -110,9 +110,9 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         mBinding.btnSelectDates.setOnClickListener(v -> selectDates());
         mBinding.btnShowMore.setOnClickListener(v -> showMoreClicked());
 
-        mBinding.imgFilter.setOnClickListener(view1 -> {
-            PopupWindow popupwindow_obj = popupMenu();
-            popupwindow_obj.showAsDropDown(mBinding.imgFilter, -40, 18);
+        mBinding.imgFilter.setOnClickListener(v -> {
+            PopupWindow popupWindow = createPopupMenu();
+            popupWindow.showAsDropDown(v, -40, 18);
         });
     }
 
@@ -297,7 +297,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         updateTimeline();
     }
 
-    private PopupWindow popupMenu() {
+    private PopupWindow createPopupMenu() {
         final PopupWindow popupWindow = new PopupWindow(getContext());
 
         // inflate your layout or dynamically add view

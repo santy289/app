@@ -81,7 +81,8 @@ public class TimelineViewModel extends ViewModel {
 
         getWorkflowUsers();
 
-        showLoading.setValue(false); //do not show loading on init
+        //fixme temporary setup of Workflows as the initial tab (uncomment following line)
+//        showLoading.setValue(false); //do not show loading on init
     }
 
     private void updateTimeline(String startDate, String endDate, List<String> users,

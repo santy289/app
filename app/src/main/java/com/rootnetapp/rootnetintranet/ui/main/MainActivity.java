@@ -128,7 +128,9 @@ public class MainActivity extends AppCompatActivity
             viewModel.getWorkflow(Integer.parseInt(workflowId));
         }
 
-        showFragment(TimelineFragment.newInstance(this), false);
+        //fixme temporary setup of Workflows as the initial tab
+        showFragment(WorkflowFragment.newInstance(this), false);
+//        showFragment(TimelineFragment.newInstance(this), false);
         setFilterBoxListeners();
         setupBottomNavigation();
         setupSpeedDialFab();
@@ -338,6 +340,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setupBottomNavigation() {
+        //fixme temporary setup of Workflows as the initial tab
+        mainBinding.bottomNavigation.setSelectedItemId(R.id.menu_workflow_list);
+
         mainBinding.bottomNavigation.setOnNavigationItemSelectedListener(
                 item -> {
                     handleBottomNavigationSelection(item);

@@ -116,11 +116,8 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
         Disposable disposable = Observable.fromCallable(() -> {
             DataSource.Factory<Integer, WorkflowListItem> factory = workflowDbDao.getWorkflowsByUpdatedAt();
 
-            if (callback != null) {
-                callback.clearDisposables();
-            }
+            clearBoundaryCallBacks();
 
-            // TODO test if callback exists and if it is NOT null clear disposables. We are creating a new instance.
             callback = new WorkflowSearchBoundaryCallback(
                     service,
                     token,
@@ -156,13 +153,7 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
         Disposable disposable = Observable.fromCallable(() -> {
             DataSource.Factory<Integer, WorkflowListItem> factory = workflowDbDao.searchWorkflow(query);
 
-            if (queryCallback != null) {
-                // Check if callback exists and if it is NOT null clear disposables.
-                // We are creating a new instance.
-                queryCallback.clearDisposables();
-            }
-
-
+            clearBoundaryCallBacks();
 
             queryCallback = new WorkflowSearchQueryCallback(
                     service,
@@ -183,27 +174,9 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
                     }
             );
 
-            if (allWorkflows != null && allWorkflows.hasActiveObservers()) {
-                Log.d(TAG, "setWorkflowList: YES");
-            }
-
-            if (allWorkflows != null && allWorkflows.hasObservers()) {
-                Log.d(TAG, "setWorkflowList: YES");
-            }
-
-
             allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)
                     .setBoundaryCallback(queryCallback)
                     .build();
-
-
-            if (allWorkflows != null && allWorkflows.hasActiveObservers()) {
-                Log.d(TAG, "setWorkflowList: YES");
-            }
-
-            if (allWorkflows != null && allWorkflows.hasObservers()) {
-                Log.d(TAG, "setWorkflowList: YES");
-            }
 
             return true;
         }).subscribeOn(Schedulers.newThread())
@@ -215,6 +188,18 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
                     Log.d(TAG, "failure: Can't init LivePagedListBuilder " + throwable.getMessage());
                 });
         disposables.add(disposable);
+    }
+
+    /**
+     * Check if callbacks exists and if are NOT null clear then clear any running disposables.
+     */
+    private void clearBoundaryCallBacks() {
+        if (callback != null) {
+            callback.clearDisposables();
+        }
+        if (queryCallback != null) {
+            queryCallback.clearDisposables();
+        }
     }
 
     /**
@@ -242,54 +227,6 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
     protected void clearDisposables() {
         disposables.clear();
         callback.clearDisposables();
-    }
-
-    /**
-     * Performs a call to the endpoint requesting the workflows that match the specified text query.
-     *
-     * @param auth authentication token.
-     * @param page number of the page.
-     * @param query text to search.
-     */
-    protected void getWorkflowsBySearchQuery(String auth, int page,
-                                             String query) {
-        Disposable disposable = service.getWorkflowsBySearchQuery(
-                auth,
-                PAGE_LIMIT,
-                page,
-                true,
-                query,
-                true
-        )
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(success -> responseWorkflowList.setValue(success), throwable -> {
-                    Log.d(TAG, "workflowListByQuery: " + throwable.getMessage());
-                    messageErrorToViewModel.setValue(false);
-                });
-        disposables.add(disposable);
-    }
-
-    /**
-     * Performs a call to the endpoint requesting the latest workflows.
-     *
-     * @param auth authentication token.
-     */
-    protected void getRecentWorkflows(String auth, int pageNumber) {
-        Disposable disposable = service.getWorkflowsDb(
-                auth,
-                PAGE_LIMIT,
-                true,
-                pageNumber,
-                true
-        )
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(success -> responseWorkflowList.setValue(success), throwable -> {
-                    Log.d(TAG, "recentWorkflows: " + throwable.getMessage());
-                    messageErrorToViewModel.setValue(false);
-                });
-        disposables.add(disposable);
     }
 
     protected LiveData<WorkflowResponseDb> getObservableWorkflowList() {
@@ -326,5 +263,4 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
         }
         return messageLoadingCompleted;
     }
-
 }

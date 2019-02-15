@@ -45,13 +45,11 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
 
     private int currentPage = 1;
     private int lastPage = 1;
-    private AppDatabase database;
     private ApiInterface service;
     private WorkflowDbDao workflowDbDao;
     private WorkflowTypeDbDao workflowTypeDbDao;
     private LiveData<PagedList<WorkflowListItem>> allWorkflows;
     private LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
-    private DataSource<Integer, WorkflowListItem> workflowListItemDataSource;
     private MutableLiveData<Boolean> handleRepoError;
     private MutableLiveData<Boolean> handleRepoSuccess;
     private MutableLiveData<Boolean> handleRepoSuccessNoFilters;
@@ -69,10 +67,9 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
 
     public WorkflowRepository(ApiInterface service, AppDatabase database) {
         this.service = service;
-        this.database = database;
-        workflowDbDao = this.database.workflowDbDao();
-        workflowTypeDbDao = this.database.workflowTypeDbDao();
-        this.profileDao = this.database.userDao();
+        workflowDbDao = database.workflowDbDao();
+        workflowTypeDbDao = database.workflowTypeDbDao();
+        this.profileDao = database.userDao();
         pagedListConfig = (new PagedList.Config.Builder())
                     .setEnablePlaceholders(false)
                     .setPageSize(LIST_PAGE_SIZE)
@@ -115,6 +112,12 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         return allWorkflows;
     }
 
+    /**
+     * It prepare a DataSource to some specific local database query. Add a BoundaryCallback to a
+     * new instance of a PagedList LiveData.
+     *
+     * @param token
+     */
     public void setWorkflowList(String token) {
         DataSource.Factory<Integer, WorkflowListItem> factory = workflowDbDao.getWorkflows();
 
@@ -128,28 +131,10 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)
                 .setBoundaryCallback(callback)
                 .build();
-
-//        DataSourceWorkflowListFactory dataSourceFactory = new DataSourceWorkflowListFactory(database);
-//        workflowListItemDataSource = dataSourceFactory.create();
-//        allWorkflows = new LivePagedListBuilder<>(dataSourceFactory, pagedListConfig).build();
     }
 
     public List<FormFieldsByWorkflowType> getFiedsByWorkflowType(int byId) {
         return workflowTypeDbDao.getFields(byId);
-    }
-
-    public void setWorkflowListByType(String token, int typeId) {
-        DataSource.Factory<Integer, WorkflowListItem> factory = workflowDbDao.getWorkflowsBy(typeId);
-        callback = new WorkflowListBoundaryCallback(
-                service,
-                token,
-                currentPage,
-                this
-        );
-
-        allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)
-                .setBoundaryCallback(callback)
-                .build();
     }
 
     /**
@@ -169,14 +154,13 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                     "ORDER BY workflowdb.created_at DESC";
             objects = new Object[]{status};
         } else {
-            searchText = "%" + searchText + "%";
             queryString = baseWorkflowListQuery +
                     "WHERE workflowdb.status = ? " +
-                    "AND workflowdb.title LIKE '%' || ? || '%' " +
+                    "AND (workflowdb.title LIKE '%' || ? || '%' OR WorkflowTypeDb.name LIKE '%' || ? || '%' OR workflowdb.description LIKE '%' || ? || '%' OR workflowdb.workflow_type_key LIKE '%' || ? || '%' OR workflowdb.full_name LIKE '%' || ? || '%') " +
                     "ORDER BY workflowdb.created_at DESC";
-            objects = new Object[]{status, searchText};
+            objects = new Object[]{status, searchText, searchText, searchText, searchText, searchText};
         }
-        startRawQuery(queryString, token, objects, id);
+        startRawQuery(queryString, token, objects, id, searchText);
     }
 
     /**
@@ -201,12 +185,12 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
             queryString = baseWorkflowListQuery +
                     "WHERE (workflowtypedb.original_id = ? OR workflowtypedb.id = ?)" +
                     "AND workflowdb.status = ? " +
-                    "AND workflowdb.title LIKE '%' || ? || '%' " +
+                    "AND (workflowdb.title LIKE '%' || ? || '%' OR WorkflowTypeDb.name LIKE '%' || ? || '%' OR workflowdb.description LIKE '%' || ? || '%' OR workflowdb.workflow_type_key LIKE '%' || ? || '%' OR workflowdb.full_name LIKE '%' || ? || '%') " +
                     "ORDER BY workflowdb.created_at DESC";
-            objects = new Object[]{originalTypeId, originalTypeId, status, searchText};
+            objects = new Object[]{originalTypeId, originalTypeId, status, searchText, searchText, searchText, searchText, searchText};
         }
         // TODO pass the workflowTypeId as well we need it later. and modify the other functions too.
-        startRawQuery(queryString, token, objects, id, originalTypeId);
+        startRawQuery(queryString, token, objects, id, originalTypeId, searchText);
     }
 
     /**
@@ -233,8 +217,8 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
             queryString = baseWorkflowListQuery +
                     "WHERE (workflowtypedb.original_id = ? OR workflowtypedb.id = ?)" +
                     "AND workflowdb.status = ? " +
-                    "AND workflowdb.title LIKE '%' || ? || '%' ";
-            objects = new Object[]{originalTypeId, originalTypeId, status, searchText};
+                    "AND (workflowdb.title LIKE '%' || ? || '%' OR WorkflowTypeDb.name LIKE '%' || ? || '%' OR workflowdb.description LIKE '%' || ? || '%' OR workflowdb.workflow_type_key LIKE '%' || ? || '%' OR workflowdb.full_name LIKE '%' || ? || '%')";
+            objects = new Object[]{originalTypeId, originalTypeId, status, searchText, searchText, searchText, searchText, searchText};
         }
         if (isDescending) {
             queryString += "ORDER BY " + column + " DESC";
@@ -242,7 +226,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
             queryString += "ORDER BY " + column + " ASC";
         }
 
-        startRawQuery(queryString, token, objects, id);
+        startRawQuery(queryString, token, objects, id, searchText);
     }
 
     /**
@@ -266,25 +250,25 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         } else {
             queryString = baseWorkflowListQuery +
                     "WHERE workflowdb.status = ? " +
-                    "AND workflowdb.title LIKE '%' || ? || '%' ";
-            objects = new Object[]{status, searchText};
+                    "AND (workflowdb.title LIKE '%' || ? || '%' OR WorkflowTypeDb.name LIKE '%' || ? || '%' OR workflowdb.description LIKE '%' || ? || '%' OR workflowdb.workflow_type_key LIKE '%' || ? || '%' OR workflowdb.full_name LIKE '%' || ? || '%')";
+            objects = new Object[]{status, searchText, searchText, searchText, searchText, searchText};
         }
         if (isDescending) {
             queryString += "ORDER BY " + column + " DESC ";
         } else {
             queryString += "ORDER BY " + column + " ASC ";
         }
-        startRawQuery(queryString, token, objects, id);
+        startRawQuery(queryString, token, objects, id, searchText);
     }
 
-    private void startRawQuery(String queryString, String token, Object[] objects, String id) {
+    private void startRawQuery(String queryString, String token, Object[] objects, String id, String searchText) {
         SimpleSQLiteQuery sqlQuery = new SimpleSQLiteQuery(queryString, objects);
-        getWorkflowsByFilters(token, sqlQuery, id, NO_WORKFLOW_TYPE);
+        getWorkflowsByFilters(token, sqlQuery, id, NO_WORKFLOW_TYPE, searchText);
     }
 
-    private void startRawQuery(String queryString, String token, Object[] objects, String id, int workflowTypeId) {
+    private void startRawQuery(String queryString, String token, Object[] objects, String id, int workflowTypeId, String searchText) {
         SimpleSQLiteQuery sqlQuery = new SimpleSQLiteQuery(queryString, objects);
-        getWorkflowsByFilters(token, sqlQuery, id, workflowTypeId);
+        getWorkflowsByFilters(token, sqlQuery, id, workflowTypeId, searchText);
     }
 
 
@@ -299,7 +283,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
      * @param id
      * @param workflowTypeId
      */
-    private void getWorkflowsByFilters(String token, SupportSQLiteQuery query, String id, int workflowTypeId) {
+    private void getWorkflowsByFilters(String token, SupportSQLiteQuery query, String id, int workflowTypeId, String searchText) {
         DataSource.Factory<Integer, WorkflowListItem> factory = workflowDbDao.getWorkflowsWithFilter(query);
 
         if (callback != null) {
@@ -313,7 +297,8 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                     currentPage,
                     this,
                     "",
-                    workflowTypeId
+                    workflowTypeId,
+                    searchText
             );
 
             allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)
@@ -322,6 +307,9 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
             return;
         }
 
+
+
+        // TODO goes here
         if (TextUtils.isEmpty(id)) {
             callback = new WorkflowListBoundaryCallback(
                     service,
@@ -336,22 +324,21 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
             return;
         }
 
+
+
         callback = new WorkflowListBoundaryCallback(
                 service,
                 token,
                 currentPage,
                 this,
                 id,
-                NO_WORKFLOW_TYPE
+                NO_WORKFLOW_TYPE,
+                searchText
         );
 
         allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)
                 .setBoundaryCallback(callback)
                 .build();
-    }
-
-    public void invalidateDataSource() {
-        workflowListItemDataSource.invalidate();
     }
 
     public void clearDisposables() {
@@ -365,7 +352,6 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
      */
     public void insertWorkflows(List<WorkflowDb> worflows) {
         Disposable disposable = Observable.fromCallable(() -> {
-//            WorkflowDbDao workflowDbDao = database.workflowDbDao();
             workflowDbDao.insertWorkflows(worflows);
             callback.updateIsLoading(false);
             return true;
@@ -442,8 +428,6 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
 
     private void workflowDbSuccessNoFilter(WorkflowResponseDb workflowsResponse) {
         Disposable disposable = Observable.fromCallable(() -> {
-//            WorkflowDbDao workflowDbDao = database.workflowDbDao();
-            workflowDbDao.deleteAllWorkflows();
             workflowDbDao.insertWorkflows(workflowsResponse.getList());
             return true;
         }).subscribeOn(Schedulers.newThread())
@@ -530,27 +514,6 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 metaData
         );
     }
-
-    public void workflowDbSuccess(WorkflowResponseDb workflowsResponse) {
-        Disposable disposable = Observable.fromCallable(() -> {
-//            WorkflowDbDao workflowDbDao = database.workflowDbDao();
-            workflowDbDao.deleteAllWorkflows();
-            workflowDbDao.insertWorkflows(workflowsResponse.getList());
-            return true;
-        }).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(success -> {
-                    Log.d(TAG, "workflowDbSuccess: ");
-                    handleRepoSuccess.postValue(true);
-                }, throwable -> {
-                    Log.d(TAG, "getWorkflowDbSuccess: error " + throwable.getMessage());
-                    handleRepoError.postValue(true);
-                });
-
-        disposables.add(disposable);
-    }
-
-
 
     public List<FormCreateProfile> getProfiles() {
         return profileDao.getAllProfiles();

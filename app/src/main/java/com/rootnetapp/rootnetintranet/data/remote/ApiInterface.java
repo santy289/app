@@ -358,7 +358,9 @@ public interface ApiInterface {
 
     @Headers({"Domain-Name: api"})
     @GET("interaction?all=true&comment=500")
-    Observable<InteractionResponse> getTimelineComments(@Header("Authorization") String authorization);
+    Observable<InteractionResponse> getTimelineComments(@Header("Authorization") String authorization,
+                                                        @Query("entity_type[]") List<String> modules,
+                                                        @Query("entity[]") List<Integer> entities);
 
 
     @Headers({"Domain-Name: api"})

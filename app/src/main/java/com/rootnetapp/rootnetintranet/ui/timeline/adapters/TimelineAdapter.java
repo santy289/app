@@ -106,15 +106,15 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                 holder.binding.topLine.setVisibility(View.INVISIBLE);
             }
             holder.binding.recComments.setLayoutManager(new LinearLayoutManager(context));
-            List<Comment> theComments = new ArrayList();
+            List<Comment> theComments = new ArrayList<>();
             final int interactionId;
             int x = -1;
-//            for (Comment comment : comments) {
-//                if (comment.getEntity() == item.getEntityId()) {
-//                    x = comment.getId();
-//                    theComments = comment.getComments();
-//                }
-//            }
+            for (Interaction interactionComment : comments) {
+                if (interactionComment.getEntity().equals(item.getEntityId())) {
+                    x = interactionComment.getId();
+                    theComments = interactionComment.getComments();
+                }
+            }
             interactionId = x;
             holder.binding.recComments.setAdapter(new TimelineCommentAdapter(theComments, people,
                     viewModel, parent));
@@ -143,7 +143,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
             holder.binding.btnComment.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    String comment = holder.binding.inputComment.getText().toString();
+                    String comment = holder.binding.etComment.getText().toString();
                     if (!TextUtils.isEmpty(comment)) {
                         if (finalAuthor != null) {
                             Utils.showLoading(context);

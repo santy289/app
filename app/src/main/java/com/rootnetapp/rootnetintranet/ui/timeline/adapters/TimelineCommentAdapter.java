@@ -100,7 +100,7 @@ public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineComment
         holder.binding.btnComment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String comment = holder.binding.inputComment.getText().toString();
+                String comment = holder.binding.etComment.getText().toString();
                 if (!TextUtils.isEmpty(comment)) {
                     if (finalAuthor != null) {
                         final Observer<Comment> postSubCommentsObserver = ((Comment data) -> {
@@ -116,7 +116,7 @@ public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineComment
                                             viewModel, parent);
                                     holder.binding.recComments.setAdapter(adapter);
                                 }
-                                holder.binding.inputComment.setText("");
+                                holder.binding.etComment.setText("");
                             }
                             viewModel.getObservablePostSubComments().removeObservers(parent);
                             viewModel.clearPostSubComments();

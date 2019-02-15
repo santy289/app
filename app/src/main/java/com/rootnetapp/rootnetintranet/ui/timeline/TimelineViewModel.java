@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.timeline;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineItem;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Comment;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Interaction;
@@ -62,7 +63,6 @@ public class TimelineViewModel extends ViewModel {
 
         updateTimeline(startDate, endDate, null, modules);
         mWebCount++;
-        mWebCount++;
     }
 
     private void updateTimeline(String startDate, String endDate, List<String> users,
@@ -73,7 +73,6 @@ public class TimelineViewModel extends ViewModel {
         setSelectedModules(modules);
 
         getTimeline();
-        getComments(); //todo verify mWebCount
     }
 
     protected void updateTimeline(String startDate, String endDate) {
@@ -189,6 +188,9 @@ public class TimelineViewModel extends ViewModel {
 
         mTimelineUiData.setTimelineItems(timelineResponse.getList());
 
+        getTimelineComments();
+        mWebCount++;
+
         updateCompleted();
     }
     //endregion
@@ -241,16 +243,24 @@ public class TimelineViewModel extends ViewModel {
     //endregion
 
     //region Comments
-    protected void getComments() {
-        showLoading.setValue(true);
+    private List<Integer> getTimelineEntityList(){
+        List<Integer> timelineEntityList = new ArrayList<>();
 
-        Disposable disposable = mRepository.getComments(mToken)
-                .subscribe(this::onCommentsSuccess, this::onFailure);
+        for (TimelineItem item : mTimelineUiData.getTimelineItems()) {
+            timelineEntityList.add(item.getEntityId());
+        }
+
+        return timelineEntityList;
+    }
+
+    protected void getTimelineComments() {
+        Disposable disposable = mRepository.getTimelineComments(mToken, getSelectedModules(), getTimelineEntityList())
+                .subscribe(this::onTimelineCommentsSuccess, this::onFailure);
 
         mDisposables.add(disposable);
     }
 
-    private void onCommentsSuccess(InteractionResponse interactionResponse) {
+    private void onTimelineCommentsSuccess(InteractionResponse interactionResponse) {
         mTimelineUiData.setInteractionComments(interactionResponse.getList());
 
         updateCompleted();

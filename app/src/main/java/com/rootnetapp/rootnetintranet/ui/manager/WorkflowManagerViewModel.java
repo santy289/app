@@ -212,8 +212,8 @@ public class WorkflowManagerViewModel extends ViewModel {
 
         List<WorkflowDb> workflowList = workflowResponseDb.getList();
 
-        mHideMoreButtonLiveData.setValue(workflowResponseDb.getPager().isIsLastPage());
         mHideWorkflowListLiveData.setValue(workflowList.isEmpty());
+        mHideMoreButtonLiveData.setValue(workflowResponseDb.getPager().isIsLastPage());
         mWorkflowListLiveData.setValue(workflowList);
     }
     //endregion

@@ -344,4 +344,8 @@
     <string name="timeline_description">Description: %s</string>
     <string name="timeline_current_status">Current status: %s</string>
     <string name="timeline_thumbs_value" translatable="false">(%d)</string>
+    <plurals name="timeline_comment_replies">
+        <item quantity="one" formatted="true">1 reply</item>
+        <item quantity="other" formatted="true">%d replies</item>
+    </plurals>
 </resources>

@@ -35,6 +35,7 @@ public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineComment
     public TimelineCommentAdapter(List<Comment> comments, List<User> people,
                                   TimelineViewModel viewModel, Fragment parent) {
         this.comments = comments;
+        if (this.comments == null) this.comments = new ArrayList<>();
         this.people = people;
         this.viewModel = viewModel;
         this.parent = parent;
@@ -71,6 +72,15 @@ public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineComment
             holder.binding.tvTime.setText(time);
             interactionId = item.getInteractionId();
             associate = item.getId();
+        }
+
+        if (item != null && item.getCount() != 0) {
+            int repliesCount = item.getCount();
+            holder.binding.tvReply.setText(context.getResources().getQuantityString(
+                    R.plurals.timeline_comment_replies,
+                    repliesCount,
+                    repliesCount)
+            );
         }
 
         Comment finalItem = item;

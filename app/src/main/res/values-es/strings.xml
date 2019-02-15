@@ -340,4 +340,8 @@
     <string name="timeline_action_workflow_comment_created">%1$s ha comentado en el workflow %2$s</string>
     <string name="timeline_description">Descripción: %s</string>
     <string name="timeline_current_status">Estatus actual: %s</string>
+    <plurals name="timeline_comment_replies">
+        <item quantity="one" formatted="true">1 respuesta</item>
+        <item quantity="other" formatted="true">%d respuestas</item>
+    </plurals>
 </resources>

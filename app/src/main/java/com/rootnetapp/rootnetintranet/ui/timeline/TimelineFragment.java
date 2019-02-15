@@ -20,7 +20,6 @@ import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.timeline.adapters.TimelineAdapter;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -34,13 +33,13 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-public class TimelineFragment extends Fragment implements TimelineInterface {
+import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MODULE_ALL;
+import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MODULE_WORKFLOWS;
+import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MODULE_WORKFLOW_APPROVALS;
+import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MODULE_WORKFLOW_COMMENTS;
+import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MODULE_WORKFLOW_FILES;
 
-    private static final String MODULE_ALL = "all";
-    private static final String MODULE_WORKFLOWS = "intranet_workflow_reports";
-    private static final String MODULE_WORKFLOW_APPROVALS = "intranet_workflow_status_approve";
-    private static final String MODULE_WORKFLOW_FILES = "intranet_workflow_file_record";
-    private static final String MODULE_WORKFLOW_COMMENTS = "intranet_workflow_comment";
+public class TimelineFragment extends Fragment implements TimelineInterface {
 
     @Inject
     TimelineViewModelFactory viewModelFactory;
@@ -85,17 +84,10 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         updateSelectedDatesUi(start, end);
         updateSelectedDateTitle(R.string.current_month);
 
-        List<String> modules = new ArrayList<>();
-        modules.add(MODULE_ALL);
-        modules.add(MODULE_WORKFLOWS);
-        modules.add(MODULE_WORKFLOW_APPROVALS);
-        modules.add(MODULE_WORKFLOW_FILES);
-        modules.add(MODULE_WORKFLOW_COMMENTS);
-
         subscribe();
         setOnClickListeners();
         setupRecycler();
-        viewModel.init(token, start, end, modules);
+        viewModel.init(token, start, end);
 
         return view;
     }
@@ -316,21 +308,27 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         popupWindow.setHeight((int) getResources().getDimension(R.dimen.filters_height));
         popupWindow.setContentView(filtersBinding.getRoot());
 
-        List<String> modules = viewModel.getAllModules();
+        filtersBinding.switchAllModules.setChecked(false);
+        filtersBinding.switchWorkflows.setChecked(false);
+        filtersBinding.switchApprovals.setChecked(false);
+        filtersBinding.switchFiles.setChecked(false);
+        filtersBinding.switchComments.setChecked(false);
+
+        List<String> modules = viewModel.getSelectedModules();
         for (String string : modules) {
             if (string.equals(MODULE_ALL)) {
                 filtersBinding.switchAllModules.setChecked(true);
             }
-            if (string.equals(MODULE_WORKFLOWS)) {
+            else if (string.equals(MODULE_WORKFLOWS)) {
                 filtersBinding.switchWorkflows.setChecked(true);
             }
-            if (string.equals(MODULE_WORKFLOW_APPROVALS)) {
+            else if (string.equals(MODULE_WORKFLOW_APPROVALS)) {
                 filtersBinding.switchApprovals.setChecked(true);
             }
-            if (string.equals(MODULE_WORKFLOW_FILES)) {
+            else if (string.equals(MODULE_WORKFLOW_FILES)) {
                 filtersBinding.switchFiles.setChecked(true);
             }
-            if (string.equals(MODULE_WORKFLOW_COMMENTS)) {
+            else if (string.equals(MODULE_WORKFLOW_COMMENTS)) {
                 filtersBinding.switchComments.setChecked(true);
             }
         }
@@ -342,7 +340,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         filtersBinding.switchComments.setOnClickListener(this::onSwitchClicked);
 
         List<WorkflowUser> workflowUsers = viewModel.getAllWorkflowUsers();
-        for (WorkflowUser user : workflowUsers) {
+        for (WorkflowUser workflowUser : workflowUsers) {
             LayoutInflater vi = (LayoutInflater) getContext()
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View v = vi.inflate(R.layout.prototype_user, null);
@@ -350,9 +348,19 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
                     new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT));
             TextView title = v.findViewById(R.id.field_name);
-            title.setText(user.getUsername());
-            v.findViewById(R.id.field_swtch).setTag(user.getId());
-            v.findViewById(R.id.field_swtch).setOnClickListener(this::userSwitchClicked);
+            title.setText(workflowUser.getUsername());
+
+            Switch switchView = v.findViewById(R.id.field_swtch);
+            switchView.setChecked(false);
+            switchView.setTag(workflowUser.getId());
+            switchView.setOnClickListener(this::userSwitchClicked);
+
+            List<String> users = viewModel.getSelectedUsers();
+            for (String user : users) {
+                if (user.equals(String.valueOf(workflowUser.getId()))) {
+                    switchView.setChecked(true);
+                }
+            }
         }
 
         return popupWindow;

@@ -25,6 +25,12 @@ import io.reactivex.disposables.Disposable;
 
 public class TimelineViewModel extends ViewModel {
 
+    protected static final String MODULE_ALL = "all";
+    protected static final String MODULE_WORKFLOWS = "intranet_workflow_reports";
+    protected static final String MODULE_WORKFLOW_APPROVALS = "intranet_workflow_status_approve";
+    protected static final String MODULE_WORKFLOW_FILES = "intranet_workflow_file_record";
+    protected static final String MODULE_WORKFLOW_COMMENTS = "intranet_workflow_comment";
+
     private static final int TIMELINE_PAGE_LIMIT = 20;
 
     private MutableLiveData<Boolean> showLoading;
@@ -50,18 +56,25 @@ public class TimelineViewModel extends ViewModel {
     protected TimelineViewModel(TimelineRepository repository) {
         this.mRepository = repository;
         mCurrentPage = 1;
+
+        List<String> modules = new ArrayList<>();
+        modules.add(MODULE_ALL);
+        modules.add(MODULE_WORKFLOWS);
+        modules.add(MODULE_WORKFLOW_APPROVALS);
+        modules.add(MODULE_WORKFLOW_FILES);
+        modules.add(MODULE_WORKFLOW_COMMENTS);
+        setAllModules(modules);
     }
 
-    protected void init(String token, String startDate, String endDate, List<String> modules) {
+    protected void init(String token, String startDate, String endDate) {
         mToken = token;
-        setAllModules(modules);
 
         mWebCount = mWebCompleted = 0;
         showLoading.setValue(true);
 
         mTimelineUiData = new TimelineUiData();
 
-        updateTimeline(startDate, endDate, null, modules);
+        updateTimeline(startDate, endDate, getAllUsers(), getAllModules());
 
         getUsers();
 

@@ -47,17 +47,16 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         this.anInterface = anInterface;
     }
 
-    public void addData(List<TimelineItem> items, List<Interaction> comments){
-        int positionStart = this.items.size();
+    public void addData(List<TimelineItem> items, List<Interaction> comments) {
+        int positionStart = getItemCount();
 
         this.items.addAll(items);
         this.comments.addAll(comments);
 
-        int positionEnd = this.items.size() - 1;
+        int positionEnd = getItemCount() - 1; //last item
 
+        notifyItemChanged(positionStart - 1); //update previously last item (show bottom line)
         notifyItemRangeInserted(positionStart, positionEnd);
-//        notifyDataSetChanged();
-        getItemCount();
     }
 
     @Override
@@ -74,117 +73,119 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
     public void onBindViewHolder(TimelineViewholder holder, int i) {
 
         User author = null;
-        if (i < items.size()) {
-            TimelineItem item = items.get(i);
-            String title = "";
-            for (User user : people) {
-                if (user.getUserId() == item.getAuthor()) {
-                    author = user;
-                    if (user.getPicture() != null) {
-                        String path = Utils.imgDomain + user.getPicture().trim();
-                        Picasso.get().load(path).into(holder.binding.imgPoster);
-                    }
-                    title = user.getFullName();
+        TimelineItem item = items.get(i);
+        String title = "";
+        for (User user : people) {
+            if (user.getUserId() == item.getAuthor()) {
+                author = user;
+                if (user.getPicture() != null) {
+                    String path = Utils.imgDomain + user.getPicture().trim();
+                    Picasso.get().load(path).into(holder.binding.imgPoster);
                 }
+                title = user.getFullName();
             }
+        }
 
-            switch (item.getDescription().getText()) {
-                case "TIMELINE_TRACKING_CREATED": {
-                    title = title + " " + context.getString(R.string.tracking_created);
-                    break;
-                }
-                case "TIMELINE_SPRINT_METADATA_STATUS_CREATED": {
-                    title = title + " " + context.getString(R.string.status_created);
-                    break;
-                }
+        switch (item.getDescription().getText()) {
+            case "TIMELINE_TRACKING_CREATED": {
+                title = title + " " + context.getString(R.string.tracking_created);
+                break;
             }
+            case "TIMELINE_SPRINT_METADATA_STATUS_CREATED": {
+                title = title + " " + context.getString(R.string.status_created);
+                break;
+            }
+        }
 
 //            if (item.getDescription().getArguments().getCompanyName() != null) {
 //                title = title + " " + item.getDescription().getArguments().getCompanyName();
 //            }
-            holder.binding.tvTitle.setText(title);
-            if (item.getDescription().getArguments().getDescription() != null) {
-                holder.binding.tvDescription
-                        .setText(context.getString(R.string.txt_description) + " "
-                                + item.getDescription().getArguments().getDescription());
-            }
-            if (item.getDescription().getArguments().getCurrentStatus() != null) {
-                holder.binding.tvDescription
-                        .setText(context.getString(R.string.txt_statusname) + " "
-                                + item.getDescription().getArguments().getCurrentStatus()
-                                .getName());
-            }
-            String date = item.getCreatedAt().split("T")[0];
-            holder.binding.tvDate.setText(date);
+        holder.binding.tvTitle.setText(title);
+        if (item.getDescription().getArguments().getDescription() != null) {
+            holder.binding.tvDescription
+                    .setText(context.getString(R.string.txt_description) + " "
+                            + item.getDescription().getArguments().getDescription());
+        }
+        if (item.getDescription().getArguments().getCurrentStatus() != null) {
+            holder.binding.tvDescription
+                    .setText(context.getString(R.string.txt_statusname) + " "
+                            + item.getDescription().getArguments().getCurrentStatus()
+                            .getName());
+        }
+        String date = item.getCreatedAt().split("T")[0];
+        holder.binding.tvDate.setText(date);
 
-            if (i == 0) {
-                holder.binding.topLine.setVisibility(View.INVISIBLE);
+        if (i == 0) {
+            holder.binding.topLine.setVisibility(View.INVISIBLE);
+        }
+        holder.binding.recComments.setLayoutManager(new LinearLayoutManager(context));
+        List<Comment> theComments = new ArrayList<>();
+        final int interactionId;
+        int x = -1;
+        for (Interaction interactionComment : comments) {
+            if (interactionComment.getEntity().equals(item.getEntityId())) {
+                x = interactionComment.getId();
+                theComments = interactionComment.getComments();
             }
-            holder.binding.recComments.setLayoutManager(new LinearLayoutManager(context));
-            List<Comment> theComments = new ArrayList<>();
-            final int interactionId;
-            int x = -1;
-            for (Interaction interactionComment : comments) {
-                if (interactionComment.getEntity().equals(item.getEntityId())) {
-                    x = interactionComment.getId();
-                    theComments = interactionComment.getComments();
-                }
+        }
+        interactionId = x;
+        holder.binding.recComments.setAdapter(new TimelineCommentAdapter(theComments, people,
+                viewModel, parent));
+        holder.binding.tvComments.setOnClickListener(view -> {
+            if (holder.binding.recComments.getVisibility() == View.GONE) {
+                holder.binding.recComments.setVisibility(View.VISIBLE);
+                holder.binding.lytComments.setVisibility(View.VISIBLE);
+            } else {
+                holder.binding.recComments.setVisibility(View.GONE);
+                holder.binding.lytComments.setVisibility(View.GONE);
             }
-            interactionId = x;
-            holder.binding.recComments.setAdapter(new TimelineCommentAdapter(theComments, people,
-                    viewModel, parent));
-            holder.binding.tvComments.setOnClickListener(view -> {
-                if (holder.binding.recComments.getVisibility() == View.GONE) {
-                    holder.binding.recComments.setVisibility(View.VISIBLE);
-                    holder.binding.lytComments.setVisibility(View.VISIBLE);
-                } else {
-                    holder.binding.recComments.setVisibility(View.GONE);
-                    holder.binding.lytComments.setVisibility(View.GONE);
-                }
-            });
-            holder.binding.lytThumbsup.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
+        });
+        holder.binding.lytThumbsup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
-                }
-            });
-            holder.binding.lytThumbsdown.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
+            }
+        });
+        holder.binding.lytThumbsdown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
-                }
-            });
-            User finalAuthor = author;
-            holder.binding.btnComment.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    String comment = holder.binding.etComment.getText().toString();
-                    if (!TextUtils.isEmpty(comment)) {
-                        if (finalAuthor != null) {
-                            Utils.showLoading(context);
-                            viewModel.postComment(interactionId, item.getEntityId(),
-                                    item.getEntity(), comment, finalAuthor.getUserId());
-                        } else {
-                            Toast.makeText(context, "error wth author", Toast.LENGTH_LONG).show();
-                        }
+            }
+        });
+        User finalAuthor = author;
+        holder.binding.btnComment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String comment = holder.binding.etComment.getText().toString();
+                if (!TextUtils.isEmpty(comment)) {
+                    if (finalAuthor != null) {
+                        Utils.showLoading(context);
+                        viewModel.postComment(interactionId, item.getEntityId(),
+                                item.getEntity(), comment, finalAuthor.getUserId());
                     } else {
-                        Toast.makeText(context, context.getString(R.string.empty_comment),
-                                Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, "error wth author", Toast.LENGTH_LONG).show();
                     }
+                } else {
+                    Toast.makeText(context, context.getString(R.string.empty_comment),
+                            Toast.LENGTH_LONG).show();
                 }
-            });
+            }
+        });
 
-            final Observer<Interaction> postCommentObserver = ((Interaction data) -> {
-                Utils.hideLoading();
-                if (null != data) {
-                    viewModel.clearPostComments();
-                    anInterface.reload();
-                }
-            });
-            viewModel.getObservablePostComments().observe(parent, postCommentObserver);
-        } else {
-            holder.binding.lytData.setVisibility(View.INVISIBLE);
+        final Observer<Interaction> postCommentObserver = ((Interaction data) -> {
+            Utils.hideLoading();
+            if (null != data) {
+                viewModel.clearPostComments();
+                anInterface.reload();
+            }
+        });
+        viewModel.getObservablePostComments().observe(parent, postCommentObserver);
+
+        //hide the bottom line for the last item
+        if (i == getItemCount() - 1) {
             holder.binding.bottomLine.setVisibility(View.GONE);
+        } else {
+            holder.binding.bottomLine.setVisibility(View.VISIBLE);
         }
     }
 

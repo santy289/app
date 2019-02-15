@@ -27,6 +27,7 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
     private int lastPage;
     private String id;
     private int workflowTypeId;
+    private String searchText;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
@@ -49,7 +50,8 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
             int currentPage,
             IncomingWorkflowsCallback workflowsCallback,
             String id,
-            int workflowTypeId) {
+            int workflowTypeId,
+            String searchText) {
         this.service = service;
         this.token = token;
         this.currentPage = currentPage;
@@ -58,6 +60,7 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
         this.lastPage = 2;
         this.id = id;
         this.workflowTypeId = workflowTypeId;
+        this.searchText = searchText;
     }
 
     /**
@@ -73,7 +76,7 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
             String token,
             int currentPage,
             IncomingWorkflowsCallback workflowsCallback) {
-        this(service, token, currentPage, workflowsCallback, "", NO_WORKFLOW_TYPE);
+        this(service, token, currentPage, workflowsCallback, "", NO_WORKFLOW_TYPE, "");
     }
 
     @Override
@@ -98,7 +101,8 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
                             nextPage,
                             false,
                             null,
-                            workflowTypeId)
+                            workflowTypeId,
+                            searchText)
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
@@ -115,12 +119,13 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
 
         if (TextUtils.isEmpty(id)) {
             disposable = service
-                    .getWorkflowsDb(
+                    .getWorkflowsDbWithSearch(
                             token,
                             WorkflowRepository.ENDPOINT_PAGE_SIZE,
                             true,
                             nextPage,
-                            false)
+                            false,
+                            searchText)
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
@@ -144,7 +149,8 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
                         nextPage,
                         false,
                         userId,
-                        null)
+                        null,
+                        searchText)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(

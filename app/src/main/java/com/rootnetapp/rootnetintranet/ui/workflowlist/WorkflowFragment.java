@@ -167,6 +167,9 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         fragmentWorkflowBinding.imgSearch.setOnClickListener(v -> performSearch());
     }
 
+    /**
+     * Tells the view model to start search by query using the input search.
+     */
     private void performSearch() {
         String searchText = fragmentWorkflowBinding.inputSearch.getText().toString();
         workflowViewModel.filterBySearchText(searchText, this);

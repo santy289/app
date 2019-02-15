@@ -972,20 +972,14 @@ public class WorkflowViewModel extends ViewModel {
         return false;
     }
 
-    // TODO END OF DYNAMIC FILTER IMPLEMENTATION
-
+    /**
+     * Sets search text value to FilterSettings object. Restart live data and apply rest of the
+     * if any.
+     *
+     * @param searchText
+     * @param lifecycleOwner
+     */
     protected void filterBySearchText(String searchText, LifecycleOwner lifecycleOwner) {
-
-
-        // TODO search starts here. Make sure that we can call the endpoint correclty with query parameter.
-        // TODO make sure that database search is also working correctly with the correct search term
-        // DATA source will change to a new data source
-        // Boundary callback will change to a new instance that handles search query.
-
-
-
-
-
         filterSettings.setSearchText(searchText);
         liveWorkflows.removeObservers(lifecycleOwner);
         applyFilters(filterSettings);
@@ -1059,6 +1053,16 @@ public class WorkflowViewModel extends ViewModel {
         applyFilters(filterSettings, "");
     }
 
+    /**
+     * Checks the FilterSettings object and according the parameters selected by the user it will
+     * sort, filter queries to the local database. At the same time it will initalize a new
+     * BoundaryCallback to enable paging for the list. Finally it will remove any observers for
+     * the LiveData observing the previous local query, and update the LiveData to observe to the
+     * new local database query.
+     *
+     * @param filterSettings
+     * @param id
+     */
     private void applyFilters(FilterSettings filterSettings, String id) {
         switch (sort.getSortingType()) {
             case NONE: {
@@ -1076,17 +1080,7 @@ public class WorkflowViewModel extends ViewModel {
                             id,
                             filterSettings.getSearchText());
                 }
-
-
-
-                // TODO
                 reloadWorkflowsList();
-
-
-
-
-
-
                 break;
             }
             case BYNUMBER: {

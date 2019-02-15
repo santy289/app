@@ -27,10 +27,11 @@ public class TimelineRepository {
         this.service = service;
     }
 
-
-    public Observable<TimelineResponse> getTimeline(String auth, String start, String end,
-                                                    List<String> users, List<String> modules) {
-        return service.getTimeline(auth, start, end, users, modules).subscribeOn(Schedulers.newThread())
+    public Observable<TimelineResponse> getTimeline(String auth, String start, String end, int page,
+                                                    int limit, List<String> users,
+                                                    List<String> modules) {
+        return service.getTimeline(auth, start, end, page, limit, users, modules)
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
@@ -44,8 +45,10 @@ public class TimelineRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<InteractionResponse> getTimelineComments(String auth, List<String> modules, List<Integer> entities) {
-        return service.getTimelineComments(auth, modules, entities).subscribeOn(Schedulers.newThread())
+    public Observable<InteractionResponse> getTimelineComments(String auth, List<String> modules,
+                                                               List<Integer> entities) {
+        return service.getTimelineComments(auth, modules, entities)
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
@@ -57,14 +60,16 @@ public class TimelineRepository {
     public Observable<PostCommentResponse> postComment(String auth, int interactionId, int entity,
                                                        String entityType, String description,
                                                        int author) {
-        return service.postComment(auth, interactionId, entity, entityType, description, author).subscribeOn(Schedulers.newThread())
+        return service.postComment(auth, interactionId, entity, entityType, description, author)
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Observable<PostSubCommentResponse> postSubComment(String auth, int interaction,
                                                              int associate, String description,
                                                              int author) {
-        return service.postSubComment(auth, interaction, associate, description, author).subscribeOn(Schedulers.newThread())
+        return service.postSubComment(auth, interaction, associate, description, author)
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 

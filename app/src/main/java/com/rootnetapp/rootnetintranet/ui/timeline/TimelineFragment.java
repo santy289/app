@@ -102,8 +102,10 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
 
     private void subscribe() {
         viewModel.getObservableShowLoading().observe(this, this::showLoading);
-        viewModel.getObservableTimeline().observe(this, this::populateTimeline);
         viewModel.getObservableError().observe(this, this::showToastMessage);
+        viewModel.getObservableTimeline().observe(this, this::populateTimeline);
+        viewModel.getObservableHideMoreButton().observe(this, this::hideMoreButton);
+        viewModel.getObservableHideTimelineList().observe(this, this::hideTimelineList);
     }
 
     /**
@@ -114,6 +116,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         mBinding.tvWeek.setOnClickListener(v -> filterWeekClicked());
         mBinding.tvDay.setOnClickListener(v -> filterDayClicked());
         mBinding.btnSelectDates.setOnClickListener(v -> selectDates());
+        mBinding.btnShowMore.setOnClickListener(v -> showMoreClicked());
 
         mBinding.imgFilter.setOnClickListener(view1 -> {
             PopupWindow popupwindow_obj = popupMenu();
@@ -137,22 +140,22 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
      * @param endDate   end date filter.
      */
     private void updateTimeline(String startDate, String endDate) {
-//        mWorkflowsAdapter = null; //todo reset the adapter
+        mTimelineAdapter = null;
         viewModel.updateTimeline(startDate, endDate);
     }
 
     private void updateTimeline() {
-//        mWorkflowsAdapter = null; //todo reset the adapter
+        mTimelineAdapter = null;
         viewModel.updateTimeline();
     }
 
     private void updateTimelineWithUsers(List<String> users) {
-//        mWorkflowsAdapter = null; //todo reset the adapter
+        mTimelineAdapter = null;
         viewModel.updateTimelineWithUsers(users);
     }
 
     private void updateTimelineWithModules(List<String> modules) {
-//        mWorkflowsAdapter = null; //todo reset the adapter
+        mTimelineAdapter = null;
         viewModel.updateTimelineWithModules(modules);
     }
 
@@ -288,6 +291,14 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         updateTimeline(start, end);
     }
     //endregion
+
+    /**
+     * Performs a request to the ViewModel to retrieve more workflows.
+     */
+    private void showMoreClicked() {
+        viewModel.incrementCurrentPage();
+        viewModel.getTimeline();
+    }
 
     @Override
     public void reload() {
@@ -434,12 +445,15 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         updateTimelineWithModules(modules);
     }
 
+    /**
+     * Adds data to the timeline adapter. Checks whether the adapter needs to be created or not.
+     *
+     * @param timelineUiData data to add to the adapter.
+     */
     @UiThread
     private void populateTimeline(TimelineUiData timelineUiData) {
-        if (timelineUiData.getTimelineItems().size() != 0) {
-            mBinding.lytNotimeline.setVisibility(View.GONE);
-            mBinding.recTimeline.setVisibility(View.VISIBLE);
-
+        if (mTimelineAdapter == null) {
+            //create a new adapter
             mTimelineAdapter = new TimelineAdapter(
                     timelineUiData.getTimelineItems(),
                     timelineUiData.getUsers(),
@@ -450,8 +464,41 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
             );
             mBinding.recTimeline.setAdapter(mTimelineAdapter);
         } else {
+            //append a list to the current adapter
+            mTimelineAdapter.addData(timelineUiData.getTimelineItems(),
+                    timelineUiData.getInteractionComments());
+        }
+    }
+
+    /**
+     * Hides or shows the "SHOW MORE" button based on the parameter.
+     *
+     * @param hide true: hide; false: show.
+     */
+    @UiThread
+    private void hideMoreButton(boolean hide) {
+        if (hide) {
+            mBinding.btnShowMore.setVisibility(View.GONE);
+        } else {
+            mBinding.btnShowMore.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Hides or shows the timeline list based on the parameter.
+     *
+     * @param hide true: hide; false: show.
+     */
+    @UiThread
+    private void hideTimelineList(boolean hide) {
+        hideMoreButton(hide);
+
+        if (hide) {
             mBinding.recTimeline.setVisibility(View.GONE);
             mBinding.lytNotimeline.setVisibility(View.VISIBLE);
+        } else {
+            mBinding.recTimeline.setVisibility(View.VISIBLE);
+            mBinding.lytNotimeline.setVisibility(View.GONE);
         }
     }
 

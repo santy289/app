@@ -353,6 +353,8 @@ public interface ApiInterface {
     Observable<TimelineResponse> getTimeline(@Header("Authorization") String authorization,
                                              @Query("start") String start,
                                              @Query("end") String end,
+                                             @Query("page") int page,
+                                             @Query("limit") int limit,
                                              @Query("userId[]") List<String> users,
                                              @Query("entity[]") List<String> modules);
 

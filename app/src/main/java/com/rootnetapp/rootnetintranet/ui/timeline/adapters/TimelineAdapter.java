@@ -47,6 +47,19 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         this.anInterface = anInterface;
     }
 
+    public void addData(List<TimelineItem> items, List<Interaction> comments){
+        int positionStart = this.items.size();
+
+        this.items.addAll(items);
+        this.comments.addAll(comments);
+
+        int positionEnd = this.items.size() - 1;
+
+        notifyItemRangeInserted(positionStart, positionEnd);
+//        notifyDataSetChanged();
+        getItemCount();
+    }
+
     @Override
     public TimelineViewholder onCreateViewHolder(ViewGroup viewGroup, int i) {
         LayoutInflater layoutInflater =
@@ -67,8 +80,10 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
             for (User user : people) {
                 if (user.getUserId() == item.getAuthor()) {
                     author = user;
-                    String path = Utils.imgDomain + user.getPicture().trim();
-                    Picasso.get().load(path).into(holder.binding.imgPoster);
+                    if (user.getPicture() != null) {
+                        String path = Utils.imgDomain + user.getPicture().trim();
+                        Picasso.get().load(path).into(holder.binding.imgPoster);
+                    }
                     title = user.getFullName();
                 }
             }
@@ -175,6 +190,6 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
 
     @Override
     public int getItemCount() {
-        return items.size() + 1;
+        return items.size();
     }
 }

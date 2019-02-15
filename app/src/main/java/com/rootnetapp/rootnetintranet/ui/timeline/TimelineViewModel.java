@@ -25,18 +25,23 @@ import io.reactivex.disposables.Disposable;
 
 public class TimelineViewModel extends ViewModel {
 
+    private static final int TIMELINE_PAGE_LIMIT = 20;
+
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<TimelineUiData> mTimelineLiveData;
     private MutableLiveData<List<Comment>> mSubCommentsLiveData;
     private MutableLiveData<Interaction> mPostCommentsLiveData;
     private MutableLiveData<Comment> mPostSubCommentsLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
+    private MutableLiveData<Boolean> mHideMoreButtonLiveData;
+    private MutableLiveData<Boolean> mHideTimelineListLiveData;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
     private TimelineRepository mRepository;
     private String mToken;
     private int mWebCount, mWebCompleted;
+    private int mCurrentPage;
     private String mStartDate, mEndDate;
     private List<String> mSelectedUsers, mSelectedModules;
     private List<String> mAllUsers, mAllModules;
@@ -44,6 +49,7 @@ public class TimelineViewModel extends ViewModel {
 
     protected TimelineViewModel(TimelineRepository repository) {
         this.mRepository = repository;
+        mCurrentPage = 1;
     }
 
     protected void init(String token, String startDate, String endDate, List<String> modules) {
@@ -51,26 +57,28 @@ public class TimelineViewModel extends ViewModel {
         setAllModules(modules);
 
         mWebCount = mWebCompleted = 0;
-        mTimelineUiData = new TimelineUiData();
-
         showLoading.setValue(true);
 
-        getUsers();
-        mWebCount++;
-
-        getWorkflowUsers();
-        mWebCount++;
+        mTimelineUiData = new TimelineUiData();
 
         updateTimeline(startDate, endDate, null, modules);
-        mWebCount++;
+
+        getUsers();
+
+        getWorkflowUsers();
     }
 
     private void updateTimeline(String startDate, String endDate, List<String> users,
-                                  List<String> modules) {
+                                List<String> modules) {
+        mWebCount = mWebCompleted = 0;
+        showLoading.setValue(true);
+
         setStartDate(startDate);
         setEndDate(endDate);
         setSelectedUsers(users);
         setSelectedModules(modules);
+
+        resetCurrentPage();
 
         getTimeline();
     }
@@ -103,11 +111,13 @@ public class TimelineViewModel extends ViewModel {
 
             mWebCount = mWebCompleted = 0;
 
+//            mHideMoreButtonLiveData.setValue(workflowResponseDb.getPager().isIsLastPage());
+            mHideTimelineListLiveData.setValue(mTimelineUiData.getTimelineItems().isEmpty());
             mTimelineLiveData.setValue(mTimelineUiData);
         }
     }
 
-    protected List<WorkflowUser> getAllWorkflowUsers(){
+    protected List<WorkflowUser> getAllWorkflowUsers() {
         return mTimelineUiData.getWorkflowUsers();
     }
 
@@ -149,7 +159,7 @@ public class TimelineViewModel extends ViewModel {
     }
 
     protected List<String> getSelectedUsers() {
-        if (mSelectedUsers == null) mSelectedUsers =  new ArrayList<>();
+        if (mSelectedUsers == null) mSelectedUsers = new ArrayList<>();
 
         return mSelectedUsers;
     }
@@ -171,10 +181,28 @@ public class TimelineViewModel extends ViewModel {
 
     //region Repo Calls
     //region Timeline
-    private void getTimeline() {
+    /**
+     * Resets the current page to its initial value. Called when the dashboard filters change.
+     */
+    protected void resetCurrentPage() {
+        this.mCurrentPage = 1;
+    }
+
+    /**
+     * Increments the current page by one. Called when the user requests more workflows.
+     */
+    protected void incrementCurrentPage() {
+        mCurrentPage++;
+    }
+
+    protected void getTimeline() {
+        mWebCount++;
+
+        showLoading.setValue(true);
+
         Disposable disposable = mRepository
-                .getTimeline(mToken, getStartDate(), getEndDate(), getSelectedUsers(),
-                        getSelectedModules())
+                .getTimeline(mToken, getStartDate(), getEndDate(), mCurrentPage,
+                        TIMELINE_PAGE_LIMIT, getSelectedUsers(), getSelectedModules())
                 .subscribe(this::onTimelineSuccess, this::onFailure);
 
         mDisposables.add(disposable);
@@ -189,7 +217,6 @@ public class TimelineViewModel extends ViewModel {
         mTimelineUiData.setTimelineItems(timelineResponse.getList());
 
         getTimelineComments();
-        mWebCount++;
 
         updateCompleted();
     }
@@ -197,6 +224,8 @@ public class TimelineViewModel extends ViewModel {
 
     //region Users
     private void getUsers() {
+        mWebCount++;
+
         Disposable disposable = mRepository.getUsers(mToken)
                 .subscribe(this::onUsersSuccess, this::onFailure);
 
@@ -218,6 +247,8 @@ public class TimelineViewModel extends ViewModel {
 
     //region Workflow Users
     private void getWorkflowUsers() {
+        mWebCount++;
+
         Disposable disposable = mRepository.getWorkflowUsers(mToken)
                 .subscribe(this::onWorkflowUsersSuccess, this::onFailure);
 
@@ -243,7 +274,7 @@ public class TimelineViewModel extends ViewModel {
     //endregion
 
     //region Comments
-    private List<Integer> getTimelineEntityList(){
+    private List<Integer> getTimelineEntityList() {
         List<Integer> timelineEntityList = new ArrayList<>();
 
         for (TimelineItem item : mTimelineUiData.getTimelineItems()) {
@@ -254,7 +285,10 @@ public class TimelineViewModel extends ViewModel {
     }
 
     protected void getTimelineComments() {
-        Disposable disposable = mRepository.getTimelineComments(mToken, getSelectedModules(), getTimelineEntityList())
+        mWebCount++;
+
+        Disposable disposable = mRepository
+                .getTimelineComments(mToken, getSelectedModules(), getTimelineEntityList())
                 .subscribe(this::onTimelineCommentsSuccess, this::onFailure);
 
         mDisposables.add(disposable);
@@ -285,7 +319,7 @@ public class TimelineViewModel extends ViewModel {
 
     //region Post Comment
     public void postComment(int interactionId, int entity, String entityType, String description,
-                               int author) {
+                            int author) {
         showLoading.setValue(true);
 
         Disposable disposable = mRepository
@@ -351,6 +385,20 @@ public class TimelineViewModel extends ViewModel {
             mPostSubCommentsLiveData = new MutableLiveData<>();
         }
         return mPostSubCommentsLiveData;
+    }
+
+    public LiveData<Boolean> getObservableHideMoreButton() {
+        if (mHideMoreButtonLiveData == null) {
+            mHideMoreButtonLiveData = new MutableLiveData<>();
+        }
+        return mHideMoreButtonLiveData;
+    }
+
+    public LiveData<Boolean> getObservableHideTimelineList() {
+        if (mHideTimelineListLiveData == null) {
+            mHideTimelineListLiveData = new MutableLiveData<>();
+        }
+        return mHideTimelineListLiveData;
     }
 
     protected LiveData<Integer> getObservableError() {

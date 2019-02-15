@@ -25,6 +25,8 @@ import io.reactivex.disposables.Disposable;
 
 public class TimelineViewModel extends ViewModel {
 
+    protected static final String USER_ALL = "all";
+
     protected static final String MODULE_ALL = "all";
     protected static final String MODULE_WORKFLOWS = "intranet_workflow_reports";
     protected static final String MODULE_WORKFLOW_APPROVALS = "intranet_workflow_status_approve";
@@ -277,6 +279,7 @@ public class TimelineViewModel extends ViewModel {
 
         List<WorkflowUser> users = workflowUserResponse.getUsers();
 
+        getAllUsers().add("all"); //"All" filter
         for (WorkflowUser user : users) {
             getAllUsers().add(String.valueOf(user.getId()));
         }

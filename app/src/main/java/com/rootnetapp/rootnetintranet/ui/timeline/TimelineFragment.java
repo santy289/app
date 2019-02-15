@@ -38,6 +38,7 @@ import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MODUL
 import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MODULE_WORKFLOW_APPROVALS;
 import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MODULE_WORKFLOW_COMMENTS;
 import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MODULE_WORKFLOW_FILES;
+import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.USER_ALL;
 
 public class TimelineFragment extends Fragment implements TimelineInterface {
 
@@ -318,17 +319,13 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         for (String string : modules) {
             if (string.equals(MODULE_ALL)) {
                 filtersBinding.switchAllModules.setChecked(true);
-            }
-            else if (string.equals(MODULE_WORKFLOWS)) {
+            } else if (string.equals(MODULE_WORKFLOWS)) {
                 filtersBinding.switchWorkflows.setChecked(true);
-            }
-            else if (string.equals(MODULE_WORKFLOW_APPROVALS)) {
+            } else if (string.equals(MODULE_WORKFLOW_APPROVALS)) {
                 filtersBinding.switchApprovals.setChecked(true);
-            }
-            else if (string.equals(MODULE_WORKFLOW_FILES)) {
+            } else if (string.equals(MODULE_WORKFLOW_FILES)) {
                 filtersBinding.switchFiles.setChecked(true);
-            }
-            else if (string.equals(MODULE_WORKFLOW_COMMENTS)) {
+            } else if (string.equals(MODULE_WORKFLOW_COMMENTS)) {
                 filtersBinding.switchComments.setChecked(true);
             }
         }
@@ -343,35 +340,51 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
 
         if (workflowUsers == null) return popupWindow;
 
+        //add "All" filter
+        addUserRow(
+                filtersBinding,
+                USER_ALL,
+                getString(R.string.all)
+        );
+
         for (WorkflowUser workflowUser : workflowUsers) {
-            LayoutInflater vi = (LayoutInflater) getContext()
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View v = vi.inflate(R.layout.prototype_user, null);
-            filtersBinding.lyt.addView(v,
-                    new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT));
-            TextView title = v.findViewById(R.id.field_name);
-            title.setText(workflowUser.getUsername());
-
-            Switch switchView = v.findViewById(R.id.field_swtch);
-            switchView.setChecked(false);
-            switchView.setTag(workflowUser.getId());
-            switchView.setOnClickListener(this::userSwitchClicked);
-
-            List<String> users = viewModel.getSelectedUsers();
-            for (String user : users) {
-                if (user.equals(String.valueOf(workflowUser.getId()))) {
-                    switchView.setChecked(true);
-                }
-            }
+            addUserRow(
+                    filtersBinding,
+                    String.valueOf(workflowUser.getId()),
+                    workflowUser.getUsername()
+            );
         }
 
         return popupWindow;
     }
 
+    private void addUserRow(TimelineFiltersMenuBinding filtersMenuBinding, String id, String name) {
+        LayoutInflater vi = (LayoutInflater) getContext()
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View v = vi.inflate(R.layout.prototype_user, null);
+        filtersMenuBinding.lyt.addView(v,
+                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
+        TextView title = v.findViewById(R.id.field_name);
+        title.setText(name);
+
+        Switch switchView = v.findViewById(R.id.field_swtch);
+        switchView.setChecked(false);
+        switchView.setTag(id);
+        switchView.setOnClickListener(this::userSwitchClicked);
+
+        List<String> users = viewModel.getSelectedUsers();
+        for (String user : users) {
+            if (user.equals(id)) {
+                switchView.setChecked(true);
+            }
+        }
+    }
+
     private void userSwitchClicked(View view) {
         boolean checked = ((Switch) view).isChecked();
-        int id = (int) view.getTag();
+        String id = (String) view.getTag();
+
         int i = 0;
 
         List<String> users = viewModel.getAllUsers();
@@ -383,11 +396,11 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         }
 
         if (checked) {
-            users.add(String.valueOf(id));
+            users.add(id);
         } else {
             i = 0;
             while (i < users.size()) {
-                if (users.get(i).equals(String.valueOf(id))) {
+                if (users.get(i).equals(id)) {
                     users.remove(i);
                 }
                 i++;

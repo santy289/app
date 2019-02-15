@@ -111,8 +111,6 @@ public class TimelineViewModel extends ViewModel {
 
             mWebCount = mWebCompleted = 0;
 
-//            mHideMoreButtonLiveData.setValue(workflowResponseDb.getPager().isIsLastPage());
-            mHideTimelineListLiveData.setValue(mTimelineUiData.getTimelineItems().isEmpty());
             mTimelineLiveData.setValue(mTimelineUiData);
         }
     }
@@ -214,6 +212,8 @@ public class TimelineViewModel extends ViewModel {
             return;
         }
 
+        mHideTimelineListLiveData.setValue(timelineResponse.getList().isEmpty());
+        mHideMoreButtonLiveData.setValue(timelineResponse.getPager().getIsLastPage());
         mTimelineUiData.setTimelineItems(timelineResponse.getList());
 
         getTimelineComments();

@@ -74,22 +74,36 @@ public class InformationViewModel extends ViewModel {
 
     /**
      * Updates the info section UI for this workflow.
+     *
      * @param workflow Workflow with info to display on the UI.
      */
     private void updateWorkflowInformation(WorkflowDb workflow, WorkflowTypeDb workflowTypeDb) {
         List<Information> informationList = new ArrayList<>();
 
-        String startDate = Utils.serverFormatToFormat(workflow.getStart(), Utils.STANDARD_DATE_DISPLAY_FORMAT);
-        String endDate = Utils.serverFormatToFormat(workflow.getEnd(), Utils.STANDARD_DATE_DISPLAY_FORMAT);
+        String startDate = null;
+        String endDate = null;
+        if (workflow.getStart() != null) {
+            startDate = Utils.getFormattedDate(workflow.getStart(), Utils.SERVER_DATE_FORMAT,
+                    Utils.STANDARD_DATE_DISPLAY_FORMAT);
+        }
+        if (workflow.getEnd() != null) {
+            endDate = Utils.getFormattedDate(workflow.getEnd(), Utils.SERVER_DATE_FORMAT,
+                    Utils.STANDARD_DATE_DISPLAY_FORMAT);
+        }
 
         Information info = new Information(R.string.title, workflow.getTitle());
         informationList.add(info);
         info = new Information(R.string.description, workflow.getDescription());
         informationList.add(info);
-        info = new Information(R.string.start_date, startDate);
-        informationList.add(info);
-        info = new Information(R.string.end_date, endDate);
-        informationList.add(info);
+
+        if (startDate != null) {
+            info = new Information(R.string.start_date, startDate);
+            informationList.add(info);
+        }
+        if (endDate != null) {
+            info = new Information(R.string.end_date, endDate);
+            informationList.add(info);
+        }
 
         if (workflow.getMetas().isEmpty()) {
             updateInformationListUi.setValue(informationList);
@@ -157,10 +171,9 @@ public class InformationViewModel extends ViewModel {
 
     /**
      * Calls the repository for obtaining a new Workflow Type by a type id.
-     * @param auth
-     *  Access token to use for endpoint request.
-     * @param typeId
-     *  Id that will be passed on to the endpoint.
+     *
+     * @param auth   Access token to use for endpoint request.
+     * @param typeId Id that will be passed on to the endpoint.
      */
     private void getWorkflowType(String auth, int typeId) {
         Disposable disposable = mRepository
@@ -213,6 +226,7 @@ public class InformationViewModel extends ViewModel {
      * Finds the a Status from the Status List in the current WorkflowType object.
      *
      * @param statusId Status id to find.
+     *
      * @return Returns a Status object or null if it doesn't find anything.
      */
     private Status findStatusInListBy(int statusId) {

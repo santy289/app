@@ -17,8 +17,6 @@ public class Arguments {
     private String description;
     @Json(name = "title")
     private String title;
-    @Json(name = "status")
-    private String status;
     @Json(name = "key")
     private String key;
     @Json(name = "workflow_type")
@@ -82,14 +80,6 @@ public class Arguments {
         this.title = title;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public String getKey() {
         return key;
     }
@@ -145,5 +135,4 @@ public class Arguments {
     public void setWorkflowId(Integer workflowId) {
         this.workflowId = workflowId;
     }
-
 }

@@ -146,7 +146,7 @@
                             android:weightSum="2">
 
                             <LinearLayout
-                                android:id="@+id/lyt_thumbsup"
+                                android:id="@+id/lyt_thumbs_up"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
@@ -159,16 +159,18 @@
                                     android:src="@drawable/ic_thumb_up_black_24dp" />
 
                                 <TextView
-                                    android:id="@+id/tv_upammount"
+                                    android:id="@+id/tv_up_amount"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:textSize="12sp"
+                                    android:paddingStart="3dp"
+                                    android:paddingEnd="3dp"
                                     android:textColor="@color/selected_filter"
-                                    android:text="(0)"/>
+                                    tools:text="(0)"/>
                             </LinearLayout>
 
                             <LinearLayout
-                                android:id="@+id/lyt_thumbsdown"
+                                android:id="@+id/lyt_thumbs_down"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
@@ -182,12 +184,14 @@
                                     android:src="@drawable/ic_thumb_down_black_24dp" />
 
                                 <TextView
-                                    android:id="@+id/tv_downammount"
+                                    android:id="@+id/tv_down_ammount"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:paddingStart="3dp"
+                                    android:paddingEnd="3dp"
                                     android:textSize="12sp"
                                     android:textColor="@color/colorPrimaryDark"
-                                    android:text="(0)"/>
+                                    tools:text="(0)"/>
 
                             </LinearLayout>
 

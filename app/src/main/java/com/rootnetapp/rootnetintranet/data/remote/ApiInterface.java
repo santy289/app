@@ -359,10 +359,10 @@ public interface ApiInterface {
                                              @Query("entity[]") List<String> modules);
 
     @Headers({"Domain-Name: api"})
-    @GET("interaction?all=true&comment=500")
-    Observable<InteractionResponse> getTimelineComments(@Header("Authorization") String authorization,
-                                                        @Query("entity_type[]") List<String> modules,
-                                                        @Query("entity[]") List<Integer> entities);
+    @GET("interaction?all=true&comment=4&thumb=4")
+    Observable<InteractionResponse> getTimelineInteractions(@Header("Authorization") String authorization,
+                                                            @Query("entity_type[]") List<String> modules,
+                                                            @Query("entity[]") List<Integer> entities);
 
 
     @Headers({"Domain-Name: api"})

@@ -152,11 +152,13 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         holder.binding.recComments.setLayoutManager(new LinearLayoutManager(context));
         List<Comment> subComments = new ArrayList<>();
         final int interactionId;
+        Interaction itemInteraction = null;
         int x = -1;
-        for (Interaction interactionComment : comments) {
-            if (interactionComment.getEntity().equals(item.getEntityId())) {
-                x = interactionComment.getId();
-                subComments = interactionComment.getComments();
+        for (Interaction interaction : comments) {
+            if (interaction.getEntity().equals(item.getEntityId())) {
+                x = interaction.getId();
+                itemInteraction = interaction;
+                subComments = interaction.getComments();
                 break;
             }
         }
@@ -172,35 +174,39 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                 holder.binding.lytComments.setVisibility(View.GONE);
             }
         });
-        holder.binding.lytThumbsup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-            }
-        });
-        holder.binding.lytThumbsdown.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        if (itemInteraction == null) {
+            holder.binding.lytThumbsUp.setVisibility(View.GONE);
+            holder.binding.lytThumbsDown.setVisibility(View.GONE);
+        } else {
+            holder.binding.lytThumbsUp.setVisibility(View.VISIBLE);
+            holder.binding.lytThumbsDown.setVisibility(View.VISIBLE);
 
+            if (itemInteraction.getThumbsUp() != null) {
+                holder.binding.tvUpAmount.setText(context.getString(R.string.timeline_thumbs_value,
+                        itemInteraction.getThumbsUp()));
             }
-        });
+            if (itemInteraction.getThumbsDown() != null) {
+                holder.binding.tvDownAmmount
+                        .setText(context.getString(R.string.timeline_thumbs_value,
+                                itemInteraction.getThumbsDown()));
+            }
+        }
+
         User finalAuthor = author;
-        holder.binding.btnComment.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String comment = holder.binding.etComment.getText().toString();
-                if (!TextUtils.isEmpty(comment)) {
-                    if (finalAuthor != null) {
-                        Utils.showLoading(context);
-                        viewModel.postComment(interactionId, item.getEntityId(),
-                                item.getEntity(), comment, finalAuthor.getUserId());
-                    } else {
-                        Toast.makeText(context, "error wth author", Toast.LENGTH_LONG).show();
-                    }
+        holder.binding.btnComment.setOnClickListener(view -> {
+            String comment = holder.binding.etComment.getText().toString();
+            if (!TextUtils.isEmpty(comment)) {
+                if (finalAuthor != null) {
+                    Utils.showLoading(context);
+                    viewModel.postComment(interactionId, item.getEntityId(),
+                            item.getEntity(), comment, finalAuthor.getUserId());
                 } else {
-                    Toast.makeText(context, context.getString(R.string.empty_comment),
-                            Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, "error wth author", Toast.LENGTH_LONG).show();
                 }
+            } else {
+                Toast.makeText(context, context.getString(R.string.empty_comment),
+                        Toast.LENGTH_LONG).show();
             }
         });
 

@@ -232,7 +232,7 @@ public class TimelineViewModel extends ViewModel {
         mHideMoreButtonLiveData.setValue(timelineResponse.getPager().getIsLastPage());
         mTimelineUiData.setTimelineItems(timelineResponse.getList());
 
-        getTimelineComments();
+        getTimelineInteractions();
 
         updateCompleted();
     }
@@ -301,17 +301,17 @@ public class TimelineViewModel extends ViewModel {
         return timelineEntityList;
     }
 
-    protected void getTimelineComments() {
+    protected void getTimelineInteractions() {
         mWebCount++;
 
         Disposable disposable = mRepository
-                .getTimelineComments(mToken, getSelectedModules(), getTimelineEntityList())
-                .subscribe(this::onTimelineCommentsSuccess, this::onFailure);
+                .getTimelineInteractions(mToken, getSelectedModules(), getTimelineEntityList())
+                .subscribe(this::onTimelineInteractionsSuccess, this::onFailure);
 
         mDisposables.add(disposable);
     }
 
-    private void onTimelineCommentsSuccess(InteractionResponse interactionResponse) {
+    private void onTimelineInteractionsSuccess(InteractionResponse interactionResponse) {
         mTimelineUiData.setInteractionComments(interactionResponse.getList());
 
         updateCompleted();

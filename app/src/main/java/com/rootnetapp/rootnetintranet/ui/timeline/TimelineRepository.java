@@ -45,9 +45,9 @@ public class TimelineRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<InteractionResponse> getTimelineComments(String auth, List<String> modules,
-                                                               List<Integer> entities) {
-        return service.getTimelineComments(auth, modules, entities)
+    public Observable<InteractionResponse> getTimelineInteractions(String auth, List<String> modules,
+                                                                   List<Integer> entities) {
+        return service.getTimelineInteractions(auth, modules, entities)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }

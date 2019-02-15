@@ -25,6 +25,10 @@ public class Interaction {
     private Integer commentsCount;
     @Json(name = "thumbsCount")
     private Integer thumbsCount;
+    @Json(name = "thumbUp")
+    private Integer thumbsUp;
+    @Json(name = "thumbDown")
+    private Integer thumbsDown;
     @Json(name = "commentsPager")
     private CommentsPager commentsPager;
     @Json(name = "comments")
@@ -102,6 +106,22 @@ public class Interaction {
         this.thumbsCount = thumbsCount;
     }
 
+    public Integer getThumbsUp() {
+        return thumbsUp;
+    }
+
+    public void setThumbsUp(Integer thumbsUp) {
+        this.thumbsUp = thumbsUp;
+    }
+
+    public Integer getThumbsDown() {
+        return thumbsDown;
+    }
+
+    public void setThumbsDown(Integer thumbsDown) {
+        this.thumbsDown = thumbsDown;
+    }
+
     public CommentsPager getCommentsPager() {
         return commentsPager;
     }
@@ -117,5 +137,4 @@ public class Interaction {
     public void setComments(List<Comment> comments) {
         this.comments = comments;
     }
-
 }

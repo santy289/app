@@ -371,6 +371,8 @@ public class TimelineViewModel extends ViewModel {
     //endregion
 
     private void onFailure(Throwable throwable) {
+        mWebCount = mWebCompleted = 0;
+
         showLoading.setValue(false);
         mErrorLiveData.setValue(R.string.failure_connect);
     }

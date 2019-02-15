@@ -411,6 +411,12 @@ public class Utils {
         }
     }
 
+    public static long getDateInMillisFromString(String date, String format) {
+        Date dateObject = getDateFromString(date, format);
+        if (dateObject == null) return 0;
+        else return dateObject.getTime();
+    }
+
     /**
      * Creates the given date in integers as a Date object
      *

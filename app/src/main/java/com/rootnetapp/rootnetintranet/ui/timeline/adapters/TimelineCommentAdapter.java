@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.github.marlonlom.utilities.timeago.TimeAgo;
+import com.github.marlonlom.utilities.timeago.TimeAgoMessages;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
@@ -17,6 +19,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
@@ -68,8 +71,12 @@ public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineComment
                 }
             }
             holder.binding.tvComment.setText(item.getDescription());
-            String time = item.getCreatedAt().split("T")[0];
-            holder.binding.tvTime.setText(time);
+
+            TimeAgoMessages messages = new TimeAgoMessages.Builder().withLocale(Locale.getDefault()).build();
+            long timeInMillis = Utils.getDateInMillisFromString(item.getCreatedAt(), Utils.SERVER_DATE_FORMAT);
+            String timeAgo = TimeAgo.using(timeInMillis, messages);
+            holder.binding.tvTimeAgo.setText(timeAgo);
+
             interactionId = item.getInteractionId();
             associate = item.getId();
         }

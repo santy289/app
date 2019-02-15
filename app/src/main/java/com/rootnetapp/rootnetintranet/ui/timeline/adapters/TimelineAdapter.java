@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.github.marlonlom.utilities.timeago.TimeAgo;
+import com.github.marlonlom.utilities.timeago.TimeAgoMessages;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
@@ -27,6 +29,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
@@ -145,9 +148,11 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
             holder.binding.tvDescription.setText(context.getString(R.string.timeline_current_status,
                     item.getDescription().getArguments().getCurrentStatus().getName()));
         }
-        String date = Utils.getFormattedDate(item.getCreatedAt(), Utils.SERVER_DATE_FORMAT,
-                Utils.SHORT_DATE_DISPLAY_FORMAT);
-        holder.binding.tvDate.setText(date);
+
+        TimeAgoMessages messages = new TimeAgoMessages.Builder().withLocale(Locale.getDefault()).build();
+        long timeInMillis = Utils.getDateInMillisFromString(item.getCreatedAt(), Utils.SERVER_DATE_FORMAT);
+        String timeAgo = TimeAgo.using(timeInMillis, messages);
+        holder.binding.tvTimeAgo.setText(timeAgo);
 
         holder.binding.recComments.setLayoutManager(new LinearLayoutManager(context));
         List<Comment> subComments = new ArrayList<>();

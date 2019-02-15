@@ -340,6 +340,9 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         filtersBinding.switchComments.setOnClickListener(this::onSwitchClicked);
 
         List<WorkflowUser> workflowUsers = viewModel.getAllWorkflowUsers();
+
+        if (workflowUsers == null) return popupWindow;
+
         for (WorkflowUser workflowUser : workflowUsers) {
             LayoutInflater vi = (LayoutInflater) getContext()
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);

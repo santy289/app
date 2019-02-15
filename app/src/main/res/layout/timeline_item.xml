@@ -78,7 +78,7 @@
                             android:layout_height="wrap_content"
                             android:textSize="12sp"
                             android:paddingBottom="5dp"
-                            android:text="Jon doe"/>
+                            tools:text="Jon doe"/>
 
                         <TextView
                             android:id="@+id/tv_description"
@@ -124,7 +124,7 @@
                                 android:layout_height="wrap_content"
                                 android:textSize="12sp"
                                 android:layout_margin="3dp"
-                                android:text="x time ago"/>
+                                tools:text="x time ago"/>
 
                         </LinearLayout>
 
@@ -134,7 +134,9 @@
                             android:layout_height="wrap_content"
                             android:textSize="12sp"
                             android:layout_margin="3dp"
-                            android:text="Mar x, 2018 12:03pm" />
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            tools:text="Mar x, 2018 12:03pm" />
 
 
                         <LinearLayout

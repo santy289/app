@@ -1,7 +1,12 @@
 package com.rootnetapp.rootnetintranet.ui.timeline.adapters;
 
 import android.content.Context;
+import android.graphics.Typeface;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,9 +16,11 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.databinding.TimelineItemBinding;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.Arguments;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineItem;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Comment;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Interaction;
+import com.rootnetapp.rootnetintranet.ui.timeline.TimelineAction;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineInterface;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel;
 import com.squareup.picasso.Picasso;
@@ -21,6 +28,8 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.StringRes;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -74,6 +83,8 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
 
         User author = null;
         TimelineItem item = items.get(i);
+        Arguments arguments = item.getDescription().getArguments();
+
         String title = "";
         for (User user : people) {
             if (user.getUserId() == item.getAuthor()) {
@@ -86,50 +97,71 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
             }
         }
 
-        switch (item.getDescription().getText()) {
-            case "TIMELINE_TRACKING_CREATED": {
-                title = title + " " + context.getString(R.string.tracking_created);
-                break;
-            }
-            case "TIMELINE_SPRINT_METADATA_STATUS_CREATED": {
-                title = title + " " + context.getString(R.string.status_created);
-                break;
+        Spannable titleSpannable = null;
+        if (author != null) {
+            switch (item.getDescription().getText()) {
+                case TimelineAction.WORKFLOW_CREATED:
+                    titleSpannable = getSpannableTitle(R.string.timeline_action_workflow_created,
+                            author.getFullName(), arguments.getKey());
+                    break;
+
+                case TimelineAction.WORKFLOW_UPDATED:
+                    titleSpannable = getSpannableTitle(R.string.timeline_action_workflow_updated,
+                            author.getFullName(), arguments.getKey());
+                    break;
+
+                case TimelineAction.WORKFLOW_STATUS_APPROVED_CREATED:
+                case TimelineAction.WORKFLOW_STATUS_APPROVED_UPDATED:
+                    titleSpannable = getSpannableTitle(
+                            R.string.timeline_action_workflow_status_updated, author.getFullName(),
+                            arguments.getKey());
+                    break;
+
+                case TimelineAction.WORKFLOW_FILE_RECORD_CREATED:
+                    titleSpannable = getSpannableTitle(
+                            R.string.timeline_action_workflow_file_created, author.getFullName(),
+                            arguments.getKey());
+                    break;
+
+                case TimelineAction.WORKFLOW_COMMENT_CREATED:
+                    titleSpannable = getSpannableTitle(
+                            R.string.timeline_action_workflow_comment_created, author.getFullName(),
+                            arguments.getKey());
+                    break;
             }
         }
 
-//            if (item.getDescription().getArguments().getCompanyName() != null) {
-//                title = title + " " + item.getDescription().getArguments().getCompanyName();
-//            }
-        holder.binding.tvTitle.setText(title);
+        if (titleSpannable != null) {
+            holder.binding.tvTitle.setText(titleSpannable);
+        } else {
+            holder.binding.tvTitle.setText(title);
+        }
+
         if (item.getDescription().getArguments().getDescription() != null) {
-            holder.binding.tvDescription
-                    .setText(context.getString(R.string.txt_description) + " "
-                            + item.getDescription().getArguments().getDescription());
+            holder.binding.tvDescription.setText(context.getString(R.string.timeline_description,
+                    item.getDescription().getArguments().getDescription()));
         }
         if (item.getDescription().getArguments().getCurrentStatus() != null) {
-            holder.binding.tvDescription
-                    .setText(context.getString(R.string.txt_statusname) + " "
-                            + item.getDescription().getArguments().getCurrentStatus()
-                            .getName());
+            holder.binding.tvDescription.setText(context.getString(R.string.timeline_current_status,
+                    item.getDescription().getArguments().getCurrentStatus().getName()));
         }
-        String date = item.getCreatedAt().split("T")[0];
+        String date = Utils.getFormattedDate(item.getCreatedAt(), Utils.SERVER_DATE_FORMAT,
+                Utils.SHORT_DATE_DISPLAY_FORMAT);
         holder.binding.tvDate.setText(date);
 
-        if (i == 0) {
-            holder.binding.topLine.setVisibility(View.INVISIBLE);
-        }
         holder.binding.recComments.setLayoutManager(new LinearLayoutManager(context));
-        List<Comment> theComments = new ArrayList<>();
+        List<Comment> subComments = new ArrayList<>();
         final int interactionId;
         int x = -1;
         for (Interaction interactionComment : comments) {
             if (interactionComment.getEntity().equals(item.getEntityId())) {
                 x = interactionComment.getId();
-                theComments = interactionComment.getComments();
+                subComments = interactionComment.getComments();
+                break;
             }
         }
         interactionId = x;
-        holder.binding.recComments.setAdapter(new TimelineCommentAdapter(theComments, people,
+        holder.binding.recComments.setAdapter(new TimelineCommentAdapter(subComments, people,
                 viewModel, parent));
         holder.binding.tvComments.setOnClickListener(view -> {
             if (holder.binding.recComments.getVisibility() == View.GONE) {
@@ -181,12 +213,55 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         });
         viewModel.getObservablePostComments().observe(parent, postCommentObserver);
 
+        //hide the top line for the first item
+        if (i == 0) {
+            holder.binding.topLine.setVisibility(View.INVISIBLE);
+        } else {
+            holder.binding.topLine.setVisibility(View.VISIBLE);
+        }
+
         //hide the bottom line for the last item
         if (i == getItemCount() - 1) {
-            holder.binding.bottomLine.setVisibility(View.GONE);
+            holder.binding.bottomLine.setVisibility(View.INVISIBLE);
         } else {
             holder.binding.bottomLine.setVisibility(View.VISIBLE);
         }
+    }
+
+    private Spannable getSpannableTitle(@StringRes int stringRes, String authorName,
+                                        String workflowKey) {
+        if (authorName == null) return null;
+        if (workflowKey == null) workflowKey = "";
+
+        String text = context.getString(stringRes, authorName, workflowKey);
+
+        Spannable spannable = new SpannableString(text);
+
+        int authorStartIndex = text.indexOf(authorName);
+        int authorEndIndex = authorStartIndex + authorName.length();
+        spannable.setSpan(
+                new StyleSpan(Typeface.BOLD),
+                authorStartIndex,
+                authorEndIndex,
+                Spannable.SPAN_INCLUSIVE_EXCLUSIVE
+        );
+
+        int workflowStartIndex = text.indexOf(workflowKey);
+        int workflowEndIndex = workflowStartIndex + workflowKey.length();
+        spannable.setSpan(
+                new StyleSpan(Typeface.BOLD),
+                workflowStartIndex,
+                workflowEndIndex,
+                Spannable.SPAN_INCLUSIVE_EXCLUSIVE
+        );
+        spannable.setSpan(
+                new ForegroundColorSpan(ContextCompat.getColor(context, R.color.colorAccent)),
+                workflowStartIndex,
+                workflowEndIndex,
+                Spannable.SPAN_INCLUSIVE_EXCLUSIVE
+        );
+
+        return spannable;
     }
 
     @Override

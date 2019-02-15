@@ -336,4 +336,11 @@
     <string name="timeline_module_workflow_approvals">Workflow Approvals</string>
     <string name="timeline_module_workflow_files">Workflow Files</string>
     <string name="timeline_modules_workflow_comments">Workflow Comments</string>
+    <string name="timeline_action_workflow_created">%1$s has created the workflow %2$s</string>
+    <string name="timeline_action_workflow_updated">%1$s has updated the workflow %2$s</string>
+    <string name="timeline_action_workflow_status_updated">%1$s has updated the status of the workflow %2$s</string>
+    <string name="timeline_action_workflow_file_created">%1$s has uploaded a file for the workflow %2$s</string>
+    <string name="timeline_action_workflow_comment_created">%1$s has commented on the workflow %2$s</string>
+    <string name="timeline_description">Description: %s</string>
+    <string name="timeline_current_status">Current status: %s</string>
 </resources>

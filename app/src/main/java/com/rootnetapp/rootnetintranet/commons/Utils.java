@@ -47,6 +47,7 @@ public class Utils {
 
     public static final String SERVER_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
     public static final String STANDARD_DATE_DISPLAY_FORMAT = "MMMM dd, yyyy";
+    public static final String SHORT_DATE_DISPLAY_FORMAT = "dd/MM/yy";
 
     public static final String[] ALLOWED_MIME_TYPES = {
             "text/*",

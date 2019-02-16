@@ -221,7 +221,7 @@ public class WorkflowDetailViewModel extends ViewModel {
 
     private void onFailure(Throwable throwable) {
         showLoading.setValue(false);
-        mErrorLiveData.setValue(R.string.failure_connect);
+        mErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
     }
 
     protected LiveData<Integer> getObservableError() {

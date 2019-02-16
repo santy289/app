@@ -2,7 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved;
 
 import android.util.Log;
 
-import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -125,7 +125,7 @@ public class PeopleInvolvedViewModel extends ViewModel {
 
     private void onFailure(Throwable throwable) {
         showLoading.setValue(false);
-        showToastMessage.setValue(R.string.failure_connect);
+        showToastMessage.setValue(Utils.getOnFailureStringRes(throwable));
     }
 
     protected LiveData<Integer> getObservableShowToastMessage() {

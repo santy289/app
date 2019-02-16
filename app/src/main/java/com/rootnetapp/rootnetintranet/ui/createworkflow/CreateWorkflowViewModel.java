@@ -1969,6 +1969,7 @@ class CreateWorkflowViewModel extends ViewModel {
 
         Log.d(TAG, "onFailure: " + throwable.getMessage());
         showLoading.setValue(false);
+        mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
     }
 
     private void onCreateFailure(Throwable throwable) {

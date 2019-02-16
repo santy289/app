@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -625,7 +626,7 @@ public class StatusViewModel extends ViewModel {
 
     private void onFailure(Throwable throwable) {
         showLoading.setValue(false);
-        mErrorLiveData.setValue(R.string.failure_connect);
+        mErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
     }
 
     protected LiveData<Integer> getObservableError() {

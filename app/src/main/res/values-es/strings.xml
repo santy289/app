@@ -7,6 +7,7 @@
     <string name="check_domain">Revisar Domain</string>
     <string name="get_plan">Obten un plan</string>
     <string name="failure_connect">Ha ocurrido un error de conexión, por favor vuelva a intentarlo</string>
+    <string name="failure_connect_forbidden_access">No posees suficientes permisos</string>
     <string name="loading_message">Cargando</string>
     <string name="username">Usuario</string>
     <string name="password">Clave</string>

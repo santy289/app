@@ -36,6 +36,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import retrofit2.HttpException;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -416,8 +417,15 @@ public class FilesViewModel extends ViewModel {
     }
 
     private void onFailure(Throwable throwable) {
+        int stringRes = R.string.failure_connect;
+
+        if (throwable instanceof HttpException) {
+            int httpCode = ((HttpException) throwable).code();
+            if (httpCode == 403) stringRes = R.string.failure_connect_forbidden_access;
+        }
+
         showLoading.setValue(false);
-        mToastMessageLiveData.setValue(R.string.failure_connect);
+        mToastMessageLiveData.setValue(stringRes);
     }
 
     protected LiveData<Integer> getObservableToastMessage() {

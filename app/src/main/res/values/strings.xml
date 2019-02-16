@@ -6,6 +6,7 @@
     <string name="check_domain">Check Domain</string>
     <string name="get_plan">Get a plan</string>
     <string name="failure_connect">Network error, please try again</string>
+    <string name="failure_connect_forbidden_access">You don\'t have enough permissions</string>
     <string name="loading_message">Loading</string>
     <string name="username">Username</string>
     <string name="password">Password</string>

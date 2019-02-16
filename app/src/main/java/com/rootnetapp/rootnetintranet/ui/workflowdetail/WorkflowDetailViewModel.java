@@ -13,7 +13,6 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Locale;
 
 import androidx.annotation.NonNull;
@@ -42,12 +41,9 @@ public class WorkflowDetailViewModel extends ViewModel {
     private LiveData<WorkflowListItem> handleRepoWorkflowRequest;
 
     protected MutableLiveData<Boolean> showLoading;
-    protected MutableLiveData<StatusUiData> setWorkflowIsOpen;
 
-    protected LiveData<StatusUiData> updateActiveStatusFromUserAction;
     protected LiveData<File> retrieveWorkflowPdfFile;
     protected LiveData<Boolean> handleShowLoadingByRepo;
-    protected LiveData<StatusUiData> handleSetWorkflowIsOpenByRepo;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
@@ -55,14 +51,11 @@ public class WorkflowDetailViewModel extends ViewModel {
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the mWorkflow.
     private WorkflowDb mWorkflow; // Not in DB and more complete response from network.
 
-    private StatusUiData mStatusUiData;
-
     private static final String TAG = "WorkflowDetailViewModel";
 
     public WorkflowDetailViewModel(WorkflowDetailRepository workflowDetailRepository) {
         this.mRepository = workflowDetailRepository;
         this.showLoading = new MutableLiveData<>();
-        this.setWorkflowIsOpen = new MutableLiveData<>();
         this.initUiWithWorkflowListItem = new MutableLiveData<>();
         subscribe();
     }
@@ -114,39 +107,6 @@ public class WorkflowDetailViewModel extends ViewModel {
      * repository. Here we will handle all incoming data from the repo.
      */
     private void subscribe() {
-        // Transformation for observing approval and rejection of workflows.
-        updateActiveStatusFromUserAction = Transformations.map(
-                mRepository.getActivationResponse(),
-                activationResponse -> {
-                    // transform WorkflowActivationResponse to StatusUiData
-
-                    showLoading.setValue(false);
-
-                    // if correct, this API will only return one workflow
-
-                    // check for emptiness of main list
-                    List<List<WorkflowDb>> responseList = activationResponse.getData();
-                    if (responseList.isEmpty()) {
-                        mShowToastMessage.setValue(R.string.error);
-                        return mStatusUiData;
-                    }
-
-                    // check for emptiness of workflow list
-                    List<WorkflowDb> workflowDbList = responseList.get(0);
-                    if (workflowDbList.isEmpty()) {
-                        mShowToastMessage.setValue(R.string.error);
-                        return mStatusUiData;
-                    }
-
-                    mWorkflow = workflowDbList.get(0);
-
-                    mShowToastMessage.setValue(R.string.request_successfully);
-
-                    updateStatusUiData(mWorkflow.isOpen(), true);
-                    return mStatusUiData;
-                }
-        );
-
         // Transformation for observing the workflow export pdf file
         retrieveWorkflowPdfFile = Transformations.map(
                 mRepository.getExportPdfResponse(),
@@ -184,44 +144,6 @@ public class WorkflowDetailViewModel extends ViewModel {
                     return show;
                 }
         );
-
-        // Transformation used in case that the workflow activation fails
-        handleSetWorkflowIsOpenByRepo = Transformations.map(
-                mRepository.getActivationFailed(),
-                statusUiData -> {
-                    /*
-                    Set the original status. mWorkflow object is only updated if the request is successful.
-                    Thus, it will always hold the correct status
-                     */
-                    updateStatusUiData(mWorkflow.isOpen(), true);
-                    return mStatusUiData;
-                }
-        );
-    }
-
-    /**
-     * Sends the parameters to modify the UI regarding the open/closed status.
-     *
-     * @param open            whether the workflow is open or closed.
-     * @param userInteraction whether to use the {@link #setWorkflowIsOpen} LiveData. If true, it's
-     *                        because it's been called from user interaction, so the {@link
-     *                        #updateActiveStatusFromUserAction} LiveData will handle the update.
-     */
-    private void updateStatusUiData(boolean open, boolean userInteraction) {
-        int iconRes = open ? R.drawable.ic_lock_open_black_24dp : R.drawable.ic_lock_outline_black_24dp;
-        int colorRes = open ? R.color.green : R.color.red;
-        mStatusUiData = new StatusUiData(iconRes, colorRes);
-
-        if (!userInteraction) setWorkflowIsOpen.setValue(mStatusUiData);
-    }
-
-    /**
-     * Calls the endpoint to change the Workflow active status. This will toggle the current state,
-     * set it to closed if it's open and vice-versa.
-     */
-    protected void toggleWorkflowActivation() {
-        showLoading.setValue(true);
-        mRepository.postWorkflowActivation(mToken, mWorkflow.getId(), !mWorkflow.isOpen());
     }
 
     /**
@@ -273,7 +195,6 @@ public class WorkflowDetailViewModel extends ViewModel {
     private void onWorkflowSuccess(WorkflowResponse workflowResponse) {
         showLoading.setValue(false);
         mWorkflow = workflowResponse.getWorkflow();
-        updateStatusUiData(mWorkflow.isOpen(), false);
 
         int version = mWorkflow.getWorkflowType().getVersion();
         String versionString = String.format(Locale.US, "v%d", version);

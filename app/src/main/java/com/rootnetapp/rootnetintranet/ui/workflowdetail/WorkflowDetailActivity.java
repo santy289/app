@@ -6,13 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -67,7 +65,6 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
 
-        setOnClickListeners();
         subscribe();
 
         showLoading(true);
@@ -131,10 +128,6 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         mBinding.viewPager.setAdapter(mViewPagerAdapter);
     }
 
-    private void setOnClickListeners() {
-        mBinding.fab.setOnClickListener(v -> workflowDetailViewModel.toggleWorkflowActivation());
-    }
-
     private void subscribe() {
         final Observer<Integer> errorObserver = ((Integer data) -> {
             showLoading(false);
@@ -150,19 +143,14 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 .observe(this, this::updateCommentsTabCounter);
         workflowDetailViewModel.getObservableFilesTabCounter()
                 .observe(this, this::updateFilesTabCounter);
-        workflowDetailViewModel.updateActiveStatusFromUserAction
-                .observe(this, this::updateWorkflowStatus);
         workflowDetailViewModel.retrieveWorkflowPdfFile
                 .observe(this, this::openPdfFile);
         workflowDetailViewModel.handleShowLoadingByRepo.observe(this, this::showLoading);
-        workflowDetailViewModel.handleSetWorkflowIsOpenByRepo
-                .observe(this, this::updateWorkflowStatus);
         workflowDetailViewModel.getObservableWorflowListItem().observe(this, this::initUiWith);
         workflowDetailViewModel.getObservableWorkflowTypeVersion()
                 .observe(this, this::updateToolbarSubtitleWithWorkflowVersion);
 
         workflowDetailViewModel.showLoading.observe(this, this::showLoading);
-        workflowDetailViewModel.setWorkflowIsOpen.observe(this, this::updateWorkflowStatus);
     }
 
     @UiThread
@@ -172,20 +160,6 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         } else {
             Utils.hideLoading();
         }
-    }
-
-    /**
-     * Changes the UI state (text and color) of the selected status. This is called after user
-     * interaction with the {@link Spinner} and after the API request is completed.
-     *
-     * @param statusUiData object that contains the current state of the status UI.
-     */
-    @UiThread
-    private void updateWorkflowStatus(StatusUiData statusUiData) {
-        mBinding.fab.setSupportBackgroundTintList(ColorStateList
-                .valueOf(ContextCompat.getColor(this, statusUiData.getSelectedColor())));
-        mBinding.fab
-                .setImageDrawable(ContextCompat.getDrawable(this, statusUiData.getSelectedIcon()));
     }
 
     /**

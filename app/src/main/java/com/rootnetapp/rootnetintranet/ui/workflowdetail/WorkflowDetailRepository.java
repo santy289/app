@@ -6,12 +6,8 @@ import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
-import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.exportpdf.ExportPdfResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -27,8 +23,6 @@ public class WorkflowDetailRepository {
     private final WorkflowDbDao workflowDbDao;
 
     private MutableLiveData<Boolean> showLoading;
-    private MutableLiveData<WorkflowActivationResponse> activationResponseLiveData;
-    private MutableLiveData<Boolean> activationFailedLiveData;
     private MutableLiveData<ExportPdfResponse> exportPdfResponseLiveData;
     private MutableLiveData<WorkflowListItem> retrieveFromDbWorkflow;
 
@@ -54,33 +48,6 @@ public class WorkflowDetailRepository {
     public Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {
         return service.getWorkflow(auth, workflowId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
-    }
-
-    /**
-     * Sets the active status (open/closed) for a specific workflow.
-     *
-     * @param token      Access token to use for endpoint request.
-     * @param workflowId single object ID to set the active status. The endpoint allows an array of
-     *                   workflow IDs, but in this method we will only work with one workflow ID.
-     * @param isOpen     whether to open or close the Workflow.
-     */
-    protected void postWorkflowActivation(String token, int workflowId, boolean isOpen) {
-        List<Integer> workflowIds = new ArrayList<>();
-        workflowIds.add(workflowId);
-
-        Disposable disposable = service.postWorkflowActivation(
-                token,
-                workflowIds,
-                isOpen
-        )
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(success -> activationResponseLiveData.setValue(success), throwable -> {
-                    Log.d(TAG, "activateWorkflow: " + throwable.getMessage());
-                    showLoading.setValue(false);
-                    activationFailedLiveData.setValue(true);
-                });
-        disposables.add(disposable);
     }
 
     /**
@@ -129,20 +96,6 @@ public class WorkflowDetailRepository {
                     showLoading.setValue(false);
                 });
         disposables.add(disposable);
-    }
-
-    protected LiveData<WorkflowActivationResponse> getActivationResponse() {
-        if (activationResponseLiveData == null) {
-            activationResponseLiveData = new MutableLiveData<>();
-        }
-        return activationResponseLiveData;
-    }
-
-    protected LiveData<Boolean> getActivationFailed() {
-        if (activationFailedLiveData == null) {
-            activationFailedLiveData = new MutableLiveData<>();
-        }
-        return activationFailedLiveData;
     }
 
     protected LiveData<ExportPdfResponse> getExportPdfResponse() {

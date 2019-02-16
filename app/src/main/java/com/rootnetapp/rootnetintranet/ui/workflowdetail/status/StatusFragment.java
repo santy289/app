@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -43,6 +44,7 @@ public class StatusFragment extends Fragment {
     protected static final int INDEX_LAST_STATUS = 0;
     protected static final int INDEX_CURRENT_STATUS = 1;
     protected static final int INDEX_NEXT_STATUS = 2;
+    private CompoundButton.OnCheckedChangeListener mOnCheckedChangeListener;
 
     public StatusFragment() {
         // Required empty public constructor
@@ -102,11 +104,20 @@ public class StatusFragment extends Fragment {
         statusViewModel.hideApproveSpinnerOnEmptyData
                 .observe(this, this::hideApproveSpinnerOnEmptyData);
         statusViewModel.updateStatusUiFromUserAction.observe(this, this::updateStatusDetails);
+        statusViewModel.updateActiveStatusFromUserAction.observe(this, this::updateWorkflowStatus);
+        statusViewModel.handleSetWorkflowIsOpenByRepo.observe(this, this::updateWorkflowStatus);
+        statusViewModel.setWorkflowIsOpen.observe(this, this::updateWorkflowStatus);
     }
 
     private void setOnClickListeners() {
         mBinding.includeNextStep.btnApprove.setOnClickListener(v -> approveAction());
         mBinding.includeNextStep.btnReject.setOnClickListener(v -> rejectAction());
+
+        mOnCheckedChangeListener = (buttonView, isChecked) -> {
+            mBinding.switchStatus.setText(statusViewModel.getSwitchStatusStringRes(isChecked));
+            statusViewModel.toggleWorkflowActivation();
+        };
+        mBinding.switchStatus.setOnCheckedChangeListener(mOnCheckedChangeListener);
         //todo verify action for "Mass Approval"
     }
 
@@ -266,6 +277,22 @@ public class StatusFragment extends Fragment {
     @UiThread
     private void showTieStatusLabel(boolean show) {
         mBinding.includeStatusSummary.tvTiedStatus.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    /**
+     * Changes the UI state (text and color) of the selected status. This is called after user
+     * interaction with the Switch or after the API request is completed.
+     *
+     * @param statusUiData object that contains the current state of the status UI.
+     */
+    @UiThread
+    private void updateWorkflowStatus(StatusUiData statusUiData) {
+        //prevent the listener from being fired after setChecked()
+        mBinding.switchStatus.setOnCheckedChangeListener(null);
+        mBinding.switchStatus.setChecked(statusUiData.isOpen());
+        mBinding.switchStatus.setOnCheckedChangeListener(mOnCheckedChangeListener);
+
+        mBinding.switchStatus.setText(statusUiData.getSelectedText());
     }
 
     private void showToastMessage(@StringRes int messageRes) {

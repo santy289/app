@@ -51,17 +51,21 @@ public class StatusViewModel extends ViewModel {
     protected MutableLiveData<List<String>> updateApproveSpinner;
     protected MutableLiveData<Boolean> hideApproveSpinnerOnEmptyData;
     protected MutableLiveData<Boolean> hideApproverListOnEmptyData;
-    protected MutableLiveData<Boolean> setWorkflowIsOpen;
     protected MutableLiveData<Boolean> mEnableApproveRejectButtonsLiveData;
     protected MutableLiveData<String[]> updateStatusUi;
     protected LiveData<String[]> updateStatusUiFromUserAction;
     protected LiveData<Boolean> handleShowLoadingByRepo;
+    protected LiveData<StatusUiData> updateActiveStatusFromUserAction;
+    protected LiveData<StatusUiData> handleSetWorkflowIsOpenByRepo;
+    protected MutableLiveData<StatusUiData> setWorkflowIsOpen;
 
     private @Nullable Integer mApproveSpinnerItemSelection;
 
     private String mToken;
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the workflow.
     private WorkflowDb mWorkflow; // Not in DB and more complete response from network.
+
+    private StatusUiData mStatusUiData;
 
     protected StatusViewModel(StatusRepository statusRepository) {
         this.mRepository = statusRepository;
@@ -122,8 +126,59 @@ public class StatusViewModel extends ViewModel {
                 show -> {
                     mEnableApproveRejectButtonsLiveData.setValue(true);
                     showLoading.setValue(false);
-                    showToastMessage.setValue(R.string.error);
+                    showToastMessage.setValue(R.string.failure_connect);
                     return show;
+                }
+        );
+
+
+        // Transformation for observing approval and rejection of workflows.
+        updateActiveStatusFromUserAction = Transformations.map(
+                mRepository.getActivationResponse(),
+                activationResponse -> {
+                    // transform WorkflowActivationResponse to StatusUiData
+
+                    showLoading.setValue(false);
+
+                    // if correct, this API will only return one workflow
+
+                    // check for emptiness of main list
+                    List<List<WorkflowDb>> responseList = activationResponse.getData();
+                    if (responseList.isEmpty()) {
+                        showToastMessage.setValue(R.string.error);
+                        return mStatusUiData;
+                    }
+
+                    // check for emptiness of workflow list
+                    List<WorkflowDb> workflowDbList = responseList.get(0);
+                    if (workflowDbList.isEmpty()) {
+                        showToastMessage.setValue(R.string.error);
+                        return mStatusUiData;
+                    }
+
+                    mWorkflow = workflowDbList.get(0);
+
+                    showToastMessage.setValue(R.string.request_successfully);
+
+                    updateStatusUiData(mWorkflow.isOpen(), true);
+                    return mStatusUiData;
+                }
+        );
+
+        // Transformation used in case that the workflow activation fails
+        handleSetWorkflowIsOpenByRepo = Transformations.map(
+                mRepository.getActivationFailed(),
+                statusUiData -> {
+                    /*
+                    Set the original status. mWorkflow object is only updated if the request is successful.
+                    Thus, it will always hold the correct status
+                     */
+                    updateStatusUiData(mWorkflow.isOpen(), true);
+
+                    showLoading.setValue(false);
+                    showToastMessage.setValue(R.string.failure_connect);
+
+                    return mStatusUiData;
                 }
         );
     }
@@ -358,7 +413,7 @@ public class StatusViewModel extends ViewModel {
                     R.string.workflow_detail_status_fragment_status_summary_tied_status_message);
         }
 
-        setWorkflowIsOpen.setValue(workflow.isOpen());
+        updateStatusUiData(mWorkflow.isOpen(), false);
     }
 
     private void updateUIWithWorkflowType(WorkflowTypeDb currentWorkflowType, int statusId) {
@@ -538,6 +593,34 @@ public class StatusViewModel extends ViewModel {
 
     protected void setApproveSpinnerItemSelection(@Nullable Integer approveSpinnerItemSelection) {
         this.mApproveSpinnerItemSelection = approveSpinnerItemSelection;
+    }
+
+    /**
+     * Sends the parameters to modify the UI regarding the open/closed status.
+     *
+     * @param isOpen            whether the workflow is open or closed.
+     * @param userInteraction whether to use the {@link #setWorkflowIsOpen} LiveData. If true, it's
+     *                        because it's been called from user interaction, so the {@link
+     *                        #updateActiveStatusFromUserAction} LiveData will handle the update.
+     */
+    private void updateStatusUiData(boolean isOpen, boolean userInteraction) {
+        int stringRes = getSwitchStatusStringRes(isOpen);
+        mStatusUiData = new StatusUiData(isOpen, stringRes);
+
+        if (!userInteraction) setWorkflowIsOpen.setValue(mStatusUiData);
+    }
+
+    protected int getSwitchStatusStringRes(boolean isOpen) {
+        return isOpen ? R.string.open : R.string.closed;
+    }
+
+    /**
+     * Calls the endpoint to change the Workflow active status. This will toggle the current state,
+     * set it to closed if it's open and vice-versa.
+     */
+    protected void toggleWorkflowActivation() {
+        showLoading.setValue(true);
+        mRepository.postWorkflowActivation(mToken, mWorkflow.getId(), !mWorkflow.isOpen());
     }
 
     private void onFailure(Throwable throwable) {

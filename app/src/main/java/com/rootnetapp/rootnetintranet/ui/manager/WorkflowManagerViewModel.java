@@ -950,4 +950,9 @@ public class WorkflowManagerViewModel extends ViewModel {
         }
         return showLoading;
     }
+
+    @Override
+    protected void onCleared() {
+        mDisposables.clear();
+    }
 }

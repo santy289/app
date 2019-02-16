@@ -119,6 +119,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<Boolean> goBack;
     private MutableLiveData<FileFormItem> mNewFormItemFileLiveData;
     private MutableLiveData<DownloadedFileUiData> mOpenDownloadedFileLiveData;
+    private MutableLiveData<Boolean> mEnableSubmitButtonLiveData;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
@@ -326,6 +327,8 @@ class CreateWorkflowViewModel extends ViewModel {
 
         mapBody.put("specific_approvers", specificApproversMap);
 
+        mEnableSubmitButtonLiveData.setValue(false);
+
         // Accepts object
         Disposable disposable = mRepository
                 .createWorkflow(mToken, mapBody)
@@ -357,10 +360,12 @@ class CreateWorkflowViewModel extends ViewModel {
 
         mapBody.put("specific_approvers", specificApproversMap);
 
+        mEnableSubmitButtonLiveData.setValue(false);
+
         // Accepts object
         Disposable disposable = mRepository
                 .editWorkflow(mToken, workflowId, mapBody)
-                .subscribe(this::onEditSuccess, this::onFailure);
+                .subscribe(this::onEditSuccess, this::onEditFailure);
 
         mDisposables.add(disposable);
     }
@@ -1935,7 +1940,8 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void onCreateSuccess(CreateWorkflowResponse createWorkflowResponse) {
-        //mCreateLiveData.setValue(createWorkflowResponse);
+        mEnableSubmitButtonLiveData.setValue(true);
+
         showLoading.setValue(false);
         DialogMessage dialogMessage = new DialogMessage();
         dialogMessage.title = R.string.created;
@@ -1946,6 +1952,8 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void onEditSuccess(CreateWorkflowResponse createWorkflowResponse) {
+        mEnableSubmitButtonLiveData.setValue(true);
+
         showLoading.setValue(false);
         DialogMessage dialogMessage = new DialogMessage();
         dialogMessage.title = R.string.edited;
@@ -1957,15 +1965,30 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void onFailure(Throwable throwable) {
+        mEnableSubmitButtonLiveData.setValue(true);
+
         Log.d(TAG, "onFailure: " + throwable.getMessage());
         showLoading.setValue(false);
     }
 
     private void onCreateFailure(Throwable throwable) {
+        mEnableSubmitButtonLiveData.setValue(true);
+
         showLoading.setValue(false);
         DialogMessage dialogMessage = new DialogMessage();
         dialogMessage.title = R.string.error;
         dialogMessage.message = R.string.error_create_workflow;
+        showDialogMessage.setValue(dialogMessage);
+        Log.d(TAG, "onFailure: " + throwable.getMessage());
+    }
+
+    private void onEditFailure(Throwable throwable) {
+        mEnableSubmitButtonLiveData.setValue(true);
+
+        showLoading.setValue(false);
+        DialogMessage dialogMessage = new DialogMessage();
+        dialogMessage.title = R.string.error;
+        dialogMessage.message = R.string.error_edit_workflow;
         showDialogMessage.setValue(dialogMessage);
         Log.d(TAG, "onFailure: " + throwable.getMessage());
     }
@@ -2059,6 +2082,13 @@ class CreateWorkflowViewModel extends ViewModel {
             mNewFormItemFileLiveData = new MutableLiveData<>();
         }
         return mNewFormItemFileLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableEnableSubmitButton() {
+        if (mEnableSubmitButtonLiveData == null) {
+            mEnableSubmitButtonLiveData = new MutableLiveData<>();
+        }
+        return mEnableSubmitButtonLiveData;
     }
 
     protected LiveData<DownloadedFileUiData> getObservableDownloadedFileUiData() {

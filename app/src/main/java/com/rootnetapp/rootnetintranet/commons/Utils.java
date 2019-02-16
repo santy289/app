@@ -36,6 +36,7 @@ import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import retrofit2.HttpException;
 
 public class Utils {
 
@@ -479,5 +480,16 @@ public class Utils {
             Log.d(TAG, "getFormattedDate: ", e);
             return null;
         }
+    }
+
+    public static int getOnFailureStringRes(Throwable throwable) {
+        int stringRes = R.string.failure_connect;
+
+        if (throwable instanceof HttpException) {
+            int httpCode = ((HttpException) throwable).code();
+            if (httpCode == 403) stringRes = R.string.failure_connect_forbidden_access;
+        }
+
+        return stringRes;
     }
 }

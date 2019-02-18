@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.PopupWindow;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -321,6 +322,8 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
 
         viewModel.postComment(interactionId, timelineItem.getEntityId(),
                 timelineItem.getEntity(), comment, author.getUserId());
+
+        hideSoftInputKeyboard();
     }
 
     @Override
@@ -630,5 +633,15 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
                 getString(messageRes),
                 Toast.LENGTH_SHORT)
                 .show();
+    }
+
+    private void hideSoftInputKeyboard() {
+        // Check if no view has focus:
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+                    Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 }

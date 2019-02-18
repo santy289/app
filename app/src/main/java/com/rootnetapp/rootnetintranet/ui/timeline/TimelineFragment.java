@@ -433,26 +433,47 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         boolean checked = ((Switch) view).isChecked();
         String id = (String) view.getTag();
 
-        int i = 0;
+        if (id.equals(USER_ALL)) {
+            for (int i = 0; i < mFiltersBinding.lyt.getChildCount(); i++) {
+                View child = mFiltersBinding.lyt.getChildAt(i);
 
-        List<String> users = viewModel.getSelectedUsers();
-        while (i < users.size()) {
-            if (users.get(i).equals("undefined")) {
-                users.remove(i);
+                Switch switchView = child.findViewById(R.id.field_swtch);
+                if (switchView == null) continue;
+
+                switchView.setChecked(checked);
             }
-            i++;
+        } else {
+            boolean isAllSelected = true;
+            Switch userAllSwitch = null;
+
+            for (int j = 0; j < mFiltersBinding.lyt.getChildCount(); j++) {
+                View child = mFiltersBinding.lyt.getChildAt(j);
+
+                Switch switchView = child.findViewById(R.id.field_swtch);
+
+                if (switchView == null) continue;
+                if (switchView.getTag().equals(USER_ALL)) {
+                    userAllSwitch = switchView;
+                    continue;
+                }
+
+                isAllSelected &= switchView.isChecked();
+            }
+
+            if (userAllSwitch != null) userAllSwitch.setChecked(isAllSelected);
         }
 
-        if (checked) {
-            users.add(id);
-        } else {
-            i = 0;
-            while (i < users.size()) {
-                if (users.get(i).equals(id)) {
-                    users.remove(i);
-                }
-                i++;
-            }
+        List<String> users = new ArrayList<>();
+
+        for (int j = 0; j < mFiltersBinding.lyt.getChildCount(); j++) {
+            View child = mFiltersBinding.lyt.getChildAt(j);
+
+            Switch switchView = child.findViewById(R.id.field_swtch);
+
+            //do not add if null or if it's the "All" filter
+            if (switchView == null || switchView.getTag().equals(USER_ALL)) continue;
+
+            if (switchView.isChecked()) users.add((String) switchView.getTag());
         }
 
         if (users.size() == 0) {

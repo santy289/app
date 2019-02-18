@@ -3,6 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.timeline;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +14,11 @@ import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.databinding.FragmentTimelineBinding;
 import com.rootnetapp.rootnetintranet.databinding.TimelineFiltersMenuBinding;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineItem;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Interaction;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
@@ -99,6 +103,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         viewModel.getObservableTimeline().observe(this, this::populateTimeline);
         viewModel.getObservableHideMoreButton().observe(this, this::hideMoreButton);
         viewModel.getObservableHideTimelineList().observe(this, this::hideTimelineList);
+        viewModel.getObservablePostInteraction().observe(this, this::updateInteraction);
     }
 
     /**
@@ -293,10 +298,51 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         viewModel.getTimeline();
     }
 
+    //region TimelineInterface
     @Override
     public void reload() {
         updateTimeline();
     }
+
+    @Override
+    public void addCommentClicked(String comment, User author, TimelineItem timelineItem,
+                                  int interactionId) {
+        if (TextUtils.isEmpty(comment)) {
+            showToastMessage(R.string.empty_comment);
+            return;
+        }
+
+        if (author == null) {
+            showToastMessage(R.string.error);
+            return;
+        }
+
+        viewModel.postComment(interactionId, timelineItem.getEntityId(),
+                timelineItem.getEntity(), comment, author.getUserId());
+    }
+
+    @Override
+    public void likeClicked(User author, TimelineItem timelineItem, int interactionId) {
+        if (author == null) {
+            showToastMessage(R.string.error);
+            return;
+        }
+
+        viewModel.postLike(interactionId, timelineItem.getEntityId(),
+                timelineItem.getEntity(), author.getUserId());
+    }
+
+    @Override
+    public void dislikeClicked(User author, TimelineItem timelineItem, int interactionId) {
+        if (author == null) {
+            showToastMessage(R.string.error);
+            return;
+        }
+
+        viewModel.postDislike(interactionId, timelineItem.getEntityId(),
+                timelineItem.getEntity(), author.getUserId());
+    }
+    //endregion
 
     private PopupWindow createPopupMenu() {
         final PopupWindow popupWindow = new PopupWindow(getContext());
@@ -539,6 +585,11 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
     @UiThread
     private void updateSelectedDateTitle(int titleRes) {
         mBinding.tvSelectedDateTitle.setText(getString(titleRes));
+    }
+
+    @UiThread
+    private void updateInteraction(Interaction interaction) {
+        mTimelineAdapter.updateInteraction(interaction);
     }
 
     @UiThread

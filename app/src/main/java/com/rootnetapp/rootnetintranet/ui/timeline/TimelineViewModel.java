@@ -7,7 +7,8 @@ import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Comment;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Interaction;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.InteractionResponse;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostCommentResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostInteractionResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostLikeDislike;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostSubCommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.SubCommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
@@ -34,11 +35,13 @@ public class TimelineViewModel extends ViewModel {
     protected static final String MODULE_WORKFLOW_COMMENTS = "intranet_workflow_comment";
 
     private static final int TIMELINE_PAGE_LIMIT = 20;
+    private static final String THUMB_ACTION_UP = "up";
+    private static final String THUMB_ACTION_DOWN = "down";
 
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<TimelineUiData> mTimelineLiveData;
     private MutableLiveData<List<Comment>> mSubCommentsLiveData;
-    private MutableLiveData<Interaction> mPostCommentsLiveData;
+    private MutableLiveData<Interaction> mPostInteractionLiveData;
     private MutableLiveData<Comment> mPostSubCommentsLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> mHideMoreButtonLiveData;
@@ -347,9 +350,9 @@ public class TimelineViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
-    private void onPostCommentSuccess(PostCommentResponse postCommentResponse) {
+    private void onPostCommentSuccess(PostInteractionResponse postInteractionResponse) {
         showLoading.setValue(false);
-        mPostCommentsLiveData.setValue(postCommentResponse.getInteraction());
+        mPostInteractionLiveData.setValue(postInteractionResponse.getInteraction());
     }
     //endregion
 
@@ -367,6 +370,38 @@ public class TimelineViewModel extends ViewModel {
     private void onPostSubCommentSuccess(PostSubCommentResponse postSubCommentResponse) {
         showLoading.setValue(false);
         mPostSubCommentsLiveData.setValue(postSubCommentResponse.getComment());
+    }
+    //endregion
+
+    //region Post Like/Dislike
+    protected void postLike(int interaction, int entityId, String entityType, int authorId) {
+        postLikeDislike(interaction, entityId, entityType, authorId, THUMB_ACTION_UP);
+    }
+
+    protected void postDislike(int interaction, int entityId, String entityType, int authorId) {
+        postLikeDislike(interaction, entityId, entityType, authorId, THUMB_ACTION_DOWN);
+    }
+
+    private void postLikeDislike(int interactionId, int entityId, String entityType, int authorId, String thumbAction) {
+        showLoading.setValue(true);
+
+        PostLikeDislike request = new PostLikeDislike();
+        request.setInteractionId(interactionId);
+        request.setEntity(entityId);
+        request.setEntityType(entityType);
+        request.setAuthor(authorId);
+        request.setThumb(thumbAction);
+
+        Disposable disposable = mRepository
+                .postLikeDislike(mToken, interactionId, request)
+                .subscribe(this::postLikeDislikeSuccess, this::onFailure);
+
+        mDisposables.add(disposable);
+    }
+
+    private void postLikeDislikeSuccess(PostInteractionResponse interactionResponse) {
+        showLoading.setValue(false);
+        mPostInteractionLiveData.setValue(interactionResponse.getInteraction());
     }
     //endregion
 
@@ -393,11 +428,11 @@ public class TimelineViewModel extends ViewModel {
         return mSubCommentsLiveData;
     }
 
-    public LiveData<Interaction> getObservablePostComments() {
-        if (mPostCommentsLiveData == null) {
-            mPostCommentsLiveData = new MutableLiveData<>();
+    public LiveData<Interaction> getObservablePostInteraction() {
+        if (mPostInteractionLiveData == null) {
+            mPostInteractionLiveData = new MutableLiveData<>();
         }
-        return mPostCommentsLiveData;
+        return mPostInteractionLiveData;
     }
 
     public LiveData<Comment> getObservablePostSubComments() {
@@ -439,8 +474,8 @@ public class TimelineViewModel extends ViewModel {
         mSubCommentsLiveData = new MutableLiveData<>();
     }
 
-    public void clearPostComments() {
-        mPostCommentsLiveData = new MutableLiveData<>();
+    public void clearPostInteractions() {
+        mPostInteractionLiveData = new MutableLiveData<>();
     }
 
     public void clearPostSubComments() {

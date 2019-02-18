@@ -4,13 +4,11 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.github.marlonlom.utilities.timeago.TimeAgo;
 import com.github.marlonlom.utilities.timeago.TimeAgoMessages;
@@ -22,6 +20,7 @@ import com.rootnetapp.rootnetintranet.models.responses.timeline.Arguments;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineItem;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Comment;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Interaction;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.adapters.OnTouchClickListener;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineAction;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineInterface;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel;
@@ -34,7 +33,6 @@ import java.util.Locale;
 import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -42,18 +40,18 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
 
     private List<TimelineItem> items;
     private List<User> people;
-    private List<Interaction> comments;
+    private List<Interaction> interactions;
     private TimelineViewModel viewModel;
     private Context context;
     private Fragment parent;
     private TimelineInterface anInterface;
 
-    public TimelineAdapter(List<TimelineItem> items, List<User> people, List<Interaction> comments,
+    public TimelineAdapter(List<TimelineItem> items, List<User> people, List<Interaction> interactions,
                            TimelineViewModel viewModel, Fragment parent,
                            TimelineInterface anInterface) {
         this.items = items;
         this.people = people;
-        this.comments = comments;
+        this.interactions = interactions;
         this.viewModel = viewModel;
         this.parent = parent;
         this.anInterface = anInterface;
@@ -63,12 +61,19 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         int positionStart = getItemCount();
 
         this.items.addAll(items);
-        this.comments.addAll(comments);
+        this.interactions.addAll(comments);
 
         int positionEnd = getItemCount() - 1; //last item
 
         notifyItemChanged(positionStart - 1); //update previously last item (show bottom line)
         notifyItemRangeInserted(positionStart, positionEnd);
+    }
+
+    public void updateInteraction(Interaction interaction) {
+        this.interactions.remove(interaction);
+        this.interactions.add(interaction);
+        notifyDataSetChanged();
+        getItemCount();
     }
 
     @Override
@@ -105,31 +110,31 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
             switch (item.getDescription().getText()) {
                 case TimelineAction.WORKFLOW_CREATED:
                     titleSpannable = getSpannableTitle(R.string.timeline_action_workflow_created,
-                            author.getFullName(), arguments.getKey());
+                            author.getFullName(), arguments.getName());
                     break;
 
                 case TimelineAction.WORKFLOW_UPDATED:
                     titleSpannable = getSpannableTitle(R.string.timeline_action_workflow_updated,
-                            author.getFullName(), arguments.getKey());
+                            author.getFullName(), arguments.getName());
                     break;
 
                 case TimelineAction.WORKFLOW_STATUS_APPROVED_CREATED:
                 case TimelineAction.WORKFLOW_STATUS_APPROVED_UPDATED:
                     titleSpannable = getSpannableTitle(
                             R.string.timeline_action_workflow_status_updated, author.getFullName(),
-                            arguments.getKey());
+                            arguments.getName());
                     break;
 
                 case TimelineAction.WORKFLOW_FILE_RECORD_CREATED:
                     titleSpannable = getSpannableTitle(
                             R.string.timeline_action_workflow_file_created, author.getFullName(),
-                            arguments.getKey());
+                            arguments.getName());
                     break;
 
                 case TimelineAction.WORKFLOW_COMMENT_CREATED:
                     titleSpannable = getSpannableTitle(
                             R.string.timeline_action_workflow_comment_created, author.getFullName(),
-                            arguments.getKey());
+                            arguments.getName());
                     break;
             }
         }
@@ -149,8 +154,10 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                     item.getDescription().getArguments().getCurrentStatus().getName()));
         }
 
-        TimeAgoMessages messages = new TimeAgoMessages.Builder().withLocale(Locale.getDefault()).build();
-        long timeInMillis = Utils.getDateInMillisFromString(item.getCreatedAt(), Utils.SERVER_DATE_FORMAT);
+        TimeAgoMessages messages = new TimeAgoMessages.Builder().withLocale(Locale.getDefault())
+                .build();
+        long timeInMillis = Utils
+                .getDateInMillisFromString(item.getCreatedAt(), Utils.SERVER_DATE_FORMAT);
         String timeAgo = TimeAgo.using(timeInMillis, messages);
         holder.binding.tvTimeAgo.setText(timeAgo);
 
@@ -159,7 +166,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         final int interactionId;
         Interaction itemInteraction = null;
         int x = -1;
-        for (Interaction interaction : comments) {
+        for (Interaction interaction : interactions) {
             if (interaction.getEntity().equals(item.getEntityId())) {
                 x = interaction.getId();
                 itemInteraction = interaction;
@@ -179,6 +186,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                 holder.binding.lytComments.setVisibility(View.GONE);
             }
         });
+        holder.binding.tvComments.setOnTouchListener(new OnTouchClickListener(holder.binding.tvComments));
 
         if (itemInteraction == null) {
             holder.binding.lytThumbsUp.setVisibility(View.GONE);
@@ -201,28 +209,17 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         User finalAuthor = author;
         holder.binding.btnComment.setOnClickListener(view -> {
             String comment = holder.binding.etComment.getText().toString();
-            if (!TextUtils.isEmpty(comment)) {
-                if (finalAuthor != null) {
-                    Utils.showLoading(context);
-                    viewModel.postComment(interactionId, item.getEntityId(),
-                            item.getEntity(), comment, finalAuthor.getUserId());
-                } else {
-                    Toast.makeText(context, "error wth author", Toast.LENGTH_LONG).show();
-                }
-            } else {
-                Toast.makeText(context, context.getString(R.string.empty_comment),
-                        Toast.LENGTH_LONG).show();
-            }
+            anInterface.addCommentClicked(comment, finalAuthor, item, interactionId);
+            holder.binding.etComment.setText("");
         });
 
-        final Observer<Interaction> postCommentObserver = ((Interaction data) -> {
-            Utils.hideLoading();
-            if (null != data) {
-                viewModel.clearPostComments();
-                anInterface.reload();
-            }
+        holder.binding.lytThumbsUp.setOnClickListener(view -> {
+            anInterface.likeClicked(finalAuthor, item, interactionId);
         });
-        viewModel.getObservablePostComments().observe(parent, postCommentObserver);
+
+        holder.binding.lytThumbsDown.setOnClickListener(view -> {
+            anInterface.dislikeClicked(finalAuthor, item, interactionId);
+        });
 
         //hide the top line for the first item
         if (i == 0) {

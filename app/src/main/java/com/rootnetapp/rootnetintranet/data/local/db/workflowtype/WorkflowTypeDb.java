@@ -43,15 +43,15 @@ public class WorkflowTypeDb {
 
     @ColumnInfo(name = "template_id")
     @Json(name = "template_id")
-    private int templateId;
+    private Integer templateId;
 
     @ColumnInfo(name = "category")
     @Json(name = "category")
-    private int category;
+    private Integer category;
 
     @ColumnInfo(name = "version")
     @Json(name = "version")
-    private int version;
+    private Integer version;
 
     @ColumnInfo(name = "define_roles")
     @Json(name = "define_roles")
@@ -101,11 +101,11 @@ public class WorkflowTypeDb {
         this.name = name;
     }
 
-    public int getCategory() {
+    public Integer getCategory() {
         return category;
     }
 
-    public void setCategory(int category) {
+    public void setCategory(Integer category) {
         this.category = category;
     }
 
@@ -165,11 +165,11 @@ public class WorkflowTypeDb {
         this.fields = fields;
     }
 
-    public int getTemplateId() {
+    public Integer getTemplateId() {
         return templateId;
     }
 
-    public void setTemplateId(int templateId) {
+    public void setTemplateId(Integer templateId) {
         this.templateId = templateId;
     }
 
@@ -181,11 +181,11 @@ public class WorkflowTypeDb {
         this.presets = presets;
     }
 
-    public int getVersion() {
+    public Integer getVersion() {
         return version;
     }
 
-    public void setVersion(int version) {
+    public void setVersion(Integer version) {
         this.version = version;
     }
 

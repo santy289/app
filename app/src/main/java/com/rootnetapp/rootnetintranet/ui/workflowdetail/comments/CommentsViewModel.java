@@ -300,7 +300,7 @@ public class CommentsViewModel extends ViewModel {
 
     private void onFailure(Throwable throwable) {
         showLoading.setValue(false);
-        mToastMessageLiveData.setValue(R.string.failure_connect);
+        mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
     }
 
     protected LiveData<Integer> getObservableToastMessage() {

@@ -110,7 +110,10 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
     private void setOnClickListeners() {
         mBinding.btnAttachment.setOnClickListener(v -> showFileChooser());
         mBinding.btnUpload.setOnClickListener(
-                v -> filesViewModel.uploadFile(mDocumentsAdapter.totalDocuments));
+                v -> {
+                    if (mDocumentsAdapter == null) return;
+                    filesViewModel.uploadFile(mDocumentsAdapter.totalDocuments);
+                });
     }
 
     /**
@@ -122,6 +125,7 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
     private void showFileChooser() {
 
         if (filesViewModel.getFileRequest() == null) {
+            if (mDocumentsAdapter == null) return;
 
             boolean isPresetSelected = filesViewModel
                     .isAnyPresetSelected(mDocumentsAdapter.totalDocuments);

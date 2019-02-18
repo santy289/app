@@ -212,8 +212,8 @@ public class WorkflowManagerViewModel extends ViewModel {
 
         List<WorkflowDb> workflowList = workflowResponseDb.getList();
 
-        mHideMoreButtonLiveData.setValue(workflowResponseDb.getPager().isIsLastPage());
         mHideWorkflowListLiveData.setValue(workflowList.isEmpty());
+        mHideMoreButtonLiveData.setValue(workflowResponseDb.getPager().isIsLastPage());
         mWorkflowListLiveData.setValue(workflowList);
     }
     //endregion
@@ -755,7 +755,7 @@ public class WorkflowManagerViewModel extends ViewModel {
 
     private void onFailure(Throwable throwable) {
         showLoading.setValue(false);
-        mErrorLiveData.setValue(R.string.failure_connect);
+        mErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
     }
 
     protected LiveData<List<WorkflowDb>> getObservableWorkflows() {
@@ -949,5 +949,10 @@ public class WorkflowManagerViewModel extends ViewModel {
             showLoading = new MutableLiveData<>();
         }
         return showLoading;
+    }
+
+    @Override
+    protected void onCleared() {
+        mDisposables.clear();
     }
 }

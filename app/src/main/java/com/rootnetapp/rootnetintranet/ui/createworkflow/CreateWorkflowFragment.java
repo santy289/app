@@ -139,6 +139,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         viewModel.getObservableGoBack().observe(this, back -> goBack());
         viewModel.getObservableFileFormItem().observe(this, this::updateFormItemUi);
         viewModel.getObservableDownloadedFileUiData().observe(this, this::openDownloadedFile);
+        viewModel.getObservableEnableSubmitButton().observe(this, this::enableSubmitButton);
     }
 
     private void setupSubmitButton() {
@@ -506,6 +507,11 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         mPeopleInvolvedAdapter.setData(list);
     }
     //endregion
+
+    @UiThread
+    private void enableSubmitButton(boolean enabled) {
+        mBinding.btnCreate.setEnabled(enabled);
+    }
 
     private void hideSoftInputKeyboard() {
         // Check if no view has focus:

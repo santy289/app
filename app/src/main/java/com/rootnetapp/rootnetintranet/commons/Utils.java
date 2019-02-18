@@ -52,6 +52,7 @@ public class Utils {
 
     public static final String[] ALLOWED_MIME_TYPES = {
             "text/*",
+            "image/*",
             "application/pdf",
             "application/msword",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",

@@ -32,6 +32,10 @@ import io.reactivex.schedulers.Schedulers;
 
 public class WorkflowManagerViewModel extends ViewModel {
 
+    protected static final int MONTH_AGO_DAYS = -30;
+    protected static final int WEEK_AGO_DAYS = -7;
+    protected static final int DAY_AGO_DAYS = -1;
+
     private static final int TAG_WORKFLOW_TYPE = 77;
     private static final String TAG = "ManagerViewModel";
 

@@ -39,6 +39,10 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import static com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerViewModel.DAY_AGO_DAYS;
+import static com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerViewModel.MONTH_AGO_DAYS;
+import static com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerViewModel.WEEK_AGO_DAYS;
+
 public class WorkflowManagerFragment extends Fragment implements ManagerInterface {
 
     @Inject
@@ -80,10 +84,10 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
 
-        String start = Utils.getMonthDay(0, 1);
-        String end = Utils.getMonthDay(0, 30);
+        String start = Utils.getCurrentDateDaysDiff(MONTH_AGO_DAYS);
+        String end = Utils.getCurrentDate();
         updateSelectedDatesUi(start, end);
-        updateSelectedDateTitle(R.string.current_month);
+        updateSelectedDateTitle(R.string.month);
 
         subscribe();
         setOnClickListeners();
@@ -305,10 +309,10 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         selectWeekButton(false);
         selectDayButton(false);
 
-        String start = Utils.getMonthDay(0, 1);
-        String end = Utils.getMonthDay(0, 30);
+        String start = Utils.getCurrentDateDaysDiff(MONTH_AGO_DAYS);
+        String end = Utils.getCurrentDate();
         updateSelectedDatesUi(start, end);
-        updateSelectedDateTitle(R.string.current_month);
+        updateSelectedDateTitle(R.string.month);
 
         updateDashboard(start, end);
     }
@@ -322,10 +326,10 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         selectWeekButton(true);
         selectDayButton(false);
 
-        String start = Utils.getWeekStart();
-        String end = Utils.getWeekEnd();
+        String start = Utils.getCurrentDateDaysDiff(WEEK_AGO_DAYS);
+        String end = Utils.getCurrentDate();
         updateSelectedDatesUi(start, end);
-        updateSelectedDateTitle(R.string.current_week);
+        updateSelectedDateTitle(R.string.week);
 
         updateDashboard(start, end);
     }
@@ -339,10 +343,10 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         selectWeekButton(false);
         selectDayButton(true);
 
-        String start = Utils.getCurrentDate();
-        String end = Utils.getTomorrowDate();
-        updateSelectedDatesUi(start);
-        updateSelectedDateTitle(R.string.today);
+        String start = Utils.getCurrentDateDaysDiff(DAY_AGO_DAYS);
+        String end = Utils.getCurrentDate();
+        updateSelectedDatesUi(start, end);
+        updateSelectedDateTitle(R.string.day);
 
         updateDashboard(start, end);
     }

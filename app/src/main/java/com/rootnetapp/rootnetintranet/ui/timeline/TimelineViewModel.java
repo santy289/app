@@ -27,6 +27,10 @@ import io.reactivex.disposables.Disposable;
 
 public class TimelineViewModel extends ViewModel {
 
+    protected static final int MONTH_AGO_DAYS = -30;
+    protected static final int WEEK_AGO_DAYS = -7;
+    protected static final int DAY_AGO_DAYS = -1;
+
     protected static final String USER_ALL = "all";
 
     protected static final String MODULE_ALL = "all";

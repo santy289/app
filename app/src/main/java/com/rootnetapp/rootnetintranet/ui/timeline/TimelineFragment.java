@@ -39,12 +39,15 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.DAY_AGO_DAYS;
 import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MODULE_ALL;
 import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MODULE_WORKFLOWS;
 import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MODULE_WORKFLOW_APPROVALS;
 import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MODULE_WORKFLOW_COMMENTS;
 import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MODULE_WORKFLOW_FILES;
+import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MONTH_AGO_DAYS;
 import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.USER_ALL;
+import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.WEEK_AGO_DAYS;
 
 public class TimelineFragment extends Fragment implements TimelineInterface {
 
@@ -87,10 +90,10 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
 
-        String start = Utils.getMonthDay(0, 1);
-        String end = Utils.getMonthDay(0, 30);
+        String start = Utils.getCurrentDateDaysDiff(MONTH_AGO_DAYS);
+        String end = Utils.getCurrentDate();
         updateSelectedDatesUi(start, end);
-        updateSelectedDateTitle(R.string.current_month);
+        updateSelectedDateTitle(R.string.month);
 
         subscribe();
         setOnClickListeners();
@@ -178,10 +181,10 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         selectWeekButton(false);
         selectDayButton(false);
 
-        String start = Utils.getMonthDay(0, 1);
-        String end = Utils.getMonthDay(0, 30);
+        String start = Utils.getCurrentDateDaysDiff(MONTH_AGO_DAYS);
+        String end = Utils.getCurrentDate();
         updateSelectedDatesUi(start, end);
-        updateSelectedDateTitle(R.string.current_month);
+        updateSelectedDateTitle(R.string.month);
 
         updateTimeline(start, end);
     }
@@ -195,10 +198,10 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         selectWeekButton(true);
         selectDayButton(false);
 
-        String start = Utils.getWeekStart();
-        String end = Utils.getWeekEnd();
+        String start = Utils.getCurrentDateDaysDiff(WEEK_AGO_DAYS);
+        String end = Utils.getCurrentDate();
         updateSelectedDatesUi(start, end);
-        updateSelectedDateTitle(R.string.current_week);
+        updateSelectedDateTitle(R.string.week);
 
         updateTimeline(start, end);
     }
@@ -212,10 +215,10 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         selectWeekButton(false);
         selectDayButton(true);
 
-        String start = Utils.getCurrentDate();
-        String end = Utils.getTomorrowDate();
-        updateSelectedDatesUi(start);
-        updateSelectedDateTitle(R.string.today);
+        String start = Utils.getCurrentDateDaysDiff(DAY_AGO_DAYS);
+        String end = Utils.getCurrentDate();
+        updateSelectedDatesUi(start, end);
+        updateSelectedDateTitle(R.string.day);
 
         updateTimeline(start, end);
     }

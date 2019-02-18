@@ -133,9 +133,9 @@
     <string name="remove_file">REMOVER ARCHIVO</string>
     <string name="select_file">Seleccionar un archivo para subir</string>
     <string name="select_preset">Seleccionar el tipo de documento para subir</string>
-    <string name="month">mes</string>
-    <string name="week">semana</string>
-    <string name="day">día</string>
+    <string name="month">Mes</string>
+    <string name="week">Semana</string>
+    <string name="day">Día</string>
     <string name="filtered_by">Filtrado por:</string>
     <string name="comment_ammount">Comentarios</string>
     <string name="add_comment">Añadir comentario</string>

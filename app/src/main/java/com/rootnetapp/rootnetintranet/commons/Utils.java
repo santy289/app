@@ -219,9 +219,9 @@ public class Utils {
         return df.format(c);
     }
 
-    public static String getTomorrowDate() {
+    public static String getCurrentDateDaysDiff(int days) {
         Calendar c = Calendar.getInstance();
-        c.add(Calendar.DAY_OF_MONTH, 1);
+        c.add(Calendar.DAY_OF_MONTH, days);
         Date date = c.getTime();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return df.format(date);

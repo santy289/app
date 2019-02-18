@@ -398,7 +398,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         for (WorkflowUser workflowUser : workflowUsers) {
             addUserRow(
                     mFiltersBinding,
-                    String.valueOf(workflowUser.getId()),
+                    String.valueOf(workflowUser.getUserId()),
                     workflowUser.getUsername()
             );
         }

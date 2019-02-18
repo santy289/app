@@ -17,6 +17,8 @@ public class WorkflowUser {
     @Json(name = "email")
     private String email;
 
+    private int userId;
+
     public int getId() {
         return id;
     }
@@ -49,4 +51,11 @@ public class WorkflowUser {
         this.email = email;
     }
 
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
 }

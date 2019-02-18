@@ -63,7 +63,7 @@ public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineComment
         if (comments != null) {
             item = comments.get(i);
             for (User user : people) {
-                if (user.getUserId() == item.getAuthor()) {
+                if (user.getId() == item.getAuthor()) {
                     author = user;
                     String path = Utils.imgDomain + user.getPicture().trim();
                     Picasso.get().load(path).into(holder.binding.imgPoster);

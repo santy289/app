@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.timeline;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineItem;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Comment;
@@ -130,6 +131,18 @@ public class TimelineViewModel extends ViewModel {
             showLoading.setValue(false);
 
             mWebCount = mWebCompleted = 0;
+
+            getAllUsers().add(USER_ALL); //"All" filter
+            for (WorkflowUser workflowUser: mTimelineUiData.getWorkflowUsers()) {
+                for (User user : mTimelineUiData.getUsers()) {
+                    if (workflowUser.getId() == user.getId()) {
+                        workflowUser.setUserId(user.getUserId());
+                        break;
+                    }
+                }
+
+                getAllUsers().add(String.valueOf(workflowUser.getUserId()));
+            }
 
             mTimelineLiveData.setValue(mTimelineUiData);
         }
@@ -281,14 +294,7 @@ public class TimelineViewModel extends ViewModel {
             return;
         }
 
-        List<WorkflowUser> users = workflowUserResponse.getUsers();
-
-        getAllUsers().add("all"); //"All" filter
-        for (WorkflowUser user : users) {
-            getAllUsers().add(String.valueOf(user.getId()));
-        }
-
-        mTimelineUiData.setWorkflowUsers(users);
+        mTimelineUiData.setWorkflowUsers(workflowUserResponse.getUsers());
 
         updateCompleted();
     }

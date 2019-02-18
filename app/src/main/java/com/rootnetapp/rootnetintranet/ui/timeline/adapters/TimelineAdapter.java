@@ -95,7 +95,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
 
         String title = "";
         for (User user : people) {
-            if (user.getUserId() == item.getAuthor()) {
+            if (user.getId() == item.getAuthor()) {
                 author = user;
                 if (user.getPicture() != null) {
                     String path = Utils.imgDomain + user.getPicture().trim();

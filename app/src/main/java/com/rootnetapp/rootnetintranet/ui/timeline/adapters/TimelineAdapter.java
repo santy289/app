@@ -110,31 +110,31 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
             switch (item.getDescription().getText()) {
                 case TimelineAction.WORKFLOW_CREATED:
                     titleSpannable = getSpannableTitle(R.string.timeline_action_workflow_created,
-                            author.getFullName(), arguments.getKey());
+                            author.getFullName(), arguments.getName());
                     break;
 
                 case TimelineAction.WORKFLOW_UPDATED:
                     titleSpannable = getSpannableTitle(R.string.timeline_action_workflow_updated,
-                            author.getFullName(), arguments.getKey());
+                            author.getFullName(), arguments.getName());
                     break;
 
                 case TimelineAction.WORKFLOW_STATUS_APPROVED_CREATED:
                 case TimelineAction.WORKFLOW_STATUS_APPROVED_UPDATED:
                     titleSpannable = getSpannableTitle(
                             R.string.timeline_action_workflow_status_updated, author.getFullName(),
-                            arguments.getKey());
+                            arguments.getName());
                     break;
 
                 case TimelineAction.WORKFLOW_FILE_RECORD_CREATED:
                     titleSpannable = getSpannableTitle(
                             R.string.timeline_action_workflow_file_created, author.getFullName(),
-                            arguments.getKey());
+                            arguments.getName());
                     break;
 
                 case TimelineAction.WORKFLOW_COMMENT_CREATED:
                     titleSpannable = getSpannableTitle(
                             R.string.timeline_action_workflow_comment_created, author.getFullName(),
-                            arguments.getKey());
+                            arguments.getName());
                     break;
             }
         }

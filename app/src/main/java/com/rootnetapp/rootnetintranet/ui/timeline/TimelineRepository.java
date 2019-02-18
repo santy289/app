@@ -3,7 +3,8 @@ package com.rootnetapp.rootnetintranet.ui.timeline;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.InteractionResponse;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostCommentResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostInteractionResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostLikeDislike;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostSubCommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.SubCommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
@@ -57,9 +58,9 @@ public class TimelineRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<PostCommentResponse> postComment(String auth, int interactionId, int entity,
-                                                       String entityType, String description,
-                                                       int author) {
+    public Observable<PostInteractionResponse> postComment(String auth, int interactionId, int entity,
+                                                           String entityType, String description,
+                                                           int author) {
         return service.postComment(auth, interactionId, entity, entityType, description, author)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
@@ -69,6 +70,13 @@ public class TimelineRepository {
                                                              int associate, String description,
                                                              int author) {
         return service.postSubComment(auth, interaction, associate, description, author)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<PostInteractionResponse> postLikeDislike(String auth, int interaction,
+                                                   PostLikeDislike request) {
+        return service.postLikeDislike(auth, interaction, request)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }

@@ -137,4 +137,38 @@ public class Interaction {
     public void setComments(List<Comment> comments) {
         this.comments = comments;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Interaction that = (Interaction) o;
+
+        if (!id.equals(that.id)) return false;
+        if (entity != null ? !entity.equals(that.entity) : that.entity != null) return false;
+        if (entityType != null ? !entityType.equals(that.entityType) : that.entityType != null) {
+            return false;
+        }
+        if (entityTypeId != null ? !entityTypeId
+                .equals(that.entityTypeId) : that.entityTypeId != null) {
+            return false;
+        }
+        if (authorCreated != null ? !authorCreated
+                .equals(that.authorCreated) : that.authorCreated != null) {
+            return false;
+        }
+        return createdAt != null ? createdAt.equals(that.createdAt) : that.createdAt == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + (entity != null ? entity.hashCode() : 0);
+        result = 31 * result + (entityType != null ? entityType.hashCode() : 0);
+        result = 31 * result + (entityTypeId != null ? entityTypeId.hashCode() : 0);
+        result = 31 * result + (authorCreated != null ? authorCreated.hashCode() : 0);
+        result = 31 * result + (createdAt != null ? createdAt.hashCode() : 0);
+        return result;
+    }
 }

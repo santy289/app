@@ -28,7 +28,8 @@ import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse
 import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.InteractionResponse;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostCommentResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostInteractionResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostLikeDislike;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostSubCommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.SubCommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
@@ -385,12 +386,12 @@ public interface ApiInterface {
     @Headers({"Domain-Name: api"})
     @POST("interaction")
     @FormUrlEncoded
-    Observable<PostCommentResponse> postComment(@Header("Authorization")String auth,
-                                                @Field("interactionId") int interactionId,
-                                                @Field("entity") int entity,
-                                                @Field("entityType") String entityType,
-                                                @Field("description") String description,
-                                                @Field("author") int author);
+    Observable<PostInteractionResponse> postComment(@Header("Authorization")String auth,
+                                                    @Field("interactionId") int interactionId,
+                                                    @Field("entity") int entity,
+                                                    @Field("entityType") String entityType,
+                                                    @Field("description") String description,
+                                                    @Field("author") int author);
 
     @Headers({"Domain-Name: api"})
     @POST("interaction/comment")
@@ -400,6 +401,12 @@ public interface ApiInterface {
                                                       @Field("associate") int associate,
                                                       @Field("description") String description,
                                                       @Field("author") int author);
+
+    @Headers({"Domain-Name: api"})
+    @PATCH("interaction/{id}")
+    Observable<PostInteractionResponse> postLikeDislike(@Header("Authorization") String authorization,
+                                            @Path("id") int interactionId,
+                                            @Body PostLikeDislike request);
 
     @Headers({"Domain-Name: api"})
     @PATCH("intranet/workflow/activation")

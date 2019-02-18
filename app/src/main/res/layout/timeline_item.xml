@@ -92,6 +92,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:paddingTop="5dp"
+                            android:focusable="true"
+                            android:focusableInTouchMode="true"
                             android:text="@string/comment_ammount"
                             android:textColor="@color/colorPrimary"
                             android:textSize="12sp" />

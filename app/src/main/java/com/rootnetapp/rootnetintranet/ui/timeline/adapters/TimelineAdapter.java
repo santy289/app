@@ -20,6 +20,7 @@ import com.rootnetapp.rootnetintranet.models.responses.timeline.Arguments;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineItem;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Comment;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Interaction;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.adapters.OnTouchClickListener;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineAction;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineInterface;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel;
@@ -185,6 +186,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                 holder.binding.lytComments.setVisibility(View.GONE);
             }
         });
+        holder.binding.tvComments.setOnTouchListener(new OnTouchClickListener(holder.binding.tvComments));
 
         if (itemInteraction == null) {
             holder.binding.lytThumbsUp.setVisibility(View.GONE);
@@ -208,6 +210,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         holder.binding.btnComment.setOnClickListener(view -> {
             String comment = holder.binding.etComment.getText().toString();
             anInterface.addCommentClicked(comment, finalAuthor, item, interactionId);
+            holder.binding.etComment.setText("");
         });
 
         holder.binding.lytThumbsUp.setOnClickListener(view -> {

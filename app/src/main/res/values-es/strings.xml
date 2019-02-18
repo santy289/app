@@ -124,7 +124,7 @@
     <string name="template">TEMPLATE:</string>
     <string name="upload">SUBIR</string>
     <string name="versions">Versiones</string>
-    <string name="interactions">COMENTARIOS</string>
+    <string name="comments">COMENTARIOS</string>
     <string name="comment">Comentar</string>
     <string name="empty_comment">El comentario no puede estar vacío</string>
     <string name="error_comment">Error en subir el comentario</string>

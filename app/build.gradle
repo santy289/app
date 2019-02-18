@@ -7,8 +7,8 @@ android {
         applicationId "com.rootnetapp.rootnetintranet"
         minSdkVersion 24
         targetSdkVersion 28
-        versionCode 14
-        versionName "1.0.1"
+        versionCode 16
+        versionName "1.1.0"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -88,6 +88,8 @@ dependencies {
     //debug API calls
     implementation "com.squareup.okhttp3:logging-interceptor:$rootProject.okhttp"
     implementation 'com.wdullaer:materialdatetimepicker:4.1.0'
+
+    implementation "com.github.marlonlom:timeago:$rootProject.timeagoVersion"
 
     //Test
     androidTestImplementation 'androidx.test:runner:1.1.1'

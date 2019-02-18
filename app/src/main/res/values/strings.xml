@@ -6,6 +6,7 @@
     <string name="check_domain">Check Domain</string>
     <string name="get_plan">Get a plan</string>
     <string name="failure_connect">Network error, please try again</string>
+    <string name="failure_connect_forbidden_access">You don\'t have enough permissions</string>
     <string name="loading_message">Loading</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
@@ -330,4 +331,22 @@
     <string name="workflow_manager_company_closed_dialog_title">Company\'s Closed Workflows</string>
     <string name="workflow_manager_company_out_of_time_dialog_title">Company\'s Out of Time Workflows</string>
     <string name="workflow_manager_company_updated_dialog_title">Company\'s Updated Workflows</string>
+
+    <!--TimelineFragment-->
+    <string name="timeline_module_workflows">Workflows</string>
+    <string name="timeline_module_workflow_approvals">Workflow Approvals</string>
+    <string name="timeline_module_workflow_files">Workflow Files</string>
+    <string name="timeline_modules_workflow_comments">Workflow Comments</string>
+    <string name="timeline_action_workflow_created">%1$s has created the workflow %2$s</string>
+    <string name="timeline_action_workflow_updated">%1$s has updated the workflow %2$s</string>
+    <string name="timeline_action_workflow_status_updated">%1$s has updated the status of the workflow %2$s</string>
+    <string name="timeline_action_workflow_file_created">%1$s has uploaded a file for the workflow %2$s</string>
+    <string name="timeline_action_workflow_comment_created">%1$s has commented on the workflow %2$s</string>
+    <string name="timeline_description">Description: %s</string>
+    <string name="timeline_current_status">Current status: %s</string>
+    <string name="timeline_thumbs_value" translatable="false">(%d)</string>
+    <plurals name="timeline_comment_replies">
+        <item quantity="one" formatted="true">1 reply</item>
+        <item quantity="other" formatted="true">%d replies</item>
+    </plurals>
 </resources>

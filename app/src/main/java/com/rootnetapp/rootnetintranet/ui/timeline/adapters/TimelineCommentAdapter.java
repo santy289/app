@@ -1,26 +1,30 @@
 package com.rootnetapp.rootnetintranet.ui.timeline.adapters;
 
-import androidx.lifecycle.Observer;
 import android.content.Context;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.github.marlonlom.utilities.timeago.TimeAgo;
+import com.github.marlonlom.utilities.timeago.TimeAgoMessages;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.databinding.TimelineCommentItemBinding;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.Comment;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Comment;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineCommentViewholder> {
 
@@ -28,16 +32,15 @@ public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineComment
     private List<User> people;
     private Context context;
     private TimelineViewModel viewModel;
-    private String token;
     private Fragment parent;
     private TimelineCommentAdapter adapter = null;
 
     public TimelineCommentAdapter(List<Comment> comments, List<User> people,
-                                  TimelineViewModel viewModel, String token, Fragment parent) {
+                                  TimelineViewModel viewModel, Fragment parent) {
         this.comments = comments;
+        if (this.comments == null) this.comments = new ArrayList<>();
         this.people = people;
         this.viewModel = viewModel;
-        this.token = token;
         this.parent = parent;
     }
 
@@ -68,10 +71,23 @@ public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineComment
                 }
             }
             holder.binding.tvComment.setText(item.getDescription());
-            String time = item.getCreatedAt().split("T")[0];
-            holder.binding.tvTime.setText(time);
+
+            TimeAgoMessages messages = new TimeAgoMessages.Builder().withLocale(Locale.getDefault()).build();
+            long timeInMillis = Utils.getDateInMillisFromString(item.getCreatedAt(), Utils.SERVER_DATE_FORMAT);
+            String timeAgo = TimeAgo.using(timeInMillis, messages);
+            holder.binding.tvTimeAgo.setText(timeAgo);
+
             interactionId = item.getInteractionId();
             associate = item.getId();
+        }
+
+        if (item != null && item.getCount() != 0) {
+            int repliesCount = item.getCount();
+            holder.binding.tvReply.setText(context.getResources().getQuantityString(
+                    R.plurals.timeline_comment_replies,
+                    repliesCount,
+                    repliesCount)
+            );
         }
 
         Comment finalItem = item;
@@ -81,9 +97,9 @@ public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineComment
                     listenToResponse(holder);
                     if (finalItem.getCount() != 0) {
                         Utils.showLoading(context);
-                        viewModel.getSubComment(token, finalItem.getId(),
+                        viewModel.getSubComment(finalItem.getId(),
                                 (finalItem.getLevel() + 1));
-                    }else{
+                    } else {
                         holder.binding.recComments.setVisibility(View.VISIBLE);
                         holder.binding.line.setVisibility(View.VISIBLE);
                         holder.binding.lytComments.setVisibility(View.VISIBLE);
@@ -101,7 +117,7 @@ public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineComment
         holder.binding.btnComment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String comment = holder.binding.inputComment.getText().toString();
+                String comment = holder.binding.etComment.getText().toString();
                 if (!TextUtils.isEmpty(comment)) {
                     if (finalAuthor != null) {
                         final Observer<Comment> postSubCommentsObserver = ((Comment data) -> {
@@ -114,23 +130,25 @@ public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineComment
                                     List<Comment> list = new ArrayList<>();
                                     list.add(data);
                                     adapter = new TimelineCommentAdapter(list, people,
-                                            viewModel, token, parent);
+                                            viewModel, parent);
                                     holder.binding.recComments.setAdapter(adapter);
                                 }
-                                holder.binding.inputComment.setText("");
+                                holder.binding.etComment.setText("");
                             }
                             viewModel.getObservablePostSubComments().removeObservers(parent);
                             viewModel.clearPostSubComments();
                         });
-                        viewModel.getObservablePostSubComments().observe(parent, postSubCommentsObserver);
+                        viewModel.getObservablePostSubComments()
+                                .observe(parent, postSubCommentsObserver);
                         Utils.showLoading(context);
-                        viewModel.postSubComment(token, finalInteractionId, finalAssociate,
+                        viewModel.postSubComment(finalInteractionId, finalAssociate,
                                 comment, finalAuthor.getUserId());
                     } else {
                         Toast.makeText(context, "error wth author", Toast.LENGTH_LONG).show();
                     }
                 } else {
-                    Toast.makeText(context, context.getString(R.string.empty_comment), Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, context.getString(R.string.empty_comment),
+                            Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -147,7 +165,7 @@ public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineComment
                 viewModel.getObservableSubComments().removeObservers(parent);
                 viewModel.clearSubComments();
                 adapter = new TimelineCommentAdapter(list, people,
-                        viewModel, token, parent);
+                        viewModel, parent);
                 holder.binding.recComments.setAdapter(adapter);
                 holder.binding.recComments.setVisibility(View.VISIBLE);
                 holder.binding.line.setVisibility(View.VISIBLE);

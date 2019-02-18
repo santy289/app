@@ -1,11 +1,11 @@
 package com.rootnetapp.rootnetintranet.ui.timeline;
 
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.InteractionResponse;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.PostCommentResponse;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.PostSubCommentResponse;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.SubCommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.InteractionResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostCommentResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostSubCommentResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.SubCommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 
@@ -27,10 +27,11 @@ public class TimelineRepository {
         this.service = service;
     }
 
-
-    public Observable<TimelineResponse> getTimeline(String auth, String start, String end,
-                                                    List<String> users, List<String> modules) {
-        return service.getTimeline(auth, start, end, users, modules).subscribeOn(Schedulers.newThread())
+    public Observable<TimelineResponse> getTimeline(String auth, String start, String end, int page,
+                                                    int limit, List<String> users,
+                                                    List<String> modules) {
+        return service.getTimeline(auth, start, end, page, limit, users, modules)
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
@@ -44,8 +45,10 @@ public class TimelineRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<InteractionResponse> getComments(String auth) {
-        return service.getTimelineComments(auth).subscribeOn(Schedulers.newThread())
+    public Observable<InteractionResponse> getTimelineInteractions(String auth, List<String> modules,
+                                                                   List<Integer> entities) {
+        return service.getTimelineInteractions(auth, modules, entities)
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
@@ -57,14 +60,16 @@ public class TimelineRepository {
     public Observable<PostCommentResponse> postComment(String auth, int interactionId, int entity,
                                                        String entityType, String description,
                                                        int author) {
-        return service.postComment(auth, interactionId, entity, entityType, description, author).subscribeOn(Schedulers.newThread())
+        return service.postComment(auth, interactionId, entity, entityType, description, author)
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Observable<PostSubCommentResponse> postSubComment(String auth, int interaction,
                                                              int associate, String description,
                                                              int author) {
-        return service.postSubComment(auth, interaction, associate, description, author).subscribeOn(Schedulers.newThread())
+        return service.postSubComment(auth, interaction, associate, description, author)
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 

@@ -36,6 +36,7 @@ import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import retrofit2.HttpException;
 
 public class Utils {
 
@@ -47,6 +48,7 @@ public class Utils {
 
     public static final String SERVER_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
     public static final String STANDARD_DATE_DISPLAY_FORMAT = "MMMM dd, yyyy";
+    public static final String SHORT_DATE_DISPLAY_FORMAT = "dd/MM/yy";
 
     public static final String[] ALLOWED_MIME_TYPES = {
             "text/*",
@@ -410,6 +412,12 @@ public class Utils {
         }
     }
 
+    public static long getDateInMillisFromString(String date, String format) {
+        Date dateObject = getDateFromString(date, format);
+        if (dateObject == null) return 0;
+        else return dateObject.getTime();
+    }
+
     /**
      * Creates the given date in integers as a Date object
      *
@@ -472,5 +480,16 @@ public class Utils {
             Log.d(TAG, "getFormattedDate: ", e);
             return null;
         }
+    }
+
+    public static int getOnFailureStringRes(Throwable throwable) {
+        int stringRes = R.string.failure_connect;
+
+        if (throwable instanceof HttpException) {
+            int httpCode = ((HttpException) throwable).code();
+            if (httpCode == 403) stringRes = R.string.failure_connect_forbidden_access;
+        }
+
+        return stringRes;
     }
 }

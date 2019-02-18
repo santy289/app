@@ -1,10 +1,7 @@
-package com.rootnetapp.rootnetintranet.models.responses.timeline;
+
+package com.rootnetapp.rootnetintranet.models.responses.timeline.interaction;
 
 import com.squareup.moshi.Json;
-
-/**
- * Created by root on 12/04/18.
- */
 
 public class PostCommentResponse {
 
@@ -18,5 +15,4 @@ public class PostCommentResponse {
     public void setInteraction(Interaction interaction) {
         this.interaction = interaction;
     }
-
 }

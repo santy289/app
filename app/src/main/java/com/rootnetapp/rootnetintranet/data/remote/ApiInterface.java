@@ -26,11 +26,11 @@ import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordRe
 import com.rootnetapp.rootnetintranet.models.responses.role.RoleResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesResponse;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.InteractionResponse;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.PostCommentResponse;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.PostSubCommentResponse;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.SubCommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.InteractionResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostCommentResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostSubCommentResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.SubCommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.websocket.WebSocketSettingResponse;
@@ -364,12 +364,16 @@ public interface ApiInterface {
     Observable<TimelineResponse> getTimeline(@Header("Authorization") String authorization,
                                              @Query("start") String start,
                                              @Query("end") String end,
+                                             @Query("page") int page,
+                                             @Query("limit") int limit,
                                              @Query("userId[]") List<String> users,
                                              @Query("entity[]") List<String> modules);
 
     @Headers({"Domain-Name: api"})
-    @GET("interaction?all=true&comment=500")
-    Observable<InteractionResponse> getTimelineComments(@Header("Authorization") String authorization);
+    @GET("interaction?all=true&comment=4&thumb=4")
+    Observable<InteractionResponse> getTimelineInteractions(@Header("Authorization") String authorization,
+                                                            @Query("entity_type[]") List<String> modules,
+                                                            @Query("entity[]") List<Integer> entities);
 
 
     @Headers({"Domain-Name: api"})

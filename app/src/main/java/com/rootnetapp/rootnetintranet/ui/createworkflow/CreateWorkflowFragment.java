@@ -343,6 +343,8 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
      */
     @UiThread
     private void showFileChooser(FileFormItem fileFormItem) {
+        hideSoftInputKeyboard();
+
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
 

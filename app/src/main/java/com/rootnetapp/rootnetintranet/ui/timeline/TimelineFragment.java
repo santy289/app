@@ -24,6 +24,7 @@ import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.timeline.adapters.TimelineAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -52,6 +53,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
     private FragmentTimelineBinding mBinding;
     private MainActivityInterface mMainInterface;
     private TimelineAdapter mTimelineAdapter;
+    private TimelineFiltersMenuBinding mFiltersBinding;
 
     public TimelineFragment() {
         // Required empty public constructor
@@ -348,39 +350,39 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         final PopupWindow popupWindow = new PopupWindow(getContext());
 
         // inflate your layout or dynamically add view
-        TimelineFiltersMenuBinding filtersBinding = DataBindingUtil.inflate(getLayoutInflater(),
+        mFiltersBinding = DataBindingUtil.inflate(getLayoutInflater(),
                 R.layout.timeline_filters_menu, null, false);
         popupWindow.setFocusable(true);
         popupWindow.setWidth((int) getResources().getDimension(R.dimen.filters_width));
         popupWindow.setHeight((int) getResources().getDimension(R.dimen.filters_height));
-        popupWindow.setContentView(filtersBinding.getRoot());
+        popupWindow.setContentView(mFiltersBinding.getRoot());
 
-        filtersBinding.switchAllModules.setChecked(false);
-        filtersBinding.switchWorkflows.setChecked(false);
-        filtersBinding.switchApprovals.setChecked(false);
-        filtersBinding.switchFiles.setChecked(false);
-        filtersBinding.switchComments.setChecked(false);
+        mFiltersBinding.switchAllModules.setChecked(false);
+        mFiltersBinding.switchWorkflows.setChecked(false);
+        mFiltersBinding.switchApprovals.setChecked(false);
+        mFiltersBinding.switchFiles.setChecked(false);
+        mFiltersBinding.switchComments.setChecked(false);
 
         List<String> modules = viewModel.getSelectedModules();
         for (String string : modules) {
             if (string.equals(MODULE_ALL)) {
-                filtersBinding.switchAllModules.setChecked(true);
+                mFiltersBinding.switchAllModules.setChecked(true);
             } else if (string.equals(MODULE_WORKFLOWS)) {
-                filtersBinding.switchWorkflows.setChecked(true);
+                mFiltersBinding.switchWorkflows.setChecked(true);
             } else if (string.equals(MODULE_WORKFLOW_APPROVALS)) {
-                filtersBinding.switchApprovals.setChecked(true);
+                mFiltersBinding.switchApprovals.setChecked(true);
             } else if (string.equals(MODULE_WORKFLOW_FILES)) {
-                filtersBinding.switchFiles.setChecked(true);
+                mFiltersBinding.switchFiles.setChecked(true);
             } else if (string.equals(MODULE_WORKFLOW_COMMENTS)) {
-                filtersBinding.switchComments.setChecked(true);
+                mFiltersBinding.switchComments.setChecked(true);
             }
         }
 
-        filtersBinding.switchAllModules.setOnClickListener(this::onSwitchClicked);
-        filtersBinding.switchWorkflows.setOnClickListener(this::onSwitchClicked);
-        filtersBinding.switchApprovals.setOnClickListener(this::onSwitchClicked);
-        filtersBinding.switchFiles.setOnClickListener(this::onSwitchClicked);
-        filtersBinding.switchComments.setOnClickListener(this::onSwitchClicked);
+        mFiltersBinding.switchAllModules.setOnClickListener(this::onSwitchClicked);
+        mFiltersBinding.switchWorkflows.setOnClickListener(this::onSwitchClicked);
+        mFiltersBinding.switchApprovals.setOnClickListener(this::onSwitchClicked);
+        mFiltersBinding.switchFiles.setOnClickListener(this::onSwitchClicked);
+        mFiltersBinding.switchComments.setOnClickListener(this::onSwitchClicked);
 
         List<WorkflowUser> workflowUsers = viewModel.getAllWorkflowUsers();
 
@@ -388,14 +390,14 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
 
         //add "All" filter
         addUserRow(
-                filtersBinding,
+                mFiltersBinding,
                 USER_ALL,
                 getString(R.string.all)
         );
 
         for (WorkflowUser workflowUser : workflowUsers) {
             addUserRow(
-                    filtersBinding,
+                    mFiltersBinding,
                     String.valueOf(workflowUser.getId()),
                     workflowUser.getUsername()
             );
@@ -433,7 +435,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
 
         int i = 0;
 
-        List<String> users = viewModel.getAllUsers();
+        List<String> users = viewModel.getSelectedUsers();
         while (i < users.size()) {
             if (users.get(i).equals("undefined")) {
                 users.remove(i);
@@ -486,27 +488,26 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
                 break;
 
         }
-        int i = 0;
 
-        List<String> modules = viewModel.getAllModules();
-        while (i < modules.size()) {
-            if (modules.get(i).equals("undefined")) {
-                modules.remove(i);
-            }
-            i++;
-        }
-
-        if (checked) {
-            modules.add(type);
+        if (type.equals(MODULE_ALL)) {
+            mFiltersBinding.switchWorkflows.setChecked(checked);
+            mFiltersBinding.switchApprovals.setChecked(checked);
+            mFiltersBinding.switchFiles.setChecked(checked);
+            mFiltersBinding.switchComments.setChecked(checked);
         } else {
-            i = 0;
-            while (i < modules.size()) {
-                if (modules.get(i).equals(type)) {
-                    modules.remove(i);
-                }
-                i++;
-            }
+            boolean isAllSelected = mFiltersBinding.switchWorkflows.isChecked()
+                    && mFiltersBinding.switchApprovals.isChecked()
+                    && mFiltersBinding.switchFiles.isChecked()
+                    && mFiltersBinding.switchComments.isChecked();
+            mFiltersBinding.switchAllModules.setChecked(isAllSelected);
         }
+
+        List<String> modules = new ArrayList<>();
+
+        if (mFiltersBinding.switchWorkflows.isChecked()) modules.add(MODULE_WORKFLOWS);
+        if (mFiltersBinding.switchApprovals.isChecked()) modules.add(MODULE_WORKFLOW_APPROVALS);
+        if (mFiltersBinding.switchFiles.isChecked()) modules.add(MODULE_WORKFLOW_FILES);
+        if (mFiltersBinding.switchComments.isChecked()) modules.add(MODULE_WORKFLOW_COMMENTS);
 
         if (modules.size() == 0) {
             modules.add("undefined");

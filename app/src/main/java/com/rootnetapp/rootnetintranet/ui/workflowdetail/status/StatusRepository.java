@@ -29,8 +29,8 @@ public class StatusRepository {
 
     private MutableLiveData<WorkflowApproveRejectResponse> responseApproveRejection;
     private MutableLiveData<WorkflowActivationResponse> activationResponseLiveData;
-    private MutableLiveData<Boolean> activationFailedLiveData;
-    private MutableLiveData<Boolean> showLoading;
+    private MutableLiveData<Throwable> activationFailedLiveData;
+    private MutableLiveData<Throwable> errorLiveData;
 
     private ApiInterface service;
     private ProfileDao profileDao;
@@ -97,7 +97,7 @@ public class StatusRepository {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(success -> responseApproveRejection.setValue(success), throwable -> {
                     Log.d(TAG, "approveWorkflow: " + throwable.getMessage());
-                    showLoading.setValue(false);
+                    errorLiveData.setValue(throwable);
                 });
         disposables.add(disposable);
     }
@@ -123,7 +123,7 @@ public class StatusRepository {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(success -> activationResponseLiveData.setValue(success), throwable -> {
                     Log.d(TAG, "activateWorkflow: " + throwable.getMessage());
-                    activationFailedLiveData.setValue(true);
+                    activationFailedLiveData.setValue(throwable);
                 });
         disposables.add(disposable);
     }
@@ -142,17 +142,17 @@ public class StatusRepository {
         return activationResponseLiveData;
     }
 
-    protected LiveData<Boolean> getActivationFailed() {
+    protected LiveData<Throwable> getActivationFailed() {
         if (activationFailedLiveData == null) {
             activationFailedLiveData = new MutableLiveData<>();
         }
         return activationFailedLiveData;
     }
 
-    protected LiveData<Boolean> getErrorShowLoading() {
-        if (showLoading == null) {
-            showLoading = new MutableLiveData<>();
+    protected LiveData<Throwable> getErrorLiveData() {
+        if (errorLiveData == null) {
+            errorLiveData = new MutableLiveData<>();
         }
-        return showLoading;
+        return errorLiveData;
     }
 }

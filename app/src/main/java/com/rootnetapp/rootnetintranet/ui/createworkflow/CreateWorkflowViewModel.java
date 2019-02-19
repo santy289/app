@@ -658,7 +658,10 @@ class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
-                }, throwable -> Log.d(TAG, "createProductsFormItem: " + throwable.getMessage()));
+                }, throwable -> {
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+                    Log.d(TAG, "createProductsFormItem: " + throwable.getMessage());
+                });
 
         mDisposables.add(disposable);
     }
@@ -712,7 +715,10 @@ class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
-                }, throwable -> Log.d(TAG, "createRolesFormItem: " + throwable.getMessage()));
+                }, throwable -> {
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+                    Log.d(TAG, "createRolesFormItem: " + throwable.getMessage());
+                });
 
         mDisposables.add(disposable);
     }
@@ -765,8 +771,10 @@ class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
-                }, throwable -> Log.d(TAG,
-                        "createServicesFormItem: can't get service: " + throwable.getMessage()));
+                }, throwable -> {
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+                    Log.d(TAG, "createServicesFormItem: can't get service: " + throwable.getMessage());
+                });
         mDisposables.add(disposable);
     }
 
@@ -902,8 +910,10 @@ class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
-                }, throwable -> Log
-                        .e(TAG, "handleList: problem getting list " + throwable.getMessage()));
+                }, throwable -> {
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+                    Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
+                });
 
         mDisposables.add(disposable);
     }
@@ -945,8 +955,10 @@ class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddFormItemLiveData.setValue(multipleChoiceFormItem);
-                }, throwable -> Log
-                        .e(TAG, "handleList: problem getting list " + throwable.getMessage()));
+                }, throwable -> {
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+                    Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
+                });
 
         mDisposables.add(disposable);
     }
@@ -1070,6 +1082,8 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(currencyFormItem);
                 }, throwable -> {
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+
                     showLoading.setValue(false);
                     Log.e(TAG, "handleCurrency: problem getting currency list " + throwable
                             .getMessage());
@@ -1112,6 +1126,8 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(phoneFormItem);
                 }, throwable -> {
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+
                     showLoading.setValue(false);
                     Log.e(TAG,
                             "handlePhone: problem getting country list " + throwable.getMessage());
@@ -1980,6 +1996,9 @@ class CreateWorkflowViewModel extends ViewModel {
         dialogMessage.title = R.string.error;
         dialogMessage.message = R.string.error_create_workflow;
         showDialogMessage.setValue(dialogMessage);
+
+        mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+
         Log.d(TAG, "onFailure: " + throwable.getMessage());
     }
 
@@ -1991,6 +2010,9 @@ class CreateWorkflowViewModel extends ViewModel {
         dialogMessage.title = R.string.error;
         dialogMessage.message = R.string.error_edit_workflow;
         showDialogMessage.setValue(dialogMessage);
+
+        mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+
         Log.d(TAG, "onFailure: " + throwable.getMessage());
     }
 

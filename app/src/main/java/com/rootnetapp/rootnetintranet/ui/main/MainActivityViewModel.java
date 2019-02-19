@@ -1,13 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
-
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import androidx.annotation.IdRes;
-
 import android.util.Log;
 
 import com.auth0.android.jwt.JWT;
@@ -28,6 +22,10 @@ import com.squareup.moshi.Moshi;
 import java.io.IOException;
 import java.util.List;
 
+import androidx.annotation.IdRes;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -296,11 +294,12 @@ public class MainActivityViewModel extends ViewModel {
 
     private void onFailure(Throwable throwable) {
         Log.d(TAG, "onFailure: " + throwable.getMessage());
-        mErrorLiveData.setValue(R.string.failure_connect);
+        mErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
     }
 
     private void onWorflowsFailure(Throwable throwable) {
         Log.d(TAG, "onWorflowsFailure: " + throwable.getMessage());
+        mWorkfErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
         mWorkfErrorLiveData.setValue(R.string.failure_connect);
     }
 

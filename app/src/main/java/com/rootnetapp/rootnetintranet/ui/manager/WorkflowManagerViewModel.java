@@ -14,6 +14,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowRespons
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import androidx.annotation.Nullable;
@@ -732,8 +733,10 @@ public class WorkflowManagerViewModel extends ViewModel {
 
             List<Option> options = new ArrayList<>();
             for (int i = 0; i < types.size(); i++) {
-                String name = types.get(i).getName();
-                Integer id = types.get(i).getId();
+                WorkflowTypeItemMenu typeItemMenu = types.get(i);
+
+                String name = String.format(Locale.US, "%s (%d)", typeItemMenu.getName(), typeItemMenu.getWorkflowCount());
+                Integer id = typeItemMenu.getId();
 
                 Option option = new Option(id, name);
                 options.add(option);

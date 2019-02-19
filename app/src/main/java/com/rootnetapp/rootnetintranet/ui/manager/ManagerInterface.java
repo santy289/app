@@ -12,4 +12,6 @@ public interface ManagerInterface {
 
     void showWorkflow(WorkflowListItem workflowListItem);
 
+    void showToastMessage(int stringRes);
+
 }

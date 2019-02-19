@@ -84,8 +84,8 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
 
-        String start = Utils.getCurrentDateDaysDiff(MONTH_AGO_DAYS);
-        String end = Utils.getCurrentDate();
+        String start = Utils.getCurrentFormattedDateDaysDiff(MONTH_AGO_DAYS);
+        String end = Utils.getCurrentFormattedDate();
         updateSelectedDatesUi(start, end);
         updateSelectedDateTitle(R.string.month);
 
@@ -309,8 +309,8 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         selectWeekButton(false);
         selectDayButton(false);
 
-        String start = Utils.getCurrentDateDaysDiff(MONTH_AGO_DAYS);
-        String end = Utils.getCurrentDate();
+        String start = Utils.getCurrentFormattedDateDaysDiff(MONTH_AGO_DAYS);
+        String end = Utils.getCurrentFormattedDate();
         updateSelectedDatesUi(start, end);
         updateSelectedDateTitle(R.string.month);
 
@@ -326,8 +326,8 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         selectWeekButton(true);
         selectDayButton(false);
 
-        String start = Utils.getCurrentDateDaysDiff(WEEK_AGO_DAYS);
-        String end = Utils.getCurrentDate();
+        String start = Utils.getCurrentFormattedDateDaysDiff(WEEK_AGO_DAYS);
+        String end = Utils.getCurrentFormattedDate();
         updateSelectedDatesUi(start, end);
         updateSelectedDateTitle(R.string.week);
 
@@ -343,8 +343,8 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         selectWeekButton(false);
         selectDayButton(true);
 
-        String start = Utils.getCurrentDateDaysDiff(DAY_AGO_DAYS);
-        String end = Utils.getCurrentDate();
+        String start = Utils.getCurrentFormattedDateDaysDiff(DAY_AGO_DAYS);
+        String end = Utils.getCurrentFormattedDate();
         updateSelectedDatesUi(start, end);
         updateSelectedDateTitle(R.string.day);
 
@@ -695,12 +695,10 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     }
 
     @UiThread
-    private void updateSelectedDatesUi(String startDate) {
-        mBinding.tvSelectedDate.setText(String.format(Locale.US, "(%s)", startDate));
-    }
-
-    @UiThread
     private void updateSelectedDatesUi(String startDate, String endDate) {
+        startDate = Utils.getFormattedDate(startDate, Utils.SERVER_DATE_FORMAT_NO_TIMEZONE, Utils.SHORT_DATE_DISPLAY_FORMAT);
+        endDate = Utils.getFormattedDate(endDate, Utils.SERVER_DATE_FORMAT_NO_TIMEZONE, Utils.SHORT_DATE_DISPLAY_FORMAT);
+
         mBinding.tvSelectedDate.setText(String.format(Locale.US, "(%s - %s)", startDate, endDate));
     }
 
@@ -774,7 +772,8 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     }
 
     @UiThread
-    private void showToastMessage(@StringRes int messageRes) {
+    @Override
+    public void showToastMessage(@StringRes int messageRes) {
         Toast.makeText(
                 getContext(),
                 getString(messageRes),

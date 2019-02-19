@@ -90,8 +90,8 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
 
-        String start = Utils.getCurrentDateDaysDiff(MONTH_AGO_DAYS);
-        String end = Utils.getCurrentDate();
+        String start = Utils.getCurrentFormattedDateDaysDiff(MONTH_AGO_DAYS);
+        String end = Utils.getCurrentFormattedDate();
         updateSelectedDatesUi(start, end);
         updateSelectedDateTitle(R.string.month);
 
@@ -181,8 +181,8 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         selectWeekButton(false);
         selectDayButton(false);
 
-        String start = Utils.getCurrentDateDaysDiff(MONTH_AGO_DAYS);
-        String end = Utils.getCurrentDate();
+        String start = Utils.getCurrentFormattedDateDaysDiff(MONTH_AGO_DAYS);
+        String end = Utils.getCurrentFormattedDate();
         updateSelectedDatesUi(start, end);
         updateSelectedDateTitle(R.string.month);
 
@@ -198,8 +198,8 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         selectWeekButton(true);
         selectDayButton(false);
 
-        String start = Utils.getCurrentDateDaysDiff(WEEK_AGO_DAYS);
-        String end = Utils.getCurrentDate();
+        String start = Utils.getCurrentFormattedDateDaysDiff(WEEK_AGO_DAYS);
+        String end = Utils.getCurrentFormattedDate();
         updateSelectedDatesUi(start, end);
         updateSelectedDateTitle(R.string.week);
 
@@ -215,8 +215,8 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         selectWeekButton(false);
         selectDayButton(true);
 
-        String start = Utils.getCurrentDateDaysDiff(DAY_AGO_DAYS);
-        String end = Utils.getCurrentDate();
+        String start = Utils.getCurrentFormattedDateDaysDiff(DAY_AGO_DAYS);
+        String end = Utils.getCurrentFormattedDate();
         updateSelectedDatesUi(start, end);
         updateSelectedDateTitle(R.string.day);
 
@@ -306,11 +306,6 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
 
     //region TimelineInterface
     @Override
-    public void reload() {
-        updateTimeline();
-    }
-
-    @Override
     public void addCommentClicked(String comment, User author, TimelineItem timelineItem,
                                   int interactionId) {
         if (TextUtils.isEmpty(comment)) {
@@ -349,6 +344,16 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
 
         viewModel.postDislike(interactionId, timelineItem.getEntityId(),
                 timelineItem.getEntity(), author.getUserId());
+    }
+
+    @UiThread
+    @Override
+    public void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                getContext(),
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
     }
     //endregion
 
@@ -601,12 +606,10 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
     }
 
     @UiThread
-    private void updateSelectedDatesUi(String startDate) {
-        mBinding.tvSelectedDate.setText(String.format(Locale.US, "(%s)", startDate));
-    }
-
-    @UiThread
     private void updateSelectedDatesUi(String startDate, String endDate) {
+        startDate = Utils.getFormattedDate(startDate, Utils.SERVER_DATE_FORMAT_NO_TIMEZONE, Utils.SHORT_DATE_DISPLAY_FORMAT);
+        endDate = Utils.getFormattedDate(endDate, Utils.SERVER_DATE_FORMAT_NO_TIMEZONE, Utils.SHORT_DATE_DISPLAY_FORMAT);
+
         mBinding.tvSelectedDate.setText(String.format(Locale.US, "(%s - %s)", startDate, endDate));
     }
 
@@ -627,15 +630,6 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         } else {
             Utils.hideLoading();
         }
-    }
-
-    @UiThread
-    private void showToastMessage(@StringRes int messageRes) {
-        Toast.makeText(
-                getContext(),
-                getString(messageRes),
-                Toast.LENGTH_SHORT)
-                .show();
     }
 
     private void hideSoftInputKeyboard() {

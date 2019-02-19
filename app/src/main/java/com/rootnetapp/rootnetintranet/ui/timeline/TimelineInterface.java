@@ -11,12 +11,12 @@ public interface TimelineInterface {
 
     void setDate(String start, String end);
 
-    void reload();
-
     void addCommentClicked(String comment, User author, TimelineItem timelineItem,
                            int interactionId);
 
     void likeClicked(User author, TimelineItem timelineItem, int interactionId);
 
     void dislikeClicked(User author, TimelineItem timelineItem, int interactionId);
+
+    void showToastMessage(int stringRes);
 }

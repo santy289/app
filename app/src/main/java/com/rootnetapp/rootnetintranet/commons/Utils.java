@@ -47,6 +47,7 @@ public class Utils {
     public static String domain;
 
     public static final String SERVER_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
+    public static final String SERVER_DATE_FORMAT_NO_TIMEZONE = "yyyy-MM-dd'T'HH:mm:ss";
     public static final String STANDARD_DATE_DISPLAY_FORMAT = "MMMM dd, yyyy";
     public static final String SHORT_DATE_DISPLAY_FORMAT = "dd/MM/yy";
 
@@ -214,17 +215,30 @@ public class Utils {
         return mimeType;
     }
 
-    public static String getCurrentDate() {
+    public static String getCurrentFormattedDate() {
         Date c = Calendar.getInstance().getTime();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat df = new SimpleDateFormat(SERVER_DATE_FORMAT_NO_TIMEZONE, Locale.getDefault());
         return df.format(c);
     }
 
-    public static String getCurrentDateDaysDiff(int days) {
+    public static String getFormattedDateFromIntegers(int year, int month, int day, int hour, int minute, int second) {
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.YEAR, year);
+        c.set(Calendar.MONTH, month);
+        c.set(Calendar.DAY_OF_MONTH, day);
+        c.set(Calendar.HOUR_OF_DAY, hour);
+        c.set(Calendar.MINUTE, minute);
+        c.set(Calendar.SECOND, second);
+        Date date = c.getTime();
+        SimpleDateFormat df = new SimpleDateFormat(SERVER_DATE_FORMAT_NO_TIMEZONE, Locale.getDefault());
+        return df.format(date);
+    }
+
+    public static String getCurrentFormattedDateDaysDiff(int days) {
         Calendar c = Calendar.getInstance();
         c.add(Calendar.DAY_OF_MONTH, days);
         Date date = c.getTime();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat df = new SimpleDateFormat(SERVER_DATE_FORMAT_NO_TIMEZONE, Locale.getDefault());
         return df.format(date);
     }
 

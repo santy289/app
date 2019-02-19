@@ -239,6 +239,7 @@
     <string name="global_approvers_form">People that can approve any status</string>
     <string name="specific_approvers_form">People that can approve a specific status</string>
     <string name="people_involved_form_return_button">Go Back</string>
+    <string name="select_date_dialog_end_date_before_start_date_error">The start date cannot be after the end date.</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Workflow Details</string>

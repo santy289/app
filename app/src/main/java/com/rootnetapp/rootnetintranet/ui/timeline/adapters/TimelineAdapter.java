@@ -94,14 +94,16 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         Arguments arguments = item.getDescription().getArguments();
 
         String title = "";
-        for (User user : people) {
-            if (user.getId() == item.getAuthor()) {
-                author = user;
-                if (user.getPicture() != null) {
-                    String path = Utils.imgDomain + user.getPicture().trim();
-                    Picasso.get().load(path).into(holder.binding.imgPoster);
+        if (people != null) {
+            for (User user : people) {
+                if (user.getId() == item.getAuthor()) {
+                    author = user;
+                    if (user.getPicture() != null) {
+                        String path = Utils.imgDomain + user.getPicture().trim();
+                        Picasso.get().load(path).into(holder.binding.imgPoster);
+                    }
+                    title = user.getFullName();
                 }
-                title = user.getFullName();
             }
         }
 
@@ -166,12 +168,14 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         final int interactionId;
         Interaction itemInteraction = null;
         int x = -1;
-        for (Interaction interaction : interactions) {
-            if (interaction.getEntity().equals(item.getEntityId())) {
-                x = interaction.getId();
-                itemInteraction = interaction;
-                subComments = interaction.getComments();
-                break;
+        if (interactions != null) {
+            for (Interaction interaction : interactions) {
+                if (interaction.getEntity().equals(item.getEntityId())) {
+                    x = interaction.getId();
+                    itemInteraction = interaction;
+                    subComments = interaction.getComments();
+                    break;
+                }
             }
         }
         interactionId = x;

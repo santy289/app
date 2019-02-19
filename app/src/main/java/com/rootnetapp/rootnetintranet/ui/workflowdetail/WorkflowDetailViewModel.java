@@ -138,10 +138,10 @@ public class WorkflowDetailViewModel extends ViewModel {
 
         // Transformation used in case that any repo request fails
         handleShowLoadingByRepo = Transformations.map(
-                mRepository.getErrorShowLoading(),
-                show -> {
-                    mShowToastMessage.setValue(R.string.failure_connect);
-                    return show;
+                mRepository.getErrorLiveData(),
+                throwable -> {
+                    mShowToastMessage.setValue(Utils.getOnFailureStringRes(throwable));
+                    return false;
                 }
         );
     }

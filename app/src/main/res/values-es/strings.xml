@@ -100,6 +100,7 @@
     <string name="add_workflow">+ Añadir Workflow</string>
     <string name="project_owner">Dueño del Proyecto</string>
     <string name="edit">Editar</string>
+    <string name="delete">Eliminar</string>
     <string name="department">Departmento</string>
     <string name="amount">Cantidad</string>
     <string name="workflow_owner">Dueño del Workflow</string>

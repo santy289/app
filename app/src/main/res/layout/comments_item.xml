@@ -33,7 +33,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:textColor="@color/text_blue"
             android:textSize="16sp"
@@ -41,7 +40,8 @@
             app:layout_constrainedWidth="true"
             app:layout_constraintEnd_toStartOf="@id/tv_date"
             app:layout_constraintStart_toEndOf="@+id/barrier_img"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/btn_options"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_options"
             tools:text="Jon Doe" />
 
         <TextView
@@ -55,12 +55,29 @@
             android:textColor="@color/low_gray_text"
             android:textSize="12sp"
             app:layout_constrainedWidth="true"
-            app:layout_constraintBottom_toBottomOf="@id/tv_name"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/btn_options"
             app:layout_constraintStart_toEndOf="@id/tv_name"
-            app:layout_constraintTop_toTopOf="@id/tv_name"
+            app:layout_constraintTop_toTopOf="@id/btn_options"
+            app:layout_constraintEnd_toStartOf="@+id/btn_options"
             app:layout_constraintWidth_min="100dp"
             tools:text="November 12, 2018 - 12:00 PM" />
+
+        <Button
+            android:id="@+id/btn_options"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+            android:layout_width="35dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            app:backgroundTint="@color/workflowListBg"
+            app:icon="@drawable/ic_more_vert_black_24dp"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tv_date"
+            app:layout_constraintTop_toTopOf="parent"
+            app:iconTint="@color/colorPrimary"
+            app:rippleColor="@color/dark_gray" />
 
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/barrier_text"

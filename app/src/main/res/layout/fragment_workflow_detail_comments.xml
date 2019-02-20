@@ -74,9 +74,29 @@
                     app:iconSize="20sp"
                     app:iconTint="@color/black"
                     app:layout_constraintBottom_toBottomOf="@+id/et_comment"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/btn_cancel_edit"
                     app:layout_constraintTop_toTopOf="@+id/et_comment"
                     app:rippleColor="@color/dark_gray" />
+
+                <Button
+                    android:id="@+id/btn_cancel_edit"
+                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                    android:layout_width="35dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:backgroundTint="@color/low_yellow"
+                    android:visibility="gone"
+                    app:backgroundTint="@color/white"
+                    app:icon="@drawable/ic_close_black_24dp"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp"
+                    app:iconSize="20sp"
+                    app:iconTint="@color/text_red"
+                    app:layout_constraintBottom_toBottomOf="@+id/et_comment"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/et_comment"
+                    app:rippleColor="@color/dark_gray"
+                    tools:visibility="visible" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <Button

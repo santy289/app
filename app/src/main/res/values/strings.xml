@@ -99,6 +99,7 @@
     <string name="add_workflow">+ Add Workflow</string>
     <string name="project_owner">Proyect Owner</string>
     <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
     <string name="department">Department</string>
     <string name="amount">Amount</string>
     <string name="workflow_owner">Workflow Owner</string>

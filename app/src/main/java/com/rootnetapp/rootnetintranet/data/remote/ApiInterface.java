@@ -3,11 +3,13 @@ package com.rootnetapp.rootnetintranet.data.remote;
 import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.requests.approval.ApprovalRequest;
+import com.rootnetapp.rootnetintranet.models.requests.comment.EditCommentRequest;
 import com.rootnetapp.rootnetintranet.models.requests.comment.PostCommentRequest;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
 import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
+import com.rootnetapp.rootnetintranet.models.responses.comments.CommentDeleteResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
@@ -52,6 +54,7 @@ import java.util.Map;
 
 import io.reactivex.Observable;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -349,6 +352,18 @@ public interface ApiInterface {
     Observable<CommentResponse> postComment(@Header("Authorization") String authorization,
                                             @Path("id") int workflowId,
                                             @Body PostCommentRequest request);
+
+    @Headers({"Domain-Name: api"})
+    @PATCH("intranet/workflow/comment/{id}")
+    Observable<CommentResponse> editComment(@Header("Authorization") String authorization,
+                                                    @Path("id") int commentId,
+                                                    @Body EditCommentRequest request);
+
+    @Headers({"Domain-Name: api"})
+    @DELETE("intranet/workflow/comment/{id}")
+    Observable<CommentDeleteResponse> deleteComment(@Header("Authorization") String authorization,
+                                                    @Path("id") int commentId,
+                                                    @Query("confirmation") boolean confirmation);
     @Headers({"Domain-Name: api"})
     @POST("intranet/workflow/{id}/approval")
     Observable<WorkflowApproveRejectResponse> postApproveReject(@Header("Authorization") String authorization,

@@ -62,6 +62,8 @@ public class ApprovalHistoryViewModel extends ViewModel {
             return;
         }
 
+        hideHistoryApprovalList.setValue(false);
+
         Disposable disposable = Observable.fromCallable(() -> {
             ApproverHistory approverHistory;
             ProfileInvolved profileInvolved;

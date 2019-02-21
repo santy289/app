@@ -3,9 +3,11 @@ package com.rootnetapp.rootnetintranet.ui.timeline;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.PopupWindow;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -13,13 +15,17 @@ import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.databinding.FragmentTimelineBinding;
 import com.rootnetapp.rootnetintranet.databinding.TimelineFiltersMenuBinding;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineItem;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Interaction;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.timeline.adapters.TimelineAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -33,12 +39,15 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.DAY_AGO_DAYS;
 import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MODULE_ALL;
 import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MODULE_WORKFLOWS;
 import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MODULE_WORKFLOW_APPROVALS;
 import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MODULE_WORKFLOW_COMMENTS;
 import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MODULE_WORKFLOW_FILES;
+import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.MONTH_AGO_DAYS;
 import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.USER_ALL;
+import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel.WEEK_AGO_DAYS;
 
 public class TimelineFragment extends Fragment implements TimelineInterface {
 
@@ -48,6 +57,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
     private FragmentTimelineBinding mBinding;
     private MainActivityInterface mMainInterface;
     private TimelineAdapter mTimelineAdapter;
+    private TimelineFiltersMenuBinding mFiltersBinding;
 
     public TimelineFragment() {
         // Required empty public constructor
@@ -80,10 +90,10 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
 
-        String start = Utils.getMonthDay(0, 1);
-        String end = Utils.getMonthDay(0, 30);
+        String start = Utils.getCurrentFormattedDateDaysDiff(MONTH_AGO_DAYS);
+        String end = Utils.getCurrentFormattedDate();
         updateSelectedDatesUi(start, end);
-        updateSelectedDateTitle(R.string.current_month);
+        updateSelectedDateTitle(R.string.month);
 
         subscribe();
         setOnClickListeners();
@@ -99,6 +109,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         viewModel.getObservableTimeline().observe(this, this::populateTimeline);
         viewModel.getObservableHideMoreButton().observe(this, this::hideMoreButton);
         viewModel.getObservableHideTimelineList().observe(this, this::hideTimelineList);
+        viewModel.getObservablePostInteraction().observe(this, this::updateInteraction);
     }
 
     /**
@@ -170,10 +181,10 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         selectWeekButton(false);
         selectDayButton(false);
 
-        String start = Utils.getMonthDay(0, 1);
-        String end = Utils.getMonthDay(0, 30);
+        String start = Utils.getCurrentFormattedDateDaysDiff(MONTH_AGO_DAYS);
+        String end = Utils.getCurrentFormattedDate();
         updateSelectedDatesUi(start, end);
-        updateSelectedDateTitle(R.string.current_month);
+        updateSelectedDateTitle(R.string.month);
 
         updateTimeline(start, end);
     }
@@ -187,10 +198,10 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         selectWeekButton(true);
         selectDayButton(false);
 
-        String start = Utils.getWeekStart();
-        String end = Utils.getWeekEnd();
+        String start = Utils.getCurrentFormattedDateDaysDiff(WEEK_AGO_DAYS);
+        String end = Utils.getCurrentFormattedDate();
         updateSelectedDatesUi(start, end);
-        updateSelectedDateTitle(R.string.current_week);
+        updateSelectedDateTitle(R.string.week);
 
         updateTimeline(start, end);
     }
@@ -204,10 +215,10 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         selectWeekButton(false);
         selectDayButton(true);
 
-        String start = Utils.getCurrentDate();
-        String end = Utils.getTomorrowDate();
-        updateSelectedDatesUi(start);
-        updateSelectedDateTitle(R.string.today);
+        String start = Utils.getCurrentFormattedDateDaysDiff(DAY_AGO_DAYS);
+        String end = Utils.getCurrentFormattedDate();
+        updateSelectedDatesUi(start, end);
+        updateSelectedDateTitle(R.string.day);
 
         updateTimeline(start, end);
     }
@@ -293,48 +304,96 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         viewModel.getTimeline();
     }
 
+    //region TimelineInterface
     @Override
-    public void reload() {
-        updateTimeline();
+    public void addCommentClicked(String comment, User author, TimelineItem timelineItem,
+                                  int interactionId) {
+        if (TextUtils.isEmpty(comment)) {
+            showToastMessage(R.string.empty_comment);
+            return;
+        }
+
+        if (author == null) {
+            showToastMessage(R.string.error);
+            return;
+        }
+
+        viewModel.postComment(interactionId, timelineItem.getEntityId(),
+                timelineItem.getEntity(), comment, author.getUserId());
+
+        hideSoftInputKeyboard();
     }
+
+    @Override
+    public void likeClicked(User author, TimelineItem timelineItem, int interactionId) {
+        if (author == null) {
+            showToastMessage(R.string.error);
+            return;
+        }
+
+        viewModel.postLike(interactionId, timelineItem.getEntityId(),
+                timelineItem.getEntity(), author.getUserId());
+    }
+
+    @Override
+    public void dislikeClicked(User author, TimelineItem timelineItem, int interactionId) {
+        if (author == null) {
+            showToastMessage(R.string.error);
+            return;
+        }
+
+        viewModel.postDislike(interactionId, timelineItem.getEntityId(),
+                timelineItem.getEntity(), author.getUserId());
+    }
+
+    @UiThread
+    @Override
+    public void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                getContext(),
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
+    }
+    //endregion
 
     private PopupWindow createPopupMenu() {
         final PopupWindow popupWindow = new PopupWindow(getContext());
 
         // inflate your layout or dynamically add view
-        TimelineFiltersMenuBinding filtersBinding = DataBindingUtil.inflate(getLayoutInflater(),
+        mFiltersBinding = DataBindingUtil.inflate(getLayoutInflater(),
                 R.layout.timeline_filters_menu, null, false);
         popupWindow.setFocusable(true);
         popupWindow.setWidth((int) getResources().getDimension(R.dimen.filters_width));
         popupWindow.setHeight((int) getResources().getDimension(R.dimen.filters_height));
-        popupWindow.setContentView(filtersBinding.getRoot());
+        popupWindow.setContentView(mFiltersBinding.getRoot());
 
-        filtersBinding.switchAllModules.setChecked(false);
-        filtersBinding.switchWorkflows.setChecked(false);
-        filtersBinding.switchApprovals.setChecked(false);
-        filtersBinding.switchFiles.setChecked(false);
-        filtersBinding.switchComments.setChecked(false);
+        mFiltersBinding.switchAllModules.setChecked(false);
+        mFiltersBinding.switchWorkflows.setChecked(false);
+        mFiltersBinding.switchApprovals.setChecked(false);
+        mFiltersBinding.switchFiles.setChecked(false);
+        mFiltersBinding.switchComments.setChecked(false);
 
         List<String> modules = viewModel.getSelectedModules();
         for (String string : modules) {
             if (string.equals(MODULE_ALL)) {
-                filtersBinding.switchAllModules.setChecked(true);
+                mFiltersBinding.switchAllModules.setChecked(true);
             } else if (string.equals(MODULE_WORKFLOWS)) {
-                filtersBinding.switchWorkflows.setChecked(true);
+                mFiltersBinding.switchWorkflows.setChecked(true);
             } else if (string.equals(MODULE_WORKFLOW_APPROVALS)) {
-                filtersBinding.switchApprovals.setChecked(true);
+                mFiltersBinding.switchApprovals.setChecked(true);
             } else if (string.equals(MODULE_WORKFLOW_FILES)) {
-                filtersBinding.switchFiles.setChecked(true);
+                mFiltersBinding.switchFiles.setChecked(true);
             } else if (string.equals(MODULE_WORKFLOW_COMMENTS)) {
-                filtersBinding.switchComments.setChecked(true);
+                mFiltersBinding.switchComments.setChecked(true);
             }
         }
 
-        filtersBinding.switchAllModules.setOnClickListener(this::onSwitchClicked);
-        filtersBinding.switchWorkflows.setOnClickListener(this::onSwitchClicked);
-        filtersBinding.switchApprovals.setOnClickListener(this::onSwitchClicked);
-        filtersBinding.switchFiles.setOnClickListener(this::onSwitchClicked);
-        filtersBinding.switchComments.setOnClickListener(this::onSwitchClicked);
+        mFiltersBinding.switchAllModules.setOnClickListener(this::onSwitchClicked);
+        mFiltersBinding.switchWorkflows.setOnClickListener(this::onSwitchClicked);
+        mFiltersBinding.switchApprovals.setOnClickListener(this::onSwitchClicked);
+        mFiltersBinding.switchFiles.setOnClickListener(this::onSwitchClicked);
+        mFiltersBinding.switchComments.setOnClickListener(this::onSwitchClicked);
 
         List<WorkflowUser> workflowUsers = viewModel.getAllWorkflowUsers();
 
@@ -342,15 +401,15 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
 
         //add "All" filter
         addUserRow(
-                filtersBinding,
+                mFiltersBinding,
                 USER_ALL,
                 getString(R.string.all)
         );
 
         for (WorkflowUser workflowUser : workflowUsers) {
             addUserRow(
-                    filtersBinding,
-                    String.valueOf(workflowUser.getId()),
+                    mFiltersBinding,
+                    String.valueOf(workflowUser.getUserId()),
                     workflowUser.getUsername()
             );
         }
@@ -385,26 +444,47 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         boolean checked = ((Switch) view).isChecked();
         String id = (String) view.getTag();
 
-        int i = 0;
+        if (id.equals(USER_ALL)) {
+            for (int i = 0; i < mFiltersBinding.lyt.getChildCount(); i++) {
+                View child = mFiltersBinding.lyt.getChildAt(i);
 
-        List<String> users = viewModel.getAllUsers();
-        while (i < users.size()) {
-            if (users.get(i).equals("undefined")) {
-                users.remove(i);
+                Switch switchView = child.findViewById(R.id.field_swtch);
+                if (switchView == null) continue;
+
+                switchView.setChecked(checked);
             }
-            i++;
+        } else {
+            boolean isAllSelected = true;
+            Switch userAllSwitch = null;
+
+            for (int j = 0; j < mFiltersBinding.lyt.getChildCount(); j++) {
+                View child = mFiltersBinding.lyt.getChildAt(j);
+
+                Switch switchView = child.findViewById(R.id.field_swtch);
+
+                if (switchView == null) continue;
+                if (switchView.getTag().equals(USER_ALL)) {
+                    userAllSwitch = switchView;
+                    continue;
+                }
+
+                isAllSelected &= switchView.isChecked();
+            }
+
+            if (userAllSwitch != null) userAllSwitch.setChecked(isAllSelected);
         }
 
-        if (checked) {
-            users.add(id);
-        } else {
-            i = 0;
-            while (i < users.size()) {
-                if (users.get(i).equals(id)) {
-                    users.remove(i);
-                }
-                i++;
-            }
+        List<String> users = new ArrayList<>();
+
+        for (int j = 0; j < mFiltersBinding.lyt.getChildCount(); j++) {
+            View child = mFiltersBinding.lyt.getChildAt(j);
+
+            Switch switchView = child.findViewById(R.id.field_swtch);
+
+            //do not add if null or if it's the "All" filter
+            if (switchView == null || switchView.getTag().equals(USER_ALL)) continue;
+
+            if (switchView.isChecked()) users.add((String) switchView.getTag());
         }
 
         if (users.size() == 0) {
@@ -440,27 +520,26 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
                 break;
 
         }
-        int i = 0;
 
-        List<String> modules = viewModel.getAllModules();
-        while (i < modules.size()) {
-            if (modules.get(i).equals("undefined")) {
-                modules.remove(i);
-            }
-            i++;
-        }
-
-        if (checked) {
-            modules.add(type);
+        if (type.equals(MODULE_ALL)) {
+            mFiltersBinding.switchWorkflows.setChecked(checked);
+            mFiltersBinding.switchApprovals.setChecked(checked);
+            mFiltersBinding.switchFiles.setChecked(checked);
+            mFiltersBinding.switchComments.setChecked(checked);
         } else {
-            i = 0;
-            while (i < modules.size()) {
-                if (modules.get(i).equals(type)) {
-                    modules.remove(i);
-                }
-                i++;
-            }
+            boolean isAllSelected = mFiltersBinding.switchWorkflows.isChecked()
+                    && mFiltersBinding.switchApprovals.isChecked()
+                    && mFiltersBinding.switchFiles.isChecked()
+                    && mFiltersBinding.switchComments.isChecked();
+            mFiltersBinding.switchAllModules.setChecked(isAllSelected);
         }
+
+        List<String> modules = new ArrayList<>();
+
+        if (mFiltersBinding.switchWorkflows.isChecked()) modules.add(MODULE_WORKFLOWS);
+        if (mFiltersBinding.switchApprovals.isChecked()) modules.add(MODULE_WORKFLOW_APPROVALS);
+        if (mFiltersBinding.switchFiles.isChecked()) modules.add(MODULE_WORKFLOW_FILES);
+        if (mFiltersBinding.switchComments.isChecked()) modules.add(MODULE_WORKFLOW_COMMENTS);
 
         if (modules.size() == 0) {
             modules.add("undefined");
@@ -527,18 +606,21 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
     }
 
     @UiThread
-    private void updateSelectedDatesUi(String startDate) {
-        mBinding.tvSelectedDate.setText(String.format(Locale.US, "(%s)", startDate));
-    }
-
-    @UiThread
     private void updateSelectedDatesUi(String startDate, String endDate) {
+        startDate = Utils.getFormattedDate(startDate, Utils.SERVER_DATE_FORMAT_NO_TIMEZONE, Utils.SHORT_DATE_DISPLAY_FORMAT);
+        endDate = Utils.getFormattedDate(endDate, Utils.SERVER_DATE_FORMAT_NO_TIMEZONE, Utils.SHORT_DATE_DISPLAY_FORMAT);
+
         mBinding.tvSelectedDate.setText(String.format(Locale.US, "(%s - %s)", startDate, endDate));
     }
 
     @UiThread
     private void updateSelectedDateTitle(int titleRes) {
         mBinding.tvSelectedDateTitle.setText(getString(titleRes));
+    }
+
+    @UiThread
+    private void updateInteraction(Interaction interaction) {
+        mTimelineAdapter.updateInteraction(interaction);
     }
 
     @UiThread
@@ -550,12 +632,13 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         }
     }
 
-    @UiThread
-    private void showToastMessage(@StringRes int messageRes) {
-        Toast.makeText(
-                getContext(),
-                getString(messageRes),
-                Toast.LENGTH_SHORT)
-                .show();
+    private void hideSoftInputKeyboard() {
+        // Check if no view has focus:
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+                    Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 }

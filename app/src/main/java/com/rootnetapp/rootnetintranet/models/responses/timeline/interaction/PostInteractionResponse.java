@@ -3,7 +3,7 @@ package com.rootnetapp.rootnetintranet.models.responses.timeline.interaction;
 
 import com.squareup.moshi.Json;
 
-public class PostCommentResponse {
+public class PostInteractionResponse {
 
     @Json(name = "interaction")
     private Interaction interaction;

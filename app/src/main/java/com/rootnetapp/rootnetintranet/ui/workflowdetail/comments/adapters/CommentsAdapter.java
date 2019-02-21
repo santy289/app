@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.GlideUrl;
+import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.CommentsItemBinding;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
@@ -15,6 +16,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragmen
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -71,6 +73,29 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> im
         holder.binding.rvAttachments.setLayoutManager(
                 new LinearLayoutManager(mContext, RecyclerView.HORIZONTAL, false));
         holder.binding.rvAttachments.setAdapter(adapter);
+
+        holder.binding.btnOptions.setOnClickListener(v -> {
+            //Creating the instance of PopupMenu
+            PopupMenu popup = new PopupMenu(context, holder.binding.btnOptions);
+            //Inflating the Popup using xml file
+            popup.getMenuInflater().inflate(R.menu.menu_comment_options, popup.getMenu());
+
+            //registering popup with OnMenuItemClickListener
+            popup.setOnMenuItemClickListener(menuItem -> {
+                switch (menuItem.getItemId()) {
+                    case R.id.action_edit:
+                        commentsFragmentInterface.editComment(item);
+                        break;
+                    case R.id.action_delete:
+                        commentsFragmentInterface.deleteComment(item);
+                        break;
+                }
+
+                return true;
+            });
+
+            popup.show();//showing popup menu
+        });
     }
 
     @Override

@@ -22,7 +22,7 @@ public class WorkflowDetailRepository {
     private final ApiInterface service;
     private final WorkflowDbDao workflowDbDao;
 
-    private MutableLiveData<Boolean> showLoading;
+    private MutableLiveData<Throwable> errorLiveData;
     private MutableLiveData<ExportPdfResponse> exportPdfResponseLiveData;
     private MutableLiveData<WorkflowListItem> retrieveFromDbWorkflow;
 
@@ -93,7 +93,7 @@ public class WorkflowDetailRepository {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(success -> exportPdfResponseLiveData.setValue(success), throwable -> {
                     Log.d(TAG, "exportPdfFile: " + throwable.getMessage());
-                    showLoading.setValue(false);
+                    errorLiveData.setValue(throwable);
                 });
         disposables.add(disposable);
     }
@@ -105,11 +105,11 @@ public class WorkflowDetailRepository {
         return exportPdfResponseLiveData;
     }
 
-    protected LiveData<Boolean> getErrorShowLoading() {
-        if (showLoading == null) {
-            showLoading = new MutableLiveData<>();
+    protected LiveData<Throwable> getErrorLiveData() {
+        if (errorLiveData == null) {
+            errorLiveData = new MutableLiveData<>();
         }
-        return showLoading;
+        return errorLiveData;
     }
 
     protected LiveData<WorkflowListItem> getObservableRetreiveFromDbWorkflow() {

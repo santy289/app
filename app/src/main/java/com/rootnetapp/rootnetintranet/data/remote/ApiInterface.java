@@ -3,11 +3,13 @@ package com.rootnetapp.rootnetintranet.data.remote;
 import com.rootnetapp.rootnetintranet.models.createworkflow.CreateRequest;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.requests.approval.ApprovalRequest;
+import com.rootnetapp.rootnetintranet.models.requests.comment.EditCommentRequest;
 import com.rootnetapp.rootnetintranet.models.requests.comment.PostCommentRequest;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
 import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
+import com.rootnetapp.rootnetintranet.models.responses.comments.CommentDeleteResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
@@ -28,7 +30,8 @@ import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse
 import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.InteractionResponse;
-import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostCommentResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostInteractionResponse;
+import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostLikeDislike;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostSubCommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.SubCommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
@@ -51,6 +54,7 @@ import java.util.Map;
 
 import io.reactivex.Observable;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -348,6 +352,18 @@ public interface ApiInterface {
     Observable<CommentResponse> postComment(@Header("Authorization") String authorization,
                                             @Path("id") int workflowId,
                                             @Body PostCommentRequest request);
+
+    @Headers({"Domain-Name: api"})
+    @PATCH("intranet/workflow/comment/{id}")
+    Observable<CommentResponse> editComment(@Header("Authorization") String authorization,
+                                                    @Path("id") int commentId,
+                                                    @Body EditCommentRequest request);
+
+    @Headers({"Domain-Name: api"})
+    @DELETE("intranet/workflow/comment/{id}")
+    Observable<CommentDeleteResponse> deleteComment(@Header("Authorization") String authorization,
+                                                    @Path("id") int commentId,
+                                                    @Query("confirmation") boolean confirmation);
     @Headers({"Domain-Name: api"})
     @POST("intranet/workflow/{id}/approval")
     Observable<WorkflowApproveRejectResponse> postApproveReject(@Header("Authorization") String authorization,
@@ -385,12 +401,12 @@ public interface ApiInterface {
     @Headers({"Domain-Name: api"})
     @POST("interaction")
     @FormUrlEncoded
-    Observable<PostCommentResponse> postComment(@Header("Authorization")String auth,
-                                                @Field("interactionId") int interactionId,
-                                                @Field("entity") int entity,
-                                                @Field("entityType") String entityType,
-                                                @Field("description") String description,
-                                                @Field("author") int author);
+    Observable<PostInteractionResponse> postComment(@Header("Authorization")String auth,
+                                                    @Field("interactionId") int interactionId,
+                                                    @Field("entity") int entity,
+                                                    @Field("entityType") String entityType,
+                                                    @Field("description") String description,
+                                                    @Field("author") int author);
 
     @Headers({"Domain-Name: api"})
     @POST("interaction/comment")
@@ -400,6 +416,12 @@ public interface ApiInterface {
                                                       @Field("associate") int associate,
                                                       @Field("description") String description,
                                                       @Field("author") int author);
+
+    @Headers({"Domain-Name: api"})
+    @PATCH("interaction/{id}")
+    Observable<PostInteractionResponse> postLikeDislike(@Header("Authorization") String authorization,
+                                            @Path("id") int interactionId,
+                                            @Body PostLikeDislike request);
 
     @Headers({"Domain-Name: api"})
     @PATCH("intranet/workflow/activation")

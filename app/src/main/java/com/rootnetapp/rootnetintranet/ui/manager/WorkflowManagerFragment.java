@@ -39,6 +39,10 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import static com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerViewModel.DAY_AGO_DAYS;
+import static com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerViewModel.MONTH_AGO_DAYS;
+import static com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerViewModel.WEEK_AGO_DAYS;
+
 public class WorkflowManagerFragment extends Fragment implements ManagerInterface {
 
     @Inject
@@ -80,10 +84,10 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
 
-        String start = Utils.getMonthDay(0, 1);
-        String end = Utils.getMonthDay(0, 30);
+        String start = Utils.getCurrentFormattedDateDaysDiff(MONTH_AGO_DAYS);
+        String end = Utils.getCurrentFormattedDate();
         updateSelectedDatesUi(start, end);
-        updateSelectedDateTitle(R.string.current_month);
+        updateSelectedDateTitle(R.string.month);
 
         subscribe();
         setOnClickListeners();
@@ -305,10 +309,10 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         selectWeekButton(false);
         selectDayButton(false);
 
-        String start = Utils.getMonthDay(0, 1);
-        String end = Utils.getMonthDay(0, 30);
+        String start = Utils.getCurrentFormattedDateDaysDiff(MONTH_AGO_DAYS);
+        String end = Utils.getCurrentFormattedDate();
         updateSelectedDatesUi(start, end);
-        updateSelectedDateTitle(R.string.current_month);
+        updateSelectedDateTitle(R.string.month);
 
         updateDashboard(start, end);
     }
@@ -322,10 +326,10 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         selectWeekButton(true);
         selectDayButton(false);
 
-        String start = Utils.getWeekStart();
-        String end = Utils.getWeekEnd();
+        String start = Utils.getCurrentFormattedDateDaysDiff(WEEK_AGO_DAYS);
+        String end = Utils.getCurrentFormattedDate();
         updateSelectedDatesUi(start, end);
-        updateSelectedDateTitle(R.string.current_week);
+        updateSelectedDateTitle(R.string.week);
 
         updateDashboard(start, end);
     }
@@ -339,10 +343,10 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         selectWeekButton(false);
         selectDayButton(true);
 
-        String start = Utils.getCurrentDate();
-        String end = Utils.getTomorrowDate();
-        updateSelectedDatesUi(start);
-        updateSelectedDateTitle(R.string.today);
+        String start = Utils.getCurrentFormattedDateDaysDiff(DAY_AGO_DAYS);
+        String end = Utils.getCurrentFormattedDate();
+        updateSelectedDatesUi(start, end);
+        updateSelectedDateTitle(R.string.day);
 
         updateDashboard(start, end);
     }
@@ -691,12 +695,10 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     }
 
     @UiThread
-    private void updateSelectedDatesUi(String startDate) {
-        mBinding.tvSelectedDate.setText(String.format(Locale.US, "(%s)", startDate));
-    }
-
-    @UiThread
     private void updateSelectedDatesUi(String startDate, String endDate) {
+        startDate = Utils.getFormattedDate(startDate, Utils.SERVER_DATE_FORMAT_NO_TIMEZONE, Utils.SHORT_DATE_DISPLAY_FORMAT);
+        endDate = Utils.getFormattedDate(endDate, Utils.SERVER_DATE_FORMAT_NO_TIMEZONE, Utils.SHORT_DATE_DISPLAY_FORMAT);
+
         mBinding.tvSelectedDate.setText(String.format(Locale.US, "(%s - %s)", startDate, endDate));
     }
 
@@ -770,7 +772,8 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     }
 
     @UiThread
-    private void showToastMessage(@StringRes int messageRes) {
+    @Override
+    public void showToastMessage(@StringRes int messageRes) {
         Toast.makeText(
                 getContext(),
                 getString(messageRes),

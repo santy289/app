@@ -123,12 +123,12 @@ public class StatusViewModel extends ViewModel {
 
         // Transformation used in case that a workflow approval or rejection fails.
         handleShowLoadingByRepo = Transformations.map(
-                mRepository.getErrorShowLoading(),
-                show -> {
+                mRepository.getErrorLiveData(),
+                throwable -> {
                     mEnableApproveRejectButtonsLiveData.setValue(true);
                     showLoading.setValue(false);
-                    showToastMessage.setValue(R.string.failure_connect);
-                    return show;
+                    showToastMessage.setValue(Utils.getOnFailureStringRes(throwable));
+                    return false;
                 }
         );
 
@@ -169,7 +169,7 @@ public class StatusViewModel extends ViewModel {
         // Transformation used in case that the workflow activation fails
         handleSetWorkflowIsOpenByRepo = Transformations.map(
                 mRepository.getActivationFailed(),
-                statusUiData -> {
+                throwable -> {
                     /*
                     Set the original status. mWorkflow object is only updated if the request is successful.
                     Thus, it will always hold the correct status
@@ -177,7 +177,7 @@ public class StatusViewModel extends ViewModel {
                     updateStatusUiData(mWorkflow.isOpen(), true);
 
                     showLoading.setValue(false);
-                    showToastMessage.setValue(R.string.failure_connect);
+                    showToastMessage.setValue(Utils.getOnFailureStringRes(throwable));
 
                     return mStatusUiData;
                 }

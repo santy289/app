@@ -2,7 +2,9 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.comments;
 
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
+import com.rootnetapp.rootnetintranet.models.requests.comment.EditCommentRequest;
 import com.rootnetapp.rootnetintranet.models.requests.comment.PostCommentRequest;
+import com.rootnetapp.rootnetintranet.models.responses.comments.CommentDeleteResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.downloadfile.DownloadFileResponse;
@@ -61,6 +63,28 @@ public class CommentsRepository {
                 auth,
                 workflowId,
                 request)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<CommentResponse> editComment(String auth, int commentId, String comment) {
+        EditCommentRequest request = new EditCommentRequest();
+        request.setCommentId(commentId);
+        request.setDescription(comment);
+
+        return service.editComment(
+                auth,
+                commentId,
+                request)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<CommentDeleteResponse> deleteComment(String auth, int commentId) {
+        return service.deleteComment(
+                auth,
+                commentId,
+                true)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }

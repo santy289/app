@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.github.marlonlom.utilities.timeago.TimeAgo;
@@ -63,7 +64,7 @@ public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineComment
         if (comments != null) {
             item = comments.get(i);
             for (User user : people) {
-                if (user.getUserId() == item.getAuthor()) {
+                if (user.getId() == item.getAuthor()) {
                     author = user;
                     String path = Utils.imgDomain + user.getPicture().trim();
                     Picasso.get().load(path).into(holder.binding.imgPoster);
@@ -72,8 +73,10 @@ public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineComment
             }
             holder.binding.tvComment.setText(item.getDescription());
 
-            TimeAgoMessages messages = new TimeAgoMessages.Builder().withLocale(Locale.getDefault()).build();
-            long timeInMillis = Utils.getDateInMillisFromString(item.getCreatedAt(), Utils.SERVER_DATE_FORMAT);
+            TimeAgoMessages messages = new TimeAgoMessages.Builder().withLocale(Locale.getDefault())
+                    .build();
+            long timeInMillis = Utils
+                    .getDateInMillisFromString(item.getCreatedAt(), Utils.SERVER_DATE_FORMAT);
             String timeAgo = TimeAgo.using(timeInMillis, messages);
             holder.binding.tvTimeAgo.setText(timeAgo);
 
@@ -143,6 +146,7 @@ public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineComment
                         Utils.showLoading(context);
                         viewModel.postSubComment(finalInteractionId, finalAssociate,
                                 comment, finalAuthor.getUserId());
+                        hideSoftInputKeyboard(holder.binding.getRoot());
                     } else {
                         Toast.makeText(context, "error wth author", Toast.LENGTH_LONG).show();
                     }
@@ -182,5 +186,11 @@ public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineComment
 
     public List<Comment> getComments() {
         return comments;
+    }
+
+    private void hideSoftInputKeyboard(View root) {
+        InputMethodManager imm = (InputMethodManager) context.getSystemService(
+                Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(root.getWindowToken(), 0);
     }
 }

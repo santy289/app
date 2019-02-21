@@ -14,6 +14,7 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
 import com.rootnetapp.rootnetintranet.models.responses.comments.Comment;
+import com.rootnetapp.rootnetintranet.models.responses.comments.CommentDeleteResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentFileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
@@ -51,6 +52,7 @@ public class CommentsViewModel extends ViewModel {
     private MutableLiveData<CommentFile> mNewCommentFileLiveData;
     private MutableLiveData<Boolean> mClearAttachments;
     private MutableLiveData<AttachmentUiData> mOpenDownloadedAttachmentLiveData;
+    private MutableLiveData<Boolean> mExitEditModeUiLiveData;
 
     protected MutableLiveData<Boolean> showLoading;
 
@@ -64,6 +66,7 @@ public class CommentsViewModel extends ViewModel {
     private String mToken;
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the workflow.
     private List<CommentFile> mCommentFiles;
+    private Comment mActiveEditModeComment;
 
     protected CommentsViewModel(CommentsRepository commentsRepository) {
         this.mRepository = commentsRepository;
@@ -191,6 +194,7 @@ public class CommentsViewModel extends ViewModel {
         if (comments == null) {
             showLoading.setValue(false);
             mHideComments.setValue(true);
+            mCommentsLiveData.setValue(new ArrayList<>());
             return;
         }
         commentsCounter = comments.size();
@@ -298,6 +302,48 @@ public class CommentsViewModel extends ViewModel {
         }
     }
 
+    protected Comment getActiveEditModeComment() {
+        return mActiveEditModeComment;
+    }
+
+    protected void setActiveEditModeComment(Comment activeCommentEditMode) {
+        this.mActiveEditModeComment = activeCommentEditMode;
+    }
+
+    protected void editComment(Comment comment) {
+        showLoading.setValue(true);
+        Disposable disposable = mRepository
+                .editComment(
+                        mToken,
+                        comment.getId(),
+                        comment.getDescription())
+                .subscribe(this::onEditCommentSuccess, this::onFailure);
+        mDisposables.add(disposable);
+    }
+
+    private void onEditCommentSuccess(CommentResponse commentResponse) {
+        showLoading.setValue(false);
+        mExitEditModeUiLiveData.setValue(true);
+
+        getComments(mToken, mWorkflowListItem.getWorkflowId());
+    }
+
+    protected void deleteComment(Comment comment) {
+        showLoading.setValue(true);
+        Disposable disposable = mRepository
+                .deleteComment(
+                        mToken,
+                        comment.getId())
+                .subscribe(this::onDeleteCommentSuccess, this::onFailure);
+        mDisposables.add(disposable);
+    }
+
+    private void onDeleteCommentSuccess(CommentDeleteResponse commentDeleteResponse) {
+        showLoading.setValue(false);
+
+        getComments(mToken, mWorkflowListItem.getWorkflowId());
+    }
+
     private void onFailure(Throwable throwable) {
         showLoading.setValue(false);
         mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
@@ -364,5 +410,12 @@ public class CommentsViewModel extends ViewModel {
             mOpenDownloadedAttachmentLiveData = new MutableLiveData<>();
         }
         return mOpenDownloadedAttachmentLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableExitEditMode() {
+        if (mExitEditModeUiLiveData == null) {
+            mExitEditModeUiLiveData = new MutableLiveData<>();
+        }
+        return mExitEditModeUiLiveData;
     }
 }

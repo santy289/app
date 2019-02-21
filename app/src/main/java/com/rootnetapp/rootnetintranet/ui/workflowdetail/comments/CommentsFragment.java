@@ -12,6 +12,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -124,6 +125,7 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
         commentsViewModel.getObservableClearAttachments().observe(this, this::clearAttachmentsList);
         commentsViewModel.getObservableOpenDownloadedAttachment()
                 .observe(this, this::openDownloadedFile);
+        commentsViewModel.getObservableExitEditMode().observe(this, this::exitEditModeUi);
 
         commentsViewModel.showLoading.observe(this, this::showLoading);
     }
@@ -153,18 +155,29 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
     private void setOnClickListeners() {
         mBinding.btnComment.setOnClickListener(v -> sendComment());
         mBinding.btnAttach.setOnClickListener(v -> showFileChooser());
+        mBinding.btnCancelEdit.setOnClickListener(v -> exitEditModeUi(true));
     }
 
     private void sendComment() {
         mBinding.etComment.setError(null);
-        String comment = mBinding.etComment.getText().toString();
+        String commentText = mBinding.etComment.getText().toString();
 
-        if (TextUtils.isEmpty(comment)) {
+        if (TextUtils.isEmpty(commentText)) {
             mBinding.etComment.setError(getString(R.string.empty_comment));
             return;
         }
 
-        commentsViewModel.postComment(comment);
+        if (commentsViewModel.getActiveEditModeComment() == null) {
+            //post new comment
+            commentsViewModel.postComment(commentText);
+        } else {
+            //edit comment
+            Comment commentToEdit = commentsViewModel.getActiveEditModeComment();
+            commentToEdit.setDescription(commentText);
+            commentsViewModel.editComment(commentToEdit);
+        }
+
+        hideSoftInputKeyboard();
     }
 
     @UiThread
@@ -295,6 +308,8 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
         mBinding.rvAttachments.setAdapter(mAttachmentsAdapter);
     }
 
+    //region CommentsFragmentInterface
+
     /**
      * Removes the attachment from the UI list and the ViewModel list. This is called after user
      * interaction.
@@ -321,6 +336,17 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
             commentsViewModel.setQueuedFile(commentFileResponse);
         }
     }
+
+    @Override
+    public void editComment(Comment comment) {
+        enterEditModeUi(comment);
+    }
+
+    @Override
+    public void deleteComment(Comment comment) {
+        commentsViewModel.deleteComment(comment);
+    }
+    //endregion
 
     /**
      * Verify whether the user has granted permissions to read/write the external storage.
@@ -385,11 +411,51 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
     }
 
     @UiThread
+    private void enterEditModeUi(Comment comment) {
+        mBinding.lytCommentInput.setBackgroundResource(R.drawable.edit_text_bg_edit_mode);
+        mBinding.btnAttach.setBackgroundTintList(
+                ContextCompat.getColorStateList(getContext(), R.color.low_yellow));
+        mBinding.etComment.setText(comment.getDescription());
+        mBinding.etComment.setSelection(comment.getDescription().length());
+        mBinding.etComment.requestFocus();
+        mBinding.btnCancelEdit.setVisibility(View.VISIBLE);
+        mBinding.btnAttach.setVisibility(View.GONE);
+
+        commentsViewModel.setActiveEditModeComment(comment);
+    }
+
+    @UiThread
+    private void exitEditModeUi(boolean exit) {
+        if (!exit) return;
+
+        mBinding.lytCommentInput.setBackgroundResource(R.drawable.edit_text_bg);
+        mBinding.btnAttach.setBackgroundTintList(
+                ContextCompat.getColorStateList(getContext(), R.color.white));
+        mBinding.etComment.setText(null);
+        mBinding.etComment.setSelection(0);
+        mBinding.etComment.clearFocus();
+        mBinding.btnCancelEdit.setVisibility(View.GONE);
+        mBinding.btnAttach.setVisibility(View.VISIBLE);
+
+        commentsViewModel.setActiveEditModeComment(null);
+    }
+
+    @UiThread
     private void showToastMessage(@StringRes int messageRes) {
         Toast.makeText(
                 getContext(),
                 getString(messageRes),
                 Toast.LENGTH_SHORT)
                 .show();
+    }
+
+    private void hideSoftInputKeyboard() {
+        // Check if no view has focus:
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+                    Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 }

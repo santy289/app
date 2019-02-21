@@ -100,6 +100,7 @@
     <string name="add_workflow">+ Añadir Workflow</string>
     <string name="project_owner">Dueño del Proyecto</string>
     <string name="edit">Editar</string>
+    <string name="delete">Eliminar</string>
     <string name="department">Departmento</string>
     <string name="amount">Cantidad</string>
     <string name="workflow_owner">Dueño del Workflow</string>
@@ -133,9 +134,9 @@
     <string name="remove_file">REMOVER ARCHIVO</string>
     <string name="select_file">Seleccionar un archivo para subir</string>
     <string name="select_preset">Seleccionar el tipo de documento para subir</string>
-    <string name="month">mes</string>
-    <string name="week">semana</string>
-    <string name="day">día</string>
+    <string name="month">Mes</string>
+    <string name="week">Semana</string>
+    <string name="day">Día</string>
     <string name="filtered_by">Filtrado por:</string>
     <string name="comment_ammount">Comentarios</string>
     <string name="add_comment">Añadir comentario</string>
@@ -165,7 +166,7 @@
     <string name="days_open">Días abierto</string>
     <string name="pending_approval">Pendiente por Aprobación</string>
     <string name="pending">Pendiente</string>
-    <string name="updated">Actualizar</string>
+    <string name="updated">Actualizados</string>
     <string name="out_of_time">Fuera de Tiempo</string>
     <string name="open">Abierto</string>
     <string name="closed">Cerrado</string>
@@ -236,6 +237,7 @@
     <string name="global_approvers_form">Usuarios que pueden aprobar cualquier estatus</string>
     <string name="specific_approvers_form">Usuarios que pueden aprobar un estatus específico</string>
     <string name="people_involved_form_return_button">Regresar</string>
+    <string name="select_date_dialog_end_date_before_start_date_error">La fecha inicial no puede ser posterior a la fecha final.</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Detalles de Workflow</string>

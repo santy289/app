@@ -773,7 +773,8 @@ class CreateWorkflowViewModel extends ViewModel {
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
                     mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
-                    Log.d(TAG, "createServicesFormItem: can't get service: " + throwable.getMessage());
+                    Log.d(TAG,
+                            "createServicesFormItem: can't get service: " + throwable.getMessage());
                 });
         mDisposables.add(disposable);
     }
@@ -1242,6 +1243,7 @@ class CreateWorkflowViewModel extends ViewModel {
                         break;
 
                     case FormSettings.TYPE_LIST:
+                    case FormSettings.TYPE_SERVICE:
                         if (fieldConfig.getMultiple()) {
                             fillMultipleChoiceFormItem(meta);
                         } else {
@@ -1301,29 +1303,65 @@ class CreateWorkflowViewModel extends ViewModel {
 
     private void fillSingleChoiceFormItem(Meta meta) {
         List<String> values = (List<String>) meta.getDisplayValue();
-        if (values == null || values.isEmpty()) return;
+        Integer intValue = null;
+        String stringValue = null;
+        if (values == null || values.isEmpty()) {
+            //check if we have the ID value
+            if (meta.getValue() == null || meta.getValue().isEmpty()
+                    && !Utils.isInteger(meta.getValue())) {
+                return;
+            }
 
-        String stringValue = values.get(0);
+            intValue = Integer.valueOf(meta.getValue());
+        } else {
+            //use display value
+            stringValue = values.get(0);
+        }
+
+        if (intValue == null && stringValue == null) return;
 
         SingleChoiceFormItem singleChoiceFormItem = (SingleChoiceFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
 
-        Option value = formSettings.findOption(singleChoiceFormItem.getOptions(), stringValue);
-        if (value == null) return;
+        Option value;
+        if (intValue != null) {
+            //find by id
+            value = formSettings.findOption(singleChoiceFormItem.getOptions(), intValue);
+        } else {
+            //find by string
+            value = formSettings.findOption(singleChoiceFormItem.getOptions(), stringValue);
+        }
 
         singleChoiceFormItem.setValue(value);
     }
 
     private void fillMultipleChoiceFormItem(Meta meta) {
         List<String> values = (List<String>) meta.getDisplayValue();
-        if (values == null || values.isEmpty()) return;
+        boolean isIntValues = false;
+        if (values == null || values.isEmpty()) {
+            //check if we have the ID values
+            if (meta.getValue() == null || meta.getValue().isEmpty()
+                    && !Utils.isInteger(meta.getValue())) {
+                return;
+            }
+
+            values = formSettings.parseMultipleSelectionRawValue(meta.getValue());
+            isIntValues = true;
+        }
 
         MultipleChoiceFormItem multipleChoiceFormItem = (MultipleChoiceFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
 
         for (String stringValue : values) {
-            Option value = formSettings
-                    .findOption(multipleChoiceFormItem.getOptions(), stringValue);
+            Option value;
+            if (isIntValues) {
+                //find by id
+                value = formSettings.findOption(multipleChoiceFormItem.getOptions(),
+                        Integer.parseInt(stringValue));
+            } else {
+                //find by string
+                value = formSettings.findOption(multipleChoiceFormItem.getOptions(), stringValue);
+            }
             if (value == null) continue;
             multipleChoiceFormItem.addValue(value);
         }

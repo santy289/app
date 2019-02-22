@@ -507,4 +507,8 @@ public class Utils {
 
         return stringRes;
     }
+
+    public static boolean isInteger(String integerToTest){
+        return integerToTest.matches("-?\\d+");
+    }
 }

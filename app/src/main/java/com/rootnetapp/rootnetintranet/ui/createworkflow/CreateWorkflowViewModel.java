@@ -137,6 +137,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private List<FileFormItem> mFilesToUpload;
     private int mQueuedFile;
     private int mUserId;
+    private int mFieldCount, mFieldCompleted;
 
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.mRepository = createWorkflowRepository;
@@ -422,35 +423,34 @@ class CreateWorkflowViewModel extends ViewModel {
     private void showFields(FormSettings formSettings) {
         List<FormFieldsByWorkflowType> fields = formSettings.getFields();
 
+        //used to make sure all fields are created before proceeding
+        mFieldCount = fields.size();
+        mFieldCompleted = 0;
+
         for (int i = 0; i < fields.size(); i++) {
             FormFieldsByWorkflowType field = fields.get(i);
             if (!field.isShowForm()) {
+                mFieldCount--;
                 continue;
             }
 
             FieldConfig fieldConfig = field.getFieldConfigObject();
             if (fieldConfig.isPrecalculated()) {
+                mFieldCount--;
                 continue;
             }
 
             //does not show the Status field
             String machineName = fieldConfig.getMachineName();
             if (machineName != null && machineName.equals(MACHINE_NAME_STATUS)) {
+                mFieldCount--;
                 continue;
             }
 
             buildField(field);
         }
 
-        mSetFormItemListLiveData.setValue(formSettings.getFormItems());
-
-        if (mWorkflowListItem == null) {
-            showLoading.setValue(false);
-            return;
-        }
-
-        // edit mode
-        getWorkflow(mToken, mWorkflowListItem.getWorkflowId());
+        showLoading.setValue(false); //the fields will be created on the background
     }
 
     /**
@@ -495,9 +495,9 @@ class CreateWorkflowViewModel extends ViewModel {
                 createServicesFormItem(field);
                 break;
 
-            case FormSettings.TYPE_PROJECT:
+            /*case FormSettings.TYPE_PROJECT:
                 createProjectsFormItem(field);
-                break;
+                break;*/
 
             case FormSettings.TYPE_SYSTEM_USERS:
                 createSystemUsersFormItem(field);
@@ -522,7 +522,27 @@ class CreateWorkflowViewModel extends ViewModel {
             default:
                 Log.d(TAG, "buildField: Not a generic type: " + typeInfo
                         .getType() + " value: " + typeInfo.getValueType());
+
+                buildFieldCompleted();
                 break;
+        }
+    }
+
+    private void buildFieldCompleted(){
+        mFieldCompleted++;
+
+        if (mFieldCompleted >= mFieldCount) {
+            mFieldCount = mFieldCompleted = 0;
+
+            mSetFormItemListLiveData.setValue(formSettings.getFormItems());
+
+            //create mode
+            if (mWorkflowListItem == null) {
+                return;
+            }
+
+            // edit mode
+            getWorkflow(mToken, mWorkflowListItem.getWorkflowId());
         }
     }
 
@@ -618,6 +638,8 @@ class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .getProducts(mToken)
                 .subscribe(productsResponse -> {
+                    buildFieldCompleted();
+
                     if (productsResponse.getCode() != 200) {
                         return;
                     }
@@ -645,6 +667,7 @@ class CreateWorkflowViewModel extends ViewModel {
                                 .setMachineName(field.getFieldConfigObject().getMachineName())
                                 .build();
                         mAddFormItemLiveData.setValue(multipleChoiceFormItem);
+
                         return;
                     }
 
@@ -674,6 +697,8 @@ class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .getRoles(mToken)
                 .subscribe(roleResponse -> {
+                    buildFieldCompleted();
+
                     if (roleResponse.getCode() != 200) {
                         return;
                     }
@@ -731,6 +756,8 @@ class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .getServices(mToken)
                 .subscribe(servicesResponse -> {
+                    buildFieldCompleted();
+
                     if (servicesResponse.getCode() != 200) {
                         return;
                     }
@@ -746,6 +773,7 @@ class CreateWorkflowViewModel extends ViewModel {
                     }
 
                     if (options.isEmpty()) return;
+
 
                     //check if multiple selection
                     if (field.getFieldConfigObject().getMultiple()) {
@@ -827,7 +855,9 @@ class CreateWorkflowViewModel extends ViewModel {
      */
     private void createSystemUsersFormItem(FormFieldsByWorkflowType field) {
         Disposable disposable = Observable.fromCallable(() -> {
-            List<FormCreateProfile> list = formSettings.getProfiles();
+            List<FormCreateProfile> list = mRepository.getProfiles();
+
+            buildFieldCompleted();
 
             if (list == null || list.size() < 1) {
                 return false;
@@ -835,14 +865,19 @@ class CreateWorkflowViewModel extends ViewModel {
 
             List<Option> options = new ArrayList<>();
             for (int i = 0; i < list.size(); i++) {
-                String name = list.get(i).getFullName();
-                Integer id = list.get(i).getId();
+                FormCreateProfile profile = list.get(i);
+
+                formSettings.setProfile(profile);
+
+                String name = profile.getFullName();
+                Integer id = profile.getId();
 
                 Option option = new Option(id, name);
                 options.add(option);
             }
 
             if (options.isEmpty()) return false;
+
 
             if (field.getFieldConfigObject().getMultiple()) {
                 return new MultipleChoiceFormItem.Builder()
@@ -866,8 +901,7 @@ class CreateWorkflowViewModel extends ViewModel {
 
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(singleChoiceFormItem -> mAddFormItemLiveData
-                                .setValue((SingleChoiceFormItem) singleChoiceFormItem),
+                .subscribe(singleChoiceFormItem -> mAddFormItemLiveData.setValue((BaseFormItem) singleChoiceFormItem),
                         throwable -> Log.d(TAG,
                                 "createSystemUsersFormItem: can't get users: " + throwable
                                         .getMessage()));
@@ -885,6 +919,8 @@ class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .getList(mToken, listId)
                 .subscribe(listsResponse -> {
+                    buildFieldCompleted();
+
                     List<ListItem> list = listsResponse.getItems();
                     if (list == null || list.isEmpty()) return;
 
@@ -930,6 +966,8 @@ class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .getList(mToken, listId)
                 .subscribe(listsResponse -> {
+                    buildFieldCompleted();
+
                     List<ListItem> list = listsResponse.getItems();
                     if (list == null || list.isEmpty()) return;
 
@@ -994,6 +1032,8 @@ class CreateWorkflowViewModel extends ViewModel {
         }
 
         formSettings.getFormItems().add(item);
+
+        buildFieldCompleted();
     }
 
     /**
@@ -1004,6 +1044,8 @@ class CreateWorkflowViewModel extends ViewModel {
     private void createDateFormItem(FormFieldsByWorkflowType field) {
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
         String valueType = typeInfo.getValueType();
+
+        buildFieldCompleted();
 
         if (!valueType.equals(FormSettings.VALUE_DATE)) {
             Log.d(TAG, "createDateFormItem: Value not recognized " + valueType);
@@ -1032,6 +1074,8 @@ class CreateWorkflowViewModel extends ViewModel {
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
         String valueType = typeInfo.getValueType();
 
+        buildFieldCompleted();
+
         if (!valueType.equals(FormSettings.VALUE_BOOLEAN)) {
             Log.d(TAG, "createBooleanFormItem: Value not recognized: " + valueType);
             return;
@@ -1057,6 +1101,8 @@ class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .getCurrencyCodes()
                 .subscribe(currencyList -> {
+                    buildFieldCompleted();
+
                     if (currencyList == null || currencyList.size() < 1) {
                         return;
                     }
@@ -1082,6 +1128,7 @@ class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddFormItemLiveData.setValue(currencyFormItem);
+
                 }, throwable -> {
                     mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
 
@@ -1101,6 +1148,8 @@ class CreateWorkflowViewModel extends ViewModel {
         Disposable disposable = mRepository
                 .getCountryCodes()
                 .subscribe(phoneFieldDataList -> {
+                    buildFieldCompleted();
+
                     if (phoneFieldDataList == null || phoneFieldDataList.size() < 1) {
                         return;
                     }
@@ -1126,6 +1175,7 @@ class CreateWorkflowViewModel extends ViewModel {
                             .build();
 
                     mAddFormItemLiveData.setValue(phoneFormItem);
+
                 }, throwable -> {
                     mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
 
@@ -1156,6 +1206,8 @@ class CreateWorkflowViewModel extends ViewModel {
                 .build();
 
         formSettings.getFormItems().add(item);
+
+        buildFieldCompleted();
     }
     //endregion
 

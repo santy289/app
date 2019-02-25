@@ -3,10 +3,9 @@ package com.rootnetapp.rootnetintranet.services.websocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.util.Log;
-import android.widget.Toast;
 
+import androidx.core.content.ContextCompat;
 
 public class RestartWebsocketReceiver extends BroadcastReceiver {
 
@@ -46,8 +45,10 @@ public class RestartWebsocketReceiver extends BroadcastReceiver {
 //        } else {
 
 
-            context.startService(reloadedIntent);
+//            context.startService(reloadedIntent);
 //        }
+
+        ContextCompat.startForegroundService(context, reloadedIntent);
     }
 
     public static void resetReceiverRunningIndicator() {

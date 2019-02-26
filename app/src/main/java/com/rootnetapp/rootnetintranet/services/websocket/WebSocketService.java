@@ -19,6 +19,7 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 public class WebSocketService extends Service {
 
@@ -91,13 +92,14 @@ public class WebSocketService extends Service {
                     CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW);
             notificationManager.createNotificationChannel(notificationChannel);
 
-            Notification.Builder builder = new Notification.Builder(this, CHANNEL_ID)
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContentIntent(pendingIntent)
                     .setOngoing(true)
                     .setShowWhen(false)
                     .setSubText(getString(R.string.background_service_notification_text))
-                    .setAutoCancel(false);
+                    .setAutoCancel(false)
+                    .setPriority(NotificationCompat.PRIORITY_MIN);
             builder.setGroup("WebSocketService");
 
             Notification notification = builder.build();
@@ -135,12 +137,14 @@ public class WebSocketService extends Service {
     }
 
     private void sendBroadcastWebsocket() {
-        Intent broadcastIntent = createIntent(RestartWebsocketReceiver.class, token, port, protocol, domain);
+        Intent broadcastIntent = createIntent(RestartWebsocketReceiver.class, token, port, protocol,
+                domain);
         broadcastIntent.setAction("restartservice");
         sendBroadcast(broadcastIntent);
     }
 
-    private Intent createIntent(Class<?> className, String token, String port, String protocol, String domain) {
+    private Intent createIntent(Class<?> className, String token, String port, String protocol,
+                                String domain) {
         Intent intent = new Intent(getApplicationContext(), className);
         intent.putExtra(WebsocketSecureHandler.KEY_TOKEN, token);
         intent.putExtra(WebsocketSecureHandler.KEY_PORT, port);

@@ -80,32 +80,32 @@ public class WebSocketService extends Service {
             Log.d(TAG, error);
         }
 
-        //create a permanent notification for Android 8.0+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Intent notificationIntent = new Intent(this, MainActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        //create a permanent notification to keep this service alive
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager notificationManager = (NotificationManager) getSystemService(
                     Context.NOTIFICATION_SERVICE);
 
             NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID,
                     CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW);
             notificationManager.createNotificationChannel(notificationChannel);
-
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setContentIntent(pendingIntent)
-                    .setOngoing(true)
-                    .setShowWhen(false)
-                    .setSubText(getString(R.string.background_service_notification_text))
-                    .setAutoCancel(false)
-                    .setPriority(NotificationCompat.PRIORITY_MIN);
-            builder.setGroup("WebSocketService");
-
-            Notification notification = builder.build();
-
-            startForeground(NOTIFICATION_ID, notification);
         }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
+        builder.setSmallIcon(R.mipmap.ic_launcher)
+                .setContentIntent(pendingIntent)
+                .setOngoing(true)
+                .setShowWhen(false)
+                .setSubText(getString(R.string.background_service_notification_text))
+                .setAutoCancel(false)
+                .setPriority(NotificationCompat.PRIORITY_MIN);
+        builder.setGroup("WebSocketService");
+
+        Notification notification = builder.build();
+
+        startForeground(NOTIFICATION_ID, notification);
 
         return START_REDELIVER_INTENT;
     }

@@ -238,6 +238,7 @@
     <string name="specific_approvers_form">Usuarios que pueden aprobar un estatus específico</string>
     <string name="people_involved_form_return_button">Regresar</string>
     <string name="select_date_dialog_end_date_before_start_date_error">La fecha inicial no puede ser posterior a la fecha final.</string>
+    <string name="background_service_notification_text">Escuchando a notificaciones</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Detalles de Workflow</string>

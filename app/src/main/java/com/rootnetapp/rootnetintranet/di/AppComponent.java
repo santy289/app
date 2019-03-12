@@ -4,6 +4,8 @@ import com.rootnetapp.rootnetintranet.services.background.WorkflowManagerService
 import com.rootnetapp.rootnetintranet.services.background.WorkflowManagerServiceModule;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowModule;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.GeolocationActivity;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.GeolocationModule;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainModule;
 import com.rootnetapp.rootnetintranet.ui.editprofile.EditProfileActivity;
@@ -83,7 +85,8 @@ import dagger.Component;
                 QuickActionsModule.class,
                 WorkflowSearchModule.class,
                 PerformActionModule.class,
-                ChangeStatusModule.class
+                ChangeStatusModule.class,
+                GeolocationModule.class
         }
 )
 
@@ -138,4 +141,6 @@ public interface AppComponent {
     void inject(ChangeStatusActivity changeStatusActivity);
 
     void inject(PeopleInvolvedFragment peopleInvolvedFragment);
+
+    void inject(GeolocationActivity geolocationActivity);
 }

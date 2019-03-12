@@ -16,6 +16,7 @@ import com.rootnetapp.rootnetintranet.databinding.FormItemCurrencyBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemDateBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemDoubleMultipleChoiceBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemFileBinding;
+import com.rootnetapp.rootnetintranet.databinding.FormItemGeolocationBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemIntentBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemMultipleChoiceBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemPhoneBinding;
@@ -29,6 +30,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.DoubleMultipleC
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DoubleOption;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.GeolocationFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.IntentFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
@@ -131,6 +133,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 return new DoubleMultipleChoiceViewHolder(FormItemDoubleMultipleChoiceBinding
                         .inflate(layoutInflater, viewGroup, false));
 
+            case FormItemViewType.GEOLOCATION:
+                return new GeolocationViewHolder(FormItemGeolocationBinding
+                        .inflate(layoutInflater, viewGroup, false));
+
             default:
                 throw new IllegalStateException("Invalid ViewType");
         }
@@ -182,6 +188,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             case FormItemViewType.DOUBLE_MULTIPLE_CHOICE:
                 populateDoubleMultipleChoiceView((DoubleMultipleChoiceViewHolder) holder, position);
+                break;
+
+            case FormItemViewType.GEOLOCATION:
+                populateGeolocationView((GeolocationViewHolder) holder, position);
                 break;
 
             default:
@@ -488,7 +498,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                     }
             );
 
-            //region Data
+            //Data
             dpd.setTitle(finalTitle);
 
             Calendar calendar = Calendar.getInstance();
@@ -500,12 +510,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 calendar.setTime(item.getMaxDate());
                 dpd.setMinDate(calendar);
             }
-            //endregion
 
-            //region UI
+            //ui
             dpd.setOkText(R.string.accept);
             dpd.setCancelText(R.string.cancel);
-            //endregion
 
             dpd.show(mFragmentManager, String.valueOf(item.getTag()));
         });
@@ -1141,6 +1149,78 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                     .setBackgroundResource(R.drawable.spinner_bg);
         }
     }
+
+    /**
+     * Handles the view for the {@link FileFormItem}. Displays the UI according to the visibility
+     * params.
+     *
+     * @param holder   view holder
+     * @param position item position in adapter.
+     */
+    private void populateGeolocationView(GeolocationViewHolder holder, int position) {
+        GeolocationFormItem item = (GeolocationFormItem) getItem(position);
+
+        //set title
+        String title = item.getTitle();
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
+        holder.getBinding().tvTitle.setText(title);
+
+        //set button click listener
+        holder.getBinding().btnSelectLocation.setOnClickListener(
+                v -> item.getOnButtonClickedListener().onButtonClicked());
+
+        //set value
+        if (item.getStringValue() != null) {
+            holder.getBinding().chipLocation.setText(item.getStringValue());
+            holder.getBinding().chipLocation.setVisibility(View.VISIBLE);
+            holder.getBinding().btnSelectLocation.setVisibility(View.GONE);
+        } else {
+            holder.getBinding().chipLocation.setVisibility(View.GONE);
+            holder.getBinding().btnSelectLocation.setVisibility(View.VISIBLE);
+        }
+
+        //handle chip close icon
+        holder.getBinding().chipLocation.setOnCloseIconClickListener(v -> {
+            item.clearLocationValues();
+            notifyItemChanged(getItemPosition(item));
+        });
+
+        //handle chip on click
+        holder.getBinding().chipLocation.setOnClickListener(v -> {
+            //todo verify click
+            /*int fileId = item.getFileId();
+            if (fileId == 0) return; //file was not uploaded yet.
+            mFragmentInterface.downloadFile(fileId);*/
+        });
+
+        //make sure this view has the focus
+        holder.getBinding().btnSelectLocation
+                .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
+
+        // verify required indicator
+        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+
+        //verify visibility
+        if (!item.isVisible()) {
+            holder.hide();
+            return;
+        } else {
+            holder.show();
+        }
+
+        //verify validation
+        if (hasToEvaluateValid && !item.isValid()) {
+            holder.getBinding().tvRequiredMsg.setVisibility(View.VISIBLE);
+        } else {
+            holder.getBinding().tvRequiredMsg.setVisibility(View.GONE);
+        }
+
+        //verify enabled param
+        holder.getBinding().btnSelectLocation.setEnabled(item.isEnabled());
+        holder.getBinding().chipLocation.setEnabled(item.isEnabled());
+    }
     //endregion
 
     //region Retrieve Values
@@ -1198,6 +1278,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
                 case FormItemViewType.INTENT:
                     //the value should be saved manually by the developer when the user completes the action
+                    continue;
+
+                case FormItemViewType.GEOLOCATION:
+                    //the value is saved when the user confirms the location selection on the map
                     continue;
 
                 default:

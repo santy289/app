@@ -11,8 +11,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -21,12 +21,14 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.databinding.FragmentCreateWorkflowBinding;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.GeolocationFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.IntentFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.adapters.FormItemsAdapter;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.ValidateFormDialog;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.GeolocationActivity;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
 
 import java.io.File;
@@ -137,7 +139,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         viewModel.getObservableShowLoading().observe(this, this::showLoading);
         viewModel.getObservableShowDialogMessage().observe(this, this::showDialog);
         viewModel.getObservableGoBack().observe(this, back -> goBack());
-        viewModel.getObservableFileFormItem().observe(this, this::updateFormItemUi);
+        viewModel.getObservableUpdateFormItem().observe(this, this::updateFormItemUi);
         viewModel.getObservableDownloadedFileUiData().observe(this, this::openDownloadedFile);
         viewModel.getObservableEnableSubmitButton().observe(this, this::enableSubmitButton);
     }
@@ -288,10 +290,8 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
      */
     @UiThread
     private void addItemToForm(BaseFormItem item) {
-        //check for any FileFormItem
-        if (item instanceof FileFormItem) {
-            createFileFormItemListener((FileFormItem) item);
-        }
+        //for FileFormItem and GeolocationFormItem
+        createFormItemListenerIfNeeded(item);
 
         mAdapter.addItem(item);
     }
@@ -304,18 +304,35 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
      */
     @UiThread
     private void setItemListToForm(List<BaseFormItem> list) {
-        //check for any FileFormItem
+        //for FileFormItem and GeolocationFormItem
         for (BaseFormItem item : list) {
-            if (item instanceof FileFormItem) {
-                createFileFormItemListener((FileFormItem) item);
-            }
+            createFormItemListenerIfNeeded(item);
         }
 
         mAdapter.setData(list);
     }
 
+    private void createFormItemListenerIfNeeded(BaseFormItem item){
+        //check for any FileFormItem
+        if (item instanceof FileFormItem) {
+            createFileFormItemListener((FileFormItem) item);
+        }
+        //check for any GeolocationFormItem
+        else if (item instanceof GeolocationFormItem){
+            createGeolocationFormItemListener((GeolocationFormItem) item);
+        }
+    }
+
     private void createFileFormItemListener(FileFormItem fileFormItem) {
         fileFormItem.setOnButtonClickedListener(() -> showFileChooser(fileFormItem));
+    }
+
+    private void createGeolocationFormItemListener(GeolocationFormItem geolocationFormItem) {
+        geolocationFormItem.setOnButtonClickedListener(() -> {
+            startActivityForResult(new Intent(getActivity(),
+                    GeolocationActivity.class), CreateWorkflowViewModel.REQUEST_GEOLOCATION);
+            viewModel.setCurrentRequestingGeolocationFormItem(geolocationFormItem);
+        });
     }
 
     /**
@@ -368,13 +385,13 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        viewModel.handleFileSelectedResult(getContext(), requestCode, resultCode, data);
+        viewModel.handleActivityResult(getContext(), requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
     }
 
     @UiThread
-    private void updateFormItemUi(FileFormItem fileFormItem) {
-        mAdapter.notifyItemChanged(mAdapter.getItemPosition(fileFormItem));
+    private void updateFormItemUi(BaseFormItem formItem) {
+        mAdapter.notifyItemChanged(mAdapter.getItemPosition(formItem));
     }
 
     /**

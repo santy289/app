@@ -3,19 +3,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.rootnetapp.rootnetintranet">
 
+    <!--
+         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
+         Google Maps Android API v2, but you must specify either coarse or fine
+         location permissions for the 'MyLocation' functionality.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <!-- Network related permissions -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <!-- Storage related permissions -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- Storage related permissions -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <!-- Notification heads up permission -->
-    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
-    <!-- Doze mode whitelist -->
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <!-- Notifications Service-->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- Notification heads up permission -->
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" /> <!-- Doze mode whitelist -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" /> <!-- Notifications Service -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/> <!--Geolocation-->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/> <!--Geolocation-->
 
     <application
         android:name=".ui.RootnetApp"
@@ -27,35 +31,50 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:allowBackup">
+
+        <!--
+             The API key for Google Maps-based APIs is defined as a string resource.
+             (See the file "res/values/google_maps_api.xml").
+             Note that the API key is linked to the encryption key used to sign the APK.
+             You need a different API key for each encryption key, including the release key that is used to
+             sign the APK for publishing.
+             You can define the keys for the debug and release targets in src/debug/ and src/release/.
+        -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
+        <activity
+            android:name=".ui.createworkflow.geolocation.GeolocationActivity"
+            android:label="@string/title_activity_geolocation" />
         <activity
             android:name=".ui.main.MainActivity"
             android:label="@string/title_activity_main"
-            android:windowSoftInputMode="adjustResize|stateHidden"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
             android:name=".ui.domain.DomainActivity"
-            android:theme="@style/LoginStyle"
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait"
+            android:theme="@style/LoginStyle" />
         <activity
             android:name=".ui.login.LoginActivity"
-            android:theme="@style/LoginStyle"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:theme="@style/LoginStyle" />
         <activity
             android:name=".ui.sync.SyncActivity"
             android:label="@string/title_activity_sync"
-            android:theme="@style/AppTheme"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.editprofile.EditProfileActivity"
             android:label="@string/title_activity_edit_profile"
-            android:theme="@style/AppTheme"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.splash.SplashActivity"
-            android:theme="@style/SplashTheme"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -65,26 +84,26 @@
         <activity
             android:name=".ui.quickactions.QuickActionsActivity"
             android:label="@string/quick_actions_activity_title"
-            android:windowSoftInputMode="adjustResize|stateHidden"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
-            android:screenOrientation="portrait"/>
+            android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
             android:name=".ui.quickactions.changestatus.ChangeStatusActivity"
             android:label="@string/change_status_activity_title"
-            android:theme="@style/AppTheme"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.workflowdetail.WorkflowDetailActivity"
-            android:parentActivityName=".ui.main.MainActivity"
-            android:windowSoftInputMode="adjustResize|stateHidden"
             android:label="@string/title_activity_edit_profile"
+            android:parentActivityName=".ui.main.MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
-            android:screenOrientation="portrait"/>
+            android:windowSoftInputMode="adjustResize|stateHidden" />
+
         <service
             android:name=".services.background.WorkflowManagerService"
             android:enabled="true"
-            android:exported="false">
-        </service>
+            android:exported="false"></service>
         <service android:name=".notifications.MessageReceiver">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -95,9 +114,7 @@
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
-
         <service android:name=".services.websocket.WebSocketService" />
-
         <service
             android:name=".services.websocket.WebSocketIntentService"
             android:stopWithTask="false" />
@@ -118,7 +135,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                android:resource="@xml/provider_paths" />
         </provider>
     </application>
 

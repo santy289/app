@@ -73,6 +73,7 @@ public class FormSettings {
     public static final String TYPE_PRODUCT = "product";
     public static final String TYPE_LIST = "list";
     public static final String TYPE_FILE = "file";
+    public static final String TYPE_GEOLOCATION = "geolocation";
     public static final String VALUE_EMAIL = "email";
     public static final String VALUE_INTEGER = "integer";
     public static final String VALUE_BOOLEAN = "boolean";

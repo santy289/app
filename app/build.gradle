@@ -64,6 +64,7 @@ dependencies {
     //google
     annotationProcessor "com.google.dagger:dagger-compiler:$rootProject.daggerLibraryVersion"
     implementation "com.google.dagger:dagger:$rootProject.daggerLibraryVersion"
+    implementation "com.google.android.gms:play-services-maps:$rootProject.googleMapsVersion"
 
     //3rd party
     implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofit"

@@ -8,7 +8,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,7 +42,7 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
 
     @Inject
     GeolocationViewModelFactory geolocationViewModelFactory;
-    private GeolocationViewModel geolocationViewModel;
+    private GeolocationViewModel viewModel;
     private ActivityGeolocationBinding mBinding;
 
     private GoogleMap mMap;
@@ -54,12 +53,13 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_geolocation);
         ((RootnetApp) getApplication()).getAppComponent().inject(this);
-        geolocationViewModel = ViewModelProviders
+        viewModel = ViewModelProviders
                 .of(this, geolocationViewModelFactory)
                 .get(GeolocationViewModel.class);
 
+        viewModel.init(getString(R.string.google_maps_key));
+
         subscribe();
-        setActionBar();
         setOnClickListeners();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -69,23 +69,13 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
     }
 
     private void subscribe() {
-        geolocationViewModel.getObservableToastMessage().observe(this, this::showToastMessage);
-        geolocationViewModel.getObservableLocationPermissionsGranted()
+        viewModel.getObservableToastMessage().observe(this, this::showToastMessage);
+        viewModel.getObservableShowLoading().observe(this, this::showLoading);
+        viewModel.getObservableLocationPermissionsGranted()
                 .observe(this, this::handleLocationPermissionsGranted);
-        geolocationViewModel.getObservableEnableConfirmButton()
-                .observe(this, this::enableConfirmButton);
-    }
-
-    /**
-     * Setup the Activity's action bar.
-     */
-    private void setActionBar() {
-        setSupportActionBar(mBinding.toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        String title = getIntent().getStringExtra(GeolocationViewModel.EXTRA_ACTIVITY_TITLE);
-        if (TextUtils.isEmpty(title)) title = (String) getTitle();
-        getSupportActionBar().setTitle(title);
+        viewModel.getObservableEnableConfirmButton().observe(this, this::enableConfirmButton);
+        viewModel.getObservableSelectedAddress().observe(this, this::updateSelectedAddressUi);
+        viewModel.getObservableConfirmLocation().observe(this, this::returnLocation);
     }
 
     private void setOnClickListeners() {
@@ -107,6 +97,16 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
         mBinding.ivCenterMarker.setVisibility(hide ? View.GONE : View.VISIBLE);
     }
 
+    @UiThread
+    private void hideSearchInput(boolean hide) {
+        mBinding.etSearch.setVisibility(hide ? View.GONE : View.VISIBLE);
+    }
+
+    @UiThread
+    private void updateSelectedAddressUi(String name) {
+        mBinding.etSearch.setText(name);
+    }
+
     //region Map
 
     /**
@@ -121,33 +121,34 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        LatLng showLocation = getIntent()
-                .getParcelableExtra(GeolocationViewModel.EXTRA_SHOW_LOCATION);
+        SelectedLocation showLocation = getIntent().getParcelableExtra(GeolocationViewModel.EXTRA_SHOW_LOCATION);
         if (showLocation != null) {
             //view only, location already selected
-            moveMap(showLocation);
+            moveMap(showLocation.getLatLng());
 
             //show a real marker and hide the centered marker image
             MarkerOptions markerOptions = new MarkerOptions()
-                    .position(showLocation)
-                    .icon(Utils.bitmapDescriptorFromVector(this, R.drawable.ic_location_pin_black_36dp,
-                            R.color.colorPrimary))
-                    .title(getString(R.string.geolocation_your_selection));
+                    .position(showLocation.getLatLng())
+                    .icon(Utils
+                            .bitmapDescriptorFromVector(this, R.drawable.ic_location_pin_black_36dp,
+                                    R.color.colorPrimary))
+                    .title(showLocation.getName());
             mMap.addMarker(markerOptions);
 
             hideConfirmButton(true);
             hideCenterMarker(true);
+            hideSearchInput(true);
             return;
         }
 
         // Move the camera to Panama as a default location
         moveMap(new LatLng(GeolocationViewModel.PANAMA_DEFAULT_LAT,
-                GeolocationViewModel.PANAMA_DEFAULT_LNG));
+                GeolocationViewModel.PANAMA_DEFAULT_LNG), GeolocationViewModel.PANAMA_ZOOM_OUT);
 
         mMap.setOnCameraIdleListener(() -> {
             //get location at the center by calling
             LatLng centerLatLng = mMap.getCameraPosition().target;
-            geolocationViewModel.setSelectedLocation(centerLatLng);
+            viewModel.setSelectedLocation(centerLatLng);
         });
 
         checkLocationPermissions();
@@ -189,7 +190,7 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
         }
 
         mMap.setMyLocationEnabled(true);
-        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        mMap.getUiSettings().setMyLocationButtonEnabled(false);
 
         //get the current location
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -269,7 +270,7 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
                                            @NonNull int[] grantResults) {
-        geolocationViewModel.handleRequestPermissionsResult(requestCode, grantResults);
+        viewModel.handleRequestPermissionsResult(requestCode, grantResults);
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
@@ -306,13 +307,27 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
     public void onProviderDisabled(String provider) {}
     //endregion
 
+    //region Confirm Location
+
+    /**
+     * Called when the user taps the submit button.
+     */
     private void confirmLocation() {
-        LatLng latLng = geolocationViewModel.getSelectedLocation();
+        viewModel.confirmLocation();
+    }
+
+    /**
+     * Invoked by the view model's live data, making sure that the last nearby search is completed.
+     *
+     * @param selectedLocation user's selected location coordinates and place name.
+     */
+    private void returnLocation(SelectedLocation selectedLocation) {
         Intent returnIntent = new Intent();
-        returnIntent.putExtra(GeolocationViewModel.EXTRA_REQUESTED_LOCATION, latLng);
+        returnIntent.putExtra(GeolocationViewModel.EXTRA_REQUESTED_LOCATION, selectedLocation);
         setResult(RESULT_OK, returnIntent);
         finish();
     }
+    //endregion
 
     /**
      * Defines the behavior for the "homeAsUp" back arrow.
@@ -337,5 +352,14 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
                 getString(messageRes),
                 Toast.LENGTH_SHORT)
                 .show();
+    }
+
+    @UiThread
+    private void showLoading(Boolean show) {
+        if (show) {
+            Utils.showLoading(this);
+        } else {
+            Utils.hideLoading();
+        }
     }
 }

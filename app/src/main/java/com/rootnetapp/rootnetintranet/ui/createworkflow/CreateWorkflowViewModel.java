@@ -65,6 +65,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.GeolocationViewModel;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.SelectedLocation;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
@@ -1615,11 +1616,11 @@ class CreateWorkflowViewModel extends ViewModel {
                 break;
             case REQUEST_GEOLOCATION:
                 if (resultCode == RESULT_OK) {
-                    LatLng latLng = data
+                    SelectedLocation selectedLocation = data
                             .getParcelableExtra(GeolocationViewModel.EXTRA_REQUESTED_LOCATION);
                     GeolocationFormItem formItem = getCurrentRequestingGeolocationFormItem();
-                    formItem.setValue(latLng);
-                    formItem.setName("Unnamed"); //todo real name
+                    formItem.setValue(selectedLocation.getLatLng());
+                    formItem.setName(selectedLocation.getName());
                     mUpdateFormItemLiveData.setValue(formItem);
                 }
                 break;

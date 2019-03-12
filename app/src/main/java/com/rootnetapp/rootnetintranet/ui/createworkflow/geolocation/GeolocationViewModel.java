@@ -1,22 +1,26 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation;
 
 import android.content.pm.PackageManager;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.models.responses.googlemaps.NearbySearchResponse;
+import com.rootnetapp.rootnetintranet.models.responses.googlemaps.Result;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 
 public class GeolocationViewModel extends ViewModel {
 
     protected static final int REQUEST_LOCATION_PERMISSIONS = 41;
     protected static final long MIN_TIME = 0;
     protected static final float MIN_DISTANCE = 1000;
-    protected static final float DEFAULT_ZOOM = 15;
+    protected static final float DEFAULT_ZOOM = 17;
 
     protected static final double PANAMA_DEFAULT_LAT = 9.180245;
     protected static final double PANAMA_DEFAULT_LNG = -79.3721478;
@@ -24,24 +28,38 @@ public class GeolocationViewModel extends ViewModel {
 
     public static final String EXTRA_REQUESTED_LOCATION = "ExtraRequestedLocation";
     public static final String EXTRA_SHOW_LOCATION = "ExtraShowLocation";
-    public static final String EXTRA_ACTIVITY_TITLE = "ExtraActivityTitle";
+
+    private static final String TAG = "GeolocationViewModel";
 
     private MutableLiveData<Integer> mToastMessageLiveData;
+    private MutableLiveData<Boolean> mShowLoadingLiveData;
     private MutableLiveData<Boolean> mLocationPermissionsGrantedLiveData;
     private MutableLiveData<Boolean> mEnableConfirmButtonLiveData;
+    private MutableLiveData<String> mSelectedAddressLiveData;
+    private MutableLiveData<SelectedLocation> mConfirmLocationLiveData;
 
-    private GeolocationRepository repository;
+    private final CompositeDisposable mDisposables;
+
+    private GeolocationRepository mRepository;
     private LatLng mSelectedLocation;
-
-    private final CompositeDisposable disposables = new CompositeDisposable();
+    private String mSelectedAddress;
+    private String mApiKey;
+    private boolean isSearchingForPlace;
+    private boolean isConfirmQueued;
 
     protected GeolocationViewModel(GeolocationRepository repository) {
-        this.repository = repository;
+        this.mRepository = repository;
+
+        mDisposables = new CompositeDisposable();
+    }
+
+    protected void init(String apiKey) {
+        mApiKey = apiKey;
     }
 
     @Override
     protected void onCleared() {
-        disposables.clear();
+        mDisposables.clear();
     }
 
     protected LatLng getSelectedLocation() {
@@ -49,9 +67,22 @@ public class GeolocationViewModel extends ViewModel {
     }
 
     protected void setSelectedLocation(LatLng selectedLocation) {
-        if (selectedLocation != null) mEnableConfirmButtonLiveData.setValue(true);
+        if (selectedLocation != null) {
+            searchNearbyPlaces(selectedLocation);
+            mEnableConfirmButtonLiveData.setValue(true);
+        }
 
         this.mSelectedLocation = selectedLocation;
+    }
+
+    protected String getSelectedAddress() {
+        return mSelectedAddress;
+    }
+
+    protected void setSelectedAddress(String selectedAddress) {
+        mSelectedAddressLiveData.setValue(selectedAddress);
+
+        this.mSelectedAddress = selectedAddress;
     }
 
     /**
@@ -81,11 +112,67 @@ public class GeolocationViewModel extends ViewModel {
         }
     }
 
+    protected void confirmLocation() {
+        if (isSearchingForPlace) {
+            //wait until the nearby search is completed
+            mShowLoadingLiveData.setValue(true);
+            enqueueConfirmLocation();
+            return;
+        }
+
+        isConfirmQueued = false;
+
+        SelectedLocation selectedLocation = new SelectedLocation(getSelectedLocation(),
+                getSelectedAddress());
+        mConfirmLocationLiveData.setValue(selectedLocation);
+    }
+
+    private void enqueueConfirmLocation() {
+        isConfirmQueued = true;
+    }
+
+    //region Nearby Search
+    private void searchNearbyPlaces(LatLng latLng) {
+        isSearchingForPlace = true;
+        Disposable disposable = mRepository.getNearbyPlaces(mApiKey, latLng)
+                .subscribe(this::onSuccessNearbyPlaces, this::onFailureNearbyPlaces);
+
+        mDisposables.add(disposable);
+    }
+
+    private void onSuccessNearbyPlaces(NearbySearchResponse nearbySearchResponse) {
+        isSearchingForPlace = false;
+
+        if (nearbySearchResponse.getResults().isEmpty()) return;
+
+        Result first = nearbySearchResponse.getResults().get(0);
+        setSelectedAddress(first.getName());
+
+        if (isConfirmQueued) {
+            confirmLocation();
+        }
+    }
+
+    private void onFailureNearbyPlaces(Throwable throwable) {
+        //todo better error handling
+        isSearchingForPlace = false;
+
+        Log.d(TAG, "searchNearbyPlaces: failed: " + throwable.getMessage());
+    }
+    //endregion
+
     protected LiveData<Integer> getObservableToastMessage() {
         if (mToastMessageLiveData == null) {
             mToastMessageLiveData = new MutableLiveData<>();
         }
         return mToastMessageLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowLoading() {
+        if (mShowLoadingLiveData == null) {
+            mShowLoadingLiveData = new MutableLiveData<>();
+        }
+        return mShowLoadingLiveData;
     }
 
     protected LiveData<Boolean> getObservableLocationPermissionsGranted() {
@@ -100,5 +187,19 @@ public class GeolocationViewModel extends ViewModel {
             mEnableConfirmButtonLiveData = new MutableLiveData<>();
         }
         return mEnableConfirmButtonLiveData;
+    }
+
+    protected LiveData<String> getObservableSelectedAddress() {
+        if (mSelectedAddressLiveData == null) {
+            mSelectedAddressLiveData = new MutableLiveData<>();
+        }
+        return mSelectedAddressLiveData;
+    }
+
+    protected LiveData<SelectedLocation> getObservableConfirmLocation() {
+        if (mConfirmLocationLiveData == null) {
+            mConfirmLocationLiveData = new MutableLiveData<>();
+        }
+        return mConfirmLocationLiveData;
     }
 }

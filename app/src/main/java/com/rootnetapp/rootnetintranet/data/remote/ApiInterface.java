@@ -21,6 +21,7 @@ import com.rootnetapp.rootnetintranet.models.responses.downloadfile.DownloadFile
 import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.exportpdf.ExportPdfResponse;
 import com.rootnetapp.rootnetintranet.models.responses.file.FilesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.googlemaps.NearbySearchResponse;
 import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.project.ProjectResponse;
@@ -451,4 +452,10 @@ public interface ApiInterface {
     @Streaming
     @GET("options?key=socket_protocol")
     Observable<WebSocketSettingResponse> getWsProtocol(@Header("Authorization") String authorization);
+
+    //region Google Maps API
+    @GET("https://maps.googleapis.com/maps/api/place/nearbysearch/json?rankby=distance")
+    Observable<NearbySearchResponse> getNearbyPlaces(@Query("location") String locationString,
+                                                     @Query("key") String apiKey);
+    //endregion
 }

@@ -739,6 +739,23 @@ public class FormSettings {
 
                 information.setDisplayValue((String) meta.getDisplayValue());
                 return information;
+
+            case FormSettings.VALUE_COORDS:
+                JsonAdapter<GeolocationMetaData> jsonAdapter = moshi
+                        .adapter(GeolocationMetaData.class);
+                try {
+                    GeolocationMetaData geolocationMetaData = jsonAdapter.fromJson(meta.getValue());
+                    if (geolocationMetaData.getValue() == null) {
+                        information.setDisplayValue("");
+                    } else {
+                        information.setDisplayValue(geolocationMetaData.getValue().getAddress());
+                    }
+                    return information;
+                } catch (IOException | JsonDataException e) {
+                    e.printStackTrace();
+                    information.setDisplayValue("");
+                    return information;
+                }
             default:
                 Log.d(TAG, "format: invalid type. Not Known.");
                 information.setDisplayValue("");

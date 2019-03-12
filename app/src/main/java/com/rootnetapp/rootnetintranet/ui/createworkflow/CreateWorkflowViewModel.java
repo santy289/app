@@ -48,6 +48,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem.InputType;
+import com.rootnetapp.rootnetintranet.models.createworkflow.geolocation.GeolocationMetaData;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
@@ -536,7 +537,7 @@ class CreateWorkflowViewModel extends ViewModel {
         }
     }
 
-    private void buildFieldCompleted(){
+    private void buildFieldCompleted() {
         mFieldCompleted++;
 
         if (mFieldCompleted >= mFieldCount) {
@@ -782,7 +783,6 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     if (options.isEmpty()) return;
 
-
                     //check if multiple selection
                     if (field.getFieldConfigObject().getMultiple()) {
                         MultipleChoiceFormItem multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
@@ -886,7 +886,6 @@ class CreateWorkflowViewModel extends ViewModel {
 
             if (options.isEmpty()) return false;
 
-
             if (field.getFieldConfigObject().getMultiple()) {
                 return new MultipleChoiceFormItem.Builder()
                         .setTitle(field.getFieldName())
@@ -909,7 +908,8 @@ class CreateWorkflowViewModel extends ViewModel {
 
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(singleChoiceFormItem -> mAddFormItemLiveData.setValue((BaseFormItem) singleChoiceFormItem),
+                .subscribe(singleChoiceFormItem -> mAddFormItemLiveData
+                                .setValue((BaseFormItem) singleChoiceFormItem),
                         throwable -> Log.d(TAG,
                                 "createSystemUsersFormItem: can't get users: " + throwable
                                         .getMessage()));
@@ -1196,8 +1196,7 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     /**
-     * Creates a file form item with the specified params and sends the item to the
-     * UI.
+     * Creates a file form item with the specified params and sends the item to the UI.
      *
      * @param field item params.
      */
@@ -1219,13 +1218,11 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     /**
-     * Creates a geolocation form item with the specified params and sends the item to the
-     * UI.
+     * Creates a geolocation form item with the specified params and sends the item to the UI.
      *
      * @param field item params.
      */
     private void createGeolocationFormItem(FormFieldsByWorkflowType field) {
-        //todo fillGeolocationFormItem()
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
 
         GeolocationFormItem item = new GeolocationFormItem.Builder()
@@ -1345,6 +1342,10 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     case FormSettings.TYPE_FILE:
                         fillFileFormItem(meta);
+                        break;
+
+                    case FormSettings.TYPE_GEOLOCATION:
+                        fillGeolocationFormItem(meta);
                         break;
                     default:
                         Log.d(TAG, "format: invalid type. Not Known.");
@@ -1506,13 +1507,34 @@ class CreateWorkflowViewModel extends ViewModel {
         fileFormItem.setFileName(fileMetaData.name);
         fileFormItem.setFileId(fileMetaData.value);
     }
+
+    private void fillGeolocationFormItem(Meta meta) throws IOException {
+        if (meta.getValue() == null || meta.getValue().isEmpty()
+                || meta.getValue().equals("\"\"")) {
+            return;
+        }
+
+        JsonAdapter<GeolocationMetaData> jsonAdapter = moshi.adapter(GeolocationMetaData.class);
+        GeolocationMetaData geolocationMetaData = jsonAdapter.fromJson(meta.getValue());
+
+        if (geolocationMetaData == null || geolocationMetaData.getValue() == null) return;
+
+        GeolocationFormItem geolocationFormItem = (GeolocationFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        LatLng latLng = new LatLng(geolocationMetaData.getValue().getLatLng().get(0),
+                geolocationMetaData.getValue().getLatLng().get(1));
+        geolocationFormItem.setValue(latLng);
+        geolocationFormItem.setName(geolocationMetaData.getValue().getAddress());
+    }
     //endregion
 
     protected GeolocationFormItem getCurrentRequestingGeolocationFormItem() {
         return mCurrentRequestingGeolocationFormItem;
     }
 
-    protected void setCurrentRequestingGeolocationFormItem(GeolocationFormItem currentRequestingGeolocationFormItem) {
+    protected void setCurrentRequestingGeolocationFormItem(
+            GeolocationFormItem currentRequestingGeolocationFormItem) {
         this.mCurrentRequestingGeolocationFormItem = currentRequestingGeolocationFormItem;
     }
 
@@ -1592,7 +1614,8 @@ class CreateWorkflowViewModel extends ViewModel {
                 }
                 break;
             case REQUEST_GEOLOCATION:
-                LatLng latLng = data.getParcelableExtra(GeolocationViewModel.EXTRA_REQUESTED_LOCATION);
+                LatLng latLng = data
+                        .getParcelableExtra(GeolocationViewModel.EXTRA_REQUESTED_LOCATION);
                 GeolocationFormItem formItem = getCurrentRequestingGeolocationFormItem();
                 formItem.setValue(latLng);
                 formItem.setName("Unnamed"); //todo real name

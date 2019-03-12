@@ -6,6 +6,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 public class GeolocationFormItem extends BaseFormItem {
 
     private LatLng value;
+    private String name;
     private OnButtonClickedListener onButtonClickedListener;
 
     private GeolocationFormItem() {
@@ -21,7 +22,7 @@ public class GeolocationFormItem extends BaseFormItem {
 
     @Override
     public String getStringValue() {
-        return getValue() != null ? getValue().toString() : null;
+        return getName();
     }
 
     public LatLng getValue() {
@@ -30,6 +31,14 @@ public class GeolocationFormItem extends BaseFormItem {
 
     public void setValue(LatLng value) {
         this.value = value;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public OnButtonClickedListener getOnButtonClickedListener() {

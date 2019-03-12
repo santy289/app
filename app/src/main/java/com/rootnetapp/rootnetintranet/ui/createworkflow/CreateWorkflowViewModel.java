@@ -1225,7 +1225,7 @@ class CreateWorkflowViewModel extends ViewModel {
      * @param field item params.
      */
     private void createGeolocationFormItem(FormFieldsByWorkflowType field) {
-        //todo fillGeolocationFormItem() and formatMetaData()
+        //todo fillGeolocationFormItem()
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
 
         GeolocationFormItem item = new GeolocationFormItem.Builder()
@@ -1595,6 +1595,7 @@ class CreateWorkflowViewModel extends ViewModel {
                 LatLng latLng = data.getParcelableExtra(GeolocationViewModel.EXTRA_REQUESTED_LOCATION);
                 GeolocationFormItem formItem = getCurrentRequestingGeolocationFormItem();
                 formItem.setValue(latLng);
+                formItem.setName("Unnamed"); //todo real name
                 mUpdateFormItemLiveData.setValue(formItem);
                 break;
         }
@@ -2085,7 +2086,7 @@ class CreateWorkflowViewModel extends ViewModel {
                 || value.equals(FormSettings.VALUE_EMAIL)
                 || value.equals(FormSettings.VALUE_INTEGER)
                 || value.equals(FormSettings.VALUE_DATE)
-                || value.equals(FormSettings.VALUE_COORD)) {
+                || value.equals(FormSettings.VALUE_COORDS)) {
             return true;
         }
         return value.equals(FormSettings.VALUE_LIST) && type.equals(FormSettings.TYPE_SYSTEM_USERS);

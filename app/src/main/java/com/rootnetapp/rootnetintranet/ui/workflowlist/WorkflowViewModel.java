@@ -963,7 +963,7 @@ public class WorkflowViewModel extends ViewModel {
                 || value.equals(FormSettings.VALUE_EMAIL)
                 || value.equals(FormSettings.VALUE_INTEGER)
                 || value.equals(FormSettings.VALUE_DATE)
-                || value.equals(FormSettings.VALUE_COORD)) {
+                || value.equals(FormSettings.VALUE_COORDS)) {
             return true;
         }
         if (value.equals(FormSettings.VALUE_LIST) && type.equals(FormSettings.TYPE_SYSTEM_USERS)) {

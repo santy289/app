@@ -8,8 +8,10 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -18,7 +20,9 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ActivityGeolocationBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 
@@ -78,7 +82,10 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
     private void setActionBar() {
         setSupportActionBar(mBinding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(getTitle());
+
+        String title = getIntent().getStringExtra(GeolocationViewModel.EXTRA_ACTIVITY_TITLE);
+        if (TextUtils.isEmpty(title)) title = (String) getTitle();
+        getSupportActionBar().setTitle(title);
     }
 
     private void setOnClickListeners() {
@@ -90,19 +97,48 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
         mBinding.btnConfirm.setEnabled(enable);
     }
 
+    @UiThread
+    private void hideConfirmButton(boolean hide) {
+        mBinding.btnConfirm.setVisibility(hide ? View.GONE : View.VISIBLE);
+    }
+
+    @UiThread
+    private void hideCenterMarker(boolean hide) {
+        mBinding.ivCenterMarker.setVisibility(hide ? View.GONE : View.VISIBLE);
+    }
+
     //region Map
 
     /**
      * Manipulates the map once available. This callback is triggered when the map is ready to be
      * used. This is where we can add markers or lines, add listeners or move the camera. In this
-     * case, we just add a marker near Sydney, Australia. If Google Play services is not installed
-     * on the device, the user will be prompted to install it inside the SupportMapFragment. This
-     * method will only be triggered once the user has installed Google Play services and returned
-     * to the app.
+     * case, we just add a marker near Panama. If Google Play services is not installed on the
+     * device, the user will be prompted to install it inside the SupportMapFragment. This method
+     * will only be triggered once the user has installed Google Play services and returned to the
+     * app.
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
+        LatLng showLocation = getIntent()
+                .getParcelableExtra(GeolocationViewModel.EXTRA_SHOW_LOCATION);
+        if (showLocation != null) {
+            //view only, location already selected
+            moveMap(showLocation);
+
+            //show a real marker and hide the centered marker image
+            MarkerOptions markerOptions = new MarkerOptions()
+                    .position(showLocation)
+                    .icon(Utils.bitmapDescriptorFromVector(this, R.drawable.ic_location_pin_black_36dp,
+                            R.color.colorPrimary))
+                    .title(getString(R.string.geolocation_your_selection));
+            mMap.addMarker(markerOptions);
+
+            hideConfirmButton(true);
+            hideCenterMarker(true);
+            return;
+        }
 
         // Move the camera to Panama as a default location
         moveMap(new LatLng(GeolocationViewModel.PANAMA_DEFAULT_LAT,

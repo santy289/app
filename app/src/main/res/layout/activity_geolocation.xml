@@ -24,10 +24,11 @@
                 tools:context=".ui.createworkflow.geolocation.GeolocationActivity" />
 
             <ImageView
+                android:id="@+id/iv_center_marker"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:layout_marginBottom="36dp"
-                android:src="@drawable/ic_location_pin_black"
+                android:src="@drawable/ic_location_pin_black_36dp"
                 android:tint="@color/colorPrimary"
                 app:layout_constraintBottom_toBottomOf="@id/map"
                 app:layout_constraintEnd_toEndOf="@id/map"

@@ -29,6 +29,7 @@ import com.rootnetapp.rootnetintranet.ui.createworkflow.adapters.FormItemsAdapte
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.ValidateFormDialog;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.GeolocationActivity;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.GeolocationViewModel;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
 
 import java.io.File;
@@ -407,6 +408,18 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         } else {
             viewModel.setQueuedFile(fileId);
         }
+    }
+
+    /**
+     * Opens the MapsActivity to display the selected location.
+     * @param geolocationFormItem form item containing the location to pinpoint.
+     */
+    @Override
+    public void showLocation(GeolocationFormItem geolocationFormItem) {
+        Intent intent = new Intent(getActivity(), GeolocationActivity.class);
+        intent.putExtra(GeolocationViewModel.EXTRA_SHOW_LOCATION, geolocationFormItem.getValue());
+        intent.putExtra(GeolocationViewModel.EXTRA_ACTIVITY_TITLE, geolocationFormItem.getTitle());
+        startActivity(intent);
     }
 
     /**

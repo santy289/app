@@ -1614,12 +1614,14 @@ class CreateWorkflowViewModel extends ViewModel {
                 }
                 break;
             case REQUEST_GEOLOCATION:
-                LatLng latLng = data
-                        .getParcelableExtra(GeolocationViewModel.EXTRA_REQUESTED_LOCATION);
-                GeolocationFormItem formItem = getCurrentRequestingGeolocationFormItem();
-                formItem.setValue(latLng);
-                formItem.setName("Unnamed"); //todo real name
-                mUpdateFormItemLiveData.setValue(formItem);
+                if (resultCode == RESULT_OK) {
+                    LatLng latLng = data
+                            .getParcelableExtra(GeolocationViewModel.EXTRA_REQUESTED_LOCATION);
+                    GeolocationFormItem formItem = getCurrentRequestingGeolocationFormItem();
+                    formItem.setValue(latLng);
+                    formItem.setName("Unnamed"); //todo real name
+                    mUpdateFormItemLiveData.setValue(formItem);
+                }
                 break;
         }
     }

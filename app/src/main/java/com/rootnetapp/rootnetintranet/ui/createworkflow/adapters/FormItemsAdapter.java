@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.FormItemBooleanBinding;
@@ -1166,6 +1167,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             title = mContext.getString(item.getTitleRes());
         }
         holder.getBinding().tvTitle.setText(title);
+        item.setTitle(title);
 
         //set button click listener
         holder.getBinding().btnSelectLocation.setOnClickListener(
@@ -1189,10 +1191,9 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         //handle chip on click
         holder.getBinding().chipLocation.setOnClickListener(v -> {
-            //todo verify click
-            /*int fileId = item.getFileId();
-            if (fileId == 0) return; //file was not uploaded yet.
-            mFragmentInterface.downloadFile(fileId);*/
+            LatLng latLng = item.getValue();
+            if (latLng == null) return; //location not selected
+            mFragmentInterface.showLocation(item);
         });
 
         //make sure this view has the focus

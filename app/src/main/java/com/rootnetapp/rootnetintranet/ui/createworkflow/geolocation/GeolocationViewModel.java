@@ -23,6 +23,8 @@ public class GeolocationViewModel extends ViewModel {
     protected static final float PANAMA_ZOOM_OUT = 10;
 
     public static final String EXTRA_REQUESTED_LOCATION = "ExtraRequestedLocation";
+    public static final String EXTRA_SHOW_LOCATION = "ExtraShowLocation";
+    public static final String EXTRA_ACTIVITY_TITLE = "ExtraActivityTitle";
 
     private MutableLiveData<Integer> mToastMessageLiveData;
     private MutableLiveData<Boolean> mLocationPermissionsGrantedLiveData;

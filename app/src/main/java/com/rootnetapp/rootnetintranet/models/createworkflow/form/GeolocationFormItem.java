@@ -51,6 +51,7 @@ public class GeolocationFormItem extends BaseFormItem {
 
     public void clearLocationValues() {
         setValue(null);
+        setName(null);
     }
 
     public static class Builder {

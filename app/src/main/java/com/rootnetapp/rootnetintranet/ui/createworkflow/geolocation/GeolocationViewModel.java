@@ -121,6 +121,10 @@ public class GeolocationViewModel extends ViewModel {
         }
     }
 
+    /**
+     * Sends the location information back to the Activity. If there is a nearby place search in
+     * progress, enqueue the confirmation action until the search is completed.
+     */
     protected void confirmLocation() {
         if (isSearchingForPlace) {
             //wait until the nearby search is completed
@@ -136,11 +140,23 @@ public class GeolocationViewModel extends ViewModel {
         mConfirmLocationLiveData.setValue(selectedLocation);
     }
 
+    /**
+     * Sets whether there is a queued confirmation action.
+     */
     private void enqueueConfirmLocation() {
         isConfirmQueued = true;
     }
 
     //region Nearby Search
+
+    /**
+     * Fetches the repository for the nearby places to the specified coordinates. This is used when
+     * the user moves the map with gestures to select a new location based on the coordinates alone.
+     * This fetches the closest places to those coordinates, defining the name of the selected
+     * location.
+     *
+     * @param latLng coordinates to search places nearby.
+     */
     private void searchNearbyPlaces(LatLng latLng) {
         isSearchingForPlace = true;
         Disposable disposable = mRepository.getNearbyPlaces(mApiKey, latLng)
@@ -180,6 +196,12 @@ public class GeolocationViewModel extends ViewModel {
         this.mSearchQuery = searchQuery;
     }
 
+    /**
+     * Performs a search of places based on a query. Used with the autocomplete feature to display
+     * suggestions as the user types.
+     *
+     * @param input search query.
+     */
     private void searchAutocomplete(String input) {
         Disposable disposable = mRepository.getAutocompletePlaces(mApiKey, input)
                 .subscribe(this::onSuccessAutocomplete, this::onFailureAutocomplete);
@@ -197,7 +219,14 @@ public class GeolocationViewModel extends ViewModel {
     }
     //endregion
 
-    //region Autocomplete Search
+    //region Place Details Search
+
+    /**
+     * Performs a search to fetch the details of a specific place. Used after the user selects an
+     * autocomplete suggestion in order to retrieve the coordinates of the selected place.
+     *
+     * @param placeId {@link Place#id}.
+     */
     protected void getPlaceDetails(String placeId) {
         mShowLoadingLiveData.setValue(true);
 

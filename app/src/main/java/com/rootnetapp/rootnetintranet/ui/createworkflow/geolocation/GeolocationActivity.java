@@ -416,6 +416,11 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
     }
     //endregion
 
+    /**
+     * Called by the {@link SuggestionsAdapter} item click when the user selects a prediction.
+     *
+     * @param prediction selected prediction by the user.
+     */
     @Override
     public void selectSuggestion(Prediction prediction) {
         hideSoftInputKeyboard();
@@ -424,6 +429,11 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
         viewModel.getPlaceDetails(prediction.getPlaceId());
     }
 
+    /**
+     * Moves the camera to the selected location and save the data into the ViewModel
+     *
+     * @param place selected location from autocomplete.
+     */
     @UiThread
     private void handlePlaceDetails(Place place) {
         LatLng latLng = new LatLng(
@@ -436,6 +446,10 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
         viewModel.setSelectedAddress(place.getName());
     }
 
+    /**
+     * Creates an IntentChooser to navigate to the specified location.
+     * @param latLng location to navigate to.
+     */
     private void navigateToLocation(LatLng latLng) {
         if (latLng == null) {
             showToastMessage(R.string.geolocation_activity_could_not_retrieve_location);

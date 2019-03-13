@@ -181,7 +181,8 @@ public class FormSettings {
     private void format(WorkflowMetas metaData, TypeInfo typeInfo, BaseFormItem formItem) {
         String value = metaData.getUnformattedValue();
         //we allow the FileFormItem even though the value is null because of the editing mode, when the user tries to delete a file.
-        if (TextUtils.isEmpty(value) && !(formItem instanceof FileFormItem)) {
+        //same applies for GeolocationFormItem
+        if (TextUtils.isEmpty(value) && !(formItem instanceof FileFormItem) && !(formItem instanceof GeolocationFormItem)) {
             return;
         }
 

@@ -5,8 +5,13 @@ import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.models.responses.googlemaps.NearbySearchResponse;
-import com.rootnetapp.rootnetintranet.models.responses.googlemaps.Result;
+import com.rootnetapp.rootnetintranet.models.responses.googlemaps.PlaceDetailsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.googlemaps.autocomplete.AutocompleteResponse;
+import com.rootnetapp.rootnetintranet.models.responses.googlemaps.autocomplete.Prediction;
+import com.rootnetapp.rootnetintranet.models.responses.googlemaps.nearbysearch.NearbySearchResponse;
+import com.rootnetapp.rootnetintranet.models.responses.googlemaps.nearbysearch.Place;
+
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
@@ -37,6 +42,9 @@ public class GeolocationViewModel extends ViewModel {
     private MutableLiveData<Boolean> mEnableConfirmButtonLiveData;
     private MutableLiveData<String> mSelectedAddressLiveData;
     private MutableLiveData<SelectedLocation> mConfirmLocationLiveData;
+    private MutableLiveData<List<Prediction>> mPredictionsLiveData;
+    private MutableLiveData<Place> mPlaceDetailsLiveData;
+    private MutableLiveData<Boolean> mHideSuggestionsLiveData;
 
     private final CompositeDisposable mDisposables;
 
@@ -46,6 +54,7 @@ public class GeolocationViewModel extends ViewModel {
     private String mApiKey;
     private boolean isSearchingForPlace;
     private boolean isConfirmQueued;
+    private String mSearchQuery;
 
     protected GeolocationViewModel(GeolocationRepository repository) {
         this.mRepository = repository;
@@ -66,9 +75,9 @@ public class GeolocationViewModel extends ViewModel {
         return mSelectedLocation;
     }
 
-    protected void setSelectedLocation(LatLng selectedLocation) {
+    protected void setSelectedLocation(LatLng selectedLocation, boolean hasSelectedFromMap) {
         if (selectedLocation != null) {
-            searchNearbyPlaces(selectedLocation);
+            if (hasSelectedFromMap) searchNearbyPlaces(selectedLocation);
             mEnableConfirmButtonLiveData.setValue(true);
         }
 
@@ -143,9 +152,9 @@ public class GeolocationViewModel extends ViewModel {
     private void onSuccessNearbyPlaces(NearbySearchResponse nearbySearchResponse) {
         isSearchingForPlace = false;
 
-        if (nearbySearchResponse.getResults().isEmpty()) return;
+        if (nearbySearchResponse.getPlaces().isEmpty()) return;
 
-        Result first = nearbySearchResponse.getResults().get(0);
+        Place first = nearbySearchResponse.getPlaces().get(0);
         setSelectedAddress(first.getName());
 
         if (isConfirmQueued) {
@@ -158,6 +167,61 @@ public class GeolocationViewModel extends ViewModel {
         isSearchingForPlace = false;
 
         Log.d(TAG, "searchNearbyPlaces: failed: " + throwable.getMessage());
+    }
+    //endregion
+
+    //region Autocomplete Search
+    protected String getSearchQuery() {
+        return mSearchQuery;
+    }
+
+    protected void setSearchQuery(String searchQuery) {
+        searchAutocomplete(searchQuery);
+
+        this.mSearchQuery = searchQuery;
+    }
+
+    private void searchAutocomplete(String input) {
+        Disposable disposable = mRepository.getAutocompletePlaces(mApiKey, input)
+                .subscribe(this::onSuccessAutocomplete, this::onFailureAutocomplete);
+
+        mDisposables.add(disposable);
+    }
+
+    private void onSuccessAutocomplete(AutocompleteResponse autocompleteResponse) {
+        mPredictionsLiveData.setValue(autocompleteResponse.getPredictions());
+    }
+
+    private void onFailureAutocomplete(Throwable throwable) {
+
+        Log.d(TAG, "searchAutocomplete: failed: " + throwable.getMessage());
+    }
+    //endregion
+
+    //region Autocomplete Search
+    protected void getPlaceDetails(String placeId) {
+        mShowLoadingLiveData.setValue(true);
+
+        Disposable disposable = mRepository.getPlaceDetails(mApiKey, placeId)
+                .subscribe(this::onSuccessPlaceDetails, this::onFailurePlaceDetails);
+
+        mDisposables.add(disposable);
+    }
+
+    private void onSuccessPlaceDetails(PlaceDetailsResponse placeDetailsResponse) {
+        mShowLoadingLiveData.setValue(false);
+        mHideSuggestionsLiveData.setValue(true);
+
+        mPlaceDetailsLiveData.setValue(placeDetailsResponse.getPlace());
+    }
+
+    private void onFailurePlaceDetails(Throwable throwable) {
+        //todo better error handling
+        mShowLoadingLiveData.setValue(false);
+
+        mToastMessageLiveData.setValue(R.string.failure_connect);
+
+        Log.d(TAG, "getPlaceDetails: failed: " + throwable.getMessage());
     }
     //endregion
 
@@ -201,5 +265,26 @@ public class GeolocationViewModel extends ViewModel {
             mConfirmLocationLiveData = new MutableLiveData<>();
         }
         return mConfirmLocationLiveData;
+    }
+
+    protected LiveData<List<Prediction>> getObservablePredictions() {
+        if (mPredictionsLiveData == null) {
+            mPredictionsLiveData = new MutableLiveData<>();
+        }
+        return mPredictionsLiveData;
+    }
+
+    protected LiveData<Place> getObservablePlaceDetails() {
+        if (mPlaceDetailsLiveData == null) {
+            mPlaceDetailsLiveData = new MutableLiveData<>();
+        }
+        return mPlaceDetailsLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableHideSuggestions() {
+        if (mHideSuggestionsLiveData == null) {
+            mHideSuggestionsLiveData = new MutableLiveData<>();
+        }
+        return mHideSuggestionsLiveData;
     }
 }

@@ -8,9 +8,12 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -23,7 +26,13 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ActivityGeolocationBinding;
+import com.rootnetapp.rootnetintranet.models.responses.googlemaps.autocomplete.Prediction;
+import com.rootnetapp.rootnetintranet.models.responses.googlemaps.nearbysearch.Place;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.adapter.SuggestionsAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -34,8 +43,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
-public class GeolocationActivity extends AppCompatActivity implements OnMapReadyCallback,
+public class GeolocationActivity extends AppCompatActivity implements GeolocationActivityInterface,
+        OnMapReadyCallback,
         LocationListener {
 
     private static final String TAG = "GeolocationActivity";
@@ -47,6 +58,8 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
 
     private GoogleMap mMap;
     private LocationManager locationManager;
+    private SuggestionsAdapter mSuggestionsAdapter;
+    private TextWatcher mTextWatcher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +74,8 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
 
         subscribe();
         setOnClickListeners();
+        setupInputSearch();
+        setupSuggestionsRecycler();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -76,10 +91,44 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
         viewModel.getObservableEnableConfirmButton().observe(this, this::enableConfirmButton);
         viewModel.getObservableSelectedAddress().observe(this, this::updateSelectedAddressUi);
         viewModel.getObservableConfirmLocation().observe(this, this::returnLocation);
+        viewModel.getObservablePredictions().observe(this, this::updateSuggestionsData);
+        viewModel.getObservablePlaceDetails().observe(this, this::handlePlaceDetails);
+        viewModel.getObservableHideSuggestions().observe(this, this::hideSuggestions);
     }
 
     private void setOnClickListeners() {
         mBinding.btnConfirm.setOnClickListener(v -> confirmLocation());
+    }
+
+    private void setupInputSearch() {
+        mTextWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                //only perform the search if on user input
+                if (mBinding.etSearch.hasFocus()) {
+                    String input = String.valueOf(s);
+                    viewModel.setSearchQuery(input);
+                }
+            }
+        };
+
+        mBinding.etSearch.addTextChangedListener(mTextWatcher);
+    }
+
+    private void setupSuggestionsRecycler() {
+        mSuggestionsAdapter = new SuggestionsAdapter(this, new ArrayList<>());
+        mBinding.rvSuggestions.setLayoutManager(new LinearLayoutManager(this));
+        mBinding.rvSuggestions.setAdapter(mSuggestionsAdapter);
     }
 
     @UiThread
@@ -107,6 +156,18 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
         mBinding.etSearch.setText(name);
     }
 
+    @UiThread
+    private void updateSuggestionsData(List<Prediction> predictionList) {
+        hideSuggestions(predictionList.isEmpty());
+
+        mSuggestionsAdapter.setData(predictionList);
+    }
+
+    @UiThread
+    private void hideSuggestions(boolean hide) {
+        mBinding.rvSuggestions.setVisibility(hide ? View.GONE : View.VISIBLE);
+    }
+
     //region Map
 
     /**
@@ -121,7 +182,8 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        SelectedLocation showLocation = getIntent().getParcelableExtra(GeolocationViewModel.EXTRA_SHOW_LOCATION);
+        SelectedLocation showLocation = getIntent()
+                .getParcelableExtra(GeolocationViewModel.EXTRA_SHOW_LOCATION);
         if (showLocation != null) {
             //view only, location already selected
             moveMap(showLocation.getLatLng());
@@ -138,6 +200,7 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
             hideConfirmButton(true);
             hideCenterMarker(true);
             hideSearchInput(true);
+            hideSuggestions(true);
             return;
         }
 
@@ -145,13 +208,13 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
         moveMap(new LatLng(GeolocationViewModel.PANAMA_DEFAULT_LAT,
                 GeolocationViewModel.PANAMA_DEFAULT_LNG), GeolocationViewModel.PANAMA_ZOOM_OUT);
 
+        checkLocationPermissions();
+
         mMap.setOnCameraIdleListener(() -> {
             //get location at the center by calling
             LatLng centerLatLng = mMap.getCameraPosition().target;
-            viewModel.setSelectedLocation(centerLatLng);
+            viewModel.setSelectedLocation(centerLatLng, true);
         });
-
-        checkLocationPermissions();
     }
 
     /**
@@ -329,6 +392,26 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
     }
     //endregion
 
+    @Override
+    public void selectSuggestion(Prediction prediction) {
+        hideSoftInputKeyboard();
+        mBinding.etSearch.clearFocus();
+
+        viewModel.getPlaceDetails(prediction.getPlaceId());
+    }
+
+    @UiThread
+    private void handlePlaceDetails(Place place) {
+        LatLng latLng = new LatLng(
+                place.getGeometry().getLocation().getLat(),
+                place.getGeometry().getLocation().getLng()
+        );
+        moveMap(latLng);
+
+        viewModel.setSelectedLocation(latLng, false);
+        viewModel.setSelectedAddress(place.getName());
+    }
+
     /**
      * Defines the behavior for the "homeAsUp" back arrow.
      *
@@ -360,6 +443,16 @@ public class GeolocationActivity extends AppCompatActivity implements OnMapReady
             Utils.showLoading(this);
         } else {
             Utils.hideLoading();
+        }
+    }
+
+    private void hideSoftInputKeyboard() {
+        // Check if no view has focus:
+        View view = getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(
+                    Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
 }

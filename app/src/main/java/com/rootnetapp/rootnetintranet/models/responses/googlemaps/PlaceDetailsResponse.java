@@ -1,16 +1,17 @@
 
 package com.rootnetapp.rootnetintranet.models.responses.googlemaps;
 
+import com.rootnetapp.rootnetintranet.models.responses.googlemaps.nearbysearch.Place;
 import com.squareup.moshi.Json;
 
 import java.util.List;
 
-public class NearbySearchResponse {
+public class PlaceDetailsResponse {
 
     @Json(name = "html_attributions")
     private List<Object> htmlAttributions = null;
-    @Json(name = "results")
-    private List<Result> results = null;
+    @Json(name = "result")
+    private Place place;
     @Json(name = "status")
     private String status;
 
@@ -22,12 +23,12 @@ public class NearbySearchResponse {
         this.htmlAttributions = htmlAttributions;
     }
 
-    public List<Result> getResults() {
-        return results;
+    public Place getPlace() {
+        return place;
     }
 
-    public void setResults(List<Result> results) {
-        this.results = results;
+    public void setPlace(Place place) {
+        this.place = place;
     }
 
     public String getStatus() {
@@ -37,5 +38,4 @@ public class NearbySearchResponse {
     public void setStatus(String status) {
         this.status = status;
     }
-
 }

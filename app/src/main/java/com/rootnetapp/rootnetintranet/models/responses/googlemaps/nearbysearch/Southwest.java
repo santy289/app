@@ -1,9 +1,9 @@
 
-package com.rootnetapp.rootnetintranet.models.responses.googlemaps;
+package com.rootnetapp.rootnetintranet.models.responses.googlemaps.nearbysearch;
 
 import com.squareup.moshi.Json;
 
-public class Location {
+public class Southwest {
 
     @Json(name = "lat")
     private Double lat;

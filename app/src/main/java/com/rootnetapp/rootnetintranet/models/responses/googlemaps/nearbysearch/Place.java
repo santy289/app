@@ -1,11 +1,11 @@
 
-package com.rootnetapp.rootnetintranet.models.responses.googlemaps;
+package com.rootnetapp.rootnetintranet.models.responses.googlemaps.nearbysearch;
 
 import com.squareup.moshi.Json;
 
 import java.util.List;
 
-public class Result {
+public class Place {
 
     @Json(name = "geometry")
     private Geometry geometry;

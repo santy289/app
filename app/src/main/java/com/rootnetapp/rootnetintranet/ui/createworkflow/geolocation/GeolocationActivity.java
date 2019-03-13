@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -98,6 +99,8 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
 
     private void setOnClickListeners() {
         mBinding.btnConfirm.setOnClickListener(v -> confirmLocation());
+        mBinding.btnNavigate
+                .setOnClickListener(v -> navigateToLocation(viewModel.getSelectedLocation()));
     }
 
     private void setupInputSearch() {
@@ -139,6 +142,11 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
     @UiThread
     private void hideConfirmButton(boolean hide) {
         mBinding.btnConfirm.setVisibility(hide ? View.GONE : View.VISIBLE);
+    }
+
+    @UiThread
+    private void hideNavigateButton(boolean hide) {
+        mBinding.btnNavigate.setVisibility(hide ? View.GONE : View.VISIBLE);
     }
 
     @UiThread
@@ -186,21 +194,19 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
                 .getParcelableExtra(GeolocationViewModel.EXTRA_SHOW_LOCATION);
         if (showLocation != null) {
             //view only, location already selected
+            viewModel.setSelectedLocation(showLocation.getLatLng(), false);
+
             moveMap(showLocation.getLatLng());
 
             //show a real marker and hide the centered marker image
-            MarkerOptions markerOptions = new MarkerOptions()
-                    .position(showLocation.getLatLng())
-                    .icon(Utils
-                            .bitmapDescriptorFromVector(this, R.drawable.ic_location_pin_black_36dp,
-                                    R.color.colorPrimary))
-                    .title(showLocation.getName());
-            mMap.addMarker(markerOptions);
+            addMarker(showLocation.getLatLng(), showLocation.getName());
 
             hideConfirmButton(true);
             hideCenterMarker(true);
             hideSearchInput(true);
             hideSuggestions(true);
+
+            hideNavigateButton(false);
             return;
         }
 
@@ -215,6 +221,21 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
             LatLng centerLatLng = mMap.getCameraPosition().target;
             viewModel.setSelectedLocation(centerLatLng, true);
         });
+    }
+
+    /**
+     * Adds a custom marker to the map at the specified location.
+     *
+     * @param latLng marker location.
+     * @param title  marker title.
+     */
+    private void addMarker(LatLng latLng, String title) {
+        MarkerOptions markerOptions = new MarkerOptions()
+                .position(latLng)
+                .icon(Utils.bitmapDescriptorFromVector(this, R.drawable.ic_location_pin_black_36dp,
+                        R.color.colorPrimary))
+                .title(title);
+        mMap.addMarker(markerOptions);
     }
 
     /**
@@ -385,6 +406,9 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
      * @param selectedLocation user's selected location coordinates and place name.
      */
     private void returnLocation(SelectedLocation selectedLocation) {
+        if (selectedLocation.getName() == null) {
+            selectedLocation.setName(getString(R.string.geolocation_activity_unnamed));
+        }
         Intent returnIntent = new Intent();
         returnIntent.putExtra(GeolocationViewModel.EXTRA_REQUESTED_LOCATION, selectedLocation);
         setResult(RESULT_OK, returnIntent);
@@ -410,6 +434,28 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
 
         viewModel.setSelectedLocation(latLng, false);
         viewModel.setSelectedAddress(place.getName());
+    }
+
+    private void navigateToLocation(LatLng latLng) {
+        if (latLng == null) {
+            showToastMessage(R.string.geolocation_activity_could_not_retrieve_location);
+            return;
+        }
+
+        String url = "waze://?ll=" + latLng.latitude + ", " + latLng.longitude + "&navigate=yes";
+        Intent intentWaze = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        intentWaze.setPackage("com.waze");
+
+        String uriGoogle = "google.navigation:q=" + latLng.latitude + "," + latLng.longitude;
+        Intent intentGoogleNav = new Intent(Intent.ACTION_VIEW, Uri.parse(uriGoogle));
+        intentGoogleNav.setPackage("com.google.android.apps.maps");
+
+        String title = getString(R.string.geolocation_activity_navigate);
+        Intent chooserIntent = Intent.createChooser(intentGoogleNav, title);
+        Intent[] arr = new Intent[1];
+        arr[0] = intentWaze;
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arr);
+        startActivity(chooserIntent);
     }
 
     /**

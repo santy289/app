@@ -362,4 +362,7 @@
     <string name="geolocation_activity_permissions_not_granted">Cannot retrieve your current location because the permissions were not granted.</string>
     <string name="geolocation_activity_cannot_retrieve_location">Cannot retrieve your current location. Check your connection and GPS status.</string>
     <string name="geolocation_activity_confirm_location">Confirm Location</string>
+    <string name="geolocation_activity_navigate">Navigate</string>
+    <string name="geolocation_activity_could_not_retrieve_location">Location not found</string>
+    <string name="geolocation_activity_unnamed">Unnamed</string>
 </resources>

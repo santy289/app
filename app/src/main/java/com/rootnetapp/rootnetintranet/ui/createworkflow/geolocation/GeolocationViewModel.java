@@ -163,7 +163,6 @@ public class GeolocationViewModel extends ViewModel {
     }
 
     private void onFailureNearbyPlaces(Throwable throwable) {
-        //todo better error handling
         isSearchingForPlace = false;
 
         Log.d(TAG, "searchNearbyPlaces: failed: " + throwable.getMessage());
@@ -216,7 +215,6 @@ public class GeolocationViewModel extends ViewModel {
     }
 
     private void onFailurePlaceDetails(Throwable throwable) {
-        //todo better error handling
         mShowLoadingLiveData.setValue(false);
 
         mToastMessageLiveData.setValue(R.string.failure_connect);

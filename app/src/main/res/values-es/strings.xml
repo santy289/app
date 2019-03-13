@@ -358,4 +358,7 @@
     <string name="geolocation_activity_permissions_not_granted">No es posible obtener su ubicación actual debido a que los permisos no fueron otorgados.</string>
     <string name="geolocation_activity_cannot_retrieve_location">No es posible obtener su ubicación actual. Verifique su conexión y el estado del GPS.</string>
     <string name="geolocation_activity_confirm_location">Confirmar Ubicación</string>
+    <string name="geolocation_activity_navigate">Navegar</string>
+    <string name="geolocation_activity_could_not_retrieve_location">Ubicación no encontrada</string>
+    <string name="geolocation_activity_unnamed">Sin nombre</string>
 </resources>

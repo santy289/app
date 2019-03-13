@@ -51,7 +51,7 @@
     <string name="password_changed">Your password was succesfully changed, please log in</string>
     <string name="title_activity_sync">SyncActivity</string>
     <string name="action_edit_profile">Edit Profile</string>
-    <string name="title_activity_edit_profile">EditProfileActivity</string>
+    <string name="title_activity_edit_profile">Edit Profile</string>
     <string name="name">Name</string>
     <string name="phone">Phone number</string>
     <string name="email">Email</string>
@@ -213,6 +213,7 @@
     <string name="public_comment">Public</string>
     <string name="private_comment">Private</string>
     <string name="no_more_status">No more status</string>
+    <string name="user_not_approver">You are not an approver of this status</string>
     <string name="status_approvers">STATUS APPROVERS</string>
     <string name="no_people_involved">No people involved</string>
     <string name="approvers">Approvers:</string>

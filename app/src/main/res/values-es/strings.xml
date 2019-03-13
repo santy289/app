@@ -52,7 +52,7 @@
     <string name="password_changed">Tu clave fue cambiado con éxito, por favor ingresar</string>
     <string name="title_activity_sync">SyncActivity</string>
     <string name="action_edit_profile">Editar Perfil</string>
-    <string name="title_activity_edit_profile">EditProfileActivity</string>
+    <string name="title_activity_edit_profile">Editar Perfil</string>
     <string name="name">Nombre</string>
     <string name="phone">Teléfono</string>
     <string name="email">Email</string>
@@ -212,6 +212,7 @@
     <string name="public_comment">Público</string>
     <string name="private_comment">Privado</string>
     <string name="no_more_status">Sin más estatus</string>
+    <string name="user_not_approver">No eres un aprobador de este estatus</string>
     <string name="status_approvers">APROBADORES DEL ESTATUS</string>
     <string name="no_people_involved">Sin personas involucradas</string>
     <string name="approvers">Aprobadores:</string>

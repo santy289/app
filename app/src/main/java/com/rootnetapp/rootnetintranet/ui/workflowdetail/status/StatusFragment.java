@@ -103,6 +103,8 @@ public class StatusFragment extends Fragment {
         statusViewModel.updateApproveSpinner.observe(this, this::updateApproveSpinner);
         statusViewModel.hideApproveSpinnerOnEmptyData
                 .observe(this, this::hideApproveSpinnerOnEmptyData);
+        statusViewModel.hideApproveSpinnerOnNotApprover
+                .observe(this, this::hideApproveSpinnerOnNotApprover);
         statusViewModel.updateStatusUiFromUserAction.observe(this, this::updateStatusDetails);
         statusViewModel.updateActiveStatusFromUserAction.observe(this, this::updateWorkflowStatus);
         statusViewModel.handleSetWorkflowIsOpenByRepo.observe(this, this::updateWorkflowStatus);
@@ -219,27 +221,59 @@ public class StatusFragment extends Fragment {
     }
 
     /**
-     * Hides the spinner in the case that we don't have any next status. When the spinner is hidden.
-     * It will replaced it with a message text view.
+     * Hides the spinner in the case that we don't have any next status. When the spinner is hidden,
+     * it will be replaced it with a message text view.
      *
      * @param hide Hides or shows the spinner view.
      */
     @UiThread
     private void hideApproveSpinnerOnEmptyData(boolean hide) {
+        hideApproveSpinner(hide);
+        mBinding.includeNextStep.tvUserNotApprover.setVisibility(View.INVISIBLE);
+
         if (hide) {
             mBinding.includeNextStep.tvNoMoreStatus.setVisibility(View.VISIBLE);
+        } else {
+            mBinding.includeNextStep.tvNoMoreStatus.setVisibility(View.INVISIBLE);
+        }
+
+    }
+
+    /**
+     * Hides the spinner in the case that the user is not an approver. When the spinner is hidden,
+     * it will be replaced it with a message text view.
+     *
+     * @param hide Hides or shows the spinner view.
+     */
+    @UiThread
+    private void hideApproveSpinnerOnNotApprover(boolean hide) {
+        hideApproveSpinner(hide);
+        mBinding.includeNextStep.tvNoMoreStatus.setVisibility(View.INVISIBLE);
+
+        if (hide) {
+            mBinding.includeNextStep.tvUserNotApprover.setVisibility(View.VISIBLE);
+        } else {
+            mBinding.includeNextStep.tvUserNotApprover.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    /**
+     * Hides or shows the approve spinner and buttons.
+     *
+     * @param hide Hides or shows the spinner view.
+     */
+    private void hideApproveSpinner(boolean hide) {
+        if (hide) {
             mBinding.includeNextStep.viewSpinnerBackground.setVisibility(View.GONE);
             mBinding.includeNextStep.spSteps.setVisibility(View.GONE);
             mBinding.includeNextStep.btnApprove.setVisibility(View.GONE);
             mBinding.includeNextStep.btnReject.setVisibility(View.GONE);
         } else {
-            mBinding.includeNextStep.tvNoMoreStatus.setVisibility(View.GONE);
             mBinding.includeNextStep.viewSpinnerBackground.setVisibility(View.VISIBLE);
             mBinding.includeNextStep.spSteps.setVisibility(View.VISIBLE);
             mBinding.includeNextStep.btnApprove.setVisibility(View.VISIBLE);
             mBinding.includeNextStep.btnReject.setVisibility(View.VISIBLE);
         }
-
     }
 
     /**

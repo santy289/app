@@ -51,6 +51,7 @@ public class StatusViewModel extends ViewModel {
     protected MutableLiveData<List<Approver>> updateCurrentApproversList;
     protected MutableLiveData<List<String>> updateApproveSpinner;
     protected MutableLiveData<Boolean> hideApproveSpinnerOnEmptyData;
+    protected MutableLiveData<Boolean> hideApproveSpinnerOnNotApprover;
     protected MutableLiveData<Boolean> hideApproverListOnEmptyData;
     protected MutableLiveData<Boolean> mEnableApproveRejectButtonsLiveData;
     protected MutableLiveData<String[]> updateStatusUi;
@@ -74,6 +75,7 @@ public class StatusViewModel extends ViewModel {
         this.updateCurrentApproversList = new MutableLiveData<>();
         this.updateApproveSpinner = new MutableLiveData<>();
         this.hideApproveSpinnerOnEmptyData = new MutableLiveData<>();
+        this.hideApproveSpinnerOnNotApprover = new MutableLiveData<>();
         this.hideApproverListOnEmptyData = new MutableLiveData<>();
         this.setWorkflowIsOpen = new MutableLiveData<>();
         this.updateStatusUi = new MutableLiveData<>();
@@ -566,7 +568,7 @@ public class StatusViewModel extends ViewModel {
      */
     private void updateApproveSpinnerUi(WorkflowDb workflow, List<Integer> nextStatusIds) {
         if (!workflow.isLoggedIsApprover()) {
-            hideApproveSpinnerOnEmptyData.setValue(true);
+            hideApproveSpinnerOnNotApprover.setValue(true);
             return;
         }
         List<String> nextStatusList = new ArrayList<>();

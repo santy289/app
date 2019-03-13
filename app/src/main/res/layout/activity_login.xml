@@ -2,6 +2,7 @@
 <layout xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+
         <variable
             name="LoginViewModel"
             type="com.rootnetapp.rootnetintranet.ui.login.LoginViewModel" />
@@ -23,8 +24,8 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:paddingBottom="100dp"
-                android:paddingTop="100dp">
+                android:paddingTop="100dp"
+                android:paddingBottom="100dp">
 
                 <ImageView
                     android:id="@+id/logo"
@@ -39,47 +40,50 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/marginVertical_domain"
-                    android:layout_marginEnd="@dimen/marginHorizontal_domain"
                     android:layout_marginStart="@dimen/marginHorizontal_domain"
                     android:layout_marginTop="@dimen/marginVertical_domain"
+                    android:layout_marginEnd="@dimen/marginHorizontal_domain"
+                    android:layout_marginBottom="@dimen/marginVertical_domain"
                     android:text="@string/cloud_based"
-                    android:textColor="@color/white" />
+                    android:textColor="@color/colorAccent" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/til_user"
+                    style="@style/LoginTextInputLayoutStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/marginVertical_domain"
-                    android:layout_marginEnd="@dimen/marginHorizontal_domain"
                     android:layout_marginStart="@dimen/marginHorizontal_domain"
                     android:layout_marginTop="@dimen/marginVertical_domain"
+                    android:layout_marginEnd="@dimen/marginHorizontal_domain"
+                    android:layout_marginBottom="@dimen/marginVertical_domain"
                     android:textColorHint="@color/colorAccent"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                    app:hintTextColor="@color/colorAccent">
 
                     <androidx.appcompat.widget.AppCompatEditText
                         android:id="@+id/input_user"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/username"
+                        android:inputType="textUri"
                         android:maxLines="1"
-                        android:textColor="@color/white"
-                        android:inputType="textUri"/>
+                        android:textColor="@color/colorAccent"
+                        android:textCursorDrawable="@null" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/til_password"
+                    style="@style/LoginTextInputLayoutStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/marginVertical_domain"
-                    android:layout_marginEnd="@dimen/marginHorizontal_domain"
                     android:layout_marginStart="@dimen/marginHorizontal_domain"
                     android:layout_marginTop="@dimen/marginVertical_domain"
+                    android:layout_marginEnd="@dimen/marginHorizontal_domain"
+                    android:layout_marginBottom="@dimen/marginVertical_domain"
                     android:textColorHint="@color/colorAccent"
-                    app:passwordToggleTint="@color/colorAccent"
+                    app:hintTextColor="@color/colorAccent"
                     app:passwordToggleEnabled="true"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                    app:passwordToggleTint="@color/colorAccent">
 
                     <androidx.appcompat.widget.AppCompatEditText
                         android:id="@+id/input_password"
@@ -88,7 +92,8 @@
                         android:hint="@string/password"
                         android:inputType="textPassword"
                         android:maxLines="1"
-                        android:textColor="@color/white" />
+                        android:textColor="@color/colorAccent"
+                        android:textCursorDrawable="@null" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -96,11 +101,11 @@
                     android:id="@+id/btn_login"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/marginVertical_domain"
-                    android:layout_marginEnd="@dimen/marginHorizontal_domain"
                     android:layout_marginStart="@dimen/marginHorizontal_domain"
                     android:layout_marginTop="@dimen/marginVertical_domain"
-                    android:backgroundTint="@color/colorPrimaryDark"
+                    android:layout_marginEnd="@dimen/marginHorizontal_domain"
+                    android:layout_marginBottom="@dimen/marginVertical_domain"
+                    android:backgroundTint="@color/colorAccent"
                     android:onClick="onClick"
                     android:text="@string/login"
                     android:textColor="@color/white" />
@@ -109,13 +114,13 @@
                     android:id="@+id/btn_change"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/marginVertical_domain"
-                    android:layout_marginEnd="@dimen/marginHorizontal_domain"
                     android:layout_marginStart="@dimen/marginHorizontal_domain"
                     android:layout_marginTop="@dimen/marginVertical_domain"
+                    android:layout_marginEnd="@dimen/marginHorizontal_domain"
+                    android:layout_marginBottom="@dimen/marginVertical_domain"
+                    android:backgroundTint="@color/colorAccent"
                     android:onClick="onClick"
                     android:text="@string/change_domain"
-                    android:backgroundTint="@color/colorPrimaryDark"
                     android:textColor="@color/white" />
 
                 <TextView

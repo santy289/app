@@ -53,7 +53,7 @@
                 android:ellipsize="end"
                 tools:text="Workflow type"
                 android:textSize="12sp"
-                android:textColor="@color/colorPrimary" />
+                android:textColor="@color/colorAccent" />
         </LinearLayout>
     </RelativeLayout>
 </layout>

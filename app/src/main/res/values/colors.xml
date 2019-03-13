@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#414759</color>
-    <color name="colorPrimaryDark">#414759</color>
-    <color name="colorAccent">#7283c1</color>
+    <color name="colorPrimary">#F5F4F4</color>
+    <color name="colorPrimaryDark">#555555</color>
+    <color name="colorAccent">@color/dark_blue</color>
 
     <color name="detail">#f5f6f8</color>
-    <color name="fab_color">#6d86c2</color>
+    <color name="fab_color">@color/dark_blue</color>
     <color name="detailsColor">#7e7283c1</color>
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
@@ -16,6 +16,7 @@
     <color name="workflow_details_section_title_bar">#DBE3F2</color>
     <color name="workflow_search_item_title">#D0D8E1</color>
     <color name="disabled">#BEECECEC</color>
+    <color name="dark_blue">#414759</color>
 
     <color name="text_blue">#3063A5</color>
 
@@ -24,7 +25,7 @@
     <color name="noColor">#00000000</color>
     <color name="workflowListBg">#f8f9fc</color>
 
-    <color name="selected_filter">#7283c1</color>
+    <color name="selected_filter">@color/dark_blue</color>
     <color name="unselected_filter">#f3f6fb</color>
 
     <color name="unselected_filter_text">#c6cedc</color>

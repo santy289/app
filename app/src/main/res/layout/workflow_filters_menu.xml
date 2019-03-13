@@ -170,7 +170,7 @@
                     android:textColor="@color/selected_filter"
                     android:textStyle="bold"
                     android:textSize="12sp"
-                    android:buttonTint="@color/colorPrimaryDark"
+                    android:buttonTint="@color/colorAccent"
                     android:text="@string/workflow_number" />
 
                 <Switch
@@ -201,7 +201,7 @@
                     android:textColor="@color/selected_filter"
                     android:textStyle="bold"
                     android:textSize="12sp"
-                    android:buttonTint="@color/colorPrimaryDark"
+                    android:buttonTint="@color/colorAccent"
                     android:text="@string/created_date" />
 
                 <Switch
@@ -232,7 +232,7 @@
                     android:textColor="@color/selected_filter"
                     android:textStyle="bold"
                     android:textSize="12sp"
-                    android:buttonTint="@color/colorPrimaryDark"
+                    android:buttonTint="@color/colorAccent"
                     android:text="@string/updated_date" />
 
                 <Switch

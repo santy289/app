@@ -76,7 +76,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/tv_date"
             app:layout_constraintTop_toTopOf="parent"
-            app:iconTint="@color/colorPrimary"
+            app:iconTint="@color/colorAccent"
             app:rippleColor="@color/dark_gray" />
 
         <androidx.constraintlayout.widget.Barrier

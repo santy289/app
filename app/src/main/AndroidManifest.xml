@@ -35,7 +35,7 @@
             android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.domain.DomainActivity"
-            android:theme="@style/LoginStyle"
+            android:theme="@style/DomainStyle"
             android:screenOrientation="portrait">
         </activity>
         <activity

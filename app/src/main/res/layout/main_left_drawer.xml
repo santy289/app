@@ -21,7 +21,7 @@
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/nav_header_height"
-                android:background="@color/colorPrimaryDark"
+                android:background="@color/colorAccent"
                 android:gravity="bottom"
                 android:orientation="vertical"
                 android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -55,7 +55,7 @@
                        android:layout_width="match_parent"
                        android:layout_height="wrap_content"
                        android:text="@string/modules"
-                       android:textColor="@color/colorPrimaryDark" />
+                       android:textColor="@color/colorAccent" />
 
                </RelativeLayout> -->
 
@@ -104,7 +104,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/synchronization"
-                    android:textColor="@color/colorPrimaryDark" />
+                    android:textColor="@color/colorAccent" />
 
             </RelativeLayout>
 

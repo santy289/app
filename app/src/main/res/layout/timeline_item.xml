@@ -95,7 +95,7 @@
                             android:focusable="true"
                             android:focusableInTouchMode="true"
                             android:text="@string/comment_ammount"
-                            android:textColor="@color/colorPrimary"
+                            android:textColor="@color/colorAccent"
                             android:textSize="12sp" />
                     </LinearLayout>
 
@@ -174,7 +174,7 @@
                                     android:layout_width="12dp"
                                     android:layout_height="12dp"
                                     android:src="@drawable/ic_thumb_down_black_24dp"
-                                    android:tint="@color/colorPrimaryDark" />
+                                    android:tint="@color/colorAccent" />
 
                                 <TextView
                                     android:id="@+id/tv_down_ammount"
@@ -182,7 +182,7 @@
                                     android:layout_height="wrap_content"
                                     android:paddingStart="3dp"
                                     android:paddingEnd="3dp"
-                                    android:textColor="@color/colorPrimaryDark"
+                                    android:textColor="@color/colorAccent"
                                     android:textSize="12sp"
                                     tools:text="(0)" />
 

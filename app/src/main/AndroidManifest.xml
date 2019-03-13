@@ -46,6 +46,8 @@
 
         <activity
             android:name=".ui.createworkflow.geolocation.GeolocationActivity"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTop"
             android:label="@string/title_activity_geolocation" />
         <activity
             android:name=".ui.main.MainActivity"

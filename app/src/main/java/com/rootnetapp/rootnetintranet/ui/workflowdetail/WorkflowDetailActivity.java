@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -149,6 +150,8 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         workflowDetailViewModel.getObservableWorflowListItem().observe(this, this::initUiWith);
         workflowDetailViewModel.getObservableWorkflowTypeVersion()
                 .observe(this, this::updateToolbarSubtitleWithWorkflowVersion);
+        workflowDetailViewModel.getObservableShowNotFoundView()
+                .observe(this, this::showNotFoundView);
 
         workflowDetailViewModel.showLoading.observe(this, this::showLoading);
     }
@@ -222,6 +225,12 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         String currentSubtitle = (String) getSupportActionBar().getSubtitle();
         currentSubtitle = String.format(Locale.US, "%s (%s)", currentSubtitle, versionString);
         getSupportActionBar().setSubtitle(currentSubtitle);
+    }
+
+    @UiThread
+    private void showNotFoundView(boolean showNotFound) {
+        mBinding.lytNotFound.setVisibility(showNotFound ? View.VISIBLE : View.GONE);
+        mBinding.lytDetails.setVisibility(showNotFound ? View.GONE : View.VISIBLE);
     }
 
     /**

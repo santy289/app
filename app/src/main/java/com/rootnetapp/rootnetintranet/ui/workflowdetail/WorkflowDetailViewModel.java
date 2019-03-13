@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModel;
 import androidx.viewpager.widget.ViewPager;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import retrofit2.HttpException;
 
 public class WorkflowDetailViewModel extends ViewModel {
 
@@ -38,6 +39,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<Integer> mShowToastMessage;
     private MutableLiveData<WorkflowListItem> initUiWithWorkflowListItem;
     private MutableLiveData<String> mWorkflowTypeVersionLiveData;
+    private MutableLiveData<Boolean> mShowNotFoundViewLiveData;
     private LiveData<WorkflowListItem> handleRepoWorkflowRequest;
 
     protected MutableLiveData<Boolean> showLoading;
@@ -183,7 +185,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     private void getWorkflow(String auth, int workflowId) {
         Disposable disposable = mRepository
                 .getWorkflow(auth, workflowId)
-                .subscribe(this::onWorkflowSuccess, this::onFailure);
+                .subscribe(this::onWorkflowSuccess, this::onWorkflowFailure);
         mDisposables.add(disposable);
     }
 
@@ -193,12 +195,27 @@ public class WorkflowDetailViewModel extends ViewModel {
      * @param workflowResponse Network response with mWorkflow data.
      */
     private void onWorkflowSuccess(WorkflowResponse workflowResponse) {
+        mShowNotFoundViewLiveData.setValue(false);
         showLoading.setValue(false);
         mWorkflow = workflowResponse.getWorkflow();
 
         int version = mWorkflow.getWorkflowType().getVersion();
         String versionString = String.format(Locale.US, "v%d", version);
         mWorkflowTypeVersionLiveData.setValue(versionString);
+    }
+
+    private void onWorkflowFailure(Throwable throwable) {
+        showLoading.setValue(false);
+
+        if (throwable instanceof HttpException) {
+            int httpCode = ((HttpException) throwable).code();
+            if (httpCode == 404) {
+                mShowNotFoundViewLiveData.setValue(true);
+                return;
+            }
+        }
+
+        mErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
     }
 
     /**
@@ -257,6 +274,13 @@ public class WorkflowDetailViewModel extends ViewModel {
             mWorkflowTypeVersionLiveData = new MutableLiveData<>();
         }
         return mWorkflowTypeVersionLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowNotFoundView() {
+        if (mShowNotFoundViewLiveData == null) {
+            mShowNotFoundViewLiveData = new MutableLiveData<>();
+        }
+        return mShowNotFoundViewLiveData;
     }
 
     protected LiveData<WorkflowListItem> getObservableWorflowListItem() {

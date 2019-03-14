@@ -70,45 +70,153 @@ public class RootnetPermissionsUtils {
     //endregion
 
     //region Workflow
+    /**
+     * Determines the ability to create a new workflow.
+     */
     public static final String WORKFLOW_CREATE = "workflow_create";
+    /**
+     * Determines the ability to delete a workflow.
+     */
     public static final String WORKFLOW_DELETE = "workflow_delete";
+    /**
+     * Determines the ability to bulk delete workflows.
+     */
     public static final String WORKFLOW_DELETE_ALL = "workflow_delete_all";
+    /**
+     * Determines the ability to create, update and delete all workflows.
+     */
     public static final String WORKFLOW_MANAGE = "workflow_manage";
+    /**
+     * Determines the ability to export a workflow from the platform.
+     */
     public static final String WORKFLOW_EXPORT = "workflow_export";
+    /**
+     * Determines the ability to activate a workflow.
+     */
     public static final String WORKFLOW_ACTIVATE_ALL = "workflow_activate_all";
+    /**
+     * Determines the ability to open and close a workflow.
+     */
     public static final String WORKFLOW_OPEN_ALL = "workflow_open_all";
-
     public static final String WORKFLOW_ADD_FILE = "workflow_add_file";
+    /**
+     * Determines the ability to view an inactive workflow.
+     */
     public static final String WORKFLOW_INACTIVE_VIEW = "workflow_inactive_view";
+    /**
+     * Determines the ability to view a closed workflow.
+     */
     public static final String WORKFLOW_CLOSED_VIEW = "workflow_closed_view";
+    /**
+     * Determines the ability to view a list of workflows.
+     */
     public static final String WORKFLOW_VIEW_ALL = "workflow_view_all";
+    /**
+     * Determines the ability to view the workflow details.
+     */
     public static final String WORKFLOW_VIEW = "workflow_view";
+    /**
+     * Determines the ability to import workflows to the platform.
+     */
     public static final String WORKFLOW_IMPORT = "workflow_import";
     //region Files
+    /**
+     * Determines the ability to view a workflow file.
+     */
     public static final String WORKFLOW_FILE_VIEW = "workflow_file_view";
+    /**
+     * Determines the ability to upload files to a workflow.
+     */
     public static final String WORKFLOW_FILE_CREATE = "workflow_file_create";
+    /**
+     * Determines the ability to upload files to all workflows.
+     */
     public static final String WORKFLOW_FILE_CREATE_ALL = "workflow_file_create_all";
+    /**
+     * Determines the ability to delete a workflow file.
+     */
     public static final String WORKFLOW_FILE_DELETE = "workflow_file_delete";
+    /**
+     * Determines the ability to view the files of the workflows where the user is part of the people involved group.
+     */
+    public static final String WORKFLOW_FILE_VIEW_BY_PEOPLE_INVOLVED = "workflow_file_view_by_people_involved";
+    /**
+     * Determines the ability to view all archived files of the workflows the user has access to.
+     */
     public static final String WORKFLOW_VIEW_ARCHIVE_FILE = "workflow_view_archive_file";
+    /**
+     * Determines the ability to view the workflow templates.
+     */
     public static final String WORKFLOW_TEMPLATE_VIEW = "workflow_template_view";
+    /**
+     * Determines the ability to create, edit and delete the workflow templates.
+     */
     public static final String WORKFLOW_TEMPLATE_CRUD = "workflow_template_crud";
     //endregion
+    //region Workflow Type
+    /**
+     * Determines the ability to view what type of workflow each one is.
+     */
     public static final String WORKFLOW_TYPE_VIEW = "workflow_type_view";
+    /**
+     * Determines the ability to create, edit and view the workflow types.
+     */
     public static final String WORKFLOW_TYPE_CRUD = "workflow_type_crud";
+    /**
+     * Determines the ability to create, edit and view the workflow type fields.
+     */
     public static final String WORKFLOW_TYPE_FIELD_CRUD = "workflow_type_field_crud";
+    /**
+     * Determines the ability to create, edit, view and delete all workflow type status.
+     */
     public static final String WORKFLOW_TYPE_STATUS_CRUD = "workflow_type_status_crud";
+    //endregion
     //region Comments
+    /**
+     * Determines the ability to edit the user's workflow comments.
+     */
     public static final String WORKFLOW_EDIT_OWN_COMMENT = "workflow_edit_own_comment";
+    /**
+     * Determines the ability to delete the user's workflow comments.
+     */
     public static final String WORKFLOW_DELETE_OWN_COMMENT = "workflow_delete_own_comment";
+    /**
+     * Determines the ability to view the comments of a workflow.
+     */
     public static final String WORKFLOW_COMMENT_VIEW = "workflow_comment_view";
+    /**
+     * Determines the ability to create, edit and delete the comments of the user's workflows.
+     */
     public static final String WORKFLOW_COMMENT_CRUD_OWN = "workflow_comment_crud_own";
+    /**
+     * Determines the ability to create, edit and delete the comments of all workflows.
+     */
     public static final String WORKFLOW_COMMENT_CRUD_ALL = "workflow_comment_crud_all";
+    /**
+     * Determines the ability to view the private comments of a workflow.
+     */
     public static final String WORKFLOW_COMMENT_PRIVATE_VIEW = "workflow_comment_private_view";
+    /**
+     * Determines the ability to comment on the workflows that the user is part of the people
+     * involved group.
+     */
     public static final String WORKFLOW_COMMENT_BY_PEOPLE_INVOLVED = "workflow_comment_by_people_involved";
     //endregion
+    /**
+     * Determines the ability to update the current status of all workflows.
+     */
     public static final String WORKFLOW_STATUS_UPDATE_ALL = "workflow_status_update_all";
+    /**
+     * Determines the ability to manage each user;s access to all workflow actions.
+     */
     public static final String WORKFLOW_PERMISSION_CRUD = "workflow_permission_crud";
+    /**
+     * Determines the ability to update workflow tag related settings.
+     */
     public static final String WORKFLOW_CRUD_TAG = "workflow_crud_tag";
+    /**
+     * Determines the ability to update workflow category related settings.
+     */
     public static final String WORKFLOW_CRUD_CATEGORY = "workflow_crud_category";
     /**
      * Determines the ability to define the specific approvers when creating a workflow.
@@ -138,10 +246,18 @@ public class RootnetPermissionsUtils {
      * involved group.
      */
     public static final String WORKFLOW_EDIT_BY_INVOLVED = "workflow_edit_by_involved";
+    /**
+     * Determines the ability to delete all workflows' approval history.
+     */
     public static final String WORKFLOW_DELETE_APPROVAL_HISTORY = "workflow_delete_approval_history";
+    /**
+     * Determines the ability to update all workflows' approval history.
+     */
     public static final String WORKFLOW_UPDATE_APPROVAL_HISTORY = "workflow_update_approval_history";
+    /**
+     * Determines the ability to view the workflows where the user is part of the people involved group.
+     */
     public static final String WORKFLOW_VIEW_BY_PEOPLE_INVOLVED = "workflow_view_by_people_involved";
-    public static final String WORKFLOW_FILE_VIEW_BY_PEOPLE_INVOLVED = "workflow_file_view_by_people_involved";
     //endregion
     //endregion
 
@@ -174,7 +290,7 @@ public class RootnetPermissionsUtils {
     //endregion
 
     //region Static Methods
-    public static String getPermissionsStringFromMap(Map<String, Object> permissionsMap){
+    public static String getPermissionsStringFromMap(Map<String, Object> permissionsMap) {
         StringBuilder stringBuilder = new StringBuilder();
 
         for (String key : permissionsMap.keySet()) {

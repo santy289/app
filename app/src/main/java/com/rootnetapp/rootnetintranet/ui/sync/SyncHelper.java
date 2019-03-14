@@ -1,10 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.sync;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-
 import android.database.sqlite.SQLiteConstraintException;
-import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -15,28 +11,28 @@ import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDB;
 import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDBDao;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.Profile;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.Field;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountryDbResponse;
+import com.rootnetapp.rootnetintranet.models.responses.user.LoggedProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.websocket.WebSocketSettingResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
-import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
-import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -68,7 +64,7 @@ public class SyncHelper {
     public final static int INDEX_KEY_STRING = 0;
     public final static int INDEX_KEY_VALUE = 1;
     private final static String TAG = "SyncHelper";
-    protected static final int MAX_ENDPOINT_CALLS = 5;
+    protected static final int MAX_ENDPOINT_CALLS = 6;
 
     public SyncHelper(ApiInterface apiInterface, AppDatabase database) {
         this.apiInterface = apiInterface;
@@ -87,6 +83,7 @@ public class SyncHelper {
         getUser(token);
         getAllWorkflows(token, 1);
         getWorkflowTypesDb(token);
+        getLoggedProfile(token);
 
         //getProfiles(token);
     }
@@ -439,6 +436,40 @@ public class SyncHelper {
                             this::failure);
             disposables.add(disposable);
 //        }
+    }
+
+    private void getLoggedProfile(String token) {
+        Disposable disposable = apiInterface.getLoggedProfile(token)
+                .subscribeOn(Schedulers.newThread()).
+                        observeOn(AndroidSchedulers.mainThread()).
+                        subscribe(this::onLoggedProfileSuccess, throwable -> {
+                            Log.d(TAG, "getData: error " + throwable.getMessage());
+                            handleNetworkError(throwable);
+                        });
+        disposables.add(disposable);
+    }
+
+    private void onLoggedProfileSuccess(LoggedProfileResponse loggedProfileResponse) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        if (loggedProfileResponse.getLoggedUser() == null || loggedProfileResponse.getLoggedUser()
+                .getPermissions() == null) {
+            failure(null);
+            return;
+        }
+
+        for (String key : loggedProfileResponse.getLoggedUser().getPermissions().keySet()) {
+            stringBuilder.append(key); //permission value
+            stringBuilder.append(","); //separator
+        }
+
+        stringBuilder.deleteCharAt(stringBuilder.length() - 1); //delete last separator
+
+        String[] value = new String[]{PreferenceKeys.PREF_USER_PERMISSIONS,
+                                      stringBuilder.toString()};
+        saveStringToPreference.postValue(value);
+
+        success(true);
     }
 
     private void success(Boolean o) {

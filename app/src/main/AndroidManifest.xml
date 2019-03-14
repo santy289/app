@@ -18,8 +18,8 @@
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" /> <!-- Doze mode whitelist -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" /> <!-- Notifications Service -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/> <!--Geolocation-->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/> <!--Geolocation-->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!--Geolocation-->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!--Geolocation-->
 
     <application
         android:name=".ui.RootnetApp"
@@ -29,6 +29,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:allowBackup">
 
@@ -46,10 +47,10 @@
 
         <activity
             android:name=".ui.createworkflow.geolocation.GeolocationActivity"
-            android:screenOrientation="portrait"
+            android:label="@string/title_activity_geolocation"
             android:launchMode="singleTop"
-            android:theme="@style/AppTheme"
-            android:label="@string/title_activity_geolocation" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.main.MainActivity"
             android:label="@string/title_activity_main"

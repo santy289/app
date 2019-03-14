@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.BuildConfig;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
+import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDB;
@@ -114,15 +115,16 @@ public class SyncHelper {
      * RxJava implementation to change 2 network requests for obtaining webSocket settings such as
      * port number and protocol type. Finally it saves to SharedPreferences all these settings.
      *
-     * @param token
-     *  Token network request.
+     * @param token Token network request.
      */
     private void getWsSettings(String token) {
         Disposable disposable = apiInterface
                 .getWsPort(token)
-                .doOnNext(response -> saveWebsocketSettingsToPreference(response, PreferenceKeys.PREF_PORT))
+                .doOnNext(response -> saveWebsocketSettingsToPreference(response,
+                        PreferenceKeys.PREF_PORT))
                 .flatMap(response -> apiInterface.getWsProtocol(token))
-                .doOnNext(response -> saveWebsocketSettingsToPreference(response, PreferenceKeys.PREF_PROTOCOL))
+                .doOnNext(response -> saveWebsocketSettingsToPreference(response,
+                        PreferenceKeys.PREF_PROTOCOL))
 //                .retryWhen(observable -> Observable.timer(3, TimeUnit.SECONDS))
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -140,14 +142,14 @@ public class SyncHelper {
     }
 
     /**
-     * Validates if response has a correct status "success". Saves response values to SharedPreferences.
+     * Validates if response has a correct status "success". Saves response values to
+     * SharedPreferences.
      *
-     * @param response
-     *  Incoming response with values.
-     * @param preferenceKey
-     *  Expecting static variables from class PreferenceKeys.
+     * @param response      Incoming response with values.
+     * @param preferenceKey Expecting static variables from class PreferenceKeys.
      */
-    private void saveWebsocketSettingsToPreference(WebSocketSettingResponse response, String preferenceKey) {
+    private void saveWebsocketSettingsToPreference(WebSocketSettingResponse response,
+                                                   String preferenceKey) {
         String status = response.getStatus();
         if (TextUtils.isEmpty(status) || !status.equals("success")) {
             return;
@@ -268,7 +270,9 @@ public class SyncHelper {
                     saveIdToPreference.setValue(id);
                     success(true);
                 }, throwable -> {
-                    Log.d(TAG, "onDatabaseSavedWorkflowTypeDb: Something went wrong trying to get category list id: " + throwable.getMessage());
+                    Log.d(TAG,
+                            "onDatabaseSavedWorkflowTypeDb: Something went wrong trying to get category list id: " + throwable
+                                    .getMessage());
                 });
         disposables.add(disposable);
     }
@@ -323,7 +327,7 @@ public class SyncHelper {
         Disposable disposable = apiInterface.getProfiles(token).subscribeOn(Schedulers.newThread()).
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe(this::onUsersSuccess, throwable -> {
-                    Log.d(TAG, "getData: error " + throwable.getMessage() );
+                    Log.d(TAG, "getData: error " + throwable.getMessage());
                     handleNetworkError(throwable);
                 });
         disposables.add(disposable);
@@ -373,7 +377,9 @@ public class SyncHelper {
                     String authToken = "Bearer " + token;
                     syncData(authToken);
                 }, throwable -> {
-                    Log.d(TAG, "attemptToLogin: Smomething failed with network request: " + throwable.getMessage());
+                    Log.d(TAG,
+                            "attemptToLogin: Smomething failed with network request: " + throwable
+                                    .getMessage());
                     goToDomain.setValue(true);
                 });
         disposables.add(disposable);
@@ -426,15 +432,15 @@ public class SyncHelper {
 //        if(!workflowsResponse.getPager().isIsLastPage()){
 //            getAllWorkflows(auth, workflowsResponse.getPager().getNextPage());
 //        }else{
-            Disposable disposable = Observable.fromCallable(() -> {
-                database.workflowDao().clearWorkflows();
-                database.workflowDao().insertAll(workflows);
-                return true;
-            }).subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::success,
-                            this::failure);
-            disposables.add(disposable);
+        Disposable disposable = Observable.fromCallable(() -> {
+            database.workflowDao().clearWorkflows();
+            database.workflowDao().insertAll(workflows);
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::success,
+                        this::failure);
+        disposables.add(disposable);
 //        }
     }
 
@@ -450,23 +456,17 @@ public class SyncHelper {
     }
 
     private void onLoggedProfileSuccess(LoggedProfileResponse loggedProfileResponse) {
-        StringBuilder stringBuilder = new StringBuilder();
-
         if (loggedProfileResponse.getLoggedUser() == null || loggedProfileResponse.getLoggedUser()
                 .getPermissions() == null) {
             failure(null);
             return;
         }
 
-        for (String key : loggedProfileResponse.getLoggedUser().getPermissions().keySet()) {
-            stringBuilder.append(key); //permission value
-            stringBuilder.append(","); //separator
-        }
-
-        stringBuilder.deleteCharAt(stringBuilder.length() - 1); //delete last separator
+        String permissionsString = RootnetPermissionsUtils.getPermissionsStringFromMap(
+                loggedProfileResponse.getLoggedUser().getPermissions());
 
         String[] value = new String[]{PreferenceKeys.PREF_USER_PERMISSIONS,
-                                      stringBuilder.toString()};
+                                      permissionsString};
         saveStringToPreference.postValue(value);
 
         success(true);
@@ -475,7 +475,7 @@ public class SyncHelper {
     private void success(Boolean o) {
         queriesDoneSoFar++;
         mProgressLiveData.setValue(queriesDoneSoFar);
-        if(MAX_ENDPOINT_CALLS == queriesDoneSoFar){
+        if (MAX_ENDPOINT_CALLS == queriesDoneSoFar) {
             mSyncLiveData.setValue(true);
         }
     }

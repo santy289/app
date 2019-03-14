@@ -48,7 +48,7 @@
     <string name="empty_token">Please enter a valid token</string>
     <string name="enter_password">Enter your new password</string>
     <string name="password_mismatch">Both passwords must match</string>
-    <string name="password_changed">Your password was succesfully changed, please log in</string>
+    <string name="password_changed">Your password was successfully changed, please log in</string>
     <string name="title_activity_sync">SyncActivity</string>
     <string name="action_edit_profile">Edit Profile</string>
     <string name="title_activity_edit_profile">Edit Profile</string>
@@ -296,6 +296,7 @@
     <string name="workflow_detail_comments_fragment_select_file">Select a file to upload</string>
     <string name="workflow_detail_comments_fragment_open_file">Open File</string>
     <string name="workflow_detail_comments_fragment_cannot_open_file">This file cannot be opened by your device.</string>
+    <string name="workflow_detail_comments_fragment_no_view_permissions">You do not have permissions to view the comments.</string>
     <!--FilesFragment-->
     <string name="workflow_detail_files_fragment_title">@string/workflow_detail_files_fragment_documents</string>
     <string name="workflow_detail_files_fragment_documents">Documents</string>

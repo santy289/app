@@ -3,7 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.information;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.RootnetPermissions;
+import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -31,6 +31,10 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_ALL;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_MY_OWN;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_OWN;
 
 public class InformationViewModel extends ViewModel {
 
@@ -74,6 +78,21 @@ public class InformationViewModel extends ViewModel {
     protected void onCleared() {
         mDisposables.clear();
         mRepository.clearDisposables();
+    }
+
+    private void checkEditPermissions(int userId, String permissionsString) {
+        List<String> permissionsToCheck = new ArrayList<>();
+
+        if (mWorkflowListItem.getOwnerId() == userId) {
+            permissionsToCheck.add(WORKFLOW_EDIT_MY_OWN);
+            permissionsToCheck.add(WORKFLOW_EDIT_OWN);
+        } else {
+            permissionsToCheck.add(WORKFLOW_EDIT_ALL);
+        }
+
+        RootnetPermissionsUtils permissionsUtils = new RootnetPermissionsUtils(permissionsString);
+        boolean hasEditPermissions = permissionsUtils.hasPermissions(permissionsToCheck);
+        showEditButtonLiveData.setValue(hasEditPermissions);
     }
 
     /**
@@ -248,20 +267,6 @@ public class InformationViewModel extends ViewModel {
         }
 
         return null;
-    }
-
-    private void checkEditPermissions(int userId, String permissionsString) {
-        List<String> permissionsToCheck = new ArrayList<>();
-
-        if (mWorkflowListItem.getOwnerId() == userId) {
-            permissionsToCheck.add(RootnetPermissions.WORKFLOW_EDIT_MY_OWN);
-            permissionsToCheck.add(RootnetPermissions.WORKFLOW_EDIT_OWN);
-        } else {
-            permissionsToCheck.add(RootnetPermissions.WORKFLOW_EDIT_ALL);
-        }
-
-        boolean hasEditPermissions = Utils.hasPermissions(permissionsToCheck, permissionsString);
-        showEditButtonLiveData.setValue(hasEditPermissions);
     }
 
     private void onFailure(Throwable throwable) {

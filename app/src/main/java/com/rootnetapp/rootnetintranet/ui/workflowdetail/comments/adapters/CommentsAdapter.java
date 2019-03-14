@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
@@ -29,18 +30,37 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> im
 
     private Context mContext;
     private CommentsFragmentInterface commentsFragmentInterface;
+    private int loggedUserId;
+    private boolean hideEditOption, hideDeleteOption;
 
-
-    public CommentsAdapter(CommentsFragmentInterface commentsFragmentInterface,Context context, List<Comment> comments) {
+    public CommentsAdapter(CommentsFragmentInterface commentsFragmentInterface, Context context,
+                           List<Comment> comments, int loggedUserId) {
         this.commentsFragmentInterface = commentsFragmentInterface;
         this.mContext = context;
         this.comments = comments;
+        this.loggedUserId = loggedUserId;
+    }
+
+    public void setData(List<Comment> list) {
+        comments = list;
+        notifyDataSetChanged();
+        getItemCount();
     }
 
     public void addItem(Comment comment) {
         comments.add(0, comment);
         notifyItemInserted(0);
         getItemCount();
+    }
+
+    public void setHideEditOption(boolean hide) {
+        this.hideEditOption = hide;
+        notifyDataSetChanged();
+    }
+
+    public void setHideDeleteOption(boolean hide) {
+        this.hideDeleteOption = hide;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -60,7 +80,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> im
         Context context = holder.itemView.getContext();
         GlideUrl url = new GlideUrl(path);
         Glide.with(context)
-                .load(url.toStringUrl())
+                .load(url)
                 .into(holder.binding.imgUser);
         holder.binding.tvName.setText(item.getUserInfo().getFullName());
 
@@ -74,11 +94,19 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> im
                 new LinearLayoutManager(mContext, RecyclerView.HORIZONTAL, false));
         holder.binding.rvAttachments.setAdapter(adapter);
 
+        holder.binding.btnOptions.setVisibility(
+                item.getUserInfo().getUserId() == loggedUserId ? View.VISIBLE : View.GONE);
+
+        holder.binding.btnOptions.setVisibility(hideEditOption && hideDeleteOption ? View.GONE : View.VISIBLE);
+
         holder.binding.btnOptions.setOnClickListener(v -> {
             //Creating the instance of PopupMenu
             PopupMenu popup = new PopupMenu(context, holder.binding.btnOptions);
             //Inflating the Popup using xml file
             popup.getMenuInflater().inflate(R.menu.menu_comment_options, popup.getMenu());
+
+            if (hideEditOption) popup.getMenu().getItem(0).setVisible(false);
+            if (hideDeleteOption) popup.getMenu().getItem(1).setVisible(false);
 
             //registering popup with OnMenuItemClickListener
             popup.setOnMenuItemClickListener(menuItem -> {

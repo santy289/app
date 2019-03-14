@@ -33,6 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginTop="15dp"
             android:layout_marginEnd="8dp"
             android:textColor="@color/text_blue"
             android:textSize="16sp"
@@ -40,8 +41,7 @@
             app:layout_constrainedWidth="true"
             app:layout_constraintEnd_toStartOf="@id/tv_date"
             app:layout_constraintStart_toEndOf="@+id/barrier_img"
-            app:layout_constraintTop_toTopOf="@+id/btn_options"
-            app:layout_constraintBottom_toBottomOf="@+id/btn_options"
+            app:layout_constraintTop_toTopOf="parent"
             tools:text="Jon Doe" />
 
         <TextView
@@ -55,12 +55,19 @@
             android:textColor="@color/low_gray_text"
             android:textSize="12sp"
             app:layout_constrainedWidth="true"
-            app:layout_constraintBottom_toBottomOf="@id/btn_options"
+            app:layout_constraintBottom_toBottomOf="@id/tv_name"
+            app:layout_constraintEnd_toStartOf="@+id/barrier_options"
             app:layout_constraintStart_toEndOf="@id/tv_name"
-            app:layout_constraintTop_toTopOf="@id/btn_options"
-            app:layout_constraintEnd_toStartOf="@+id/btn_options"
+            app:layout_constraintTop_toTopOf="@id/tv_name"
             app:layout_constraintWidth_min="100dp"
             tools:text="November 12, 2018 - 12:00 PM" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier_options"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="start"
+            app:constraint_referenced_ids="btn_options" />
 
         <Button
             android:id="@+id/btn_options"
@@ -72,11 +79,12 @@
             app:icon="@drawable/ic_more_vert_black_24dp"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
-            app:iconSize="24dp"
+            app:iconSize="20dp"
+            app:iconTint="@color/colorAccent"
+            app:layout_constraintBottom_toBottomOf="@id/tv_name"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/tv_date"
-            app:layout_constraintTop_toTopOf="parent"
-            app:iconTint="@color/colorAccent"
+            app:layout_constraintTop_toTopOf="@id/tv_name"
             app:rippleColor="@color/dark_gray" />
 
         <androidx.constraintlayout.widget.Barrier
@@ -84,7 +92,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:barrierDirection="bottom"
-            app:constraint_referenced_ids="tv_name,tv_date" />
+            app:constraint_referenced_ids="tv_name,tv_date, " />
 
         <TextView
             android:id="@+id/tv_comment"
@@ -104,10 +112,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:paddingBottom="8dp"
             android:clipToPadding="false"
-            android:paddingEnd="8dp"
             android:paddingStart="0dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/tv_comment"
             app:layout_constraintTop_toBottomOf="@id/tv_comment" />

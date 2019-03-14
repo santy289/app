@@ -16,6 +16,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailCommentsBinding;
@@ -101,13 +102,15 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
+        String loggedUserId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
+        String permissionsString = prefs.getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
 
         setupSwitch();
         setOnClickListeners();
         setupCommentsRecycler();
         setupAttachmentsRecycler();
         subscribe();
-        commentsViewModel.initDetails(token, mWorkflowListItem);
+        commentsViewModel.initDetails(token, mWorkflowListItem, loggedUserId, permissionsString);
 
         return view;
     }
@@ -115,7 +118,8 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
     private void subscribe() {
         commentsViewModel.getObservableToastMessage().observe(this, this::showToastMessage);
         commentsViewModel.getObservableComments().observe(this, this::updateCommentsList);
-        commentsViewModel.getObservableHideComments().observe(this, this::hideCommentsList);
+        commentsViewModel.getObservableHideCommentsEmpty().observe(this, this::hideCommentsListEmpty);
+        commentsViewModel.getObservableHideCommentsPermissions().observe(this, this::hideCommentsListPermissions);
         commentsViewModel.getObservableComment().observe(this, this::addNewComment);
         commentsViewModel.getObservableCommentsTabCounter().observe(this, this::updateTabCounter);
         commentsViewModel.getObservableEnableCommentButton()
@@ -126,6 +130,10 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
         commentsViewModel.getObservableOpenDownloadedAttachment()
                 .observe(this, this::openDownloadedFile);
         commentsViewModel.getObservableExitEditMode().observe(this, this::exitEditModeUi);
+        commentsViewModel.getObservableHideCommentInput().observe(this, this::hideCommentInput);
+        commentsViewModel.getObservableHideSwitchPrivatePublic().observe(this, this::hideSwitchPrivatePublic);
+        commentsViewModel.getObservableHideEditCommentOption().observe(this, this::hideEditCommentOption);
+        commentsViewModel.getObservableHideDeleteCommentOption().observe(this, this::hideDeleteCommentOption);
 
         commentsViewModel.showLoading.observe(this, this::showLoading);
     }
@@ -139,7 +147,7 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
     }
 
     private void setupCommentsRecycler() {
-        mCommentsAdapter = new CommentsAdapter(this, getContext(), new ArrayList<>());
+        mCommentsAdapter = new CommentsAdapter(this, getContext(), new ArrayList<>(), commentsViewModel.getLoggedUserId());
         mBinding.rvComments.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvComments.setAdapter(mCommentsAdapter);
         mBinding.rvComments.setNestedScrollingEnabled(false);
@@ -191,7 +199,10 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
 
     @UiThread
     private void updateCommentsList(List<Comment> commentList) {
-        mCommentsAdapter = new CommentsAdapter(this, getContext(), commentList);
+//        mCommentsAdapter.setData(commentList);
+        mCommentsAdapter = new CommentsAdapter(this, getContext(), commentList, commentsViewModel.getLoggedUserId());
+        mCommentsAdapter.setHideEditOption(!commentsViewModel.hasEditPermissions());
+        mCommentsAdapter.setHideDeleteOption(!commentsViewModel.hasDeletePermissions());
         mBinding.rvComments.setAdapter(mCommentsAdapter);
     }
 
@@ -199,7 +210,7 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
     private void addNewComment(Comment comment) {
         if (comment != null && mCommentsAdapter != null) {
             mCommentsAdapter.addItem(comment);
-            hideCommentsList(false);
+            hideCommentsListEmpty(false);
         } else {
             showToastMessage(R.string.error_comment);
         }
@@ -207,18 +218,38 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
     }
 
     /**
-     * Shows the comment list.
+     * Hides or shows the comments list depending on the data.
      *
      * @param hide boolean that decides if we are showing this list or not.
      */
     @UiThread
-    private void hideCommentsList(boolean hide) {
+    private void hideCommentsListEmpty(boolean hide) {
+        mBinding.tvNoPermissions.setVisibility(View.INVISIBLE);
+
         if (hide) {
-            mBinding.rvComments.setVisibility(View.GONE);
+            mBinding.rvComments.setVisibility(View.INVISIBLE);
             mBinding.tvNoComments.setVisibility(View.VISIBLE);
         } else {
             mBinding.rvComments.setVisibility(View.VISIBLE);
-            mBinding.tvNoComments.setVisibility(View.GONE);
+            mBinding.tvNoComments.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    /**
+     * Hides or shows the comments list depending on the permissions.
+     *
+     * @param hide boolean that decides if we are showing this list or not.
+     */
+    @UiThread
+    private void hideCommentsListPermissions(boolean hide) {
+        mBinding.tvNoComments.setVisibility(View.INVISIBLE);
+
+        if (hide) {
+            mBinding.rvComments.setVisibility(View.INVISIBLE);
+            mBinding.tvNoPermissions.setVisibility(View.VISIBLE);
+        } else {
+            mBinding.rvComments.setVisibility(View.VISIBLE);
+            mBinding.tvNoPermissions.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -438,6 +469,31 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
         mBinding.btnAttach.setVisibility(View.VISIBLE);
 
         commentsViewModel.setActiveEditModeComment(null);
+    }
+
+    @UiThread
+    private void hideCommentInput(boolean hide){
+        mBinding.lytCommentInput.setVisibility(hide ? View.GONE : View.VISIBLE);
+        mBinding.btnComment.setVisibility(hide ? View.GONE : View.VISIBLE);
+    }
+
+    @UiThread
+    private void hideSwitchPrivatePublic(boolean hide){
+        mBinding.switchPrivatePublic.setVisibility(hide ? View.GONE : View.VISIBLE);
+    }
+
+    @UiThread
+    private void hideEditCommentOption(boolean hide){
+        if (mCommentsAdapter == null) return;
+
+        mCommentsAdapter.setHideEditOption(hide);
+    }
+
+    @UiThread
+    private void hideDeleteCommentOption(boolean hide){
+        if (mCommentsAdapter == null) return;
+
+        mCommentsAdapter.setHideDeleteOption(hide);
     }
 
     @UiThread

@@ -12,6 +12,7 @@ import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItem
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.DATE;
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.DOUBLE_MULTIPLE_CHOICE;
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.FILE;
+import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.GEOLOCATION;
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.INTENT;
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.MULTIPLE_CHOICE;
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.PHONE;
@@ -33,7 +34,8 @@ import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItem
         PHONE,
         FILE,
         INTENT,
-        DOUBLE_MULTIPLE_CHOICE
+        DOUBLE_MULTIPLE_CHOICE,
+        GEOLOCATION
 })
 public @interface FormItemViewType {
 
@@ -47,4 +49,5 @@ public @interface FormItemViewType {
     int FILE = 8;
     int INTENT = 9;
     int DOUBLE_MULTIPLE_CHOICE = 10;
+    int GEOLOCATION = 11;
 }

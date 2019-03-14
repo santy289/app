@@ -19,10 +19,13 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.GeolocationFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.geolocation.GeolocationMetaData;
+import com.rootnetapp.rootnetintranet.models.createworkflow.geolocation.Value;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
@@ -73,6 +76,7 @@ public class FormSettings {
     public static final String TYPE_PRODUCT = "product";
     public static final String TYPE_LIST = "list";
     public static final String TYPE_FILE = "file";
+    public static final String TYPE_GEOLOCATION = "geolocation";
     public static final String VALUE_EMAIL = "email";
     public static final String VALUE_INTEGER = "integer";
     public static final String VALUE_BOOLEAN = "boolean";
@@ -81,7 +85,7 @@ public class FormSettings {
     public static final String VALUE_LIST = "list";
     public static final String VALUE_DATE = "date";
     public static final String VALUE_ENTITY = "entity";
-    public static final String VALUE_COORD = "coords";
+    public static final String VALUE_COORDS = "coords";
 
     private static final String TAG = "FormSettings";
 
@@ -177,7 +181,8 @@ public class FormSettings {
     private void format(WorkflowMetas metaData, TypeInfo typeInfo, BaseFormItem formItem) {
         String value = metaData.getUnformattedValue();
         //we allow the FileFormItem even though the value is null because of the editing mode, when the user tries to delete a file.
-        if (TextUtils.isEmpty(value) && !(formItem instanceof FileFormItem)) {
+        //same applies for GeolocationFormItem
+        if (TextUtils.isEmpty(value) && !(formItem instanceof FileFormItem) && !(formItem instanceof GeolocationFormItem)) {
             return;
         }
 
@@ -253,6 +258,12 @@ public class FormSettings {
             case FormSettings.TYPE_LINK:
                 metaData.setValue(value);
                 break;
+            case FormSettings.VALUE_COORDS:
+                if (formItem instanceof GeolocationFormItem) {
+                    String json = getGeolocationMetaJson((GeolocationFormItem) formItem);
+                    metaData.setValue(json);
+                }
+                break;
             default:
                 Log.d(TAG, "format: invalid type. Not Known.");
                 metaData.setValue("");
@@ -265,6 +276,7 @@ public class FormSettings {
                 || typeInfo.getType().equals(TYPE_PHONE)
                 || typeInfo.getType().equals(TYPE_CURRENCY)
                 || typeInfo.getType().equals(TYPE_PRODUCT)
+                || typeInfo.getType().equals(TYPE_GEOLOCATION)
                 || typeInfo.getType().equals(TYPE_FILE)) {
             return;
         }
@@ -339,6 +351,28 @@ public class FormSettings {
         fileMetaData.value = id;
         JsonAdapter<FileMetaData> jsonAdapter = moshi.adapter(FileMetaData.class);
         return jsonAdapter.toJson(fileMetaData);
+    }
+
+    private String getGeolocationMetaJson(GeolocationFormItem formItem) {
+        String name = formItem.getName();
+        if (TextUtils.isEmpty(name) || formItem.getValue() == null) {
+            return "\"\"";
+        }
+
+        GeolocationMetaData geolocationMetaData = new GeolocationMetaData();
+
+        Value value = new Value();
+        value.setAddress(formItem.getName());
+
+        List<Double> latLng = new ArrayList<>();
+        latLng.add(formItem.getValue().latitude);
+        latLng.add(formItem.getValue().longitude);
+        value.setLatLng(latLng);
+
+        geolocationMetaData.setValue(value);
+
+        JsonAdapter<GeolocationMetaData> jsonAdapter = moshi.adapter(GeolocationMetaData.class);
+        return jsonAdapter.toJson(geolocationMetaData);
     }
 
     private String getJsonForCurrencyType(CurrencyFormItem formItem) {
@@ -706,6 +740,23 @@ public class FormSettings {
 
                 information.setDisplayValue((String) meta.getDisplayValue());
                 return information;
+
+            case FormSettings.VALUE_COORDS:
+                JsonAdapter<GeolocationMetaData> jsonAdapter = moshi
+                        .adapter(GeolocationMetaData.class);
+                try {
+                    GeolocationMetaData geolocationMetaData = jsonAdapter.fromJson(meta.getValue());
+                    if (geolocationMetaData.getValue() == null) {
+                        information.setDisplayValue("");
+                    } else {
+                        information.setDisplayValue(geolocationMetaData.getValue().getAddress());
+                    }
+                    return information;
+                } catch (IOException | JsonDataException e) {
+                    e.printStackTrace();
+                    information.setDisplayValue("");
+                    return information;
+                }
             default:
                 Log.d(TAG, "format: invalid type. Not Known.");
                 information.setDisplayValue("");

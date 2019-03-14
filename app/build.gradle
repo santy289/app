@@ -64,6 +64,8 @@ dependencies {
     //google
     annotationProcessor "com.google.dagger:dagger-compiler:$rootProject.daggerLibraryVersion"
     implementation "com.google.dagger:dagger:$rootProject.daggerLibraryVersion"
+    implementation "com.google.android.gms:play-services-maps:$rootProject.googleMapsVersion"
+    implementation "com.google.android.libraries.places:places:$rootProject.placesVersion"
 
     //3rd party
     implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofit"
@@ -98,4 +100,8 @@ dependencies {
     implementation 'com.auth0.android:jwtdecode:1.1.1'
     implementation "de.hdodenhof:circleimageview:$rootProject.circleImageViewVersion"
     implementation project(':autobahn')
+}
+
+configurations {
+    all*.exclude group: 'com.google.guava', module: 'listenablefuture'
 }

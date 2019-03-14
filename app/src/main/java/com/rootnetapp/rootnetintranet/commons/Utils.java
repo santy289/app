@@ -30,8 +30,10 @@ import java.io.ObjectInputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import androidx.annotation.NonNull;
@@ -510,5 +512,23 @@ public class Utils {
 
     public static boolean isInteger(String integerToTest){
         return integerToTest.matches("-?\\d+");
+    }
+
+    public static boolean hasPermission(@RootnetPermissions String permissionToCheck, String permissionsString) {
+        String[] permissionsArray = permissionsString.split(",");
+
+        return Arrays.asList(permissionsArray).contains(permissionToCheck);
+    }
+
+    public static boolean hasPermissions(@RootnetPermissions String[] permissionsToCheck, String permissionsString) {
+        String[] permissionsArray = permissionsString.split(",");
+
+        return Arrays.asList(permissionsArray).containsAll(Arrays.asList(permissionsToCheck));
+    }
+
+    public static boolean hasPermissions(@RootnetPermissions List<String> permissionsToCheck, String permissionsString) {
+        String[] permissionsArray = permissionsString.split(",");
+
+        return Arrays.asList(permissionsArray).containsAll(permissionsToCheck);
     }
 }

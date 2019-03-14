@@ -229,8 +229,10 @@
     <string name="request_successfully">Pedido realizado exitosamente.</string>
     <string name="functionality_not_available">Esta función aún no está disponible.</string>
     <string name="add_file">Añadir Archivo</string>
+    <string name="select_location">Elija una ubicación</string>
     <string name="file_form_item_required_msg">Necesitas añadir un archivo para continuar.</string>
     <string name="intent_form_item_required_msg">Necesitas completar esto para poder continuar.</string>
+    <string name="geolocation_form_item_required_msg">Necesitas seleccionar una ubicación para poder continuar.</string>
     <string name="fill_all_form_items">Necesitas llenar todos los elementos requeridos.</string>
     <string name="action">Acción</string>
     <string name="people_involved_action">Configurar</string>
@@ -351,4 +353,14 @@
         <item quantity="one" formatted="true">1 respuesta</item>
         <item quantity="other" formatted="true">%d respuestas</item>
     </plurals>
+
+    <!--GeolocationActivity-->
+    <string name="title_activity_geolocation">Elija una Ubicación</string>
+    <string name="geolocation_your_selection">Ubicación seleccionada</string>
+    <string name="geolocation_activity_permissions_not_granted">No es posible obtener su ubicación actual debido a que los permisos no fueron otorgados.</string>
+    <string name="geolocation_activity_cannot_retrieve_location">No es posible obtener su ubicación actual. Verifique su conexión y el estado del GPS.</string>
+    <string name="geolocation_activity_confirm_location">Confirmar Ubicación</string>
+    <string name="geolocation_activity_navigate">Navegar</string>
+    <string name="geolocation_activity_could_not_retrieve_location">Ubicación no encontrada</string>
+    <string name="geolocation_activity_unnamed">Sin nombre</string>
 </resources>

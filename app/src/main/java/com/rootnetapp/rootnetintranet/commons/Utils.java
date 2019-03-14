@@ -3,6 +3,9 @@ package com.rootnetapp.rootnetintranet.commons;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.text.TextUtils;
@@ -10,6 +13,8 @@ import android.util.Base64;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.rootnetapp.rootnetintranet.BuildConfig;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.models.responses.login.JWToken;
@@ -36,8 +41,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import androidx.annotation.ColorRes;
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import retrofit2.HttpException;
 
 public class Utils {
@@ -219,11 +227,13 @@ public class Utils {
 
     public static String getCurrentFormattedDate() {
         Date c = Calendar.getInstance().getTime();
-        SimpleDateFormat df = new SimpleDateFormat(SERVER_DATE_FORMAT_NO_TIMEZONE, Locale.getDefault());
+        SimpleDateFormat df = new SimpleDateFormat(SERVER_DATE_FORMAT_NO_TIMEZONE,
+                Locale.getDefault());
         return df.format(c);
     }
 
-    public static String getFormattedDateFromIntegers(int year, int month, int day, int hour, int minute, int second) {
+    public static String getFormattedDateFromIntegers(int year, int month, int day, int hour,
+                                                      int minute, int second) {
         Calendar c = Calendar.getInstance();
         c.set(Calendar.YEAR, year);
         c.set(Calendar.MONTH, month);
@@ -232,7 +242,8 @@ public class Utils {
         c.set(Calendar.MINUTE, minute);
         c.set(Calendar.SECOND, second);
         Date date = c.getTime();
-        SimpleDateFormat df = new SimpleDateFormat(SERVER_DATE_FORMAT_NO_TIMEZONE, Locale.getDefault());
+        SimpleDateFormat df = new SimpleDateFormat(SERVER_DATE_FORMAT_NO_TIMEZONE,
+                Locale.getDefault());
         return df.format(date);
     }
 
@@ -240,7 +251,8 @@ public class Utils {
         Calendar c = Calendar.getInstance();
         c.add(Calendar.DAY_OF_MONTH, days);
         Date date = c.getTime();
-        SimpleDateFormat df = new SimpleDateFormat(SERVER_DATE_FORMAT_NO_TIMEZONE, Locale.getDefault());
+        SimpleDateFormat df = new SimpleDateFormat(SERVER_DATE_FORMAT_NO_TIMEZONE,
+                Locale.getDefault());
         return df.format(date);
     }
 
@@ -431,8 +443,11 @@ public class Utils {
 
     public static long getDateInMillisFromString(String date, String format) {
         Date dateObject = getDateFromString(date, format);
-        if (dateObject == null) return 0;
-        else return dateObject.getTime();
+        if (dateObject == null) {
+            return 0;
+        } else {
+            return dateObject.getTime();
+        }
     }
 
     /**
@@ -510,8 +525,33 @@ public class Utils {
         return stringRes;
     }
 
-    public static boolean isInteger(String integerToTest){
+    public static boolean isInteger(String integerToTest) {
         return integerToTest.matches("-?\\d+");
+    }
+
+    /**
+     * Converts a vector asset (xml) into a BitmapDescriptor object with the specified tint color.
+     *
+     * @param context      any context.
+     * @param vectorResId  vector asset resource
+     * @param tintColorRes color resource to tint the vector with.
+     *
+     * @return a BitmapDescriptor object of the tinted vector.
+     */
+    public static BitmapDescriptor bitmapDescriptorFromVector(Context context,
+                                                              @DrawableRes int vectorResId,
+                                                              @ColorRes int tintColorRes) {
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
+        vectorDrawable.mutate(); //avoid modifying all references of this drawable
+        vectorDrawable.setTint(ContextCompat.getColor(context, tintColorRes));
+        vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(),
+                vectorDrawable.getIntrinsicHeight());
+
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(),
+                vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
     public static boolean hasPermission(@RootnetPermissions String permissionToCheck, String permissionsString) {

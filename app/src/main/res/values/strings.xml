@@ -231,9 +231,11 @@
     <string name="request_successfully">Request done successfully.</string>
     <string name="functionality_not_available">This functionality is not available yet</string>
     <string name="add_file">Add File</string>
+    <string name="select_location">Select a location</string>
     <string name="asterisk" translatable="false">*</string>
     <string name="file_form_item_required_msg">You must add a file in order to continue.</string>
     <string name="intent_form_item_required_msg">You must complete this in order to continue.</string>
+    <string name="geolocation_form_item_required_msg">You must select a location in order to continue.</string>
     <string name="fill_all_form_items">You need to fill out all of the required elements.</string>
     <string name="action">Action</string>
     <string name="people_involved_action">Configure</string>
@@ -352,7 +354,17 @@
     <string name="timeline_current_status">Current status: %s</string>
     <string name="timeline_thumbs_value" translatable="false">(%d)</string>
     <plurals name="timeline_comment_replies">
-        <item quantity="one" formatted="true">1 reply</item>
-        <item quantity="other" formatted="true">%d replies</item>
+        <item formatted="true" quantity="one">1 reply</item>
+        <item formatted="true" quantity="other">%d replies</item>
     </plurals>
+
+    <!--GeolocationActivity-->
+    <string name="title_activity_geolocation">Select a Location</string>
+    <string name="geolocation_your_selection">Selected location</string>
+    <string name="geolocation_activity_permissions_not_granted">Cannot retrieve your current location because the permissions were not granted.</string>
+    <string name="geolocation_activity_cannot_retrieve_location">Cannot retrieve your current location. Check your connection and GPS status.</string>
+    <string name="geolocation_activity_confirm_location">Confirm Location</string>
+    <string name="geolocation_activity_navigate">Navigate</string>
+    <string name="geolocation_activity_could_not_retrieve_location">Location not found</string>
+    <string name="geolocation_activity_unnamed">Unnamed</string>
 </resources>

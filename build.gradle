@@ -51,6 +51,8 @@ ext {
     okhttp                          = "3.12.0"
     autobahn                        = "18.5.1"
     timeagoVersion                  = "3.0.2"
+    googleMapsVersion               = "16.1.0"
+    placesVersion                   = "1.0.0"
     PLATFORM = project.properties.get('buildPlatform', 'android')
     PLATFORM_ANDROID = 'android'
     PLATFORM_NETTY = 'netty'

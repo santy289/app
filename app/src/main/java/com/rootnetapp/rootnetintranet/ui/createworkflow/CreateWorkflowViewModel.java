@@ -12,6 +12,7 @@ import android.util.Log;
 import android.util.Patterns;
 
 import com.auth0.android.jwt.JWT;
+import com.google.android.gms.maps.model.LatLng;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -39,6 +40,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DoubleMultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DoubleOption;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.GeolocationFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.IntentFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
@@ -46,6 +48,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem.InputType;
+import com.rootnetapp.rootnetintranet.models.createworkflow.geolocation.GeolocationMetaData;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
@@ -61,6 +64,8 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.GeolocationViewModel;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.SelectedLocation;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
@@ -92,6 +97,7 @@ import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACH
 class CreateWorkflowViewModel extends ViewModel {
 
     protected static final int REQUEST_FILE_TO_ATTACH = 27;
+    protected static final int REQUEST_GEOLOCATION = 28;
     protected static final int REQUEST_EXTERNAL_STORAGE_PERMISSIONS = 72;
     protected static final int TAG_WORKFLOW_TYPE = 80;
     protected static final int TAG_PEOPLE_INVOLVED = 2772;
@@ -101,8 +107,8 @@ class CreateWorkflowViewModel extends ViewModel {
     protected static final int TAG_SPECIFIC_APPROVERS = 2776;
     protected static final int FORM_BASE_INFO = 1;
     protected static final int FORM_PEOPLE_INVOLVED = 2;
-    private static final String ENTITY_ROLE = "role";
 
+    private static final String ENTITY_ROLE = "role";
     private final int UPLOAD_FILE_SIZE_LIMIT = 10;
 
     private MutableLiveData<Integer> mToastMessageLiveData;
@@ -117,7 +123,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<BaseFormItem> mValidationUiLiveData;
     private MutableLiveData<DialogMessage> showDialogMessage;
     private MutableLiveData<Boolean> goBack;
-    private MutableLiveData<FileFormItem> mNewFormItemFileLiveData;
+    private MutableLiveData<BaseFormItem> mUpdateFormItemLiveData;
     private MutableLiveData<DownloadedFileUiData> mOpenDownloadedFileLiveData;
     private MutableLiveData<Boolean> mEnableSubmitButtonLiveData;
 
@@ -134,6 +140,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private WorkflowDb mWorkflow;
     private final Moshi moshi;
     private FileFormItem mCurrentRequestingFileFormItem;
+    private GeolocationFormItem mCurrentRequestingGeolocationFormItem;
     private List<FileFormItem> mFilesToUpload;
     private int mQueuedFile;
     private int mUserId;
@@ -519,6 +526,9 @@ class CreateWorkflowViewModel extends ViewModel {
             case FormSettings.TYPE_FILE:
                 createFileFormItem(field);
                 break;
+            case FormSettings.TYPE_GEOLOCATION:
+                createGeolocationFormItem(field);
+                break;
             default:
                 Log.d(TAG, "buildField: Not a generic type: " + typeInfo
                         .getType() + " value: " + typeInfo.getValueType());
@@ -528,7 +538,7 @@ class CreateWorkflowViewModel extends ViewModel {
         }
     }
 
-    private void buildFieldCompleted(){
+    private void buildFieldCompleted() {
         mFieldCompleted++;
 
         if (mFieldCompleted >= mFieldCount) {
@@ -774,7 +784,6 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     if (options.isEmpty()) return;
 
-
                     //check if multiple selection
                     if (field.getFieldConfigObject().getMultiple()) {
                         MultipleChoiceFormItem multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
@@ -878,7 +887,6 @@ class CreateWorkflowViewModel extends ViewModel {
 
             if (options.isEmpty()) return false;
 
-
             if (field.getFieldConfigObject().getMultiple()) {
                 return new MultipleChoiceFormItem.Builder()
                         .setTitle(field.getFieldName())
@@ -901,7 +909,8 @@ class CreateWorkflowViewModel extends ViewModel {
 
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(singleChoiceFormItem -> mAddFormItemLiveData.setValue((BaseFormItem) singleChoiceFormItem),
+                .subscribe(singleChoiceFormItem -> mAddFormItemLiveData
+                                .setValue((BaseFormItem) singleChoiceFormItem),
                         throwable -> Log.d(TAG,
                                 "createSystemUsersFormItem: can't get users: " + throwable
                                         .getMessage()));
@@ -1188,8 +1197,7 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     /**
-     * Creates a custom Boolean/Checkbox item with the specified params and sends the item to the
-     * UI.
+     * Creates a file form item with the specified params and sends the item to the UI.
      *
      * @param field item params.
      */
@@ -1197,6 +1205,28 @@ class CreateWorkflowViewModel extends ViewModel {
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
 
         FileFormItem item = new FileFormItem.Builder()
+                .setTitle(field.getFieldName())
+                .setRequired(field.isRequired())
+                .setTag(field.getId())
+                .setEscaped(escape(field.getFieldConfigObject()))
+                .setMachineName(field.getFieldConfigObject().getMachineName())
+                .setTypeInfo(typeInfo)
+                .build();
+
+        formSettings.getFormItems().add(item);
+
+        buildFieldCompleted();
+    }
+
+    /**
+     * Creates a geolocation form item with the specified params and sends the item to the UI.
+     *
+     * @param field item params.
+     */
+    private void createGeolocationFormItem(FormFieldsByWorkflowType field) {
+        TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
+
+        GeolocationFormItem item = new GeolocationFormItem.Builder()
                 .setTitle(field.getFieldName())
                 .setRequired(field.isRequired())
                 .setTag(field.getId())
@@ -1313,6 +1343,10 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     case FormSettings.TYPE_FILE:
                         fillFileFormItem(meta);
+                        break;
+
+                    case FormSettings.TYPE_GEOLOCATION:
+                        fillGeolocationFormItem(meta);
                         break;
                     default:
                         Log.d(TAG, "format: invalid type. Not Known.");
@@ -1474,7 +1508,36 @@ class CreateWorkflowViewModel extends ViewModel {
         fileFormItem.setFileName(fileMetaData.name);
         fileFormItem.setFileId(fileMetaData.value);
     }
+
+    private void fillGeolocationFormItem(Meta meta) throws IOException {
+        if (meta.getValue() == null || meta.getValue().isEmpty()
+                || meta.getValue().equals("\"\"")) {
+            return;
+        }
+
+        JsonAdapter<GeolocationMetaData> jsonAdapter = moshi.adapter(GeolocationMetaData.class);
+        GeolocationMetaData geolocationMetaData = jsonAdapter.fromJson(meta.getValue());
+
+        if (geolocationMetaData == null || geolocationMetaData.getValue() == null) return;
+
+        GeolocationFormItem geolocationFormItem = (GeolocationFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        LatLng latLng = new LatLng(geolocationMetaData.getValue().getLatLng().get(0),
+                geolocationMetaData.getValue().getLatLng().get(1));
+        geolocationFormItem.setValue(latLng);
+        geolocationFormItem.setName(geolocationMetaData.getValue().getAddress());
+    }
     //endregion
+
+    protected GeolocationFormItem getCurrentRequestingGeolocationFormItem() {
+        return mCurrentRequestingGeolocationFormItem;
+    }
+
+    protected void setCurrentRequestingGeolocationFormItem(
+            GeolocationFormItem currentRequestingGeolocationFormItem) {
+        this.mCurrentRequestingGeolocationFormItem = currentRequestingGeolocationFormItem;
+    }
 
     //region File Upload
     protected FileFormItem getCurrentRequestingFileFormItem() {
@@ -1494,8 +1557,8 @@ class CreateWorkflowViewModel extends ViewModel {
      * @param resultCode  ActivityResult resultCode.
      * @param data        the file URI that was selected.
      */
-    protected void handleFileSelectedResult(Context context, int requestCode, int resultCode,
-                                            Intent data) {
+    protected void handleActivityResult(Context context, int requestCode, int resultCode,
+                                        Intent data) {
         switch (requestCode) {
             case REQUEST_FILE_TO_ATTACH:
                 if (resultCode == RESULT_OK) {
@@ -1545,10 +1608,20 @@ class CreateWorkflowViewModel extends ViewModel {
                         formItem.setFileType(fileType);
                         formItem.setFilePath(uri.getPath());
 
-                        mNewFormItemFileLiveData.setValue(formItem);
+                        mUpdateFormItemLiveData.setValue(formItem);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                }
+                break;
+            case REQUEST_GEOLOCATION:
+                if (resultCode == RESULT_OK) {
+                    SelectedLocation selectedLocation = data
+                            .getParcelableExtra(GeolocationViewModel.EXTRA_REQUESTED_LOCATION);
+                    GeolocationFormItem formItem = getCurrentRequestingGeolocationFormItem();
+                    formItem.setValue(selectedLocation.getLatLng());
+                    formItem.setName(selectedLocation.getName());
+                    mUpdateFormItemLiveData.setValue(formItem);
                 }
                 break;
         }
@@ -2039,7 +2112,7 @@ class CreateWorkflowViewModel extends ViewModel {
                 || value.equals(FormSettings.VALUE_EMAIL)
                 || value.equals(FormSettings.VALUE_INTEGER)
                 || value.equals(FormSettings.VALUE_DATE)
-                || value.equals(FormSettings.VALUE_COORD)) {
+                || value.equals(FormSettings.VALUE_COORDS)) {
             return true;
         }
         return value.equals(FormSettings.VALUE_LIST) && type.equals(FormSettings.TYPE_SYSTEM_USERS);
@@ -2190,11 +2263,11 @@ class CreateWorkflowViewModel extends ViewModel {
         return mToastMessageLiveData;
     }
 
-    protected LiveData<FileFormItem> getObservableFileFormItem() {
-        if (mNewFormItemFileLiveData == null) {
-            mNewFormItemFileLiveData = new MutableLiveData<>();
+    protected LiveData<BaseFormItem> getObservableUpdateFormItem() {
+        if (mUpdateFormItemLiveData == null) {
+            mUpdateFormItemLiveData = new MutableLiveData<>();
         }
-        return mNewFormItemFileLiveData;
+        return mUpdateFormItemLiveData;
     }
 
     protected LiveData<Boolean> getObservableEnableSubmitButton() {

@@ -263,7 +263,7 @@ public class TimelineViewModel extends ViewModel {
         }
 
         boolean isEmpty = timelineResponse.getList().isEmpty();
-        mHideTimelineListLiveData.setValue(timelineResponse.getList().isEmpty());
+        mHideTimelineListLiveData.setValue(mCurrentPage == 1 && timelineResponse.getList().isEmpty());
         mHideMoreButtonLiveData.setValue(isEmpty || timelineResponse.getPager().getIsLastPage());
         mTimelineUiData.setTimelineItems(timelineResponse.getList());
 

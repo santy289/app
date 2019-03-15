@@ -197,16 +197,13 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rec_comments"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone" />
+                    android:layout_height="wrap_content" />
 
                 <RelativeLayout
                     android:id="@+id/lyt_comments"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/transparentArrow"
-                    android:visibility="gone"
-                    tools:visibility="visible">
+                    android:background="@color/transparentArrow">
 
                     <de.hdodenhof.circleimageview.CircleImageView
                         android:id="@+id/img_profile"

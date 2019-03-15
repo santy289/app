@@ -16,6 +16,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentCreateWorkflowBinding;
@@ -114,7 +115,9 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
                 .get(CreateWorkflowViewModel.class);
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String token = "Bearer " + prefs.getString("token", "");
+        String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
+        String loggedUserId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
+        String permissionsString = prefs.getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
 
         setupSubmitButton();
         setOnClickListeners();
@@ -122,7 +125,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         setupPeopleInvolvedRecycler();
         subscribe();
 
-        viewModel.initForm(token, mWorkflowListItem);
+        viewModel.initForm(token, mWorkflowListItem, loggedUserId, permissionsString);
 
         return view;
     }

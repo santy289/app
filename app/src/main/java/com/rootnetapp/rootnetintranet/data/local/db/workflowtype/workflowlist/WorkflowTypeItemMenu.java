@@ -1,12 +1,13 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist;
 
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
+
 import androidx.room.ColumnInfo;
 
 public class WorkflowTypeItemMenu {
+
     public int id;
-
     public String name;
-
     public int category;
 
     @ColumnInfo(name = "workflow_count")
@@ -14,6 +15,21 @@ public class WorkflowTypeItemMenu {
 
     @ColumnInfo(name = "original_id")
     private int originalId;
+
+    public WorkflowTypeItemMenu() {}
+
+    /**
+     * Mapping constructor to convert a {@link WorkflowTypeDb} into a {@link WorkflowTypeItemMenu}.
+     *
+     * @param workflowTypeDb object to map.
+     */
+    public WorkflowTypeItemMenu(WorkflowTypeDb workflowTypeDb) {
+        this.id = workflowTypeDb.getId();
+        this.name = workflowTypeDb.getName();
+        this.category = workflowTypeDb.getCategory() == null ? 0 : workflowTypeDb.getCategory();
+        this.workflowCount = workflowTypeDb.getWorkflowCount();
+        this.originalId = workflowTypeDb.getOriginalId();
+    }
 
     public int getCategory() {
         return category;

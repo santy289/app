@@ -245,6 +245,10 @@ public interface ApiInterface {
     @GET("intranet/workflows/types?all_versions=true&filter_counter_status=true")
     Observable<WorkflowTypeDbResponse> getWorkflowTypesDb(@Header("Authorization") String authorization);
 
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows/types?allowed=true")
+    Observable<WorkflowTypeDbResponse> getWorkflowTypesDbAllowedOnly(@Header("Authorization") String authorization);
+
 
     @Headers({"Domain-Name: api"})
     @GET("list/{id}/item")

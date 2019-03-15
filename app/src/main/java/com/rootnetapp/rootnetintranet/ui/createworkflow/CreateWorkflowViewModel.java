@@ -11,10 +11,9 @@ import android.util.Base64;
 import android.util.Log;
 import android.util.Patterns;
 
-import com.auth0.android.jwt.JWT;
 import com.google.android.gms.maps.model.LatLng;
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
+import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.Profile;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
@@ -62,10 +61,12 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.GeolocationViewModel;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.SelectedLocation;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragment;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
@@ -90,6 +91,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static android.app.Activity.RESULT_OK;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_DEFINE_SPECIFIC;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_OWNER;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_STATUS;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_TYPE;
@@ -152,7 +154,8 @@ class CreateWorkflowViewModel extends ViewModel {
         moshi = new Moshi.Builder().build();
     }
 
-    protected void initForm(String token, @Nullable WorkflowListItem item) {
+    protected void initForm(String token, @Nullable WorkflowListItem item, String userId,
+                            String userPermissions) {
         showLoading.setValue(true);
         if (formSettings == null) {
             formSettings = new FormSettings();
@@ -160,15 +163,28 @@ class CreateWorkflowViewModel extends ViewModel {
         this.mToken = token;
         this.mWorkflowListItem = item;
 
-        JWT jwt = new JWT(token.replace("Bearer ", ""));
-        String userId = jwt.getClaim(PreferenceKeys.PREF_PROFILE_ID).asString();
         if (userId != null && !userId.isEmpty()) mUserId = Integer.parseInt(userId);
+
+        checkPermissions(userPermissions);
 
         createWorkflowTypeItem();
     }
 
     protected void onCleared() {
         mDisposables.clear();
+    }
+
+    /**
+     * Verifies all of the user permissions related to this ViewModel and {@link CommentsFragment}.
+     * Hide the UI related to the unauthorized actions.
+     *
+     * @param permissionsString users permissions.
+     */
+    private void checkPermissions(String permissionsString) {
+        RootnetPermissionsUtils permissionsUtils = new RootnetPermissionsUtils(permissionsString);
+
+        boolean hasDefineSpecificApproverPermissions = permissionsUtils
+                .hasPermission(WORKFLOW_DEFINE_SPECIFIC);
     }
 
     private WorkflowMetas createMetaData(BaseFormItem formItem) {
@@ -552,7 +568,7 @@ class CreateWorkflowViewModel extends ViewModel {
             }
 
             // edit mode
-            getWorkflow(mToken, mWorkflowListItem.getWorkflowId());
+            getWorkflow(mWorkflowListItem.getWorkflowId());
         }
     }
 
@@ -563,55 +579,57 @@ class CreateWorkflowViewModel extends ViewModel {
      * and then send the form item to the UI.
      */
     private void createWorkflowTypeItem() {
-        //used to be setWorkflowTypes
+        showLoading.setValue(true);
+        Disposable disposable = mRepository
+                .getAllowedWorkflowTypes(mToken)
+                .subscribe(this::onWorkflowTypesSuccess, this::onFailure);
 
-        Disposable disposable = Observable.fromCallable(() -> {
-            List<WorkflowTypeItemMenu> types = mRepository.getWorklowTypeNames();
-            if (types == null || types.size() < 1) {
-                return false;
-            }
-
-            Option selectedOption = null; //used only in edit mode
-            List<Option> options = new ArrayList<>();
-            for (int i = 0; i < types.size(); i++) {
-                String name = types.get(i).getName();
-                Integer id = types.get(i).getId();
-                formSettings.setId(id);
-                formSettings.setName(name);
-
-                Option option = new Option(id, name);
-                options.add(option);
-
-                if (mWorkflowListItem != null && mWorkflowListItem.getWorkflowTypeId() == id) {
-                    selectedOption = option;
-                }
-            }
-
-            SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
-                    .setTitleRes(R.string.type)
-                    .setRequired(true)
-                    .setTag(TAG_WORKFLOW_TYPE)
-                    .setOptions(options)
-                    .setValue(selectedOption)
-                    .setEnabled(selectedOption == null) //if we are in edit mode, disable it
-                    .setVisible(selectedOption == null) //if we are in edit mode, hide it
-                    .setMachineName(MACHINE_NAME_TYPE)
-                    .build();
-
-            formSettings.getFormItems().add(singleChoiceFormItem);
-
-            return singleChoiceFormItem;
-        }).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(singleChoiceFormItem -> {
-                    showLoading.setValue(false);
-                    mAddWorkflowTypeItemLiveData
-                            .setValue((SingleChoiceFormItem) singleChoiceFormItem);
-                }, throwable -> {
-                    Log.d(TAG, "setWorkflowTypes: error " + throwable.getMessage());
-                    showLoading.setValue(false);
-                });
         mDisposables.add(disposable);
+    }
+
+    private void onWorkflowTypesSuccess(WorkflowTypeDbResponse workflowTypeDbResponse) {
+        List<WorkflowTypeDb> workflowTypeDbList = workflowTypeDbResponse.getList();
+        if (workflowTypeDbList == null || workflowTypeDbList.isEmpty()) {
+            return;
+        }
+
+        List<WorkflowTypeItemMenu> types = new ArrayList<>();
+
+        for (WorkflowTypeDb workflowTypeDb : workflowTypeDbList) {
+            types.add(new WorkflowTypeItemMenu(workflowTypeDb));
+        }
+
+        Option selectedOption = null; //used only in edit mode
+        List<Option> options = new ArrayList<>();
+        for (int i = 0; i < types.size(); i++) {
+            String name = types.get(i).getName();
+            int id = types.get(i).getId();
+            formSettings.setId(id);
+            formSettings.setName(name);
+
+            Option option = new Option(id, name);
+            options.add(option);
+
+            if (mWorkflowListItem != null && mWorkflowListItem.getWorkflowTypeId() == id) {
+                selectedOption = option;
+            }
+        }
+
+        SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
+                .setTitleRes(R.string.type)
+                .setRequired(true)
+                .setTag(TAG_WORKFLOW_TYPE)
+                .setOptions(options)
+                .setValue(selectedOption)
+                .setEnabled(selectedOption == null) //if we are in edit mode, disable it
+                .setVisible(selectedOption == null) //if we are in edit mode, hide it
+                .setMachineName(MACHINE_NAME_TYPE)
+                .build();
+
+        formSettings.getFormItems().add(singleChoiceFormItem);
+
+        showLoading.setValue(false);
+        mAddWorkflowTypeItemLiveData.setValue(singleChoiceFormItem);
     }
 
     /**
@@ -1247,12 +1265,11 @@ class CreateWorkflowViewModel extends ViewModel {
      * Performs a request to the remote repository to fetch the workflow information in order to
      * fill the form items.
      *
-     * @param auth       token
      * @param workflowId ID of the workflow that is being edited.
      */
-    private void getWorkflow(String auth, int workflowId) {
+    private void getWorkflow(int workflowId) {
         Disposable disposable = mRepository
-                .getWorkflow(auth, workflowId)
+                .getWorkflow(mToken, workflowId)
                 .subscribe(this::onWorkflowSuccess, this::onFailure);
         mDisposables.add(disposable);
     }

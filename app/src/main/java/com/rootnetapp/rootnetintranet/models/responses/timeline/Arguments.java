@@ -17,6 +17,8 @@ public class Arguments {
     private String description;
     @Json(name = "title")
     private String title;
+    @Json(name = "comment")
+    private String comment;
     @Json(name = "key")
     private String key;
     @Json(name = "workflow_type")
@@ -78,6 +80,14 @@ public class Arguments {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public String getKey() {

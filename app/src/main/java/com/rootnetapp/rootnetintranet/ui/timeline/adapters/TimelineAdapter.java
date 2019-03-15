@@ -46,7 +46,8 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
     private Fragment parent;
     private TimelineInterface anInterface;
 
-    public TimelineAdapter(List<TimelineItem> items, List<User> people, List<Interaction> interactions,
+    public TimelineAdapter(List<TimelineItem> items, List<User> people,
+                           List<Interaction> interactions,
                            TimelineViewModel viewModel, Fragment parent,
                            TimelineInterface anInterface) {
         this.items = items;
@@ -108,6 +109,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         }
 
         Spannable titleSpannable = null;
+        String description = null;
         if (author != null) {
             switch (item.getDescription().getText()) {
                 case TimelineAction.WORKFLOW_CREATED:
@@ -137,6 +139,8 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                     titleSpannable = getSpannableTitle(
                             R.string.timeline_action_workflow_comment_created, author.getFullName(),
                             arguments.getName());
+
+                    description = item.getDescription().getArguments().getComment();
                     break;
             }
         }
@@ -147,13 +151,14 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
             holder.binding.tvTitle.setText(title);
         }
 
-        if (item.getDescription().getArguments().getDescription() != null) {
-            holder.binding.tvDescription.setText(context.getString(R.string.timeline_description,
-                    item.getDescription().getArguments().getDescription()));
-        }
-        if (item.getDescription().getArguments().getCurrentStatus() != null) {
+        if (description != null) {
+            holder.binding.tvDescription.setText(description);
+        } else if (item.getDescription().getArguments().getCurrentStatus() != null) {
             holder.binding.tvDescription.setText(context.getString(R.string.timeline_current_status,
                     item.getDescription().getArguments().getCurrentStatus().getName()));
+        } else if (item.getDescription().getArguments().getDescription() != null) {
+            holder.binding.tvDescription.setText(context.getString(R.string.timeline_description,
+                    item.getDescription().getArguments().getDescription()));
         }
 
         TimeAgoMessages messages = new TimeAgoMessages.Builder().withLocale(Locale.getDefault())
@@ -190,7 +195,8 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                 holder.binding.lytComments.setVisibility(View.GONE);
             }
         });
-        holder.binding.tvComments.setOnTouchListener(new OnTouchClickListener(holder.binding.tvComments));
+        holder.binding.tvComments
+                .setOnTouchListener(new OnTouchClickListener(holder.binding.tvComments));
 
         if (itemInteraction == null) {
             holder.binding.lytThumbsUp.setVisibility(View.GONE);

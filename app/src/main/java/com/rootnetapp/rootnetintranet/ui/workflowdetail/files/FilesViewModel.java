@@ -25,7 +25,6 @@ import com.rootnetapp.rootnetintranet.models.responses.templates.Templates;
 import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.presets.Preset;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragment;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,7 +39,6 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 import static android.app.Activity.RESULT_OK;
-import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_FILE_DELETE;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_FILE_VIEW;
 
 public class FilesViewModel extends ViewModel {
@@ -102,7 +100,7 @@ public class FilesViewModel extends ViewModel {
     }
 
     /**
-     * Verifies all of the user permissions related to this ViewModel and {@link CommentsFragment}.
+     * Verifies all of the user permissions related to this ViewModel and {@link FilesFragment}.
      * Hide the UI related to the unauthorized actions.
      *
      * @param permissionsString users permissions.

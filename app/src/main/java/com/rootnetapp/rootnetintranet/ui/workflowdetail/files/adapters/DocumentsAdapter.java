@@ -27,12 +27,22 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder> 
     private List<DocumentsFile> files;
     private Context context;
     private FilesFragmentInterface mFilesFragmentInterface;
+    private boolean showFileDownloadButton;
+    private boolean showTemplateDownloadButton;
 
     public DocumentsAdapter(FilesFragmentInterface filesFragmentInterface,
                             List<Preset> totalDocuments, List<DocumentsFile> files) {
         this.mFilesFragmentInterface = filesFragmentInterface;
         this.totalDocuments = totalDocuments;
         this.files = files;
+    }
+
+    public void setShowFileDownloadButton(boolean show) {
+        showFileDownloadButton = show;
+    }
+
+    public void setShowTemplateDownloadButton(boolean show) {
+        showTemplateDownloadButton = show;
     }
 
     @NonNull
@@ -61,6 +71,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder> 
                 (compoundButton, b) -> item.setSelected(b));
         item.setSelected(holder.binding.chbxItem.isChecked());
         if (file != null) {
+            holder.binding.imgDownload.setVisibility(showFileDownloadButton ? View.VISIBLE : View.GONE);
+
             holder.binding.imgUploaded.setImageResource(R.drawable.ic_check_accent_24dp);
             holder.binding.imgUploaded
                     .setColorFilter(ContextCompat.getColor(context, R.color.green),
@@ -72,7 +84,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsViewholder> 
         } else {
             if (item.getPresetFile() != null) {
                 holder.binding.tvFileName.setText(item.getPresetFile().getFileName());
-                holder.binding.imgDownload.setVisibility(View.VISIBLE);
+                holder.binding.imgDownload.setVisibility(showTemplateDownloadButton ? View.VISIBLE : View.GONE);
             } else {
                 holder.binding.imgDownload.setVisibility(View.GONE);
             }

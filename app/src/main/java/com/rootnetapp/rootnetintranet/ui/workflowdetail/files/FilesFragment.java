@@ -107,8 +107,13 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
         filesViewModel.showLoading.observe(this, this::showLoading);
         filesViewModel.setDocumentsView.observe(this, this::setDocumentsView);
         filesViewModel.setTemplateTitleWith.observe(this, this::setTemplateTitleWith);
-        filesViewModel.showTemplateDocumentsUiEmpty.observe(this, this::showTemplateDocumentsUiEmpty);
-        filesViewModel.showTemplateDocumentsUiPermissions.observe(this, this::showTemplateDocumentsUiPermissions);
+        filesViewModel.showTemplateDocumentsUiEmpty
+                .observe(this, this::showTemplateDocumentsUiEmpty);
+        filesViewModel.showTemplateDocumentsUiPermissions
+                .observe(this, this::showTemplateDocumentsUiPermissions);
+        filesViewModel.showDownloadTemplateButton
+                .observe(this, this::setShowDownloadTemplateButton);
+        filesViewModel.showDownloadFileButton.observe(this, this::setShowDownloadFileButton);
     }
 
     private void setOnClickListeners() {
@@ -264,6 +269,9 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
                 filesViewModel.getPresets(),
                 documents
         );
+        mDocumentsAdapter
+                .setShowTemplateDownloadButton(filesViewModel.hasViewTemplatesPermissions());
+        mDocumentsAdapter.setShowFileDownloadButton(filesViewModel.hasViewFilesPermissions());
         mBinding.rvFiles.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvFiles.setAdapter(mDocumentsAdapter);
         mBinding.rvFiles.setNestedScrollingEnabled(false);
@@ -370,5 +378,19 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
                                            @NonNull int[] grantResults) {
         filesViewModel.handleRequestPermissionsResult(requestCode, grantResults);
+    }
+
+    @UiThread
+    private void setShowDownloadTemplateButton(boolean show) {
+        if (mDocumentsAdapter == null) return;
+
+        mDocumentsAdapter.setShowTemplateDownloadButton(show);
+    }
+
+    @UiThread
+    private void setShowDownloadFileButton(boolean show) {
+        if (mDocumentsAdapter == null) return;
+
+        mDocumentsAdapter.setShowFileDownloadButton(show);
     }
 }

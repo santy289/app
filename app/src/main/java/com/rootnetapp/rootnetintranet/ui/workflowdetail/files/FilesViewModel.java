@@ -39,7 +39,9 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 import static android.app.Activity.RESULT_OK;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.TEMPLATE_VIEW;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_FILE_VIEW;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_TEMPLATE_VIEW;
 
 public class FilesViewModel extends ViewModel {
 
@@ -61,6 +63,8 @@ public class FilesViewModel extends ViewModel {
     protected MutableLiveData<Boolean> showLoading;
     protected MutableLiveData<Boolean> showTemplateDocumentsUiEmpty;
     protected MutableLiveData<Boolean> showTemplateDocumentsUiPermissions;
+    protected MutableLiveData<Boolean> showDownloadTemplateButton;
+    protected MutableLiveData<Boolean> showDownloadFileButton;
     protected MutableLiveData<String> setTemplateTitleWith;
     protected MutableLiveData<List<DocumentsFile>> setDocumentsView;
 
@@ -71,12 +75,16 @@ public class FilesViewModel extends ViewModel {
     private DocumentsFile mDocumentFileToDownload;
     private Preset mPresetToDownload;
     private boolean hasViewPermissions;
+    private boolean hasViewFilesPermissions;
+    private boolean hasViewTemplatesPermissions;
 
     protected FilesViewModel(FilesRepository filesRepository) {
         this.mRepository = filesRepository;
         this.showLoading = new MutableLiveData<>();
         this.showTemplateDocumentsUiEmpty = new MutableLiveData<>();
         this.showTemplateDocumentsUiPermissions = new MutableLiveData<>();
+        this.showDownloadTemplateButton = new MutableLiveData<>();
+        this.showDownloadFileButton = new MutableLiveData<>();
         this.setTemplateTitleWith = new MutableLiveData<>();
         this.setDocumentsView = new MutableLiveData<>();
     }
@@ -108,9 +116,21 @@ public class FilesViewModel extends ViewModel {
     private void checkPermissions(String permissionsString) {
         RootnetPermissionsUtils permissionsUtils = new RootnetPermissionsUtils(permissionsString);
 
-        hasViewPermissions = permissionsUtils.hasPermission(WORKFLOW_FILE_VIEW);
+        hasViewPermissions = permissionsUtils.hasPermission(TEMPLATE_VIEW);
+        hasViewTemplatesPermissions = permissionsUtils.hasPermission(WORKFLOW_TEMPLATE_VIEW);
+        hasViewFilesPermissions = permissionsUtils.hasPermission(WORKFLOW_FILE_VIEW);
 
         showTemplateDocumentsUiPermissions.setValue(hasViewPermissions);
+        showDownloadTemplateButton.setValue(hasViewTemplatesPermissions);
+        showDownloadFileButton.setValue(hasViewFilesPermissions);
+    }
+
+    protected boolean hasViewTemplatesPermissions(){
+        return hasViewTemplatesPermissions;
+    }
+
+    protected boolean hasViewFilesPermissions(){
+        return hasViewFilesPermissions;
     }
 
     protected List<Preset> getPresets() {

@@ -139,6 +139,7 @@
     <string name="day">Día</string>
     <string name="filtered_by">Filtrado por:</string>
     <string name="comment_ammount">Comentarios</string>
+    <string name="view_comments">Ver comentarios</string>
     <string name="add_comment">Añadir comentario</string>
     <string name="today">Hoy</string>
     <string name="current_week">Semana Actual</string>
@@ -353,6 +354,10 @@
     <plurals name="timeline_comment_replies">
         <item quantity="one" formatted="true">1 respuesta</item>
         <item quantity="other" formatted="true">%d respuestas</item>
+    </plurals>
+    <plurals name="timeline_comments">
+        <item formatted="true" quantity="one">1 comentario</item>
+        <item formatted="true" quantity="other">%d comentarios</item>
     </plurals>
 
     <!--GeolocationActivity-->

@@ -197,6 +197,14 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         });
         holder.binding.tvComments
                 .setOnTouchListener(new OnTouchClickListener(holder.binding.tvComments));
+        if (!subComments.isEmpty()) {
+            holder.binding.tvComments.setText(
+                    context.getResources().getQuantityString(
+                            R.plurals.timeline_comments,
+                            subComments.size(),
+                            subComments.size())
+            );
+        }
 
         if (itemInteraction == null) {
             holder.binding.lytThumbsUp.setVisibility(View.GONE);

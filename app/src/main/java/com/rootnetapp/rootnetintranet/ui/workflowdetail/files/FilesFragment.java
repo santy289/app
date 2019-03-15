@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailFilesBinding;
@@ -83,11 +84,13 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
 
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String token = "Bearer " + prefs.getString("token", "");
+        String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
+        String loggedUserId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
+        String permissionsString = prefs.getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
 
         setOnClickListeners();
         subscribe();
-        filesViewModel.initDetails(token, mWorkflowListItem);
+        filesViewModel.initDetails(token, mWorkflowListItem, loggedUserId, permissionsString);
 
         return view;
     }
@@ -104,7 +107,8 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
         filesViewModel.showLoading.observe(this, this::showLoading);
         filesViewModel.setDocumentsView.observe(this, this::setDocumentsView);
         filesViewModel.setTemplateTitleWith.observe(this, this::setTemplateTitleWith);
-        filesViewModel.showTemplateDocumentsUi.observe(this, this::showTemplateDocumentsUi);
+        filesViewModel.showTemplateDocumentsUiEmpty.observe(this, this::showTemplateDocumentsUiEmpty);
+        filesViewModel.showTemplateDocumentsUiPermissions.observe(this, this::showTemplateDocumentsUiPermissions);
     }
 
     private void setOnClickListeners() {
@@ -178,13 +182,14 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
     }
 
     /**
-     * Whether to display the templates list or not, the only scenario where this list would be
-     * hidden includes an absence of templates.
+     * Whether to display the templates list or not due to the absence of templates.
      *
      * @param show whether to show the UI.
      */
     @UiThread
-    private void showTemplateDocumentsUi(boolean show) {
+    private void showTemplateDocumentsUiEmpty(boolean show) {
+        mBinding.tvNoPermissions.setVisibility(View.INVISIBLE);
+
         if (show) {
             mBinding.rvFiles.setVisibility(View.VISIBLE);
             mBinding.btnAttachment.setVisibility(View.VISIBLE);
@@ -197,6 +202,34 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
             mBinding.btnUpload.setVisibility(View.GONE);
             mBinding.tvFileUploaded.setVisibility(View.GONE);
             mBinding.tvNoFiles.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Whether to display the templates list or not due to no view permissions
+     *
+     * @param show whether to show the UI.
+     */
+    @UiThread
+    private void showTemplateDocumentsUiPermissions(boolean show) {
+        mBinding.tvNoFiles.setVisibility(View.INVISIBLE);
+
+        if (show) {
+            mBinding.rvFiles.setVisibility(View.VISIBLE);
+            mBinding.btnAttachment.setVisibility(View.VISIBLE);
+            mBinding.btnUpload.setVisibility(View.VISIBLE);
+//            mBinding.tvFileUploaded.setVisibility(View.VISIBLE); //only show when a file was attached
+            mBinding.tvTitleFiles.setVisibility(View.VISIBLE);
+            mBinding.viewTitleFiles.setVisibility(View.VISIBLE);
+            mBinding.tvNoPermissions.setVisibility(View.GONE);
+        } else {
+            mBinding.rvFiles.setVisibility(View.GONE);
+            mBinding.btnAttachment.setVisibility(View.GONE);
+            mBinding.btnUpload.setVisibility(View.GONE);
+            mBinding.tvFileUploaded.setVisibility(View.GONE);
+            mBinding.tvTitleFiles.setVisibility(View.GONE);
+            mBinding.viewTitleFiles.setVisibility(View.GONE);
+            mBinding.tvNoPermissions.setVisibility(View.VISIBLE);
         }
     }
 

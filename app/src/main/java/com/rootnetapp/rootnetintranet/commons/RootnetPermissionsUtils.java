@@ -98,7 +98,6 @@ public class RootnetPermissionsUtils {
      * Determines the ability to open and close a workflow.
      */
     public static final String WORKFLOW_OPEN_ALL = "workflow_open_all";
-    public static final String WORKFLOW_ADD_FILE = "workflow_add_file";
     /**
      * Determines the ability to view an inactive workflow.
      */
@@ -128,6 +127,7 @@ public class RootnetPermissionsUtils {
      * Determines the ability to upload files to a workflow.
      */
     public static final String WORKFLOW_FILE_CREATE = "workflow_file_create";
+    public static final String WORKFLOW_ADD_FILE = "workflow_add_file";
     /**
      * Determines the ability to upload files to all workflows.
      */

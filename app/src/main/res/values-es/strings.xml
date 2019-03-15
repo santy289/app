@@ -306,6 +306,7 @@
     <string name="workflow_detail_files_fragment_cannot_open_file">Su dispositivo no puede abrir este archivo.</string>
     <string name="workflow_detail_files_fragment_preset_unavailable">Este template no está disponible.</string>
     <string name="workflow_detail_files_fragment_permissions_not_granted">No es posible descargar el archivo debido a que los permisos no fueron otorgados.</string>
+    <string name="workflow_detail_files_fragment_no_view_permissions">No tienes suficientes permisos para ver los archivos</string>
 
     <!--MainActivity-->
     <string name="bottom_nav_timeline">Timeline</string>

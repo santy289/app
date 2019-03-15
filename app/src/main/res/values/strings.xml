@@ -297,7 +297,7 @@
     <string name="workflow_detail_comments_fragment_select_file">Select a file to upload</string>
     <string name="workflow_detail_comments_fragment_open_file">Open File</string>
     <string name="workflow_detail_comments_fragment_cannot_open_file">This file cannot be opened by your device.</string>
-    <string name="workflow_detail_comments_fragment_no_view_permissions">You do not have permissions to view the comments.</string>
+    <string name="workflow_detail_comments_fragment_no_view_permissions">You do not have permissions to view the comments</string>
     <!--FilesFragment-->
     <string name="workflow_detail_files_fragment_title">@string/workflow_detail_files_fragment_documents</string>
     <string name="workflow_detail_files_fragment_documents">Documents</string>
@@ -309,6 +309,7 @@
     <string name="workflow_detail_files_fragment_cannot_open_file">This file cannot be opened by your device.</string>
     <string name="workflow_detail_files_fragment_preset_unavailable">This preset is not available to download.</string>
     <string name="workflow_detail_files_fragment_permissions_not_granted">Cannot download the file because the permissions were not granted.</string>
+    <string name="workflow_detail_files_fragment_no_view_permissions">You do not have permissions to view the files</string>
 
     <!--MainActivity-->
     <string name="bottom_nav_timeline">Timeline</string>

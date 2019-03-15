@@ -29,6 +29,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <View
+                android:id="@+id/view_title_files"
                 android:layout_width="0dp"
                 android:layout_height="2dp"
                 android:layout_marginStart="16dp"
@@ -39,6 +40,13 @@
                 app:layout_constraintStart_toEndOf="@id/tv_title_files"
                 app:layout_constraintTop_toTopOf="@id/tv_title_files" />
 
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="tv_title_files,view_title_files" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_files"
                 android:layout_width="match_parent"
@@ -47,7 +55,7 @@
                 android:padding="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_title_files" />
+                app:layout_constraintTop_toBottomOf="@id/barrier_title" />
 
             <TextView
                 android:id="@+id/tv_no_files"
@@ -60,7 +68,21 @@
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_title_files"
+                app:layout_constraintTop_toBottomOf="@id/barrier_title"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/tv_no_permissions"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="8dp"
+                android:text="@string/workflow_detail_files_fragment_no_view_permissions"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/barrier_title"
                 tools:visibility="visible" />
 
             <Button

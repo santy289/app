@@ -101,7 +101,7 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
 
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String token = "Bearer " + prefs.getString("token", "");
+        String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
         String loggedUserId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
         String permissionsString = prefs.getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
 

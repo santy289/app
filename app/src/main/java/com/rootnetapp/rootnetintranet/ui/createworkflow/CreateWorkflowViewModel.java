@@ -19,6 +19,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.profile.Profile;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.DefaultRoleApprover;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
@@ -148,6 +149,8 @@ class CreateWorkflowViewModel extends ViewModel {
     private int mUserId;
     private int mFieldCount, mFieldCompleted;
     private boolean hasDefineSpecificApproverPermissions;
+    private List<WorkflowTypeDb> mWorkflowTypeDbList;
+    private WorkflowTypeDb mSelectedWorkflowType;
 
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.mRepository = createWorkflowRepository;
@@ -402,6 +405,9 @@ class CreateWorkflowViewModel extends ViewModel {
             return;
         }
 
+        mSelectedWorkflowType = mWorkflowTypeDbList.stream().filter(
+                workflowTypeDb -> id == workflowTypeDb.getId()).findAny().orElse(null);
+
         showLoading.setValue(true);
         clearForm();
         formSettings.setWorkflowTypeIdSelected(id);
@@ -589,14 +595,14 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void onWorkflowTypesSuccess(WorkflowTypeDbResponse workflowTypeDbResponse) {
-        List<WorkflowTypeDb> workflowTypeDbList = workflowTypeDbResponse.getList();
-        if (workflowTypeDbList == null || workflowTypeDbList.isEmpty()) {
+        mWorkflowTypeDbList = workflowTypeDbResponse.getList();
+        if (mWorkflowTypeDbList == null || mWorkflowTypeDbList.isEmpty()) {
             return;
         }
 
         List<WorkflowTypeItemMenu> types = new ArrayList<>();
 
-        for (WorkflowTypeDb workflowTypeDb : workflowTypeDbList) {
+        for (WorkflowTypeDb workflowTypeDb : mWorkflowTypeDbList) {
             types.add(new WorkflowTypeItemMenu(workflowTypeDb));
         }
 
@@ -2018,6 +2024,15 @@ class CreateWorkflowViewModel extends ViewModel {
                             }
                         }
 
+                        //check for default approvers if value is null
+                        DefaultRoleApprover defaultApprover = null;
+                        if (value == null && mSelectedWorkflowType != null) {
+                            defaultApprover = mSelectedWorkflowType.getDefaultRoleApprovers()
+                                    .stream().filter(
+                                            defaultRoleApprover -> approver.entityId == defaultRoleApprover
+                                                    .getRoleId()).findAny().orElse(null);
+                        }
+
                         //get options for each role
                         List<Option> approverOptions = new ArrayList<>();
                         for (int i = 0; i < profileIds.size(); i++) {
@@ -2031,6 +2046,12 @@ class CreateWorkflowViewModel extends ViewModel {
 
                             Option option = new Option(id, name);
                             approverOptions.add(option);
+
+                            //verify if there is a default approver
+                            if (defaultApprover != null && defaultApprover.getProfileId() == option
+                                    .getId()) {
+                                value = option;
+                            }
                         }
 
                         //ignore item if there are no options

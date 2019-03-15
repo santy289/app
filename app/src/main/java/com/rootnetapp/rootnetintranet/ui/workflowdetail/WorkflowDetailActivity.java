@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.ActivityWorkflowDetailBinding;
@@ -53,6 +54,7 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     private WorkflowDetailViewModel workflowDetailViewModel;
     private ActivityWorkflowDetailBinding mBinding;
     private WorkflowDetailViewPagerAdapter mViewPagerAdapter;
+    private MenuItem mExportPdfMenuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +66,8 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 .get(WorkflowDetailViewModel.class);
 
         SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String token = "Bearer " + prefs.getString("token", "");
+        String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
+        String permissionsString = prefs.getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
 
         subscribe();
 
@@ -75,10 +78,10 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         if (mWorkflowListItem == null) {
             String workflowId;
             workflowId = getIntent().getStringExtra(INTENT_EXTRA_ID);
-            workflowDetailViewModel.initWithId(token, workflowId);
+            workflowDetailViewModel.initWithId(token, workflowId, permissionsString);
             subscribeForIdInit();
         } else {
-            workflowDetailViewModel.initWithDetails(token, mWorkflowListItem);
+            workflowDetailViewModel.initWithDetails(token, mWorkflowListItem, permissionsString);
         }
     }
 
@@ -152,6 +155,8 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 .observe(this, this::updateToolbarSubtitleWithWorkflowVersion);
         workflowDetailViewModel.getObservableShowNotFoundView()
                 .observe(this, this::showNotFoundView);
+        workflowDetailViewModel.getObservableShowExportPdfButton()
+                .observe(this, this::showExportPdfMenuItem);
 
         workflowDetailViewModel.showLoading.observe(this, this::showLoading);
     }
@@ -233,6 +238,13 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         mBinding.lytDetails.setVisibility(showNotFound ? View.GONE : View.VISIBLE);
     }
 
+    @UiThread
+    private void showExportPdfMenuItem(boolean show) {
+        if (mExportPdfMenuItem == null) return;
+
+        mExportPdfMenuItem.setVisible(show);
+    }
+
     /**
      * Verify whether the user has granted permissions to read/write the external storage.
      *
@@ -266,6 +278,8 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_workflow_detail, menu);
+        mExportPdfMenuItem = menu.findItem(R.id.export_pdf);
+        mExportPdfMenuItem.setVisible(workflowDetailViewModel.hasExportPermissions());
         return super.onCreateOptionsMenu(menu);
     }
 

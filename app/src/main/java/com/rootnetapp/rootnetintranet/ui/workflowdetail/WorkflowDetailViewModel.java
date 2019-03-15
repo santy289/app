@@ -4,6 +4,7 @@ import android.content.pm.PackageManager;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -25,8 +26,11 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import retrofit2.HttpException;
 
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EXPORT;
+
 public class WorkflowDetailViewModel extends ViewModel {
 
+    private static final String TAG = "WorkflowDetailViewModel";
     private static final int INDEX_STATUS_OPEN = 0;
     private static final int INDEX_STATUS_CLOSED = 1;
 
@@ -40,6 +44,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<WorkflowListItem> initUiWithWorkflowListItem;
     private MutableLiveData<String> mWorkflowTypeVersionLiveData;
     private MutableLiveData<Boolean> mShowNotFoundViewLiveData;
+    private MutableLiveData<Boolean> mShowExportPdfButtonLiveData;
     private LiveData<WorkflowListItem> handleRepoWorkflowRequest;
 
     protected MutableLiveData<Boolean> showLoading;
@@ -52,8 +57,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     private String mToken;
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the mWorkflow.
     private WorkflowDb mWorkflow; // Not in DB and more complete response from network.
-
-    private static final String TAG = "WorkflowDetailViewModel";
+    private boolean hasExportPermissions;
 
     public WorkflowDetailViewModel(WorkflowDetailRepository workflowDetailRepository) {
         this.mRepository = workflowDetailRepository;
@@ -69,16 +73,20 @@ public class WorkflowDetailViewModel extends ViewModel {
     }
 
     /**
-     * Initialize the Workflow detail screen using a WorkflowListItem coming from the user
-     * selection on the workflow list.
+     * Initialize the Workflow detail screen using a WorkflowListItem coming from the user selection
+     * on the workflow list.
      *
-     * @param token
-     * @param workflow
+     * @param token             auth token
+     * @param workflow          workflow item
+     * @param permissionsString user permissions
      */
-    protected void initWithDetails(String token, WorkflowListItem workflow) {
+    protected void initWithDetails(String token, WorkflowListItem workflow, String permissionsString) {
         this.mToken = token;
         this.mWorkflowListItem = workflow;
         initUiWithWorkflowListItem.setValue(workflow);
+
+        checkPermissions(permissionsString);
+
         getWorkflow(this.mToken, this.mWorkflowListItem.getWorkflowId());
     }
 
@@ -86,10 +94,11 @@ public class WorkflowDetailViewModel extends ViewModel {
      * Initialize the Workflow detail screen using an id. This method is responsible for looking the
      * actual WorkflowDb object from the local database or network.
      *
-     * @param token
-     * @param id
+     * @param token             auth token
+     * @param id workflow id
+     * @param permissionsString user permissions
      */
-    protected void initWithId(String token, String id) {
+    protected void initWithId(String token, String id, String permissionsString) {
         this.mToken = token;
 
         handleRepoWorkflowRequest = Transformations.map(
@@ -101,7 +110,27 @@ public class WorkflowDetailViewModel extends ViewModel {
                 }
         );
 
+        checkPermissions(permissionsString);
+
         mRepository.getWorkflowFromDataSources(token, Integer.valueOf(id));
+    }
+
+    /**
+     * Verifies all of the user permissions related to this ViewModel and {@link WorkflowDetailActivity}.
+     * Hide the UI related to the unauthorized actions.
+     *
+     * @param permissionsString users permissions.
+     */
+    private void checkPermissions(String permissionsString) {
+        RootnetPermissionsUtils permissionsUtils = new RootnetPermissionsUtils(permissionsString);
+
+        hasExportPermissions = permissionsUtils.hasPermission(WORKFLOW_EXPORT);
+
+        mShowExportPdfButtonLiveData.setValue(hasExportPermissions);
+    }
+
+    protected boolean hasExportPermissions(){
+        return hasExportPermissions;
     }
 
     /**
@@ -281,6 +310,13 @@ public class WorkflowDetailViewModel extends ViewModel {
             mShowNotFoundViewLiveData = new MutableLiveData<>();
         }
         return mShowNotFoundViewLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowExportPdfButton() {
+        if (mShowExportPdfButtonLiveData == null) {
+            mShowExportPdfButtonLiveData = new MutableLiveData<>();
+        }
+        return mShowExportPdfButtonLiveData;
     }
 
     protected LiveData<WorkflowListItem> getObservableWorflowListItem() {

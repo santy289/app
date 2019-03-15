@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="@dimen/filters_width"
@@ -138,6 +138,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/clear_filters"
+                app:backgroundTint="@color/colorAccent"
                 style="?android:attr/borderlessButtonStyle"/>
 
             <View

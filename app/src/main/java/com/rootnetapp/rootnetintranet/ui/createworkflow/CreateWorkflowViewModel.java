@@ -147,6 +147,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private int mQueuedFile;
     private int mUserId;
     private int mFieldCount, mFieldCompleted;
+    private boolean hasDefineSpecificApproverPermissions;
 
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.mRepository = createWorkflowRepository;
@@ -183,7 +184,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private void checkPermissions(String permissionsString) {
         RootnetPermissionsUtils permissionsUtils = new RootnetPermissionsUtils(permissionsString);
 
-        boolean hasDefineSpecificApproverPermissions = permissionsUtils
+        hasDefineSpecificApproverPermissions = permissionsUtils
                 .hasPermission(WORKFLOW_DEFINE_SPECIFIC);
     }
 
@@ -1844,8 +1845,7 @@ class CreateWorkflowViewModel extends ViewModel {
      */
     private void createProfilesFormItems(WorkflowTypeDb workflowTypeDb) {
 
-        Disposable disposable;
-        disposable = mRepository
+        Disposable disposable = mRepository
                 .getProfiles(mToken, true)
                 .subscribe(profileResponse -> {
                     showLoading.setValue(false);
@@ -1872,8 +1872,8 @@ class CreateWorkflowViewModel extends ViewModel {
                             .setTag(TAG_OWNER)
                             .setOptions(userOptions)
                             .setValue(selection)
-                            .setEnabled(
-                                    mWorkflow == null) //disable for edit mode, cannot edit the owner
+                            //enable only if the user has permissions and it's not edit mode
+                            .setEnabled(hasDefineSpecificApproverPermissions && mWorkflow == null)
                             .setMachineName(MACHINE_NAME_OWNER)
                             .build();
 
@@ -1907,75 +1907,83 @@ class CreateWorkflowViewModel extends ViewModel {
                     //endregion
 
                     //region Global Approvers
-                    //verify selected values
-                    List<BaseOption> globalApproversValues = null;
-                    if (mWorkflow != null) {
-                        globalApproversValues = new ArrayList<>();
-                        for (Integer id : mWorkflow.getSpecificApprovers().global) {
-                            Profile profile = Profile.getProfileByIdFromList(profiles, id);
-
-                            if (profile == null) continue;
-
-                            Option option = new Option(id, profile.getFullName());
-                            globalApproversValues.add(option);
-                        }
-                    }
-
-                    multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
-                            .setTitleRes(R.string.global_approvers_form)
-                            .setRequired(false)
-                            .setTag(TAG_GLOBAL_APPROVERS)
-                            .setOptions(userOptions)
-                            .setValues(globalApproversValues)
-                            .build();
-
-                    mAddPeopleInvolvedFormItemLiveData.setValue(multipleChoiceFormItem);
-                    //endregion
-
-                    //region Specific Approvers
-                    List<Status> statuses = workflowTypeDb.getStatus();
-                    if (statuses != null && !statuses.isEmpty()) {
+                    //check for user permissions
+                    if (hasDefineSpecificApproverPermissions) {
                         //verify selected values
-                        List<BaseOption> specificApproversValues = null;
+                        List<BaseOption> globalApproversValues = null;
                         if (mWorkflow != null) {
-                            specificApproversValues = new ArrayList<>();
-                            for (StatusSpecific statusSpecific : mWorkflow
-                                    .getSpecificApprovers().statusSpecific) {
-                                Profile profile = Profile
-                                        .getProfileByIdFromList(profiles, statusSpecific.user);
-                                Status status = Status
-                                        .getStatusByIdFromList(statuses, statusSpecific.status);
+                            globalApproversValues = new ArrayList<>();
+                            for (Integer id : mWorkflow.getSpecificApprovers().global) {
+                                Profile profile = Profile.getProfileByIdFromList(profiles, id);
 
-                                if (profile == null || status == null) continue;
+                                if (profile == null) continue;
 
-                                Option userOption = new Option(profile.getId(),
-                                        profile.getFullName());
-                                Option statusOption = new Option(status.getId(), status.getName());
-                                DoubleOption doubleOption = new DoubleOption(userOption,
-                                        statusOption);
-                                specificApproversValues.add(doubleOption);
+                                Option option = new Option(id, profile.getFullName());
+                                globalApproversValues.add(option);
                             }
                         }
 
-                        List<Option> statusOptions = new ArrayList<>();
-                        for (int i = 0; i < statuses.size(); i++) {
-                            String name = statuses.get(i).getName();
-                            Integer id = statuses.get(i).getId();
-
-                            Option option = new Option(id, name);
-                            statusOptions.add(option);
-                        }
-
-                        DoubleMultipleChoiceFormItem doubleMultipleChoiceFormItem = new DoubleMultipleChoiceFormItem.Builder()
-                                .setTitleRes(R.string.specific_approvers_form)
+                        multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
+                                .setTitleRes(R.string.global_approvers_form)
                                 .setRequired(false)
-                                .setTag(TAG_SPECIFIC_APPROVERS)
-                                .setFirstOptions(userOptions)
-                                .setSecondOptions(statusOptions)
-                                .setValues(specificApproversValues)
+                                .setTag(TAG_GLOBAL_APPROVERS)
+                                .setOptions(userOptions)
+                                .setValues(globalApproversValues)
                                 .build();
 
-                        mAddPeopleInvolvedFormItemLiveData.setValue(doubleMultipleChoiceFormItem);
+                        mAddPeopleInvolvedFormItemLiveData.setValue(multipleChoiceFormItem);
+                    }
+                    //endregion
+
+                    //region Specific Approvers
+                    //check for user permissions
+                    if (hasDefineSpecificApproverPermissions) {
+                        List<Status> statuses = workflowTypeDb.getStatus();
+                        if (statuses != null && !statuses.isEmpty()) {
+                            //verify selected values
+                            List<BaseOption> specificApproversValues = null;
+                            if (mWorkflow != null) {
+                                specificApproversValues = new ArrayList<>();
+                                for (StatusSpecific statusSpecific : mWorkflow
+                                        .getSpecificApprovers().statusSpecific) {
+                                    Profile profile = Profile
+                                            .getProfileByIdFromList(profiles, statusSpecific.user);
+                                    Status status = Status
+                                            .getStatusByIdFromList(statuses, statusSpecific.status);
+
+                                    if (profile == null || status == null) continue;
+
+                                    Option userOption = new Option(profile.getId(),
+                                            profile.getFullName());
+                                    Option statusOption = new Option(status.getId(),
+                                            status.getName());
+                                    DoubleOption doubleOption = new DoubleOption(userOption,
+                                            statusOption);
+                                    specificApproversValues.add(doubleOption);
+                                }
+                            }
+
+                            List<Option> statusOptions = new ArrayList<>();
+                            for (int i = 0; i < statuses.size(); i++) {
+                                String name = statuses.get(i).getName();
+                                Integer id = statuses.get(i).getId();
+
+                                Option option = new Option(id, name);
+                                statusOptions.add(option);
+                            }
+
+                            DoubleMultipleChoiceFormItem doubleMultipleChoiceFormItem = new DoubleMultipleChoiceFormItem.Builder()
+                                    .setTitleRes(R.string.specific_approvers_form)
+                                    .setRequired(false)
+                                    .setTag(TAG_SPECIFIC_APPROVERS)
+                                    .setFirstOptions(userOptions)
+                                    .setSecondOptions(statusOptions)
+                                    .setValues(specificApproversValues)
+                                    .build();
+
+                            mAddPeopleInvolvedFormItemLiveData
+                                    .setValue(doubleMultipleChoiceFormItem);
+                        }
                     }
                     //endregion
 
@@ -2033,6 +2041,8 @@ class CreateWorkflowViewModel extends ViewModel {
                                 .setRequired(workflowTypeDb.isDefineRoles())
                                 .setTag(approver.entityId)
                                 .setOptions(approverOptions)
+                                //check for user permissions
+                                .setEnabled(hasDefineSpecificApproverPermissions)
                                 .setValue(value)
                                 .build();
 

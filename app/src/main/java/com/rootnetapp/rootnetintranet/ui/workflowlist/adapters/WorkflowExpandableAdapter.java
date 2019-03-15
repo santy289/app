@@ -28,12 +28,17 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
     private final int VIEW_PROG = 0;
 
     private WorkflowFragmentInterface anInterface;
+    private boolean showViewWorkflowButton;
 
     public WorkflowExpandableAdapter(WorkflowFragmentInterface anInterface) {
         super(WorkflowExpandableAdapter.DIFF_CALLBACK);
         this.anInterface = anInterface;
         this.expandedItems = new ArrayMap<>();
         this.checkedItems = new ArrayMap<>();
+    }
+
+    public void setShowViewWorkflowButton(boolean showViewWorkflowButton){
+        this.showViewWorkflowButton = showViewWorkflowButton;
     }
 
     private static final DiffUtil.ItemCallback<WorkflowListItem> DIFF_CALLBACK =
@@ -144,6 +149,8 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
                 }
             }
         });
+
+        holder.binding.btnDetail.setVisibility(showViewWorkflowButton ? View.VISIBLE : View.GONE);
 
         holder.binding.btnDetail.setOnClickListener(view -> {
             int position = holder.getAdapterPosition();

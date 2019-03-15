@@ -105,8 +105,8 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsViewholder> im
             //Inflating the Popup using xml file
             popup.getMenuInflater().inflate(R.menu.menu_comment_options, popup.getMenu());
 
-            if (hideEditOption) popup.getMenu().getItem(0).setVisible(false);
-            if (hideDeleteOption) popup.getMenu().getItem(1).setVisible(false);
+            if (hideEditOption) popup.getMenu().findItem(R.id.action_edit).setVisible(false);
+            if (hideDeleteOption) popup.getMenu().findItem(R.id.action_delete).setVisible(false);
 
             //registering popup with OnMenuItemClickListener
             popup.setOnMenuItemClickListener(menuItem -> {

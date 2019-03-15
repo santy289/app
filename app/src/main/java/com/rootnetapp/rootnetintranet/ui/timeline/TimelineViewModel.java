@@ -258,11 +258,13 @@ public class TimelineViewModel extends ViewModel {
     private void onTimelineSuccess(TimelineResponse timelineResponse) {
         if (timelineResponse.getList() == null) {
             mErrorLiveData.setValue(R.string.error);
+            mHideMoreButtonLiveData.setValue(false);
             return;
         }
 
+        boolean isEmpty = timelineResponse.getList().isEmpty();
         mHideTimelineListLiveData.setValue(timelineResponse.getList().isEmpty());
-        mHideMoreButtonLiveData.setValue(timelineResponse.getPager().getIsLastPage());
+        mHideMoreButtonLiveData.setValue(isEmpty || timelineResponse.getPager().getIsLastPage());
         mTimelineUiData.setTimelineItems(timelineResponse.getList());
 
         getTimelineInteractions();

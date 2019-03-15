@@ -1690,11 +1690,8 @@ class CreateWorkflowViewModel extends ViewModel {
     private void postFileRequest(FileFormItem fileFormItem) {
         FilePostDetail filePostDetail = new FilePostDetail();
         filePostDetail.setFile(fileFormItem.getValue());
-        String path = fileFormItem.getFilePath();
-        String extension = path.substring(path.lastIndexOf("."));
-        String fileName = path.substring(path.lastIndexOf("/") + 1);
-        filePostDetail.setType(extension);
-        filePostDetail.setName(fileName);
+        filePostDetail.setType(fileFormItem.getFileType());
+        filePostDetail.setName(fileFormItem.getFileName());
 
         FilePost filePost = new FilePost();
         filePost.setFile(filePostDetail);

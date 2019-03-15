@@ -16,7 +16,9 @@
     <color name="workflow_details_section_title_bar">#DBE3F2</color>
     <color name="workflow_search_item_title">#D0D8E1</color>
     <color name="disabled">#BEECECEC</color>
+    <color name="light_blue">#D1DDED</color>
     <color name="dark_blue">#414759</color>
+    <color name="light_blue_background_t">#80F6F9FD</color>
 
     <color name="text_blue">#3063A5</color>
 

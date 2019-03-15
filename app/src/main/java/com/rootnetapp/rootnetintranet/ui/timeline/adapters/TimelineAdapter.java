@@ -189,10 +189,10 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         holder.binding.tvComments.setOnClickListener(view -> {
             if (holder.binding.recComments.getVisibility() == View.GONE) {
                 holder.binding.recComments.setVisibility(View.VISIBLE);
-                holder.binding.lytComments.setVisibility(View.VISIBLE);
+                holder.binding.lytCommentInput.setVisibility(View.VISIBLE);
             } else {
                 holder.binding.recComments.setVisibility(View.GONE);
-                holder.binding.lytComments.setVisibility(View.GONE);
+                holder.binding.lytCommentInput.setVisibility(View.GONE);
             }
         });
         holder.binding.tvComments

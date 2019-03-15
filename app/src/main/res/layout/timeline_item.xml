@@ -25,7 +25,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_below="@id/top_line"
-                android:src="@color/selected_filter" />
+                android:src="@color/dark_blue" />
 
             <View
                 android:id="@+id/bottom_line"
@@ -33,7 +33,7 @@
                 android:layout_height="match_parent"
                 android:layout_below="@id/img_item"
                 android:layout_centerHorizontal="true"
-                android:background="@color/transparentArrow" />
+                android:background="@color/light_blue" />
 
         </RelativeLayout>
 
@@ -49,7 +49,8 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
                 android:background="@drawable/spinner_bg"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingBottom="1dp">
 
                 <RelativeLayout
                     android:layout_width="match_parent"
@@ -91,9 +92,9 @@
                             android:id="@+id/tv_comments"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:paddingTop="5dp"
                             android:focusable="true"
                             android:focusableInTouchMode="true"
+                            android:paddingTop="5dp"
                             android:text="@string/view_comments"
                             android:textColor="@color/colorAccent"
                             android:textSize="12sp" />
@@ -200,10 +201,10 @@
                     android:layout_height="wrap_content" />
 
                 <RelativeLayout
-                    android:id="@+id/lyt_comments"
+                    android:id="@+id/lyt_comment_input"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/transparentArrow">
+                    android:background="@color/light_blue_background_t">
 
                     <de.hdodenhof.circleimageview.CircleImageView
                         android:id="@+id/img_profile"
@@ -237,9 +238,10 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_margin="10dp"
                         android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
                         android:layout_marginEnd="16dp"
+                        android:layout_marginBottom="8dp"
                         app:backgroundTint="@color/green"
                         app:cornerRadius="50dp"
                         app:icon="@drawable/ic_message_black_24dp"

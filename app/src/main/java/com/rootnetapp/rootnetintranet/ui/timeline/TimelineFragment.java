@@ -607,8 +607,8 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
 
     @UiThread
     private void updateSelectedDatesUi(String startDate, String endDate) {
-        startDate = Utils.getFormattedDate(startDate, Utils.SERVER_DATE_FORMAT_NO_TIMEZONE, Utils.SHORT_DATE_DISPLAY_FORMAT);
-        endDate = Utils.getFormattedDate(endDate, Utils.SERVER_DATE_FORMAT_NO_TIMEZONE, Utils.SHORT_DATE_DISPLAY_FORMAT);
+        startDate = Utils.getFormattedDate(startDate, Utils.SERVER_DATE_FORMAT, Utils.SHORT_DATE_DISPLAY_FORMAT);
+        endDate = Utils.getFormattedDate(endDate, Utils.SERVER_DATE_FORMAT, Utils.SHORT_DATE_DISPLAY_FORMAT);
 
         mBinding.tvSelectedDate.setText(String.format(Locale.US, "(%s - %s)", startDate, endDate));
     }

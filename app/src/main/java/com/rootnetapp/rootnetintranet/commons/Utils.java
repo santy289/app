@@ -225,7 +225,7 @@ public class Utils {
 
     public static String getCurrentFormattedDate() {
         Date c = Calendar.getInstance().getTime();
-        SimpleDateFormat df = new SimpleDateFormat(SERVER_DATE_FORMAT_NO_TIMEZONE,
+        SimpleDateFormat df = new SimpleDateFormat(SERVER_DATE_FORMAT,
                 Locale.getDefault());
         return df.format(c);
     }
@@ -240,7 +240,7 @@ public class Utils {
         c.set(Calendar.MINUTE, minute);
         c.set(Calendar.SECOND, second);
         Date date = c.getTime();
-        SimpleDateFormat df = new SimpleDateFormat(SERVER_DATE_FORMAT_NO_TIMEZONE,
+        SimpleDateFormat df = new SimpleDateFormat(SERVER_DATE_FORMAT,
                 Locale.getDefault());
         return df.format(date);
     }
@@ -249,7 +249,7 @@ public class Utils {
         Calendar c = Calendar.getInstance();
         c.add(Calendar.DAY_OF_MONTH, days);
         Date date = c.getTime();
-        SimpleDateFormat df = new SimpleDateFormat(SERVER_DATE_FORMAT_NO_TIMEZONE,
+        SimpleDateFormat df = new SimpleDateFormat(SERVER_DATE_FORMAT,
                 Locale.getDefault());
         return df.format(date);
     }

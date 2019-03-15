@@ -13,6 +13,8 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowoverview.Workflow
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -690,20 +692,22 @@ public class WorkflowManagerViewModel extends ViewModel {
         return mStartDate;
     }
 
-    protected String getFormattedStartDate() {
-        return Utils.getFormattedDate(getStartDate(), Utils.SERVER_DATE_FORMAT, "yyyy-MM-dd");
-    }
-
     private void setStartDate(String startDate) {
         this.mStartDate = startDate;
     }
 
     protected String getEndDate() {
-        return mEndDate;
-    }
+        Date date = Utils.getDateFromString(mEndDate, Utils.SERVER_DATE_FORMAT);
 
-    protected String getFormattedEndDate() {
-        return Utils.getFormattedDate(getEndDate(), Utils.SERVER_DATE_FORMAT, "yyyy-MM-dd");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+
+        date = calendar.getTime();
+
+        return Utils.getFormattedDate(date, Utils.SERVER_DATE_FORMAT);
     }
 
     private void setEndDate(String endDate) {

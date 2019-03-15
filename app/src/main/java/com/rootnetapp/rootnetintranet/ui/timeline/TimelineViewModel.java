@@ -17,6 +17,8 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import androidx.lifecycle.LiveData;
@@ -178,7 +180,7 @@ public class TimelineViewModel extends ViewModel {
 
     //region Filters
     protected String getStartDate() {
-        return Utils.getFormattedDate(mStartDate, "yyyy-MM-dd", Utils.SERVER_DATE_FORMAT);
+        return mStartDate;
     }
 
     private void setStartDate(String startDate) {
@@ -186,7 +188,17 @@ public class TimelineViewModel extends ViewModel {
     }
 
     protected String getEndDate() {
-        return Utils.getFormattedDate(mEndDate, "yyyy-MM-dd", Utils.SERVER_DATE_FORMAT);
+        Date date = Utils.getDateFromString(mEndDate, Utils.SERVER_DATE_FORMAT);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+
+        date = calendar.getTime();
+
+        return Utils.getFormattedDate(date, Utils.SERVER_DATE_FORMAT);
     }
 
     private void setEndDate(String endDate) {

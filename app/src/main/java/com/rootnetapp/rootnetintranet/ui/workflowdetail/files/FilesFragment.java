@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailFilesBinding;
@@ -83,28 +84,37 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
 
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String token = "Bearer " + prefs.getString("token", "");
+        String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
+        String loggedUserId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
+        String permissionsString = prefs.getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
 
         setOnClickListeners();
         subscribe();
-        filesViewModel.initDetails(token, mWorkflowListItem);
+        filesViewModel.initDetails(token, mWorkflowListItem, loggedUserId, permissionsString);
 
         return view;
     }
 
     private void subscribe() {
 
-        filesViewModel.getObservableToastMessage().observe(this, this::showToastMessage);
-        filesViewModel.getObservableAttachSuccess().observe(this, this::handleAttachmentUiResponse);
-        filesViewModel.getObservableFilesTabCounter().observe(this, this::updateTabCounter);
-        filesViewModel.getObservableUploadedFileName().observe(this, this::setFileUploadedTextWith);
-        filesViewModel.getObservableAttachButtonText().observe(this, this::setButtonAttachmentText);
-        filesViewModel.getObservableOpenDownloadedFile().observe(this, this::openDownloadedFile);
+        filesViewModel.getObservableToastMessage().observe(getViewLifecycleOwner(), this::showToastMessage);
+        filesViewModel.getObservableAttachSuccess().observe(getViewLifecycleOwner(), this::handleAttachmentUiResponse);
+        filesViewModel.getObservableFilesTabCounter().observe(getViewLifecycleOwner(), this::updateTabCounter);
+        filesViewModel.getObservableUploadedFileName().observe(getViewLifecycleOwner(), this::setFileUploadedTextWith);
+        filesViewModel.getObservableAttachButtonText().observe(getViewLifecycleOwner(), this::setButtonAttachmentText);
+        filesViewModel.getObservableOpenDownloadedFile().observe(getViewLifecycleOwner(), this::openDownloadedFile);
 
-        filesViewModel.showLoading.observe(this, this::showLoading);
-        filesViewModel.setDocumentsView.observe(this, this::setDocumentsView);
-        filesViewModel.setTemplateTitleWith.observe(this, this::setTemplateTitleWith);
-        filesViewModel.showTemplateDocumentsUi.observe(this, this::showTemplateDocumentsUi);
+        filesViewModel.showLoading.observe(getViewLifecycleOwner(), this::showLoading);
+        filesViewModel.setDocumentsView.observe(getViewLifecycleOwner(), this::setDocumentsView);
+        filesViewModel.setTemplateTitleWith.observe(getViewLifecycleOwner(), this::setTemplateTitleWith);
+        filesViewModel.showTemplateDocumentsUiEmpty
+                .observe(getViewLifecycleOwner(), this::showTemplateDocumentsUiEmpty);
+        filesViewModel.showTemplateDocumentsUiPermissions
+                .observe(getViewLifecycleOwner(), this::showTemplateDocumentsUiPermissions);
+        filesViewModel.showDownloadTemplateButton
+                .observe(getViewLifecycleOwner(), this::setShowDownloadTemplateButton);
+        filesViewModel.showDownloadFileButton.observe(getViewLifecycleOwner(), this::setShowDownloadFileButton);
+        filesViewModel.showAttachUploadFileButton.observe(getViewLifecycleOwner(), this::showAttachUploadFileButton);
     }
 
     private void setOnClickListeners() {
@@ -178,13 +188,14 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
     }
 
     /**
-     * Whether to display the templates list or not, the only scenario where this list would be
-     * hidden includes an absence of templates.
+     * Whether to display the templates list or not due to the absence of templates.
      *
      * @param show whether to show the UI.
      */
     @UiThread
-    private void showTemplateDocumentsUi(boolean show) {
+    private void showTemplateDocumentsUiEmpty(boolean show) {
+        mBinding.tvNoPermissions.setVisibility(View.INVISIBLE);
+
         if (show) {
             mBinding.rvFiles.setVisibility(View.VISIBLE);
             mBinding.btnAttachment.setVisibility(View.VISIBLE);
@@ -197,6 +208,34 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
             mBinding.btnUpload.setVisibility(View.GONE);
             mBinding.tvFileUploaded.setVisibility(View.GONE);
             mBinding.tvNoFiles.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Whether to display the templates list or not due to no view permissions
+     *
+     * @param show whether to show the UI.
+     */
+    @UiThread
+    private void showTemplateDocumentsUiPermissions(boolean show) {
+        mBinding.tvNoFiles.setVisibility(View.INVISIBLE);
+
+        if (show) {
+            mBinding.rvFiles.setVisibility(View.VISIBLE);
+            mBinding.btnAttachment.setVisibility(View.VISIBLE);
+            mBinding.btnUpload.setVisibility(View.VISIBLE);
+//            mBinding.tvFileUploaded.setVisibility(View.VISIBLE); //only show when a file was attached
+            mBinding.tvTitleFiles.setVisibility(View.VISIBLE);
+            mBinding.viewTitleFiles.setVisibility(View.VISIBLE);
+            mBinding.tvNoPermissions.setVisibility(View.GONE);
+        } else {
+            mBinding.rvFiles.setVisibility(View.GONE);
+            mBinding.btnAttachment.setVisibility(View.GONE);
+            mBinding.btnUpload.setVisibility(View.GONE);
+            mBinding.tvFileUploaded.setVisibility(View.GONE);
+            mBinding.tvTitleFiles.setVisibility(View.GONE);
+            mBinding.viewTitleFiles.setVisibility(View.GONE);
+            mBinding.tvNoPermissions.setVisibility(View.VISIBLE);
         }
     }
 
@@ -231,6 +270,9 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
                 filesViewModel.getPresets(),
                 documents
         );
+        mDocumentsAdapter
+                .setShowTemplateDownloadButton(filesViewModel.hasViewPermissions());
+        mDocumentsAdapter.setShowFileDownloadButton(filesViewModel.hasViewFilesPermissions());
         mBinding.rvFiles.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvFiles.setAdapter(mDocumentsAdapter);
         mBinding.rvFiles.setNestedScrollingEnabled(false);
@@ -337,5 +379,25 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
                                            @NonNull int[] grantResults) {
         filesViewModel.handleRequestPermissionsResult(requestCode, grantResults);
+    }
+
+    @UiThread
+    private void setShowDownloadTemplateButton(boolean show) {
+        if (mDocumentsAdapter == null) return;
+
+        mDocumentsAdapter.setShowTemplateDownloadButton(show);
+    }
+
+    @UiThread
+    private void setShowDownloadFileButton(boolean show) {
+        if (mDocumentsAdapter == null) return;
+
+        mDocumentsAdapter.setShowFileDownloadButton(show);
+    }
+
+    @UiThread
+    private void showAttachUploadFileButton(boolean show) {
+        mBinding.btnAttachment.setVisibility(show ? View.VISIBLE : View.GONE);
+        mBinding.btnUpload.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 }

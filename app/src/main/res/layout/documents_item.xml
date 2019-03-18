@@ -38,7 +38,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="8"
                 android:text="@string/name"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/colorAccent"
                 android:textSize="12sp" />
 
             <ImageView
@@ -76,7 +76,7 @@
                     android:layout_height="wrap_content"
                     android:padding="15dp"
                     android:text="@string/workflow_detail_files_fragment_file_name"
-                    android:textColor="@color/colorPrimaryDark"
+                    android:textColor="@color/colorAccent"
                     android:textSize="12sp" />
 
                 <TextView
@@ -111,7 +111,7 @@
                     android:layout_height="wrap_content"
                     android:padding="15dp"
                     android:text="@string/creation_date"
-                    android:textColor="@color/colorPrimaryDark"
+                    android:textColor="@color/colorAccent"
                     android:textSize="12sp" />
 
                 <TextView
@@ -135,7 +135,7 @@
                     android:layout_height="wrap_content"
                     android:padding="15dp"
                     android:text="@string/owner"
-                    android:textColor="@color/colorPrimaryDark"
+                    android:textColor="@color/colorAccent"
                     android:textSize="12sp" />
 
                 <TextView
@@ -159,7 +159,7 @@
                     android:layout_height="wrap_content"
                     android:padding="15dp"
                     android:text="@string/versions"
-                    android:textColor="@color/colorPrimaryDark"
+                    android:textColor="@color/colorAccent"
                     android:textSize="12sp" />
 
                 <TextView

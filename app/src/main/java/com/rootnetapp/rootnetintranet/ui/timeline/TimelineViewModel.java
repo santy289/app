@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.timeline;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineItem;
@@ -17,6 +18,8 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import androidx.lifecycle.LiveData;
@@ -24,6 +27,8 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.TIMELINE_VIEW;
 
 public class TimelineViewModel extends ViewModel {
 
@@ -50,7 +55,8 @@ public class TimelineViewModel extends ViewModel {
     private MutableLiveData<Comment> mPostSubCommentsLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> mHideMoreButtonLiveData;
-    private MutableLiveData<Boolean> mHideTimelineListLiveData;
+    private MutableLiveData<Boolean> mHideTimelineListEmptyLiveData;
+    private MutableLiveData<Boolean> mHideTimelineListPermissionsLiveData;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
@@ -62,6 +68,7 @@ public class TimelineViewModel extends ViewModel {
     private List<String> mSelectedUsers, mSelectedModules;
     private List<String> mAllUsers, mAllModules;
     private TimelineUiData mTimelineUiData;
+    private boolean hasViewPermissions;
 
     protected TimelineViewModel(TimelineRepository repository) {
         this.mRepository = repository;
@@ -76,11 +83,15 @@ public class TimelineViewModel extends ViewModel {
         setAllModules(modules);
     }
 
-    protected void init(String token, String startDate, String endDate) {
+    protected void init(String token, String startDate, String endDate, String userId,
+                        String userPermissions) {
         mToken = token;
 
-        mWebCount = mWebCompleted = 0;
+        checkPermissions(userId == null ? 0 : Integer.parseInt(userId), userPermissions);
 
+        if (!hasViewPermissions) return;
+
+        mWebCount = mWebCompleted = 0;
         mTimelineUiData = new TimelineUiData();
 
         updateTimeline(startDate, endDate, getAllUsers(), getAllModules());
@@ -93,8 +104,28 @@ public class TimelineViewModel extends ViewModel {
 //        showLoading.setValue(false); //do not show loading on init
     }
 
+    /**
+     * Verifies all of the user permissions related to this ViewModel and {@link TimelineFragment}.
+     * Hide the UI related to the unauthorized actions.
+     *
+     * @param permissionsString users permissions.
+     */
+    private void checkPermissions(int userId, String permissionsString) {
+        RootnetPermissionsUtils permissionsUtils = new RootnetPermissionsUtils(permissionsString);
+
+        hasViewPermissions = permissionsUtils.hasPermission(TIMELINE_VIEW);
+
+        mHideTimelineListPermissionsLiveData.setValue(!hasViewPermissions);
+    }
+
+    protected boolean hasViewPermissions(){
+        return hasViewPermissions;
+    }
+
     private void updateTimeline(String startDate, String endDate, List<String> users,
                                 List<String> modules) {
+        if (!hasViewPermissions) return;
+
         mWebCount = mWebCompleted = 0;
         showLoading.setValue(true);
 
@@ -137,7 +168,7 @@ public class TimelineViewModel extends ViewModel {
             mWebCount = mWebCompleted = 0;
 
             getAllUsers().add(USER_ALL); //"All" filter
-            for (WorkflowUser workflowUser: mTimelineUiData.getWorkflowUsers()) {
+            for (WorkflowUser workflowUser : mTimelineUiData.getWorkflowUsers()) {
                 for (User user : mTimelineUiData.getUsers()) {
                     if (workflowUser.getId() == user.getId()) {
                         workflowUser.setUserId(user.getUserId());
@@ -178,7 +209,7 @@ public class TimelineViewModel extends ViewModel {
 
     //region Filters
     protected String getStartDate() {
-        return Utils.getFormattedDate(mStartDate, "yyyy-MM-dd", Utils.SERVER_DATE_FORMAT);
+        return mStartDate;
     }
 
     private void setStartDate(String startDate) {
@@ -186,7 +217,17 @@ public class TimelineViewModel extends ViewModel {
     }
 
     protected String getEndDate() {
-        return Utils.getFormattedDate(mEndDate, "yyyy-MM-dd", Utils.SERVER_DATE_FORMAT);
+        Date date = Utils.getDateFromString(mEndDate, Utils.SERVER_DATE_FORMAT);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+
+        date = calendar.getTime();
+
+        return Utils.getFormattedDate(date, Utils.SERVER_DATE_FORMAT);
     }
 
     private void setEndDate(String endDate) {
@@ -216,6 +257,7 @@ public class TimelineViewModel extends ViewModel {
 
     //region Repo Calls
     //region Timeline
+
     /**
      * Resets the current page to its initial value. Called when the dashboard filters change.
      */
@@ -246,11 +288,14 @@ public class TimelineViewModel extends ViewModel {
     private void onTimelineSuccess(TimelineResponse timelineResponse) {
         if (timelineResponse.getList() == null) {
             mErrorLiveData.setValue(R.string.error);
+            mHideMoreButtonLiveData.setValue(false);
             return;
         }
 
-        mHideTimelineListLiveData.setValue(timelineResponse.getList().isEmpty());
-        mHideMoreButtonLiveData.setValue(timelineResponse.getPager().getIsLastPage());
+        boolean isEmpty = timelineResponse.getList().isEmpty();
+        mHideTimelineListEmptyLiveData
+                .setValue(mCurrentPage == 1 && timelineResponse.getList().isEmpty());
+        mHideMoreButtonLiveData.setValue(isEmpty || timelineResponse.getPager().getIsLastPage());
         mTimelineUiData.setTimelineItems(timelineResponse.getList());
 
         getTimelineInteractions();
@@ -392,7 +437,8 @@ public class TimelineViewModel extends ViewModel {
         postLikeDislike(interaction, entityId, entityType, authorId, THUMB_ACTION_DOWN);
     }
 
-    private void postLikeDislike(int interactionId, int entityId, String entityType, int authorId, String thumbAction) {
+    private void postLikeDislike(int interactionId, int entityId, String entityType, int authorId,
+                                 String thumbAction) {
         showLoading.setValue(true);
 
         PostLikeDislike request = new PostLikeDislike();
@@ -438,7 +484,7 @@ public class TimelineViewModel extends ViewModel {
         return mSubCommentsLiveData;
     }
 
-    public LiveData<Interaction> getObservablePostInteraction() {
+    protected LiveData<Interaction> getObservablePostInteraction() {
         if (mPostInteractionLiveData == null) {
             mPostInteractionLiveData = new MutableLiveData<>();
         }
@@ -452,18 +498,25 @@ public class TimelineViewModel extends ViewModel {
         return mPostSubCommentsLiveData;
     }
 
-    public LiveData<Boolean> getObservableHideMoreButton() {
+    protected LiveData<Boolean> getObservableHideMoreButton() {
         if (mHideMoreButtonLiveData == null) {
             mHideMoreButtonLiveData = new MutableLiveData<>();
         }
         return mHideMoreButtonLiveData;
     }
 
-    public LiveData<Boolean> getObservableHideTimelineList() {
-        if (mHideTimelineListLiveData == null) {
-            mHideTimelineListLiveData = new MutableLiveData<>();
+    protected LiveData<Boolean> getObservableHideTimelineListEmpty() {
+        if (mHideTimelineListEmptyLiveData == null) {
+            mHideTimelineListEmptyLiveData = new MutableLiveData<>();
         }
-        return mHideTimelineListLiveData;
+        return mHideTimelineListEmptyLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableHideTimelineListPermissions() {
+        if (mHideTimelineListPermissionsLiveData == null) {
+            mHideTimelineListPermissionsLiveData = new MutableLiveData<>();
+        }
+        return mHideTimelineListPermissionsLiveData;
     }
 
     protected LiveData<Integer> getObservableError() {

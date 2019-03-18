@@ -21,6 +21,9 @@ import com.rootnetapp.rootnetintranet.models.responses.downloadfile.DownloadFile
 import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.exportpdf.ExportPdfResponse;
 import com.rootnetapp.rootnetintranet.models.responses.file.FilesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.googlemaps.PlaceDetailsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.googlemaps.autocomplete.AutocompleteResponse;
+import com.rootnetapp.rootnetintranet.models.responses.googlemaps.nearbysearch.NearbySearchResponse;
 import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.project.ProjectResponse;
@@ -34,6 +37,7 @@ import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.Post
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostLikeDislike;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.PostSubCommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.SubCommentsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.user.LoggedProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.websocket.WebSocketSettingResponse;
@@ -115,6 +119,10 @@ public interface ApiInterface {
     @GET("profiles?")
     Observable<ProfileResponse> getProfiles(@Header("Authorization") String authorization,
                                             @Query("enabled") boolean enabled);
+
+    @Headers({"Domain-Name: api"})
+    @GET("profile")
+    Observable<LoggedProfileResponse> getLoggedProfile(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
     @PATCH("profiles/{id}")
@@ -236,6 +244,10 @@ public interface ApiInterface {
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows/types?all_versions=true&filter_counter_status=true")
     Observable<WorkflowTypeDbResponse> getWorkflowTypesDb(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows/types?allowed=true")
+    Observable<WorkflowTypeDbResponse> getWorkflowTypesDbAllowedOnly(@Header("Authorization") String authorization);
 
 
     @Headers({"Domain-Name: api"})
@@ -451,4 +463,18 @@ public interface ApiInterface {
     @Streaming
     @GET("options?key=socket_protocol")
     Observable<WebSocketSettingResponse> getWsProtocol(@Header("Authorization") String authorization);
+
+    //region Google Maps API
+    @GET("https://maps.googleapis.com/maps/api/place/nearbysearch/json?rankby=distance")
+    Observable<NearbySearchResponse> getNearbyPlaces(@Query("location") String locationString,
+                                                     @Query("key") String apiKey);
+
+    @GET("https://maps.googleapis.com/maps/api/place/autocomplete/json?")
+    Observable<AutocompleteResponse> getAutocompletePlaces(@Query("input") String input,
+                                                           @Query("key") String apiKey);
+
+    @GET("https://maps.googleapis.com/maps/api/place/details/json?fields=name,geometry")
+    Observable<PlaceDetailsResponse> getPlaceDetails(@Query("placeid") String placeId,
+                                                     @Query("key") String apiKey);
+    //endregion
 }

@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailInformationBinding;
@@ -68,10 +69,12 @@ public class InformationFragment extends Fragment {
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
+        String userId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
+        String permissionsString = prefs.getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
 
         setOnClickListeners();
         subscribe();
-        informationViewModel.initDetails(token, mWorkflowListItem);
+        informationViewModel.initDetails(token, userId, permissionsString, mWorkflowListItem);
 
         return view;
     }
@@ -84,12 +87,13 @@ public class InformationFragment extends Fragment {
             }
         });
 
-        informationViewModel.getObservableError().observe(this, errorObserver);
+        informationViewModel.getObservableError().observe(getViewLifecycleOwner(), errorObserver);
 //
-        informationViewModel.showLoading.observe(this, this::showLoading);
-        informationViewModel.updateInformationListUi.observe(this, this::updateInformationListUi);
-        informationViewModel.showImportantInfoSection.observe(this, this::showImportantInfoSection);
-        informationViewModel.loadImportantInfoSection.observe(this, this::loadImportantInfoSection);
+        informationViewModel.showLoading.observe(getViewLifecycleOwner(), this::showLoading);
+        informationViewModel.updateInformationListUi.observe(getViewLifecycleOwner(), this::updateInformationListUi);
+        informationViewModel.showImportantInfoSection.observe(getViewLifecycleOwner(), this::showImportantInfoSection);
+        informationViewModel.loadImportantInfoSection.observe(getViewLifecycleOwner(), this::loadImportantInfoSection);
+        informationViewModel.showEditButtonLiveData.observe(getViewLifecycleOwner(), this::showEditButton);
     }
 
     private void setOnClickListeners() {
@@ -136,5 +140,10 @@ public class InformationFragment extends Fragment {
         mBinding.rvSteps.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvSteps.setAdapter(new StepsAdapter(steps));
         mBinding.rvSteps.setNestedScrollingEnabled(false);
+    }
+
+    @UiThread
+    private void showEditButton(boolean show) {
+        mBinding.btnEdit.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 }

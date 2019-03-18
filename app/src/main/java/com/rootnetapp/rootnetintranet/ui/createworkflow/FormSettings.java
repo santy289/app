@@ -8,6 +8,7 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
+import com.rootnetapp.rootnetintranet.models.createworkflow.BaseEntityJsonValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
@@ -15,14 +16,16 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.PostCountryCodeAndVa
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCurrency;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostPhone;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
-import com.rootnetapp.rootnetintranet.models.createworkflow.ProductJsonValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.GeolocationFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.geolocation.GeolocationMetaData;
+import com.rootnetapp.rootnetintranet.models.createworkflow.geolocation.Value;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
@@ -37,6 +40,7 @@ import com.squareup.moshi.Types;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import androidx.collection.ArrayMap;
@@ -72,6 +76,7 @@ public class FormSettings {
     public static final String TYPE_PRODUCT = "product";
     public static final String TYPE_LIST = "list";
     public static final String TYPE_FILE = "file";
+    public static final String TYPE_GEOLOCATION = "geolocation";
     public static final String VALUE_EMAIL = "email";
     public static final String VALUE_INTEGER = "integer";
     public static final String VALUE_BOOLEAN = "boolean";
@@ -80,7 +85,7 @@ public class FormSettings {
     public static final String VALUE_LIST = "list";
     public static final String VALUE_DATE = "date";
     public static final String VALUE_ENTITY = "entity";
-    public static final String VALUE_COORD = "coords";
+    public static final String VALUE_COORDS = "coords";
 
     private static final String TAG = "FormSettings";
 
@@ -176,7 +181,8 @@ public class FormSettings {
     private void format(WorkflowMetas metaData, TypeInfo typeInfo, BaseFormItem formItem) {
         String value = metaData.getUnformattedValue();
         //we allow the FileFormItem even though the value is null because of the editing mode, when the user tries to delete a file.
-        if (TextUtils.isEmpty(value) && !(formItem instanceof FileFormItem)) {
+        //same applies for GeolocationFormItem
+        if (TextUtils.isEmpty(value) && !(formItem instanceof FileFormItem) && !(formItem instanceof GeolocationFormItem)) {
             return;
         }
 
@@ -227,15 +233,10 @@ public class FormSettings {
 
                 if (typeInfo.getType().equals(TYPE_PRODUCT)) {
                     String json = isMultiple
-                            ? getProductListJson((MultipleChoiceFormItem) formItem, metaData)
+                            ? getEntityListJson((MultipleChoiceFormItem) formItem, metaData)
                             : getProductJson((SingleChoiceFormItem) formItem, metaData);
                     metaData.setValue(json);
                     break;
-                }
-
-                if (typeInfo.getType().equals(TYPE_SERVICE)) {
-                    // TODO handle service.
-
                 }
 
                 if (isMultiple) {
@@ -257,6 +258,12 @@ public class FormSettings {
             case FormSettings.TYPE_LINK:
                 metaData.setValue(value);
                 break;
+            case FormSettings.VALUE_COORDS:
+                if (formItem instanceof GeolocationFormItem) {
+                    String json = getGeolocationMetaJson((GeolocationFormItem) formItem);
+                    metaData.setValue(json);
+                }
+                break;
             default:
                 Log.d(TAG, "format: invalid type. Not Known.");
                 metaData.setValue("");
@@ -269,6 +276,7 @@ public class FormSettings {
                 || typeInfo.getType().equals(TYPE_PHONE)
                 || typeInfo.getType().equals(TYPE_CURRENCY)
                 || typeInfo.getType().equals(TYPE_PRODUCT)
+                || typeInfo.getType().equals(TYPE_GEOLOCATION)
                 || typeInfo.getType().equals(TYPE_FILE)) {
             return;
         }
@@ -290,45 +298,45 @@ public class FormSettings {
         int id = value.getId();
         if (id == 0) return "";
 
-        ProductJsonValue productJsonValue = new ProductJsonValue();
-        productJsonValue.setValue(String.valueOf(id));
-        productJsonValue.setWorkflowTypeFieldId(workflowMetas.getWorkflowTypeFieldId());
+        BaseEntityJsonValue baseEntityJsonValue = new BaseEntityJsonValue();
+        baseEntityJsonValue.setValue(String.valueOf(id));
+        baseEntityJsonValue.setWorkflowTypeFieldId(workflowMetas.getWorkflowTypeFieldId());
 
-        JsonAdapter<ProductJsonValue> jsonAdapter = moshi.adapter(ProductJsonValue.class);
+        JsonAdapter<BaseEntityJsonValue> jsonAdapter = moshi.adapter(BaseEntityJsonValue.class);
 
-        return jsonAdapter.toJson(productJsonValue);
+        return jsonAdapter.toJson(baseEntityJsonValue);
     }
 
     /**
-     * Generates the JSON object in String format for the Products {@link MultipleChoiceFormItem}
-     * that will be sent to the server.
+     * Generates the JSON object in String format for the base entities {@link
+     * MultipleChoiceFormItem} that will be sent to the server.
      *
      * @param formItem item to serialize
      *
      * @return JSON string
      */
-    private String getProductListJson(MultipleChoiceFormItem formItem,
-                                      WorkflowMetas workflowMetas) {
+    private String getEntityListJson(MultipleChoiceFormItem formItem,
+                                     WorkflowMetas workflowMetas) {
         List<Option> list = formItem.getOptions();
         if (list == null) {
             return "";
         }
 
-        List<ProductJsonValue> productJsonValueList = new ArrayList<>();
+        List<BaseEntityJsonValue> baseEntityJsonValueList = new ArrayList<>();
         for (int i = 0; i < formItem.getValues().size(); i++) {
             Option value = (Option) formItem.getValues().get(i);
 
-            ProductJsonValue productJsonValue = new ProductJsonValue();
-            productJsonValue.setValue(String.valueOf(value.getId()));
-            productJsonValue.setWorkflowTypeFieldId(workflowMetas.getWorkflowTypeFieldId());
+            BaseEntityJsonValue baseEntityJsonValue = new BaseEntityJsonValue();
+            baseEntityJsonValue.setValue(String.valueOf(value.getId()));
+            baseEntityJsonValue.setWorkflowTypeFieldId(workflowMetas.getWorkflowTypeFieldId());
 
-            productJsonValueList.add(productJsonValue);
+            baseEntityJsonValueList.add(baseEntityJsonValue);
         }
 
         Moshi moshi = new Moshi.Builder().build();
-        Type type = Types.newParameterizedType(List.class, ProductJsonValue.class);
-        JsonAdapter<List<ProductJsonValue>> jsonAdapter = moshi.adapter(type);
-        return jsonAdapter.toJson(productJsonValueList);
+        Type type = Types.newParameterizedType(List.class, BaseEntityJsonValue.class);
+        JsonAdapter<List<BaseEntityJsonValue>> jsonAdapter = moshi.adapter(type);
+        return jsonAdapter.toJson(baseEntityJsonValueList);
     }
 
     private String getFileMetaJson(FileFormItem formItem) {
@@ -343,6 +351,28 @@ public class FormSettings {
         fileMetaData.value = id;
         JsonAdapter<FileMetaData> jsonAdapter = moshi.adapter(FileMetaData.class);
         return jsonAdapter.toJson(fileMetaData);
+    }
+
+    private String getGeolocationMetaJson(GeolocationFormItem formItem) {
+        String name = formItem.getName();
+        if (TextUtils.isEmpty(name) || formItem.getValue() == null) {
+            return "\"\"";
+        }
+
+        GeolocationMetaData geolocationMetaData = new GeolocationMetaData();
+
+        Value value = new Value();
+        value.setAddress(formItem.getName());
+
+        List<Double> latLng = new ArrayList<>();
+        latLng.add(formItem.getValue().latitude);
+        latLng.add(formItem.getValue().longitude);
+        value.setLatLng(latLng);
+
+        geolocationMetaData.setValue(value);
+
+        JsonAdapter<GeolocationMetaData> jsonAdapter = moshi.adapter(GeolocationMetaData.class);
+        return jsonAdapter.toJson(geolocationMetaData);
     }
 
     private String getJsonForCurrencyType(CurrencyFormItem formItem) {
@@ -482,6 +512,23 @@ public class FormSettings {
         }
         String formattedValue = stringBuilder.append("]").toString();
         metaData.setValue(formattedValue);
+    }
+
+    /**
+     * Parses the multiple selection raw values and return a list of selected values.
+     *
+     * @param rawValue raw value
+     */
+    public List<String> parseMultipleSelectionRawValue(String rawValue) {
+        if (rawValue == null || rawValue.isEmpty() || !rawValue.contains("[")
+                || !rawValue.contains("]")) {
+            return null;
+        }
+
+        rawValue = rawValue.replace("[", "").replace("]", "");
+        String[] split = rawValue.split(",");
+
+        return Arrays.asList(split);
     }
 
     protected List<BaseFormItem> getFormItems() {
@@ -693,6 +740,23 @@ public class FormSettings {
 
                 information.setDisplayValue((String) meta.getDisplayValue());
                 return information;
+
+            case FormSettings.VALUE_COORDS:
+                JsonAdapter<GeolocationMetaData> jsonAdapter = moshi
+                        .adapter(GeolocationMetaData.class);
+                try {
+                    GeolocationMetaData geolocationMetaData = jsonAdapter.fromJson(meta.getValue());
+                    if (geolocationMetaData.getValue() == null) {
+                        information.setDisplayValue("");
+                    } else {
+                        information.setDisplayValue(geolocationMetaData.getValue().getAddress());
+                    }
+                    return information;
+                } catch (IOException | JsonDataException e) {
+                    e.printStackTrace();
+                    information.setDisplayValue("");
+                    return information;
+                }
             default:
                 Log.d(TAG, "format: invalid type. Not Known.");
                 information.setDisplayValue("");

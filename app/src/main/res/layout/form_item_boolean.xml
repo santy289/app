@@ -15,7 +15,7 @@
             android:layout_height="wrap_content"
             android:switchPadding="10dp"
             android:textAllCaps="true"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="@color/colorAccent"
             android:textSize="14sp"
             android:theme="@style/SwitchStyle"
             app:layout_constraintBottom_toBottomOf="parent"

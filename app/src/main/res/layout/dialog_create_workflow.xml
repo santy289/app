@@ -15,7 +15,7 @@
                 android:id="@+id/square"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@color/colorPrimaryDark"
+                android:background="@color/colorAccent"
                 android:padding="20dp"
                 android:text="@string/workflow"
                 android:textColor="@color/white"
@@ -67,7 +67,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:padding="5dp"
-                            android:textColor="@color/colorPrimaryDark"
+                            android:textColor="@color/colorAccent"
 
                             android:text="@string/workflow_type" />
 
@@ -116,7 +116,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:padding="5dp"
-                            android:textColor="@color/colorPrimaryDark"
+                            android:textColor="@color/colorAccent"
                             android:text="@string/number" />
 
                         <androidx.appcompat.widget.AppCompatEditText
@@ -147,7 +147,7 @@
                         android:layout_height="wrap_content"
                         android:paddingEnd="10dp"
                         android:text="@string/workflow_name"
-                        android:textColor="@color/colorPrimaryDark"
+                        android:textColor="@color/colorAccent"
                         android:textSize="20sp" />
 
                     <View
@@ -184,7 +184,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="5dp"
-                        android:textColor="@color/colorPrimaryDark"
+                        android:textColor="@color/colorAccent"
                         android:text="@string/description" />
 
                     <androidx.appcompat.widget.AppCompatEditText
@@ -206,7 +206,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="20dp"
-                    android:textColor="@color/colorPrimaryDark"
+                    android:textColor="@color/colorAccent"
                     android:text="@string/creation_date" />
 
                 <DatePicker
@@ -228,7 +228,7 @@
                         android:layout_height="wrap_content"
                         android:paddingEnd="10dp"
                         android:text="@string/basic_info"
-                        android:textColor="@color/colorPrimaryDark"
+                        android:textColor="@color/colorAccent"
                         android:textSize="20sp" />
 
                     <View
@@ -259,7 +259,7 @@
                         android:layout_height="wrap_content"
                         android:paddingEnd="10dp"
                         android:text="@string/workflow_team"
-                        android:textColor="@color/colorPrimaryDark"
+                        android:textColor="@color/colorAccent"
                         android:textSize="20sp" />
 
                     <View
@@ -282,7 +282,7 @@
                         android:layout_height="wrap_content"
                         android:paddingEnd="10dp"
                         android:text="@string/workflow_owner"
-                        android:textColor="@color/colorPrimary" />
+                        android:textColor="@color/colorAccent" />
 
                     <View
                         android:layout_width="match_parent"
@@ -306,7 +306,7 @@
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:padding="10dp"
-                        android:textColor="@color/colorPrimaryDark"
+                        android:textColor="@color/colorAccent"
                         android:text="Jon Doe" />
 
                     <de.hdodenhof.circleimageview.CircleImageView
@@ -323,7 +323,7 @@
                         android:layout_height="wrap_content"
                         android:padding="10dp"
                         android:text="@string/edit"
-                        android:textColor="@color/colorPrimary" />
+                        android:textColor="@color/colorAccent" />
 
                 </LinearLayout>
 
@@ -338,7 +338,7 @@
                         android:layout_height="wrap_content"
                         android:paddingEnd="10dp"
                         android:text="@string/department"
-                        android:textColor="@color/colorPrimary" />
+                        android:textColor="@color/colorAccent" />
 
                     <View
                         android:layout_width="match_parent"

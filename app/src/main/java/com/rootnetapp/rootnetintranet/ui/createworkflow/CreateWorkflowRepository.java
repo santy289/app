@@ -25,6 +25,7 @@ import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse
 import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUserResponse;
@@ -57,24 +58,29 @@ public class CreateWorkflowRepository {
         this.workflowTypeMenuItems = workflowTypeDbDao.getObservableTypesForMenu();
     }
 
-    public LiveData<List<WorkflowTypeItemMenu>> getWorkflowTypeMenuItems() {
+    protected LiveData<List<WorkflowTypeItemMenu>> getWorkflowTypeMenuItems() {
         return workflowTypeMenuItems;
     }
 
-    public List<WorkflowTypeItemMenu> getWorklowTypeNames() {
+    protected List<WorkflowTypeItemMenu> getWorklowTypeNames() {
         return workflowTypeDbDao.getListOfWorkflowNames();
     }
 
-    public WorkflowTypeDb getWorklowType(int workflowTypeId) {
+    protected WorkflowTypeDb getWorklowType(int workflowTypeId) {
         return workflowTypeDbDao.getWorkflowTypeBy(workflowTypeId);
     }
 
-    public List<FormCreateProfile> getProfiles() {
+    protected List<FormCreateProfile> getProfiles() {
         return profileDao.getAllProfiles();
     }
 
-    public List<FormFieldsByWorkflowType> getFiedsByWorkflowType(int byId) {
+    protected List<FormFieldsByWorkflowType> getFiedsByWorkflowType(int byId) {
         return workflowTypeDbDao.getFields(byId);
+    }
+
+    protected Observable<WorkflowTypeDbResponse> getAllowedWorkflowTypes(String auth) {
+        return service.getWorkflowTypesDbAllowedOnly(auth).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     protected Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {

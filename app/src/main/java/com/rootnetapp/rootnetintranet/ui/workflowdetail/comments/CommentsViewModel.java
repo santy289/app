@@ -10,6 +10,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.models.requests.comment.CommentFile;
@@ -32,6 +33,12 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 import static android.app.Activity.RESULT_OK;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_COMMENT_CRUD_ALL;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_COMMENT_CRUD_OWN;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_COMMENT_PRIVATE_VIEW;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_COMMENT_VIEW;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_DELETE_OWN_COMMENT;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_OWN_COMMENT;
 
 public class CommentsViewModel extends ViewModel {
 
@@ -46,13 +53,18 @@ public class CommentsViewModel extends ViewModel {
     private MutableLiveData<Integer> mToastMessageLiveData;
     private MutableLiveData<List<Comment>> mCommentsLiveData;
     private MutableLiveData<Comment> mCommentLiveData;
-    private MutableLiveData<Boolean> mHideComments;
+    private MutableLiveData<Boolean> mHideCommentsEmpty;
+    private MutableLiveData<Boolean> mHideCommentsPermissions;
     private MutableLiveData<Integer> mCommentsTabCounter;
     private MutableLiveData<Boolean> mEnableCommentButton;
     private MutableLiveData<CommentFile> mNewCommentFileLiveData;
     private MutableLiveData<Boolean> mClearAttachments;
     private MutableLiveData<AttachmentUiData> mOpenDownloadedAttachmentLiveData;
     private MutableLiveData<Boolean> mExitEditModeUiLiveData;
+    private MutableLiveData<Boolean> mHideCommentInputLiveData;
+    private MutableLiveData<Boolean> mHideSwitchPrivatePublicLiveData;
+    private MutableLiveData<Boolean> mHideEditCommentOption;
+    private MutableLiveData<Boolean> mHideDeleteCommentOption;
 
     protected MutableLiveData<Boolean> showLoading;
 
@@ -67,22 +79,85 @@ public class CommentsViewModel extends ViewModel {
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the workflow.
     private List<CommentFile> mCommentFiles;
     private Comment mActiveEditModeComment;
+    private int mLoggedUserId;
+    private boolean hasViewPermissions;
+    private boolean hasEditPermissions;
+    private boolean hasDeletePermissions;
 
     protected CommentsViewModel(CommentsRepository commentsRepository) {
         this.mRepository = commentsRepository;
         this.showLoading = new MutableLiveData<>();
     }
 
-    protected void initDetails(String token, WorkflowListItem workflow) {
+    protected void initDetails(String token, WorkflowListItem workflow, String userId,
+                               String userPermissions) {
         this.mToken = token;
         this.mWorkflowListItem = workflow;
-        getComments(mToken, mWorkflowListItem.getWorkflowId());
+
+        setLoggedUserId(userId == null ? 0 : Integer.parseInt(userId));
+
+        checkPermissions(userPermissions);
+
+        if (hasViewPermissions) {
+            getComments(mToken, mWorkflowListItem.getWorkflowId());
+        }
     }
 
     @Override
     protected void onCleared() {
         mDisposables.clear();
         mRepository.clearDisposables();
+    }
+
+    protected int getLoggedUserId() {
+        return mLoggedUserId;
+    }
+
+    private void setLoggedUserId(int loggedUserId) {
+        this.mLoggedUserId = loggedUserId;
+    }
+
+    protected boolean hasEditPermissions() {
+        return hasEditPermissions;
+    }
+
+    protected boolean hasDeletePermissions() {
+        return hasDeletePermissions;
+    }
+
+    /**
+     * Verifies all of the user permissions related to this ViewModel and {@link CommentsFragment}.
+     * Hide the UI related to the unauthorized actions.
+     *
+     * @param permissionsString users permissions.
+     */
+    private void checkPermissions(String permissionsString) {
+        RootnetPermissionsUtils permissionsUtils = new RootnetPermissionsUtils(permissionsString);
+
+        hasViewPermissions = permissionsUtils.hasPermission(WORKFLOW_COMMENT_VIEW);
+
+        boolean hasViewPrivatePermissions = permissionsUtils
+                .hasPermission(WORKFLOW_COMMENT_PRIVATE_VIEW);
+
+        boolean hasCrudAllPermissions = permissionsUtils.hasPermission(WORKFLOW_COMMENT_CRUD_ALL);
+        boolean hasCrudOwnPermissions = permissionsUtils.hasPermission(WORKFLOW_COMMENT_CRUD_OWN);
+        boolean hasCrudPermissions = hasCrudAllPermissions
+                || (mWorkflowListItem.getOwnerId() == getLoggedUserId() && hasCrudOwnPermissions);
+
+        boolean hasEditOwnPermissions = permissionsUtils.hasPermission(WORKFLOW_EDIT_OWN_COMMENT);
+         hasEditPermissions = hasCrudPermissions ||
+                (mWorkflowListItem.getOwnerId() == getLoggedUserId() && hasEditOwnPermissions);
+
+        boolean hasDeleteOwnPermissions = permissionsUtils
+                .hasPermission(WORKFLOW_DELETE_OWN_COMMENT);
+         hasDeletePermissions = hasCrudPermissions ||
+                (mWorkflowListItem.getOwnerId() == getLoggedUserId() && hasDeleteOwnPermissions);
+
+        mHideCommentsPermissions.setValue(!hasViewPermissions);
+        mHideCommentInputLiveData.setValue(!hasCrudPermissions && !hasEditPermissions);
+        mHideSwitchPrivatePublicLiveData.setValue(!hasViewPrivatePermissions);
+        mHideEditCommentOption.setValue(!hasEditPermissions);
+        mHideDeleteCommentOption.setValue(!hasDeletePermissions);
     }
 
     /**
@@ -193,7 +268,7 @@ public class CommentsViewModel extends ViewModel {
 
         if (comments == null) {
             showLoading.setValue(false);
-            mHideComments.setValue(true);
+            mHideCommentsEmpty.setValue(true);
             mCommentsLiveData.setValue(new ArrayList<>());
             return;
         }
@@ -201,7 +276,7 @@ public class CommentsViewModel extends ViewModel {
         setCommentsTabCounter(comments.size());
         mCommentsLiveData.setValue(commentsResponse.getResponse());
         showLoading.setValue(false);
-        mHideComments.setValue(false);
+        mHideCommentsEmpty.setValue(false);
     }
 
     private void onPostCommentSuccess(CommentResponse commentResponse) {
@@ -370,11 +445,18 @@ public class CommentsViewModel extends ViewModel {
         return mCommentLiveData;
     }
 
-    protected LiveData<Boolean> getObservableHideComments() {
-        if (mHideComments == null) {
-            mHideComments = new MutableLiveData<>();
+    protected LiveData<Boolean> getObservableHideCommentsEmpty() {
+        if (mHideCommentsEmpty == null) {
+            mHideCommentsEmpty = new MutableLiveData<>();
         }
-        return mHideComments;
+        return mHideCommentsEmpty;
+    }
+
+    protected LiveData<Boolean> getObservableHideCommentsPermissions() {
+        if (mHideCommentsPermissions == null) {
+            mHideCommentsPermissions = new MutableLiveData<>();
+        }
+        return mHideCommentsPermissions;
     }
 
     protected LiveData<Integer> getObservableCommentsTabCounter() {
@@ -417,5 +499,33 @@ public class CommentsViewModel extends ViewModel {
             mExitEditModeUiLiveData = new MutableLiveData<>();
         }
         return mExitEditModeUiLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableHideCommentInput() {
+        if (mHideCommentInputLiveData == null) {
+            mHideCommentInputLiveData = new MutableLiveData<>();
+        }
+        return mHideCommentInputLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableHideSwitchPrivatePublic() {
+        if (mHideSwitchPrivatePublicLiveData == null) {
+            mHideSwitchPrivatePublicLiveData = new MutableLiveData<>();
+        }
+        return mHideSwitchPrivatePublicLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableHideEditCommentOption() {
+        if (mHideEditCommentOption == null) {
+            mHideEditCommentOption = new MutableLiveData<>();
+        }
+        return mHideEditCommentOption;
+    }
+
+    protected LiveData<Boolean> getObservableHideDeleteCommentOption() {
+        if (mHideDeleteCommentOption == null) {
+            mHideDeleteCommentOption = new MutableLiveData<>();
+        }
+        return mHideDeleteCommentOption;
     }
 }

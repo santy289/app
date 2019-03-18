@@ -88,25 +88,27 @@ public class StatusFragment extends Fragment {
             }
         });
 
-        statusViewModel.getObservableError().observe(this, errorObserver);
-        statusViewModel.getObservableShowToastMessage().observe(this, this::showToastMessage);
-        statusViewModel.getObservableTieStatus().observe(this, this::showTieStatusLabel);
+        statusViewModel.getObservableError().observe(getViewLifecycleOwner(), errorObserver);
+        statusViewModel.getObservableShowToastMessage().observe(getViewLifecycleOwner(), this::showToastMessage);
+        statusViewModel.getObservableTieStatus().observe(getViewLifecycleOwner(), this::showTieStatusLabel);
         statusViewModel.getObservableEnableApproveRejectButtons()
-                .observe(this, this::enableApproveRejectButtons);
+                .observe(getViewLifecycleOwner(), this::enableApproveRejectButtons);
 
-        statusViewModel.showLoading.observe(this, this::showLoading);
-        statusViewModel.handleShowLoadingByRepo.observe(this, this::showLoading);
-        statusViewModel.updateStatusUi.observe(this, this::updateStatusDetails);
-        statusViewModel.updateCurrentApproversList.observe(this, this::updateCurrentApproversList);
+        statusViewModel.showLoading.observe(getViewLifecycleOwner(), this::showLoading);
+        statusViewModel.handleShowLoadingByRepo.observe(getViewLifecycleOwner(), this::showLoading);
+        statusViewModel.updateStatusUi.observe(getViewLifecycleOwner(), this::updateStatusDetails);
+        statusViewModel.updateCurrentApproversList.observe(getViewLifecycleOwner(), this::updateCurrentApproversList);
         statusViewModel.hideApproverListOnEmptyData
-                .observe(this, this::hideApproverListOnEmptyData);
-        statusViewModel.updateApproveSpinner.observe(this, this::updateApproveSpinner);
+                .observe(getViewLifecycleOwner(), this::hideApproverListOnEmptyData);
+        statusViewModel.updateApproveSpinner.observe(getViewLifecycleOwner(), this::updateApproveSpinner);
         statusViewModel.hideApproveSpinnerOnEmptyData
-                .observe(this, this::hideApproveSpinnerOnEmptyData);
-        statusViewModel.updateStatusUiFromUserAction.observe(this, this::updateStatusDetails);
-        statusViewModel.updateActiveStatusFromUserAction.observe(this, this::updateWorkflowStatus);
-        statusViewModel.handleSetWorkflowIsOpenByRepo.observe(this, this::updateWorkflowStatus);
-        statusViewModel.setWorkflowIsOpen.observe(this, this::updateWorkflowStatus);
+                .observe(getViewLifecycleOwner(), this::hideApproveSpinnerOnEmptyData);
+        statusViewModel.hideApproveSpinnerOnNotApprover
+                .observe(getViewLifecycleOwner(), this::hideApproveSpinnerOnNotApprover);
+        statusViewModel.updateStatusUiFromUserAction.observe(getViewLifecycleOwner(), this::updateStatusDetails);
+        statusViewModel.updateActiveStatusFromUserAction.observe(getViewLifecycleOwner(), this::updateWorkflowStatus);
+        statusViewModel.handleSetWorkflowIsOpenByRepo.observe(getViewLifecycleOwner(), this::updateWorkflowStatus);
+        statusViewModel.setWorkflowIsOpen.observe(getViewLifecycleOwner(), this::updateWorkflowStatus);
     }
 
     private void setOnClickListeners() {
@@ -219,27 +221,59 @@ public class StatusFragment extends Fragment {
     }
 
     /**
-     * Hides the spinner in the case that we don't have any next status. When the spinner is hidden.
-     * It will replaced it with a message text view.
+     * Hides the spinner in the case that we don't have any next status. When the spinner is hidden,
+     * it will be replaced it with a message text view.
      *
      * @param hide Hides or shows the spinner view.
      */
     @UiThread
     private void hideApproveSpinnerOnEmptyData(boolean hide) {
+        hideApproveSpinner(hide);
+        mBinding.includeNextStep.tvUserNotApprover.setVisibility(View.INVISIBLE);
+
         if (hide) {
             mBinding.includeNextStep.tvNoMoreStatus.setVisibility(View.VISIBLE);
+        } else {
+            mBinding.includeNextStep.tvNoMoreStatus.setVisibility(View.INVISIBLE);
+        }
+
+    }
+
+    /**
+     * Hides the spinner in the case that the user is not an approver. When the spinner is hidden,
+     * it will be replaced it with a message text view.
+     *
+     * @param hide Hides or shows the spinner view.
+     */
+    @UiThread
+    private void hideApproveSpinnerOnNotApprover(boolean hide) {
+        hideApproveSpinner(hide);
+        mBinding.includeNextStep.tvNoMoreStatus.setVisibility(View.INVISIBLE);
+
+        if (hide) {
+            mBinding.includeNextStep.tvUserNotApprover.setVisibility(View.VISIBLE);
+        } else {
+            mBinding.includeNextStep.tvUserNotApprover.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    /**
+     * Hides or shows the approve spinner and buttons.
+     *
+     * @param hide Hides or shows the spinner view.
+     */
+    private void hideApproveSpinner(boolean hide) {
+        if (hide) {
             mBinding.includeNextStep.viewSpinnerBackground.setVisibility(View.GONE);
             mBinding.includeNextStep.spSteps.setVisibility(View.GONE);
             mBinding.includeNextStep.btnApprove.setVisibility(View.GONE);
             mBinding.includeNextStep.btnReject.setVisibility(View.GONE);
         } else {
-            mBinding.includeNextStep.tvNoMoreStatus.setVisibility(View.GONE);
             mBinding.includeNextStep.viewSpinnerBackground.setVisibility(View.VISIBLE);
             mBinding.includeNextStep.spSteps.setVisibility(View.VISIBLE);
             mBinding.includeNextStep.btnApprove.setVisibility(View.VISIBLE);
             mBinding.includeNextStep.btnReject.setVisibility(View.VISIBLE);
         }
-
     }
 
     /**

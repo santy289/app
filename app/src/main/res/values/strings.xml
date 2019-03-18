@@ -48,10 +48,10 @@
     <string name="empty_token">Please enter a valid token</string>
     <string name="enter_password">Enter your new password</string>
     <string name="password_mismatch">Both passwords must match</string>
-    <string name="password_changed">Your password was succesfully changed, please log in</string>
+    <string name="password_changed">Your password was successfully changed, please log in</string>
     <string name="title_activity_sync">SyncActivity</string>
     <string name="action_edit_profile">Edit Profile</string>
-    <string name="title_activity_edit_profile">EditProfileActivity</string>
+    <string name="title_activity_edit_profile">Edit Profile</string>
     <string name="name">Name</string>
     <string name="phone">Phone number</string>
     <string name="email">Email</string>
@@ -138,6 +138,7 @@
     <string name="day">Day</string>
     <string name="filtered_by">Filtered by:</string>
     <string name="comment_ammount">Comments</string>
+    <string name="view_comments">View comments</string>
     <string name="add_comment">Add a comment</string>
     <string name="today">Today</string>
     <string name="current_week">Current week</string>
@@ -213,6 +214,7 @@
     <string name="public_comment">Public</string>
     <string name="private_comment">Private</string>
     <string name="no_more_status">No more status</string>
+    <string name="user_not_approver">You are not an approver of this status</string>
     <string name="status_approvers">STATUS APPROVERS</string>
     <string name="no_people_involved">No people involved</string>
     <string name="approvers">Approvers:</string>
@@ -230,9 +232,11 @@
     <string name="request_successfully">Request done successfully.</string>
     <string name="functionality_not_available">This functionality is not available yet</string>
     <string name="add_file">Add File</string>
+    <string name="select_location">Select a location</string>
     <string name="asterisk" translatable="false">*</string>
     <string name="file_form_item_required_msg">You must add a file in order to continue.</string>
     <string name="intent_form_item_required_msg">You must complete this in order to continue.</string>
+    <string name="geolocation_form_item_required_msg">You must select a location in order to continue.</string>
     <string name="fill_all_form_items">You need to fill out all of the required elements.</string>
     <string name="action">Action</string>
     <string name="people_involved_action">Configure</string>
@@ -241,12 +245,14 @@
     <string name="specific_approvers_form">People that can approve a specific status</string>
     <string name="people_involved_form_return_button">Go Back</string>
     <string name="select_date_dialog_end_date_before_start_date_error">The start date cannot be after the end date.</string>
+    <string name="background_service_notification_text">Listening for notifications</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Workflow Details</string>
     <string name="workflow_detail_activity_open_file">Open File</string>
     <string name="workflow_detail_activity_no_pdf_reader">This file cannot be opened by your device. Please install a PDF reader.</string>
     <string name="workflow_detail_activity_permissions_not_granted">Cannot export PDF because the permissions were not granted.</string>
+    <string name="workflow_detail_workflow_not_found">This workflow does not exist.</string>
     <!--StatusFragment-->
     <string name="workflow_detail_status_fragment_title">Status</string>
     <string name="workflow_detail_status_fragment_status_summary">Workflow Status</string>
@@ -263,6 +269,7 @@
     <string name="workflow_detail_status_fragment_spinner_title">- Select Status -</string>
     <string name="workflow_detail_status_fragment_must_select_step">You must select a status first</string>
     <string name="workflow_detail_status_fragment_export_pdf">Export PDF</string>
+    <string name="workflow_detail_status_fragment_view_tree">View Diagram</string>
     <!--InformationFragment-->
     <string name="workflow_detail_information_fragment_title">@string/workflow_detail_information_fragment_information</string>
     <string name="workflow_detail_information_fragment_important_things">Important Things About This Step</string>
@@ -291,6 +298,7 @@
     <string name="workflow_detail_comments_fragment_select_file">Select a file to upload</string>
     <string name="workflow_detail_comments_fragment_open_file">Open File</string>
     <string name="workflow_detail_comments_fragment_cannot_open_file">This file cannot be opened by your device.</string>
+    <string name="workflow_detail_comments_fragment_no_view_permissions">You do not have permissions to view the comments</string>
     <!--FilesFragment-->
     <string name="workflow_detail_files_fragment_title">@string/workflow_detail_files_fragment_documents</string>
     <string name="workflow_detail_files_fragment_documents">Documents</string>
@@ -302,6 +310,7 @@
     <string name="workflow_detail_files_fragment_cannot_open_file">This file cannot be opened by your device.</string>
     <string name="workflow_detail_files_fragment_preset_unavailable">This preset is not available to download.</string>
     <string name="workflow_detail_files_fragment_permissions_not_granted">Cannot download the file because the permissions were not granted.</string>
+    <string name="workflow_detail_files_fragment_no_view_permissions">You do not have permissions to view the files</string>
 
     <!--MainActivity-->
     <string name="bottom_nav_timeline">Timeline</string>
@@ -349,7 +358,23 @@
     <string name="timeline_current_status">Current status: %s</string>
     <string name="timeline_thumbs_value" translatable="false">(%d)</string>
     <plurals name="timeline_comment_replies">
-        <item quantity="one" formatted="true">1 reply</item>
-        <item quantity="other" formatted="true">%d replies</item>
+        <item formatted="true" quantity="one">1 reply</item>
+        <item formatted="true" quantity="other">%d replies</item>
     </plurals>
+    <plurals name="timeline_comments">
+        <item formatted="true" quantity="one">1 comment</item>
+        <item formatted="true" quantity="other">%d comments</item>
+    </plurals>
+    <string name="timeline_fragment_no_view_permissions">You do not have permissions to view the timeline.</string>
+
+    <!--GeolocationActivity-->
+    <string name="title_activity_geolocation">Select a Location</string>
+    <string name="geolocation_your_selection">Selected location</string>
+    <string name="geolocation_activity_permissions_not_granted">Cannot retrieve your current location because the permissions were not granted.</string>
+    <string name="geolocation_activity_cannot_retrieve_location">Cannot retrieve your current location. Check your connection and GPS status.</string>
+    <string name="geolocation_activity_confirm_location">Confirm Location</string>
+    <string name="geolocation_activity_navigate">Navigate</string>
+    <string name="geolocation_activity_could_not_retrieve_location">Location not found</string>
+    <string name="geolocation_activity_unnamed">Unnamed</string>
+    <string name="geolocation_activity_no_connection">No internet connection.</string>
 </resources>

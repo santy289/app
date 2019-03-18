@@ -1,42 +1,39 @@
 package com.rootnetapp.rootnetintranet.ui.sync;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-
 import android.database.sqlite.SQLiteConstraintException;
-import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.BuildConfig;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
+import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDB;
 import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDBDao;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.Profile;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.Field;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountryDbResponse;
+import com.rootnetapp.rootnetintranet.models.responses.user.LoggedProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.websocket.WebSocketSettingResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowType;
-import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
-import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -68,7 +65,7 @@ public class SyncHelper {
     public final static int INDEX_KEY_STRING = 0;
     public final static int INDEX_KEY_VALUE = 1;
     private final static String TAG = "SyncHelper";
-    protected static final int MAX_ENDPOINT_CALLS = 5;
+    protected static final int MAX_ENDPOINT_CALLS = 6;
 
     public SyncHelper(ApiInterface apiInterface, AppDatabase database) {
         this.apiInterface = apiInterface;
@@ -87,6 +84,7 @@ public class SyncHelper {
         getUser(token);
         getAllWorkflows(token, 1);
         getWorkflowTypesDb(token);
+        getLoggedProfile(token);
 
         //getProfiles(token);
     }
@@ -117,15 +115,16 @@ public class SyncHelper {
      * RxJava implementation to change 2 network requests for obtaining webSocket settings such as
      * port number and protocol type. Finally it saves to SharedPreferences all these settings.
      *
-     * @param token
-     *  Token network request.
+     * @param token Token network request.
      */
     private void getWsSettings(String token) {
         Disposable disposable = apiInterface
                 .getWsPort(token)
-                .doOnNext(response -> saveWebsocketSettingsToPreference(response, PreferenceKeys.PREF_PORT))
+                .doOnNext(response -> saveWebsocketSettingsToPreference(response,
+                        PreferenceKeys.PREF_PORT))
                 .flatMap(response -> apiInterface.getWsProtocol(token))
-                .doOnNext(response -> saveWebsocketSettingsToPreference(response, PreferenceKeys.PREF_PROTOCOL))
+                .doOnNext(response -> saveWebsocketSettingsToPreference(response,
+                        PreferenceKeys.PREF_PROTOCOL))
 //                .retryWhen(observable -> Observable.timer(3, TimeUnit.SECONDS))
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -143,14 +142,14 @@ public class SyncHelper {
     }
 
     /**
-     * Validates if response has a correct status "success". Saves response values to SharedPreferences.
+     * Validates if response has a correct status "success". Saves response values to
+     * SharedPreferences.
      *
-     * @param response
-     *  Incoming response with values.
-     * @param preferenceKey
-     *  Expecting static variables from class PreferenceKeys.
+     * @param response      Incoming response with values.
+     * @param preferenceKey Expecting static variables from class PreferenceKeys.
      */
-    private void saveWebsocketSettingsToPreference(WebSocketSettingResponse response, String preferenceKey) {
+    private void saveWebsocketSettingsToPreference(WebSocketSettingResponse response,
+                                                   String preferenceKey) {
         String status = response.getStatus();
         if (TextUtils.isEmpty(status) || !status.equals("success")) {
             return;
@@ -271,7 +270,9 @@ public class SyncHelper {
                     saveIdToPreference.setValue(id);
                     success(true);
                 }, throwable -> {
-                    Log.d(TAG, "onDatabaseSavedWorkflowTypeDb: Something went wrong trying to get category list id: " + throwable.getMessage());
+                    Log.d(TAG,
+                            "onDatabaseSavedWorkflowTypeDb: Something went wrong trying to get category list id: " + throwable
+                                    .getMessage());
                 });
         disposables.add(disposable);
     }
@@ -326,7 +327,7 @@ public class SyncHelper {
         Disposable disposable = apiInterface.getProfiles(token).subscribeOn(Schedulers.newThread()).
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe(this::onUsersSuccess, throwable -> {
-                    Log.d(TAG, "getData: error " + throwable.getMessage() );
+                    Log.d(TAG, "getData: error " + throwable.getMessage());
                     handleNetworkError(throwable);
                 });
         disposables.add(disposable);
@@ -376,7 +377,9 @@ public class SyncHelper {
                     String authToken = "Bearer " + token;
                     syncData(authToken);
                 }, throwable -> {
-                    Log.d(TAG, "attemptToLogin: Smomething failed with network request: " + throwable.getMessage());
+                    Log.d(TAG,
+                            "attemptToLogin: Smomething failed with network request: " + throwable
+                                    .getMessage());
                     goToDomain.setValue(true);
                 });
         disposables.add(disposable);
@@ -429,22 +432,50 @@ public class SyncHelper {
 //        if(!workflowsResponse.getPager().isIsLastPage()){
 //            getAllWorkflows(auth, workflowsResponse.getPager().getNextPage());
 //        }else{
-            Disposable disposable = Observable.fromCallable(() -> {
-                database.workflowDao().clearWorkflows();
-                database.workflowDao().insertAll(workflows);
-                return true;
-            }).subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::success,
-                            this::failure);
-            disposables.add(disposable);
+        Disposable disposable = Observable.fromCallable(() -> {
+            database.workflowDao().clearWorkflows();
+            database.workflowDao().insertAll(workflows);
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::success,
+                        this::failure);
+        disposables.add(disposable);
 //        }
+    }
+
+    private void getLoggedProfile(String token) {
+        Disposable disposable = apiInterface.getLoggedProfile(token)
+                .subscribeOn(Schedulers.newThread()).
+                        observeOn(AndroidSchedulers.mainThread()).
+                        subscribe(this::onLoggedProfileSuccess, throwable -> {
+                            Log.d(TAG, "getData: error " + throwable.getMessage());
+                            handleNetworkError(throwable);
+                        });
+        disposables.add(disposable);
+    }
+
+    private void onLoggedProfileSuccess(LoggedProfileResponse loggedProfileResponse) {
+        if (loggedProfileResponse.getLoggedUser() == null || loggedProfileResponse.getLoggedUser()
+                .getPermissions() == null) {
+            failure(null);
+            return;
+        }
+
+        String permissionsString = RootnetPermissionsUtils.getPermissionsStringFromMap(
+                loggedProfileResponse.getLoggedUser().getPermissions());
+
+        String[] value = new String[]{PreferenceKeys.PREF_USER_PERMISSIONS,
+                                      permissionsString};
+        saveStringToPreference.postValue(value);
+
+        success(true);
     }
 
     private void success(Boolean o) {
         queriesDoneSoFar++;
         mProgressLiveData.setValue(queriesDoneSoFar);
-        if(MAX_ENDPOINT_CALLS == queriesDoneSoFar){
+        if (MAX_ENDPOINT_CALLS == queriesDoneSoFar) {
             mSyncLiveData.setValue(true);
         }
     }

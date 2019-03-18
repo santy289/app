@@ -81,11 +81,11 @@ public class ApprovalHistoryFragment extends Fragment {
             }
         });
 
-        approvalHistoryViewModel.getObservableError().observe(this, errorObserver);
+        approvalHistoryViewModel.getObservableError().observe(getViewLifecycleOwner(), errorObserver);
 //
-        approvalHistoryViewModel.showLoading.observe(this, this::showLoading);
-        approvalHistoryViewModel.updateApprovalHistoryList.observe(this, this::updateApprovalHistoryList);
-        approvalHistoryViewModel.hideHistoryApprovalList.observe(this, this::hideHistoryApprovalList);
+        approvalHistoryViewModel.showLoading.observe(getViewLifecycleOwner(), this::showLoading);
+        approvalHistoryViewModel.updateApprovalHistoryList.observe(getViewLifecycleOwner(), this::updateApprovalHistoryList);
+        approvalHistoryViewModel.hideHistoryApprovalList.observe(getViewLifecycleOwner(), this::hideHistoryApprovalList);
     }
 
     @UiThread

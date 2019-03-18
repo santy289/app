@@ -35,11 +35,14 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import androidx.annotation.UiThread;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.paging.PagedList;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -132,6 +135,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             subscribe();
         }
         workflowViewModel.iniRightDrawerFilters();
+        workflowViewModel.checkPermissions(prefs);
         return view;
     }
 
@@ -142,6 +146,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     @Override
     public void showDetail(WorkflowListItem item) {
+        if (!workflowViewModel.hasViewDetailsPermissions()) return;
+
         workflowViewModel.resetFilterSettings();
         Intent intent = new Intent(getActivity(), WorkflowDetailActivity.class);
         intent.putExtra(WorkflowDetailActivity.EXTRA_WORKFLOW_LIST_ITEM, item);
@@ -176,9 +182,16 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     }
 
     private void setupWorkflowRecyclerView() {
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
-        fragmentWorkflowBinding.recWorkflows.setLayoutManager(mLayoutManager);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
+        fragmentWorkflowBinding.recWorkflows.setLayoutManager(layoutManager);
         fragmentWorkflowBinding.recWorkflows.setNestedScrollingEnabled(false);
+
+        DividerItemDecoration itemDecoration = new DividerItemDecoration(getContext(),
+                ((LinearLayoutManager) layoutManager).getOrientation());
+        itemDecoration.setDrawable(
+                ContextCompat.getDrawable(getContext(), R.drawable.recycler_divider));
+        fragmentWorkflowBinding.recWorkflows.addItemDecoration(itemDecoration);
+
         adapter = new WorkflowExpandableAdapter(this);
         fragmentWorkflowBinding.recWorkflows.setAdapter(adapter);
         // Swipe to refresh recyclerView
@@ -340,6 +353,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.messageMainBaseFilters.observe(this, this::handleMessageMainBaseFilters);
         workflowViewModel.messageMainBaseFilterSelectionToFilterList
                 .observe(this, this::handleMessageMainBaseFilterSelected);
+        workflowViewModel.getObservableShowAddButton()
+                .observe(this, this::showAddButton);
+        workflowViewModel.getObservableShowViewWorkflowButton()
+                .observe(this, this::showViewWorkflowDetailsButton);
 
         // MainActivity's ViewModel
         mainViewModel.messageContainerToWorkflowList
@@ -545,5 +562,15 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                         "toggleRadioButtonFilter: Trying to perform toggle on unknown radio button");
                 break;
         }
+    }
+
+    @UiThread
+    private void showAddButton(boolean show) {
+        fragmentWorkflowBinding.btnAdd.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    @UiThread
+    private void showViewWorkflowDetailsButton(boolean show) {
+        adapter.setShowViewWorkflowButton(show);
     }
 }

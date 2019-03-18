@@ -2,7 +2,7 @@ package com.rootnetapp.rootnetintranet.models.createworkflow;
 
 import com.squareup.moshi.Json;
 
-public class ProductJsonValue {
+public class BaseEntityJsonValue {
     @Json(name = "value")
     String value;
     @Json(name = "workflow_type_field_id")

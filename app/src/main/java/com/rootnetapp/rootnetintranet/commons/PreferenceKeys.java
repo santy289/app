@@ -9,4 +9,5 @@ public class PreferenceKeys {
     public static final String PREF_DOMAIN = "domain";
     public static final String PREF_PROTOCOL = "ws_protocol";
     public static final String PREF_PORT = "ws_port";
+    public static final String PREF_USER_PERMISSIONS = "user_permissions";
 }

@@ -16,7 +16,7 @@
                 android:id="@+id/square"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@color/colorPrimaryDark"
+                android:background="@color/colorAccent"
                 android:padding="20dp"
                 android:text="@string/select_date"
                 android:textAllCaps="true"
@@ -63,7 +63,7 @@
                     android:paddingBottom="5dp"
                     android:paddingTop="10dp"
                     android:text="@string/start_date"
-                    android:textColor="@color/colorPrimaryDark" />
+                    android:textColor="@color/colorAccent" />
 
                 <DatePicker
                     android:id="@+id/picker_startdate"
@@ -79,7 +79,7 @@
                     android:paddingBottom="5dp"
                     android:paddingTop="10dp"
                     android:text="@string/end_date"
-                    android:textColor="@color/colorPrimaryDark" />
+                    android:textColor="@color/colorAccent" />
 
                 <DatePicker
                     android:id="@+id/picker_enddate"

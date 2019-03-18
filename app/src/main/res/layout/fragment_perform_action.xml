@@ -21,6 +21,9 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 android:background="@drawable/border_bg_workflow_perform_action"
                 android:paddingTop="8dp"
                 android:paddingBottom="8dp">
@@ -34,8 +37,11 @@
                     android:ellipsize="end"
                     android:gravity="center_vertical"
                     android:maxLines="2"
-                    android:textColor="@color/colorPrimary"
+                    android:textColor="@color/colorAccent"
                     android:textSize="18sp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
                     tools:text="Now we have some very long text to test if we can have something here correctly without breaking Long text in here." />
 
                 <TextView
@@ -44,7 +50,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:text="@string/workflow_search_fragment_search_type"
-                    android:textColor="@color/colorPrimary"
+                    android:textColor="@color/colorAccent"
                     app:layout_constraintStart_toStartOf="@id/tv_title"
                     app:layout_constraintTop_toBottomOf="@id/tv_title" />
 
@@ -64,7 +70,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/workflow_search_fragment_search_status"
-                    android:textColor="@color/colorPrimary"
+                    android:textColor="@color/colorAccent"
                     app:layout_constraintStart_toStartOf="@id/tv_type_title"
                     app:layout_constraintTop_toBottomOf="@id/tv_type_title" />
 

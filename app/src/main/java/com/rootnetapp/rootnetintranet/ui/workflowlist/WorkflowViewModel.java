@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
+import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -47,6 +48,8 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_CREATE;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_VIEW;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.CHECK;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.INDEX_CHECK;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.INDEX_TYPE;
@@ -61,6 +64,9 @@ import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.UN
 
 public class WorkflowViewModel extends ViewModel {
 
+    public static final int NO_TYPE_SELECTED = 0;
+    public static final int WORKFLOW_TYPE_FIELD = -98;
+
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<PagedList<WorkflowListItem>> updateWithSortedList;
@@ -71,6 +77,8 @@ public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<Boolean> showList;
     private MutableLiveData<Boolean> addWorkflowObserver;
     private MutableLiveData<Boolean> setAllCheckboxesList;
+    private MutableLiveData<Boolean> showAddButtonLiveData;
+    private MutableLiveData<Boolean> showViewWorkflowButtonLiveData;
     public MutableLiveData<Boolean> showBottomSheetLoading;
     protected MutableLiveData<Boolean> clearFilters;
     private LiveData<PagedList<WorkflowListItem>> liveWorkflows;
@@ -109,10 +117,7 @@ public class WorkflowViewModel extends ViewModel {
     private int categoryId;
     private List<ListItem> categoryList;
     private static final String TAG = "WorkflowViewModel";
-
-    public static final int NO_TYPE_SELECTED = 0;
-
-    public static final int WORKFLOW_TYPE_FIELD = -98;
+    private boolean hasViewDetailsPermissions;
 
     public WorkflowViewModel(WorkflowRepository workflowRepository) {
         this.workflowRepository = workflowRepository;
@@ -137,6 +142,29 @@ public class WorkflowViewModel extends ViewModel {
     protected void onCleared() {
         disposables.clear();
         workflowRepository.clearDisposables();
+    }
+
+    /**
+     * Verifies all of the user permissions related to this ViewModel and {@link WorkflowFragment}.
+     * Hide the UI related to the unauthorized actions.
+     *
+     * @param prefs shared preferences
+     */
+    protected void checkPermissions(SharedPreferences prefs) {
+        String loggedUserId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
+        String permissionsString = prefs.getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
+
+        RootnetPermissionsUtils permissionsUtils = new RootnetPermissionsUtils(permissionsString);
+
+        boolean hasCreatePermissions = permissionsUtils.hasPermission(WORKFLOW_CREATE);
+        hasViewDetailsPermissions = permissionsUtils.hasPermission(WORKFLOW_VIEW);
+
+        showAddButtonLiveData.setValue(hasCreatePermissions);
+        showViewWorkflowButtonLiveData.setValue(hasViewDetailsPermissions);
+    }
+
+    protected boolean hasViewDetailsPermissions() {
+        return hasViewDetailsPermissions;
     }
 
     private void getWorkflowTypesFromDb() {
@@ -410,8 +438,10 @@ public class WorkflowViewModel extends ViewModel {
 
     /**
      * Finds out if the originalId is already saved on the WorkflowTypeMenu list.
+     *
      * @param originalId
      * @param types
+     *
      * @return
      */
     private boolean isOriginalIdInList(int originalId, List<WorkflowTypeMenu> types) {
@@ -963,7 +993,7 @@ public class WorkflowViewModel extends ViewModel {
                 || value.equals(FormSettings.VALUE_EMAIL)
                 || value.equals(FormSettings.VALUE_INTEGER)
                 || value.equals(FormSettings.VALUE_DATE)
-                || value.equals(FormSettings.VALUE_COORD)) {
+                || value.equals(FormSettings.VALUE_COORDS)) {
             return true;
         }
         if (value.equals(FormSettings.VALUE_LIST) && type.equals(FormSettings.TYPE_SYSTEM_USERS)) {
@@ -973,8 +1003,8 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     /**
-     * Sets search text value to FilterSettings object. Restart live data and apply rest of the
-     * if any.
+     * Sets search text value to FilterSettings object. Restart live data and apply rest of the if
+     * any.
      *
      * @param searchText
      * @param lifecycleOwner
@@ -1004,7 +1034,7 @@ public class WorkflowViewModel extends ViewModel {
         });
 
         final Observer<Boolean> handleRestSuccessWithNoApplyFilter = (success -> {
-           showLoading.postValue(false);
+            showLoading.postValue(false);
         });
 
         workflowRepository.getObservableHandleRepoError()
@@ -1056,9 +1086,9 @@ public class WorkflowViewModel extends ViewModel {
     /**
      * Checks the FilterSettings object and according the parameters selected by the user it will
      * sort, filter queries to the local database. At the same time it will initalize a new
-     * BoundaryCallback to enable paging for the list. Finally it will remove any observers for
-     * the LiveData observing the previous local query, and update the LiveData to observe to the
-     * new local database query.
+     * BoundaryCallback to enable paging for the list. Finally it will remove any observers for the
+     * LiveData observing the previous local query, and update the LiveData to observe to the new
+     * local database query.
      *
      * @param filterSettings
      * @param id
@@ -1535,6 +1565,20 @@ public class WorkflowViewModel extends ViewModel {
             setAllCheckboxesList = new MutableLiveData<>();
         }
         return setAllCheckboxesList;
+    }
+
+    protected LiveData<Boolean> getObservableShowAddButton() {
+        if (showAddButtonLiveData == null) {
+            showAddButtonLiveData = new MutableLiveData<>();
+        }
+        return showAddButtonLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowViewWorkflowButton() {
+        if (showViewWorkflowButtonLiveData == null) {
+            showViewWorkflowButtonLiveData = new MutableLiveData<>();
+        }
+        return showViewWorkflowButtonLiveData;
     }
 
     protected LiveData<Integer> getObservableSetSelectType() {

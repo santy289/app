@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,7 +13,6 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,7 +41,6 @@ import com.rootnetapp.rootnetintranet.services.websocket.WebsocketSecureHandler;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragmentInterface;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
-import com.rootnetapp.rootnetintranet.ui.main.adapters.SearchAdapter;
 import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerFragment;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
@@ -65,7 +62,6 @@ import androidx.annotation.StringRes;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
-import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
@@ -201,45 +197,6 @@ public class MainActivity extends AppCompatActivity
             }
         }
         return false;
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_search, menu);
-        mSearch = menu.findItem(R.id.action_search);
-        SearchView mSearchView = (SearchView) mSearch.getActionView();
-        mSearchView.setQueryHint(getString(R.string.search));
-        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                if (!TextUtils.isEmpty(newText)) {
-                    viewModel.getWorkflowsLike("%" + newText + "%");
-                }
-                return true;
-            }
-        });
-
-        final Observer<Cursor> workflowsObserver = ((Cursor data) -> {
-            if (null != data) {
-                mSearchView.setSuggestionsAdapter(new SearchAdapter(this, data, this));
-            } else {
-                Toast.makeText(this, "error", Toast.LENGTH_LONG).show();
-            }
-        });
-
-        final Observer<Integer> wfErrorObserver = ((Integer data) -> {
-            if (null != data) {
-                Toast.makeText(this, "error", Toast.LENGTH_LONG).show();
-            }
-        });
-        viewModel.getObservableWorkflowError().observe(this, wfErrorObserver);
-        viewModel.getObservableWorkflows().observe(this, workflowsObserver);
-        return super.onCreateOptionsMenu(menu);
     }
 
     @Override

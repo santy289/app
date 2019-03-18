@@ -21,7 +21,7 @@
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:iconSize="24dp"
-            app:iconTint="@color/colorPrimary"
+            app:iconTint="@color/colorAccent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:rippleColor="@color/dark_gray" />
@@ -38,6 +38,13 @@
             app:layout_constraintStart_toEndOf="@id/btn_edit"
             app:layout_constraintTop_toTopOf="@id/btn_edit" />
 
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier_edit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="btn_edit,view_information" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_all_people_involved"
             android:layout_width="0dp"
@@ -47,7 +54,7 @@
             android:layout_marginEnd="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_edit" />
+            app:layout_constraintTop_toBottomOf="@+id/barrier_edit" />
 
         <TextView
             android:id="@+id/no_people_involved"
@@ -63,7 +70,7 @@
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_edit"
+            app:layout_constraintTop_toBottomOf="@+id/barrier_edit"
             tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -27,6 +27,8 @@ public class WorkflowListItem implements Parcelable {
     public String workflowTypeKey;
     @ColumnInfo(name = "full_name")
     public String fullName;
+    @ColumnInfo(name = "user_id")
+    public int ownerId;
     @ColumnInfo(name = "current_status_name")
     public String currentStatusName;
     @ColumnInfo(name = "created_at")
@@ -66,6 +68,7 @@ public class WorkflowListItem implements Parcelable {
         title = workflowDb.getTitle();
         workflowTypeKey = workflowDb.getWorkflowTypeKey();
         fullName = workflowDb.getAuthor() != null ? workflowDb.getAuthor().getFullName() : null;
+        ownerId = workflowDb.getAuthor() != null ? workflowDb.getAuthor().getUserId() : 0;
         currentStatusName = workflowDb.getCurrentStatusName();
         createdAt = workflowDb.getCreatedAt();
         updatedAt = workflowDb.getUpdatedAt();
@@ -113,6 +116,14 @@ public class WorkflowListItem implements Parcelable {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public int getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(int ownerId) {
+        this.ownerId = ownerId;
     }
 
     public String getCurrentStatusName() {
@@ -260,6 +271,7 @@ public class WorkflowListItem implements Parcelable {
                 Objects.equals(getTitle(), that.getTitle()) &&
                 Objects.equals(getWorkflowTypeKey(), that.getWorkflowTypeKey()) &&
                 Objects.equals(getFullName(), that.getFullName()) &&
+                Objects.equals(getOwnerId(), that.getOwnerId()) &&
                 Objects.equals(getCurrentStatusName(), that.getCurrentStatusName()) &&
                 Objects.equals(getCreatedAt(), that.getCreatedAt()) &&
                 Objects.equals(getUpdatedAt(), that.getUpdatedAt()) &&
@@ -271,7 +283,7 @@ public class WorkflowListItem implements Parcelable {
     public int hashCode() {
 
         return Objects.hash(getWorkflowId(), getWorkflowTypeId(), getWorkflowTypeName(), getTitle(),
-                getWorkflowTypeKey(), getFullName(), getCurrentStatusName(), getCreatedAt(),
+                getWorkflowTypeKey(), getFullName(), getOwnerId(), getCurrentStatusName(), getCreatedAt(),
                 getUpdatedAt(), getStart(), getEnd(), isStatus());
     }
 
@@ -284,6 +296,7 @@ public class WorkflowListItem implements Parcelable {
         title = in.readString();
         workflowTypeKey = in.readString();
         fullName = in.readString();
+        ownerId = in.readInt();
         currentStatusName = in.readString();
         createdAt = in.readString();
         updatedAt = in.readString();
@@ -311,6 +324,7 @@ public class WorkflowListItem implements Parcelable {
         dest.writeString(title);
         dest.writeString(workflowTypeKey);
         dest.writeString(fullName);
+        dest.writeInt(ownerId);
         dest.writeString(currentStatusName);
         dest.writeString(createdAt);
         dest.writeString(updatedAt);

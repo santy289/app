@@ -11,7 +11,6 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/border"
             android:padding="10dp">
 
             <CheckBox
@@ -32,7 +31,7 @@
                 android:layout_toEndOf="@+id/chbx_selected"
                 android:layout_toStartOf="@+id/clock"
                 android:clickable="true"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/colorAccent"
                 android:focusable="true"
                 android:singleLine="false"
                 android:maxLines="2"
@@ -93,7 +92,7 @@
                         android:paddingStart="10dp"
                         android:textAllCaps="true"
                         android:textSize="12sp"
-                        android:textColor="@color/colorPrimaryDark"
+                        android:textColor="@color/colorAccent"
                         android:text="@string/workflow_type"/>
 
                     <TextView
@@ -104,13 +103,13 @@
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
                         android:textSize="12sp"
-                        android:textColor="@color/colorPrimary" />
+                        android:textColor="@color/colorAccent" />
 
                     <ImageView
                         android:id="@+id/btn_detail"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:tint="@color/colorPrimary"
+                        android:tint="@color/colorAccent"
                         android:padding="10dp"
                         android:src="@drawable/ic_visibility_black_24dp" />
                 </LinearLayout>
@@ -137,7 +136,7 @@
                         android:textAllCaps="true"
                         android:textSize="12sp"
                         android:text="@string/owner"
-                        android:textColor="@color/colorPrimaryDark" />
+                        android:textColor="@color/colorAccent" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -153,7 +152,7 @@
                             android:paddingEnd="10dp"
                             android:paddingStart="10dp"
                             android:textSize="12sp"
-                            android:textColor="@color/colorPrimary" />
+                            android:textColor="@color/colorAccent" />
 
                         <de.hdodenhof.circleimageview.CircleImageView
                             android:id="@+id/img_profile"
@@ -187,7 +186,7 @@
                         android:textAllCaps="true"
                         android:textSize="12sp"
                         android:text="@string/actual_state"
-                        android:textColor="@color/colorPrimaryDark" />
+                        android:textColor="@color/colorAccent" />
 
                     <TextView
                         android:id="@+id/tv_actualstate"
@@ -197,7 +196,7 @@
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
                         android:textSize="12sp"
-                        android:textColor="@color/colorPrimary" />
+                        android:textColor="@color/colorAccent" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -220,7 +219,7 @@
                         android:textAllCaps="true"
                         android:textSize="12sp"
                         android:text="@string/status"
-                        android:textColor="@color/colorPrimaryDark" />
+                        android:textColor="@color/colorAccent" />
 
                     <TextView
                         android:id="@+id/tv_status"
@@ -230,7 +229,7 @@
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
                         android:textSize="12sp"
-                        android:textColor="@color/colorPrimary" />
+                        android:textColor="@color/colorAccent" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -255,7 +254,7 @@
                         android:textAllCaps="true"
                         android:textSize="12sp"
                         android:text="@string/created_at"
-                        android:textColor="@color/colorPrimaryDark" />
+                        android:textColor="@color/colorAccent" />
 
                     <TextView
                         android:id="@+id/tv_createdat"
@@ -265,7 +264,7 @@
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
                         android:textSize="12sp"
-                        android:textColor="@color/colorPrimary" />
+                        android:textColor="@color/colorAccent" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -287,7 +286,7 @@
                         android:textAllCaps="true"
                         android:textSize="12sp"
                         android:text="@string/updated_at"
-                        android:textColor="@color/colorPrimaryDark" />
+                        android:textColor="@color/colorAccent" />
                     <TextView
                         android:id="@+id/tv_updated_at"
                         android:layout_width="0dp"
@@ -296,7 +295,7 @@
                         android:paddingEnd="10dp"
                         android:paddingStart="10dp"
                         android:textSize="12sp"
-                        android:textColor="@color/colorPrimary" />
+                        android:textColor="@color/colorAccent" />
                 </LinearLayout>
             </LinearLayout>
         </RelativeLayout>

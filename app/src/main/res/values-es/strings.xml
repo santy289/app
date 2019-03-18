@@ -52,7 +52,7 @@
     <string name="password_changed">Tu clave fue cambiado con éxito, por favor ingresar</string>
     <string name="title_activity_sync">SyncActivity</string>
     <string name="action_edit_profile">Editar Perfil</string>
-    <string name="title_activity_edit_profile">EditProfileActivity</string>
+    <string name="title_activity_edit_profile">Editar Perfil</string>
     <string name="name">Nombre</string>
     <string name="phone">Teléfono</string>
     <string name="email">Email</string>
@@ -139,6 +139,7 @@
     <string name="day">Día</string>
     <string name="filtered_by">Filtrado por:</string>
     <string name="comment_ammount">Comentarios</string>
+    <string name="view_comments">Ver comentarios</string>
     <string name="add_comment">Añadir comentario</string>
     <string name="today">Hoy</string>
     <string name="current_week">Semana Actual</string>
@@ -212,6 +213,7 @@
     <string name="public_comment">Público</string>
     <string name="private_comment">Privado</string>
     <string name="no_more_status">Sin más estatus</string>
+    <string name="user_not_approver">No eres un aprobador de este estatus</string>
     <string name="status_approvers">APROBADORES DEL ESTATUS</string>
     <string name="no_people_involved">Sin personas involucradas</string>
     <string name="approvers">Aprobadores:</string>
@@ -228,8 +230,10 @@
     <string name="request_successfully">Pedido realizado exitosamente.</string>
     <string name="functionality_not_available">Esta función aún no está disponible.</string>
     <string name="add_file">Añadir Archivo</string>
+    <string name="select_location">Elija una ubicación</string>
     <string name="file_form_item_required_msg">Necesitas añadir un archivo para continuar.</string>
     <string name="intent_form_item_required_msg">Necesitas completar esto para poder continuar.</string>
+    <string name="geolocation_form_item_required_msg">Necesitas seleccionar una ubicación para poder continuar.</string>
     <string name="fill_all_form_items">Necesitas llenar todos los elementos requeridos.</string>
     <string name="action">Acción</string>
     <string name="people_involved_action">Configurar</string>
@@ -238,12 +242,14 @@
     <string name="specific_approvers_form">Usuarios que pueden aprobar un estatus específico</string>
     <string name="people_involved_form_return_button">Regresar</string>
     <string name="select_date_dialog_end_date_before_start_date_error">La fecha inicial no puede ser posterior a la fecha final.</string>
+    <string name="background_service_notification_text">Escuchando a notificaciones</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Detalles de Workflow</string>
     <string name="workflow_detail_activity_open_file">Abrir Archivo</string>
     <string name="workflow_detail_activity_no_pdf_reader">Su dispositivo no puede abrir archivos PDF. Por favor instale un lector de PDF.</string>
     <string name="workflow_detail_activity_permissions_not_granted">No es posible exportar el PDF debido a que los permisos no fueron otorgados.</string>
+    <string name="workflow_detail_workflow_not_found">Este workflow no existe.</string>
     <!--StatusFragment-->
     <string name="workflow_detail_status_fragment_title">Estatus</string>
     <string name="workflow_detail_status_fragment_status_summary">Estatus del Workflow</string>
@@ -260,6 +266,7 @@
     <string name="workflow_detail_status_fragment_spinner_title">- Elija un Estatus -</string>
     <string name="workflow_detail_status_fragment_must_select_step">Debes seleccionar un estatus</string>
     <string name="workflow_detail_status_fragment_export_pdf">Exportar PDF</string>
+    <string name="workflow_detail_status_fragment_view_tree">Ver Diagrama</string>
     <!--InformationFragment-->
     <string name="workflow_detail_information_fragment_title">@string/workflow_detail_information_fragment_information</string>
     <string name="workflow_detail_information_fragment_important_things">Datos Importantes Sobre Este Estatus</string>
@@ -288,6 +295,7 @@
     <string name="workflow_detail_comments_fragment_select_file">Elija el archivo para subir</string>
     <string name="workflow_detail_comments_fragment_open_file">Abrir Archivo</string>
     <string name="workflow_detail_comments_fragment_cannot_open_file">Su dispositivo no puede abrir este archivo.</string>
+    <string name="workflow_detail_comments_fragment_no_view_permissions">No tienes suficientes permisos para ver los comentarios</string>
     <!--FilesFragment-->
     <string name="workflow_detail_files_fragment_title">@string/workflow_detail_files_fragment_documents</string>
     <string name="workflow_detail_files_fragment_documents">Documentos</string>
@@ -299,6 +307,7 @@
     <string name="workflow_detail_files_fragment_cannot_open_file">Su dispositivo no puede abrir este archivo.</string>
     <string name="workflow_detail_files_fragment_preset_unavailable">Este template no está disponible.</string>
     <string name="workflow_detail_files_fragment_permissions_not_granted">No es posible descargar el archivo debido a que los permisos no fueron otorgados.</string>
+    <string name="workflow_detail_files_fragment_no_view_permissions">No tienes suficientes permisos para ver los archivos</string>
 
     <!--MainActivity-->
     <string name="bottom_nav_timeline">Timeline</string>
@@ -348,4 +357,20 @@
         <item quantity="one" formatted="true">1 respuesta</item>
         <item quantity="other" formatted="true">%d respuestas</item>
     </plurals>
+    <plurals name="timeline_comments">
+        <item formatted="true" quantity="one">1 comentario</item>
+        <item formatted="true" quantity="other">%d comentarios</item>
+    </plurals>
+    <string name="timeline_fragment_no_view_permissions">No tienes suficientes permisos para ver el timeline.</string>
+
+    <!--GeolocationActivity-->
+    <string name="title_activity_geolocation">Elija una Ubicación</string>
+    <string name="geolocation_your_selection">Ubicación seleccionada</string>
+    <string name="geolocation_activity_permissions_not_granted">No es posible obtener su ubicación actual debido a que los permisos no fueron otorgados.</string>
+    <string name="geolocation_activity_cannot_retrieve_location">No es posible obtener su ubicación actual. Verifique su conexión y el estado del GPS.</string>
+    <string name="geolocation_activity_confirm_location">Confirmar Ubicación</string>
+    <string name="geolocation_activity_navigate">Navegar</string>
+    <string name="geolocation_activity_could_not_retrieve_location">Ubicación no encontrada</string>
+    <string name="geolocation_activity_unnamed">Sin nombre</string>
+    <string name="geolocation_activity_no_connection">Sin conexión a internet.</string>
 </resources>

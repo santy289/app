@@ -92,7 +92,7 @@
                     android:layout_marginEnd="@dimen/marginHorizontal_domain"
                     android:layout_marginStart="@dimen/marginHorizontal_domain"
                     android:layout_marginTop="@dimen/marginVertical_domain"
-                    android:backgroundTint="@color/colorPrimaryDark"
+                    android:backgroundTint="@color/colorAccent"
                     android:onClick="onClick"
                     android:text="@string/check_domain"
                     android:textColor="@color/white" />

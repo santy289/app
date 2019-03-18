@@ -10,6 +10,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
@@ -38,6 +39,9 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 import static android.app.Activity.RESULT_OK;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.TEMPLATE_VIEW;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_FILE_CREATE;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_FILE_VIEW;
 
 public class FilesViewModel extends ViewModel {
 
@@ -57,7 +61,11 @@ public class FilesViewModel extends ViewModel {
     private MutableLiveData<FileUiData> mOpenDownloadedFileLiveData;
 
     protected MutableLiveData<Boolean> showLoading;
-    protected MutableLiveData<Boolean> showTemplateDocumentsUi;
+    protected MutableLiveData<Boolean> showTemplateDocumentsUiEmpty;
+    protected MutableLiveData<Boolean> showTemplateDocumentsUiPermissions;
+    protected MutableLiveData<Boolean> showDownloadTemplateButton;
+    protected MutableLiveData<Boolean> showDownloadFileButton;
+    protected MutableLiveData<Boolean> showAttachUploadFileButton;
     protected MutableLiveData<String> setTemplateTitleWith;
     protected MutableLiveData<List<DocumentsFile>> setDocumentsView;
 
@@ -67,20 +75,31 @@ public class FilesViewModel extends ViewModel {
     private List<Preset> mPresets;
     private DocumentsFile mDocumentFileToDownload;
     private Preset mPresetToDownload;
+    private boolean hasViewPermissions;
+    private boolean hasViewFilesPermissions;
 
     protected FilesViewModel(FilesRepository filesRepository) {
         this.mRepository = filesRepository;
         this.showLoading = new MutableLiveData<>();
-        this.showTemplateDocumentsUi = new MutableLiveData<>();
+        this.showTemplateDocumentsUiEmpty = new MutableLiveData<>();
+        this.showTemplateDocumentsUiPermissions = new MutableLiveData<>();
+        this.showDownloadTemplateButton = new MutableLiveData<>();
+        this.showDownloadFileButton = new MutableLiveData<>();
+        this.showAttachUploadFileButton = new MutableLiveData<>();
         this.setTemplateTitleWith = new MutableLiveData<>();
         this.setDocumentsView = new MutableLiveData<>();
     }
 
-    protected void initDetails(String token, WorkflowListItem workflow) {
+    protected void initDetails(String token, WorkflowListItem workflow, String userId,
+                               String userPermissions) {
         this.mToken = token;
         this.mWorkflowListItem = workflow;
 
-        getWorkflowType(mToken, mWorkflowListItem.getWorkflowTypeId());
+        checkPermissions(userPermissions);
+
+        if (hasViewPermissions) {
+            getWorkflowType(mToken, mWorkflowListItem.getWorkflowTypeId());
+        }
     }
 
     @Override
@@ -89,13 +108,40 @@ public class FilesViewModel extends ViewModel {
         mRepository.clearDisposables();
     }
 
+    /**
+     * Verifies all of the user permissions related to this ViewModel and {@link FilesFragment}.
+     * Hide the UI related to the unauthorized actions.
+     *
+     * @param permissionsString users permissions.
+     */
+    private void checkPermissions(String permissionsString) {
+        RootnetPermissionsUtils permissionsUtils = new RootnetPermissionsUtils(permissionsString);
+
+        hasViewPermissions = permissionsUtils.hasPermission(TEMPLATE_VIEW);
+        hasViewFilesPermissions = permissionsUtils.hasPermission(WORKFLOW_FILE_VIEW);
+        boolean hasUploadFilesPermissions = permissionsUtils.hasPermission(WORKFLOW_FILE_CREATE);
+
+        showTemplateDocumentsUiPermissions.setValue(hasViewPermissions);
+        showDownloadTemplateButton.setValue(hasViewPermissions);
+        showDownloadFileButton.setValue(hasViewFilesPermissions);
+        showAttachUploadFileButton.setValue(hasUploadFilesPermissions);
+    }
+
+    protected boolean hasViewPermissions(){
+        return hasViewPermissions;
+    }
+
+    protected boolean hasViewFilesPermissions(){
+        return hasViewFilesPermissions;
+    }
+
     protected List<Preset> getPresets() {
         return mPresets;
     }
 
     private void getTemplateBy(int templateId) {
         if (templateId < 1) {
-            showTemplateDocumentsUi.setValue(false);
+            showTemplateDocumentsUiEmpty.setValue(false);
             return;
         }
         getTemplate(mToken, templateId);

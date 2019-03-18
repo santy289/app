@@ -1,20 +1,31 @@
 package com.rootnetapp.rootnetintranet.services.websocket;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
+import android.os.Build;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.util.Log;
-import android.widget.Toast;
 
+import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 public class WebSocketService extends Service {
+
+    private static final String CHANNEL_ID = "web-socket";
+    private static final CharSequence CHANNEL_NAME = "Notifications";
+    private static final int NOTIFICATION_ID = 77;
 
     private volatile ServiceHandler serviceHandler;
     private volatile Looper looper;
@@ -69,6 +80,33 @@ public class WebSocketService extends Service {
             Log.d(TAG, error);
         }
 
+        //create a permanent notification to keep this service alive
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager notificationManager = (NotificationManager) getSystemService(
+                    Context.NOTIFICATION_SERVICE);
+
+            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID,
+                    CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
+        builder.setSmallIcon(R.mipmap.ic_launcher)
+                .setContentIntent(pendingIntent)
+                .setOngoing(true)
+                .setShowWhen(false)
+                .setSubText(getString(R.string.background_service_notification_text))
+                .setAutoCancel(false)
+                .setPriority(NotificationCompat.PRIORITY_MIN);
+        builder.setGroup("WebSocketService");
+
+        Notification notification = builder.build();
+
+        startForeground(NOTIFICATION_ID, notification);
+
         return START_REDELIVER_INTENT;
     }
 
@@ -77,6 +115,9 @@ public class WebSocketService extends Service {
 //        Toast.makeText(getApplicationContext(), "onDestroy Service " + startId , Toast.LENGTH_LONG).show();
         Log.d(TAG, "onDestroy: SERVICE DESTROYED");
         serviceCleanup();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            stopForeground(true); //true will remove notification
+        }
         super.onDestroy();
     }
 
@@ -96,12 +137,14 @@ public class WebSocketService extends Service {
     }
 
     private void sendBroadcastWebsocket() {
-        Intent broadcastIntent = createIntent(RestartWebsocketReceiver.class, token, port, protocol, domain);
+        Intent broadcastIntent = createIntent(RestartWebsocketReceiver.class, token, port, protocol,
+                domain);
         broadcastIntent.setAction("restartservice");
         sendBroadcast(broadcastIntent);
     }
 
-    private Intent createIntent(Class<?> className, String token, String port, String protocol, String domain) {
+    private Intent createIntent(Class<?> className, String token, String port, String protocol,
+                                String domain) {
         Intent intent = new Intent(getApplicationContext(), className);
         intent.putExtra(WebsocketSecureHandler.KEY_TOKEN, token);
         intent.putExtra(WebsocketSecureHandler.KEY_PORT, port);

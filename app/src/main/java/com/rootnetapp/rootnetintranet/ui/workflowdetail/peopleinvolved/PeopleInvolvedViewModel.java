@@ -63,6 +63,12 @@ public class PeopleInvolvedViewModel extends ViewModel {
         mRepository.clearDisposables();
     }
 
+    /**
+     * Validates the user permissions for the edit action of {@link PeopleInvolvedFragment}.
+     *
+     * @param userId            logged user id.
+     * @param permissionsString user permissions.
+     */
     private void checkEditPermissions(int userId, String permissionsString) {
         List<String> permissionsToCheck = new ArrayList<>();
 
@@ -96,6 +102,12 @@ public class PeopleInvolvedViewModel extends ViewModel {
         updateProfilesInvolvedUi(workflow.getPeopleRelated());
     }
 
+    /**
+     * Fetches the picture for each {@link PersonRelated} in the parameter list, then send the data
+     * list to the UI.
+     *
+     * @param peopleRelated list of {@link PersonRelated}.
+     */
     private void updateProfilesInvolvedUi(List<PersonRelated> peopleRelated) {
         if (peopleRelated == null || peopleRelated.isEmpty()) {
             hideProfilesInvolvedList.setValue(true);

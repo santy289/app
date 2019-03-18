@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -64,11 +65,13 @@ public class PeopleInvolvedFragment extends Fragment {
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
+        String userId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
+        String permissionsString = prefs.getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
 
         subscribe();
         setOnClickListeners();
 
-        peopleInvolvedViewModel.initDetails(token, mWorkflowListItem);
+        peopleInvolvedViewModel.initDetails(token, mWorkflowListItem, userId, permissionsString);
 
         return view;
     }
@@ -81,6 +84,8 @@ public class PeopleInvolvedFragment extends Fragment {
         peopleInvolvedViewModel.updateProfilesInvolved.observe(getViewLifecycleOwner(), this::updateProfilesInvolved);
         peopleInvolvedViewModel.hideProfilesInvolvedList
                 .observe(getViewLifecycleOwner(), this::hideProfilesInvolvedList);
+        peopleInvolvedViewModel.showEditButtonLiveData
+                .observe(getViewLifecycleOwner(), this::showEditButton);
     }
 
     private void setOnClickListeners() {
@@ -132,5 +137,11 @@ public class PeopleInvolvedFragment extends Fragment {
                 getString(messageRes),
                 Toast.LENGTH_SHORT)
                 .show();
+    }
+
+    @UiThread
+    private void showEditButton(boolean show) {
+        mBinding.btnEdit.setVisibility(show ? View.VISIBLE : View.GONE);
+        mBinding.viewInformation.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 }

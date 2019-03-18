@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved;
 
 import android.util.Log;
 
+import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
@@ -20,6 +21,10 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_ALL;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_MY_OWN;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_OWN;
+
 public class PeopleInvolvedViewModel extends ViewModel {
 
     private static final String TAG = "PeopleInvolvedViewModel";
@@ -32,23 +37,45 @@ public class PeopleInvolvedViewModel extends ViewModel {
     protected MutableLiveData<Boolean> showLoading;
     protected MutableLiveData<List<ProfileInvolved>> updateProfilesInvolved;
     protected MutableLiveData<Boolean> hideProfilesInvolvedList;
+    protected MutableLiveData<Boolean> showEditButtonLiveData;
+    private WorkflowListItem mWorkflowListItem;
 
     protected PeopleInvolvedViewModel(PeopleInvolvedRepository peopleInvolvedRepository) {
         this.mRepository = peopleInvolvedRepository;
         this.showLoading = new MutableLiveData<>();
         this.updateProfilesInvolved = new MutableLiveData<>();
         this.hideProfilesInvolvedList = new MutableLiveData<>();
+        this.showEditButtonLiveData = new MutableLiveData<>();
     }
 
-    protected void initDetails(String token, WorkflowListItem workflow) {
+    protected void initDetails(String token, WorkflowListItem workflow, String userId, String userPermissions) {
         // in DB but has limited data about the workflow.
+        mWorkflowListItem = workflow;
         getWorkflow(token, workflow.getWorkflowId());
+        checkEditPermissions(userId == null ? 0 : Integer.parseInt(userId), userPermissions);
     }
 
     @Override
     protected void onCleared() {
         mDisposables.clear();
         mRepository.clearDisposables();
+    }
+
+    private void checkEditPermissions(int userId, String permissionsString) {
+        List<String> permissionsToCheck = new ArrayList<>();
+
+        if (mWorkflowListItem.getOwnerId() == userId) {
+            permissionsToCheck.add(WORKFLOW_EDIT_MY_OWN);
+            permissionsToCheck.add(WORKFLOW_EDIT_OWN);
+        } else {
+            permissionsToCheck.add(WORKFLOW_EDIT_ALL);
+        }
+
+        permissionsString = "";
+
+        RootnetPermissionsUtils permissionsUtils = new RootnetPermissionsUtils(permissionsString);
+        boolean hasEditPermissions = permissionsUtils.hasPermissions(permissionsToCheck);
+        showEditButtonLiveData.setValue(hasEditPermissions);
     }
 
     private void getWorkflow(String auth, int workflowId) {

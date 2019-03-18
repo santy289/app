@@ -93,6 +93,9 @@ import io.reactivex.schedulers.Schedulers;
 
 import static android.app.Activity.RESULT_OK;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_DEFINE_SPECIFIC;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_ALL;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_MY_OWN;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_OWN;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_OWNER;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_STATUS;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_TYPE;
@@ -149,6 +152,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private int mUserId;
     private int mFieldCount, mFieldCompleted;
     private boolean hasDefineSpecificApproverPermissions;
+    private boolean hasEditPermissions;
     private List<WorkflowTypeDb> mWorkflowTypeDbList;
     private WorkflowTypeDb mSelectedWorkflowType;
 
@@ -169,7 +173,7 @@ class CreateWorkflowViewModel extends ViewModel {
 
         if (userId != null && !userId.isEmpty()) mUserId = Integer.parseInt(userId);
 
-        checkPermissions(userPermissions);
+        checkPermissions(mUserId, userPermissions);
 
         createWorkflowTypeItem();
     }
@@ -184,8 +188,19 @@ class CreateWorkflowViewModel extends ViewModel {
      *
      * @param permissionsString users permissions.
      */
-    private void checkPermissions(String permissionsString) {
+    private void checkPermissions(int userId, String permissionsString) {
         RootnetPermissionsUtils permissionsUtils = new RootnetPermissionsUtils(permissionsString);
+
+        List<String> permissionsToCheck = new ArrayList<>();
+
+        if (mWorkflowListItem == null || mWorkflowListItem.getOwnerId() == userId) {
+            permissionsToCheck.add(WORKFLOW_EDIT_MY_OWN);
+            permissionsToCheck.add(WORKFLOW_EDIT_OWN);
+        } else {
+            permissionsToCheck.add(WORKFLOW_EDIT_ALL);
+        }
+
+        hasEditPermissions = permissionsUtils.hasPermissions(permissionsToCheck);
 
         hasDefineSpecificApproverPermissions = permissionsUtils
                 .hasPermission(WORKFLOW_DEFINE_SPECIFIC);
@@ -1879,7 +1894,7 @@ class CreateWorkflowViewModel extends ViewModel {
                             .setOptions(userOptions)
                             .setValue(selection)
                             //enable only if the user has permissions and it's not edit mode
-                            .setEnabled(hasDefineSpecificApproverPermissions && mWorkflow == null)
+                            .setEnabled(hasEditPermissions && mWorkflow == null)
                             .setMachineName(MACHINE_NAME_OWNER)
                             .build();
 

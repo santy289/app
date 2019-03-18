@@ -27,6 +27,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
+import com.rootnetapp.rootnetintranet.BuildConfig;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -556,6 +557,9 @@ public class MainActivity extends AppCompatActivity
         //in order to prevent the filters drawer to be opened from any activity by the user
         mainBinding.drawerLayout
                 .setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
+
+        String versionName = BuildConfig.VERSION_NAME;
+        mainBinding.leftDrawer.tvVersionName.setText(versionName);
 
         toggle.syncState();
     }

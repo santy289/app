@@ -283,6 +283,10 @@
     <string name="workflow_detail_information_fragment_owner">Owner</string>
     <!--PeopleInvolvedFragment-->
     <string name="workflow_detail_people_involved_fragment_title">People Involved</string>
+    <string name="workflow_detail_people_involved_fragment_owner">Owner</string>
+    <string name="workflow_detail_people_involved_fragment_approver">Approver</string>
+    <string name="workflow_detail_people_involved_fragment_specific_approver">Specific Approver</string>
+    <string name="workflow_detail_people_involved_fragment_person_related">Person Involved</string>
     <!--ApprovalHistoryFragment-->
     <string name="workflow_detail_approval_history_fragment_title">@string/workflow_detail_approval_history_fragment_approval_history</string>
     <string name="workflow_detail_approval_history_fragment_approval_history">Approval History</string>

@@ -7,6 +7,7 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.PersonRelated;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class PeopleInvolvedViewModel extends ViewModel {
     private MutableLiveData<Integer> showToastMessage;
 
     protected MutableLiveData<Boolean> showLoading;
-    protected MutableLiveData<List<ProfileInvolved>> updateProfilesInvolved;
+    protected MutableLiveData<List<PersonRelated>> updateProfilesInvolved;
     protected MutableLiveData<Boolean> hideProfilesInvolvedList;
     protected MutableLiveData<Boolean> showEditButtonLiveData;
     private WorkflowListItem mWorkflowListItem;
@@ -48,7 +49,8 @@ public class PeopleInvolvedViewModel extends ViewModel {
         this.showEditButtonLiveData = new MutableLiveData<>();
     }
 
-    protected void initDetails(String token, WorkflowListItem workflow, String userId, String userPermissions) {
+    protected void initDetails(String token, WorkflowListItem workflow, String userId,
+                               String userPermissions) {
         // in DB but has limited data about the workflow.
         mWorkflowListItem = workflow;
         getWorkflow(token, workflow.getWorkflowId());
@@ -71,8 +73,6 @@ public class PeopleInvolvedViewModel extends ViewModel {
             permissionsToCheck.add(WORKFLOW_EDIT_ALL);
         }
 
-        permissionsString = "";
-
         RootnetPermissionsUtils permissionsUtils = new RootnetPermissionsUtils(permissionsString);
         boolean hasEditPermissions = permissionsUtils.hasPermissions(permissionsToCheck);
         showEditButtonLiveData.setValue(hasEditPermissions);
@@ -92,46 +92,31 @@ public class PeopleInvolvedViewModel extends ViewModel {
      */
     private void onWorkflowSuccess(WorkflowResponse workflowResponse) {
         // Not in DB and more complete response from network.
-        WorkflowDb mWorkflow = workflowResponse.getWorkflow();
-        updateUIWithWorkflow(mWorkflow);
+        WorkflowDb workflow = workflowResponse.getWorkflow();
+        updateProfilesInvolvedUi(workflow.getPeopleRelated());
     }
 
-    /**
-     * Update the activation status (Open/Closed) and the tie state of the current status.
-     *
-     * @param workflow current workflow.
-     */
-    private void updateUIWithWorkflow(WorkflowDb workflow) {
-        updateProfilesInvolvedUi(workflow.getProfilesInvolved());
-    }
-
-    /**
-     * Given some profile ids it will look in the profiles tables in the local database for matching
-     * Profiles, and return a ProfileInvolved object with limited profile information for the UI. It
-     * will look for those profiles in the background thread.
-     *
-     * @param profilesId List of profiles to look in the database.
-     */
-    private void updateProfilesInvolvedUi(List<Integer> profilesId) {
-        if (profilesId == null || profilesId.size() < 1) {
+    private void updateProfilesInvolvedUi(List<PersonRelated> peopleRelated) {
+        if (peopleRelated == null || peopleRelated.isEmpty()) {
             hideProfilesInvolvedList.setValue(true);
             return;
         }
 
         Disposable disposable = Observable.fromCallable(() -> {
-            List<ProfileInvolved> profilesList = new ArrayList<>();
-            ProfileInvolved profileInvolved;
-            for (int i = 0; i < profilesId.size(); i++) {
-                profileInvolved = mRepository.getProfileBy(profilesId.get(i));
+            for (PersonRelated personRelated : peopleRelated) {
+                ProfileInvolved profileInvolved = mRepository.getProfileBy(personRelated.getId());
+
                 if (profileInvolved == null) {
                     continue;
                 }
-                profilesList.add(profileInvolved);
+
+                personRelated.setPicture(profileInvolved.picture);
             }
-            return profilesList;
+
+            return peopleRelated;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::setProfilesInvovledOnUi, throwable -> Log
+                .subscribe(this::setPeopleInvolvedOnUi, throwable -> Log
                         .d(TAG, "updateProfilesInvolvedUi: Something went wrong - " + throwable
                                 .getMessage()));
         mDisposables.add(disposable);
@@ -140,14 +125,14 @@ public class PeopleInvolvedViewModel extends ViewModel {
     /**
      * Sends back to the View a list of profiles that are involved to the current workflow.
      *
-     * @param profiles Profiles to be used for UI list.
+     * @param peopleRelated Profiles to be used for UI list.
      */
-    private void setProfilesInvovledOnUi(List<ProfileInvolved> profiles) {
-        if (profiles == null || profiles.size() < 1) {
+    private void setPeopleInvolvedOnUi(List<PersonRelated> peopleRelated) {
+        if (peopleRelated == null || peopleRelated.isEmpty()) {
             hideProfilesInvolvedList.setValue(true);
             return;
         }
-        updateProfilesInvolved.setValue(profiles);
+        updateProfilesInvolved.setValue(peopleRelated);
     }
 
     private void onFailure(Throwable throwable) {

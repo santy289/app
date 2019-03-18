@@ -11,9 +11,9 @@ import android.widget.Toast;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailPeopleInvolvedBinding;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.PersonRelated;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved.adapters.PeopleInvolvedAdapter;
@@ -107,12 +107,12 @@ public class PeopleInvolvedFragment extends Fragment {
     /**
      * Updates the profiles involved.
      *
-     * @param profiles List of profiles to display in People Involved recyclerView.
+     * @param peopleRelated List of profiles to display in People Involved recyclerView.
      */
     @UiThread
-    private void updateProfilesInvolved(List<ProfileInvolved> profiles) {
+    private void updateProfilesInvolved(List<PersonRelated> peopleRelated) {
         mBinding.rvAllPeopleInvolved.setLayoutManager(new LinearLayoutManager(getContext()));
-        mBinding.rvAllPeopleInvolved.setAdapter(new PeopleInvolvedAdapter(profiles));
+        mBinding.rvAllPeopleInvolved.setAdapter(new PeopleInvolvedAdapter(peopleRelated));
     }
 
     /**

@@ -5,6 +5,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.models.createworkflow.SpecificApprovers;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.NextStatusRequirements;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.PersonRelated;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.presets.Preset;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
 import com.squareup.moshi.Json;
@@ -153,6 +154,10 @@ public class WorkflowDb {
     @Ignore
     @Json(name = "next_status_requirements")
     private NextStatusRequirements nextStatusRequirements;
+
+    @Ignore
+    @Json(name = "peopleRelated")
+    private List<PersonRelated> peopleRelated = null;
 
     public WorkflowTypeDb getWorkflowType() {
         return workflowType;
@@ -385,5 +390,13 @@ public class WorkflowDb {
 
     public void setNextStatusRequirements(NextStatusRequirements nextStatusRequirements) {
         this.nextStatusRequirements = nextStatusRequirements;
+    }
+
+    public List<PersonRelated> getPeopleRelated() {
+        return peopleRelated;
+    }
+
+    public void setPeopleRelated(List<PersonRelated> peopleRelated) {
+        this.peopleRelated = peopleRelated;
     }
 }

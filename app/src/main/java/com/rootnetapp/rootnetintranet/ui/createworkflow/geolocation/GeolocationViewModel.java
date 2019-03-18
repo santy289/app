@@ -11,6 +11,7 @@ import com.rootnetapp.rootnetintranet.models.responses.googlemaps.autocomplete.P
 import com.rootnetapp.rootnetintranet.models.responses.googlemaps.nearbysearch.NearbySearchResponse;
 import com.rootnetapp.rootnetintranet.models.responses.googlemaps.nearbysearch.Place;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -45,6 +46,7 @@ public class GeolocationViewModel extends ViewModel {
     private MutableLiveData<List<Prediction>> mPredictionsLiveData;
     private MutableLiveData<Place> mPlaceDetailsLiveData;
     private MutableLiveData<Boolean> mHideSuggestionsLiveData;
+    private MutableLiveData<Boolean> mShowNoConnectionViewLiveData;
 
     private final CompositeDisposable mDisposables;
 
@@ -181,6 +183,8 @@ public class GeolocationViewModel extends ViewModel {
     private void onFailureNearbyPlaces(Throwable throwable) {
         isSearchingForPlace = false;
 
+        mToastMessageLiveData.setValue(R.string.failure_connect);
+
         Log.d(TAG, "searchNearbyPlaces: failed: " + throwable.getMessage());
     }
     //endregion
@@ -211,9 +215,14 @@ public class GeolocationViewModel extends ViewModel {
 
     private void onSuccessAutocomplete(AutocompleteResponse autocompleteResponse) {
         mPredictionsLiveData.setValue(autocompleteResponse.getPredictions());
+        mHideSuggestionsLiveData.setValue(false);
+        mShowNoConnectionViewLiveData.setValue(false);
     }
 
     private void onFailureAutocomplete(Throwable throwable) {
+        mPredictionsLiveData.setValue(new ArrayList<>());
+        mHideSuggestionsLiveData.setValue(true);
+        mShowNoConnectionViewLiveData.setValue(true);
 
         Log.d(TAG, "searchAutocomplete: failed: " + throwable.getMessage());
     }
@@ -239,6 +248,7 @@ public class GeolocationViewModel extends ViewModel {
     private void onSuccessPlaceDetails(PlaceDetailsResponse placeDetailsResponse) {
         mShowLoadingLiveData.setValue(false);
         mHideSuggestionsLiveData.setValue(true);
+        mShowNoConnectionViewLiveData.setValue(false);
 
         mPlaceDetailsLiveData.setValue(placeDetailsResponse.getPlace());
     }
@@ -313,5 +323,12 @@ public class GeolocationViewModel extends ViewModel {
             mHideSuggestionsLiveData = new MutableLiveData<>();
         }
         return mHideSuggestionsLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowNoConnectionView() {
+        if (mShowNoConnectionViewLiveData == null) {
+            mShowNoConnectionViewLiveData = new MutableLiveData<>();
+        }
+        return mShowNoConnectionViewLiveData;
     }
 }

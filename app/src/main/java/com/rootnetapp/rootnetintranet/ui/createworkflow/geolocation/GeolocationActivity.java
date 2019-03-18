@@ -95,6 +95,7 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
         viewModel.getObservablePredictions().observe(this, this::updateSuggestionsData);
         viewModel.getObservablePlaceDetails().observe(this, this::handlePlaceDetails);
         viewModel.getObservableHideSuggestions().observe(this, this::hideSuggestions);
+        viewModel.getObservableShowNoConnectionView().observe(this, this::showNoConnectionView);
     }
 
     private void setOnClickListeners() {
@@ -174,6 +175,11 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
     @UiThread
     private void hideSuggestions(boolean hide) {
         mBinding.rvSuggestions.setVisibility(hide ? View.GONE : View.VISIBLE);
+    }
+
+    @UiThread
+    private void showNoConnectionView(boolean show){
+        mBinding.lytNoConnectionView.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     //region Map

@@ -374,4 +374,5 @@
     <string name="geolocation_activity_navigate">Navigate</string>
     <string name="geolocation_activity_could_not_retrieve_location">Location not found</string>
     <string name="geolocation_activity_unnamed">Unnamed</string>
+    <string name="geolocation_activity_no_connection">No internet connection.</string>
 </resources>

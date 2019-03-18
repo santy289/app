@@ -7,8 +7,8 @@ android {
         applicationId "com.rootnetapp.rootnetintranet"
         minSdkVersion 24
         targetSdkVersion 28
-        versionCode 20
-        versionName "1.1.4"
+        versionCode 21
+        versionName "1.1.5"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -104,4 +104,7 @@ dependencies {
 
 configurations {
     all*.exclude group: 'com.google.guava', module: 'listenablefuture'
+    configurations.all {
+        resolutionStrategy.force 'com.google.code.findbugs:jsr305:2.0.1'
+    }
 }

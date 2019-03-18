@@ -271,7 +271,7 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
                 documents
         );
         mDocumentsAdapter
-                .setShowTemplateDownloadButton(filesViewModel.hasViewTemplatesPermissions());
+                .setShowTemplateDownloadButton(filesViewModel.hasViewPermissions());
         mDocumentsAdapter.setShowFileDownloadButton(filesViewModel.hasViewFilesPermissions());
         mBinding.rvFiles.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvFiles.setAdapter(mDocumentsAdapter);

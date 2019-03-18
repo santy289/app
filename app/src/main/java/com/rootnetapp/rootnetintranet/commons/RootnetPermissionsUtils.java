@@ -144,11 +144,11 @@ public class RootnetPermissionsUtils {
      */
     public static final String WORKFLOW_VIEW_ARCHIVE_FILE = "workflow_view_archive_file";
     /**
-     * Determines the ability to view the workflow templates.
+     * Determines the ability to view the workflow import templates.
      */
     public static final String WORKFLOW_TEMPLATE_VIEW = "workflow_template_view";
     /**
-     * Determines the ability to create, edit and delete the workflow templates.
+     * Determines the ability to create, edit and delete the workflow import templates.
      */
     public static final String WORKFLOW_TEMPLATE_CRUD = "workflow_template_crud";
     //endregion

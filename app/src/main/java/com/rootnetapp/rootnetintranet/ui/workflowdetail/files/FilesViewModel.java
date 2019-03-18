@@ -42,7 +42,6 @@ import static android.app.Activity.RESULT_OK;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.TEMPLATE_VIEW;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_FILE_CREATE;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_FILE_VIEW;
-import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_TEMPLATE_VIEW;
 
 public class FilesViewModel extends ViewModel {
 
@@ -78,7 +77,6 @@ public class FilesViewModel extends ViewModel {
     private Preset mPresetToDownload;
     private boolean hasViewPermissions;
     private boolean hasViewFilesPermissions;
-    private boolean hasViewTemplatesPermissions;
 
     protected FilesViewModel(FilesRepository filesRepository) {
         this.mRepository = filesRepository;
@@ -120,18 +118,17 @@ public class FilesViewModel extends ViewModel {
         RootnetPermissionsUtils permissionsUtils = new RootnetPermissionsUtils(permissionsString);
 
         hasViewPermissions = permissionsUtils.hasPermission(TEMPLATE_VIEW);
-        hasViewTemplatesPermissions = permissionsUtils.hasPermission(WORKFLOW_TEMPLATE_VIEW);
         hasViewFilesPermissions = permissionsUtils.hasPermission(WORKFLOW_FILE_VIEW);
         boolean hasUploadFilesPermissions = permissionsUtils.hasPermission(WORKFLOW_FILE_CREATE);
 
         showTemplateDocumentsUiPermissions.setValue(hasViewPermissions);
-        showDownloadTemplateButton.setValue(hasViewTemplatesPermissions);
+        showDownloadTemplateButton.setValue(hasViewPermissions);
         showDownloadFileButton.setValue(hasViewFilesPermissions);
         showAttachUploadFileButton.setValue(hasUploadFilesPermissions);
     }
 
-    protected boolean hasViewTemplatesPermissions(){
-        return hasViewTemplatesPermissions;
+    protected boolean hasViewPermissions(){
+        return hasViewPermissions;
     }
 
     protected boolean hasViewFilesPermissions(){

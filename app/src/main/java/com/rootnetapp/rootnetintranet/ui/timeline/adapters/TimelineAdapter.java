@@ -197,7 +197,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         });
         holder.binding.tvComments
                 .setOnTouchListener(new OnTouchClickListener(holder.binding.tvComments));
-        if (!subComments.isEmpty()) {
+        if (subComments != null && !subComments.isEmpty()) {
             holder.binding.tvComments.setText(
                     context.getResources().getQuantityString(
                             R.plurals.timeline_comments,
@@ -252,6 +252,8 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         } else {
             holder.binding.bottomLine.setVisibility(View.VISIBLE);
         }
+
+        holder.binding.executePendingBindings();
     }
 
     private Spannable getSpannableTitle(@StringRes int stringRes, String authorName,

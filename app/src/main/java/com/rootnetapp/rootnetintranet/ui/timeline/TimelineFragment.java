@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.databinding.FragmentTimelineBinding;
@@ -88,7 +89,9 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         //TODO preferences inyectadas con Dagger
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String token = "Bearer " + prefs.getString("token", "");
+        String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
+        String loggedUserId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
+        String permissionsString = prefs.getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
 
         String start = Utils.getCurrentFormattedDateDaysDiff(MONTH_AGO_DAYS);
         String end = Utils.getCurrentFormattedDate();
@@ -98,7 +101,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         subscribe();
         setOnClickListeners();
         setupRecycler();
-        viewModel.init(token, start, end);
+        viewModel.init(token, start, end, loggedUserId, permissionsString);
 
         return view;
     }
@@ -107,9 +110,14 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         viewModel.getObservableShowLoading().observe(getViewLifecycleOwner(), this::showLoading);
         viewModel.getObservableError().observe(getViewLifecycleOwner(), this::showToastMessage);
         viewModel.getObservableTimeline().observe(getViewLifecycleOwner(), this::populateTimeline);
-        viewModel.getObservableHideMoreButton().observe(getViewLifecycleOwner(), this::hideMoreButton);
-        viewModel.getObservableHideTimelineList().observe(getViewLifecycleOwner(), this::hideTimelineList);
-        viewModel.getObservablePostInteraction().observe(getViewLifecycleOwner(), this::updateInteraction);
+        viewModel.getObservableHideMoreButton()
+                .observe(getViewLifecycleOwner(), this::hideMoreButton);
+        viewModel.getObservableHideTimelineListEmpty()
+                .observe(getViewLifecycleOwner(), this::hideTimelineListEmpty);
+        viewModel.getObservablePostInteraction()
+                .observe(getViewLifecycleOwner(), this::updateInteraction);
+        viewModel.getObservableHideTimelineListPermissions()
+                .observe(getViewLifecycleOwner(), this::hideTimelineListPermissions);
     }
 
     /**
@@ -123,6 +131,8 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
         mBinding.btnShowMore.setOnClickListener(v -> showMoreClicked());
 
         mBinding.imgFilter.setOnClickListener(v -> {
+            if (!viewModel.hasViewPermissions()) return;
+
             PopupWindow popupWindow = createPopupMenu();
             popupWindow.showAsDropDown(v, -40, 18);
         });
@@ -615,15 +625,37 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
      * @param hide true: hide; false: show.
      */
     @UiThread
-    private void hideTimelineList(boolean hide) {
+    private void hideTimelineListEmpty(boolean hide) {
         hideMoreButton(hide);
+
+        mBinding.tvNoPermissions.setVisibility(View.GONE);
 
         if (hide) {
             mBinding.recTimeline.setVisibility(View.GONE);
-            mBinding.lytNotimeline.setVisibility(View.VISIBLE);
+            mBinding.tvEmpty.setVisibility(View.VISIBLE);
         } else {
             mBinding.recTimeline.setVisibility(View.VISIBLE);
-            mBinding.lytNotimeline.setVisibility(View.GONE);
+            mBinding.tvEmpty.setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * Hides or shows the timeline list based on the view permissions.
+     *
+     * @param hide true: hide; false: show.
+     */
+    @UiThread
+    private void hideTimelineListPermissions(boolean hide) {
+        hideMoreButton(hide);
+
+        mBinding.tvEmpty.setVisibility(View.GONE);
+
+        if (hide) {
+            mBinding.recTimeline.setVisibility(View.GONE);
+            mBinding.tvNoPermissions.setVisibility(View.VISIBLE);
+        } else {
+            mBinding.recTimeline.setVisibility(View.VISIBLE);
+            mBinding.tvNoPermissions.setVisibility(View.GONE);
         }
     }
 

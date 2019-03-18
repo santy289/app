@@ -365,6 +365,7 @@
         <item formatted="true" quantity="one">1 comment</item>
         <item formatted="true" quantity="other">%d comments</item>
     </plurals>
+    <string name="timeline_fragment_no_view_permissions">You do not have permissions to view the timeline.</string>
 
     <!--GeolocationActivity-->
     <string name="title_activity_geolocation">Select a Location</string>

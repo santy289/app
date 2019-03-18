@@ -119,7 +119,7 @@ public class FilesViewModel extends ViewModel {
 
         hasViewPermissions = permissionsUtils.hasPermission(TEMPLATE_VIEW);
         hasViewFilesPermissions = permissionsUtils.hasPermission(WORKFLOW_FILE_VIEW);
-        boolean hasUploadFilesPermissions = permissionsUtils.hasPermission(WORKFLOW_FILE_CREATE);
+        boolean hasUploadFilesPermissions = hasViewFilesPermissions && permissionsUtils.hasPermission(WORKFLOW_FILE_CREATE);
 
         showTemplateDocumentsUiPermissions.setValue(hasViewPermissions);
         showDownloadTemplateButton.setValue(hasViewPermissions);

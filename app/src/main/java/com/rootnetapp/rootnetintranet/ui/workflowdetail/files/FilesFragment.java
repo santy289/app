@@ -114,6 +114,7 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
         filesViewModel.showDownloadTemplateButton
                 .observe(getViewLifecycleOwner(), this::setShowDownloadTemplateButton);
         filesViewModel.showDownloadFileButton.observe(getViewLifecycleOwner(), this::setShowDownloadFileButton);
+        filesViewModel.showAttachUploadFileButton.observe(getViewLifecycleOwner(), this::showAttachUploadFileButton);
     }
 
     private void setOnClickListeners() {
@@ -392,5 +393,11 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
         if (mDocumentsAdapter == null) return;
 
         mDocumentsAdapter.setShowFileDownloadButton(show);
+    }
+
+    @UiThread
+    private void showAttachUploadFileButton(boolean show) {
+        mBinding.btnAttachment.setVisibility(show ? View.VISIBLE : View.GONE);
+        mBinding.btnUpload.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 }

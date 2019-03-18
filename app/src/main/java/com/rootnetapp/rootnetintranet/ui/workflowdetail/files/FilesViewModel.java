@@ -40,6 +40,7 @@ import io.reactivex.disposables.Disposable;
 
 import static android.app.Activity.RESULT_OK;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.TEMPLATE_VIEW;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_FILE_CREATE;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_FILE_VIEW;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_TEMPLATE_VIEW;
 
@@ -65,6 +66,7 @@ public class FilesViewModel extends ViewModel {
     protected MutableLiveData<Boolean> showTemplateDocumentsUiPermissions;
     protected MutableLiveData<Boolean> showDownloadTemplateButton;
     protected MutableLiveData<Boolean> showDownloadFileButton;
+    protected MutableLiveData<Boolean> showAttachUploadFileButton;
     protected MutableLiveData<String> setTemplateTitleWith;
     protected MutableLiveData<List<DocumentsFile>> setDocumentsView;
 
@@ -85,6 +87,7 @@ public class FilesViewModel extends ViewModel {
         this.showTemplateDocumentsUiPermissions = new MutableLiveData<>();
         this.showDownloadTemplateButton = new MutableLiveData<>();
         this.showDownloadFileButton = new MutableLiveData<>();
+        this.showAttachUploadFileButton = new MutableLiveData<>();
         this.setTemplateTitleWith = new MutableLiveData<>();
         this.setDocumentsView = new MutableLiveData<>();
     }
@@ -119,10 +122,12 @@ public class FilesViewModel extends ViewModel {
         hasViewPermissions = permissionsUtils.hasPermission(TEMPLATE_VIEW);
         hasViewTemplatesPermissions = permissionsUtils.hasPermission(WORKFLOW_TEMPLATE_VIEW);
         hasViewFilesPermissions = permissionsUtils.hasPermission(WORKFLOW_FILE_VIEW);
+        boolean hasUploadFilesPermissions = permissionsUtils.hasPermission(WORKFLOW_FILE_CREATE);
 
         showTemplateDocumentsUiPermissions.setValue(hasViewPermissions);
         showDownloadTemplateButton.setValue(hasViewTemplatesPermissions);
         showDownloadFileButton.setValue(hasViewFilesPermissions);
+        showAttachUploadFileButton.setValue(hasUploadFilesPermissions);
     }
 
     protected boolean hasViewTemplatesPermissions(){

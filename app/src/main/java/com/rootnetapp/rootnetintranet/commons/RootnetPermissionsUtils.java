@@ -127,7 +127,6 @@ public class RootnetPermissionsUtils {
      * Determines the ability to upload files to a workflow.
      */
     public static final String WORKFLOW_FILE_CREATE = "workflow_file_create";
-    public static final String WORKFLOW_ADD_FILE = "workflow_add_file";
     /**
      * Determines the ability to upload files to all workflows.
      */
@@ -349,7 +348,6 @@ public class RootnetPermissionsUtils {
             WORKFLOW_OPEN_ALL,
             WORKFLOW_EDIT_OWN_COMMENT,
             WORKFLOW_DELETE_OWN_COMMENT,
-            WORKFLOW_ADD_FILE,
             WORKFLOW_INACTIVE_VIEW,
             WORKFLOW_CLOSED_VIEW,
             WORKFLOW_VIEW_ALL,

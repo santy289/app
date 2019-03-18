@@ -20,6 +20,7 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.ActivityWorkflowDetailBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.quickactions.changestatus.ChangeStatusActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.WorkflowDetailViewPagerAdapter;
 
 import java.io.File;
@@ -295,6 +296,14 @@ public class WorkflowDetailActivity extends AppCompatActivity {
             if (checkExternalStoragePermissions()) {
                 workflowDetailViewModel.handleExportPdf();
             }
+        } else if (item.getItemId() == R.id.view_tree) {
+            WorkflowListItem workflowListItem = workflowDetailViewModel.getWorkflowListItem();
+
+            Intent intent = new Intent(this, ChangeStatusActivity.class);
+            intent.putExtra(ChangeStatusActivity.EXTRA_WORKFLOW_LIST_ITEM, workflowListItem);
+            intent.putExtra(ChangeStatusActivity.EXTRA_TITLE, workflowListItem.getTitle());
+            intent.putExtra(ChangeStatusActivity.EXTRA_SUBTITLE, workflowListItem.getWorkflowTypeKey());
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);

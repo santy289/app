@@ -133,6 +133,10 @@ public class WorkflowDetailViewModel extends ViewModel {
         return hasExportPermissions;
     }
 
+    protected WorkflowListItem getWorkflowListItem(){
+        return mWorkflowListItem;
+    }
+
     /**
      * This subscribe function will make map transformations to observe LiveData objects in the
      * repository. Here we will handle all incoming data from the repo.
@@ -227,6 +231,7 @@ public class WorkflowDetailViewModel extends ViewModel {
         mShowNotFoundViewLiveData.setValue(false);
         showLoading.setValue(false);
         mWorkflow = workflowResponse.getWorkflow();
+        mWorkflowListItem = new WorkflowListItem(mWorkflow);
 
         int version = mWorkflow.getWorkflowType().getVersion();
         String versionString = String.format(Locale.US, "v%d", version);

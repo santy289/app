@@ -266,6 +266,7 @@
     <string name="workflow_detail_status_fragment_spinner_title">- Elija un Estatus -</string>
     <string name="workflow_detail_status_fragment_must_select_step">Debes seleccionar un estatus</string>
     <string name="workflow_detail_status_fragment_export_pdf">Exportar PDF</string>
+    <string name="workflow_detail_status_fragment_view_tree">Ver Diagrama</string>
     <!--InformationFragment-->
     <string name="workflow_detail_information_fragment_title">@string/workflow_detail_information_fragment_information</string>
     <string name="workflow_detail_information_fragment_important_things">Datos Importantes Sobre Este Estatus</string>

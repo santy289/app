@@ -26,6 +26,8 @@ import androidx.lifecycle.ViewModelProviders;
 public class ChangeStatusActivity extends AppCompatActivity {
 
     public static final String EXTRA_WORKFLOW_LIST_ITEM = "Extra.WorkflowListItem";
+    public static final String EXTRA_TITLE = "Extra.Title";
+    public static final String EXTRA_SUBTITLE = "Extra.Subtitle";
 
     private static final String TAG = "ChangeStatusActivity";
 
@@ -61,7 +63,12 @@ public class ChangeStatusActivity extends AppCompatActivity {
         setSupportActionBar(mBinding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        getSupportActionBar().setTitle(getTitle());
+        String title = getIntent().getStringExtra(EXTRA_TITLE);
+        if (title == null) title = (String) getTitle();
+        getSupportActionBar().setTitle(title);
+
+        String subtitle = getIntent().getStringExtra(EXTRA_SUBTITLE);
+        if (subtitle != null) getSupportActionBar().setSubtitle(subtitle);
     }
 
     /**

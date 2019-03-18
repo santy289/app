@@ -7,7 +7,7 @@
         android:id="@+id/lyt_all_people_involved"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/border_workflow_detail"
+        android:background="@color/white"
         android:padding="10dp">
 
         <Button

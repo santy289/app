@@ -116,26 +116,26 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
     }
 
     private void subscribe() {
-        commentsViewModel.getObservableToastMessage().observe(this, this::showToastMessage);
-        commentsViewModel.getObservableComments().observe(this, this::updateCommentsList);
-        commentsViewModel.getObservableHideCommentsEmpty().observe(this, this::hideCommentsListEmpty);
-        commentsViewModel.getObservableHideCommentsPermissions().observe(this, this::hideCommentsListPermissions);
-        commentsViewModel.getObservableComment().observe(this, this::addNewComment);
-        commentsViewModel.getObservableCommentsTabCounter().observe(this, this::updateTabCounter);
+        commentsViewModel.getObservableToastMessage().observe(getViewLifecycleOwner(), this::showToastMessage);
+        commentsViewModel.getObservableComments().observe(getViewLifecycleOwner(), this::updateCommentsList);
+        commentsViewModel.getObservableHideCommentsEmpty().observe(getViewLifecycleOwner(), this::hideCommentsListEmpty);
+        commentsViewModel.getObservableHideCommentsPermissions().observe(getViewLifecycleOwner(), this::hideCommentsListPermissions);
+        commentsViewModel.getObservableComment().observe(getViewLifecycleOwner(), this::addNewComment);
+        commentsViewModel.getObservableCommentsTabCounter().observe(getViewLifecycleOwner(), this::updateTabCounter);
         commentsViewModel.getObservableEnableCommentButton()
-                .observe(this, this::enableCommentButton);
+                .observe(getViewLifecycleOwner(), this::enableCommentButton);
         commentsViewModel.getObservableNewCommentFile()
-                .observe(this, this::addNewAttachment);
-        commentsViewModel.getObservableClearAttachments().observe(this, this::clearAttachmentsList);
+                .observe(getViewLifecycleOwner(), this::addNewAttachment);
+        commentsViewModel.getObservableClearAttachments().observe(getViewLifecycleOwner(), this::clearAttachmentsList);
         commentsViewModel.getObservableOpenDownloadedAttachment()
-                .observe(this, this::openDownloadedFile);
-        commentsViewModel.getObservableExitEditMode().observe(this, this::exitEditModeUi);
-        commentsViewModel.getObservableHideCommentInput().observe(this, this::hideCommentInput);
-        commentsViewModel.getObservableHideSwitchPrivatePublic().observe(this, this::hideSwitchPrivatePublic);
-        commentsViewModel.getObservableHideEditCommentOption().observe(this, this::hideEditCommentOption);
-        commentsViewModel.getObservableHideDeleteCommentOption().observe(this, this::hideDeleteCommentOption);
+                .observe(getViewLifecycleOwner(), this::openDownloadedFile);
+        commentsViewModel.getObservableExitEditMode().observe(getViewLifecycleOwner(), this::exitEditModeUi);
+        commentsViewModel.getObservableHideCommentInput().observe(getViewLifecycleOwner(), this::hideCommentInput);
+        commentsViewModel.getObservableHideSwitchPrivatePublic().observe(getViewLifecycleOwner(), this::hideSwitchPrivatePublic);
+        commentsViewModel.getObservableHideEditCommentOption().observe(getViewLifecycleOwner(), this::hideEditCommentOption);
+        commentsViewModel.getObservableHideDeleteCommentOption().observe(getViewLifecycleOwner(), this::hideDeleteCommentOption);
 
-        commentsViewModel.showLoading.observe(this, this::showLoading);
+        commentsViewModel.showLoading.observe(getViewLifecycleOwner(), this::showLoading);
     }
 
     private void setupSwitch() {

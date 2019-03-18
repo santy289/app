@@ -104,12 +104,12 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
     }
 
     private void subscribe() {
-        viewModel.getObservableShowLoading().observe(this, this::showLoading);
-        viewModel.getObservableError().observe(this, this::showToastMessage);
-        viewModel.getObservableTimeline().observe(this, this::populateTimeline);
-        viewModel.getObservableHideMoreButton().observe(this, this::hideMoreButton);
-        viewModel.getObservableHideTimelineList().observe(this, this::hideTimelineList);
-        viewModel.getObservablePostInteraction().observe(this, this::updateInteraction);
+        viewModel.getObservableShowLoading().observe(getViewLifecycleOwner(), this::showLoading);
+        viewModel.getObservableError().observe(getViewLifecycleOwner(), this::showToastMessage);
+        viewModel.getObservableTimeline().observe(getViewLifecycleOwner(), this::populateTimeline);
+        viewModel.getObservableHideMoreButton().observe(getViewLifecycleOwner(), this::hideMoreButton);
+        viewModel.getObservableHideTimelineList().observe(getViewLifecycleOwner(), this::hideTimelineList);
+        viewModel.getObservablePostInteraction().observe(getViewLifecycleOwner(), this::updateInteraction);
     }
 
     /**

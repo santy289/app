@@ -102,35 +102,35 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
      * Performs all of the subscriptions to the ViewModel's observables.
      */
     private void subscribe() {
-        viewModel.getObservableShowLoading().observe(this, this::showLoading);
-        viewModel.getObservableError().observe(this, this::showToastMessage);
-        viewModel.getObservableWorkflows().observe(this, this::populatePendingWorkflows);
-        viewModel.getObservableHideMoreButton().observe(this, this::hideMoreButton);
-        viewModel.getObservableHideWorkflowList().observe(this, this::hideWorkflowList);
-        viewModel.getObservableWorkflowTypeItem().observe(this, this::setupWorkflowTypeFormItem);
+        viewModel.getObservableShowLoading().observe(getViewLifecycleOwner(), this::showLoading);
+        viewModel.getObservableError().observe(getViewLifecycleOwner(), this::showToastMessage);
+        viewModel.getObservableWorkflows().observe(getViewLifecycleOwner(), this::populatePendingWorkflows);
+        viewModel.getObservableHideMoreButton().observe(getViewLifecycleOwner(), this::hideMoreButton);
+        viewModel.getObservableHideWorkflowList().observe(getViewLifecycleOwner(), this::hideWorkflowList);
+        viewModel.getObservableWorkflowTypeItem().observe(getViewLifecycleOwner(), this::setupWorkflowTypeFormItem);
 
-        viewModel.getObservableUserPendingCount().observe(this, this::updateUserPendingWorkflowsCount);
-        viewModel.getObservableUserOpenCount().observe(this, this::updateUserOpenWorkflowsCount);
-        viewModel.getObservableUserClosedCount().observe(this, this::updateUserClosedWorkflowsCount);
-        viewModel.getObservableUserOutOfTimeCount().observe(this, this::updateUserOutOfTimeWorkflowsCount);
-        viewModel.getObservableUserUpdatedCount().observe(this, this::updateUserUpdatedWorkflowsCount);
-        viewModel.getObservableUserPendingWorkflows().observe(this, this::showUserPendingWorkflowsDialog);
-        viewModel.getObservableUserOpenWorkflows().observe(this, this::showUserOpenWorkflowsDialog);
-        viewModel.getObservableUserClosedWorkflows().observe(this, this::showUserClosedWorkflowsDialog);
-        viewModel.getObservableUserOutOfTimeWorkflows().observe(this, this::showUserOutOfTimeWorkflowsDialog);
-        viewModel.getObservableUserUpdatedWorkflows().observe(this, this::showUserUpdatedWorkflowsDialog);
+        viewModel.getObservableUserPendingCount().observe(getViewLifecycleOwner(), this::updateUserPendingWorkflowsCount);
+        viewModel.getObservableUserOpenCount().observe(getViewLifecycleOwner(), this::updateUserOpenWorkflowsCount);
+        viewModel.getObservableUserClosedCount().observe(getViewLifecycleOwner(), this::updateUserClosedWorkflowsCount);
+        viewModel.getObservableUserOutOfTimeCount().observe(getViewLifecycleOwner(), this::updateUserOutOfTimeWorkflowsCount);
+        viewModel.getObservableUserUpdatedCount().observe(getViewLifecycleOwner(), this::updateUserUpdatedWorkflowsCount);
+        viewModel.getObservableUserPendingWorkflows().observe(getViewLifecycleOwner(), this::showUserPendingWorkflowsDialog);
+        viewModel.getObservableUserOpenWorkflows().observe(getViewLifecycleOwner(), this::showUserOpenWorkflowsDialog);
+        viewModel.getObservableUserClosedWorkflows().observe(getViewLifecycleOwner(), this::showUserClosedWorkflowsDialog);
+        viewModel.getObservableUserOutOfTimeWorkflows().observe(getViewLifecycleOwner(), this::showUserOutOfTimeWorkflowsDialog);
+        viewModel.getObservableUserUpdatedWorkflows().observe(getViewLifecycleOwner(), this::showUserUpdatedWorkflowsDialog);
 
-        viewModel.getObservableCompanyPendingCount().observe(this, this::updateCompanyPendingWorkflowsCount);
-        viewModel.getObservableCompanyOpenCount().observe(this, this::updateCompanyOpenWorkflowsCount);
-        viewModel.getObservableCompanyClosedCount().observe(this, this::updateCompanyClosedWorkflowsCount);
-        viewModel.getObservableCompanyOutOfTimeCount().observe(this, this::updateCompanyOutOfTimeWorkflowsCount);
-        viewModel.getObservableCompanyUpdatedCount().observe(this, this::updateCompanyUpdatedWorkflowsCount);
-        viewModel.getObservableCompanyPeopleInvolvedCount().observe(this, this::updateCompanyPeopleInvolvedCount);
-        viewModel.getObservableCompanyPendingWorkflows().observe(this, this::showCompanyPendingWorkflowsDialog);
-        viewModel.getObservableCompanyOpenWorkflows().observe(this, this::showCompanyOpenWorkflowsDialog);
-        viewModel.getObservableCompanyClosedWorkflows().observe(this, this::showCompanyClosedWorkflowsDialog);
-        viewModel.getObservableCompanyOutOfTimeWorkflows().observe(this, this::showCompanyOutOfTimeWorkflowsDialog);
-        viewModel.getObservableCompanyUpdatedWorkflows().observe(this, this::showCompanyUpdatedWorkflowsDialog);
+        viewModel.getObservableCompanyPendingCount().observe(getViewLifecycleOwner(), this::updateCompanyPendingWorkflowsCount);
+        viewModel.getObservableCompanyOpenCount().observe(getViewLifecycleOwner(), this::updateCompanyOpenWorkflowsCount);
+        viewModel.getObservableCompanyClosedCount().observe(getViewLifecycleOwner(), this::updateCompanyClosedWorkflowsCount);
+        viewModel.getObservableCompanyOutOfTimeCount().observe(getViewLifecycleOwner(), this::updateCompanyOutOfTimeWorkflowsCount);
+        viewModel.getObservableCompanyUpdatedCount().observe(getViewLifecycleOwner(), this::updateCompanyUpdatedWorkflowsCount);
+        viewModel.getObservableCompanyPeopleInvolvedCount().observe(getViewLifecycleOwner(), this::updateCompanyPeopleInvolvedCount);
+        viewModel.getObservableCompanyPendingWorkflows().observe(getViewLifecycleOwner(), this::showCompanyPendingWorkflowsDialog);
+        viewModel.getObservableCompanyOpenWorkflows().observe(getViewLifecycleOwner(), this::showCompanyOpenWorkflowsDialog);
+        viewModel.getObservableCompanyClosedWorkflows().observe(getViewLifecycleOwner(), this::showCompanyClosedWorkflowsDialog);
+        viewModel.getObservableCompanyOutOfTimeWorkflows().observe(getViewLifecycleOwner(), this::showCompanyOutOfTimeWorkflowsDialog);
+        viewModel.getObservableCompanyUpdatedWorkflows().observe(getViewLifecycleOwner(), this::showCompanyUpdatedWorkflowsDialog);
     }
 
     /**

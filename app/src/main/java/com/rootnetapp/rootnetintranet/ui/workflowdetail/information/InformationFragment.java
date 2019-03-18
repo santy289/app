@@ -87,13 +87,13 @@ public class InformationFragment extends Fragment {
             }
         });
 
-        informationViewModel.getObservableError().observe(this, errorObserver);
+        informationViewModel.getObservableError().observe(getViewLifecycleOwner(), errorObserver);
 //
-        informationViewModel.showLoading.observe(this, this::showLoading);
-        informationViewModel.updateInformationListUi.observe(this, this::updateInformationListUi);
-        informationViewModel.showImportantInfoSection.observe(this, this::showImportantInfoSection);
-        informationViewModel.loadImportantInfoSection.observe(this, this::loadImportantInfoSection);
-        informationViewModel.showEditButtonLiveData.observe(this, this::showEditButton);
+        informationViewModel.showLoading.observe(getViewLifecycleOwner(), this::showLoading);
+        informationViewModel.updateInformationListUi.observe(getViewLifecycleOwner(), this::updateInformationListUi);
+        informationViewModel.showImportantInfoSection.observe(getViewLifecycleOwner(), this::showImportantInfoSection);
+        informationViewModel.loadImportantInfoSection.observe(getViewLifecycleOwner(), this::loadImportantInfoSection);
+        informationViewModel.showEditButtonLiveData.observe(getViewLifecycleOwner(), this::showEditButton);
     }
 
     private void setOnClickListeners() {

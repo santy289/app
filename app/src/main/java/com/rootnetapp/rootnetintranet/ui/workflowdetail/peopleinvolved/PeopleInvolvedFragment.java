@@ -77,10 +77,10 @@ public class PeopleInvolvedFragment extends Fragment {
         peopleInvolvedViewModel.getObservableShowToastMessage()
                 .observe(this, this::showToastMessage);
 
-        peopleInvolvedViewModel.showLoading.observe(this, this::showLoading);
-        peopleInvolvedViewModel.updateProfilesInvolved.observe(this, this::updateProfilesInvolved);
+        peopleInvolvedViewModel.showLoading.observe(getViewLifecycleOwner(), this::showLoading);
+        peopleInvolvedViewModel.updateProfilesInvolved.observe(getViewLifecycleOwner(), this::updateProfilesInvolved);
         peopleInvolvedViewModel.hideProfilesInvolvedList
-                .observe(this, this::hideProfilesInvolvedList);
+                .observe(getViewLifecycleOwner(), this::hideProfilesInvolvedList);
     }
 
     private void setOnClickListeners() {

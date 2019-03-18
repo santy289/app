@@ -97,23 +97,23 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
 
     private void subscribe() {
 
-        filesViewModel.getObservableToastMessage().observe(this, this::showToastMessage);
-        filesViewModel.getObservableAttachSuccess().observe(this, this::handleAttachmentUiResponse);
-        filesViewModel.getObservableFilesTabCounter().observe(this, this::updateTabCounter);
-        filesViewModel.getObservableUploadedFileName().observe(this, this::setFileUploadedTextWith);
-        filesViewModel.getObservableAttachButtonText().observe(this, this::setButtonAttachmentText);
-        filesViewModel.getObservableOpenDownloadedFile().observe(this, this::openDownloadedFile);
+        filesViewModel.getObservableToastMessage().observe(getViewLifecycleOwner(), this::showToastMessage);
+        filesViewModel.getObservableAttachSuccess().observe(getViewLifecycleOwner(), this::handleAttachmentUiResponse);
+        filesViewModel.getObservableFilesTabCounter().observe(getViewLifecycleOwner(), this::updateTabCounter);
+        filesViewModel.getObservableUploadedFileName().observe(getViewLifecycleOwner(), this::setFileUploadedTextWith);
+        filesViewModel.getObservableAttachButtonText().observe(getViewLifecycleOwner(), this::setButtonAttachmentText);
+        filesViewModel.getObservableOpenDownloadedFile().observe(getViewLifecycleOwner(), this::openDownloadedFile);
 
-        filesViewModel.showLoading.observe(this, this::showLoading);
-        filesViewModel.setDocumentsView.observe(this, this::setDocumentsView);
-        filesViewModel.setTemplateTitleWith.observe(this, this::setTemplateTitleWith);
+        filesViewModel.showLoading.observe(getViewLifecycleOwner(), this::showLoading);
+        filesViewModel.setDocumentsView.observe(getViewLifecycleOwner(), this::setDocumentsView);
+        filesViewModel.setTemplateTitleWith.observe(getViewLifecycleOwner(), this::setTemplateTitleWith);
         filesViewModel.showTemplateDocumentsUiEmpty
-                .observe(this, this::showTemplateDocumentsUiEmpty);
+                .observe(getViewLifecycleOwner(), this::showTemplateDocumentsUiEmpty);
         filesViewModel.showTemplateDocumentsUiPermissions
-                .observe(this, this::showTemplateDocumentsUiPermissions);
+                .observe(getViewLifecycleOwner(), this::showTemplateDocumentsUiPermissions);
         filesViewModel.showDownloadTemplateButton
-                .observe(this, this::setShowDownloadTemplateButton);
-        filesViewModel.showDownloadFileButton.observe(this, this::setShowDownloadFileButton);
+                .observe(getViewLifecycleOwner(), this::setShowDownloadTemplateButton);
+        filesViewModel.showDownloadFileButton.observe(getViewLifecycleOwner(), this::setShowDownloadFileButton);
     }
 
     private void setOnClickListeners() {

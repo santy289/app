@@ -88,27 +88,27 @@ public class StatusFragment extends Fragment {
             }
         });
 
-        statusViewModel.getObservableError().observe(this, errorObserver);
-        statusViewModel.getObservableShowToastMessage().observe(this, this::showToastMessage);
-        statusViewModel.getObservableTieStatus().observe(this, this::showTieStatusLabel);
+        statusViewModel.getObservableError().observe(getViewLifecycleOwner(), errorObserver);
+        statusViewModel.getObservableShowToastMessage().observe(getViewLifecycleOwner(), this::showToastMessage);
+        statusViewModel.getObservableTieStatus().observe(getViewLifecycleOwner(), this::showTieStatusLabel);
         statusViewModel.getObservableEnableApproveRejectButtons()
-                .observe(this, this::enableApproveRejectButtons);
+                .observe(getViewLifecycleOwner(), this::enableApproveRejectButtons);
 
-        statusViewModel.showLoading.observe(this, this::showLoading);
-        statusViewModel.handleShowLoadingByRepo.observe(this, this::showLoading);
-        statusViewModel.updateStatusUi.observe(this, this::updateStatusDetails);
-        statusViewModel.updateCurrentApproversList.observe(this, this::updateCurrentApproversList);
+        statusViewModel.showLoading.observe(getViewLifecycleOwner(), this::showLoading);
+        statusViewModel.handleShowLoadingByRepo.observe(getViewLifecycleOwner(), this::showLoading);
+        statusViewModel.updateStatusUi.observe(getViewLifecycleOwner(), this::updateStatusDetails);
+        statusViewModel.updateCurrentApproversList.observe(getViewLifecycleOwner(), this::updateCurrentApproversList);
         statusViewModel.hideApproverListOnEmptyData
-                .observe(this, this::hideApproverListOnEmptyData);
-        statusViewModel.updateApproveSpinner.observe(this, this::updateApproveSpinner);
+                .observe(getViewLifecycleOwner(), this::hideApproverListOnEmptyData);
+        statusViewModel.updateApproveSpinner.observe(getViewLifecycleOwner(), this::updateApproveSpinner);
         statusViewModel.hideApproveSpinnerOnEmptyData
-                .observe(this, this::hideApproveSpinnerOnEmptyData);
+                .observe(getViewLifecycleOwner(), this::hideApproveSpinnerOnEmptyData);
         statusViewModel.hideApproveSpinnerOnNotApprover
-                .observe(this, this::hideApproveSpinnerOnNotApprover);
-        statusViewModel.updateStatusUiFromUserAction.observe(this, this::updateStatusDetails);
-        statusViewModel.updateActiveStatusFromUserAction.observe(this, this::updateWorkflowStatus);
-        statusViewModel.handleSetWorkflowIsOpenByRepo.observe(this, this::updateWorkflowStatus);
-        statusViewModel.setWorkflowIsOpen.observe(this, this::updateWorkflowStatus);
+                .observe(getViewLifecycleOwner(), this::hideApproveSpinnerOnNotApprover);
+        statusViewModel.updateStatusUiFromUserAction.observe(getViewLifecycleOwner(), this::updateStatusDetails);
+        statusViewModel.updateActiveStatusFromUserAction.observe(getViewLifecycleOwner(), this::updateWorkflowStatus);
+        statusViewModel.handleSetWorkflowIsOpenByRepo.observe(getViewLifecycleOwner(), this::updateWorkflowStatus);
+        statusViewModel.setWorkflowIsOpen.observe(getViewLifecycleOwner(), this::updateWorkflowStatus);
     }
 
     private void setOnClickListeners() {

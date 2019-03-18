@@ -131,22 +131,22 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     }
 
     private void subscribe() {
-        viewModel.getObservableToastMessage().observe(this, this::showToastMessage);
-        viewModel.getObservableAddWorkflowTypeItem().observe(this, this::addWorkflowTypeItem);
-        viewModel.getObservableAddPeopleInvolvedItem().observe(this, this::addPeopleInvolvedItem);
-        viewModel.getObservableAddFormItem().observe(this, this::addItemToForm);
-        viewModel.getObservableSetFormItemList().observe(this, this::setItemListToForm);
+        viewModel.getObservableToastMessage().observe(getViewLifecycleOwner(), this::showToastMessage);
+        viewModel.getObservableAddWorkflowTypeItem().observe(getViewLifecycleOwner(), this::addWorkflowTypeItem);
+        viewModel.getObservableAddPeopleInvolvedItem().observe(getViewLifecycleOwner(), this::addPeopleInvolvedItem);
+        viewModel.getObservableAddFormItem().observe(getViewLifecycleOwner(), this::addItemToForm);
+        viewModel.getObservableSetFormItemList().observe(getViewLifecycleOwner(), this::setItemListToForm);
         viewModel.getObservableAddPeopleInvolvedFormItem()
-                .observe(this, this::addItemToPeopleInvolvedForm);
+                .observe(getViewLifecycleOwner(), this::addItemToPeopleInvolvedForm);
         viewModel.getObservableSetPeopleInvolvedFormItemList()
-                .observe(this, this::setItemListToPeopleInvolvedForm);
-        viewModel.getObservableValidationUi().observe(this, this::updateValidationUi);
-        viewModel.getObservableShowLoading().observe(this, this::showLoading);
-        viewModel.getObservableShowDialogMessage().observe(this, this::showDialog);
-        viewModel.getObservableGoBack().observe(this, back -> goBack());
-        viewModel.getObservableUpdateFormItem().observe(this, this::updateFormItemUi);
-        viewModel.getObservableDownloadedFileUiData().observe(this, this::openDownloadedFile);
-        viewModel.getObservableEnableSubmitButton().observe(this, this::enableSubmitButton);
+                .observe(getViewLifecycleOwner(), this::setItemListToPeopleInvolvedForm);
+        viewModel.getObservableValidationUi().observe(getViewLifecycleOwner(), this::updateValidationUi);
+        viewModel.getObservableShowLoading().observe(getViewLifecycleOwner(), this::showLoading);
+        viewModel.getObservableShowDialogMessage().observe(getViewLifecycleOwner(), this::showDialog);
+        viewModel.getObservableGoBack().observe(getViewLifecycleOwner(), back -> goBack());
+        viewModel.getObservableUpdateFormItem().observe(getViewLifecycleOwner(), this::updateFormItemUi);
+        viewModel.getObservableDownloadedFileUiData().observe(getViewLifecycleOwner(), this::openDownloadedFile);
+        viewModel.getObservableEnableSubmitButton().observe(getViewLifecycleOwner(), this::enableSubmitButton);
     }
 
     private void setupSubmitButton() {

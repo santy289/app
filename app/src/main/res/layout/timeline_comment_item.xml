@@ -94,7 +94,7 @@
             android:visibility="gone" />
 
         <RelativeLayout
-            android:id="@+id/lyt_comments"
+            android:id="@+id/lyt_comment_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/rec_comments"

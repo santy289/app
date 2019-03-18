@@ -341,8 +341,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
             return;
         }
 
-        viewModel.postLike(interactionId, timelineItem.getEntityId(),
-                timelineItem.getEntity(), author.getUserId());
+        viewModel.postLike(interactionId, timelineItem, author.getUserId());
     }
 
     @Override
@@ -352,8 +351,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
             return;
         }
 
-        viewModel.postDislike(interactionId, timelineItem.getEntityId(),
-                timelineItem.getEntity(), author.getUserId());
+        viewModel.postDislike(interactionId, timelineItem, author.getUserId());
     }
 
     @UiThread

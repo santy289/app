@@ -28,6 +28,8 @@ import androidx.lifecycle.ViewModel;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.TIMELINE_CRUD;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.TIMELINE_CRUD_OWN;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.TIMELINE_VIEW;
 
 public class TimelineViewModel extends ViewModel {
@@ -69,6 +71,9 @@ public class TimelineViewModel extends ViewModel {
     private List<String> mAllUsers, mAllModules;
     private TimelineUiData mTimelineUiData;
     private boolean hasViewPermissions;
+    private boolean hasInteractionsPermissions;
+    private boolean hasInteractionsOwnPermissions;
+    private int mUserId;
 
     protected TimelineViewModel(TimelineRepository repository) {
         this.mRepository = repository;
@@ -86,8 +91,9 @@ public class TimelineViewModel extends ViewModel {
     protected void init(String token, String startDate, String endDate, String userId,
                         String userPermissions) {
         mToken = token;
+        mUserId = userId == null ? 0 : Integer.parseInt(userId);
 
-        checkPermissions(userId == null ? 0 : Integer.parseInt(userId), userPermissions);
+        checkPermissions(userPermissions);
 
         if (!hasViewPermissions) return;
 
@@ -110,15 +116,17 @@ public class TimelineViewModel extends ViewModel {
      *
      * @param permissionsString users permissions.
      */
-    private void checkPermissions(int userId, String permissionsString) {
+    private void checkPermissions(String permissionsString) {
         RootnetPermissionsUtils permissionsUtils = new RootnetPermissionsUtils(permissionsString);
 
         hasViewPermissions = permissionsUtils.hasPermission(TIMELINE_VIEW);
+        hasInteractionsPermissions = permissionsUtils.hasPermission(TIMELINE_CRUD);
+        hasInteractionsOwnPermissions = permissionsUtils.hasPermission(TIMELINE_CRUD_OWN);
 
         mHideTimelineListPermissionsLiveData.setValue(!hasViewPermissions);
     }
 
-    protected boolean hasViewPermissions(){
+    protected boolean hasViewPermissions() {
         return hasViewPermissions;
     }
 
@@ -298,6 +306,14 @@ public class TimelineViewModel extends ViewModel {
         mHideMoreButtonLiveData.setValue(isEmpty || timelineResponse.getPager().getIsLastPage());
         mTimelineUiData.setTimelineItems(timelineResponse.getList());
 
+        for (TimelineItem item : mTimelineUiData.getTimelineItems()) {
+            if (item.getAuthor() == mUserId) {
+                item.setShowCommentInput(hasInteractionsOwnPermissions);
+            } else {
+                item.setShowCommentInput(hasInteractionsPermissions);
+            }
+        }
+
         getTimelineInteractions();
 
         updateCompleted();
@@ -429,22 +445,27 @@ public class TimelineViewModel extends ViewModel {
     //endregion
 
     //region Post Like/Dislike
-    protected void postLike(int interaction, int entityId, String entityType, int authorId) {
-        postLikeDislike(interaction, entityId, entityType, authorId, THUMB_ACTION_UP);
+    protected void postLike(int interaction, TimelineItem timelineItem, int authorId) {
+        postLikeDislike(interaction, timelineItem, authorId, THUMB_ACTION_UP);
     }
 
-    protected void postDislike(int interaction, int entityId, String entityType, int authorId) {
-        postLikeDislike(interaction, entityId, entityType, authorId, THUMB_ACTION_DOWN);
+    protected void postDislike(int interaction, TimelineItem timelineItem, int authorId) {
+        postLikeDislike(interaction, timelineItem, authorId, THUMB_ACTION_DOWN);
     }
 
-    private void postLikeDislike(int interactionId, int entityId, String entityType, int authorId,
+    private void postLikeDislike(int interactionId, TimelineItem timelineItem, int authorId,
                                  String thumbAction) {
+        boolean isOwnItem = timelineItem.getAuthor() == mUserId;
+        if (!hasInteractionsPermissions && (!hasInteractionsOwnPermissions || !isOwnItem)) {
+            return;
+        }
+
         showLoading.setValue(true);
 
         PostLikeDislike request = new PostLikeDislike();
         request.setInteractionId(interactionId);
-        request.setEntity(entityId);
-        request.setEntityType(entityType);
+        request.setEntity(timelineItem.getEntityId());
+        request.setEntityType(timelineItem.getEntity());
         request.setAuthor(authorId);
         request.setThumb(thumbAction);
 

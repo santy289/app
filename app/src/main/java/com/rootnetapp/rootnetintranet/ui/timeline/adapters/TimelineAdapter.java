@@ -45,6 +45,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
     private Context context;
     private Fragment parent;
     private TimelineInterface anInterface;
+    private boolean hasInteractionOwnPermissions;
 
     public TimelineAdapter(List<TimelineItem> items, List<User> people,
                            List<Interaction> interactions,
@@ -75,6 +76,10 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         this.interactions.add(interaction);
         notifyDataSetChanged();
         getItemCount();
+    }
+
+    public void setHasInteractionOwnPermissions(boolean permissions) {
+        hasInteractionOwnPermissions = hasInteractionOwnPermissions;
     }
 
     @Override
@@ -185,11 +190,14 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         }
         interactionId = x;
         holder.binding.recComments.setAdapter(new TimelineCommentAdapter(subComments, people,
-                viewModel, parent));
+                viewModel, parent, item.isShowCommentInput()));
+
         holder.binding.tvComments.setOnClickListener(view -> {
             if (holder.binding.recComments.getVisibility() == View.GONE) {
                 holder.binding.recComments.setVisibility(View.VISIBLE);
-                holder.binding.lytCommentInput.setVisibility(View.VISIBLE);
+                if (item.isShowCommentInput()) {
+                    holder.binding.lytCommentInput.setVisibility(View.VISIBLE);
+                }
             } else {
                 holder.binding.recComments.setVisibility(View.GONE);
                 holder.binding.lytCommentInput.setVisibility(View.GONE);
@@ -197,14 +205,16 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         });
         holder.binding.tvComments
                 .setOnTouchListener(new OnTouchClickListener(holder.binding.tvComments));
-        if (subComments != null && !subComments.isEmpty()) {
-            holder.binding.tvComments.setText(
-                    context.getResources().getQuantityString(
-                            R.plurals.timeline_comments,
-                            subComments.size(),
-                            subComments.size())
-            );
-        }
+        int commentsAmount = subComments == null ? 0 : subComments.size();
+        holder.binding.tvComments.setText(
+                context.getResources().getQuantityString(
+                        R.plurals.timeline_comments,
+                        commentsAmount,
+                        commentsAmount)
+        );
+
+        holder.binding.lytCommentInput
+                .setVisibility(item.isShowCommentInput() ? View.VISIBLE : View.GONE);
 
         if (itemInteraction == null) {
             holder.binding.lytThumbsUp.setVisibility(View.GONE);
@@ -225,17 +235,23 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         }
 
         User finalAuthor = author;
-        holder.binding.btnComment.setOnClickListener(view -> {
+        holder.binding.btnComment.setOnClickListener(view ->
+
+        {
             String comment = holder.binding.etComment.getText().toString();
             anInterface.addCommentClicked(comment, finalAuthor, item, interactionId);
             holder.binding.etComment.setText("");
         });
 
-        holder.binding.lytThumbsUp.setOnClickListener(view -> {
+        holder.binding.lytThumbsUp.setOnClickListener(view ->
+
+        {
             anInterface.likeClicked(finalAuthor, item, interactionId);
         });
 
-        holder.binding.lytThumbsDown.setOnClickListener(view -> {
+        holder.binding.lytThumbsDown.setOnClickListener(view ->
+
+        {
             anInterface.dislikeClicked(finalAuthor, item, interactionId);
         });
 
@@ -247,7 +263,9 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         }
 
         //hide the bottom line for the last item
-        if (i == getItemCount() - 1) {
+        if (i ==
+
+                getItemCount() - 1) {
             holder.binding.bottomLine.setVisibility(View.INVISIBLE);
         } else {
             holder.binding.bottomLine.setVisibility(View.VISIBLE);

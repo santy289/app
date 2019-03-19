@@ -31,6 +31,8 @@ public class Approver {
     public String entityAvatar;
 
     public Boolean approved;
+    public boolean isGlobal;
+    public boolean isStatusSpecific;
 
     @Override
     public boolean equals(Object o) {

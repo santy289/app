@@ -113,7 +113,6 @@
     <string name="next_step_approver">PRÓXIMO PASO APROBAR</string>
     <string name="next_approver">Próximo paso aprobar:</string>
     <string name="mass_approval">Aprobación masiva</string>
-    <string name="required_approval">(requiere aprobación)</string>
     <string name="start_date">Fecha de Inicio</string>
     <string name="campaign">Campaña</string>
     <string name="origin">Origen</string>
@@ -267,6 +266,9 @@
     <string name="workflow_detail_status_fragment_must_select_step">Debes seleccionar un estatus</string>
     <string name="workflow_detail_status_fragment_export_pdf">Exportar PDF</string>
     <string name="workflow_detail_status_fragment_view_tree">Ver Diagrama</string>
+    <string name="workflow_detail_status_fragment_required_approval">(aprobación requerida)</string>
+    <string name="workflow_detail_status_fragment_all_status">(todos los estatus)</string>
+    <string name="workflow_detail_status_fragment_specific_status">(específico)</string>
     <!--InformationFragment-->
     <string name="workflow_detail_information_fragment_title">@string/workflow_detail_information_fragment_information</string>
     <string name="workflow_detail_information_fragment_important_things">Datos Importantes Sobre Este Estatus</string>

@@ -354,6 +354,7 @@
     <string name="timeline_action_workflow_status_updated">%1$s has updated the status of the workflow %2$s</string>
     <string name="timeline_action_workflow_file_created">%1$s has uploaded a file for the workflow %2$s</string>
     <string name="timeline_action_workflow_comment_created">%1$s has commented on the workflow %2$s</string>
+    <string name="timeline_action_workflow_comment_updated">%1$s has updated a comment on the workflow %2$s</string>
     <string name="timeline_description">Description: %s</string>
     <string name="timeline_current_status">Current status: %s</string>
     <string name="timeline_thumbs_value" translatable="false">(%d)</string>

@@ -351,6 +351,7 @@
     <string name="timeline_action_workflow_status_updated">%1$s ha actualizado el estatus del workflow %2$s</string>
     <string name="timeline_action_workflow_file_created">%1$s ha subido un archivo para el workflow %2$s</string>
     <string name="timeline_action_workflow_comment_created">%1$s ha comentado en el workflow %2$s</string>
+    <string name="timeline_action_workflow_comment_updated">%1$s ha actualizado un comentario en el workflow %2$s</string>
     <string name="timeline_description">Descripción: %s</string>
     <string name="timeline_current_status">Estatus actual: %s</string>
     <plurals name="timeline_comment_replies">

@@ -179,6 +179,15 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                     description = item.getDescription().getArguments().getComment();
                     drawableResId = R.drawable.ic_comment_timeline_black_24dp;
                     break;
+
+                case TimelineAction.WORKFLOW_COMMENT_UPDATED:
+                    titleSpannable = getSpannableTitle(
+                            R.string.timeline_action_workflow_comment_updated, author.getFullName(),
+                            arguments.getName());
+
+                    description = item.getDescription().getArguments().getComment();
+                    drawableResId = R.drawable.ic_comment_timeline_black_24dp;
+                    break;
             }
         }
 

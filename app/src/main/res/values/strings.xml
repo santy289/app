@@ -355,7 +355,8 @@
     <string name="timeline_modules_workflow_comments">Workflow Comments</string>
     <string name="timeline_action_workflow_created">%1$s has created the workflow %2$s</string>
     <string name="timeline_action_workflow_updated">%1$s has updated the workflow %2$s</string>
-    <string name="timeline_action_workflow_status_updated">%1$s has updated the status of the workflow %2$s</string>
+    <string name="timeline_action_workflow_status_approved">%1$s has approved %2$s of the workflow %3$s</string>
+    <string name="timeline_action_workflow_status_rejected">%1$s has rejected %2$s of the workflow %3$s</string>
     <string name="timeline_action_workflow_file_created">%1$s has uploaded a file for the workflow %2$s</string>
     <string name="timeline_action_workflow_comment_created">%1$s has commented on the workflow %2$s</string>
     <string name="timeline_action_workflow_comment_updated">%1$s has updated a comment on the workflow %2$s</string>
@@ -364,6 +365,16 @@
     <string name="timeline_description_file">
         <![CDATA[
             <b>File:</b> %s
+        ]]>
+    </string>
+    <string name="timeline_description_workflow_status_approved">
+        <![CDATA[
+            <b>Approved:</b> %1$s -> %2$s
+        ]]>
+    </string>
+    <string name="timeline_description_workflow_status_rejected">
+        <![CDATA[
+            <b>Rejected:</b> %s
         ]]>
     </string>
     <string name="timeline_description_workflow_created_out_of_time">Out of time (%s)</string>

@@ -32,8 +32,10 @@ import org.threeten.bp.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import androidx.annotation.DrawableRes;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -165,16 +167,43 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
 
                 case TimelineAction.WORKFLOW_STATUS_APPROVED_CREATED:
                 case TimelineAction.WORKFLOW_STATUS_APPROVED_UPDATED:
+                    String currentStatus = "";
+                    if (arguments.getStatus() != null && arguments.getStatus() instanceof Map) {
+                        Map<String, Object> statusMap = (Map<String, Object>) arguments.getStatus();
+                        currentStatus = (String) statusMap.get("name");
+                    }
+
+                    int titleResId = arguments.getApproved()
+                            ? R.string.timeline_action_workflow_status_approved
+                            : R.string.timeline_action_workflow_status_rejected;
                     titleSpannable = getSpannableTitle(
-                            R.string.timeline_action_workflow_status_updated, author.getFullName(),
-                            arguments.getName());
+                            titleResId,
+                            author.getFullName(),
+                            currentStatus,
+                            arguments.getName()
+                    );
                     drawableResId = R.drawable.ic_flag_black_24dp;
 
-                    if (item.getDescription().getArguments().getCurrentStatus() != null) {
-                        description = context
-                                .getString(R.string.timeline_description_current_status,
-                                        item.getDescription().getArguments().getCurrentStatus()
-                                                .getName());
+                    String nextStatus = null;
+                    if (arguments.getNextStatus() != null) {
+                        nextStatus = arguments.getNextStatus().getName();
+                    }
+
+                    if (arguments.getApproved()) {
+                        if (currentStatus != null && nextStatus != null) {
+                            description = context.getString(
+                                    R.string.timeline_description_workflow_status_approved,
+                                    currentStatus,
+                                    nextStatus
+                            );
+                        }
+                    } else {
+                        if (currentStatus != null) {
+                            description = context.getString(
+                                    R.string.timeline_description_workflow_status_rejected,
+                                    currentStatus
+                            );
+                        }
                     }
                     break;
 
@@ -185,7 +214,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                     drawableResId = R.drawable.ic_file_black;
 
                     description = context.getString(R.string.timeline_description_file,
-                            item.getDescription().getArguments().getFileName());
+                            arguments.getFileName());
                     break;
 
                 case TimelineAction.WORKFLOW_COMMENT_CREATED:
@@ -195,7 +224,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
 
                     drawableResId = R.drawable.ic_comment_timeline_black_24dp;
 
-                    description = item.getDescription().getArguments().getComment();
+                    description = arguments.getComment();
                     break;
 
                 case TimelineAction.WORKFLOW_COMMENT_UPDATED:
@@ -205,11 +234,11 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
 
                     drawableResId = R.drawable.ic_comment_timeline_black_24dp;
 
-                    description = item.getDescription().getArguments().getComment();
+                    description = arguments.getComment();
                     break;
                 default:
                     description = context.getString(R.string.timeline_description,
-                            item.getDescription().getArguments().getDescription());
+                            arguments.getDescription());
             }
         }
 
@@ -326,11 +355,16 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
     }
 
     private Spannable getSpannableTitle(@StringRes int stringRes, String authorName,
-                                        String workflowKey) {
+                                        @Nullable String status, String workflowKey) {
         if (authorName == null) return null;
         if (workflowKey == null) workflowKey = "";
 
-        String text = context.getString(stringRes, authorName, workflowKey);
+        String text;
+        if (status == null) {
+            text = context.getString(stringRes, authorName, workflowKey);
+        } else {
+            text = context.getString(stringRes, authorName, status, workflowKey);
+        }
 
         Spannable spannable = new SpannableString(text);
 
@@ -359,6 +393,11 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         );
 
         return spannable;
+    }
+
+    private Spannable getSpannableTitle(@StringRes int stringRes, String authorName,
+                                        String workflowKey) {
+        return getSpannableTitle(stringRes, authorName, null, workflowKey);
     }
 
     @Override

@@ -39,6 +39,8 @@ public class Arguments {
     private Integer fileId;
     @Json(name = "preset_id")
     private Integer presetId;
+    @Json(name = "status")
+    private Object status;
 
     public CurrentStatus getCurrentStatus() {
         return currentStatus;
@@ -174,5 +176,13 @@ public class Arguments {
 
     public void setPresetId(Integer presetId) {
         this.presetId = presetId;
+    }
+
+    public Object getStatus() {
+        return status;
+    }
+
+    public void setStatus(Object status) {
+        this.status = status;
     }
 }

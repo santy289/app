@@ -54,9 +54,11 @@
             android:id="@+id/lyt_data"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="60dp">
+            android:layout_marginStart="60dp"
+            android:background="?selectableItemBackground">
 
             <LinearLayout
+                android:id="@+id/ll_data"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
@@ -66,8 +68,10 @@
                 android:paddingBottom="1dp">
 
                 <RelativeLayout
+                    android:id="@+id/rl_header"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="?selectableItemBackground"
                     android:padding="5dp">
 
                     <de.hdodenhof.circleimageview.CircleImageView
@@ -105,6 +109,7 @@
                             android:id="@+id/tv_comments"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:background="?selectableItemBackground"
                             android:focusable="true"
                             android:focusableInTouchMode="true"
                             android:paddingTop="5dp"

@@ -337,6 +337,17 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         holder.binding.lytThumbsDown.setOnClickListener(view ->
                 anInterface.dislikeClicked(finalAuthor, item, finalInteractionId));
 
+        holder.binding.rlHeader.setOnClickListener(v -> {
+            Integer workflowId = arguments.getWorkflowId() ;
+            if (workflowId == null) {
+                workflowId = item.getEntityId();
+            }
+
+            if (workflowId == null) return;
+
+            anInterface.showWorkflowDetails(workflowId);
+        });
+
         //hide the top line for the first item
         if (i == 0) {
             holder.binding.topLine.setVisibility(View.INVISIBLE);

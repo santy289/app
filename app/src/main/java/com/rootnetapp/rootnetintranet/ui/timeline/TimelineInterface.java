@@ -20,5 +20,7 @@ public interface TimelineInterface {
 
     void dislikeClicked(User author, TimelineItem timelineItem, @Nullable Integer interactionId);
 
+    void showWorkflowDetails(int workflowId);
+
     void showToastMessage(int stringRes);
 }

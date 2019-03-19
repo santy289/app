@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.timeline;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -25,6 +26,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.timeline.adapters.TimelineAdapter;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -336,7 +338,8 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
     }
 
     @Override
-    public void likeClicked(User author, TimelineItem timelineItem, @Nullable Integer interactionId) {
+    public void likeClicked(User author, TimelineItem timelineItem,
+                            @Nullable Integer interactionId) {
         if (author == null) {
             showToastMessage(R.string.error);
             return;
@@ -346,13 +349,21 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
     }
 
     @Override
-    public void dislikeClicked(User author, TimelineItem timelineItem, @Nullable Integer interactionId) {
+    public void dislikeClicked(User author, TimelineItem timelineItem,
+                               @Nullable Integer interactionId) {
         if (author == null) {
             showToastMessage(R.string.error);
             return;
         }
 
         viewModel.postDislike(interactionId, timelineItem, author.getUserId());
+    }
+
+    @Override
+    public void showWorkflowDetails(int workflowId) {
+        Intent intent = new Intent(getContext(), WorkflowDetailActivity.class);
+        intent.putExtra(WorkflowDetailActivity.INTENT_EXTRA_ID, String.valueOf(workflowId));
+        mMainInterface.showActivity(intent);
     }
 
     @UiThread

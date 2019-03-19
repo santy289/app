@@ -251,7 +251,9 @@
     <string name="workflow_detail_activity_open_file">Open File</string>
     <string name="workflow_detail_activity_no_pdf_reader">This file cannot be opened by your device. Please install a PDF reader.</string>
     <string name="workflow_detail_activity_permissions_not_granted">Cannot export PDF because the permissions were not granted.</string>
-    <string name="workflow_detail_workflow_not_found">This workflow does not exist.</string>
+    <string name="workflow_detail_activity_workflow_not_found">This workflow does not exist.</string>
+    <string name="workflow_detail_activity_export_pdf">Export PDF</string>
+    <string name="workflow_detail_activity_view_tree">View Diagram</string>
     <!--StatusFragment-->
     <string name="workflow_detail_status_fragment_title">Status</string>
     <string name="workflow_detail_status_fragment_status_summary">Workflow Status</string>
@@ -267,8 +269,6 @@
     <string name="workflow_detail_status_fragment_reject">Reject</string>
     <string name="workflow_detail_status_fragment_spinner_title">- Select Status -</string>
     <string name="workflow_detail_status_fragment_must_select_step">You must select a status first</string>
-    <string name="workflow_detail_status_fragment_export_pdf">Export PDF</string>
-    <string name="workflow_detail_status_fragment_view_tree">View Diagram</string>
     <string name="workflow_detail_status_fragment_required_approval">(required approval)</string>
     <string name="workflow_detail_status_fragment_all_status">(all status)</string>
     <string name="workflow_detail_status_fragment_specific_status">(specific)</string>

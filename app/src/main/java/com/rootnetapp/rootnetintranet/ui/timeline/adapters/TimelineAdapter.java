@@ -338,7 +338,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                 anInterface.dislikeClicked(finalAuthor, item, finalInteractionId));
 
         holder.binding.rlHeader.setOnClickListener(v -> {
-            Integer workflowId = arguments.getWorkflowId() ;
+            Integer workflowId = arguments.getWorkflowId();
             if (workflowId == null) {
                 workflowId = item.getEntityId();
             }
@@ -423,13 +423,13 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                     .getName();
         }
 
-        int remainingTime = item.getDescription().getArguments().getRemainingTime();
-        boolean isOutOfTime = remainingTime < 0;
-        remainingTime = Math.abs(remainingTime);
+        int remainingTimeSeconds = item.getDescription().getArguments().getRemainingTime();
+        boolean isOutOfTime = remainingTimeSeconds < 0;
+        remainingTimeSeconds = Math.abs(remainingTimeSeconds);
 
         String remainingTimeString;
 
-        Duration duration = Duration.ofMillis(remainingTime);
+        Duration duration = Duration.ofSeconds(remainingTimeSeconds);
 
         int days = (int) duration.toDays();
         duration = duration.minusDays(days);
@@ -460,7 +460,12 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                 );
             }
         } else {
-            remainingTimeString = formattedTime;
+            if (days == 0) {
+                remainingTimeString = String.format(Locale.US, "%s", hoursString);
+
+            } else {
+                remainingTimeString = formattedTime;
+            }
         }
 
         String startDate;

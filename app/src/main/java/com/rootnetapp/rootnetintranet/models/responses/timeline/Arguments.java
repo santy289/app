@@ -8,7 +8,7 @@ public class Arguments {
     @Json(name = "current_status")
     private CurrentStatus currentStatus;
     @Json(name = "remaining_time")
-    private Integer remainingTime;
+    private Integer remainingTime; //value in seconds
     @Json(name = "workflow_type_id")
     private Integer workflowTypeId;
     @Json(name = "start")

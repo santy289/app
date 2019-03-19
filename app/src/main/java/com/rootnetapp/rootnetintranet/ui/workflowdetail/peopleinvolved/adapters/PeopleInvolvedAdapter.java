@@ -22,7 +22,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class PeopleInvolvedAdapter extends RecyclerView.Adapter<PeopleInvolvedViewholder> {
 
-    private Context context;
     private List<PersonRelated> mDataset;
 
     public PeopleInvolvedAdapter(List<PersonRelated> profiles) {
@@ -36,7 +35,6 @@ public class PeopleInvolvedAdapter extends RecyclerView.Adapter<PeopleInvolvedVi
                 LayoutInflater.from(viewGroup.getContext());
         PeopleInvolvedItemBinding itemBinding =
                 PeopleInvolvedItemBinding.inflate(layoutInflater, viewGroup, false);
-        context = viewGroup.getContext();
         return new PeopleInvolvedViewholder(itemBinding);
     }
 
@@ -46,10 +44,10 @@ public class PeopleInvolvedAdapter extends RecyclerView.Adapter<PeopleInvolvedVi
             return;
         }
 
+        Context context = viewHolder.binding.getRoot().getContext();
         PersonRelated item = getItem(i);
 
         if (!TextUtils.isEmpty(item.getPicture())) {
-            Context context = viewHolder.binding.imgInvolvedAvatar.getContext();
             String path = Utils.imgDomain + item.getPicture();
             GlideUrl url = new GlideUrl(path);
             Glide.with(context)

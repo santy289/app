@@ -20,18 +20,31 @@
                 android:layout_centerHorizontal="true"
                 android:background="@color/transparentArrow" />
 
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/img_item"
+            <FrameLayout
+                android:id="@+id/fl_img_item"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_below="@id/top_line"
-                android:src="@color/dark_blue" />
+                android:layout_below="@id/top_line">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/circle_accent" />
+
+                <ImageView
+                    android:id="@+id/img_item"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:tint="@color/white"
+                    tools:src="@drawable/ic_code_branch_black" />
+            </FrameLayout>
 
             <View
                 android:id="@+id/bottom_line"
                 android:layout_width="10dp"
                 android:layout_height="match_parent"
-                android:layout_below="@id/img_item"
+                android:layout_below="@id/fl_img_item"
                 android:layout_centerHorizontal="true"
                 android:background="@color/light_blue" />
 

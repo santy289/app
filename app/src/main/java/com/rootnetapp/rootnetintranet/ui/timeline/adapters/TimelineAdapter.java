@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -140,16 +141,19 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
 
         Spannable titleSpannable = null;
         String description = null;
+        @DrawableRes int drawableResId = 0;
         if (author != null) {
             switch (item.getDescription().getText()) {
                 case TimelineAction.WORKFLOW_CREATED:
                     titleSpannable = getSpannableTitle(R.string.timeline_action_workflow_created,
                             author.getFullName(), arguments.getName());
+                    drawableResId = R.drawable.ic_code_branch_black;
                     break;
 
                 case TimelineAction.WORKFLOW_UPDATED:
                     titleSpannable = getSpannableTitle(R.string.timeline_action_workflow_updated,
                             author.getFullName(), arguments.getName());
+                    drawableResId = R.drawable.ic_code_branch_black;
                     break;
 
                 case TimelineAction.WORKFLOW_STATUS_APPROVED_CREATED:
@@ -157,12 +161,14 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                     titleSpannable = getSpannableTitle(
                             R.string.timeline_action_workflow_status_updated, author.getFullName(),
                             arguments.getName());
+                    drawableResId = R.drawable.ic_flag_black_24dp;
                     break;
 
                 case TimelineAction.WORKFLOW_FILE_RECORD_CREATED:
                     titleSpannable = getSpannableTitle(
                             R.string.timeline_action_workflow_file_created, author.getFullName(),
                             arguments.getName());
+                    drawableResId = R.drawable.ic_file_black;
                     break;
 
                 case TimelineAction.WORKFLOW_COMMENT_CREATED:
@@ -171,8 +177,13 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                             arguments.getName());
 
                     description = item.getDescription().getArguments().getComment();
+                    drawableResId = R.drawable.ic_comment_timeline_black_24dp;
                     break;
             }
+        }
+
+        if (drawableResId != 0){
+            holder.binding.imgItem.setImageResource(drawableResId);
         }
 
         if (titleSpannable != null) {

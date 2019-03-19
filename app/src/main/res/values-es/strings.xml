@@ -280,6 +280,10 @@
     <string name="workflow_detail_information_fragment_owner">Dueño</string>
     <!--PeopleInvolvedFragment-->
     <string name="workflow_detail_people_involved_fragment_title">Personas Involucradas</string>
+    <string name="workflow_detail_people_involved_fragment_owner">Dueño</string>
+    <string name="workflow_detail_people_involved_fragment_approver">Aprobador</string>
+    <string name="workflow_detail_people_involved_fragment_specific_approver">Aprobador Específico</string>
+    <string name="workflow_detail_people_involved_fragment_person_related">Persona Involucrada</string>
     <!--ApprovalHistoryFragment-->
     <string name="workflow_detail_approval_history_fragment_title">@string/workflow_detail_approval_history_fragment_approval_history</string>
     <string name="workflow_detail_approval_history_fragment_approval_history">Historial de Aprobaciones</string>

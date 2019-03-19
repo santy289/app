@@ -10,19 +10,22 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.request.RequestOptions;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
 import com.rootnetapp.rootnetintranet.databinding.PeopleInvolvedItemBinding;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.PersonRelated;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class PeopleInvolvedAdapter extends RecyclerView.Adapter<PeopleInvolvedViewholder>{
-    private List<ProfileInvolved> profiles;
+public class PeopleInvolvedAdapter extends RecyclerView.Adapter<PeopleInvolvedViewholder> {
 
-    public PeopleInvolvedAdapter(List<ProfileInvolved> profiles) {
-        this.profiles = profiles;
+    private List<PersonRelated> mDataset;
+
+    public PeopleInvolvedAdapter(List<PersonRelated> profiles) {
+        this.mDataset = profiles;
     }
 
     @NonNull
@@ -41,11 +44,11 @@ public class PeopleInvolvedAdapter extends RecyclerView.Adapter<PeopleInvolvedVi
             return;
         }
 
-        ProfileInvolved profileInvolved = profiles.get(i);
+        Context context = viewHolder.binding.getRoot().getContext();
+        PersonRelated item = getItem(i);
 
-        if (!TextUtils.isEmpty(profileInvolved.picture)) {
-            Context context = viewHolder.binding.imgInvolvedAvatar.getContext();
-            String path = Utils.imgDomain + profileInvolved.picture;
+        if (!TextUtils.isEmpty(item.getPicture())) {
+            String path = Utils.imgDomain + item.getPicture();
             GlideUrl url = new GlideUrl(path);
             Glide.with(context)
                     .load(url.toStringUrl())
@@ -57,12 +60,48 @@ public class PeopleInvolvedAdapter extends RecyclerView.Adapter<PeopleInvolvedVi
                     .into(viewHolder.binding.imgInvolvedAvatar);
         }
 
-        viewHolder.binding.tvInvolvedName.setText(profileInvolved.fullName);
+        viewHolder.binding.tvName.setText(item.getName());
+
+        List<String> relations = new ArrayList<>();
+        if (item.isOwner()) {
+            relations.add(context
+                    .getString(R.string.workflow_detail_people_involved_fragment_owner));
+        }
+        if (item.isApprover()) {
+            relations.add(context
+                    .getString(R.string.workflow_detail_people_involved_fragment_approver));
+        }
+        if (item.isSpecificApprover()) {
+            relations.add(context.getString(
+                    R.string.workflow_detail_people_involved_fragment_specific_approver));
+        }
+        if (item.isProfileInvolved()) {
+            relations.add(context
+                    .getString(R.string.workflow_detail_people_involved_fragment_person_related));
+        }
+
+        StringBuilder stringBuilder = new StringBuilder();
+        Iterator<String> iterator = relations.iterator();
+        while (iterator.hasNext()) {
+            String relation = iterator.next();
+            stringBuilder.append(relation);
+
+            if (iterator.hasNext()) {
+                stringBuilder.append(" - ");
+            }
+        }
+
+        viewHolder.binding.tvRelations.setText(stringBuilder.toString());
+
         viewHolder.binding.executePendingBindings();
     }
 
     @Override
     public int getItemCount() {
-        return profiles.size();
+        return mDataset.size();
+    }
+
+    private PersonRelated getItem(int position) {
+        return mDataset.get(position);
     }
 }

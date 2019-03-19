@@ -360,7 +360,30 @@
     <string name="timeline_action_workflow_comment_created">%1$s has commented on the workflow %2$s</string>
     <string name="timeline_action_workflow_comment_updated">%1$s has updated a comment on the workflow %2$s</string>
     <string name="timeline_description">Description: %s</string>
-    <string name="timeline_current_status">Current status: %s</string>
+    <string name="timeline_description_current_status">Current status: %s</string>
+    <string name="timeline_description_file">
+        <![CDATA[
+            <b>File:</b> %s
+        ]]>
+    </string>
+    <string name="timeline_description_workflow_created_out_of_time">Out of time (%s)</string>
+    <plurals name="timeline_description_out_of_time_days">
+        <item formatted="true" quantity="one">1 day</item>
+        <item formatted="true" quantity="other">%d days</item>
+    </plurals>
+    <plurals name="timeline_description_out_of_time_hours">
+        <item formatted="true" quantity="one">1 hour</item>
+        <item formatted="true" quantity="other">%d hours</item>
+    </plurals>
+    <string name="timeline_description_workflow_created">
+        <![CDATA[
+            <b>Type:</b> %1$s
+            <br><b>Description:</b> %2$s
+            <br><b>Start:</b> %3$s
+            <br><b>Remaining:</b> %4$s
+            <br><b>Current status:</b> %5$s
+        ]]>
+    </string>
     <string name="timeline_thumbs_value" translatable="false">(%d)</string>
     <plurals name="timeline_comment_replies">
         <item formatted="true" quantity="one">1 reply</item>

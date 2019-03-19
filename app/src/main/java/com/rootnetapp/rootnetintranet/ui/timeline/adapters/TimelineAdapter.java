@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.timeline.adapters;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -25,6 +26,8 @@ import com.rootnetapp.rootnetintranet.ui.timeline.TimelineAction;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineInterface;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineViewModel;
 import com.squareup.picasso.Picasso;
+
+import org.threeten.bp.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -148,12 +151,16 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                     titleSpannable = getSpannableTitle(R.string.timeline_action_workflow_created,
                             author.getFullName(), arguments.getName());
                     drawableResId = R.drawable.ic_code_branch_black;
+
+                    description = getWorkflowDescription(item);
                     break;
 
                 case TimelineAction.WORKFLOW_UPDATED:
                     titleSpannable = getSpannableTitle(R.string.timeline_action_workflow_updated,
                             author.getFullName(), arguments.getName());
                     drawableResId = R.drawable.ic_code_branch_black;
+
+                    description = getWorkflowDescription(item);
                     break;
 
                 case TimelineAction.WORKFLOW_STATUS_APPROVED_CREATED:
@@ -162,6 +169,13 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                             R.string.timeline_action_workflow_status_updated, author.getFullName(),
                             arguments.getName());
                     drawableResId = R.drawable.ic_flag_black_24dp;
+
+                    if (item.getDescription().getArguments().getCurrentStatus() != null) {
+                        description = context
+                                .getString(R.string.timeline_description_current_status,
+                                        item.getDescription().getArguments().getCurrentStatus()
+                                                .getName());
+                    }
                     break;
 
                 case TimelineAction.WORKFLOW_FILE_RECORD_CREATED:
@@ -169,6 +183,9 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                             R.string.timeline_action_workflow_file_created, author.getFullName(),
                             arguments.getName());
                     drawableResId = R.drawable.ic_file_black;
+
+                    description = context.getString(R.string.timeline_description_file,
+                            item.getDescription().getArguments().getFileName());
                     break;
 
                 case TimelineAction.WORKFLOW_COMMENT_CREATED:
@@ -176,8 +193,9 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                             R.string.timeline_action_workflow_comment_created, author.getFullName(),
                             arguments.getName());
 
-                    description = item.getDescription().getArguments().getComment();
                     drawableResId = R.drawable.ic_comment_timeline_black_24dp;
+
+                    description = item.getDescription().getArguments().getComment();
                     break;
 
                 case TimelineAction.WORKFLOW_COMMENT_UPDATED:
@@ -185,13 +203,17 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                             R.string.timeline_action_workflow_comment_updated, author.getFullName(),
                             arguments.getName());
 
-                    description = item.getDescription().getArguments().getComment();
                     drawableResId = R.drawable.ic_comment_timeline_black_24dp;
+
+                    description = item.getDescription().getArguments().getComment();
                     break;
+                default:
+                    description = context.getString(R.string.timeline_description,
+                            item.getDescription().getArguments().getDescription());
             }
         }
 
-        if (drawableResId != 0){
+        if (drawableResId != 0) {
             holder.binding.imgItem.setImageResource(drawableResId);
         }
 
@@ -202,13 +224,8 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         }
 
         if (description != null) {
-            holder.binding.tvDescription.setText(description);
-        } else if (item.getDescription().getArguments().getCurrentStatus() != null) {
-            holder.binding.tvDescription.setText(context.getString(R.string.timeline_current_status,
-                    item.getDescription().getArguments().getCurrentStatus().getName()));
-        } else if (item.getDescription().getArguments().getDescription() != null) {
-            holder.binding.tvDescription.setText(context.getString(R.string.timeline_description,
-                    item.getDescription().getArguments().getDescription()));
+            holder.binding.tvDescription
+                    .setText(Html.fromHtml(description, Html.FROM_HTML_MODE_LEGACY));
         }
 
         TimeAgoMessages messages = new TimeAgoMessages.Builder().withLocale(Locale.getDefault())
@@ -262,7 +279,8 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                         commentsAmount)
         );
 
-        holder.binding.lytCommentInput.setVisibility(item.isShowCommentInput() && commentsAmount < 10 ? View.VISIBLE : View.GONE);
+        holder.binding.lytCommentInput.setVisibility(
+                item.isShowCommentInput() && commentsAmount < 10 ? View.VISIBLE : View.GONE);
         holder.binding.recComments.setVisibility(commentsAmount < 10 ? View.VISIBLE : View.GONE);
 
         int thumbsUp = itemInteraction != null && itemInteraction
@@ -346,5 +364,78 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
     @Override
     public int getItemCount() {
         return items == null ? 0 : items.size();
+    }
+
+    private String getWorkflowDescription(TimelineItem item) {
+        String workflowType = "";
+        if (item.getDescription().getArguments().getWorkflowType() != null) {
+            workflowType = item.getDescription().getArguments().getWorkflowType()
+                    .getName();
+        }
+
+        int remainingTime = item.getDescription().getArguments().getRemainingTime();
+        boolean isOutOfTime = remainingTime < 0;
+        remainingTime = Math.abs(remainingTime);
+
+        String remainingTimeString;
+
+        Duration duration = Duration.ofMillis(remainingTime);
+
+        int days = (int) duration.toDays();
+        duration = duration.minusDays(days);
+        int hours = (int) duration.toHours();
+
+        String daysString = context.getResources().getQuantityString(
+                R.plurals.timeline_description_out_of_time_days,
+                days,
+                days);
+
+        String hoursString = context.getResources().getQuantityString(
+                R.plurals.timeline_description_out_of_time_hours,
+                hours,
+                hours);
+
+        String formattedTime = String.format(Locale.US, "%s, %s", daysString, hoursString);
+
+        if (isOutOfTime) {
+            if (days == 0) {
+                remainingTimeString = context.getString(
+                        R.string.timeline_description_workflow_created_out_of_time,
+                        hoursString
+                );
+            } else {
+                remainingTimeString = context.getString(
+                        R.string.timeline_description_workflow_created_out_of_time,
+                        formattedTime
+                );
+            }
+        } else {
+            remainingTimeString = formattedTime;
+        }
+
+        String startDate;
+        if (item.getDescription().getArguments().getStart() != null) {
+            startDate = Utils
+                    .getFormattedDate(item.getDescription().getArguments().getStart(),
+                            "yyyy-MM-dd hh:mm", Utils.SHORT_DATE_DISPLAY_FORMAT);
+        } else {
+            startDate = Utils.serverFormatToFormat(item.getCreatedAt(),
+                    Utils.SHORT_DATE_DISPLAY_FORMAT);
+        }
+
+        String currentStatus = "";
+        if (item.getDescription().getArguments().getCurrentStatus() != null) {
+            currentStatus = item.getDescription().getArguments().getCurrentStatus()
+                    .getName();
+        }
+
+        return context.getString(
+                R.string.timeline_description_workflow_created,
+                workflowType,
+                item.getDescription().getArguments().getDescription(),
+                startDate,
+                remainingTimeString,
+                currentStatus
+        );
     }
 }

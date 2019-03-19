@@ -33,6 +33,12 @@ public class Arguments {
     private Boolean approved;
     @Json(name = "workflow_id")
     private Integer workflowId;
+    @Json(name = "file_name")
+    private String fileName;
+    @Json(name = "file_id")
+    private Integer fileId;
+    @Json(name = "preset_id")
+    private Integer presetId;
 
     public CurrentStatus getCurrentStatus() {
         return currentStatus;
@@ -144,5 +150,29 @@ public class Arguments {
 
     public void setWorkflowId(Integer workflowId) {
         this.workflowId = workflowId;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public Integer getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(Integer fileId) {
+        this.fileId = fileId;
+    }
+
+    public Integer getPresetId() {
+        return presetId;
+    }
+
+    public void setPresetId(Integer presetId) {
+        this.presetId = presetId;
     }
 }

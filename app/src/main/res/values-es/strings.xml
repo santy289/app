@@ -357,10 +357,33 @@
     <string name="timeline_action_workflow_comment_created">%1$s ha comentado en el workflow %2$s</string>
     <string name="timeline_action_workflow_comment_updated">%1$s ha actualizado un comentario en el workflow %2$s</string>
     <string name="timeline_description">Descripción: %s</string>
-    <string name="timeline_current_status">Estatus actual: %s</string>
+    <string name="timeline_description_current_status">Estatus actual: %s</string>
+    <string name="timeline_description_file">
+        <![CDATA[
+            <b>Archivo:</b> %s
+        ]]>
+    </string>
+    <string name="timeline_description_workflow_created_out_of_time">Fuera de tiempo (%s)</string>
+    <plurals name="timeline_description_out_of_time_days">
+        <item formatted="true" quantity="one">1 día</item>
+        <item formatted="true" quantity="other">%d días</item>
+    </plurals>
+    <plurals name="timeline_description_out_of_time_hours">
+        <item formatted="true" quantity="one">1 hora</item>
+        <item formatted="true" quantity="other">%d horas</item>
+    </plurals>
+    <string name="timeline_description_workflow_created">
+        <![CDATA[
+            <b>Tipo:</b> %1$s
+            <br><b>Descripción:</b> %2$s
+            <br><b>Inicio:</b> %3$s
+            <br><b>Tiempo restante:</b> %4$s
+            <br><b>Estado actual:</b> %5$s
+        ]]>
+    </string>
     <plurals name="timeline_comment_replies">
-        <item quantity="one" formatted="true">1 respuesta</item>
-        <item quantity="other" formatted="true">%d respuestas</item>
+        <item formatted="true" quantity="one">1 respuesta</item>
+        <item formatted="true" quantity="other">%d respuestas</item>
     </plurals>
     <plurals name="timeline_comments">
         <item formatted="true" quantity="one">1 comentario</item>

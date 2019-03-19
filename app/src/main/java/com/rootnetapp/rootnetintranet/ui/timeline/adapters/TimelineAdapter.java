@@ -41,11 +41,11 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
     private List<TimelineItem> items;
     private List<User> people;
     private List<Interaction> interactions;
+    private List<Interaction> usedInteractions; //avoid repetition
     private TimelineViewModel viewModel;
     private Context context;
     private Fragment parent;
     private TimelineInterface anInterface;
-    private boolean hasInteractionOwnPermissions;
 
     public TimelineAdapter(List<TimelineItem> items, List<User> people,
                            List<Interaction> interactions,
@@ -57,6 +57,8 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         this.viewModel = viewModel;
         this.parent = parent;
         this.anInterface = anInterface;
+
+        usedInteractions = new ArrayList<>();
     }
 
     public void addData(List<TimelineItem> items, List<Interaction> comments) {
@@ -76,10 +78,6 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         this.interactions.add(interaction);
         notifyDataSetChanged();
         getItemCount();
-    }
-
-    public void setHasInteractionOwnPermissions(boolean permissions) {
-        hasInteractionOwnPermissions = hasInteractionOwnPermissions;
     }
 
     @Override
@@ -180,10 +178,14 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         int x = -1;
         if (interactions != null) {
             for (Interaction interaction : interactions) {
-                if (interaction.getEntity().equals(item.getEntityId())) {
+                if (interaction.getEntity().equals(item.getEntityId())
+                && interaction.getEntityType().equals(item.getEntity())
+                && !usedInteractions.contains(interaction)) {
                     x = interaction.getId();
                     itemInteraction = interaction;
                     subComments = interaction.getComments();
+
+                    usedInteractions.add(interaction);
                     break;
                 }
             }

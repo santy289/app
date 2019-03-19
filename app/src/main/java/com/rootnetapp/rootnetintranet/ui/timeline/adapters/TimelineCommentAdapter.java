@@ -98,8 +98,6 @@ public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineComment
             holder.binding.tvReply.setVisibility(showCommentInput ? View.VISIBLE : View.GONE);
         }
 
-        holder.binding.lytCommentInput.setVisibility(showCommentInput ? View.VISIBLE : View.GONE);
-
         Comment finalItem = item;
         holder.binding.tvReply.setOnClickListener(view -> {
             if (holder.binding.recComments.getVisibility() == View.GONE) {

@@ -32,6 +32,7 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.core.content.ContextCompat;
@@ -317,7 +318,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
     //region TimelineInterface
     @Override
     public void addCommentClicked(String comment, User author, TimelineItem timelineItem,
-                                  int interactionId) {
+                                  @Nullable Integer interactionId) {
         if (TextUtils.isEmpty(comment)) {
             showToastMessage(R.string.empty_comment);
             return;
@@ -335,7 +336,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
     }
 
     @Override
-    public void likeClicked(User author, TimelineItem timelineItem, int interactionId) {
+    public void likeClicked(User author, TimelineItem timelineItem, @Nullable Integer interactionId) {
         if (author == null) {
             showToastMessage(R.string.error);
             return;
@@ -345,7 +346,7 @@ public class TimelineFragment extends Fragment implements TimelineInterface {
     }
 
     @Override
-    public void dislikeClicked(User author, TimelineItem timelineItem, int interactionId) {
+    public void dislikeClicked(User author, TimelineItem timelineItem, @Nullable Integer interactionId) {
         if (author == null) {
             showToastMessage(R.string.error);
             return;

@@ -48,6 +48,10 @@ public class TimelineCommentAdapter extends RecyclerView.Adapter<TimelineComment
         this.showCommentInput = showCommentInput;
     }
 
+    public List<Comment> getData() {
+        return comments;
+    }
+
     @Override
     public TimelineCommentViewholder onCreateViewHolder(ViewGroup viewGroup, int i) {
         LayoutInflater layoutInflater =

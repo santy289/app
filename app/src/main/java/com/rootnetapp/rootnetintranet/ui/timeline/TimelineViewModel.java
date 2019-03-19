@@ -22,6 +22,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -410,7 +411,7 @@ public class TimelineViewModel extends ViewModel {
     //endregion
 
     //region Post Comment
-    public void postComment(int interactionId, int entity, String entityType, String description,
+    public void postComment(@Nullable Integer interactionId, int entity, String entityType, String description,
                             int author) {
         showLoading.setValue(true);
 
@@ -445,15 +446,15 @@ public class TimelineViewModel extends ViewModel {
     //endregion
 
     //region Post Like/Dislike
-    protected void postLike(int interaction, TimelineItem timelineItem, int authorId) {
-        postLikeDislike(interaction, timelineItem, authorId, THUMB_ACTION_UP);
+    protected void postLike(@Nullable Integer interactionId, TimelineItem timelineItem, int authorId) {
+        postLikeDislike(interactionId, timelineItem, authorId, THUMB_ACTION_UP);
     }
 
-    protected void postDislike(int interaction, TimelineItem timelineItem, int authorId) {
-        postLikeDislike(interaction, timelineItem, authorId, THUMB_ACTION_DOWN);
+    protected void postDislike(@Nullable Integer interactionId, TimelineItem timelineItem, int authorId) {
+        postLikeDislike(interactionId, timelineItem, authorId, THUMB_ACTION_DOWN);
     }
 
-    private void postLikeDislike(int interactionId, TimelineItem timelineItem, int authorId,
+    private void postLikeDislike(@Nullable Integer interactionId, TimelineItem timelineItem, int authorId,
                                  String thumbAction) {
         boolean isOwnItem = timelineItem.getAuthor() == mUserId;
         if (!hasInteractionsPermissions && (!hasInteractionsOwnPermissions || !isOwnItem)) {
@@ -469,9 +470,16 @@ public class TimelineViewModel extends ViewModel {
         request.setAuthor(authorId);
         request.setThumb(thumbAction);
 
-        Disposable disposable = mRepository
-                .postLikeDislike(mToken, interactionId, request)
-                .subscribe(this::postLikeDislikeSuccess, this::onFailure);
+        Disposable disposable;
+        if (interactionId == null) {
+            disposable = mRepository
+                    .postLikeDislike(mToken, request)
+                    .subscribe(this::postLikeDislikeSuccess, this::onFailure);
+        } else {
+            disposable = mRepository
+                    .postLikeDislike(mToken, interactionId, request)
+                    .subscribe(this::postLikeDislikeSuccess, this::onFailure);
+        }
 
         mDisposables.add(disposable);
     }

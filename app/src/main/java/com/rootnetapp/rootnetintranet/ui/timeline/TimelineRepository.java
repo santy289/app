@@ -12,6 +12,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser
 
 import java.util.List;
 
+import androidx.annotation.Nullable;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -58,7 +59,7 @@ public class TimelineRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<PostInteractionResponse> postComment(String auth, int interactionId, int entity,
+    public Observable<PostInteractionResponse> postComment(String auth, @Nullable Integer interactionId, int entity,
                                                            String entityType, String description,
                                                            int author) {
         return service.postComment(auth, interactionId, entity, entityType, description, author)
@@ -77,6 +78,12 @@ public class TimelineRepository {
     public Observable<PostInteractionResponse> postLikeDislike(String auth, int interaction,
                                                    PostLikeDislike request) {
         return service.postLikeDislike(auth, interaction, request)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<PostInteractionResponse> postLikeDislike(String auth, PostLikeDislike request) {
+        return service.postLikeDislike(auth, request)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }

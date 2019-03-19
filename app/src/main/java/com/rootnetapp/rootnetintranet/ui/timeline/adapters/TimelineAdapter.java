@@ -74,10 +74,37 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
     }
 
     public void updateInteraction(Interaction interaction) {
+        int oldInteractionIndex = this.interactions.indexOf(interaction);
+        if (oldInteractionIndex != -1) {
+            Interaction oldInteraction = this.interactions.get(oldInteractionIndex);
+            //check for null on the new interaction and use the previous interaction values
+            if (interaction.getComments() == null) {
+                interaction.setComments(oldInteraction.getComments());
+            }
+            if (interaction.getThumbsUp() == null) {
+                interaction.setThumbsUp(oldInteraction.getThumbsUp());
+            }
+            if (interaction.getThumbsDown() == null) {
+                interaction.setThumbsDown(oldInteraction.getThumbsDown());
+            }
+        }
+
         this.interactions.remove(interaction);
+        this.usedInteractions.remove(interaction);
         this.interactions.add(interaction);
-        notifyDataSetChanged();
-        getItemCount();
+
+        TimelineItem item = this.items.stream()
+                .filter(timelineItem -> timelineItem.getEntityId().equals(interaction.getEntity())
+                        && timelineItem.getEntity().equals(interaction.getEntityType()))
+                .findAny()
+                .orElse(null);
+
+        if (item != null) {
+            notifyItemChanged(this.items.indexOf(item));
+        } else {
+            notifyDataSetChanged();
+            getItemCount();
+        }
     }
 
     @Override
@@ -172,16 +199,16 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         holder.binding.tvTimeAgo.setText(timeAgo);
 
         holder.binding.recComments.setLayoutManager(new LinearLayoutManager(context));
+
         List<Comment> subComments = new ArrayList<>();
-        final int interactionId;
+        Integer interactionId = null;
         Interaction itemInteraction = null;
-        int x = -1;
         if (interactions != null) {
             for (Interaction interaction : interactions) {
                 if (interaction.getEntity().equals(item.getEntityId())
-                && interaction.getEntityType().equals(item.getEntity())
-                && !usedInteractions.contains(interaction)) {
-                    x = interaction.getId();
+                        && interaction.getEntityType().equals(item.getEntity())
+                        && !usedInteractions.contains(interaction)) {
+                    interactionId = interaction.getId();
                     itemInteraction = interaction;
                     subComments = interaction.getComments();
 
@@ -190,7 +217,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                 }
             }
         }
-        interactionId = x;
+
         holder.binding.recComments.setAdapter(new TimelineCommentAdapter(subComments, people,
                 viewModel, parent, item.isShowCommentInput()));
 
@@ -218,44 +245,30 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         holder.binding.lytCommentInput
                 .setVisibility(item.isShowCommentInput() ? View.VISIBLE : View.GONE);
 
-        if (itemInteraction == null) {
-            holder.binding.lytThumbsUp.setVisibility(View.GONE);
-            holder.binding.lytThumbsDown.setVisibility(View.GONE);
-        } else {
-            holder.binding.lytThumbsUp.setVisibility(View.VISIBLE);
-            holder.binding.lytThumbsDown.setVisibility(View.VISIBLE);
-
-            if (itemInteraction.getThumbsUp() != null) {
-                holder.binding.tvUpAmount.setText(context.getString(R.string.timeline_thumbs_value,
-                        itemInteraction.getThumbsUp()));
-            }
-            if (itemInteraction.getThumbsDown() != null) {
-                holder.binding.tvDownAmmount
-                        .setText(context.getString(R.string.timeline_thumbs_value,
-                                itemInteraction.getThumbsDown()));
-            }
-        }
+        int thumbsUp = itemInteraction != null && itemInteraction
+                .getThumbsUp() != null ? itemInteraction.getThumbsUp() : 0;
+        int thumbsDown = itemInteraction != null && itemInteraction
+                .getThumbsDown() != null ? itemInteraction.getThumbsDown() : 0;
+        holder.binding.tvUpAmount.setText(context.getString(
+                R.string.timeline_thumbs_value,
+                thumbsUp));
+        holder.binding.tvDownAmmount.setText(context.getString(
+                R.string.timeline_thumbs_value,
+                thumbsDown));
 
         User finalAuthor = author;
-        holder.binding.btnComment.setOnClickListener(view ->
-
-        {
+        Integer finalInteractionId = interactionId;
+        holder.binding.btnComment.setOnClickListener(view -> {
             String comment = holder.binding.etComment.getText().toString();
-            anInterface.addCommentClicked(comment, finalAuthor, item, interactionId);
+            anInterface.addCommentClicked(comment, finalAuthor, item, finalInteractionId);
             holder.binding.etComment.setText("");
         });
 
         holder.binding.lytThumbsUp.setOnClickListener(view ->
-
-        {
-            anInterface.likeClicked(finalAuthor, item, interactionId);
-        });
+                anInterface.likeClicked(finalAuthor, item, finalInteractionId));
 
         holder.binding.lytThumbsDown.setOnClickListener(view ->
-
-        {
-            anInterface.dislikeClicked(finalAuthor, item, interactionId);
-        });
+                anInterface.dislikeClicked(finalAuthor, item, finalInteractionId));
 
         //hide the top line for the first item
         if (i == 0) {
@@ -265,9 +278,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         }
 
         //hide the bottom line for the last item
-        if (i ==
-
-                getItemCount() - 1) {
+        if (i == getItemCount() - 1) {
             holder.binding.bottomLine.setVisibility(View.INVISIBLE);
         } else {
             holder.binding.bottomLine.setVisibility(View.VISIBLE);

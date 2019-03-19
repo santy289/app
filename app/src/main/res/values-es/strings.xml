@@ -259,7 +259,7 @@
     <string name="workflow_detail_status_fragment_status_summary_tied_status">Empatado</string>
     <string name="workflow_detail_status_fragment_status_summary_tied_status_message">El estatus actual está empatado</string>
     <string name="workflow_detail_status_fragment_next_step">Elija el Siguiente Estatus</string>
-    <string name="workflow_detail_status_fragment_next_step_approvers">Aprobadores del siguiente estatus:</string>
+    <string name="workflow_detail_status_fragment_next_step_approvers">Aprobadores del estatus:</string>
     <string name="workflow_detail_status_fragment_next_step_mass_approval">Aprobación masiva</string>
     <string name="workflow_detail_status_fragment_approve">Aprobar</string>
     <string name="workflow_detail_status_fragment_reject">Rechazar</string>

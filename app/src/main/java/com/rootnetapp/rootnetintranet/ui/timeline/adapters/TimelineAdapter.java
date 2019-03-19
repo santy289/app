@@ -242,8 +242,8 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                         commentsAmount)
         );
 
-        holder.binding.lytCommentInput
-                .setVisibility(item.isShowCommentInput() ? View.VISIBLE : View.GONE);
+        holder.binding.lytCommentInput.setVisibility(item.isShowCommentInput() && commentsAmount < 10 ? View.VISIBLE : View.GONE);
+        holder.binding.recComments.setVisibility(commentsAmount < 10 ? View.VISIBLE : View.GONE);
 
         int thumbsUp = itemInteraction != null && itemInteraction
                 .getThumbsUp() != null ? itemInteraction.getThumbsUp() : 0;

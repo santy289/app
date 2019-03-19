@@ -398,7 +398,7 @@ public interface ApiInterface {
                                              @Query("entity[]") List<String> modules);
 
     @Headers({"Domain-Name: api"})
-    @GET("interaction?all=true&comment=20") //&thumb=100
+    @GET("interaction?all=true&comment=100&thumb=100")
     Observable<InteractionResponse> getTimelineInteractions(@Header("Authorization") String authorization,
                                                             @Query("entity_type[]") List<String> modules,
                                                             @Query("entity[]") List<Integer> entities);

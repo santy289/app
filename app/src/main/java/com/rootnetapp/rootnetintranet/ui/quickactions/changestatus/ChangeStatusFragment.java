@@ -6,8 +6,9 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.ValueCallback;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -15,62 +16,67 @@ import android.webkit.WebViewClient;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
-import com.rootnetapp.rootnetintranet.databinding.ActivityChangeStatusBinding;
+import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailDiagramBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 
 import javax.inject.Inject;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.UiThread;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
-public class ChangeStatusActivity extends AppCompatActivity {
+public class ChangeStatusFragment extends Fragment {
 
-    public static final String EXTRA_WORKFLOW_LIST_ITEM = "Extra.WorkflowListItem";
-    public static final String EXTRA_TITLE = "Extra.Title";
-    public static final String EXTRA_SUBTITLE = "Extra.Subtitle";
-
-    private static final String TAG = "ChangeStatusActivity";
+    private static final String TAG = "ChangeStatusFragment";
 
     @Inject
     ChangeStatusViewModelFactory changeStatusViewModelFactory;
     private ChangeStatusViewModel changeStatusViewModel;
-    private ActivityChangeStatusBinding mBinding;
+    private FragmentWorkflowDetailDiagramBinding mBinding;
+    private WorkflowListItem mWorkflowListItem;
     private int loadCounter, localStorageCount, localStorageCompleted;
 
+    public ChangeStatusFragment() {
+        // Required empty public constructor
+    }
+
+    public static ChangeStatusFragment newInstance(WorkflowListItem item) {
+        ChangeStatusFragment fragment = new ChangeStatusFragment();
+        fragment.mWorkflowListItem = item;
+        return fragment;
+    }
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_change_status);
-        ((RootnetApp) getApplication()).getAppComponent().inject(this);
+    }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        mBinding = DataBindingUtil.inflate(inflater,
+                R.layout.fragment_workflow_detail_diagram, container, false);
+        View view = mBinding.getRoot();
+        ((RootnetApp) getActivity().getApplication()).getAppComponent().inject(this);
         changeStatusViewModel = ViewModelProviders
                 .of(this, changeStatusViewModelFactory)
                 .get(ChangeStatusViewModel.class);
-        SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+
+        SharedPreferences prefs = getContext()
+                .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
-        WorkflowListItem item = getIntent().getParcelableExtra(EXTRA_WORKFLOW_LIST_ITEM);
 
-        setActionBar();
         subscribe();
+        changeStatusViewModel.init(prefs, token, mWorkflowListItem);
 
-        changeStatusViewModel.init(prefs, token, item);
+        return view;
     }
 
     private void subscribe() {
         changeStatusViewModel.getObservableWebViewData().observe(this, this::setupWebView);
-    }
-
-    private void setActionBar() {
-        setSupportActionBar(mBinding.toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        String title = getIntent().getStringExtra(EXTRA_TITLE);
-        if (title == null) title = (String) getTitle();
-        getSupportActionBar().setTitle(title);
-
-        String subtitle = getIntent().getStringExtra(EXTRA_SUBTITLE);
-        if (subtitle != null) getSupportActionBar().setSubtitle(subtitle);
     }
 
     /**
@@ -92,7 +98,8 @@ public class ChangeStatusActivity extends AppCompatActivity {
         Log.d(TAG, "Enabling HTML5-Features");
         ws.setDomStorageEnabled(true);
         ws.setDatabaseEnabled(true);
-        ws.setAppCachePath(getFilesDir().getPath() + getPackageName() + "/cache/");
+        ws.setAppCachePath(
+                getActivity().getFilesDir().getPath() + getActivity().getPackageName() + "/cache/");
         ws.setAppCacheEnabled(true);
         Log.d(TAG, "Enabled HTML5-Features");
 
@@ -154,15 +161,5 @@ public class ChangeStatusActivity extends AppCompatActivity {
     @UiThread
     private void showLoading(boolean show) {
         mBinding.progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }

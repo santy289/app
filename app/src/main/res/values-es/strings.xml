@@ -326,6 +326,7 @@
     <string name="quick_actions_activity_title">Acciones rápidas</string>
     <!--ChangeStatusActivity-->
     <string name="change_status_activity_title">Cambiar Estatus</string>
+    <string name="workflow_detail_diagram_fragment_title">Diagrama</string>
     <!--WorkflowSearchFragment-->
     <string name="workflow_search_fragment_search_hint">Buscar workflow…</string>
     <string name="workflow_search_fragment_search_no_results">Tu búsqueda no ha traído resultados</string>

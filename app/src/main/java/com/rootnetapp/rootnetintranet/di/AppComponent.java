@@ -21,6 +21,7 @@ import com.rootnetapp.rootnetintranet.ui.profile.ProfileModule;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsModule;
 import com.rootnetapp.rootnetintranet.ui.quickactions.changestatus.ChangeStatusActivity;
+import com.rootnetapp.rootnetintranet.ui.quickactions.changestatus.ChangeStatusFragment;
 import com.rootnetapp.rootnetintranet.ui.quickactions.changestatus.ChangeStatusModule;
 import com.rootnetapp.rootnetintranet.ui.quickactions.performaction.PerformActionFragment;
 import com.rootnetapp.rootnetintranet.ui.quickactions.performaction.PerformActionModule;
@@ -139,6 +140,8 @@ public interface AppComponent {
     void inject(PerformActionFragment performActionFragment);
 
     void inject(ChangeStatusActivity changeStatusActivity);
+
+    void inject(ChangeStatusFragment changeStatusFragment);
 
     void inject(PeopleInvolvedFragment peopleInvolvedFragment);
 

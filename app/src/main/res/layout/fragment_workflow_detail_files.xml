@@ -25,8 +25,10 @@
                 android:textColor="@color/workflow_details_section_title"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
 
             <View
                 android:id="@+id/view_title_files"
@@ -35,10 +37,12 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:background="@color/workflow_details_section_title_bar"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@id/tv_title_files"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/tv_title_files"
-                app:layout_constraintTop_toTopOf="@id/tv_title_files" />
+                app:layout_constraintTop_toTopOf="@id/tv_title_files"
+                tools:visibility="visible" />
 
             <androidx.constraintlayout.widget.Barrier
                 android:id="@+id/barrier_title"
@@ -93,8 +97,10 @@
                 android:backgroundTint="@color/colorAccent"
                 android:text="@string/attach"
                 android:textColor="@color/white"
+                android:visibility="invisible"
                 app:layout_constraintEnd_toStartOf="@+id/btn_upload"
-                app:layout_constraintTop_toTopOf="@+id/btn_upload" />
+                app:layout_constraintTop_toTopOf="@+id/btn_upload"
+                tools:visibility="visible" />
 
             <Button
                 android:id="@+id/btn_upload"
@@ -103,8 +109,10 @@
                 android:backgroundTint="@color/green"
                 android:text="@string/upload"
                 android:textColor="@color/white"
+                android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/rv_files" />
+                app:layout_constraintTop_toBottomOf="@id/rv_files"
+                tools:visibility="visible" />
 
             <TextView
                 android:id="@+id/tv_file_uploaded"

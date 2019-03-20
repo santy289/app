@@ -77,6 +77,7 @@ public class FilesViewModel extends ViewModel {
     private Preset mPresetToDownload;
     private boolean hasViewPermissions;
     private boolean hasViewFilesPermissions;
+    private boolean hasUploadFilesPermissions;
 
     protected FilesViewModel(FilesRepository filesRepository) {
         this.mRepository = filesRepository;
@@ -99,6 +100,8 @@ public class FilesViewModel extends ViewModel {
 
         if (hasViewPermissions) {
             getWorkflowType(mToken, mWorkflowListItem.getWorkflowTypeId());
+        } else {
+            showTemplateDocumentsUiPermissions.setValue(false);
         }
     }
 
@@ -119,12 +122,10 @@ public class FilesViewModel extends ViewModel {
 
         hasViewPermissions = permissionsUtils.hasPermission(TEMPLATE_VIEW);
         hasViewFilesPermissions = permissionsUtils.hasPermission(WORKFLOW_FILE_VIEW);
-        boolean hasUploadFilesPermissions = hasViewFilesPermissions && permissionsUtils.hasPermission(WORKFLOW_FILE_CREATE);
+        hasUploadFilesPermissions = hasViewFilesPermissions && permissionsUtils.hasPermission(WORKFLOW_FILE_CREATE);
 
-        showTemplateDocumentsUiPermissions.setValue(hasViewPermissions);
         showDownloadTemplateButton.setValue(hasViewPermissions);
         showDownloadFileButton.setValue(hasViewFilesPermissions);
-        showAttachUploadFileButton.setValue(hasUploadFilesPermissions);
     }
 
     protected boolean hasViewPermissions(){
@@ -142,6 +143,7 @@ public class FilesViewModel extends ViewModel {
     private void getTemplateBy(int templateId) {
         if (templateId < 1) {
             showTemplateDocumentsUiEmpty.setValue(false);
+            showAttachUploadFileButton.setValue(false);
             return;
         }
         getTemplate(mToken, templateId);
@@ -165,7 +167,9 @@ public class FilesViewModel extends ViewModel {
 
     private void onTemplateSuccess(TemplatesResponse templatesResponse) {
         Templates templates = templatesResponse.getTemplates();
-        if (templates == null) {
+        if (templates == null || mPresets.isEmpty()) {
+            showTemplateDocumentsUiEmpty.setValue(false);
+            showAttachUploadFileButton.setValue(false);
             return;
         }
 
@@ -175,9 +179,10 @@ public class FilesViewModel extends ViewModel {
 
     private void onFilesSuccess(FilesResponse filesResponse) {
         List<DocumentsFile> documents = filesResponse.getList();
-        if (documents == null) {
-            return;
-        }
+        if (documents == null) documents = new ArrayList<>();
+
+        showTemplateDocumentsUiEmpty.setValue(hasViewPermissions);
+        showAttachUploadFileButton.setValue(hasUploadFilesPermissions);
         setDocumentsView.setValue(documents);
         setFilesTabCounter(documents.size());
     }

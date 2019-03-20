@@ -5,7 +5,7 @@ import android.content.Context;
 import com.google.android.material.tabs.TabLayout;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
-import com.rootnetapp.rootnetintranet.ui.quickactions.changestatus.ChangeStatusFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.flowchart.FlowchartFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragment;
@@ -51,7 +51,7 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
             case 0:
                 return StatusFragment.newInstance(mWorkflowItem);
             case 1:
-                return ChangeStatusFragment.newInstance(mWorkflowItem);
+                return FlowchartFragment.newInstance(mWorkflowItem);
             case 2:
                 return BaseInformationFragment.newInstance(mWorkflowItem);
             case 3:

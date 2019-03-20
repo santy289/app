@@ -1,14 +1,12 @@
 package com.rootnetapp.rootnetintranet.ui.quickactions.changestatus;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.ActivityChangeStatusBinding;
-import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.flowchart.FlowchartFragment;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
@@ -28,15 +26,11 @@ public class ChangeStatusActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_change_status);
 
-        ((RootnetApp) getApplication()).getAppComponent().inject(this);
-
-        SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String token = "Bearer " + prefs.getString("token", "");
         WorkflowListItem item = getIntent().getParcelableExtra(EXTRA_WORKFLOW_LIST_ITEM);
 
         setActionBar();
 
-        showFragment(ChangeStatusFragment.newInstance(item));
+        showFragment(FlowchartFragment.newInstance(item));
     }
 
     private void setActionBar() {
@@ -52,12 +46,10 @@ public class ChangeStatusActivity extends AppCompatActivity {
     }
 
     private void showFragment(Fragment fragment) {
-        String tag = fragment.getClass().getSimpleName();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out,
                 android.R.anim.fade_in, android.R.anim.fade_out);
         transaction.replace(R.id.container, fragment);
-        transaction.addToBackStack(tag);
         transaction.commit();
     }
 

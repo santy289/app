@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.ui.quickactions.changestatus;
+package com.rootnetapp.rootnetintranet.ui.workflowdetail.flowchart;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -27,23 +27,23 @@ import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
-public class ChangeStatusFragment extends Fragment {
+public class FlowchartFragment extends Fragment {
 
-    private static final String TAG = "ChangeStatusFragment";
+    private static final String TAG = "FlowchartFragment";
 
     @Inject
-    ChangeStatusViewModelFactory changeStatusViewModelFactory;
-    private ChangeStatusViewModel changeStatusViewModel;
+    FlowchartViewModelFactory flowchartViewModelFactory;
+    private FlowchartViewModel flowchartViewModel;
     private FragmentWorkflowDetailDiagramBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
     private int loadCounter, localStorageCount, localStorageCompleted;
 
-    public ChangeStatusFragment() {
+    public FlowchartFragment() {
         // Required empty public constructor
     }
 
-    public static ChangeStatusFragment newInstance(WorkflowListItem item) {
-        ChangeStatusFragment fragment = new ChangeStatusFragment();
+    public static FlowchartFragment newInstance(WorkflowListItem item) {
+        FlowchartFragment fragment = new FlowchartFragment();
         fragment.mWorkflowListItem = item;
         return fragment;
     }
@@ -61,22 +61,22 @@ public class ChangeStatusFragment extends Fragment {
                 R.layout.fragment_workflow_detail_diagram, container, false);
         View view = mBinding.getRoot();
         ((RootnetApp) getActivity().getApplication()).getAppComponent().inject(this);
-        changeStatusViewModel = ViewModelProviders
-                .of(this, changeStatusViewModelFactory)
-                .get(ChangeStatusViewModel.class);
+        flowchartViewModel = ViewModelProviders
+                .of(this, flowchartViewModelFactory)
+                .get(FlowchartViewModel.class);
 
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
 
         subscribe();
-        changeStatusViewModel.init(prefs, token, mWorkflowListItem);
+        flowchartViewModel.init(prefs, token, mWorkflowListItem);
 
         return view;
     }
 
     private void subscribe() {
-        changeStatusViewModel.getObservableWebViewData().observe(this, this::setupWebView);
+        flowchartViewModel.getObservableWebViewData().observe(this, this::setupWebView);
     }
 
     /**
@@ -122,12 +122,12 @@ public class ChangeStatusFragment extends Fragment {
                     loadCounter++;
 
                     //check for the jwt token in the localStorage
-                    String scriptGetJwt = changeStatusViewModel.getScriptGetLocalStorageItem("jwt");
+                    String scriptGetJwt = flowchartViewModel.getScriptGetLocalStorageItem("jwt");
                     webView.evaluateJavascript(scriptGetJwt, token -> {
                         Log.d("", "");
 
                         //check if the Android WebView needs a new jwt token
-                        if (changeStatusViewModel.isTokenInvalid(token)) {
+                        if (flowchartViewModel.isTokenInvalid(token)) {
 
                             ValueCallback<String> callback = value -> {
                                 localStorageCompleted++;

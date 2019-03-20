@@ -20,9 +20,6 @@ import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileModule;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsModule;
-import com.rootnetapp.rootnetintranet.ui.quickactions.changestatus.ChangeStatusActivity;
-import com.rootnetapp.rootnetintranet.ui.quickactions.changestatus.ChangeStatusFragment;
-import com.rootnetapp.rootnetintranet.ui.quickactions.changestatus.ChangeStatusModule;
 import com.rootnetapp.rootnetintranet.ui.quickactions.performaction.PerformActionFragment;
 import com.rootnetapp.rootnetintranet.ui.quickactions.performaction.PerformActionModule;
 import com.rootnetapp.rootnetintranet.ui.quickactions.workflowsearch.WorkflowSearchFragment;
@@ -44,6 +41,8 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragmen
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesModule;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.flowchart.FlowchartFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.flowchart.FlowchartModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved.PeopleInvolvedFragment;
@@ -86,7 +85,7 @@ import dagger.Component;
                 QuickActionsModule.class,
                 WorkflowSearchModule.class,
                 PerformActionModule.class,
-                ChangeStatusModule.class,
+                FlowchartModule.class,
                 GeolocationModule.class
         }
 )
@@ -139,9 +138,7 @@ public interface AppComponent {
 
     void inject(PerformActionFragment performActionFragment);
 
-    void inject(ChangeStatusActivity changeStatusActivity);
-
-    void inject(ChangeStatusFragment changeStatusFragment);
+    void inject(FlowchartFragment flowchartFragment);
 
     void inject(PeopleInvolvedFragment peopleInvolvedFragment);
 

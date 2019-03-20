@@ -8,7 +8,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/white"
-        android:padding="10dp">
+        android:padding="16dp">
+
+        <View
+            android:id="@+id/view_information"
+            android:layout_width="0dp"
+            android:layout_height="2dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@color/workflow_details_section_title_bar"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_edit"
+            app:layout_constraintEnd_toStartOf="@+id/btn_edit"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/btn_edit" />
 
         <Button
             android:id="@+id/btn_edit"
@@ -22,21 +34,10 @@
             app:iconPadding="0dp"
             app:iconSize="24dp"
             app:iconTint="@color/colorAccent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/view_information"
             app:layout_constraintTop_toTopOf="parent"
             app:rippleColor="@color/dark_gray" />
-
-        <View
-            android:id="@+id/view_information"
-            android:layout_width="0dp"
-            android:layout_height="2dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:background="@color/workflow_details_section_title_bar"
-            app:layout_constraintBottom_toBottomOf="@id/btn_edit"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/btn_edit"
-            app:layout_constraintTop_toTopOf="@id/btn_edit" />
 
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/barrier_edit"

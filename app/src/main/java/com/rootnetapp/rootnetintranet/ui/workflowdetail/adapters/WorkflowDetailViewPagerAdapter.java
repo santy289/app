@@ -94,7 +94,7 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
             case 0:
                 return mContext.getString(R.string.workflow_detail_status_fragment_title);
             case 1:
-                return mContext.getString(R.string.workflow_detail_diagram_fragment_title);
+                return mContext.getString(R.string.workflow_detail_flowchart_fragment_title);
             case 2:
                 return mContext.getString(R.string.workflow_detail_information_fragment_title);
             case 3:

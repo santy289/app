@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -14,6 +17,7 @@ import com.rootnetapp.rootnetintranet.databinding.FragmentProfileBinding;
 import com.rootnetapp.rootnetintranet.models.responses.user.Department;
 import com.rootnetapp.rootnetintranet.models.responses.user.LoggedUser;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.editprofile.EditProfileActivity;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.squareup.picasso.Picasso;
 
@@ -62,6 +66,8 @@ public class ProfileFragment extends Fragment {
         profileViewModel = ViewModelProviders
                 .of(this, profileViewModelFactory)
                 .get(ProfileViewModel.class);
+        setHasOptionsMenu(true);
+
         //TODO preferences inyectadas con Dagger
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
@@ -121,5 +127,22 @@ public class ProfileFragment extends Fragment {
         } else {
             Utils.hideLoading();
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.profile_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_edit_profile: {
+                mainActivityInterface.showActivity(EditProfileActivity.class);
+                return true;
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

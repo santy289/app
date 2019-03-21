@@ -292,6 +292,7 @@ class CreateWorkflowViewModel extends ViewModel {
         Map<String, Object> roleApprovers = new HashMap<>();
         for (BaseFormItem formItem : formSettings.getRoleApproversFormItems()) {
             Option roleApprover = ((SingleChoiceFormItem) formItem).getValue();
+            if (roleApprover == null) continue; //not selected
             roleApprovers.put(String.valueOf(formItem.getTag()), roleApprover.getId());
         }
 

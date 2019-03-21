@@ -29,6 +29,7 @@ import com.rootnetapp.rootnetintranet.databinding.FormItemPhoneBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemSingleChoiceBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemTextInputBinding;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseOption;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
@@ -721,6 +722,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 new LinearLayoutManager(mContext, RecyclerView.HORIZONTAL, false));
         holder.getBinding().rvSelectedItems.setAdapter(selectionsAdapter);
 
+        //generates the options for the form item
         List<Option> options = new ArrayList<>(item.getOptions());
 
         //adds a hint to the spinner
@@ -731,10 +733,16 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             options.add(0, new Option(0, hint));
         }
 
+        //remove the options that are already added from the spinner
+        for (BaseOption selectedOption : item.getValues()) {
+            options.remove(selectedOption); //selectedOption is always of type Option
+        }
+
         //creates the options adapter
-        holder.getBinding().spInput.setAdapter(
-                new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
-                        options));
+        ArrayAdapter<Option> spinnerAdapter = new ArrayAdapter<>(mContext,
+                android.R.layout.simple_spinner_dropdown_item,
+                options);
+        holder.getBinding().spInput.setAdapter(spinnerAdapter);
 
         //only creates the listener once.
         if (holder.getBinding().spInput.getOnItemSelectedListener() == null) {
@@ -751,10 +759,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                             }
 
                             // the user has selected a valid option
-                            int index = position - 1; // because of the hint option
-                            selectionsAdapter.addItem(item.getOptions().get(index));
-                            holder.getBinding().spInput
-                                    .setSelection(0, false); //clear spinner selection
+                            Option selectedOption = spinnerAdapter.getItem(position);
+                            selectionsAdapter.addItem(selectedOption);
+                            //clear spinner selection
+                            holder.getBinding().spInput.setSelection(0, false);
                         }
 
                         @Override
@@ -767,6 +775,14 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.getBinding().spInput
                     .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
         }
+
+        //creates the OnItemRemovedListener for the selectionsAdapter
+        selectionsAdapter.setOnItemRemovedListener(
+                option -> spinnerAdapter.add((Option) option));
+
+        //creates the OnItemAddedListener for the selectionsAdapter
+        selectionsAdapter.setOnItemAddedListener(
+                option -> spinnerAdapter.remove((Option) option));
 
         // verify required indicator
         holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);

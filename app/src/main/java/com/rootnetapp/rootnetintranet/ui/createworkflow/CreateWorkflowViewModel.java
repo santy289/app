@@ -2012,16 +2012,18 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     //region Approvers by Role
                     List<Approver> approvers = workflowTypeDb.getDistinctApprovers();
-                    for (int i = 0; i < approvers.size(); i++) {
-                        Approver approver = approvers.get(i);
+                    boolean isFirst = true;
+                    for (Approver approver : approvers) {
                         //only add editable items for roles
                         if (!approver.entityType.equalsIgnoreCase(ENTITY_ROLE)) {
                             DisplayFormItem displayFormItem = new DisplayFormItem.Builder()
-                                    .setTitleRes(i == 0 ? R.string.approvers_involved : 0)
+                                    .setTitleRes(isFirst ? R.string.approvers_involved : 0)
                                     .setTag(approver.entityId)
                                     .setValue(approver.entityName)
                                     .setImage(approver.entityAvatar)
                                     .build();
+
+                            isFirst = false;
 
                             mAddPeopleInvolvedFormItemLiveData.setValue(displayFormItem);
                             continue;
@@ -2100,6 +2102,8 @@ class CreateWorkflowViewModel extends ViewModel {
                         formSettings.getRoleApproversFormItems().add(singleChoiceFormItem);
 
                         mAddPeopleInvolvedFormItemLiveData.setValue(singleChoiceFormItem);
+
+                        isFirst = false;
                     }
                     //endregion
                 }, throwable -> Log

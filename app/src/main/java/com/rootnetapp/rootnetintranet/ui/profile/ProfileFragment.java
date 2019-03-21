@@ -84,7 +84,7 @@ public class ProfileFragment extends Fragment {
         if (user == null) return;
 
         String path = Utils.imgDomain + user.getPicture().trim();
-        Picasso.get().load(path).into(mBinding.imgUser);
+        Picasso.get().load(path).into(mBinding.ivUser);
 
         mBinding.tvName.setText(user.getFullName());
 
@@ -99,7 +99,7 @@ public class ProfileFragment extends Fragment {
             }
         }
 
-        mBinding.tvDepartment.setText(departmentStringBuilder.toString());
+        mBinding.tvDepartments.setText(departmentStringBuilder.toString());
         mBinding.tvPhone.setText(user.getPhoneNumber());
         mBinding.tvEmail.setText(user.getEmail());
         mBinding.layoutProfile.setVisibility(View.VISIBLE);

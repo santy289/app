@@ -37,6 +37,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseOption;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.DisplayFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DoubleMultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DoubleOption;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
@@ -2010,9 +2011,21 @@ class CreateWorkflowViewModel extends ViewModel {
                     //endregion
 
                     //region Approvers by Role
-                    for (Approver approver : workflowTypeDb.getDistinctApprovers()) {
-                        //only add items for roles
-                        if (!approver.entityType.equalsIgnoreCase(ENTITY_ROLE)) continue;
+                    List<Approver> approvers = workflowTypeDb.getDistinctApprovers();
+                    for (int i = 0; i < approvers.size(); i++) {
+                        Approver approver = approvers.get(i);
+                        //only add editable items for roles
+                        if (!approver.entityType.equalsIgnoreCase(ENTITY_ROLE)) {
+                            DisplayFormItem displayFormItem = new DisplayFormItem.Builder()
+                                    .setTitleRes(i == 0 ? R.string.approvers_involved : 0)
+                                    .setTag(approver.entityId)
+                                    .setValue(approver.entityName)
+                                    .setImage(approver.entityAvatar)
+                                    .build();
+
+                            mAddPeopleInvolvedFormItemLiveData.setValue(displayFormItem);
+                            continue;
+                        }
 
                         List<Integer> profileIds = workflowTypeDb
                                 .getRoleApproverProfileIds(approver.entityId);
@@ -2051,8 +2064,8 @@ class CreateWorkflowViewModel extends ViewModel {
 
                         //get options for each role
                         List<Option> approverOptions = new ArrayList<>();
-                        for (int i = 0; i < profileIds.size(); i++) {
-                            int profileId = profileIds.get(i);
+                        for (int j = 0; j < profileIds.size(); j++) {
+                            int profileId = profileIds.get(j);
                             Profile profile = Profile.getProfileByIdFromList(profiles, profileId);
 
                             if (profile == null) continue;

@@ -105,7 +105,6 @@
                     android:layout_marginTop="@dimen/marginVertical_domain"
                     android:layout_marginEnd="@dimen/marginHorizontal_domain"
                     android:layout_marginBottom="@dimen/marginVertical_domain"
-                    android:backgroundTint="@color/colorAccent"
                     android:onClick="onClick"
                     android:text="@string/login"
                     android:textColor="@color/white" />
@@ -118,7 +117,6 @@
                     android:layout_marginTop="@dimen/marginVertical_domain"
                     android:layout_marginEnd="@dimen/marginHorizontal_domain"
                     android:layout_marginBottom="@dimen/marginVertical_domain"
-                    android:backgroundTint="@color/colorAccent"
                     android:onClick="onClick"
                     android:text="@string/change_domain"
                     android:textColor="@color/white" />

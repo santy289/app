@@ -37,7 +37,6 @@
                     android:layout_gravity="end"
                     android:layout_marginEnd="10dp"
                     android:layout_marginBottom="16dp"
-                    android:backgroundTint="@color/green"
                     android:padding="10dp"
                     android:text="@string/create_workflow"
                     android:textColor="@color/white"

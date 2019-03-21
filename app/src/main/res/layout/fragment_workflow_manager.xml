@@ -974,7 +974,6 @@
                 android:layout_height="40dp"
                 android:layout_gravity="end"
                 android:layout_margin="15dp"
-                android:backgroundTint="@color/colorAccent"
                 android:text="@string/show_more"
                 android:textColor="@color/white" />
 

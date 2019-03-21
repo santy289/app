@@ -63,6 +63,7 @@
                     android:padding="10dp"
                     android:text="@string/create_workflow"
                     android:textColor="@color/white"
+                    app:backgroundTint="@drawable/selector_green_button"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/barrier_fields" />

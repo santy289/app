@@ -1559,7 +1559,12 @@ class CreateWorkflowViewModel extends ViewModel {
         JsonAdapter<GeolocationMetaData> jsonAdapter = moshi.adapter(GeolocationMetaData.class);
         GeolocationMetaData geolocationMetaData = jsonAdapter.fromJson(meta.getValue());
 
-        if (geolocationMetaData == null || geolocationMetaData.getValue() == null) return;
+        if (geolocationMetaData == null
+                || geolocationMetaData.getValue() == null
+                || geolocationMetaData.getValue().getLatLng() == null
+                || geolocationMetaData.getValue().getLatLng().size() < 2) {
+            return;
+        }
 
         GeolocationFormItem geolocationFormItem = (GeolocationFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());

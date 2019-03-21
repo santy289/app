@@ -389,6 +389,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initActionListeners() {
+        mainBinding.leftDrawer.navWorkflows.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navProfile.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navExit.setOnClickListener(this::drawerClicks);
         mainBinding.rightDrawer.drawerBackButton.setOnClickListener(view -> {
@@ -575,6 +576,12 @@ public class MainActivity extends AppCompatActivity
     private void drawerClicks(View view) {
         int id = view.getId();
         switch (id) {
+            case R.id.nav_workflows: {
+                mainBinding.bottomNavigation.setSelectedItemId(R.id.menu_workflow_list);
+                showFragment(WorkflowFragment.newInstance(this), false);
+                mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
+                break;
+            }
             case R.id.nav_profile: {
                 showFragment(ProfileFragment.newInstance(this), false);
                 mainBinding.drawerLayout.closeDrawer(GravityCompat.START);

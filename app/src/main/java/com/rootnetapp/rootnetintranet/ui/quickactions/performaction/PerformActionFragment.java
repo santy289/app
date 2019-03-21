@@ -77,7 +77,7 @@ public class PerformActionFragment extends Fragment {
                 showFragment(StatusFragment.newInstance(mWorkflowListItem), true);
                 break;
             case QuickAction.CHANGE_STATUS:
-                //todo add fragment
+                //this action is invoked directly by WorflowSearchFragment
                 break;
             case QuickAction.COMMENT:
                 showFragment(CommentsFragment.newInstance(mWorkflowListItem, false), true);

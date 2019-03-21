@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.ui.quickactions.changestatus;
+package com.rootnetapp.rootnetintranet.ui.workflowdetail.flowchart;
 
 import android.content.SharedPreferences;
 import android.util.Log;
@@ -18,18 +18,18 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import io.reactivex.disposables.CompositeDisposable;
 
-public class ChangeStatusViewModel extends ViewModel {
+public class FlowchartViewModel extends ViewModel {
 
-    private static final String TAG = "ChangeStatusViewModel";
+    private static final String TAG = "FlowchartViewModel";
 
-    private ChangeStatusRepository repository;
+    private FlowchartRepository repository;
     private MutableLiveData<WebViewData> mWebViewDataLiveData;
 
     private String mToken;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
-    public ChangeStatusViewModel(ChangeStatusRepository repository) {
+    public FlowchartViewModel(FlowchartRepository repository) {
         this.repository = repository;
     }
 

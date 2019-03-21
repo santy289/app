@@ -228,7 +228,8 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     }
 
     @UiThread
-    private void showToastMessage(@StringRes int messageRes) {
+    @Override
+    public void showToastMessage(@StringRes int messageRes) {
         Toast.makeText(
                 getContext(),
                 getString(messageRes),

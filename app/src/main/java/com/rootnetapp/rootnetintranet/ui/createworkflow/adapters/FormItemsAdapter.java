@@ -1094,13 +1094,23 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         //set button click listener
         holder.getBinding().btnAdd.setOnClickListener(v -> {
             int firstSelectionPosition = holder.getBinding().spFirstInput.getSelectedItemPosition();
-            if (firstSelectionPosition == 0) return; //no selection
+            if (firstSelectionPosition == 0) {
+                //no selection
+                mFragmentInterface
+                        .showToastMessage(R.string.double_multiple_choice_form_item_select_both);
+                return;
+            }
             int firstIndex = firstSelectionPosition - 1; // because of the hint option
             Option firstOption = item.getFirstOptions().get(firstIndex);
 
             int secondSelectionPosition = holder.getBinding().spSecondInput
                     .getSelectedItemPosition();
-            if (secondSelectionPosition == 0) return; //no selection
+            if (secondSelectionPosition == 0) {
+                //no selection
+                mFragmentInterface
+                        .showToastMessage(R.string.double_multiple_choice_form_item_select_both);
+                return;
+            }
             int secondIndex = secondSelectionPosition - 1; // because of the hint option
             Option secondOption = item.getSecondOptions().get(secondIndex);
 

@@ -147,6 +147,9 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         viewModel.getObservableUpdateFormItem().observe(getViewLifecycleOwner(), this::updateFormItemUi);
         viewModel.getObservableDownloadedFileUiData().observe(getViewLifecycleOwner(), this::openDownloadedFile);
         viewModel.getObservableEnableSubmitButton().observe(getViewLifecycleOwner(), this::enableSubmitButton);
+        viewModel.getObservableShowSubmitButton().observe(getViewLifecycleOwner(), this::showSubmitButton);
+        viewModel.getObservableShowNoPermissionsView().observe(getViewLifecycleOwner(), this::showNoPermissionsView);
+        viewModel.getObservableShowFieldsRecycler().observe(getViewLifecycleOwner(), this::showFieldsRecycler);
     }
 
     private void setupSubmitButton() {
@@ -552,6 +555,21 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     @UiThread
     private void enableSubmitButton(boolean enabled) {
         mBinding.btnCreate.setEnabled(enabled);
+    }
+
+    @UiThread
+    private void showSubmitButton(boolean show) {
+        mBinding.btnCreate.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    @UiThread
+    private void showNoPermissionsView(boolean show){
+        mBinding.tvNoPermissions.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    @UiThread
+    private void showFieldsRecycler(boolean show){
+        mBinding.rvFields.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     private void hideSoftInputKeyboard() {

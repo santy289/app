@@ -91,6 +91,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import retrofit2.HttpException;
 
 import static android.app.Activity.RESULT_OK;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_DEFINE_SPECIFIC;
@@ -133,6 +134,9 @@ class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<BaseFormItem> mUpdateFormItemLiveData;
     private MutableLiveData<DownloadedFileUiData> mOpenDownloadedFileLiveData;
     private MutableLiveData<Boolean> mEnableSubmitButtonLiveData;
+    private MutableLiveData<Boolean> mShowNoPermissionsViewLiveData;
+    private MutableLiveData<Boolean> mShowFieldsRecyclerLiveData;
+    private MutableLiveData<Boolean> mShowSubmitButtonLiveData;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
@@ -607,7 +611,7 @@ class CreateWorkflowViewModel extends ViewModel {
         showLoading.setValue(true);
         Disposable disposable = mRepository
                 .getAllowedWorkflowTypes(mToken)
-                .subscribe(this::onWorkflowTypesSuccess, this::onFailure);
+                .subscribe(this::onWorkflowTypesSuccess, this::onWorkflowTypesFailure);
 
         mDisposables.add(disposable);
     }
@@ -655,6 +659,25 @@ class CreateWorkflowViewModel extends ViewModel {
 
         showLoading.setValue(false);
         mAddWorkflowTypeItemLiveData.setValue(singleChoiceFormItem);
+    }
+
+    private void onWorkflowTypesFailure(Throwable throwable) {
+        Log.d(TAG, "onWorkflowTypesFailure: " + throwable.getMessage());
+        showLoading.setValue(false);
+        mShowFieldsRecyclerLiveData.setValue(false);
+
+        //check if the error was due to lack of permissions
+        if (throwable instanceof HttpException) {
+            int httpCode = ((HttpException) throwable).code();
+            if (httpCode == 403) {
+                mShowNoPermissionsViewLiveData.setValue(true);
+                mShowSubmitButtonLiveData.setValue(false);
+                return;
+            }
+        }
+
+        //show general error message if the error is not due to lack of permissions
+        onFailure(throwable);
     }
 
     /**
@@ -2356,6 +2379,27 @@ class CreateWorkflowViewModel extends ViewModel {
             mEnableSubmitButtonLiveData = new MutableLiveData<>();
         }
         return mEnableSubmitButtonLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowNoPermissionsView() {
+        if (mShowNoPermissionsViewLiveData == null) {
+            mShowNoPermissionsViewLiveData = new MutableLiveData<>();
+        }
+        return mShowNoPermissionsViewLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowFieldsRecycler() {
+        if (mShowFieldsRecyclerLiveData == null) {
+            mShowFieldsRecyclerLiveData = new MutableLiveData<>();
+        }
+        return mShowFieldsRecyclerLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowSubmitButton() {
+        if (mShowSubmitButtonLiveData == null) {
+            mShowSubmitButtonLiveData = new MutableLiveData<>();
+        }
+        return mShowSubmitButtonLiveData;
     }
 
     protected LiveData<DownloadedFileUiData> getObservableDownloadedFileUiData() {

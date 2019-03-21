@@ -18,8 +18,7 @@
                 android:id="@+id/img_user"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:layout_margin="10dp"
-                android:src="@drawable/ic_perm_identity_black_24dp"/>
+                android:layout_margin="10dp"/>
 
             <TextView
                 android:id="@+id/tv_name"
@@ -28,7 +27,7 @@
                 android:layout_gravity="center"
                 android:textSize="20sp"
                 android:textColor="@color/white"
-                android:text="John Doe"/>
+                tools:text="John Doe"/>
 
         </LinearLayout>
 
@@ -49,7 +48,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="John Doe"/>
+                tools:text="546545615648"/>
 
         </LinearLayout>
         <LinearLayout
@@ -69,7 +68,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="asdfg@asdf.com"/>
+                tools:text="asdfg@asdf.com"/>
 
         </LinearLayout>
         <LinearLayout
@@ -89,7 +88,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="Managment"/>
+                tools:text="Managment"/>
 
         </LinearLayout>
 

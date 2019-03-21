@@ -1,11 +1,14 @@
 package com.rootnetapp.rootnetintranet.ui.profile;
 
+import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.models.responses.user.LoggedProfileResponse;
+import com.rootnetapp.rootnetintranet.models.responses.user.LoggedUser;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-
-import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.data.local.db.user.User;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Created by Propietario on 15/03/2018.
@@ -13,37 +16,67 @@ import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 
 public class ProfileViewModel extends ViewModel {
 
-    private MutableLiveData<User> mUserLiveData;
+    private MutableLiveData<LoggedUser> mUserLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
-    private ProfileRepository profileRepository;
+    private MutableLiveData<Boolean> mShowLoadingLiveData;
+    private ProfileRepository mRepository;
+    private CompositeDisposable mDisposables;
+    private String mToken;
 
-    public ProfileViewModel(ProfileRepository profileRepository) {
-        this.profileRepository = profileRepository;
+    public ProfileViewModel(ProfileRepository mRepository) {
+        this.mRepository = mRepository;
+        mDisposables = new CompositeDisposable();
     }
 
-    public void getUser(int id) {
-        profileRepository.getUser(id).subscribe(this::onUserSuccess, this::onUserFailure);
+    protected void init(String token) {
+        mToken = token;
+
+        getUser();
     }
 
-    private void onUserSuccess(User user) {
-        mUserLiveData.setValue(user);
+    private void getUser() {
+        mShowLoadingLiveData.setValue(true);
+
+        Disposable disposable = mRepository
+                .getLoggedProfile(mToken)
+                .subscribe(this::onUserSuccess, this::onUserFailure);
+
+        mDisposables.add(disposable);
+    }
+
+    private void onUserSuccess(LoggedProfileResponse loggedProfileResponse) {
+        mShowLoadingLiveData.setValue(false);
+        mUserLiveData.setValue(loggedProfileResponse.getLoggedUser());
     }
 
     private void onUserFailure(Throwable throwable) {
-        mErrorLiveData.setValue(R.string.failure_connect);
+        mShowLoadingLiveData.setValue(false);
+        mErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
     }
 
-    public LiveData<User> getObservableUser() {
+    @Override
+    protected void onCleared() {
+        mDisposables.clear();
+    }
+
+    protected LiveData<LoggedUser> getObservableUser() {
         if (mUserLiveData == null) {
             mUserLiveData = new MutableLiveData<>();
         }
         return mUserLiveData;
     }
 
-    public LiveData<Integer> getObservableError() {
+    protected LiveData<Integer> getObservableError() {
         if (mErrorLiveData == null) {
             mErrorLiveData = new MutableLiveData<>();
         }
         return mErrorLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowLoading() {
+        if (mShowLoadingLiveData == null) {
+            mShowLoadingLiveData = new MutableLiveData<>();
+        }
+        return mShowLoadingLiveData;
     }
 }

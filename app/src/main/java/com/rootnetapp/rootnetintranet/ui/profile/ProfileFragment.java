@@ -1,41 +1,40 @@
 package com.rootnetapp.rootnetintranet.ui.profile;
 
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.SharedPreferences;
-import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.auth0.android.jwt.JWT;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.databinding.FragmentProfileBinding;
 import com.rootnetapp.rootnetintranet.models.responses.user.Department;
+import com.rootnetapp.rootnetintranet.models.responses.user.LoggedUser;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
-import com.rootnetapp.rootnetintranet.ui.editprofile.EditProfileActivity;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.squareup.picasso.Picasso;
 
+import java.util.List;
+
 import javax.inject.Inject;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
+import androidx.annotation.UiThread;
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
 
 public class ProfileFragment extends Fragment {
 
     @Inject
     ProfileViewModelFactory profileViewModelFactory;
-    ProfileViewModel profileViewModel;
-    private FragmentProfileBinding fragmentProfileBinding;
+    private ProfileViewModel profileViewModel;
+    private FragmentProfileBinding mBinding;
     private MainActivityInterface mainActivityInterface;
-    int id;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -53,77 +52,74 @@ public class ProfileFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        fragmentProfileBinding = DataBindingUtil.inflate(inflater,
+        mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_profile, container, false);
-        View view = fragmentProfileBinding.getRoot();
+        View view = mBinding.getRoot();
         ((RootnetApp) getActivity().getApplication()).getAppComponent().inject(this);
         profileViewModel = ViewModelProviders
                 .of(this, profileViewModelFactory)
                 .get(ProfileViewModel.class);
-        setHasOptionsMenu(true);
         //TODO preferences inyectadas con Dagger
-        SharedPreferences prefs = getContext().getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String token = prefs.getString("token", "");
-        JWT jwt = new JWT(token);
-        id = Integer.parseInt(jwt.getClaim("profile_id").asString());
+        SharedPreferences prefs = getContext()
+                .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        String token = "Bearer " + prefs.getString("token", "");
+
         subscribe();
-        Utils.showLoading(getContext());
-        profileViewModel.getUser(id);
+
+        profileViewModel.init(token);
         return view;
     }
 
-    @Override
-    public void onResume() {
-        profileViewModel.getUser(id);
-        super.onResume();
+    private void subscribe() {
+        profileViewModel.getObservableUser().observe(this, this::updateProfileUi);
+        profileViewModel.getObservableError().observe(this, this::showToastMessage);
+        profileViewModel.getObservableShowLoading().observe(this, this::showLoading);
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.profile_menu, menu);
-        super.onCreateOptionsMenu(menu, inflater);
-    }
+    @UiThread
+    private void updateProfileUi(LoggedUser user) {
+        if (user == null) return;
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_edit_profile: {
-                mainActivityInterface.showActivity(EditProfileActivity.class);
-                return true;
+        String path = Utils.imgDomain + user.getPicture().trim();
+        Picasso.get().load(path).into(mBinding.imgUser);
+
+        mBinding.tvName.setText(user.getFullName());
+
+        StringBuilder departmentStringBuilder = new StringBuilder();
+        List<Department> departments = user.getDepartment();
+        for (int i = 0; i < departments.size(); i++) {
+            Department department = departments.get(i);
+            departmentStringBuilder.append(department.getName());
+
+            if (i < departments.size() - 1) {
+                departmentStringBuilder.append(", "); //separator
             }
         }
-        return super.onOptionsItemSelected(item);
+
+        mBinding.tvDepartment.setText(departmentStringBuilder.toString());
+        mBinding.tvPhone.setText(user.getPhoneNumber());
+        mBinding.tvEmail.setText(user.getEmail());
+        mBinding.layoutProfile.setVisibility(View.VISIBLE);
     }
 
-    private void subscribe() {
-        final Observer<User> userObserver = ((User data) -> {
-            Utils.hideLoading();
-            if (null != data) {
-                String path = Utils.imgDomain + data.getPicture().trim();
-                Picasso.get().load(path).into(fragmentProfileBinding.imgUser);
-                fragmentProfileBinding.tvName.setText(data.getFullName());
-                String departments = "";
-                for (Department dpt : data.getDepartment()) {
-                    departments += dpt.getName() + " ";
-                }
-                fragmentProfileBinding.tvDepartment.setText(departments);
-                fragmentProfileBinding.tvPhone.setText(data.getPhoneNumber());
-                fragmentProfileBinding.tvEmail.setText(data.getEmail());
-                fragmentProfileBinding.layoutProfile.setVisibility(View.VISIBLE);
-            }
-        });
-        final Observer<Integer> errorObserver = ((Integer data) -> {
-            Utils.hideLoading();
-            if (null != data) {
-                //TODO mejorar toast
-                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
-            }
-        });
-        profileViewModel.getObservableUser().observe(this, userObserver);
-        profileViewModel.getObservableError().observe(this, errorObserver);
+    @UiThread
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                getContext(),
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
     }
 
+    @UiThread
+    private void showLoading(boolean show) {
+        if (show) {
+            Utils.showLoading(getContext());
+        } else {
+            Utils.hideLoading();
+        }
+    }
 }

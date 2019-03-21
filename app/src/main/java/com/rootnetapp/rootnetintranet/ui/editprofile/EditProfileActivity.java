@@ -1,42 +1,68 @@
 package com.rootnetapp.rootnetintranet.ui.editprofile;
 
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.SharedPreferences;
-import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.auth0.android.jwt.JWT;
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.databinding.ActivityEditProfileBinding;
+import com.rootnetapp.rootnetintranet.models.responses.user.LoggedUser;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 
 import javax.inject.Inject;
+
+import androidx.annotation.StringRes;
+import androidx.annotation.UiThread;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 
 public class EditProfileActivity extends AppCompatActivity {
 
     @Inject
     EditProfileViewModelFactory editProfileViewModelFactory;
-    EditProfileViewModel editProfileViewModel;
+    private EditProfileViewModel editProfileViewModel;
     private ActivityEditProfileBinding activityEditProfileBinding;
-    int id;
-    String token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ((RootnetApp) getApplication()).getAppComponent().inject(this);
-        activityEditProfileBinding = DataBindingUtil.setContentView(this, R.layout.activity_edit_profile);
+        activityEditProfileBinding = DataBindingUtil
+                .setContentView(this, R.layout.activity_edit_profile);
         editProfileViewModel = ViewModelProviders
                 .of(this, editProfileViewModelFactory)
                 .get(EditProfileViewModel.class);
+
+        //TODO preferences inyectadas con Dagger
+        SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
+
+        subscribe();
+        setActionBar();
+
+        editProfileViewModel.init(token);
+    }
+
+    private void subscribe() {
+        final Observer<Boolean> statusObserver = ((Boolean data) -> {
+            Utils.hideLoading();
+            if (data) {
+                finish();
+            }
+        });
+        editProfileViewModel.getObservableStatus().observe(this, statusObserver);
+        editProfileViewModel.getObservableUser().observe(this, this::updateUserUi);
+        editProfileViewModel.getObservableError().observe(this, this::showToastMessage);
+        editProfileViewModel.getObservableShowLoading().observe(this, this::showLoading);
+    }
+
+    private void setActionBar() {
         setSupportActionBar(activityEditProfileBinding.toolbar);
         activityEditProfileBinding.toolbar.setTitle(getString(R.string.edit_profile));
         // add back arrow to toolbar
@@ -44,64 +70,56 @@ public class EditProfileActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
-        Utils.showLoading(this);
-        subscribe();
-        //TODO preferences inyectadas con Dagger
-        SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        token = prefs.getString("token","");
-        JWT jwt = new JWT(token);
-        id = Integer.parseInt(jwt.getClaim("profile_id").asString());
-        editProfileViewModel.getUser(id);
-    }
-
-    private void subscribe() {
-        final Observer<User> userObserver = ((User data) -> {
-            if (data != null) {
-                activityEditProfileBinding.inputName.setText(data.getFullName());
-                activityEditProfileBinding.inputEmail.setText(data.getEmail());
-                activityEditProfileBinding.inputPhone.setText(data.getPhoneNumber());
-                activityEditProfileBinding.btnAccept.setOnClickListener(view -> editUser());
-            }
-            Utils.hideLoading();
-        });
-        final Observer<Boolean> statusObserver = ((Boolean data) -> {
-            Utils.hideLoading();
-            if (data) {
-                finish();
-            }
-        });
-        final Observer<Integer> errorObserver = ((Integer data) -> {
-            Utils.hideLoading();
-            if (null != data) {
-                //TODO mejorar toast
-                Toast.makeText(this, getString(data), Toast.LENGTH_LONG).show();
-            }
-        });
-        editProfileViewModel.getObservableUser().observe(this, userObserver);
-        editProfileViewModel.getObservableStatus().observe(this, statusObserver);
-        editProfileViewModel.getObservableError().observe(this, errorObserver);
     }
 
     private void editUser() {
 
-        activityEditProfileBinding.tilEmail.setError(null);
+        /*activityEditProfileBinding.tilEmail.setError(null);
         activityEditProfileBinding.tilName.setError(null);
         //activityEditProfileBinding.tilPhone.setError(null);
         boolean canUpdate = true;
-        if(TextUtils.isEmpty(activityEditProfileBinding.inputName.getText().toString())){
+        if (TextUtils.isEmpty(activityEditProfileBinding.inputName.getText().toString())) {
             canUpdate = false;
             activityEditProfileBinding.tilName.setError(getString(R.string.empty_name));
         }
-        if(TextUtils.isEmpty(activityEditProfileBinding.inputEmail.getText().toString())){
+        if (TextUtils.isEmpty(activityEditProfileBinding.inputEmail.getText().toString())) {
             canUpdate = false;
             activityEditProfileBinding.tilEmail.setError(getString(R.string.empty_email));
         }
-        if(canUpdate){
+        if (canUpdate) {
             Utils.showLoading(this);
-            editProfileViewModel.editUser("Bearer "+token, id,
+            editProfileViewModel.editUser("Bearer " + token, id,
                     activityEditProfileBinding.inputName.getText().toString(),
                     activityEditProfileBinding.inputEmail.getText().toString(),
                     activityEditProfileBinding.inputPhone.getText().toString());
+        }*/
+    }
+
+    @UiThread
+    private void updateUserUi(LoggedUser user) {
+        if (user == null) return;
+
+        activityEditProfileBinding.inputName.setText(user.getFullName());
+        activityEditProfileBinding.inputEmail.setText(user.getEmail());
+        activityEditProfileBinding.inputPhone.setText(user.getPhoneNumber());
+        activityEditProfileBinding.btnAccept.setOnClickListener(view -> editUser());
+    }
+
+    @UiThread
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                this,
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
+    }
+
+    @UiThread
+    private void showLoading(boolean show) {
+        if (show) {
+            Utils.showLoading(this);
+        } else {
+            Utils.hideLoading();
         }
     }
 
@@ -109,7 +127,7 @@ public class EditProfileActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // handle arrow click here
         if (item.getItemId() == android.R.id.home) {
-            finish(); // close this activity and return to preview activity (if there is any)
+            onBackPressed();
         }
         return super.onOptionsItemSelected(item);
     }

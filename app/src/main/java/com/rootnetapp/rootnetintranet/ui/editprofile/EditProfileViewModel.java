@@ -1,50 +1,83 @@
 package com.rootnetapp.rootnetintranet.ui.editprofile;
 
+import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse;
+import com.rootnetapp.rootnetintranet.models.responses.user.LoggedProfileResponse;
+import com.rootnetapp.rootnetintranet.models.responses.user.LoggedUser;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-
-import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.data.local.db.user.User;
-import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Created by Propietario on 15/03/2018.
  */
 
 public class EditProfileViewModel extends ViewModel {
-    private MutableLiveData<User> mUserLiveData;
+    private MutableLiveData<LoggedUser> mUserLiveData;
     private MutableLiveData<Boolean> mStatusLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
-    private EditProfileRepository editProfileRepository;
+    private MutableLiveData<Boolean> mShowLoadingLiveData;
+    private EditProfileRepository mRepository;
+    private String mToken;
+    private CompositeDisposable mDisposables;
 
-    public EditProfileViewModel(EditProfileRepository editProfileRepository) {
-        this.editProfileRepository = editProfileRepository;
+    public EditProfileViewModel(EditProfileRepository repository) {
+        mRepository = repository;
+        mDisposables = new CompositeDisposable();
     }
 
-    protected void getUser(int id) {
-        editProfileRepository.getUser(id).subscribe(this::onGetUserSuccess, this::onUserFailure);
+    protected void init(String token) {
+        mToken = token;
+
+        getUser();
     }
 
-    private void onGetUserSuccess(User user) {
-        mUserLiveData.setValue(user);
+    private void getUser() {
+        mShowLoadingLiveData.setValue(true);
+
+        Disposable disposable = mRepository
+                .getLoggedProfile(mToken)
+                .subscribe(this::onUserSuccess, this::onUserFailure);
+
+        mDisposables.add(disposable);
+    }
+
+    private void onUserSuccess(LoggedProfileResponse loggedProfileResponse) {
+        mShowLoadingLiveData.setValue(false);
+        mUserLiveData.setValue(loggedProfileResponse.getLoggedUser());
+    }
+
+    private void onUserFailure(Throwable throwable) {
+        mShowLoadingLiveData.setValue(false);
+        mErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
     }
 
     protected void editUser(String token, int id,
                             String fullName, String email, String phoneNumber) {
-        editProfileRepository.editUserService(token, id, fullName, email, phoneNumber).subscribe(this::onEditRemoteSuccess, this::onUserFailure);
+        mRepository.editUserService(token, id, fullName, email, phoneNumber).subscribe(this::onEditRemoteSuccess, this::onUserFailure);
     }
 
     private void onEditRemoteSuccess(EditUserResponse editUserResponse) {
-        editProfileRepository.editUserLocal(editUserResponse.getProfile()).subscribe(this::onEditLocalSuccess, this::onUserFailure);
+        mRepository.editUserLocal(editUserResponse.getProfile()).subscribe(this::onEditLocalSuccess, this::onUserFailure);
     }
 
     private void onEditLocalSuccess(Boolean aBoolean) {
         mStatusLiveData.setValue(true);
     }
 
-    private void onUserFailure(Throwable throwable) {
-        mErrorLiveData.setValue(R.string.failure_connect);
+    @Override
+    protected void onCleared() {
+        mDisposables.clear();
+    }
+
+    protected LiveData<Boolean> getObservableShowLoading() {
+        if (mShowLoadingLiveData == null) {
+            mShowLoadingLiveData = new MutableLiveData<>();
+        }
+        return mShowLoadingLiveData;
     }
 
     protected LiveData<Boolean> getObservableStatus() {
@@ -61,7 +94,7 @@ public class EditProfileViewModel extends ViewModel {
         return mErrorLiveData;
     }
 
-    public LiveData<User> getObservableUser() {
+    protected LiveData<LoggedUser> getObservableUser() {
         if (mUserLiveData == null) {
             mUserLiveData = new MutableLiveData<>();
         }

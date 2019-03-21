@@ -497,6 +497,7 @@ class CreateWorkflowViewModel extends ViewModel {
             buildField(field);
         }
 
+        mEnableSubmitButtonLiveData.setValue(true);
         showLoading.setValue(false); //the fields will be created on the background
     }
 
@@ -2226,8 +2227,6 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void onFailure(Throwable throwable) {
-        mEnableSubmitButtonLiveData.setValue(true);
-
         Log.d(TAG, "onFailure: " + throwable.getMessage());
         showLoading.setValue(false);
         mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));

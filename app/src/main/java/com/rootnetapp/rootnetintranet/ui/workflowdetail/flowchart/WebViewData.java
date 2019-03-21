@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.ui.quickactions.changestatus;
+package com.rootnetapp.rootnetintranet.ui.workflowdetail.flowchart;
 
 import java.util.List;
 import java.util.Locale;

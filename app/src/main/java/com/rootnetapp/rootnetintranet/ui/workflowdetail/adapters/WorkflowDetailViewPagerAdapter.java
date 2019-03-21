@@ -5,6 +5,7 @@ import android.content.Context;
 import com.google.android.material.tabs.TabLayout;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.flowchart.FlowchartFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.approvalhistory.ApprovalHistoryFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragment;
@@ -50,14 +51,16 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
             case 0:
                 return StatusFragment.newInstance(mWorkflowItem);
             case 1:
-                return BaseInformationFragment.newInstance(mWorkflowItem);
+                return FlowchartFragment.newInstance(mWorkflowItem);
             case 2:
-                return BasePeopleInvolvedFragment.newInstance(mWorkflowItem);
+                return BaseInformationFragment.newInstance(mWorkflowItem);
             case 3:
-                return ApprovalHistoryFragment.newInstance(mWorkflowItem);
+                return BasePeopleInvolvedFragment.newInstance(mWorkflowItem);
             case 4:
-                return CommentsFragment.newInstance(mWorkflowItem, true);
+                return ApprovalHistoryFragment.newInstance(mWorkflowItem);
             case 5:
+                return CommentsFragment.newInstance(mWorkflowItem, true);
+            case 6:
                 return FilesFragment.newInstance(mWorkflowItem);
             default:
                 return null;
@@ -71,7 +74,7 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
      */
     @Override
     public int getCount() {
-        return 6;
+        return 7;
     }
 
     /**
@@ -91,18 +94,20 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
             case 0:
                 return mContext.getString(R.string.workflow_detail_status_fragment_title);
             case 1:
-                return mContext.getString(R.string.workflow_detail_information_fragment_title);
+                return mContext.getString(R.string.workflow_detail_flowchart_fragment_title);
             case 2:
-                return mContext.getString(R.string.workflow_detail_people_involved_fragment_title);
+                return mContext.getString(R.string.workflow_detail_information_fragment_title);
             case 3:
-                return mContext.getString(R.string.workflow_detail_approval_history_fragment_title);
+                return mContext.getString(R.string.workflow_detail_people_involved_fragment_title);
             case 4:
+                return mContext.getString(R.string.workflow_detail_approval_history_fragment_title);
+            case 5:
                 title = mContext.getString(R.string.workflow_detail_comments_fragment_title);
                 if (getCommentsCounter() > 0) {
                     title += " (" + getCommentsCounter() + ")";
                 }
                 return title;
-            case 5:
+            case 6:
                 title = mContext.getString(R.string.workflow_detail_files_fragment_title);
                 if (getFilesCounter() > 0) {
                     title += " (" + getFilesCounter() + ")";

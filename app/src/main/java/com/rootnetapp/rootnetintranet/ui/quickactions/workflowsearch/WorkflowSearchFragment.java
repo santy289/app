@@ -232,6 +232,8 @@ public class WorkflowSearchFragment extends Fragment implements WorkflowSearchFr
         if (mAction == QuickAction.CHANGE_STATUS) {
             Intent intent = new Intent(getActivity(), ChangeStatusActivity.class);
             intent.putExtra(ChangeStatusActivity.EXTRA_WORKFLOW_LIST_ITEM, item);
+            intent.putExtra(ChangeStatusActivity.EXTRA_TITLE, item.getTitle());
+            intent.putExtra(ChangeStatusActivity.EXTRA_SUBTITLE, item.getWorkflowTypeKey());
             mQuickActionsInterface.showActivity(intent);
             return;
         }

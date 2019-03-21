@@ -1318,17 +1318,16 @@ class CreateWorkflowViewModel extends ViewModel {
     private void updateWorkflowInformation(WorkflowDb workflow) {
         TextInputFormItem titleItem = (TextInputFormItem) formSettings
                 .findItem(FormSettings.MACHINE_NAME_TITLE);
-        titleItem.setValue(workflow.getTitle());
+        if (titleItem != null) titleItem.setValue(workflow.getTitle());
 
         TextInputFormItem descriptionItem = (TextInputFormItem) formSettings
                 .findItem(FormSettings.MACHINE_NAME_DESCRIPTION);
-        descriptionItem.setValue(workflow.getDescription());
+        if (descriptionItem != null) descriptionItem.setValue(workflow.getDescription());
 
         DateFormItem startDateItem = (DateFormItem) formSettings
                 .findItem(FormSettings.MACHINE_NAME_START_DATE);
         Date startDate = Utils.getDateFromString(workflow.getStart(), Utils.SERVER_DATE_FORMAT);
-        startDateItem.setValue(startDate);
-//        String endDate = Utils.serverFormatToFormat(workflow.getEnd(), FORMAT);
+        if (startDateItem != null) startDateItem.setValue(startDate);
 
         if (workflow.getMetas().isEmpty()) {
             mSetFormItemListLiveData.setValue(formSettings.getFormItems());

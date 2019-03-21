@@ -281,6 +281,11 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
      * @param type    server input type.
      */
     private void setTextInputParams(AppCompatEditText etInput, String type) {
+        if (type == null) {
+            etInput.setInputType(InputType.TYPE_CLASS_TEXT);
+            return;
+        }
+
         switch (type) {
 
             case TextInputFormItem.InputType.TEXT_AREA:

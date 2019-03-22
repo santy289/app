@@ -31,6 +31,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import retrofit2.HttpException;
 
 import static com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusFragment.INDEX_CURRENT_STATUS;
 import static com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusFragment.INDEX_LAST_STATUS;
@@ -571,6 +572,14 @@ public class StatusViewModel extends ViewModel {
     }
 
     private void onFailure(Throwable throwable) {
+        if (throwable instanceof HttpException) {
+            int httpCode = ((HttpException) throwable).code();
+            if (httpCode == 404) {
+                //not found is handled by Activity
+                return;
+            }
+        }
+
         showLoading.setValue(false);
         mErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
     }

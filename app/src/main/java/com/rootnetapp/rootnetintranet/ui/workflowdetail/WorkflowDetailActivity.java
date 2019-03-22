@@ -251,6 +251,17 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     private void showNotFoundView(boolean showNotFound) {
         mBinding.lytNotFound.setVisibility(showNotFound ? View.VISIBLE : View.GONE);
         mBinding.lytDetails.setVisibility(showNotFound ? View.GONE : View.VISIBLE);
+
+        //hide the menu items
+        if (showNotFound) {
+            mMenu.findItem(R.id.enable).setVisible(false);
+            mMenu.findItem(R.id.disable).setVisible(false);
+            mMenu.findItem(R.id.open).setVisible(false);
+            mMenu.findItem(R.id.close).setVisible(false);
+            mMenu.findItem(R.id.export_pdf).setVisible(false);
+            mMenu.findItem(R.id.share).setVisible(false);
+            mMenu.findItem(R.id.delete).setVisible(false);
+        }
     }
 
     @UiThread

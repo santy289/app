@@ -261,6 +261,7 @@
     <string name="workflow_detail_activity_delete">Eliminar</string>
     <string name="workflow_detail_activity_delete_dialog_title">Eliminar Workflow</string>
     <string name="workflow_detail_activity_delete_dialog_msg">¿Está seguro que desea eliminar el workflow %s?</string>
+    <string name="workflow_detail_activity_share_chooser">Compartir mediante</string>
     <!--StatusFragment-->
     <string name="workflow_detail_status_fragment_title">Estatus</string>
     <string name="workflow_detail_status_fragment_status_summary">Estatus del Workflow</string>

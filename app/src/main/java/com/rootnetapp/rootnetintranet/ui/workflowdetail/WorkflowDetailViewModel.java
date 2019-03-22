@@ -8,9 +8,12 @@ import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,6 +51,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<Boolean> mShowExportPdfButtonLiveData;
     private MutableLiveData<Boolean> mShowEnableDisableLiveData;
     private MutableLiveData<Boolean> mShowOpenCloseLiveData;
+    private MutableLiveData<String> mShareWorkflowLiveData;
     private LiveData<WorkflowListItem> handleRepoWorkflowRequest;
     protected LiveData<Boolean> updateOpenClosedStatusFromUserAction;
     protected LiveData<Boolean> updateEnabledDisabledStatusFromUserAction;
@@ -86,7 +90,8 @@ public class WorkflowDetailViewModel extends ViewModel {
      * @param workflow          workflow item
      * @param permissionsString user permissions
      */
-    protected void initWithDetails(String token, WorkflowListItem workflow, String permissionsString) {
+    protected void initWithDetails(String token, WorkflowListItem workflow,
+                                   String permissionsString) {
         this.mToken = token;
         this.mWorkflowListItem = workflow;
         initUiWithWorkflowListItem.setValue(workflow);
@@ -101,7 +106,7 @@ public class WorkflowDetailViewModel extends ViewModel {
      * actual WorkflowDb object from the local database or network.
      *
      * @param token             auth token
-     * @param id workflow id
+     * @param id                workflow id
      * @param permissionsString user permissions
      */
     protected void initWithId(String token, String id, String permissionsString) {
@@ -122,8 +127,8 @@ public class WorkflowDetailViewModel extends ViewModel {
     }
 
     /**
-     * Verifies all of the user permissions related to this ViewModel and {@link WorkflowDetailActivity}.
-     * Hide the UI related to the unauthorized actions.
+     * Verifies all of the user permissions related to this ViewModel and {@link
+     * WorkflowDetailActivity}. Hide the UI related to the unauthorized actions.
      *
      * @param permissionsString users permissions.
      */
@@ -135,11 +140,11 @@ public class WorkflowDetailViewModel extends ViewModel {
         mShowExportPdfButtonLiveData.setValue(hasExportPermissions);
     }
 
-    protected boolean hasExportPermissions(){
+    protected boolean hasExportPermissions() {
         return hasExportPermissions;
     }
 
-    protected WorkflowListItem getWorkflowListItem(){
+    protected WorkflowListItem getWorkflowListItem() {
         return mWorkflowListItem;
     }
 
@@ -176,8 +181,6 @@ public class WorkflowDetailViewModel extends ViewModel {
 
                 }
         );
-
-
 
         // Transformation for observing open/close actions
         updateOpenClosedStatusFromUserAction = Transformations.map(
@@ -386,6 +389,37 @@ public class WorkflowDetailViewModel extends ViewModel {
         mRepository.deleteWorkflow(mToken, mWorkflow.getId());
     }
 
+    /**
+     * Generates the text to share this workflow, including the title, key and URL.
+     *
+     * @param domainJson the domain saved in the preferences.
+     */
+    protected void shareWorkflow(String domainJson) {
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<ClientResponse> jsonAdapter = moshi.adapter(ClientResponse.class);
+        ClientResponse domain;
+
+        try {
+            domain = jsonAdapter.fromJson(domainJson);
+
+            String workflowUrl = "https://" + domain.getClient().getDomain()
+                    + "/Intranet/workflow/" + mWorkflowListItem.getWorkflowId();
+            String shareText = String.format(
+                    Locale.US,
+                    "%s - %s (%s)",
+                    mWorkflowListItem.getTitle(),
+                    mWorkflowListItem.getWorkflowTypeKey(),
+                    workflowUrl
+            );
+
+            mShareWorkflowLiveData.setValue(shareText);
+
+        } catch (IOException e) {
+            Log.e(TAG, "shareWorkflow: error: " + e.getMessage());
+            onFailure(e);
+        }
+    }
+
     private void onFailure(Throwable throwable) {
         showLoading.setValue(false);
         mErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
@@ -452,6 +486,13 @@ public class WorkflowDetailViewModel extends ViewModel {
             mShowOpenCloseLiveData = new MutableLiveData<>();
         }
         return mShowOpenCloseLiveData;
+    }
+
+    protected LiveData<String> getObservableShareWorkflow() {
+        if (mShareWorkflowLiveData == null) {
+            mShareWorkflowLiveData = new MutableLiveData<>();
+        }
+        return mShareWorkflowLiveData;
     }
 
     protected LiveData<WorkflowListItem> getObservableWorflowListItem() {

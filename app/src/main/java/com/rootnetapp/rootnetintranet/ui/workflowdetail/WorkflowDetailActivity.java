@@ -159,6 +159,8 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 .observe(this, this::showNotFoundView);
         workflowDetailViewModel.getObservableShowExportPdfButton()
                 .observe(this, this::showExportPdfMenuItem);
+        workflowDetailViewModel.getObservableShareWorkflow()
+                .observe(this, this::showShareIntentChooser);
 
         workflowDetailViewModel.getObservableShowEnableDisable()
                 .observe(this, this::showEnableDisableMenuItem);
@@ -305,6 +307,21 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     }
 
     /**
+     * Opens an IntentChooser to share plain text.
+     *
+     * @param textToShare the text to share.
+     */
+    @UiThread
+    private void showShareIntentChooser(String textToShare) {
+        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+        sharingIntent.setType("text/plain");
+        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, textToShare);
+        Intent chooserIntent = Intent.createChooser(sharingIntent,
+                getString(R.string.workflow_detail_activity_share_chooser));
+        startActivity(chooserIntent);
+    }
+
+    /**
      * Verify whether the user has granted permissions to read/write the external storage.
      *
      * @return whether the permissions are granted.
@@ -369,6 +386,13 @@ public class WorkflowDetailActivity extends AppCompatActivity {
             if (checkExternalStoragePermissions()) {
                 workflowDetailViewModel.handleExportPdf();
             }
+
+        } else if (item.getItemId() == R.id.share) {
+            SharedPreferences sharedPreferences = getSharedPreferences("Sessions",
+                    Context.MODE_PRIVATE);
+            String domainJson = sharedPreferences.getString(PreferenceKeys.PREF_DOMAIN, "");
+
+            workflowDetailViewModel.shareWorkflow(domainJson);
 
         } else if (item.getItemId() == R.id.delete) {
             showDeleteConfirmationDialog();

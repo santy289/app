@@ -279,8 +279,13 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     private void showEnableDisableMenuItem(boolean showEnable) {
         if (mMenu == null) return;
 
-        mMenu.findItem(R.id.enable).setVisible(showEnable);
-        mMenu.findItem(R.id.disable).setVisible(!showEnable);
+        if (workflowDetailViewModel.hasEnableDisablePermissions()) {
+            mMenu.findItem(R.id.enable).setVisible(showEnable);
+            mMenu.findItem(R.id.disable).setVisible(!showEnable);
+        } else {
+            mMenu.findItem(R.id.enable).setVisible(false);
+            mMenu.findItem(R.id.disable).setVisible(false);
+        }
     }
 
     @UiThread
@@ -292,8 +297,13 @@ public class WorkflowDetailActivity extends AppCompatActivity {
 
         if (mMenu == null) return;
 
-        mMenu.findItem(R.id.open).setVisible(showOpen);
-        mMenu.findItem(R.id.close).setVisible(!showOpen);
+        if (workflowDetailViewModel.hasOpenClosePermissions()) {
+            mMenu.findItem(R.id.open).setVisible(showOpen);
+            mMenu.findItem(R.id.close).setVisible(!showOpen);
+        } else {
+            mMenu.findItem(R.id.open).setVisible(false);
+            mMenu.findItem(R.id.close).setVisible(false);
+        }
     }
 
     @UiThread

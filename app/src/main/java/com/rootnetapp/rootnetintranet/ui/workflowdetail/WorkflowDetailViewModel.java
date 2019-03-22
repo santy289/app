@@ -30,8 +30,10 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import retrofit2.HttpException;
 
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_ACTIVATE_ALL;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_DELETE;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EXPORT;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_OPEN_ALL;
 
 public class WorkflowDetailViewModel extends ViewModel {
 
@@ -71,6 +73,8 @@ public class WorkflowDetailViewModel extends ViewModel {
     private WorkflowDb mWorkflow; // Not in DB and more complete response from network.
     private boolean hasExportPermissions;
     private boolean hasDeletePermissions;
+    private boolean hasEnableDisablePermissions;
+    private boolean hasOpenClosePermissions;
 
     public WorkflowDetailViewModel(WorkflowDetailRepository workflowDetailRepository) {
         this.mRepository = workflowDetailRepository;
@@ -140,9 +144,13 @@ public class WorkflowDetailViewModel extends ViewModel {
 
         hasExportPermissions = permissionsUtils.hasPermission(WORKFLOW_EXPORT);
         hasDeletePermissions = permissionsUtils.hasPermission(WORKFLOW_DELETE);
+        hasEnableDisablePermissions = permissionsUtils.hasPermission(WORKFLOW_ACTIVATE_ALL);
+        hasOpenClosePermissions = permissionsUtils.hasPermission(WORKFLOW_OPEN_ALL);
 
         mShowExportPdfButtonLiveData.setValue(hasExportPermissions);
         mShowDeleteLiveData.setValue(hasDeletePermissions);
+        mShowEnableDisableLiveData.setValue(hasEnableDisablePermissions);
+        mShowOpenCloseLiveData.setValue(hasOpenClosePermissions);
     }
 
     protected boolean hasExportPermissions() {
@@ -151,6 +159,12 @@ public class WorkflowDetailViewModel extends ViewModel {
 
     protected boolean hasDeletePermissions() {
         return hasDeletePermissions;
+    }
+    protected boolean hasEnableDisablePermissions() {
+        return hasEnableDisablePermissions;
+    }
+    protected boolean hasOpenClosePermissions() {
+        return hasOpenClosePermissions;
     }
 
     protected WorkflowListItem getWorkflowListItem() {

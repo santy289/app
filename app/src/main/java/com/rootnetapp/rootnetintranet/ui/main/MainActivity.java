@@ -208,7 +208,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_profile:
-                showFragment(ProfileFragment.newInstance(this), false);
+                showFragment(ProfileFragment.newInstance(), false);
                 return true;
             default:
                 return false;
@@ -416,7 +416,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         mainBinding.toolbarImage.setOnClickListener(
-                v -> showFragment(ProfileFragment.newInstance(MainActivity.this), true));
+                v -> showFragment(ProfileFragment.newInstance(), false));
     }
 
     private void openRightDrawer(boolean open) {
@@ -591,7 +591,7 @@ public class MainActivity extends AppCompatActivity
                 break;
             }
             case R.id.nav_profile: {
-                showFragment(ProfileFragment.newInstance(this), true);
+                showFragment(ProfileFragment.newInstance(), false);
                 mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
                 break;
             }

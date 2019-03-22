@@ -19,7 +19,6 @@ import com.rootnetapp.rootnetintranet.databinding.FragmentProfileBinding;
 import com.rootnetapp.rootnetintranet.models.responses.user.Department;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.editprofile.EditProfileActivity;
-import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -43,16 +42,13 @@ public class ProfileFragment extends Fragment {
     ProfileViewModelFactory profileViewModelFactory;
     private ProfileViewModel profileViewModel;
     private FragmentProfileBinding mBinding;
-    private MainActivityInterface mainActivityInterface;
 
     public ProfileFragment() {
         // Required empty public constructor
     }
 
-    public static ProfileFragment newInstance(MainActivityInterface mainActivityInterface) {
-        ProfileFragment fragment = new ProfileFragment();
-        fragment.mainActivityInterface = mainActivityInterface;
-        return fragment;
+    public static ProfileFragment newInstance() {
+        return new ProfileFragment();
     }
 
     @Override
@@ -85,11 +81,19 @@ public class ProfileFragment extends Fragment {
     }
 
     private void subscribe() {
-        profileViewModel.getObservableUser().observe(getViewLifecycleOwner(), this::updateProfileUi);
-        profileViewModel.getObservableError().observe(getViewLifecycleOwner(), this::showToastMessage);
-        profileViewModel.getObservableShowLoading().observe(getViewLifecycleOwner(), this::showLoading);
+        profileViewModel.getObservableUser()
+                .observe(getViewLifecycleOwner(), this::updateProfileUi);
+        profileViewModel.getObservableError()
+                .observe(getViewLifecycleOwner(), this::showToastMessage);
+        profileViewModel.getObservableShowLoading()
+                .observe(getViewLifecycleOwner(), this::showLoading);
     }
 
+    /**
+     * Fills the UI components with the user's information.
+     *
+     * @param user user info.
+     */
     @UiThread
     private void updateProfileUi(User user) {
         if (user == null) return;

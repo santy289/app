@@ -36,6 +36,9 @@ public class ProfileViewModel extends ViewModel {
         getUser();
     }
 
+    /**
+     * Fetches the logged user data from the server.
+     */
     protected void getUser() {
         mShowLoadingLiveData.setValue(true);
 

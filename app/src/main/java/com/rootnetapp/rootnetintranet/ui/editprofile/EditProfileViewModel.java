@@ -39,6 +39,9 @@ public class EditProfileViewModel extends ViewModel {
         getUser();
     }
 
+    /**
+     * Fetches the logged user data from the server.
+     */
     private void getUser() {
         mShowLoadingLiveData.setValue(true);
 
@@ -66,6 +69,13 @@ public class EditProfileViewModel extends ViewModel {
         mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
     }
 
+    /**
+     * Sends a request to the server to edit the user's information.
+     *
+     * @param fullName    user's full name.
+     * @param email       user's email.
+     * @param phoneNumber user's phone number.
+     */
     protected void editUser(String fullName, String email, String phoneNumber) {
         if (mLoggedUser == null) {
             return;
@@ -92,6 +102,12 @@ public class EditProfileViewModel extends ViewModel {
         mStatusLiveData.setValue(true);
     }
 
+    /**
+     * Sends a request to the server to update the user's password.
+     *
+     * @param newPassword      new password.
+     * @param repeatedPassword confirmed password.
+     */
     protected void changePassword(String newPassword, String repeatedPassword) {
         if (mLoggedUser == null) {
             return;
@@ -106,7 +122,7 @@ public class EditProfileViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
-    private void onChangePasswordSuccess(EditUserResponse editUserResponse) {
+    private void onChangePasswordSuccess(EditUserResponse ignored) {
         mShowLoadingLiveData.setValue(false);
         mToastMessageLiveData.setValue(R.string.password_changed_successfully);
     }

@@ -102,6 +102,9 @@ public class EditProfileActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Displays an AlertDialog with two password inputs, prompting the user's new desired password.
+     */
     private void showChangePasswordDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogTheme);
 
@@ -120,6 +123,12 @@ public class EditProfileActivity extends AppCompatActivity {
                 v -> changePassword(dialog, binding));
     }
 
+    /**
+     * Verifies the input and proceed to send the request to change the user's password.
+     *
+     * @param dialog  AlertDialog of this view.
+     * @param binding AlertDialog's view binding.
+     */
     private void changePassword(AlertDialog dialog, DialogChangePasswordBinding binding) {
         binding.tilPassword.setError(null);
         binding.tilConfirmPassword.setError(null);

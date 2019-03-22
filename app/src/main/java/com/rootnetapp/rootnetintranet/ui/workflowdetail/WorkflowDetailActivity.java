@@ -163,14 +163,10 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 .observe(this, this::showEnableDisableMenuItem);
         workflowDetailViewModel.updateEnabledDisabledStatusFromUserAction
                 .observe(this, this::showEnableDisableMenuItem);
-        workflowDetailViewModel.handleSetWorkflowIsEnabledByRepo
-                .observe(this, this::showEnableDisableMenuItem);
 
         workflowDetailViewModel.getObservableShowOpenClose()
                 .observe(this, this::showOpenCloseMenuItem);
         workflowDetailViewModel.updateOpenClosedStatusFromUserAction
-                .observe(this, this::showOpenCloseMenuItem);
-        workflowDetailViewModel.handleSetWorkflowIsOpenByRepo
                 .observe(this, this::showOpenCloseMenuItem);
 
         workflowDetailViewModel.showLoading.observe(this, this::showLoading);

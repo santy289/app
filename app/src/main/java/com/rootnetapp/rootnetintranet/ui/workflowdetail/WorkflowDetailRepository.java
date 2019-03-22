@@ -29,9 +29,7 @@ public class WorkflowDetailRepository {
     private MutableLiveData<Throwable> errorLiveData;
     private MutableLiveData<ExportPdfResponse> exportPdfResponseLiveData;
     private MutableLiveData<WorkflowActivationResponse> openCloseResponseLiveData;
-    private MutableLiveData<Throwable> openCloseFailedLiveData;
     private MutableLiveData<WorkflowActivationResponse> enableDisableResponseLiveData;
-    private MutableLiveData<Throwable> enableDisableFailedLiveData;
     private MutableLiveData<WorkflowListItem> retrieveFromDbWorkflow;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
@@ -60,16 +58,17 @@ public class WorkflowDetailRepository {
 
     /**
      * This method attempts to first find the workflow type id from the database, then it looks for
-     * data coming from the WorkflowDb and WorkflowTypeDb tables to create a WorkflowListItem
-     * object that is used by WorkflowDetailActivity's UI.
+     * data coming from the WorkflowDb and WorkflowTypeDb tables to create a WorkflowListItem object
+     * that is used by WorkflowDetailActivity's UI.
      *
-     * @param token         Access token.
-     * @param workflowId    Workflow Id to use for querying data.
+     * @param token      Access token.
+     * @param workflowId Workflow Id to use for querying data.
      */
     protected void getWorkflowFromDataSources(String token, int workflowId) {
         Disposable disposable = workflowDbDao
                 .loadWorkflowTypeId(workflowId)
-                .flatMap(workflowTypeId -> workflowDbDao.getWorkflowDbBy(workflowId, workflowTypeId.getId()))
+                .flatMap(workflowTypeId -> workflowDbDao
+                        .getWorkflowDbBy(workflowId, workflowTypeId.getId()))
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(workflowListItem -> {
@@ -93,10 +92,7 @@ public class WorkflowDetailRepository {
      * @param workflowId object ID to retrieve the PDF file.
      */
     protected void getWorkflowPdfFile(String token, int workflowId) {
-        Disposable disposable = service.getWorkflowPdfFile(
-                token,
-                workflowId
-        )
+        Disposable disposable = service.getWorkflowPdfFile(token, workflowId)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(success -> exportPdfResponseLiveData.setValue(success), throwable -> {
@@ -118,16 +114,12 @@ public class WorkflowDetailRepository {
         List<Integer> workflowIds = new ArrayList<>();
         workflowIds.add(workflowId);
 
-        Disposable disposable = service.postWorkflowActivationOpenClose(
-                token,
-                workflowIds,
-                isOpen
-        )
+        Disposable disposable = service.postWorkflowActivationOpenClose(token, workflowIds, isOpen)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(success -> openCloseResponseLiveData.setValue(success), throwable -> {
-                    Log.d(TAG, "activateWorkflow: " + throwable.getMessage());
-                    openCloseFailedLiveData.setValue(throwable);
+                    Log.d(TAG, "postWorkflowActivationOpenClose: " + throwable.getMessage());
+                    errorLiveData.setValue(throwable);
                 });
         disposables.add(disposable);
     }
@@ -138,23 +130,23 @@ public class WorkflowDetailRepository {
      * @param token      Access token to use for endpoint request.
      * @param workflowId single object ID to set the active status. The endpoint allows an array of
      *                   workflow IDs, but in this method we will only work with one workflow ID.
-     * @param isEnabled     whether to open or close the Workflow.
+     * @param isEnabled  whether to open or close the Workflow.
      */
-    protected void postWorkflowActivationEnableDisable(String token, int workflowId, boolean isEnabled) {
+    protected void postWorkflowActivationEnableDisable(String token, int workflowId,
+                                                       boolean isEnabled) {
         List<Integer> workflowIds = new ArrayList<>();
         workflowIds.add(workflowId);
 
-        Disposable disposable = service.postWorkflowActivationEnableDisable(
-                token,
-                workflowIds,
-                isEnabled
-        )
+        Disposable disposable = service
+                .postWorkflowActivationEnableDisable(token, workflowIds, isEnabled)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(success -> enableDisableResponseLiveData.setValue(success), throwable -> {
-                    Log.d(TAG, "activateWorkflow: " + throwable.getMessage());
-                    enableDisableFailedLiveData.setValue(throwable);
-                });
+                .subscribe(success -> enableDisableResponseLiveData.setValue(success),
+                        throwable -> {
+                            Log.d(TAG, "postWorkflowActivationEnableDisable: " + throwable
+                                    .getMessage());
+                            errorLiveData.setValue(throwable);
+                        });
         disposables.add(disposable);
     }
 
@@ -186,24 +178,10 @@ public class WorkflowDetailRepository {
         return openCloseResponseLiveData;
     }
 
-    protected LiveData<Throwable> getOpenCloseFailed() {
-        if (openCloseFailedLiveData == null) {
-            openCloseFailedLiveData = new MutableLiveData<>();
-        }
-        return openCloseFailedLiveData;
-    }
-
     protected LiveData<WorkflowActivationResponse> getEnableDisableResponse() {
         if (enableDisableResponseLiveData == null) {
             enableDisableResponseLiveData = new MutableLiveData<>();
         }
         return enableDisableResponseLiveData;
-    }
-
-    protected LiveData<Throwable> getEnableDisableFailed() {
-        if (enableDisableFailedLiveData == null) {
-            enableDisableFailedLiveData = new MutableLiveData<>();
-        }
-        return enableDisableFailedLiveData;
     }
 }

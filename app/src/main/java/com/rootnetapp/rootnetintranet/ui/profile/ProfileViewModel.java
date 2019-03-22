@@ -16,6 +16,8 @@ import io.reactivex.disposables.Disposable;
 
 public class ProfileViewModel extends ViewModel {
 
+    protected static final int REQUEST_EDIT_PROFILE = 55;
+
     private MutableLiveData<LoggedUser> mUserLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> mShowLoadingLiveData;
@@ -34,7 +36,7 @@ public class ProfileViewModel extends ViewModel {
         getUser();
     }
 
-    private void getUser() {
+    protected void getUser() {
         mShowLoadingLiveData.setValue(true);
 
         Disposable disposable = mRepository

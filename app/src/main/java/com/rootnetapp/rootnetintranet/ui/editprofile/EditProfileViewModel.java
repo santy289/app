@@ -1,5 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.editprofile;
 
+import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.LoggedProfileResponse;
@@ -16,12 +17,15 @@ import io.reactivex.disposables.Disposable;
  */
 
 public class EditProfileViewModel extends ViewModel {
+
     private MutableLiveData<LoggedUser> mUserLiveData;
     private MutableLiveData<Boolean> mStatusLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> mShowLoadingLiveData;
+
     private EditProfileRepository mRepository;
     private String mToken;
+    private LoggedUser mLoggedUser;
     private CompositeDisposable mDisposables;
 
     public EditProfileViewModel(EditProfileRepository repository) {
@@ -46,8 +50,15 @@ public class EditProfileViewModel extends ViewModel {
     }
 
     private void onUserSuccess(LoggedProfileResponse loggedProfileResponse) {
+        if (loggedProfileResponse == null) {
+            mErrorLiveData.setValue(R.string.failure_connect);
+            return;
+        }
+
+        mLoggedUser = loggedProfileResponse.getLoggedUser();
+
         mShowLoadingLiveData.setValue(false);
-        mUserLiveData.setValue(loggedProfileResponse.getLoggedUser());
+        mUserLiveData.setValue(mLoggedUser);
     }
 
     private void onUserFailure(Throwable throwable) {
@@ -55,17 +66,36 @@ public class EditProfileViewModel extends ViewModel {
         mErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
     }
 
-    protected void editUser(String token, int id,
-                            String fullName, String email, String phoneNumber) {
-        mRepository.editUserService(token, id, fullName, email, phoneNumber).subscribe(this::onEditRemoteSuccess, this::onUserFailure);
+    protected void editUser(String fullName, String email, String phoneNumber) {
+        if (mLoggedUser == null) {
+            return;
+        }
+
+        mShowLoadingLiveData.setValue(true);
+
+        Disposable disposable = mRepository
+                .editUserService(mToken, mLoggedUser.getId(), fullName, email, phoneNumber)
+                .subscribe(this::onEditRemoteSuccess, this::onFailure);
+
+        mDisposables.add(disposable);
     }
 
     private void onEditRemoteSuccess(EditUserResponse editUserResponse) {
-        mRepository.editUserLocal(editUserResponse.getProfile()).subscribe(this::onEditLocalSuccess, this::onUserFailure);
+        Disposable disposable = mRepository.editUserLocal(editUserResponse.getProfile())
+                .subscribe(this::onEditLocalSuccess, this::onFailure);
+
+        mDisposables.add(disposable);
     }
 
-    private void onEditLocalSuccess(Boolean aBoolean) {
+    private void onEditLocalSuccess(Boolean ignored) {
+        mShowLoadingLiveData.setValue(false);
+
         mStatusLiveData.setValue(true);
+    }
+
+    private void onFailure(Throwable throwable) {
+        mShowLoadingLiveData.setValue(false);
+        mErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
     }
 
     @Override

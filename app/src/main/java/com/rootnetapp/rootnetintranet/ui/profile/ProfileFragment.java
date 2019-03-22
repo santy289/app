@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.profile;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -26,11 +27,15 @@ import java.util.List;
 import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
+
+import static android.app.Activity.RESULT_OK;
+import static com.rootnetapp.rootnetintranet.ui.profile.ProfileViewModel.REQUEST_EDIT_PROFILE;
 
 public class ProfileFragment extends Fragment {
 
@@ -80,9 +85,9 @@ public class ProfileFragment extends Fragment {
     }
 
     private void subscribe() {
-        profileViewModel.getObservableUser().observe(this, this::updateProfileUi);
-        profileViewModel.getObservableError().observe(this, this::showToastMessage);
-        profileViewModel.getObservableShowLoading().observe(this, this::showLoading);
+        profileViewModel.getObservableUser().observe(getViewLifecycleOwner(), this::updateProfileUi);
+        profileViewModel.getObservableError().observe(getViewLifecycleOwner(), this::showToastMessage);
+        profileViewModel.getObservableShowLoading().observe(getViewLifecycleOwner(), this::showLoading);
     }
 
     @UiThread
@@ -138,11 +143,19 @@ public class ProfileFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_edit_profile: {
-                mainActivityInterface.showActivity(EditProfileActivity.class);
+            case R.id.action_edit_profile:
+                Intent intent = new Intent(getActivity(), EditProfileActivity.class);
+                startActivityForResult(intent, REQUEST_EDIT_PROFILE);
                 return true;
-            }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_EDIT_PROFILE && resultCode == RESULT_OK) {
+            profileViewModel.getUser();
+        }
     }
 }

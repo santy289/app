@@ -3,7 +3,10 @@ package com.rootnetapp.rootnetintranet.ui.editprofile;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -19,7 +22,6 @@ import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 public class EditProfileActivity extends AppCompatActivity {
@@ -27,13 +29,13 @@ public class EditProfileActivity extends AppCompatActivity {
     @Inject
     EditProfileViewModelFactory editProfileViewModelFactory;
     private EditProfileViewModel editProfileViewModel;
-    private ActivityEditProfileBinding activityEditProfileBinding;
+    private ActivityEditProfileBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ((RootnetApp) getApplication()).getAppComponent().inject(this);
-        activityEditProfileBinding = DataBindingUtil
+        mBinding = DataBindingUtil
                 .setContentView(this, R.layout.activity_edit_profile);
         editProfileViewModel = ViewModelProviders
                 .of(this, editProfileViewModelFactory)
@@ -50,21 +52,15 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     private void subscribe() {
-        final Observer<Boolean> statusObserver = ((Boolean data) -> {
-            Utils.hideLoading();
-            if (data) {
-                finish();
-            }
-        });
-        editProfileViewModel.getObservableStatus().observe(this, statusObserver);
+        editProfileViewModel.getObservableStatus().observe(this, this::finishActivity);
         editProfileViewModel.getObservableUser().observe(this, this::updateUserUi);
         editProfileViewModel.getObservableError().observe(this, this::showToastMessage);
         editProfileViewModel.getObservableShowLoading().observe(this, this::showLoading);
     }
 
     private void setActionBar() {
-        setSupportActionBar(activityEditProfileBinding.toolbar);
-        activityEditProfileBinding.toolbar.setTitle(getString(R.string.edit_profile));
+        setSupportActionBar(mBinding.toolbar);
+        mBinding.toolbar.setTitle(getString(R.string.edit_profile));
         // add back arrow to toolbar
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -73,36 +69,46 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     private void editUser() {
-
-        /*activityEditProfileBinding.tilEmail.setError(null);
-        activityEditProfileBinding.tilName.setError(null);
-        //activityEditProfileBinding.tilPhone.setError(null);
+        mBinding.tilEmail.setError(null);
+        mBinding.tilName.setError(null);
+        //mBinding.tilPhone.setError(null);
         boolean canUpdate = true;
-        if (TextUtils.isEmpty(activityEditProfileBinding.inputName.getText().toString())) {
+        if (TextUtils.isEmpty(mBinding.inputName.getText().toString())) {
             canUpdate = false;
-            activityEditProfileBinding.tilName.setError(getString(R.string.empty_name));
+            mBinding.tilName.setError(getString(R.string.empty_name));
         }
-        if (TextUtils.isEmpty(activityEditProfileBinding.inputEmail.getText().toString())) {
+        if (TextUtils.isEmpty(mBinding.inputEmail.getText().toString())) {
             canUpdate = false;
-            activityEditProfileBinding.tilEmail.setError(getString(R.string.empty_email));
+            mBinding.tilEmail.setError(getString(R.string.empty_email));
         }
         if (canUpdate) {
-            Utils.showLoading(this);
-            editProfileViewModel.editUser("Bearer " + token, id,
-                    activityEditProfileBinding.inputName.getText().toString(),
-                    activityEditProfileBinding.inputEmail.getText().toString(),
-                    activityEditProfileBinding.inputPhone.getText().toString());
-        }*/
+            hideSoftInputKeyboard();
+
+            editProfileViewModel.editUser(
+                    mBinding.inputName.getText().toString(),
+                    mBinding.inputEmail.getText().toString(),
+                    mBinding.inputPhone.getText().toString()
+            );
+        }
+    }
+
+    @UiThread
+    private void finishActivity(boolean isFinish){
+        if (!isFinish) return;
+
+        setResult(RESULT_OK);
+        finish();
     }
 
     @UiThread
     private void updateUserUi(LoggedUser user) {
         if (user == null) return;
 
-        activityEditProfileBinding.inputName.setText(user.getFullName());
-        activityEditProfileBinding.inputEmail.setText(user.getEmail());
-        activityEditProfileBinding.inputPhone.setText(user.getPhoneNumber());
-        activityEditProfileBinding.btnAccept.setOnClickListener(view -> editUser());
+        mBinding.inputName.setText(user.getFullName());
+        mBinding.inputEmail.setText(user.getEmail());
+        mBinding.inputPhone.setText(user.getPhoneNumber());
+
+        mBinding.btnAccept.setOnClickListener(view -> editUser());
     }
 
     @UiThread
@@ -132,4 +138,13 @@ public class EditProfileActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void hideSoftInputKeyboard() {
+        // Check if no view has focus:
+        View view = getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(
+                    Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
 }

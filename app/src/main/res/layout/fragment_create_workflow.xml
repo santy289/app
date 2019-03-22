@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/view_flipper"
@@ -30,6 +31,27 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
+                <TextView
+                    android:id="@+id/tv_no_permissions"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:text="@string/fragment_create_workflow_no_permissions"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:visibility="visible" />
+
+                <androidx.constraintlayout.widget.Barrier
+                    android:id="@+id/barrier_fields"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:barrierDirection="bottom"
+                    app:constraint_referenced_ids="rv_fields,tv_no_permissions" />
+
                 <Button
                     android:id="@+id/btn_create"
                     android:layout_width="wrap_content"
@@ -37,13 +59,14 @@
                     android:layout_gravity="end"
                     android:layout_marginEnd="10dp"
                     android:layout_marginBottom="16dp"
-                    android:backgroundTint="@color/green"
+                    android:enabled="false"
                     android:padding="10dp"
                     android:text="@string/create_workflow"
                     android:textColor="@color/white"
+                    app:backgroundTint="@drawable/selector_green_button"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/rv_fields" />
+                    app:layout_constraintTop_toBottomOf="@id/barrier_fields" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.core.widget.NestedScrollView>
 

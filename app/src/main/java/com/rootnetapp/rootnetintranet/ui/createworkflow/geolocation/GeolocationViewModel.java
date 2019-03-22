@@ -168,6 +168,7 @@ public class GeolocationViewModel extends ViewModel {
     }
 
     private void onSuccessNearbyPlaces(NearbySearchResponse nearbySearchResponse) {
+        mShowLoadingLiveData.setValue(false);
         isSearchingForPlace = false;
 
         if (nearbySearchResponse.getPlaces().isEmpty()) return;

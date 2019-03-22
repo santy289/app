@@ -15,6 +15,8 @@ class MultipleChoiceSelectionsAdapter extends
         RecyclerView.Adapter<MultipleChoiceSelectionsViewHolder> {
 
     private final List<BaseOption> selectedValues;
+    private OnItemRemovedListener onItemRemovedListener;
+    private OnItemAddedListener onItemAddedListener;
 
     MultipleChoiceSelectionsAdapter(List<BaseOption> selectedValues) {
         this.selectedValues = selectedValues;
@@ -36,6 +38,7 @@ class MultipleChoiceSelectionsAdapter extends
         selectedValues.add(value);
         notifyItemInserted(selectedValues.size() - 1);
         getItemCount();
+        if (onItemAddedListener != null) onItemAddedListener.onItemAdded(value);
         return true;
     }
 
@@ -44,6 +47,15 @@ class MultipleChoiceSelectionsAdapter extends
         selectedValues.remove(value);
         notifyItemRemoved(position);
         getItemCount();
+        if (onItemRemovedListener != null) onItemRemovedListener.onItemRemoved(value);
+    }
+
+    void setOnItemRemovedListener(OnItemRemovedListener listener){
+        onItemRemovedListener = listener;
+    }
+
+    void setOnItemAddedListener(OnItemAddedListener listener){
+        onItemAddedListener = listener;
     }
 
     @NonNull
@@ -75,5 +87,15 @@ class MultipleChoiceSelectionsAdapter extends
 
     private BaseOption getItem(int position) {
         return selectedValues.get(position);
+    }
+
+    public interface OnItemRemovedListener {
+
+        void onItemRemoved(BaseOption option);
+    }
+
+    public interface OnItemAddedListener {
+
+        void onItemAdded(BaseOption option);
     }
 }

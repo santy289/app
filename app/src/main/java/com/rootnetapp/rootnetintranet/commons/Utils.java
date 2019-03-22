@@ -67,7 +67,7 @@ public class Utils {
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             "application/vnd.ms-excel",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "application/mspowerpoint",
+            "application/vnd.ms-powerpoint",
             "application/vnd.openxmlformats-officedocument.presentationml.presentation"
     };
 
@@ -95,7 +95,7 @@ public class Utils {
             progress = new ProgressDialog(ctx);
         } else {
             if (progress.getContext() != ctx) {
-                progress.dismiss();
+                if (progress.isShowing()) progress.dismiss();
                 progress = new ProgressDialog(ctx);
             }
         }

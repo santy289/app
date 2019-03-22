@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import androidx.annotation.StringDef;
 
 import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineAction.WORKFLOW_COMMENT_CREATED;
+import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineAction.WORKFLOW_COMMENT_UPDATED;
 import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineAction.WORKFLOW_CREATED;
 import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineAction.WORKFLOW_FILE_RECORD_CREATED;
 import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineAction.WORKFLOW_STATUS_APPROVED_CREATED;
@@ -22,7 +23,8 @@ import static com.rootnetapp.rootnetintranet.ui.timeline.TimelineAction.WORKFLOW
         WORKFLOW_STATUS_APPROVED_CREATED,
         WORKFLOW_STATUS_APPROVED_UPDATED,
         WORKFLOW_FILE_RECORD_CREATED,
-        WORKFLOW_COMMENT_CREATED
+        WORKFLOW_COMMENT_CREATED,
+        WORKFLOW_COMMENT_UPDATED
 })
 public @interface TimelineAction {
 
@@ -32,4 +34,5 @@ public @interface TimelineAction {
     String WORKFLOW_STATUS_APPROVED_UPDATED = "TIMELINE_WORKFLOW_STATUS_APPROVE_UPDATED";
     String WORKFLOW_FILE_RECORD_CREATED = "TIMELINE_WORKFLOW_FILE_RECORD_CREATED";
     String WORKFLOW_COMMENT_CREATED = "TIMELINE_WORKFLOW_COMMENT_CREATED";
+    String WORKFLOW_COMMENT_UPDATED = "TIMELINE_WORKFLOW_COMMENT_UPDATED";
 }

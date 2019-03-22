@@ -483,6 +483,7 @@ public class StatusViewModel extends ViewModel {
                 approver.entityId = id;
                 approver.approved = ApproverHistory.getApprovalStateForStatusAndApprover(
                         mWorkflow.getWorkflowApprovalHistory(), approver.statusId, approver.entityId);
+                approver.isGlobal = true;
 
                 approverList.add(approver);
             }
@@ -534,6 +535,7 @@ public class StatusViewModel extends ViewModel {
                 approver.entityId = id;
                 approver.approved = ApproverHistory.getApprovalStateForStatusAndApprover(
                         mWorkflow.getWorkflowApprovalHistory(), approver.statusId, approver.entityId);
+                approver.isStatusSpecific = true;
 
                 approverList.add(approver);
             }

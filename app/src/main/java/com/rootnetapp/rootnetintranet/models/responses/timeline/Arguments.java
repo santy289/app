@@ -8,7 +8,7 @@ public class Arguments {
     @Json(name = "current_status")
     private CurrentStatus currentStatus;
     @Json(name = "remaining_time")
-    private Integer remainingTime;
+    private Integer remainingTime; //value in seconds
     @Json(name = "workflow_type_id")
     private Integer workflowTypeId;
     @Json(name = "start")
@@ -33,6 +33,14 @@ public class Arguments {
     private Boolean approved;
     @Json(name = "workflow_id")
     private Integer workflowId;
+    @Json(name = "file_name")
+    private String fileName;
+    @Json(name = "file_id")
+    private Integer fileId;
+    @Json(name = "preset_id")
+    private Integer presetId;
+    @Json(name = "status")
+    private Object status;
 
     public CurrentStatus getCurrentStatus() {
         return currentStatus;
@@ -144,5 +152,37 @@ public class Arguments {
 
     public void setWorkflowId(Integer workflowId) {
         this.workflowId = workflowId;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public Integer getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(Integer fileId) {
+        this.fileId = fileId;
+    }
+
+    public Integer getPresetId() {
+        return presetId;
+    }
+
+    public void setPresetId(Integer presetId) {
+        this.presetId = presetId;
+    }
+
+    public Object getStatus() {
+        return status;
+    }
+
+    public void setStatus(Object status) {
+        this.status = status;
     }
 }

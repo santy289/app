@@ -406,7 +406,7 @@ public interface ApiInterface {
                                              @Query("entity[]") List<String> modules);
 
     @Headers({"Domain-Name: api"})
-    @GET("interaction?all=true&comment=4&thumb=4")
+    @GET("interaction?all=true&comment=100&thumb=100")
     Observable<InteractionResponse> getTimelineInteractions(@Header("Authorization") String authorization,
                                                             @Query("entity_type[]") List<String> modules,
                                                             @Query("entity[]") List<Integer> entities);
@@ -422,7 +422,7 @@ public interface ApiInterface {
     @POST("interaction")
     @FormUrlEncoded
     Observable<PostInteractionResponse> postComment(@Header("Authorization")String auth,
-                                                    @Field("interactionId") int interactionId,
+                                                    @Field("interactionId") Integer interactionId,
                                                     @Field("entity") int entity,
                                                     @Field("entityType") String entityType,
                                                     @Field("description") String description,
@@ -440,8 +440,13 @@ public interface ApiInterface {
     @Headers({"Domain-Name: api"})
     @PATCH("interaction/{id}")
     Observable<PostInteractionResponse> postLikeDislike(@Header("Authorization") String authorization,
-                                            @Path("id") int interactionId,
-                                            @Body PostLikeDislike request);
+                                                        @Path("id") int interactionId,
+                                                        @Body PostLikeDislike request);
+
+    @Headers({"Domain-Name: api"})
+    @POST("interaction")
+    Observable<PostInteractionResponse> postLikeDislike(@Header("Authorization") String authorization,
+                                                        @Body PostLikeDislike request);
 
     @Headers({"Domain-Name: api"})
     @PATCH("intranet/workflow/activation")

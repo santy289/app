@@ -10,6 +10,7 @@ import androidx.annotation.IntDef;
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.BOOLEAN;
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.CURRENCY;
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.DATE;
+import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.DISPLAY;
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.DOUBLE_MULTIPLE_CHOICE;
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.FILE;
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.GEOLOCATION;
@@ -35,7 +36,8 @@ import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItem
         FILE,
         INTENT,
         DOUBLE_MULTIPLE_CHOICE,
-        GEOLOCATION
+        GEOLOCATION,
+        DISPLAY
 })
 public @interface FormItemViewType {
 
@@ -50,4 +52,5 @@ public @interface FormItemViewType {
     int INTENT = 9;
     int DOUBLE_MULTIPLE_CHOICE = 10;
     int GEOLOCATION = 11;
+    int DISPLAY = 12;
 }

@@ -198,16 +198,16 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
 
         if (show) {
             mBinding.rvFiles.setVisibility(View.VISIBLE);
-            mBinding.btnAttachment.setVisibility(View.VISIBLE);
-            mBinding.btnUpload.setVisibility(View.VISIBLE);
 //            mBinding.tvFileUploaded.setVisibility(View.VISIBLE); //only show when a file was attached
+            mBinding.tvTitleFiles.setVisibility(View.VISIBLE);
+            mBinding.viewTitleFiles.setVisibility(View.VISIBLE);
             mBinding.tvNoFiles.setVisibility(View.GONE);
         } else {
             mBinding.rvFiles.setVisibility(View.GONE);
-            mBinding.btnAttachment.setVisibility(View.GONE);
-            mBinding.btnUpload.setVisibility(View.GONE);
             mBinding.tvFileUploaded.setVisibility(View.GONE);
             mBinding.tvNoFiles.setVisibility(View.VISIBLE);
+            mBinding.tvTitleFiles.setVisibility(View.GONE);
+            mBinding.viewTitleFiles.setVisibility(View.GONE);
         }
     }
 
@@ -222,16 +222,12 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
 
         if (show) {
             mBinding.rvFiles.setVisibility(View.VISIBLE);
-            mBinding.btnAttachment.setVisibility(View.VISIBLE);
-            mBinding.btnUpload.setVisibility(View.VISIBLE);
 //            mBinding.tvFileUploaded.setVisibility(View.VISIBLE); //only show when a file was attached
             mBinding.tvTitleFiles.setVisibility(View.VISIBLE);
             mBinding.viewTitleFiles.setVisibility(View.VISIBLE);
             mBinding.tvNoPermissions.setVisibility(View.GONE);
         } else {
             mBinding.rvFiles.setVisibility(View.GONE);
-            mBinding.btnAttachment.setVisibility(View.GONE);
-            mBinding.btnUpload.setVisibility(View.GONE);
             mBinding.tvFileUploaded.setVisibility(View.GONE);
             mBinding.tvTitleFiles.setVisibility(View.GONE);
             mBinding.viewTitleFiles.setVisibility(View.GONE);

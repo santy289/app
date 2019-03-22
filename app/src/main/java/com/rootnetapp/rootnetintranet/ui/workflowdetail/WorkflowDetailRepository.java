@@ -28,8 +28,10 @@ public class WorkflowDetailRepository {
 
     private MutableLiveData<Throwable> errorLiveData;
     private MutableLiveData<ExportPdfResponse> exportPdfResponseLiveData;
-    private MutableLiveData<WorkflowActivationResponse> activationResponseLiveData;
-    private MutableLiveData<Throwable> activationFailedLiveData;
+    private MutableLiveData<WorkflowActivationResponse> openCloseResponseLiveData;
+    private MutableLiveData<Throwable> openCloseFailedLiveData;
+    private MutableLiveData<WorkflowActivationResponse> enableDisableResponseLiveData;
+    private MutableLiveData<Throwable> enableDisableFailedLiveData;
     private MutableLiveData<WorkflowListItem> retrieveFromDbWorkflow;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
@@ -105,27 +107,53 @@ public class WorkflowDetailRepository {
     }
 
     /**
-     * Sets the active status (open/closed) for a specific workflow.
+     * Sets the open/closed status for a specific workflow.
      *
      * @param token      Access token to use for endpoint request.
      * @param workflowId single object ID to set the active status. The endpoint allows an array of
      *                   workflow IDs, but in this method we will only work with one workflow ID.
      * @param isOpen     whether to open or close the Workflow.
      */
-    protected void postWorkflowActivation(String token, int workflowId, boolean isOpen) {
+    protected void postWorkflowActivationOpenClose(String token, int workflowId, boolean isOpen) {
         List<Integer> workflowIds = new ArrayList<>();
         workflowIds.add(workflowId);
 
-        Disposable disposable = service.postWorkflowActivation(
+        Disposable disposable = service.postWorkflowActivationOpenClose(
                 token,
                 workflowIds,
                 isOpen
         )
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(success -> activationResponseLiveData.setValue(success), throwable -> {
+                .subscribe(success -> openCloseResponseLiveData.setValue(success), throwable -> {
                     Log.d(TAG, "activateWorkflow: " + throwable.getMessage());
-                    activationFailedLiveData.setValue(throwable);
+                    openCloseFailedLiveData.setValue(throwable);
+                });
+        disposables.add(disposable);
+    }
+
+    /**
+     * Sets the enabled/disabled status for a specific workflow.
+     *
+     * @param token      Access token to use for endpoint request.
+     * @param workflowId single object ID to set the active status. The endpoint allows an array of
+     *                   workflow IDs, but in this method we will only work with one workflow ID.
+     * @param isEnabled     whether to open or close the Workflow.
+     */
+    protected void postWorkflowActivationEnableDisable(String token, int workflowId, boolean isEnabled) {
+        List<Integer> workflowIds = new ArrayList<>();
+        workflowIds.add(workflowId);
+
+        Disposable disposable = service.postWorkflowActivationEnableDisable(
+                token,
+                workflowIds,
+                isEnabled
+        )
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(success -> enableDisableResponseLiveData.setValue(success), throwable -> {
+                    Log.d(TAG, "activateWorkflow: " + throwable.getMessage());
+                    enableDisableFailedLiveData.setValue(throwable);
                 });
         disposables.add(disposable);
     }
@@ -151,18 +179,31 @@ public class WorkflowDetailRepository {
         return retrieveFromDbWorkflow;
     }
 
-    protected LiveData<WorkflowActivationResponse> getActivationResponse() {
-        if (activationResponseLiveData == null) {
-            activationResponseLiveData = new MutableLiveData<>();
+    protected LiveData<WorkflowActivationResponse> getOpenCloseResponse() {
+        if (openCloseResponseLiveData == null) {
+            openCloseResponseLiveData = new MutableLiveData<>();
         }
-        return activationResponseLiveData;
+        return openCloseResponseLiveData;
     }
 
-    protected LiveData<Throwable> getActivationFailed() {
-        if (activationFailedLiveData == null) {
-            activationFailedLiveData = new MutableLiveData<>();
+    protected LiveData<Throwable> getOpenCloseFailed() {
+        if (openCloseFailedLiveData == null) {
+            openCloseFailedLiveData = new MutableLiveData<>();
         }
-        return activationFailedLiveData;
+        return openCloseFailedLiveData;
     }
 
+    protected LiveData<WorkflowActivationResponse> getEnableDisableResponse() {
+        if (enableDisableResponseLiveData == null) {
+            enableDisableResponseLiveData = new MutableLiveData<>();
+        }
+        return enableDisableResponseLiveData;
+    }
+
+    protected LiveData<Throwable> getEnableDisableFailed() {
+        if (enableDisableFailedLiveData == null) {
+            enableDisableFailedLiveData = new MutableLiveData<>();
+        }
+        return enableDisableFailedLiveData;
+    }
 }

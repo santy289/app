@@ -158,11 +158,17 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 .observe(this, this::showNotFoundView);
         workflowDetailViewModel.getObservableShowExportPdfButton()
                 .observe(this, this::showExportPdfMenuItem);
+
         workflowDetailViewModel.getObservableShowEnableDisable()
                 .observe(this, this::showEnableDisableMenuItem);
+        workflowDetailViewModel.updateEnabledDisabledStatusFromUserAction
+                .observe(this, this::showEnableDisableMenuItem);
+        workflowDetailViewModel.handleSetWorkflowIsEnabledByRepo
+                .observe(this, this::showEnableDisableMenuItem);
+
         workflowDetailViewModel.getObservableShowOpenClose()
                 .observe(this, this::showOpenCloseMenuItem);
-        workflowDetailViewModel.updateActiveStatusFromUserAction
+        workflowDetailViewModel.updateOpenClosedStatusFromUserAction
                 .observe(this, this::showOpenCloseMenuItem);
         workflowDetailViewModel.handleSetWorkflowIsOpenByRepo
                 .observe(this, this::showOpenCloseMenuItem);
@@ -324,7 +330,13 @@ public class WorkflowDetailActivity extends AppCompatActivity {
 
             return true;
 
-        } else if (item.getItemId() == R.id.open) {
+        } else if (item.getItemId() == R.id.enable) {
+            workflowDetailViewModel.setWorkflowEnabledStatus(true);
+
+        } else if (item.getItemId() == R.id.disable) {
+            workflowDetailViewModel.setWorkflowEnabledStatus(false);
+
+        }  else if (item.getItemId() == R.id.open) {
             workflowDetailViewModel.setWorkflowOpenStatus(true);
 
         } else if (item.getItemId() == R.id.close) {

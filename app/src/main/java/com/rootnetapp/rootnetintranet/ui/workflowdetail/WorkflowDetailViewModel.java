@@ -49,8 +49,10 @@ public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<Boolean> mShowEnableDisableLiveData;
     private MutableLiveData<Boolean> mShowOpenCloseLiveData;
     private LiveData<WorkflowListItem> handleRepoWorkflowRequest;
-    protected LiveData<Boolean> updateActiveStatusFromUserAction;
+    protected LiveData<Boolean> updateOpenClosedStatusFromUserAction;
     protected LiveData<Boolean> handleSetWorkflowIsOpenByRepo;
+    protected LiveData<Boolean> updateEnabledDisabledStatusFromUserAction;
+    protected LiveData<Boolean> handleSetWorkflowIsEnabledByRepo;
 
     protected MutableLiveData<Boolean> showLoading;
 
@@ -185,11 +187,11 @@ public class WorkflowDetailViewModel extends ViewModel {
                 }
         );
 
-        // Transformation for observing approval and rejection of workflows.
-        updateActiveStatusFromUserAction = Transformations.map(
-                mRepository.getActivationResponse(),
+        // Transformation for observing open/close actions
+        updateOpenClosedStatusFromUserAction = Transformations.map(
+                mRepository.getOpenCloseResponse(),
                 activationResponse -> {
-                    // transform WorkflowActivationResponse to StatusUiData
+                    // transform WorkflowActivationResponse to Boolean
 
                     showLoading.setValue(false);
 
@@ -217,9 +219,9 @@ public class WorkflowDetailViewModel extends ViewModel {
                 }
         );
 
-        // Transformation used in case that the workflow activation fails
+        // Transformation used in case that the workflow open/close activation fails
         handleSetWorkflowIsOpenByRepo = Transformations.map(
-                mRepository.getActivationFailed(),
+                mRepository.getOpenCloseFailed(),
                 throwable -> {
                     /*
                     Set the original status. mWorkflow object is only updated if the request is successful.
@@ -230,6 +232,54 @@ public class WorkflowDetailViewModel extends ViewModel {
                     mShowToastMessage.setValue(Utils.getOnFailureStringRes(throwable));
 
                     return !mWorkflow.isOpen();
+                }
+        );
+
+        // Transformation for observing enable/disable actions
+        updateEnabledDisabledStatusFromUserAction = Transformations.map(
+                mRepository.getEnableDisableResponse(),
+                activationResponse -> {
+                    // transform WorkflowActivationResponse to Boolean
+
+                    showLoading.setValue(false);
+
+                    // if correct, this API will only return one workflow
+
+                    // check for emptiness of main list
+                    List<List<WorkflowDb>> responseList = activationResponse.getData();
+                    if (responseList.isEmpty()) {
+                        mShowToastMessage.setValue(R.string.error);
+                        return !mWorkflow.isStatus();
+                    }
+
+                    // check for emptiness of workflow list
+                    List<WorkflowDb> workflowDbList = responseList.get(0);
+                    if (workflowDbList.isEmpty()) {
+                        mShowToastMessage.setValue(R.string.error);
+                        return !mWorkflow.isStatus();
+                    }
+
+                    mWorkflow = workflowDbList.get(0);
+
+                    mShowToastMessage.setValue(R.string.request_successfully);
+
+                    return !mWorkflow.isStatus();
+                }
+        );
+
+        // Transformation used in case that the workflow enable/disable activation fails
+        handleSetWorkflowIsEnabledByRepo = Transformations.map(
+                mRepository.getEnableDisableFailed(),
+                throwable -> {
+                    /*
+                    Set the original status. mWorkflow object is only updated if the request is successful.
+                    Thus, it will always hold the correct status
+                     */
+
+                    showLoading.setValue(false);
+                    mShowToastMessage.setValue(Utils.getOnFailureStringRes(throwable));
+
+                    return !mWorkflow.isStatus();
                 }
         );
     }
@@ -327,11 +377,19 @@ public class WorkflowDetailViewModel extends ViewModel {
     }
 
     /**
-     * Calls the endpoint to change the Workflow active status.
+     * Calls the endpoint to change the Workflow open/closed status.
      */
     protected void setWorkflowOpenStatus(boolean open) {
         showLoading.setValue(true);
-        mRepository.postWorkflowActivation(mToken, mWorkflow.getId(), open);
+        mRepository.postWorkflowActivationOpenClose(mToken, mWorkflow.getId(), open);
+    }
+
+    /**
+     * Calls the endpoint to change the Workflow enabled/disabled status.
+     */
+    protected void setWorkflowEnabledStatus(boolean enabled) {
+        showLoading.setValue(true);
+        mRepository.postWorkflowActivationEnableDisable(mToken, mWorkflow.getId(), enabled);
     }
 
     private void onFailure(Throwable throwable) {

@@ -443,9 +443,16 @@ public interface ApiInterface {
     @Headers({"Domain-Name: api"})
     @PATCH("intranet/workflow/activation")
     @FormUrlEncoded
-    Observable<WorkflowActivationResponse> postWorkflowActivation(@Header("Authorization") String authorization,
-                                                                  @Field("workflows[]") List<Integer> workflowIds,
-                                                                  @Field("open") boolean isOpen);
+    Observable<WorkflowActivationResponse> postWorkflowActivationOpenClose(@Header("Authorization") String authorization,
+                                                                           @Field("workflows[]") List<Integer> workflowIds,
+                                                                           @Field("open") boolean isOpen);
+
+    @Headers({"Domain-Name: api"})
+    @PATCH("intranet/workflow/activation")
+    @FormUrlEncoded
+    Observable<WorkflowActivationResponse> postWorkflowActivationEnableDisable(@Header("Authorization") String authorization,
+                                                                           @Field("workflows[]") List<Integer> workflowIds,
+                                                                           @Field("activate") boolean isEnabled);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows/{id}/pdf?dump=false")

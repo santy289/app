@@ -409,6 +409,9 @@ public class MainActivity extends AppCompatActivity
         mainBinding.rightDrawer.rightDrawerBaseFilters.setOnClickListener(view -> {
             viewModel.sendBaseFiltersClicked();
         });
+
+        mainBinding.toolbarImage.setOnClickListener(
+                v -> showFragment(ProfileFragment.newInstance(MainActivity.this), true));
     }
 
     private void openRightDrawer(boolean open) {
@@ -583,7 +586,7 @@ public class MainActivity extends AppCompatActivity
                 break;
             }
             case R.id.nav_profile: {
-                showFragment(ProfileFragment.newInstance(this), false);
+                showFragment(ProfileFragment.newInstance(this), true);
                 mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
                 break;
             }

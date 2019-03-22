@@ -3,9 +3,37 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/export_pdf"
-        android:icon="@drawable/ic_picture_as_pdf_black_24dp"
+        android:id="@+id/enable"
         app:showAsAction="never"
-        app:iconTint="@color/colorAccent"
+        android:title="@string/workflow_detail_activity_enable"/>
+
+    <item
+        android:id="@+id/disable"
+        app:showAsAction="never"
+        android:title="@string/workflow_detail_activity_disable"/>
+
+    <item
+        android:id="@+id/open"
+        app:showAsAction="never"
+        android:title="@string/workflow_detail_activity_open"/>
+
+    <item
+        android:id="@+id/close"
+        app:showAsAction="never"
+        android:title="@string/workflow_detail_activity_close"/>
+
+    <item
+        android:id="@+id/export_pdf"
+        app:showAsAction="never"
         android:title="@string/workflow_detail_activity_export_pdf"/>
+
+    <item
+        android:id="@+id/share"
+        app:showAsAction="never"
+        android:title="@string/workflow_detail_activity_share"/>
+
+    <item
+        android:id="@+id/delete"
+        app:showAsAction="never"
+        android:title="@string/workflow_detail_activity_delete"/>
 </menu>

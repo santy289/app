@@ -145,10 +145,12 @@ public class FlowchartFragment extends Fragment {
                                 webView.evaluateJavascript(script, callback);
                             }
                         } else {
+                            showWebView(true);
                             showLoading(false);
                         }
                     });
                 } else {
+                    showWebView(true);
                     showLoading(false);
                 }
             }
@@ -156,6 +158,11 @@ public class FlowchartFragment extends Fragment {
 
         //load the page
         mBinding.webView.loadUrl(data.getUrl());
+    }
+
+    @UiThread
+    private void showWebView(boolean show){
+        mBinding.webView.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     @UiThread

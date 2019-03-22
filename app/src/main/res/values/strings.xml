@@ -13,7 +13,9 @@
     <string name="new_password">New password</string>
     <string name="confirm_password">Confirm password</string>
     <string name="change_domain">Change Company</string>
-    <string name="login">Log In</string>
+    <string name="login">Login</string>
+    <string name="logout">Logout</string>
+    <string name="logout_confirmation">Are you sure you want to logout?</string>
     <string name="empty_domain">The domain name cannot be empty</string>
     <string name="empty_user">Please provide a username to continue</string>
     <string name="empty_password">Please enter your password to continue</string>

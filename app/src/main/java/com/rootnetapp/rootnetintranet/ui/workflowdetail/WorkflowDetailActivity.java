@@ -159,6 +159,8 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 .observe(this, this::showNotFoundView);
         workflowDetailViewModel.getObservableShowExportPdfButton()
                 .observe(this, this::showExportPdfMenuItem);
+        workflowDetailViewModel.getObservableShowDelete()
+                .observe(this, this::showDeleteMenuItem);
         workflowDetailViewModel.getObservableShareWorkflow()
                 .observe(this, this::showShareIntentChooser);
 
@@ -294,6 +296,13 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         mMenu.findItem(R.id.close).setVisible(!showOpen);
     }
 
+    @UiThread
+    private void showDeleteMenuItem(boolean show) {
+        if (mMenu == null) return;
+
+        mMenu.findItem(R.id.delete).setVisible(show);
+    }
+
     /**
      * This is called after the delete workflow service response.
      *
@@ -358,6 +367,7 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         mMenu = menu;
 
         mMenu.findItem(R.id.export_pdf).setVisible(workflowDetailViewModel.hasExportPermissions());
+        mMenu.findItem(R.id.delete).setVisible(workflowDetailViewModel.hasDeletePermissions());
 
         return super.onCreateOptionsMenu(menu);
     }

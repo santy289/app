@@ -30,6 +30,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import retrofit2.HttpException;
 
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_DELETE;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EXPORT;
 
 public class WorkflowDetailViewModel extends ViewModel {
@@ -49,6 +50,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<String> mWorkflowTypeVersionLiveData;
     private MutableLiveData<Boolean> mShowNotFoundViewLiveData;
     private MutableLiveData<Boolean> mShowExportPdfButtonLiveData;
+    private MutableLiveData<Boolean> mShowDeleteLiveData;
     private MutableLiveData<Boolean> mShowEnableDisableLiveData;
     private MutableLiveData<Boolean> mShowOpenCloseLiveData;
     private MutableLiveData<String> mShareWorkflowLiveData;
@@ -68,6 +70,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the mWorkflow.
     private WorkflowDb mWorkflow; // Not in DB and more complete response from network.
     private boolean hasExportPermissions;
+    private boolean hasDeletePermissions;
 
     public WorkflowDetailViewModel(WorkflowDetailRepository workflowDetailRepository) {
         this.mRepository = workflowDetailRepository;
@@ -136,12 +139,18 @@ public class WorkflowDetailViewModel extends ViewModel {
         RootnetPermissionsUtils permissionsUtils = new RootnetPermissionsUtils(permissionsString);
 
         hasExportPermissions = permissionsUtils.hasPermission(WORKFLOW_EXPORT);
+        hasDeletePermissions = permissionsUtils.hasPermission(WORKFLOW_DELETE);
 
         mShowExportPdfButtonLiveData.setValue(hasExportPermissions);
+        mShowDeleteLiveData.setValue(hasDeletePermissions);
     }
 
     protected boolean hasExportPermissions() {
         return hasExportPermissions;
+    }
+
+    protected boolean hasDeletePermissions() {
+        return hasDeletePermissions;
     }
 
     protected WorkflowListItem getWorkflowListItem() {
@@ -472,6 +481,13 @@ public class WorkflowDetailViewModel extends ViewModel {
             mShowExportPdfButtonLiveData = new MutableLiveData<>();
         }
         return mShowExportPdfButtonLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowDelete() {
+        if (mShowDeleteLiveData == null) {
+            mShowDeleteLiveData = new MutableLiveData<>();
+        }
+        return mShowDeleteLiveData;
     }
 
     protected LiveData<Boolean> getObservableShowEnableDisable() {

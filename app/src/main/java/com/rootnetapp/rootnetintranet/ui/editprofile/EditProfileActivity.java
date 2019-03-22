@@ -15,9 +15,9 @@ import android.widget.Toast;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.databinding.ActivityEditProfileBinding;
 import com.rootnetapp.rootnetintranet.databinding.DialogChangePasswordBinding;
-import com.rootnetapp.rootnetintranet.models.responses.user.LoggedUser;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 
 import javax.inject.Inject;
@@ -156,7 +156,7 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     @UiThread
-    private void updateUserUi(LoggedUser user) {
+    private void updateUserUi(User user) {
         if (user == null) return;
 
         mBinding.inputName.setText(user.getFullName());

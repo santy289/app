@@ -1,8 +1,8 @@
 package com.rootnetapp.rootnetintranet.ui.profile;
 
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.models.responses.user.LoggedProfileResponse;
-import com.rootnetapp.rootnetintranet.models.responses.user.LoggedUser;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -18,7 +18,7 @@ public class ProfileViewModel extends ViewModel {
 
     protected static final int REQUEST_EDIT_PROFILE = 55;
 
-    private MutableLiveData<LoggedUser> mUserLiveData;
+    private MutableLiveData<User> mUserLiveData;
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> mShowLoadingLiveData;
     private ProfileRepository mRepository;
@@ -48,7 +48,7 @@ public class ProfileViewModel extends ViewModel {
 
     private void onUserSuccess(LoggedProfileResponse loggedProfileResponse) {
         mShowLoadingLiveData.setValue(false);
-        mUserLiveData.setValue(loggedProfileResponse.getLoggedUser());
+        mUserLiveData.setValue(loggedProfileResponse.getUser());
     }
 
     private void onUserFailure(Throwable throwable) {
@@ -61,7 +61,7 @@ public class ProfileViewModel extends ViewModel {
         mDisposables.clear();
     }
 
-    protected LiveData<LoggedUser> getObservableUser() {
+    protected LiveData<User> getObservableUser() {
         if (mUserLiveData == null) {
             mUserLiveData = new MutableLiveData<>();
         }

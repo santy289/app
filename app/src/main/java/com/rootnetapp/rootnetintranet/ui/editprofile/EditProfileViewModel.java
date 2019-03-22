@@ -2,9 +2,9 @@ package com.rootnetapp.rootnetintranet.ui.editprofile;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.models.responses.edituser.EditUserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.LoggedProfileResponse;
-import com.rootnetapp.rootnetintranet.models.responses.user.LoggedUser;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -18,14 +18,14 @@ import io.reactivex.disposables.Disposable;
 
 public class EditProfileViewModel extends ViewModel {
 
-    private MutableLiveData<LoggedUser> mUserLiveData;
+    private MutableLiveData<User> mUserLiveData;
     private MutableLiveData<Boolean> mStatusLiveData;
     private MutableLiveData<Integer> mToastMessageLiveData;
     private MutableLiveData<Boolean> mShowLoadingLiveData;
 
     private EditProfileRepository mRepository;
     private String mToken;
-    private LoggedUser mLoggedUser;
+    private User mLoggedUser;
     private CompositeDisposable mDisposables;
 
     public EditProfileViewModel(EditProfileRepository repository) {
@@ -55,7 +55,7 @@ public class EditProfileViewModel extends ViewModel {
             return;
         }
 
-        mLoggedUser = loggedProfileResponse.getLoggedUser();
+        mLoggedUser = loggedProfileResponse.getUser();
 
         mShowLoadingLiveData.setValue(false);
         mUserLiveData.setValue(mLoggedUser);
@@ -142,7 +142,7 @@ public class EditProfileViewModel extends ViewModel {
         return mToastMessageLiveData;
     }
 
-    protected LiveData<LoggedUser> getObservableUser() {
+    protected LiveData<User> getObservableUser() {
         if (mUserLiveData == null) {
             mUserLiveData = new MutableLiveData<>();
         }

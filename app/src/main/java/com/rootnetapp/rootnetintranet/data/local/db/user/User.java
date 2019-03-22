@@ -1,11 +1,5 @@
 package com.rootnetapp.rootnetintranet.data.local.db.user;
 
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
-import androidx.room.TypeConverter;
-import androidx.room.TypeConverters;
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.rootnetapp.rootnetintranet.models.responses.user.Department;
@@ -13,6 +7,14 @@ import com.squareup.moshi.Json;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
+
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+import androidx.room.TypeConverter;
+import androidx.room.TypeConverters;
 
 class UserConverters {
     @TypeConverter
@@ -117,6 +119,10 @@ public class User {
     @ColumnInfo(name = "groups")
     @Json(name = "groups")
     private List<Integer> groups = null;
+
+    @Ignore
+    @Json(name = "new_permissions")
+    private Map<String, Object> permissions;
 
     /*
     @Json(name = "roles")
@@ -225,4 +231,12 @@ public class User {
     public void setRoles(Roles roles) {
         this.roles = roles;
     }*/
+
+    public Map<String, Object> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(Map<String, Object> permissions) {
+        this.permissions = permissions;
+    }
 }

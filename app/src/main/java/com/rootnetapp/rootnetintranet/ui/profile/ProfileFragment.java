@@ -14,9 +14,9 @@ import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.databinding.FragmentProfileBinding;
 import com.rootnetapp.rootnetintranet.models.responses.user.Department;
-import com.rootnetapp.rootnetintranet.models.responses.user.LoggedUser;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.editprofile.EditProfileActivity;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
@@ -91,7 +91,7 @@ public class ProfileFragment extends Fragment {
     }
 
     @UiThread
-    private void updateProfileUi(LoggedUser user) {
+    private void updateProfileUi(User user) {
         if (user == null) return;
 
         String path = Utils.imgDomain + user.getPicture().trim();

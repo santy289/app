@@ -12,6 +12,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDB;
 import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDBDao;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.Profile;
+import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
@@ -456,20 +457,34 @@ public class SyncHelper {
     }
 
     private void onLoggedProfileSuccess(LoggedProfileResponse loggedProfileResponse) {
-        if (loggedProfileResponse.getLoggedUser() == null || loggedProfileResponse.getLoggedUser()
+        if (loggedProfileResponse.getUser() == null || loggedProfileResponse.getUser()
                 .getPermissions() == null) {
             failure(null);
             return;
         }
 
+        User loggedUser = loggedProfileResponse.getUser();
+
         String permissionsString = RootnetPermissionsUtils.getPermissionsStringFromMap(
-                loggedProfileResponse.getLoggedUser().getPermissions());
+                loggedUser.getPermissions());
 
         String[] value = new String[]{PreferenceKeys.PREF_USER_PERMISSIONS,
                                       permissionsString};
         saveStringToPreference.postValue(value);
 
-        success(true);
+        addLoggedProfileToDatabase(loggedUser);
+    }
+
+    private void addLoggedProfileToDatabase(User user){
+        Disposable disposable = Observable.fromCallable(() -> {
+            List<User> list = new ArrayList<>();
+            list.add(user);
+            database.userDao().insertAll(list);
+            return true;
+        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::success,
+                        this::failure);
+        disposables.add(disposable);
     }
 
     private void success(Boolean o) {

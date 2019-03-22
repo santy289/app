@@ -3,18 +3,23 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow.adapters;
 import android.content.Context;
 import android.text.Editable;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.FormItemBooleanBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemCurrencyBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemDateBinding;
+import com.rootnetapp.rootnetintranet.databinding.FormItemDisplayBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemDoubleMultipleChoiceBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemFileBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemGeolocationBinding;
@@ -24,9 +29,11 @@ import com.rootnetapp.rootnetintranet.databinding.FormItemPhoneBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemSingleChoiceBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemTextInputBinding;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseOption;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.DisplayFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DoubleMultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.DoubleOption;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
@@ -138,6 +145,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 return new GeolocationViewHolder(FormItemGeolocationBinding
                         .inflate(layoutInflater, viewGroup, false));
 
+            case FormItemViewType.DISPLAY:
+                return new DisplayViewHolder(FormItemDisplayBinding
+                        .inflate(layoutInflater, viewGroup, false));
+
             default:
                 throw new IllegalStateException("Invalid ViewType");
         }
@@ -193,6 +204,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             case FormItemViewType.GEOLOCATION:
                 populateGeolocationView((GeolocationViewHolder) holder, position);
+                break;
+
+            case FormItemViewType.DISPLAY:
+                populateDisplayView((DisplayViewHolder) holder, position);
                 break;
 
             default:
@@ -281,6 +296,11 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
      * @param type    server input type.
      */
     private void setTextInputParams(AppCompatEditText etInput, String type) {
+        if (type == null) {
+            etInput.setInputType(InputType.TYPE_CLASS_TEXT);
+            return;
+        }
+
         switch (type) {
 
             case TextInputFormItem.InputType.TEXT_AREA:
@@ -702,6 +722,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 new LinearLayoutManager(mContext, RecyclerView.HORIZONTAL, false));
         holder.getBinding().rvSelectedItems.setAdapter(selectionsAdapter);
 
+        //generates the options for the form item
         List<Option> options = new ArrayList<>(item.getOptions());
 
         //adds a hint to the spinner
@@ -712,10 +733,16 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             options.add(0, new Option(0, hint));
         }
 
+        //remove the options that are already added from the spinner
+        for (BaseOption selectedOption : item.getValues()) {
+            options.remove(selectedOption); //selectedOption is always of type Option
+        }
+
         //creates the options adapter
-        holder.getBinding().spInput.setAdapter(
-                new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item,
-                        options));
+        ArrayAdapter<Option> spinnerAdapter = new ArrayAdapter<>(mContext,
+                android.R.layout.simple_spinner_dropdown_item,
+                options);
+        holder.getBinding().spInput.setAdapter(spinnerAdapter);
 
         //only creates the listener once.
         if (holder.getBinding().spInput.getOnItemSelectedListener() == null) {
@@ -732,10 +759,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                             }
 
                             // the user has selected a valid option
-                            int index = position - 1; // because of the hint option
-                            selectionsAdapter.addItem(item.getOptions().get(index));
-                            holder.getBinding().spInput
-                                    .setSelection(0, false); //clear spinner selection
+                            Option selectedOption = spinnerAdapter.getItem(position);
+                            selectionsAdapter.addItem(selectedOption);
+                            //clear spinner selection
+                            holder.getBinding().spInput.setSelection(0, false);
                         }
 
                         @Override
@@ -748,6 +775,14 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.getBinding().spInput
                     .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
         }
+
+        //creates the OnItemRemovedListener for the selectionsAdapter
+        selectionsAdapter.setOnItemRemovedListener(
+                option -> spinnerAdapter.add((Option) option));
+
+        //creates the OnItemAddedListener for the selectionsAdapter
+        selectionsAdapter.setOnItemAddedListener(
+                option -> spinnerAdapter.remove((Option) option));
 
         // verify required indicator
         holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
@@ -1094,13 +1129,23 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         //set button click listener
         holder.getBinding().btnAdd.setOnClickListener(v -> {
             int firstSelectionPosition = holder.getBinding().spFirstInput.getSelectedItemPosition();
-            if (firstSelectionPosition == 0) return; //no selection
+            if (firstSelectionPosition == 0) {
+                //no selection
+                mFragmentInterface
+                        .showToastMessage(R.string.double_multiple_choice_form_item_select_both);
+                return;
+            }
             int firstIndex = firstSelectionPosition - 1; // because of the hint option
             Option firstOption = item.getFirstOptions().get(firstIndex);
 
             int secondSelectionPosition = holder.getBinding().spSecondInput
                     .getSelectedItemPosition();
-            if (secondSelectionPosition == 0) return; //no selection
+            if (secondSelectionPosition == 0) {
+                //no selection
+                mFragmentInterface
+                        .showToastMessage(R.string.double_multiple_choice_form_item_select_both);
+                return;
+            }
             int secondIndex = secondSelectionPosition - 1; // because of the hint option
             Option secondOption = item.getSecondOptions().get(secondIndex);
 
@@ -1222,6 +1267,48 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         holder.getBinding().btnSelectLocation.setEnabled(item.isEnabled());
         holder.getBinding().chipLocation.setEnabled(item.isEnabled());
     }
+
+    /**
+     * Handles the view for the {@link DisplayFormItem}. Displays the UI according to the
+     * visibility, enabled and validation params.
+     *
+     * @param holder   view holder
+     * @param position item position in adapter.
+     */
+    private void populateDisplayView(DisplayViewHolder holder, int position) {
+        DisplayFormItem item = (DisplayFormItem) getItem(position);
+
+        //set title
+        String title = item.getTitle();
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
+        holder.getBinding().tvTitle.setText(title);
+        item.setTitle(title);
+        if (TextUtils.isEmpty(title)) holder.getBinding().tvTitle.setVisibility(View.GONE);
+
+        //set image
+        if (!TextUtils.isEmpty(item.getImage())) {
+            String path = Utils.imgDomain + item.getImage();
+            GlideUrl url = new GlideUrl(path);
+            Glide.with(holder.getBinding().ivImage.getContext())
+                    .load(url.toStringUrl())
+                    .apply(new RequestOptions()
+                            .placeholder(R.drawable.default_profile_avatar)
+                            .error(R.drawable.default_profile_avatar))
+                    .into(holder.getBinding().ivImage);
+        }
+
+        //set name
+        holder.getBinding().tvName.setText(item.getValue());
+
+        // verify visibility
+        if (!item.isVisible()) {
+            holder.hide();
+        } else {
+            holder.show();
+        }
+    }
     //endregion
 
     //region Retrieve Values
@@ -1283,6 +1370,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
                 case FormItemViewType.GEOLOCATION:
                     //the value is saved when the user confirms the location selection on the map
+                    continue;
+
+                case FormItemViewType.DISPLAY:
+                    //this is not an input type field
                     continue;
 
                 default:

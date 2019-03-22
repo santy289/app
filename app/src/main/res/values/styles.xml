@@ -12,6 +12,7 @@
         <item name="colorControlActivated">@color/colorAccent</item>
 
         <item name="android:colorButtonNormal">@color/colorAccent</item>
+        <item name="colorButtonNormal">@android:color/transparent</item>
 
         <item name="boxStrokeColor">@color/colorAccent</item>
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>

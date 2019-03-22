@@ -45,7 +45,6 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:backgroundTint="@color/colorAccent"
                     android:text="@string/filters"
                     android:textColor="@color/white" />
 

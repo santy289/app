@@ -13,4 +13,6 @@ public interface CreateWorkflowFragmentInterface {
      * @return true if your processing has priority if not false
      */
     boolean onBackPressed();
+
+    void showToastMessage(int stringRes);
 }

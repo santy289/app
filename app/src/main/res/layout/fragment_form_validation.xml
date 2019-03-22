@@ -32,6 +32,5 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="10dp"
         android:text="@string/ok"
-        app:backgroundTint="@color/colorAccent"
         tools:text="OK" />
 </LinearLayout>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#F5F4F4</color>
+    <color name="colorPrimary">@color/dark_blue</color>
     <color name="colorPrimaryDark">#555555</color>
     <color name="colorAccent">@color/dark_blue</color>
 
@@ -19,6 +19,7 @@
     <color name="light_blue">#D1DDED</color>
     <color name="dark_blue">#414759</color>
     <color name="light_blue_background_t">#80F6F9FD</color>
+    <color name="toolbar">#F5F4F4</color>
 
     <color name="text_blue">#3063A5</color>
 

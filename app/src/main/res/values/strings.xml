@@ -245,6 +245,9 @@
     <string name="people_involved_form_return_button">Go Back</string>
     <string name="select_date_dialog_end_date_before_start_date_error">The start date cannot be after the end date.</string>
     <string name="background_service_notification_text">Listening for notifications</string>
+    <string name="double_multiple_choice_form_item_select_both">You need to select both values to add an option.</string>
+    <string name="approvers_involved">Approvers Involved</string>
+    <string name="fragment_create_workflow_no_permissions">You do not have permissions to create a workflow.</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Workflow Details</string>

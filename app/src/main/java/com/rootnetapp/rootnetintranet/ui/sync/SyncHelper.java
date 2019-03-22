@@ -32,6 +32,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTyp
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -464,15 +465,21 @@ public class SyncHelper {
         }
 
         User loggedUser = loggedProfileResponse.getUser();
+        addLoggedProfileToDatabase(loggedUser);
+
+        Object permissionsObj = loggedUser.getPermissions();
+
+        if (!(permissionsObj instanceof Map)) {
+            failure(null);
+            return;
+        }
 
         String permissionsString = RootnetPermissionsUtils.getPermissionsStringFromMap(
-                loggedUser.getPermissions());
+                (Map<String, Object>) permissionsObj);
 
         String[] value = new String[]{PreferenceKeys.PREF_USER_PERMISSIONS,
                                       permissionsString};
         saveStringToPreference.postValue(value);
-
-        addLoggedProfileToDatabase(loggedUser);
     }
 
     private void addLoggedProfileToDatabase(User user){

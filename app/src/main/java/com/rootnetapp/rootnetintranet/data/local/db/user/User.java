@@ -7,7 +7,6 @@ import com.squareup.moshi.Json;
 
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Map;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
@@ -122,7 +121,7 @@ public class User {
 
     @Ignore
     @Json(name = "new_permissions")
-    private Map<String, Object> permissions;
+    private Object permissions;
 
     /*
     @Json(name = "roles")
@@ -232,11 +231,11 @@ public class User {
         this.roles = roles;
     }*/
 
-    public Map<String, Object> getPermissions() {
+    public Object getPermissions() {
         return permissions;
     }
 
-    public void setPermissions(Map<String, Object> permissions) {
+    public void setPermissions(Object permissions) {
         this.permissions = permissions;
     }
 }

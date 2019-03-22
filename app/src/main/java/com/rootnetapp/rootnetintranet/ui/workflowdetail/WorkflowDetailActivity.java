@@ -55,6 +55,7 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     private ActivityWorkflowDetailBinding mBinding;
     private WorkflowDetailViewPagerAdapter mViewPagerAdapter;
     private Menu mMenu;
+    private OnOpenStatusChangedListener mOnOpenStatusChangedListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -161,6 +162,10 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 .observe(this, this::showEnableDisableMenuItem);
         workflowDetailViewModel.getObservableShowOpenClose()
                 .observe(this, this::showOpenCloseMenuItem);
+        workflowDetailViewModel.updateActiveStatusFromUserAction
+                .observe(this, this::showOpenCloseMenuItem);
+        workflowDetailViewModel.handleSetWorkflowIsOpenByRepo
+                .observe(this, this::showOpenCloseMenuItem);
 
         workflowDetailViewModel.showLoading.observe(this, this::showLoading);
     }
@@ -259,6 +264,11 @@ public class WorkflowDetailActivity extends AppCompatActivity {
 
     @UiThread
     private void showOpenCloseMenuItem(boolean showOpen) {
+        if (mOnOpenStatusChangedListener != null) {
+            //pass the open status to the listener
+            mOnOpenStatusChangedListener.onOpenStatusChanged(!showOpen);
+        }
+
         if (mMenu == null) return;
 
         mMenu.findItem(R.id.open).setVisible(showOpen);
@@ -314,6 +324,12 @@ public class WorkflowDetailActivity extends AppCompatActivity {
 
             return true;
 
+        } else if (item.getItemId() == R.id.open) {
+            workflowDetailViewModel.setWorkflowOpenStatus(true);
+
+        } else if (item.getItemId() == R.id.close) {
+            workflowDetailViewModel.setWorkflowOpenStatus(false);
+
         } else if (item.getItemId() == R.id.export_pdf) {
             if (checkExternalStoragePermissions()) {
                 workflowDetailViewModel.handleExportPdf();
@@ -321,5 +337,17 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Listener that will update the open status of the workflow.
+     */
+    public interface OnOpenStatusChangedListener {
+
+        void onOpenStatusChanged(boolean isOpen);
+    }
+
+    public void setOnOpenStatusChangedListener(OnOpenStatusChangedListener listener) {
+        mOnOpenStatusChangedListener = listener;
     }
 }

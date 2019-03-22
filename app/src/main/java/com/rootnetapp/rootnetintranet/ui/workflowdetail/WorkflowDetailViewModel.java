@@ -14,6 +14,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 
 import androidx.annotation.NonNull;
@@ -48,6 +49,8 @@ public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<Boolean> mShowEnableDisableLiveData;
     private MutableLiveData<Boolean> mShowOpenCloseLiveData;
     private LiveData<WorkflowListItem> handleRepoWorkflowRequest;
+    protected LiveData<Boolean> updateActiveStatusFromUserAction;
+    protected LiveData<Boolean> handleSetWorkflowIsOpenByRepo;
 
     protected MutableLiveData<Boolean> showLoading;
 
@@ -104,7 +107,7 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.mToken = token;
 
         handleRepoWorkflowRequest = Transformations.map(
-                mRepository.getObservableRetreiveFromDbWorkflow(),
+                mRepository.getObservableRetrieveFromDbWorkflow(),
                 workflowDb -> {
                     initUiWithWorkflowListItem.setValue(workflowDb);
                     getWorkflow(token, workflowDb.getWorkflowId());
@@ -179,6 +182,54 @@ public class WorkflowDetailViewModel extends ViewModel {
                 throwable -> {
                     mShowToastMessage.setValue(Utils.getOnFailureStringRes(throwable));
                     return false;
+                }
+        );
+
+        // Transformation for observing approval and rejection of workflows.
+        updateActiveStatusFromUserAction = Transformations.map(
+                mRepository.getActivationResponse(),
+                activationResponse -> {
+                    // transform WorkflowActivationResponse to StatusUiData
+
+                    showLoading.setValue(false);
+
+                    // if correct, this API will only return one workflow
+
+                    // check for emptiness of main list
+                    List<List<WorkflowDb>> responseList = activationResponse.getData();
+                    if (responseList.isEmpty()) {
+                        mShowToastMessage.setValue(R.string.error);
+                        return !mWorkflow.isOpen();
+                    }
+
+                    // check for emptiness of workflow list
+                    List<WorkflowDb> workflowDbList = responseList.get(0);
+                    if (workflowDbList.isEmpty()) {
+                        mShowToastMessage.setValue(R.string.error);
+                        return !mWorkflow.isOpen();
+                    }
+
+                    mWorkflow = workflowDbList.get(0);
+
+                    mShowToastMessage.setValue(R.string.request_successfully);
+
+                    return !mWorkflow.isOpen();
+                }
+        );
+
+        // Transformation used in case that the workflow activation fails
+        handleSetWorkflowIsOpenByRepo = Transformations.map(
+                mRepository.getActivationFailed(),
+                throwable -> {
+                    /*
+                    Set the original status. mWorkflow object is only updated if the request is successful.
+                    Thus, it will always hold the correct status
+                     */
+
+                    showLoading.setValue(false);
+                    mShowToastMessage.setValue(Utils.getOnFailureStringRes(throwable));
+
+                    return !mWorkflow.isOpen();
                 }
         );
     }
@@ -273,6 +324,14 @@ public class WorkflowDetailViewModel extends ViewModel {
      */
     public void setFilesCounter(int count) {
         mFilesTabCounter.setValue(count);
+    }
+
+    /**
+     * Calls the endpoint to change the Workflow active status.
+     */
+    protected void setWorkflowOpenStatus(boolean open) {
+        showLoading.setValue(true);
+        mRepository.postWorkflowActivation(mToken, mWorkflow.getId(), open);
     }
 
     private void onFailure(Throwable throwable) {

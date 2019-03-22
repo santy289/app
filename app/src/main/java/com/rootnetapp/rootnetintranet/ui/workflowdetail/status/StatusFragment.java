@@ -16,6 +16,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailStatusBinding;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters.ApproversAdapter;
 
 import java.util.List;
@@ -28,6 +29,7 @@ import androidx.annotation.UiThread;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -72,6 +74,7 @@ public class StatusFragment extends Fragment {
         String token = "Bearer " + prefs.getString("token", "");
 
         setOnClickListeners();
+        setOnOpenStatusChangedListener();
         subscribe();
 
         statusViewModel.initDetails(token, mWorkflowListItem);
@@ -110,10 +113,6 @@ public class StatusFragment extends Fragment {
                 .observe(getViewLifecycleOwner(), this::hideApproveSpinnerOnNotApprover);
         statusViewModel.updateStatusUiFromUserAction
                 .observe(getViewLifecycleOwner(), this::updateStatusDetails);
-        statusViewModel.updateActiveStatusFromUserAction
-                .observe(getViewLifecycleOwner(), this::updateWorkflowStatus);
-        statusViewModel.handleSetWorkflowIsOpenByRepo
-                .observe(getViewLifecycleOwner(), this::updateWorkflowStatus);
         statusViewModel.setWorkflowIsOpen
                 .observe(getViewLifecycleOwner(), this::updateWorkflowStatus);
     }
@@ -121,6 +120,18 @@ public class StatusFragment extends Fragment {
     private void setOnClickListeners() {
         mBinding.includeNextStep.btnApprove.setOnClickListener(v -> approveAction());
         mBinding.includeNextStep.btnReject.setOnClickListener(v -> rejectAction());
+    }
+
+    /**
+     * Set the open status changed listener of the {@link WorkflowDetailActivity}. The listener is
+     * invoked when the user activates the open/close action from the Activity's menu items.
+     */
+    private void setOnOpenStatusChangedListener() {
+        FragmentActivity activity = getActivity();
+        if (activity instanceof WorkflowDetailActivity) {
+            ((WorkflowDetailActivity) activity).setOnOpenStatusChangedListener(
+                    isOpen -> statusViewModel.updateStatusUiData(isOpen));
+        }
     }
 
     /**

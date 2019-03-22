@@ -20,18 +20,31 @@
                 android:layout_centerHorizontal="true"
                 android:background="@color/transparentArrow" />
 
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/img_item"
+            <FrameLayout
+                android:id="@+id/fl_img_item"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_below="@id/top_line"
-                android:src="@color/dark_blue" />
+                android:layout_below="@id/top_line">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/circle_accent" />
+
+                <ImageView
+                    android:id="@+id/img_item"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:tint="@color/white"
+                    tools:src="@drawable/ic_code_branch_black" />
+            </FrameLayout>
 
             <View
                 android:id="@+id/bottom_line"
                 android:layout_width="10dp"
                 android:layout_height="match_parent"
-                android:layout_below="@id/img_item"
+                android:layout_below="@id/fl_img_item"
                 android:layout_centerHorizontal="true"
                 android:background="@color/light_blue" />
 
@@ -41,9 +54,11 @@
             android:id="@+id/lyt_data"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="60dp">
+            android:layout_marginStart="60dp"
+            android:background="?selectableItemBackground">
 
             <LinearLayout
+                android:id="@+id/ll_data"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
@@ -53,8 +68,10 @@
                 android:paddingBottom="1dp">
 
                 <RelativeLayout
+                    android:id="@+id/rl_header"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="?selectableItemBackground"
                     android:padding="5dp">
 
                     <de.hdodenhof.circleimageview.CircleImageView
@@ -92,6 +109,7 @@
                             android:id="@+id/tv_comments"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:background="?selectableItemBackground"
                             android:focusable="true"
                             android:focusableInTouchMode="true"
                             android:paddingTop="5dp"

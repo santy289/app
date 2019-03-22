@@ -27,6 +27,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
+import com.rootnetapp.rootnetintranet.BuildConfig;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -388,6 +389,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initActionListeners() {
+        mainBinding.leftDrawer.navWorkflows.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navProfile.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navExit.setOnClickListener(this::drawerClicks);
         mainBinding.rightDrawer.drawerBackButton.setOnClickListener(view -> {
@@ -557,6 +559,9 @@ public class MainActivity extends AppCompatActivity
         mainBinding.drawerLayout
                 .setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
 
+        String versionName = BuildConfig.VERSION_NAME;
+        mainBinding.leftDrawer.tvVersionName.setText(versionName);
+
         toggle.syncState();
     }
 
@@ -571,6 +576,12 @@ public class MainActivity extends AppCompatActivity
     private void drawerClicks(View view) {
         int id = view.getId();
         switch (id) {
+            case R.id.nav_workflows: {
+                mainBinding.bottomNavigation.setSelectedItemId(R.id.menu_workflow_list);
+                showFragment(WorkflowFragment.newInstance(this), false);
+                mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
+                break;
+            }
             case R.id.nav_profile: {
                 showFragment(ProfileFragment.newInstance(this), false);
                 mainBinding.drawerLayout.closeDrawer(GravityCompat.START);

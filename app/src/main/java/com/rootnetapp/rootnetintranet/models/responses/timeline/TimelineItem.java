@@ -28,6 +28,8 @@ public class TimelineItem {
     @Json(name = "description")
     private Description description;
 
+    private boolean showCommentInput;
+
     public Integer getId() {
         return id;
     }
@@ -108,4 +110,11 @@ public class TimelineItem {
         this.description = description;
     }
 
+    public boolean isShowCommentInput() {
+        return showCommentInput;
+    }
+
+    public void setShowCommentInput(boolean showCommentInput) {
+        this.showCommentInput = showCommentInput;
+    }
 }

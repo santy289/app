@@ -3,7 +3,6 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters;
 import android.content.Context;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
@@ -60,9 +59,17 @@ public class ApproversAdapter extends RecyclerView.Adapter<ApproversViewholder> 
                     .into(viewholder.binding.detailApproverAvatar);
         }
 
-        //we use INVISIBLE instead of GONE to keep the constraints
-        viewholder.binding.detailApproverRequired
-                .setVisibility(currentApprover.isRequire ? View.VISIBLE : View.INVISIBLE);
+        String detailText = "";
+        if (currentApprover.isRequire) {
+            detailText = context
+                    .getString(R.string.workflow_detail_status_fragment_required_approval);
+        } else if (currentApprover.isGlobal) {
+            detailText = context.getString(R.string.workflow_detail_status_fragment_all_status);
+        } else if (currentApprover.isStatusSpecific) {
+            detailText = context
+                    .getString(R.string.workflow_detail_status_fragment_specific_status);
+        }
+        viewholder.binding.tvApproverDetail.setText(detailText);
 
         viewholder.binding.detailApproverName.setText(currentApprover.entityName);
 

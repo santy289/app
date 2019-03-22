@@ -78,7 +78,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="@string/workflow_detail_workflow_not_found"
+                android:text="@string/workflow_detail_activity_workflow_not_found"
                 android:textColor="@color/colorAccent"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="parent"

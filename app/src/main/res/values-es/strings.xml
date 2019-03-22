@@ -113,7 +113,6 @@
     <string name="next_step_approver">PRÓXIMO PASO APROBAR</string>
     <string name="next_approver">Próximo paso aprobar:</string>
     <string name="mass_approval">Aprobación masiva</string>
-    <string name="required_approval">(requiere aprobación)</string>
     <string name="start_date">Fecha de Inicio</string>
     <string name="campaign">Campaña</string>
     <string name="origin">Origen</string>
@@ -249,7 +248,9 @@
     <string name="workflow_detail_activity_open_file">Abrir Archivo</string>
     <string name="workflow_detail_activity_no_pdf_reader">Su dispositivo no puede abrir archivos PDF. Por favor instale un lector de PDF.</string>
     <string name="workflow_detail_activity_permissions_not_granted">No es posible exportar el PDF debido a que los permisos no fueron otorgados.</string>
-    <string name="workflow_detail_workflow_not_found">Este workflow no existe.</string>
+    <string name="workflow_detail_activity_workflow_not_found">Este workflow no existe.</string>
+    <string name="workflow_detail_activity_export_pdf">Exportar PDF</string>
+    <string name="workflow_detail_activity_view_tree">Ver Diagrama</string>
     <!--StatusFragment-->
     <string name="workflow_detail_status_fragment_title">Estatus</string>
     <string name="workflow_detail_status_fragment_status_summary">Estatus del Workflow</string>
@@ -259,14 +260,15 @@
     <string name="workflow_detail_status_fragment_status_summary_tied_status">Empatado</string>
     <string name="workflow_detail_status_fragment_status_summary_tied_status_message">El estatus actual está empatado</string>
     <string name="workflow_detail_status_fragment_next_step">Elija el Siguiente Estatus</string>
-    <string name="workflow_detail_status_fragment_next_step_approvers">Aprobadores del siguiente estatus:</string>
+    <string name="workflow_detail_status_fragment_next_step_approvers">Aprobadores del estatus:</string>
     <string name="workflow_detail_status_fragment_next_step_mass_approval">Aprobación masiva</string>
     <string name="workflow_detail_status_fragment_approve">Aprobar</string>
     <string name="workflow_detail_status_fragment_reject">Rechazar</string>
     <string name="workflow_detail_status_fragment_spinner_title">- Elija un Estatus -</string>
     <string name="workflow_detail_status_fragment_must_select_step">Debes seleccionar un estatus</string>
-    <string name="workflow_detail_status_fragment_export_pdf">Exportar PDF</string>
-    <string name="workflow_detail_status_fragment_view_tree">Ver Diagrama</string>
+    <string name="workflow_detail_status_fragment_required_approval">(aprobación requerida)</string>
+    <string name="workflow_detail_status_fragment_all_status">(todos los estatus)</string>
+    <string name="workflow_detail_status_fragment_specific_status">(específico)</string>
     <!--InformationFragment-->
     <string name="workflow_detail_information_fragment_title">@string/workflow_detail_information_fragment_information</string>
     <string name="workflow_detail_information_fragment_important_things">Datos Importantes Sobre Este Estatus</string>
@@ -303,7 +305,7 @@
     <!--FilesFragment-->
     <string name="workflow_detail_files_fragment_title">@string/workflow_detail_files_fragment_documents</string>
     <string name="workflow_detail_files_fragment_documents">Documentos</string>
-    <string name="workflow_detail_files_fragment_no_files">Ningún archivo a mostrar</string>
+    <string name="workflow_detail_files_fragment_no_files">Ningún archivo a mostrar.</string>
     <string name="workflow_detail_files_fragment_file_name">Nombre del archivo</string>
     <string name="workflow_detail_files_fragment_no_file_manager">Por favor instale un manejador de archivos.</string>
     <string name="workflow_detail_files_fragment_select_file">Elija el archivo para subir</string>
@@ -353,14 +355,49 @@
     <string name="timeline_modules_workflow_comments">Comentarios de Workflows</string>
     <string name="timeline_action_workflow_created">%1$s ha creado el workflow %2$s</string>
     <string name="timeline_action_workflow_updated">%1$s ha actualizado el workflow %2$s</string>
-    <string name="timeline_action_workflow_status_updated">%1$s ha actualizado el estatus del workflow %2$s</string>
+    <string name="timeline_action_workflow_status_approved">%1$s has approved %2$s of the workflow %3$s</string>
+    <string name="timeline_action_workflow_status_rejected">%1$s has rejected %2$s of the workflow %3$s</string>
     <string name="timeline_action_workflow_file_created">%1$s ha subido un archivo para el workflow %2$s</string>
     <string name="timeline_action_workflow_comment_created">%1$s ha comentado en el workflow %2$s</string>
+    <string name="timeline_action_workflow_comment_updated">%1$s ha actualizado un comentario en el workflow %2$s</string>
     <string name="timeline_description">Descripción: %s</string>
-    <string name="timeline_current_status">Estatus actual: %s</string>
+    <string name="timeline_description_current_status">Estatus actual: %s</string>
+    <string name="timeline_description_file">
+        <![CDATA[
+            <b>Archivo:</b> %s
+        ]]>
+    </string>
+    <string name="timeline_description_workflow_status_approved">
+        <![CDATA[
+            <b>Aprobado:</b> %1$s -> %2$s
+        ]]>
+    </string>
+    <string name="timeline_description_workflow_status_rejected">
+        <![CDATA[
+            <b>Rechazado:</b> %s
+        ]]>
+    </string>
+    <string name="timeline_description_workflow_created_out_of_time">Fuera de tiempo (%s)</string>
+    <plurals name="timeline_description_out_of_time_days">
+        <item formatted="true" quantity="one">1 día</item>
+        <item formatted="true" quantity="other">%d días</item>
+    </plurals>
+    <plurals name="timeline_description_out_of_time_hours">
+        <item formatted="true" quantity="one">1 hora</item>
+        <item formatted="true" quantity="other">%d horas</item>
+    </plurals>
+    <string name="timeline_description_workflow_created">
+        <![CDATA[
+            <b>Tipo:</b> %1$s
+            <br><b>Descripción:</b> %2$s
+            <br><b>Inicio:</b> %3$s
+            <br><b>Tiempo restante:</b> %4$s
+            <br><b>Estado actual:</b> %5$s
+        ]]>
+    </string>
     <plurals name="timeline_comment_replies">
-        <item quantity="one" formatted="true">1 respuesta</item>
-        <item quantity="other" formatted="true">%d respuestas</item>
+        <item formatted="true" quantity="one">1 respuesta</item>
+        <item formatted="true" quantity="other">%d respuestas</item>
     </plurals>
     <plurals name="timeline_comments">
         <item formatted="true" quantity="one">1 comentario</item>

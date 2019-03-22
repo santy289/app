@@ -45,6 +45,8 @@ public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<String> mWorkflowTypeVersionLiveData;
     private MutableLiveData<Boolean> mShowNotFoundViewLiveData;
     private MutableLiveData<Boolean> mShowExportPdfButtonLiveData;
+    private MutableLiveData<Boolean> mShowEnableDisableLiveData;
+    private MutableLiveData<Boolean> mShowOpenCloseLiveData;
     private LiveData<WorkflowListItem> handleRepoWorkflowRequest;
 
     protected MutableLiveData<Boolean> showLoading;
@@ -236,6 +238,9 @@ public class WorkflowDetailViewModel extends ViewModel {
         int version = mWorkflow.getWorkflowType().getVersion();
         String versionString = String.format(Locale.US, "v%d", version);
         mWorkflowTypeVersionLiveData.setValue(versionString);
+
+        mShowEnableDisableLiveData.setValue(!mWorkflow.isStatus());
+        mShowOpenCloseLiveData.setValue(!mWorkflow.isOpen());
     }
 
     private void onWorkflowFailure(Throwable throwable) {
@@ -322,6 +327,20 @@ public class WorkflowDetailViewModel extends ViewModel {
             mShowExportPdfButtonLiveData = new MutableLiveData<>();
         }
         return mShowExportPdfButtonLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowEnableDisable() {
+        if (mShowEnableDisableLiveData == null) {
+            mShowEnableDisableLiveData = new MutableLiveData<>();
+        }
+        return mShowEnableDisableLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowOpenClose() {
+        if (mShowOpenCloseLiveData == null) {
+            mShowOpenCloseLiveData = new MutableLiveData<>();
+        }
+        return mShowOpenCloseLiveData;
     }
 
     protected LiveData<WorkflowListItem> getObservableWorflowListItem() {

@@ -20,7 +20,6 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.ActivityWorkflowDetailBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
-import com.rootnetapp.rootnetintranet.ui.quickactions.changestatus.ChangeStatusActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.WorkflowDetailViewPagerAdapter;
 
 import java.io.File;
@@ -55,7 +54,7 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     private WorkflowDetailViewModel workflowDetailViewModel;
     private ActivityWorkflowDetailBinding mBinding;
     private WorkflowDetailViewPagerAdapter mViewPagerAdapter;
-    private MenuItem mExportPdfMenuItem;
+    private Menu mMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,6 +157,10 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 .observe(this, this::showNotFoundView);
         workflowDetailViewModel.getObservableShowExportPdfButton()
                 .observe(this, this::showExportPdfMenuItem);
+        workflowDetailViewModel.getObservableShowEnableDisable()
+                .observe(this, this::showEnableDisableMenuItem);
+        workflowDetailViewModel.getObservableShowOpenClose()
+                .observe(this, this::showOpenCloseMenuItem);
 
         workflowDetailViewModel.showLoading.observe(this, this::showLoading);
     }
@@ -241,9 +244,25 @@ public class WorkflowDetailActivity extends AppCompatActivity {
 
     @UiThread
     private void showExportPdfMenuItem(boolean show) {
-        if (mExportPdfMenuItem == null) return;
+        if (mMenu == null) return;
 
-        mExportPdfMenuItem.setVisible(show);
+        mMenu.findItem(R.id.export_pdf).setVisible(show);
+    }
+
+    @UiThread
+    private void showEnableDisableMenuItem(boolean showEnable) {
+        if (mMenu == null) return;
+
+        mMenu.findItem(R.id.enable).setVisible(showEnable);
+        mMenu.findItem(R.id.disable).setVisible(!showEnable);
+    }
+
+    @UiThread
+    private void showOpenCloseMenuItem(boolean showOpen) {
+        if (mMenu == null) return;
+
+        mMenu.findItem(R.id.open).setVisible(showOpen);
+        mMenu.findItem(R.id.close).setVisible(!showOpen);
     }
 
     /**
@@ -279,8 +298,11 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_workflow_detail, menu);
-        mExportPdfMenuItem = menu.findItem(R.id.export_pdf);
-        mExportPdfMenuItem.setVisible(workflowDetailViewModel.hasExportPermissions());
+
+        mMenu = menu;
+
+        mMenu.findItem(R.id.export_pdf).setVisible(workflowDetailViewModel.hasExportPermissions());
+
         return super.onCreateOptionsMenu(menu);
     }
 

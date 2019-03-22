@@ -20,7 +20,7 @@ public class EditProfileViewModel extends ViewModel {
 
     private MutableLiveData<LoggedUser> mUserLiveData;
     private MutableLiveData<Boolean> mStatusLiveData;
-    private MutableLiveData<Integer> mErrorLiveData;
+    private MutableLiveData<Integer> mToastMessageLiveData;
     private MutableLiveData<Boolean> mShowLoadingLiveData;
 
     private EditProfileRepository mRepository;
@@ -51,7 +51,7 @@ public class EditProfileViewModel extends ViewModel {
 
     private void onUserSuccess(LoggedProfileResponse loggedProfileResponse) {
         if (loggedProfileResponse == null) {
-            mErrorLiveData.setValue(R.string.failure_connect);
+            mToastMessageLiveData.setValue(R.string.failure_connect);
             return;
         }
 
@@ -63,7 +63,7 @@ public class EditProfileViewModel extends ViewModel {
 
     private void onUserFailure(Throwable throwable) {
         mShowLoadingLiveData.setValue(false);
-        mErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+        mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
     }
 
     protected void editUser(String fullName, String email, String phoneNumber) {
@@ -89,13 +89,31 @@ public class EditProfileViewModel extends ViewModel {
 
     private void onEditLocalSuccess(Boolean ignored) {
         mShowLoadingLiveData.setValue(false);
-
         mStatusLiveData.setValue(true);
+    }
+
+    protected void changePassword(String newPassword, String repeatedPassword) {
+        if (mLoggedUser == null) {
+            return;
+        }
+
+        mShowLoadingLiveData.setValue(true);
+
+        Disposable disposable = mRepository
+                .changePassword(mToken, mLoggedUser.getId(), newPassword, repeatedPassword)
+                .subscribe(this::onChangePasswordSuccess, this::onFailure);
+
+        mDisposables.add(disposable);
+    }
+
+    private void onChangePasswordSuccess(EditUserResponse editUserResponse) {
+        mShowLoadingLiveData.setValue(false);
+        mToastMessageLiveData.setValue(R.string.password_changed_successfully);
     }
 
     private void onFailure(Throwable throwable) {
         mShowLoadingLiveData.setValue(false);
-        mErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+        mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
     }
 
     @Override
@@ -117,11 +135,11 @@ public class EditProfileViewModel extends ViewModel {
         return mStatusLiveData;
     }
 
-    protected LiveData<Integer> getObservableError() {
-        if (mErrorLiveData == null) {
-            mErrorLiveData = new MutableLiveData<>();
+    protected LiveData<Integer> getObservableToastMessage() {
+        if (mToastMessageLiveData == null) {
+            mToastMessageLiveData = new MutableLiveData<>();
         }
-        return mErrorLiveData;
+        return mToastMessageLiveData;
     }
 
     protected LiveData<LoggedUser> getObservableUser() {

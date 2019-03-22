@@ -11,11 +11,16 @@
     <string name="loading_message">Cargando</string>
     <string name="username">Usuario</string>
     <string name="password">Clave</string>
+    <string name="new_password">Nueva clave</string>
+    <string name="confirm_password">Confirmar clave</string>
     <string name="change_domain">Cambiar Compañía</string>
     <string name="login">Ingresar</string>
     <string name="empty_domain">El dominio no puede estar sin valor</string>
     <string name="empty_user">Por favor ingrese un usuario para continuar</string>
     <string name="empty_password">Por favor ingrese una clave para continuar</string>
+    <string name="empty_confirm_password">Por favor confirme su clave para continuar</string>
+    <string name="passwords_dont_match">Las claves no coinciden</string>
+    <string name="password_changed_successfully">Su contraseña ha sido cambiada con éxito.</string>
     <string name="forgot_password">Olvidó su clave?</string>
     <string name="recover_password">Recuperar Clave</string>
     <string name="accept">Aceptar</string>

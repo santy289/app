@@ -32,16 +32,24 @@ public class EditProfileRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<EditUserResponse> editUserService(String token, int id, String fullName, String email, String phoneNumber) {
-        return service.editUser(token, id, fullName, email, phoneNumber).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
+    protected Observable<EditUserResponse> editUserService(String token, int id, String fullName,
+                                                           String email, String phoneNumber) {
+        return service.editUser(token, id, fullName, email, phoneNumber)
+                .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
     }
 
     public Observable<Boolean> editUserLocal(User user) {
-        return Observable.fromCallable(()->{
+        return Observable.fromCallable(() -> {
             List<User> list = new ArrayList<>();
             list.add(user);
             database.userDao().insertAll(list);
             return true;
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<EditUserResponse> changePassword(String token, int userId, String password,
+                                                          String repeatedPassword) {
+        return service.changeUserPassword(token, userId, password, repeatedPassword)
+                .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
     }
 }

@@ -1,9 +1,12 @@
 package com.rootnetapp.rootnetintranet.ui.editprofile;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -13,6 +16,7 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ActivityEditProfileBinding;
+import com.rootnetapp.rootnetintranet.databinding.DialogChangePasswordBinding;
 import com.rootnetapp.rootnetintranet.models.responses.user.LoggedUser;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 
@@ -47,6 +51,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
         subscribe();
         setActionBar();
+        setOnClickListeners();
 
         editProfileViewModel.init(token);
     }
@@ -54,7 +59,7 @@ public class EditProfileActivity extends AppCompatActivity {
     private void subscribe() {
         editProfileViewModel.getObservableStatus().observe(this, this::finishActivity);
         editProfileViewModel.getObservableUser().observe(this, this::updateUserUi);
-        editProfileViewModel.getObservableError().observe(this, this::showToastMessage);
+        editProfileViewModel.getObservableToastMessage().observe(this, this::showToastMessage);
         editProfileViewModel.getObservableShowLoading().observe(this, this::showLoading);
     }
 
@@ -66,6 +71,11 @@ public class EditProfileActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
+    }
+
+    private void setOnClickListeners() {
+        mBinding.btnAccept.setOnClickListener(view -> editUser());
+        mBinding.btnChangePassword.setOnClickListener(v -> showChangePasswordDialog());
     }
 
     private void editUser() {
@@ -92,8 +102,53 @@ public class EditProfileActivity extends AppCompatActivity {
         }
     }
 
+    private void showChangePasswordDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogTheme);
+
+        DialogChangePasswordBinding binding = DataBindingUtil
+                .inflate(LayoutInflater.from(this), R.layout.dialog_change_password, null, false);
+        builder.setView(binding.getRoot());
+
+        builder.setTitle(R.string.change_password);
+        builder.setCancelable(false);
+
+        builder.setPositiveButton(R.string.accept, null);
+        builder.setNegativeButton(R.string.cancel, null);
+
+        AlertDialog dialog = builder.show();
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(
+                v -> changePassword(dialog, binding));
+    }
+
+    private void changePassword(AlertDialog dialog, DialogChangePasswordBinding binding) {
+        binding.tilPassword.setError(null);
+        binding.tilConfirmPassword.setError(null);
+        boolean canUpdate = true;
+
+        String password = binding.inputPassword.getText().toString();
+        String confirmPassword = binding.inputConfirmPassword.getText().toString();
+
+        if (TextUtils.isEmpty(password)) {
+            canUpdate = false;
+            binding.tilPassword.setError(getString(R.string.empty_password));
+        } else if (TextUtils.isEmpty(confirmPassword)) {
+            canUpdate = false;
+            binding.tilConfirmPassword.setError(getString(R.string.empty_confirm_password));
+        } else if (!password.equals(confirmPassword)) {
+            canUpdate = false;
+            binding.tilConfirmPassword.setError(getString(R.string.passwords_dont_match));
+        }
+
+        if (canUpdate) {
+            dialog.dismiss();
+            hideSoftInputKeyboard();
+
+            editProfileViewModel.changePassword(password, confirmPassword);
+        }
+    }
+
     @UiThread
-    private void finishActivity(boolean isFinish){
+    private void finishActivity(boolean isFinish) {
         if (!isFinish) return;
 
         setResult(RESULT_OK);
@@ -107,8 +162,6 @@ public class EditProfileActivity extends AppCompatActivity {
         mBinding.inputName.setText(user.getFullName());
         mBinding.inputEmail.setText(user.getEmail());
         mBinding.inputPhone.setText(user.getPhoneNumber());
-
-        mBinding.btnAccept.setOnClickListener(view -> editUser());
     }
 
     @UiThread

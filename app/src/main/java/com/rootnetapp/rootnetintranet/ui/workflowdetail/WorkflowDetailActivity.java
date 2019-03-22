@@ -371,10 +371,6 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         builder.setTitle(R.string.workflow_detail_activity_delete_dialog_title);
 
         String workflowKey = workflowDetailViewModel.getWorkflowListItem().getWorkflowTypeKey();
-        String message = getString(
-                R.string.workflow_detail_activity_delete_dialog_msg,
-                workflowKey
-        );
         builder.setMessage(getString(
                 R.string.workflow_detail_activity_delete_dialog_msg,
                 workflowKey

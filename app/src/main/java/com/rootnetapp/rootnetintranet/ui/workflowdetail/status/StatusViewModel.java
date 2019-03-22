@@ -610,13 +610,18 @@ public class StatusViewModel extends ViewModel {
      */
     private void updateStatusUiData(boolean isOpen, boolean userInteraction) {
         int stringRes = getSwitchStatusStringRes(isOpen);
-        mStatusUiData = new StatusUiData(isOpen, stringRes);
+        int colorRes = getSwitchStatusColorRes(isOpen);
+        mStatusUiData = new StatusUiData(isOpen, stringRes, colorRes);
 
         if (!userInteraction) setWorkflowIsOpen.setValue(mStatusUiData);
     }
 
     protected int getSwitchStatusStringRes(boolean isOpen) {
         return isOpen ? R.string.open : R.string.closed;
+    }
+
+    protected int getSwitchStatusColorRes(boolean isOpen) {
+        return isOpen ? R.color.green : R.color.text_red;
     }
 
     /**

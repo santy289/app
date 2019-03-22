@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -26,6 +25,7 @@ import javax.inject.Inject;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
@@ -44,7 +44,6 @@ public class StatusFragment extends Fragment {
     protected static final int INDEX_LAST_STATUS = 0;
     protected static final int INDEX_CURRENT_STATUS = 1;
     protected static final int INDEX_NEXT_STATUS = 2;
-    private CompoundButton.OnCheckedChangeListener mOnCheckedChangeListener;
 
     public StatusFragment() {
         // Required empty public constructor
@@ -89,38 +88,39 @@ public class StatusFragment extends Fragment {
         });
 
         statusViewModel.getObservableError().observe(getViewLifecycleOwner(), errorObserver);
-        statusViewModel.getObservableShowToastMessage().observe(getViewLifecycleOwner(), this::showToastMessage);
-        statusViewModel.getObservableTieStatus().observe(getViewLifecycleOwner(), this::showTieStatusLabel);
+        statusViewModel.getObservableShowToastMessage()
+                .observe(getViewLifecycleOwner(), this::showToastMessage);
+        statusViewModel.getObservableTieStatus()
+                .observe(getViewLifecycleOwner(), this::showTieStatusLabel);
         statusViewModel.getObservableEnableApproveRejectButtons()
                 .observe(getViewLifecycleOwner(), this::enableApproveRejectButtons);
 
         statusViewModel.showLoading.observe(getViewLifecycleOwner(), this::showLoading);
         statusViewModel.handleShowLoadingByRepo.observe(getViewLifecycleOwner(), this::showLoading);
         statusViewModel.updateStatusUi.observe(getViewLifecycleOwner(), this::updateStatusDetails);
-        statusViewModel.updateCurrentApproversList.observe(getViewLifecycleOwner(), this::updateCurrentApproversList);
+        statusViewModel.updateCurrentApproversList
+                .observe(getViewLifecycleOwner(), this::updateCurrentApproversList);
         statusViewModel.hideApproverListOnEmptyData
                 .observe(getViewLifecycleOwner(), this::hideApproverListOnEmptyData);
-        statusViewModel.updateApproveSpinner.observe(getViewLifecycleOwner(), this::updateApproveSpinner);
+        statusViewModel.updateApproveSpinner
+                .observe(getViewLifecycleOwner(), this::updateApproveSpinner);
         statusViewModel.hideApproveSpinnerOnEmptyData
                 .observe(getViewLifecycleOwner(), this::hideApproveSpinnerOnEmptyData);
         statusViewModel.hideApproveSpinnerOnNotApprover
                 .observe(getViewLifecycleOwner(), this::hideApproveSpinnerOnNotApprover);
-        statusViewModel.updateStatusUiFromUserAction.observe(getViewLifecycleOwner(), this::updateStatusDetails);
-        statusViewModel.updateActiveStatusFromUserAction.observe(getViewLifecycleOwner(), this::updateWorkflowStatus);
-        statusViewModel.handleSetWorkflowIsOpenByRepo.observe(getViewLifecycleOwner(), this::updateWorkflowStatus);
-        statusViewModel.setWorkflowIsOpen.observe(getViewLifecycleOwner(), this::updateWorkflowStatus);
+        statusViewModel.updateStatusUiFromUserAction
+                .observe(getViewLifecycleOwner(), this::updateStatusDetails);
+        statusViewModel.updateActiveStatusFromUserAction
+                .observe(getViewLifecycleOwner(), this::updateWorkflowStatus);
+        statusViewModel.handleSetWorkflowIsOpenByRepo
+                .observe(getViewLifecycleOwner(), this::updateWorkflowStatus);
+        statusViewModel.setWorkflowIsOpen
+                .observe(getViewLifecycleOwner(), this::updateWorkflowStatus);
     }
 
     private void setOnClickListeners() {
         mBinding.includeNextStep.btnApprove.setOnClickListener(v -> approveAction());
         mBinding.includeNextStep.btnReject.setOnClickListener(v -> rejectAction());
-
-        mOnCheckedChangeListener = (buttonView, isChecked) -> {
-            mBinding.switchStatus.setText(statusViewModel.getSwitchStatusStringRes(isChecked));
-            statusViewModel.toggleWorkflowActivation();
-        };
-        mBinding.switchStatus.setOnCheckedChangeListener(mOnCheckedChangeListener);
-        //todo verify action for "Mass Approval"
     }
 
     /**
@@ -314,19 +314,17 @@ public class StatusFragment extends Fragment {
     }
 
     /**
-     * Changes the UI state (text and color) of the selected status. This is called after user
-     * interaction with the Switch or after the API request is completed.
+     * Changes the UI state (text and color) of the selected status. This is called after the API
+     * request is completed.
      *
      * @param statusUiData object that contains the current state of the status UI.
      */
     @UiThread
     private void updateWorkflowStatus(StatusUiData statusUiData) {
-        //prevent the listener from being fired after setChecked()
-        mBinding.switchStatus.setOnCheckedChangeListener(null);
-        mBinding.switchStatus.setChecked(statusUiData.isOpen());
-        mBinding.switchStatus.setOnCheckedChangeListener(mOnCheckedChangeListener);
-
-        mBinding.switchStatus.setText(statusUiData.getSelectedText());
+        mBinding.tvStatus.setVisibility(View.VISIBLE);
+        mBinding.tvStatus.setText(statusUiData.getSelectedText());
+        mBinding.tvStatus.setTextColor(
+                ContextCompat.getColor(getContext(), statusUiData.getSelectedColor()));
     }
 
     private void showToastMessage(@StringRes int messageRes) {

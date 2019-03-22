@@ -30,6 +30,7 @@ import javax.inject.Inject;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -117,7 +118,7 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         setSupportActionBar(mBinding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        String title = workflowListItem.title;
+        String title = workflowListItem.getTitle();
         String subtitle = workflowListItem.getWorkflowTypeKey();
         if (title == null || title.isEmpty()) title = getTitle().toString();
         getSupportActionBar().setTitle(title);
@@ -168,6 +169,9 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 .observe(this, this::showOpenCloseMenuItem);
         workflowDetailViewModel.updateOpenClosedStatusFromUserAction
                 .observe(this, this::showOpenCloseMenuItem);
+
+        workflowDetailViewModel.deleteWorkflowRepsonseLiveData
+                .observe(this, this::finishActivityWorkflowDeleted);
 
         workflowDetailViewModel.showLoading.observe(this, this::showLoading);
     }
@@ -278,6 +282,18 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     }
 
     /**
+     * This is called after the delete workflow service response.
+     *
+     * @param isDeleted if the workflow has been deleted, finish this activity.
+     */
+    @UiThread
+    private void finishActivityWorkflowDeleted(boolean isDeleted) {
+        if (!isDeleted) return;
+
+        finish();
+    }
+
+    /**
      * Verify whether the user has granted permissions to read/write the external storage.
      *
      * @return whether the permissions are granted.
@@ -332,7 +348,7 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         } else if (item.getItemId() == R.id.disable) {
             workflowDetailViewModel.setWorkflowEnabledStatus(false);
 
-        }  else if (item.getItemId() == R.id.open) {
+        } else if (item.getItemId() == R.id.open) {
             workflowDetailViewModel.setWorkflowOpenStatus(true);
 
         } else if (item.getItemId() == R.id.close) {
@@ -342,9 +358,33 @@ public class WorkflowDetailActivity extends AppCompatActivity {
             if (checkExternalStoragePermissions()) {
                 workflowDetailViewModel.handleExportPdf();
             }
+
+        } else if (item.getItemId() == R.id.delete) {
+            showDeleteConfirmationDialog();
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showDeleteConfirmationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.workflow_detail_activity_delete_dialog_title);
+
+        String workflowKey = workflowDetailViewModel.getWorkflowListItem().getWorkflowTypeKey();
+        String message = getString(
+                R.string.workflow_detail_activity_delete_dialog_msg,
+                workflowKey
+        );
+        builder.setMessage(getString(
+                R.string.workflow_detail_activity_delete_dialog_msg,
+                workflowKey
+        ));
+        builder.setCancelable(false);
+
+        builder.setPositiveButton(R.string.accept,
+                (dialog, which) -> workflowDetailViewModel.deleteWorkflow());
+        builder.setNegativeButton(R.string.cancel, null);
+        builder.show();
     }
 
     /**

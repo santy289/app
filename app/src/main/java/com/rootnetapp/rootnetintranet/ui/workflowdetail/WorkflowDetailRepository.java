@@ -8,6 +8,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.exportpdf.ExportPdfResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.DeleteWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public class WorkflowDetailRepository {
     private MutableLiveData<WorkflowActivationResponse> openCloseResponseLiveData;
     private MutableLiveData<WorkflowActivationResponse> enableDisableResponseLiveData;
     private MutableLiveData<WorkflowListItem> retrieveFromDbWorkflow;
+    private MutableLiveData<DeleteWorkflowResponse> deleteWorkflowResponseLiveData;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
@@ -150,6 +152,25 @@ public class WorkflowDetailRepository {
         disposables.add(disposable);
     }
 
+    /**
+     * Deletes a specific workflow.
+     *
+     * @param workflowId workflow ID to delete.
+     */
+    protected void deleteWorkflow(String token, int workflowId) {
+        Disposable disposable = service
+                .deleteWorkflow(token, workflowId)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(success -> deleteWorkflowResponseLiveData.setValue(success),
+                        throwable -> {
+                            Log.d(TAG, "deleteWorkflow: " + throwable
+                                    .getMessage());
+                            errorLiveData.setValue(throwable);
+                        });
+        disposables.add(disposable);
+    }
+
     protected LiveData<ExportPdfResponse> getExportPdfResponse() {
         if (exportPdfResponseLiveData == null) {
             exportPdfResponseLiveData = new MutableLiveData<>();
@@ -183,5 +204,12 @@ public class WorkflowDetailRepository {
             enableDisableResponseLiveData = new MutableLiveData<>();
         }
         return enableDisableResponseLiveData;
+    }
+
+    protected LiveData<DeleteWorkflowResponse> getDeleteWorkflowResponse() {
+        if (deleteWorkflowResponseLiveData == null) {
+            deleteWorkflowResponseLiveData = new MutableLiveData<>();
+        }
+        return deleteWorkflowResponseLiveData;
     }
 }

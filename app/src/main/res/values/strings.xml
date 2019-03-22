@@ -262,6 +262,8 @@
     <string name="workflow_detail_activity_export_pdf">Export PDF</string>
     <string name="workflow_detail_activity_share">Share</string>
     <string name="workflow_detail_activity_delete">Delete</string>
+    <string name="workflow_detail_activity_delete_dialog_title">Delete Workflow</string>
+    <string name="workflow_detail_activity_delete_dialog_msg">Are you sure you want to delete the workflow %s?</string>
     <!--StatusFragment-->
     <string name="workflow_detail_status_fragment_title">Status</string>
     <string name="workflow_detail_status_fragment_status_summary">Workflow Status</string>

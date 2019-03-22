@@ -51,6 +51,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     private LiveData<WorkflowListItem> handleRepoWorkflowRequest;
     protected LiveData<Boolean> updateOpenClosedStatusFromUserAction;
     protected LiveData<Boolean> updateEnabledDisabledStatusFromUserAction;
+    protected LiveData<Boolean> deleteWorkflowRepsonseLiveData;
 
     protected MutableLiveData<Boolean> showLoading;
 
@@ -242,6 +243,22 @@ public class WorkflowDetailViewModel extends ViewModel {
                 }
         );
 
+        // Transformation for observing delete actions
+        deleteWorkflowRepsonseLiveData = Transformations.map(
+                mRepository.getDeleteWorkflowResponse(),
+                deleteWorkflowResponse -> {
+                    // transform DeleteWorkflowResponse to Boolean
+
+                    showLoading.setValue(false);
+
+                    // if correct, this API will return code 200
+
+                    mShowToastMessage.setValue(R.string.request_successfully);
+
+                    return deleteWorkflowResponse.getCode() == 200;
+                }
+        );
+
         // Transformation used in case that any repo request fails
         handleShowLoadingByRepo = Transformations.map(
                 mRepository.getErrorLiveData(),
@@ -359,6 +376,14 @@ public class WorkflowDetailViewModel extends ViewModel {
     protected void setWorkflowEnabledStatus(boolean enabled) {
         showLoading.setValue(true);
         mRepository.postWorkflowActivationEnableDisable(mToken, mWorkflow.getId(), enabled);
+    }
+
+    /**
+     * Calls the endpoint to delete this workflow.
+     */
+    protected void deleteWorkflow() {
+        showLoading.setValue(true);
+        mRepository.deleteWorkflow(mToken, mWorkflow.getId());
     }
 
     private void onFailure(Throwable throwable) {

@@ -41,6 +41,7 @@ import com.rootnetapp.rootnetintranet.models.responses.user.LoggedProfileRespons
 import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.websocket.WebSocketSettingResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.DeleteWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.WorkflowApproveRejectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowoverview.WorkflowOverviewResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
@@ -340,6 +341,11 @@ public interface ApiInterface {
     @GET("intranet/workflows/{id}")
     Observable<WorkflowResponse> getWorkflow(@Header("Authorization") String authorization,
                                              @Path("id") int workflowId);
+
+    @Headers({"Domain-Name: api"})
+    @POST("intranet/workflows/{id}?confirmation=true")
+    Observable<DeleteWorkflowResponse> deleteWorkflow(@Header("Authorization") String authorization,
+                                                      @Path("id") int workflowId);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/templates/{id}")

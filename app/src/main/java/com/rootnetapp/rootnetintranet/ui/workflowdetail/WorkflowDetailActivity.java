@@ -20,7 +20,6 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.ActivityWorkflowDetailBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
-import com.rootnetapp.rootnetintranet.ui.quickactions.changestatus.ChangeStatusActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.WorkflowDetailViewPagerAdapter;
 
 import java.io.File;
@@ -31,6 +30,7 @@ import javax.inject.Inject;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -55,7 +55,8 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     private WorkflowDetailViewModel workflowDetailViewModel;
     private ActivityWorkflowDetailBinding mBinding;
     private WorkflowDetailViewPagerAdapter mViewPagerAdapter;
-    private MenuItem mExportPdfMenuItem;
+    private Menu mMenu;
+    private OnOpenStatusChangedListener mOnOpenStatusChangedListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,7 +118,7 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         setSupportActionBar(mBinding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        String title = workflowListItem.title;
+        String title = workflowListItem.getTitle();
         String subtitle = workflowListItem.getWorkflowTypeKey();
         if (title == null || title.isEmpty()) title = getTitle().toString();
         getSupportActionBar().setTitle(title);
@@ -158,6 +159,23 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 .observe(this, this::showNotFoundView);
         workflowDetailViewModel.getObservableShowExportPdfButton()
                 .observe(this, this::showExportPdfMenuItem);
+        workflowDetailViewModel.getObservableShowDelete()
+                .observe(this, this::showDeleteMenuItem);
+        workflowDetailViewModel.getObservableShareWorkflow()
+                .observe(this, this::showShareIntentChooser);
+
+        workflowDetailViewModel.getObservableShowEnableDisable()
+                .observe(this, this::showEnableDisableMenuItem);
+        workflowDetailViewModel.updateEnabledDisabledStatusFromUserAction
+                .observe(this, this::showEnableDisableMenuItem);
+
+        workflowDetailViewModel.getObservableShowOpenClose()
+                .observe(this, this::showOpenCloseMenuItem);
+        workflowDetailViewModel.updateOpenClosedStatusFromUserAction
+                .observe(this, this::showOpenCloseMenuItem);
+
+        workflowDetailViewModel.deleteWorkflowRepsonseLiveData
+                .observe(this, this::finishActivityWorkflowDeleted);
 
         workflowDetailViewModel.showLoading.observe(this, this::showLoading);
     }
@@ -237,13 +255,89 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     private void showNotFoundView(boolean showNotFound) {
         mBinding.lytNotFound.setVisibility(showNotFound ? View.VISIBLE : View.GONE);
         mBinding.lytDetails.setVisibility(showNotFound ? View.GONE : View.VISIBLE);
+
+        //hide the menu items
+        if (showNotFound) {
+            mMenu.findItem(R.id.enable).setVisible(false);
+            mMenu.findItem(R.id.disable).setVisible(false);
+            mMenu.findItem(R.id.open).setVisible(false);
+            mMenu.findItem(R.id.close).setVisible(false);
+            mMenu.findItem(R.id.export_pdf).setVisible(false);
+            mMenu.findItem(R.id.share).setVisible(false);
+            mMenu.findItem(R.id.delete).setVisible(false);
+        }
     }
 
     @UiThread
     private void showExportPdfMenuItem(boolean show) {
-        if (mExportPdfMenuItem == null) return;
+        if (mMenu == null) return;
 
-        mExportPdfMenuItem.setVisible(show);
+        mMenu.findItem(R.id.export_pdf).setVisible(show);
+    }
+
+    @UiThread
+    private void showEnableDisableMenuItem(boolean showEnable) {
+        if (mMenu == null) return;
+
+        if (workflowDetailViewModel.hasEnableDisablePermissions()) {
+            mMenu.findItem(R.id.enable).setVisible(showEnable);
+            mMenu.findItem(R.id.disable).setVisible(!showEnable);
+        } else {
+            mMenu.findItem(R.id.enable).setVisible(false);
+            mMenu.findItem(R.id.disable).setVisible(false);
+        }
+    }
+
+    @UiThread
+    private void showOpenCloseMenuItem(boolean showOpen) {
+        if (mOnOpenStatusChangedListener != null) {
+            //pass the open status to the listener
+            mOnOpenStatusChangedListener.onOpenStatusChanged(!showOpen);
+        }
+
+        if (mMenu == null) return;
+
+        if (workflowDetailViewModel.hasOpenClosePermissions()) {
+            mMenu.findItem(R.id.open).setVisible(showOpen);
+            mMenu.findItem(R.id.close).setVisible(!showOpen);
+        } else {
+            mMenu.findItem(R.id.open).setVisible(false);
+            mMenu.findItem(R.id.close).setVisible(false);
+        }
+    }
+
+    @UiThread
+    private void showDeleteMenuItem(boolean show) {
+        if (mMenu == null) return;
+
+        mMenu.findItem(R.id.delete).setVisible(show);
+    }
+
+    /**
+     * This is called after the delete workflow service response.
+     *
+     * @param isDeleted if the workflow has been deleted, finish this activity.
+     */
+    @UiThread
+    private void finishActivityWorkflowDeleted(boolean isDeleted) {
+        if (!isDeleted) return;
+
+        finish();
+    }
+
+    /**
+     * Opens an IntentChooser to share plain text.
+     *
+     * @param textToShare the text to share.
+     */
+    @UiThread
+    private void showShareIntentChooser(String textToShare) {
+        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+        sharingIntent.setType("text/plain");
+        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, textToShare);
+        Intent chooserIntent = Intent.createChooser(sharingIntent,
+                getString(R.string.workflow_detail_activity_share_chooser));
+        startActivity(chooserIntent);
     }
 
     /**
@@ -279,8 +373,12 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_workflow_detail, menu);
-        mExportPdfMenuItem = menu.findItem(R.id.export_pdf);
-        mExportPdfMenuItem.setVisible(workflowDetailViewModel.hasExportPermissions());
+
+        mMenu = menu;
+
+        mMenu.findItem(R.id.export_pdf).setVisible(workflowDetailViewModel.hasExportPermissions());
+        mMenu.findItem(R.id.delete).setVisible(workflowDetailViewModel.hasDeletePermissions());
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -292,12 +390,63 @@ public class WorkflowDetailActivity extends AppCompatActivity {
 
             return true;
 
+        } else if (item.getItemId() == R.id.enable) {
+            workflowDetailViewModel.setWorkflowEnabledStatus(true);
+
+        } else if (item.getItemId() == R.id.disable) {
+            workflowDetailViewModel.setWorkflowEnabledStatus(false);
+
+        } else if (item.getItemId() == R.id.open) {
+            workflowDetailViewModel.setWorkflowOpenStatus(true);
+
+        } else if (item.getItemId() == R.id.close) {
+            workflowDetailViewModel.setWorkflowOpenStatus(false);
+
         } else if (item.getItemId() == R.id.export_pdf) {
             if (checkExternalStoragePermissions()) {
                 workflowDetailViewModel.handleExportPdf();
             }
+
+        } else if (item.getItemId() == R.id.share) {
+            SharedPreferences sharedPreferences = getSharedPreferences("Sessions",
+                    Context.MODE_PRIVATE);
+            String domainJson = sharedPreferences.getString(PreferenceKeys.PREF_DOMAIN, "");
+
+            workflowDetailViewModel.shareWorkflow(domainJson);
+
+        } else if (item.getItemId() == R.id.delete) {
+            showDeleteConfirmationDialog();
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showDeleteConfirmationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.workflow_detail_activity_delete_dialog_title);
+
+        String workflowKey = workflowDetailViewModel.getWorkflowListItem().getWorkflowTypeKey();
+        builder.setMessage(getString(
+                R.string.workflow_detail_activity_delete_dialog_msg,
+                workflowKey
+        ));
+        builder.setCancelable(false);
+
+        builder.setPositiveButton(R.string.accept,
+                (dialog, which) -> workflowDetailViewModel.deleteWorkflow());
+        builder.setNegativeButton(R.string.cancel, null);
+        builder.show();
+    }
+
+    /**
+     * Listener that will update the open status of the workflow.
+     */
+    public interface OnOpenStatusChangedListener {
+
+        void onOpenStatusChanged(boolean isOpen);
+    }
+
+    public void setOnOpenStatusChangedListener(OnOpenStatusChangedListener listener) {
+        mOnOpenStatusChangedListener = listener;
     }
 }

@@ -41,6 +41,7 @@ import com.rootnetapp.rootnetintranet.models.responses.user.LoggedProfileRespons
 import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
 import com.rootnetapp.rootnetintranet.models.responses.websocket.WebSocketSettingResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.DeleteWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.WorkflowApproveRejectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowoverview.WorkflowOverviewResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
@@ -350,6 +351,11 @@ public interface ApiInterface {
                                              @Path("id") int workflowId);
 
     @Headers({"Domain-Name: api"})
+    @POST("intranet/workflows/{id}?confirmation=true")
+    Observable<DeleteWorkflowResponse> deleteWorkflow(@Header("Authorization") String authorization,
+                                                      @Path("id") int workflowId);
+
+    @Headers({"Domain-Name: api"})
     @GET("intranet/templates/{id}")
     Observable<TemplatesResponse> getTemplate(@Header("Authorization") String authorization,
                                               @Path("id") int templateId);
@@ -451,9 +457,16 @@ public interface ApiInterface {
     @Headers({"Domain-Name: api"})
     @PATCH("intranet/workflow/activation")
     @FormUrlEncoded
-    Observable<WorkflowActivationResponse> postWorkflowActivation(@Header("Authorization") String authorization,
-                                                                  @Field("workflows[]") List<Integer> workflowIds,
-                                                                  @Field("open") boolean isOpen);
+    Observable<WorkflowActivationResponse> postWorkflowActivationOpenClose(@Header("Authorization") String authorization,
+                                                                           @Field("workflows[]") List<Integer> workflowIds,
+                                                                           @Field("open") boolean isOpen);
+
+    @Headers({"Domain-Name: api"})
+    @PATCH("intranet/workflow/activation")
+    @FormUrlEncoded
+    Observable<WorkflowActivationResponse> postWorkflowActivationEnableDisable(@Header("Authorization") String authorization,
+                                                                           @Field("workflows[]") List<Integer> workflowIds,
+                                                                           @Field("activate") boolean isEnabled);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows/{id}/pdf?dump=false")

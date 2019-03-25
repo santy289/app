@@ -36,26 +36,25 @@
                 android:layout_marginEnd="16dp"
                 android:background="@color/workflow_details_section_title_bar"
                 app:layout_constraintBottom_toBottomOf="@id/tv_title_workflow_status"
-                app:layout_constraintEnd_toStartOf="@+id/switch_status"
+                app:layout_constraintEnd_toStartOf="@+id/tv_status"
                 app:layout_constraintStart_toEndOf="@id/tv_title_workflow_status"
                 app:layout_constraintTop_toTopOf="@id/tv_title_workflow_status" />
 
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/switch_status"
+            <TextView
+                android:id="@+id/tv_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:checked="true"
+                android:layout_marginEnd="8dp"
                 android:text="@string/open"
                 android:textAllCaps="true"
-                android:textColor="@drawable/selector_switch_status"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:theme="@style/SwitchStatusStyle"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@id/tv_title_workflow_status"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/view_line"
                 app:layout_constraintTop_toTopOf="@id/tv_title_workflow_status"
-                app:switchPadding="10dp" />
+                tools:visibility="visible" />
 
             <include
                 android:id="@+id/include_status_summary"

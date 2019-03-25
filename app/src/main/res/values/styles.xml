@@ -91,6 +91,19 @@
         <item name="android:textColor">@color/dark_gray</item>
     </style>
 
+    <style name="AlertDialogTheme" parent="Base.ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="android:buttonBarPositiveButtonStyle">@style/DialogPositiveButton</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/DialogNegativeButton</item>
+    </style>
+
+    <style name="DialogPositiveButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/colorAccent</item>
+    </style>
+
+    <style name="DialogNegativeButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/dark_gray</item>
+    </style>
+
     <style name="DrawerArrowStyle" parent="@style/Widget.AppCompat.DrawerArrowToggle">
         <item name="spinBars">true</item>
         <item name="color">@color/colorAccent</item>

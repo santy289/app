@@ -262,8 +262,16 @@
     <string name="workflow_detail_activity_no_pdf_reader">This file cannot be opened by your device. Please install a PDF reader.</string>
     <string name="workflow_detail_activity_permissions_not_granted">Cannot export PDF because the permissions were not granted.</string>
     <string name="workflow_detail_activity_workflow_not_found">This workflow does not exist.</string>
+    <string name="workflow_detail_activity_enable">Enable</string>
+    <string name="workflow_detail_activity_disable">Disable</string>
+    <string name="workflow_detail_activity_open">Open</string>
+    <string name="workflow_detail_activity_close">Close</string>
     <string name="workflow_detail_activity_export_pdf">Export PDF</string>
-    <string name="workflow_detail_activity_view_tree">View Diagram</string>
+    <string name="workflow_detail_activity_share">Share</string>
+    <string name="workflow_detail_activity_delete">Delete</string>
+    <string name="workflow_detail_activity_delete_dialog_title">Delete Workflow</string>
+    <string name="workflow_detail_activity_delete_dialog_msg">Are you sure you want to delete the workflow %s?</string>
+    <string name="workflow_detail_activity_share_chooser">Share via</string>
     <!--StatusFragment-->
     <string name="workflow_detail_status_fragment_title">Status</string>
     <string name="workflow_detail_status_fragment_status_summary">Workflow Status</string>

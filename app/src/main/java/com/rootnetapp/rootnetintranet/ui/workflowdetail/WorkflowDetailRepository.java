@@ -6,8 +6,13 @@ import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
+import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.exportpdf.ExportPdfResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.DeleteWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -24,7 +29,10 @@ public class WorkflowDetailRepository {
 
     private MutableLiveData<Throwable> errorLiveData;
     private MutableLiveData<ExportPdfResponse> exportPdfResponseLiveData;
+    private MutableLiveData<WorkflowActivationResponse> openCloseResponseLiveData;
+    private MutableLiveData<WorkflowActivationResponse> enableDisableResponseLiveData;
     private MutableLiveData<WorkflowListItem> retrieveFromDbWorkflow;
+    private MutableLiveData<DeleteWorkflowResponse> deleteWorkflowResponseLiveData;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
@@ -52,16 +60,17 @@ public class WorkflowDetailRepository {
 
     /**
      * This method attempts to first find the workflow type id from the database, then it looks for
-     * data coming from the WorkflowDb and WorkflowTypeDb tables to create a WorkflowListItem
-     * object that is used by WorkflowDetailActivity's UI.
+     * data coming from the WorkflowDb and WorkflowTypeDb tables to create a WorkflowListItem object
+     * that is used by WorkflowDetailActivity's UI.
      *
-     * @param token         Access token.
-     * @param workflowId    Workflow Id to use for querying data.
+     * @param token      Access token.
+     * @param workflowId Workflow Id to use for querying data.
      */
     protected void getWorkflowFromDataSources(String token, int workflowId) {
         Disposable disposable = workflowDbDao
                 .loadWorkflowTypeId(workflowId)
-                .flatMap(workflowTypeId -> workflowDbDao.getWorkflowDbBy(workflowId, workflowTypeId.getId()))
+                .flatMap(workflowTypeId -> workflowDbDao
+                        .getWorkflowDbBy(workflowId, workflowTypeId.getId()))
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(workflowListItem -> {
@@ -85,16 +94,80 @@ public class WorkflowDetailRepository {
      * @param workflowId object ID to retrieve the PDF file.
      */
     protected void getWorkflowPdfFile(String token, int workflowId) {
-        Disposable disposable = service.getWorkflowPdfFile(
-                token,
-                workflowId
-        )
+        Disposable disposable = service.getWorkflowPdfFile(token, workflowId)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(success -> exportPdfResponseLiveData.setValue(success), throwable -> {
                     Log.d(TAG, "exportPdfFile: " + throwable.getMessage());
                     errorLiveData.setValue(throwable);
                 });
+        disposables.add(disposable);
+    }
+
+    /**
+     * Sets the open/closed status for a specific workflow.
+     *
+     * @param token      Access token to use for endpoint request.
+     * @param workflowId single object ID to set the active status. The endpoint allows an array of
+     *                   workflow IDs, but in this method we will only work with one workflow ID.
+     * @param isOpen     whether to open or close the Workflow.
+     */
+    protected void postWorkflowActivationOpenClose(String token, int workflowId, boolean isOpen) {
+        List<Integer> workflowIds = new ArrayList<>();
+        workflowIds.add(workflowId);
+
+        Disposable disposable = service.postWorkflowActivationOpenClose(token, workflowIds, isOpen)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(success -> openCloseResponseLiveData.setValue(success), throwable -> {
+                    Log.d(TAG, "postWorkflowActivationOpenClose: " + throwable.getMessage());
+                    errorLiveData.setValue(throwable);
+                });
+        disposables.add(disposable);
+    }
+
+    /**
+     * Sets the enabled/disabled status for a specific workflow.
+     *
+     * @param token      Access token to use for endpoint request.
+     * @param workflowId single object ID to set the active status. The endpoint allows an array of
+     *                   workflow IDs, but in this method we will only work with one workflow ID.
+     * @param isEnabled  whether to open or close the Workflow.
+     */
+    protected void postWorkflowActivationEnableDisable(String token, int workflowId,
+                                                       boolean isEnabled) {
+        List<Integer> workflowIds = new ArrayList<>();
+        workflowIds.add(workflowId);
+
+        Disposable disposable = service
+                .postWorkflowActivationEnableDisable(token, workflowIds, isEnabled)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(success -> enableDisableResponseLiveData.setValue(success),
+                        throwable -> {
+                            Log.d(TAG, "postWorkflowActivationEnableDisable: " + throwable
+                                    .getMessage());
+                            errorLiveData.setValue(throwable);
+                        });
+        disposables.add(disposable);
+    }
+
+    /**
+     * Deletes a specific workflow.
+     *
+     * @param workflowId workflow ID to delete.
+     */
+    protected void deleteWorkflow(String token, int workflowId) {
+        Disposable disposable = service
+                .deleteWorkflow(token, workflowId)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(success -> deleteWorkflowResponseLiveData.setValue(success),
+                        throwable -> {
+                            Log.d(TAG, "deleteWorkflow: " + throwable
+                                    .getMessage());
+                            errorLiveData.setValue(throwable);
+                        });
         disposables.add(disposable);
     }
 
@@ -112,11 +185,31 @@ public class WorkflowDetailRepository {
         return errorLiveData;
     }
 
-    protected LiveData<WorkflowListItem> getObservableRetreiveFromDbWorkflow() {
+    protected LiveData<WorkflowListItem> getObservableRetrieveFromDbWorkflow() {
         if (retrieveFromDbWorkflow == null) {
             retrieveFromDbWorkflow = new MutableLiveData<>();
         }
         return retrieveFromDbWorkflow;
     }
 
+    protected LiveData<WorkflowActivationResponse> getOpenCloseResponse() {
+        if (openCloseResponseLiveData == null) {
+            openCloseResponseLiveData = new MutableLiveData<>();
+        }
+        return openCloseResponseLiveData;
+    }
+
+    protected LiveData<WorkflowActivationResponse> getEnableDisableResponse() {
+        if (enableDisableResponseLiveData == null) {
+            enableDisableResponseLiveData = new MutableLiveData<>();
+        }
+        return enableDisableResponseLiveData;
+    }
+
+    protected LiveData<DeleteWorkflowResponse> getDeleteWorkflowResponse() {
+        if (deleteWorkflowResponseLiveData == null) {
+            deleteWorkflowResponseLiveData = new MutableLiveData<>();
+        }
+        return deleteWorkflowResponseLiveData;
+    }
 }

@@ -31,6 +31,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
+import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.Information;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonDataException;
@@ -54,6 +55,7 @@ public class FormSettings {
     private String description;
     private long createdTimestamp;
     private final ArrayList<FormCreateProfile> profiles;
+    private final ArrayList<WorkflowUser> workflowUsers;
     private List<FormFieldsByWorkflowType> fields; // Full info of all fields.
     private final Moshi moshi;
     private List<BaseFormItem> formItems; //new
@@ -93,6 +95,7 @@ public class FormSettings {
         names = new ArrayList<>();
         ids = new ArrayList<>();
         profiles = new ArrayList<>();
+        workflowUsers = new ArrayList<>();
         fields = new ArrayList<>();
         title = "";
         description = "";
@@ -128,6 +131,14 @@ public class FormSettings {
         profiles.add(profile);
     }
 
+    public ArrayList<WorkflowUser> getWorkflowUsers() {
+        return workflowUsers;
+    }
+
+    public void addWorkflowUser(WorkflowUser profile) {
+        workflowUsers.add(profile);
+    }
+
     public ArrayList<String> getProfileNames() {
         ArrayList<String> fullNames = new ArrayList<>();
         for (int i = 0; i < profiles.size(); i++) {
@@ -150,6 +161,17 @@ public class FormSettings {
             profile = profiles.get(i);
             if (profile.username.equals(userName)) {
                 return profile;
+            }
+        }
+        return null;
+    }
+
+    protected WorkflowUser getWorkflowUserBy(int id) {
+        WorkflowUser workflowUser;
+        for (int i = 0; i < workflowUsers.size(); i++) {
+            workflowUser = workflowUsers.get(i);
+            if (workflowUser.getId() == id) {
+                return workflowUser;
             }
         }
         return null;
@@ -413,14 +435,13 @@ public class FormSettings {
         Option value = formItem.getValue();
         if (value == null) return "";
 
-        String username = value.getName();
-        FormCreateProfile profile = getProfileBy(username);
-        if (profile == null) return "";
+        WorkflowUser workflowUser = getWorkflowUserBy(value.getId());
+        if (workflowUser == null) return "";
 
         PostSystemUser postSystemUser = new PostSystemUser();
-        postSystemUser.id = profile.getId();
-        postSystemUser.username = profile.getUsername();
-        postSystemUser.email = profile.getEmail();
+        postSystemUser.id = workflowUser.getId();
+        postSystemUser.username = workflowUser.getUsername();
+        postSystemUser.email = workflowUser.getEmail();
 
         Moshi moshi = new Moshi.Builder().build();
         JsonAdapter<PostSystemUser> jsonAdapter = moshi.adapter(PostSystemUser.class);
@@ -445,15 +466,15 @@ public class FormSettings {
         for (int i = 0; i < formItem.getValues().size(); i++) {
             Option value = (Option) formItem.getValues().get(i);
 
-            FormCreateProfile profile = getProfileBy(value.getName());
-            if (profile == null) {
-                continue;
-            }
+            if (value == null) continue;
+
+            WorkflowUser workflowUser = getWorkflowUserBy(value.getId());
+            if (workflowUser == null) continue;
 
             PostSystemUser postSystemUser = new PostSystemUser();
-            postSystemUser.id = profile.getId();
-            postSystemUser.username = profile.getUsername();
-            postSystemUser.email = profile.getEmail();
+            postSystemUser.id = workflowUser.getId();
+            postSystemUser.username = workflowUser.getUsername();
+            postSystemUser.email = workflowUser.getEmail();
 
             postSystemUserList.add(postSystemUser);
         }

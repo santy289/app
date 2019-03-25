@@ -2,8 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDBDao;
-import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
-import com.rootnetapp.rootnetintranet.data.local.db.user.UserDao;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.ProfileDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
@@ -44,7 +43,7 @@ public class CreateWorkflowRepository {
     private final ApiInterface service;
     private final AppDatabase database;
     private final WorkflowTypeDbDao workflowTypeDbDao;
-    private final UserDao profileDao;
+    private final ProfileDao profileDao;
     private final CountryDBDao countryDBDao;
 
     private final LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
@@ -53,7 +52,7 @@ public class CreateWorkflowRepository {
         this.service = service;
         this.database = database;
         this.workflowTypeDbDao = this.database.workflowTypeDbDao();
-        this.profileDao = this.database.userDao();
+        this.profileDao = this.database.profileDao();
         this.countryDBDao = this.database.countryDBDao();
         this.workflowTypeMenuItems = workflowTypeDbDao.getObservableTypesForMenu();
     }
@@ -68,10 +67,6 @@ public class CreateWorkflowRepository {
 
     protected WorkflowTypeDb getWorklowType(int workflowTypeId) {
         return workflowTypeDbDao.getWorkflowTypeBy(workflowTypeId);
-    }
-
-    protected List<FormCreateProfile> getProfiles() {
-        return profileDao.getAllProfiles();
     }
 
     protected List<FormFieldsByWorkflowType> getFiedsByWorkflowType(int byId) {
@@ -134,8 +129,8 @@ public class CreateWorkflowRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<WorkflowUserResponse> getUsers(String auth) {
-        return service.getWorkflowUsers(auth).subscribeOn(Schedulers.newThread())
+    public Observable<WorkflowUserResponse> getUsers(String auth, int clientId) {
+        return service.getWorkflowUsers(auth, clientId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 

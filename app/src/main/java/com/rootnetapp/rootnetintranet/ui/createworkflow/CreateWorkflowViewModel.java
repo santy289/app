@@ -16,7 +16,6 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.Profile;
-import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.DefaultRoleApprover;
@@ -65,6 +64,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.GeolocationViewModel;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.SelectedLocation;
@@ -147,6 +147,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private FormSettings formSettings;
 
     private String mToken;
+    private Integer mClientId;
     private WorkflowListItem mWorkflowListItem;
     private WorkflowDb mWorkflow;
     private final Moshi moshi;
@@ -167,13 +168,14 @@ class CreateWorkflowViewModel extends ViewModel {
         moshi = new Moshi.Builder().build();
     }
 
-    protected void initForm(String token, @Nullable WorkflowListItem item, String userId,
-                            String userPermissions) {
+    protected void initForm(String token, Integer clientId, @Nullable WorkflowListItem item,
+                            String userId, String userPermissions) {
         showLoading.setValue(true);
         if (formSettings == null) {
             formSettings = new FormSettings();
         }
         this.mToken = token;
+        this.mClientId = clientId;
         this.mWorkflowListItem = item;
 
         if (userId != null && !userId.isEmpty()) mUserId = Integer.parseInt(userId);
@@ -491,9 +493,15 @@ class CreateWorkflowViewModel extends ViewModel {
                 continue;
             }
 
-            //does not show the Status field
+            //do not show the Status field
             String machineName = fieldConfig.getMachineName();
             if (machineName != null && machineName.equals(MACHINE_NAME_STATUS)) {
+                mFieldCount--;
+                continue;
+            }
+
+            //do not show the Owner field (it is separated on the people involved form)
+            if (machineName != null && machineName.equals(MACHINE_NAME_OWNER)) {
                 mFieldCount--;
                 continue;
             }
@@ -929,57 +937,65 @@ class CreateWorkflowViewModel extends ViewModel {
      * then send the form item to the UI.
      */
     private void createSystemUsersFormItem(FormFieldsByWorkflowType field) {
-        Disposable disposable = Observable.fromCallable(() -> {
-            List<FormCreateProfile> list = mRepository.getProfiles();
-
+        if (mClientId == null){
             buildFieldCompleted();
+            return;
+        }
 
-            if (list == null || list.size() < 1) {
-                return false;
-            }
+        Disposable disposable = mRepository
+                .getUsers(mToken, mClientId)
+                .subscribe(workflowUsersResponse -> {
+                    buildFieldCompleted();
 
-            List<Option> options = new ArrayList<>();
-            for (int i = 0; i < list.size(); i++) {
-                FormCreateProfile profile = list.get(i);
+                    if (workflowUsersResponse.getCode() != 200) {
+                        return;
+                    }
 
-                formSettings.setProfile(profile);
+                    List<WorkflowUser> list = workflowUsersResponse.getUsers();
+                    List<Option> options = new ArrayList<>();
+                    for (int i = 0; i < list.size(); i++) {
+                        WorkflowUser workflowUser = list.get(i);
 
-                String name = profile.getFullName();
-                Integer id = profile.getId();
+                        String name = workflowUser.getUsername();
+                        Integer id = workflowUser.getId();
 
-                Option option = new Option(id, name);
-                options.add(option);
-            }
+                        Option option = new Option(id, name);
+                        options.add(option);
 
-            if (options.isEmpty()) return false;
+                        formSettings.addWorkflowUser(workflowUser);
+                    }
 
-            if (field.getFieldConfigObject().getMultiple()) {
-                return new MultipleChoiceFormItem.Builder()
-                        .setTitle(field.getFieldName())
-                        .setRequired(field.isRequired())
-                        .setTag(field.getId())
-                        .setOptions(options)
-                        .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
-                        .setMachineName(field.getFieldConfigObject().getMachineName())
-                        .build();
-            }
+                    if (options.isEmpty()) return;
 
-            return new SingleChoiceFormItem.Builder()
-                    .setTitle(field.getFieldName())
-                    .setRequired(field.isRequired())
-                    .setTag(field.getId())
-                    .setOptions(options)
-                    .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
-                    .setMachineName(field.getFieldConfigObject().getMachineName())
-                    .build();
+                    //check if multiple selection
+                    if (field.getFieldConfigObject().getMultiple()) {
+                        MultipleChoiceFormItem multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
+                                .setTitle(field.getFieldName())
+                                .setRequired(field.isRequired())
+                                .setTag(field.getId())
+                                .setOptions(options)
+                                .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                                .setMachineName(field.getFieldConfigObject().getMachineName())
+                                .build();
+                        mAddFormItemLiveData.setValue(multipleChoiceFormItem);
+                        return;
+                    }
 
-        }).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(singleChoiceFormItem -> mAddFormItemLiveData
-                                .setValue((BaseFormItem) singleChoiceFormItem),
-                        throwable -> Log.d(TAG,
-                                "createSystemUsersFormItem: can't get users: " + throwable
-                                        .getMessage()));
+                    SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
+                            .setTitle(field.getFieldName())
+                            .setRequired(field.isRequired())
+                            .setTag(field.getId())
+                            .setOptions(options)
+                            .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                            .setMachineName(field.getFieldConfigObject().getMachineName())
+                            .build();
+
+                    mAddFormItemLiveData.setValue(singleChoiceFormItem);
+                }, throwable -> {
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+                    Log.d(TAG,
+                            "createSystemUsersFormItem: can't get users: " + throwable.getMessage());
+                });
         mDisposables.add(disposable);
     }
 

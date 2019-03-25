@@ -276,10 +276,14 @@ public interface ApiInterface {
     Observable<ProjectResponse> getProjects(@Header("Authorization") String authorization);
 
 
-
     @Headers({"Domain-Name: api"})
     @GET("client/35/users")
     Observable<WorkflowUserResponse> getWorkflowUsers(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: api"})
+    @GET("client/{clientId}/users")
+    Observable<WorkflowUserResponse> getWorkflowUsers(@Header("Authorization") String authorization,
+                                                      @Path("clientId") int clientId);
 
     @GET("check/countries")
     Observable<CountriesResponse> getCountries(@Header("Authorization") String authorization);

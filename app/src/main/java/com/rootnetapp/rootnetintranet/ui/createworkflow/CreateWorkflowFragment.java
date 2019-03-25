@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.GeolocationFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.IntentFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
+import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.adapters.FormItemsAdapter;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
@@ -33,8 +35,11 @@ import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.GeolocationA
 import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.GeolocationViewModel;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.SelectedLocation;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -119,13 +124,26 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         String loggedUserId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
         String permissionsString = prefs.getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
 
+        String clientJsonString = prefs.getString(PreferenceKeys.PREF_DOMAIN, "");
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<ClientResponse> jsonAdapter = moshi.adapter(ClientResponse.class);
+        Integer clientId = null;
+        try {
+            if (clientJsonString != null) {
+                ClientResponse clientResponse = jsonAdapter.fromJson(clientJsonString);
+                clientId = clientResponse.getClient().getId();
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Problems getting the client domain: " + e.getMessage());
+        }
+
         setupSubmitButton();
         setOnClickListeners();
         setupFormRecycler();
         setupPeopleInvolvedRecycler();
         subscribe();
 
-        viewModel.initForm(token, mWorkflowListItem, loggedUserId, permissionsString);
+        viewModel.initForm(token, clientId, mWorkflowListItem, loggedUserId, permissionsString);
 
         return view;
     }

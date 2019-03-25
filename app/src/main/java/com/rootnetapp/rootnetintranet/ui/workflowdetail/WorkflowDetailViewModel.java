@@ -8,12 +8,16 @@ import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 
 import androidx.annotation.NonNull;
@@ -26,7 +30,10 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import retrofit2.HttpException;
 
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_ACTIVATE_ALL;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_DELETE;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EXPORT;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_OPEN_ALL;
 
 public class WorkflowDetailViewModel extends ViewModel {
 
@@ -45,7 +52,14 @@ public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<String> mWorkflowTypeVersionLiveData;
     private MutableLiveData<Boolean> mShowNotFoundViewLiveData;
     private MutableLiveData<Boolean> mShowExportPdfButtonLiveData;
+    private MutableLiveData<Boolean> mShowDeleteLiveData;
+    private MutableLiveData<Boolean> mShowEnableDisableLiveData;
+    private MutableLiveData<Boolean> mShowOpenCloseLiveData;
+    private MutableLiveData<String> mShareWorkflowLiveData;
     private LiveData<WorkflowListItem> handleRepoWorkflowRequest;
+    protected LiveData<Boolean> updateOpenClosedStatusFromUserAction;
+    protected LiveData<Boolean> updateEnabledDisabledStatusFromUserAction;
+    protected LiveData<Boolean> deleteWorkflowRepsonseLiveData;
 
     protected MutableLiveData<Boolean> showLoading;
 
@@ -58,6 +72,9 @@ public class WorkflowDetailViewModel extends ViewModel {
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the mWorkflow.
     private WorkflowDb mWorkflow; // Not in DB and more complete response from network.
     private boolean hasExportPermissions;
+    private boolean hasDeletePermissions;
+    private boolean hasEnableDisablePermissions;
+    private boolean hasOpenClosePermissions;
 
     public WorkflowDetailViewModel(WorkflowDetailRepository workflowDetailRepository) {
         this.mRepository = workflowDetailRepository;
@@ -80,7 +97,8 @@ public class WorkflowDetailViewModel extends ViewModel {
      * @param workflow          workflow item
      * @param permissionsString user permissions
      */
-    protected void initWithDetails(String token, WorkflowListItem workflow, String permissionsString) {
+    protected void initWithDetails(String token, WorkflowListItem workflow,
+                                   String permissionsString) {
         this.mToken = token;
         this.mWorkflowListItem = workflow;
         initUiWithWorkflowListItem.setValue(workflow);
@@ -95,14 +113,14 @@ public class WorkflowDetailViewModel extends ViewModel {
      * actual WorkflowDb object from the local database or network.
      *
      * @param token             auth token
-     * @param id workflow id
+     * @param id                workflow id
      * @param permissionsString user permissions
      */
     protected void initWithId(String token, String id, String permissionsString) {
         this.mToken = token;
 
         handleRepoWorkflowRequest = Transformations.map(
-                mRepository.getObservableRetreiveFromDbWorkflow(),
+                mRepository.getObservableRetrieveFromDbWorkflow(),
                 workflowDb -> {
                     initUiWithWorkflowListItem.setValue(workflowDb);
                     getWorkflow(token, workflowDb.getWorkflowId());
@@ -116,8 +134,8 @@ public class WorkflowDetailViewModel extends ViewModel {
     }
 
     /**
-     * Verifies all of the user permissions related to this ViewModel and {@link WorkflowDetailActivity}.
-     * Hide the UI related to the unauthorized actions.
+     * Verifies all of the user permissions related to this ViewModel and {@link
+     * WorkflowDetailActivity}. Hide the UI related to the unauthorized actions.
      *
      * @param permissionsString users permissions.
      */
@@ -125,15 +143,31 @@ public class WorkflowDetailViewModel extends ViewModel {
         RootnetPermissionsUtils permissionsUtils = new RootnetPermissionsUtils(permissionsString);
 
         hasExportPermissions = permissionsUtils.hasPermission(WORKFLOW_EXPORT);
+        hasDeletePermissions = permissionsUtils.hasPermission(WORKFLOW_DELETE);
+        hasEnableDisablePermissions = permissionsUtils.hasPermission(WORKFLOW_ACTIVATE_ALL);
+        hasOpenClosePermissions = permissionsUtils.hasPermission(WORKFLOW_OPEN_ALL);
 
         mShowExportPdfButtonLiveData.setValue(hasExportPermissions);
+        mShowDeleteLiveData.setValue(hasDeletePermissions);
+        mShowEnableDisableLiveData.setValue(hasEnableDisablePermissions);
+        mShowOpenCloseLiveData.setValue(hasOpenClosePermissions);
     }
 
-    protected boolean hasExportPermissions(){
+    protected boolean hasExportPermissions() {
         return hasExportPermissions;
     }
 
-    protected WorkflowListItem getWorkflowListItem(){
+    protected boolean hasDeletePermissions() {
+        return hasDeletePermissions;
+    }
+    protected boolean hasEnableDisablePermissions() {
+        return hasEnableDisablePermissions;
+    }
+    protected boolean hasOpenClosePermissions() {
+        return hasOpenClosePermissions;
+    }
+
+    protected WorkflowListItem getWorkflowListItem() {
         return mWorkflowListItem;
     }
 
@@ -171,10 +205,91 @@ public class WorkflowDetailViewModel extends ViewModel {
                 }
         );
 
+        // Transformation for observing open/close actions
+        updateOpenClosedStatusFromUserAction = Transformations.map(
+                mRepository.getOpenCloseResponse(),
+                activationResponse -> {
+                    // transform WorkflowActivationResponse to Boolean
+
+                    showLoading.setValue(false);
+
+                    // if correct, this API will only return one workflow
+
+                    // check for emptiness of main list
+                    List<List<WorkflowDb>> responseList = activationResponse.getData();
+                    if (responseList.isEmpty()) {
+                        mShowToastMessage.setValue(R.string.error);
+                        return !mWorkflow.isOpen();
+                    }
+
+                    // check for emptiness of workflow list
+                    List<WorkflowDb> workflowDbList = responseList.get(0);
+                    if (workflowDbList.isEmpty()) {
+                        mShowToastMessage.setValue(R.string.error);
+                        return !mWorkflow.isOpen();
+                    }
+
+                    mWorkflow = workflowDbList.get(0);
+
+                    mShowToastMessage.setValue(R.string.request_successfully);
+
+                    return !mWorkflow.isOpen();
+                }
+        );
+
+        // Transformation for observing enable/disable actions
+        updateEnabledDisabledStatusFromUserAction = Transformations.map(
+                mRepository.getEnableDisableResponse(),
+                activationResponse -> {
+                    // transform WorkflowActivationResponse to Boolean
+
+                    showLoading.setValue(false);
+
+                    // if correct, this API will only return one workflow
+
+                    // check for emptiness of main list
+                    List<List<WorkflowDb>> responseList = activationResponse.getData();
+                    if (responseList.isEmpty()) {
+                        mShowToastMessage.setValue(R.string.error);
+                        return !mWorkflow.isStatus();
+                    }
+
+                    // check for emptiness of workflow list
+                    List<WorkflowDb> workflowDbList = responseList.get(0);
+                    if (workflowDbList.isEmpty()) {
+                        mShowToastMessage.setValue(R.string.error);
+                        return !mWorkflow.isStatus();
+                    }
+
+                    mWorkflow = workflowDbList.get(0);
+
+                    mShowToastMessage.setValue(R.string.request_successfully);
+
+                    return !mWorkflow.isStatus();
+                }
+        );
+
+        // Transformation for observing delete actions
+        deleteWorkflowRepsonseLiveData = Transformations.map(
+                mRepository.getDeleteWorkflowResponse(),
+                deleteWorkflowResponse -> {
+                    // transform DeleteWorkflowResponse to Boolean
+
+                    showLoading.setValue(false);
+
+                    // if correct, this API will return code 200
+
+                    mShowToastMessage.setValue(R.string.request_successfully);
+
+                    return deleteWorkflowResponse.getCode() == 200;
+                }
+        );
+
         // Transformation used in case that any repo request fails
         handleShowLoadingByRepo = Transformations.map(
                 mRepository.getErrorLiveData(),
                 throwable -> {
+                    showLoading.setValue(false);
                     mShowToastMessage.setValue(Utils.getOnFailureStringRes(throwable));
                     return false;
                 }
@@ -236,6 +351,9 @@ public class WorkflowDetailViewModel extends ViewModel {
         int version = mWorkflow.getWorkflowType().getVersion();
         String versionString = String.format(Locale.US, "v%d", version);
         mWorkflowTypeVersionLiveData.setValue(versionString);
+
+        mShowEnableDisableLiveData.setValue(!mWorkflow.isStatus());
+        mShowOpenCloseLiveData.setValue(!mWorkflow.isOpen());
     }
 
     private void onWorkflowFailure(Throwable throwable) {
@@ -268,6 +386,61 @@ public class WorkflowDetailViewModel extends ViewModel {
      */
     public void setFilesCounter(int count) {
         mFilesTabCounter.setValue(count);
+    }
+
+    /**
+     * Calls the endpoint to change the Workflow open/closed status.
+     */
+    protected void setWorkflowOpenStatus(boolean open) {
+        showLoading.setValue(true);
+        mRepository.postWorkflowActivationOpenClose(mToken, mWorkflow.getId(), open);
+    }
+
+    /**
+     * Calls the endpoint to change the Workflow enabled/disabled status.
+     */
+    protected void setWorkflowEnabledStatus(boolean enabled) {
+        showLoading.setValue(true);
+        mRepository.postWorkflowActivationEnableDisable(mToken, mWorkflow.getId(), enabled);
+    }
+
+    /**
+     * Calls the endpoint to delete this workflow.
+     */
+    protected void deleteWorkflow() {
+        showLoading.setValue(true);
+        mRepository.deleteWorkflow(mToken, mWorkflow.getId());
+    }
+
+    /**
+     * Generates the text to share this workflow, including the title, key and URL.
+     *
+     * @param domainJson the domain saved in the preferences.
+     */
+    protected void shareWorkflow(String domainJson) {
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<ClientResponse> jsonAdapter = moshi.adapter(ClientResponse.class);
+        ClientResponse domain;
+
+        try {
+            domain = jsonAdapter.fromJson(domainJson);
+
+            String workflowUrl = "https://" + domain.getClient().getDomain()
+                    + "/Intranet/workflow/" + mWorkflowListItem.getWorkflowId();
+            String shareText = String.format(
+                    Locale.US,
+                    "%s - %s (%s)",
+                    mWorkflowListItem.getTitle(),
+                    mWorkflowListItem.getWorkflowTypeKey(),
+                    workflowUrl
+            );
+
+            mShareWorkflowLiveData.setValue(shareText);
+
+        } catch (IOException e) {
+            Log.e(TAG, "shareWorkflow: error: " + e.getMessage());
+            onFailure(e);
+        }
     }
 
     private void onFailure(Throwable throwable) {
@@ -322,6 +495,34 @@ public class WorkflowDetailViewModel extends ViewModel {
             mShowExportPdfButtonLiveData = new MutableLiveData<>();
         }
         return mShowExportPdfButtonLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowDelete() {
+        if (mShowDeleteLiveData == null) {
+            mShowDeleteLiveData = new MutableLiveData<>();
+        }
+        return mShowDeleteLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowEnableDisable() {
+        if (mShowEnableDisableLiveData == null) {
+            mShowEnableDisableLiveData = new MutableLiveData<>();
+        }
+        return mShowEnableDisableLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowOpenClose() {
+        if (mShowOpenCloseLiveData == null) {
+            mShowOpenCloseLiveData = new MutableLiveData<>();
+        }
+        return mShowOpenCloseLiveData;
+    }
+
+    protected LiveData<String> getObservableShareWorkflow() {
+        if (mShareWorkflowLiveData == null) {
+            mShareWorkflowLiveData = new MutableLiveData<>();
+        }
+        return mShareWorkflowLiveData;
     }
 
     protected LiveData<WorkflowListItem> getObservableWorflowListItem() {

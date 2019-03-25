@@ -10,11 +10,18 @@
     <string name="loading_message">Loading</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
+    <string name="new_password">New password</string>
+    <string name="confirm_password">Confirm password</string>
     <string name="change_domain">Change Company</string>
-    <string name="login">Log In</string>
+    <string name="login">Login</string>
+    <string name="logout">Logout</string>
+    <string name="logout_confirmation">Are you sure you want to logout?</string>
     <string name="empty_domain">The domain name cannot be empty</string>
     <string name="empty_user">Please provide a username to continue</string>
     <string name="empty_password">Please enter your password to continue</string>
+    <string name="empty_confirm_password">Please confirm your password to continue</string>
+    <string name="passwords_dont_match">The passwords do not match</string>
+    <string name="password_changed_successfully">Your password has been changed successfully.</string>
     <string name="forgot_password">Forgot your password?</string>
     <string name="recover_password">Recover your Password</string>
     <string name="accept">Accept</string>
@@ -255,8 +262,16 @@
     <string name="workflow_detail_activity_no_pdf_reader">This file cannot be opened by your device. Please install a PDF reader.</string>
     <string name="workflow_detail_activity_permissions_not_granted">Cannot export PDF because the permissions were not granted.</string>
     <string name="workflow_detail_activity_workflow_not_found">This workflow does not exist.</string>
+    <string name="workflow_detail_activity_enable">Enable</string>
+    <string name="workflow_detail_activity_disable">Disable</string>
+    <string name="workflow_detail_activity_open">Open</string>
+    <string name="workflow_detail_activity_close">Close</string>
     <string name="workflow_detail_activity_export_pdf">Export PDF</string>
-    <string name="workflow_detail_activity_view_tree">View Diagram</string>
+    <string name="workflow_detail_activity_share">Share</string>
+    <string name="workflow_detail_activity_delete">Delete</string>
+    <string name="workflow_detail_activity_delete_dialog_title">Delete Workflow</string>
+    <string name="workflow_detail_activity_delete_dialog_msg">Are you sure you want to delete the workflow %s?</string>
+    <string name="workflow_detail_activity_share_chooser">Share via</string>
     <!--StatusFragment-->
     <string name="workflow_detail_status_fragment_title">Status</string>
     <string name="workflow_detail_status_fragment_status_summary">Workflow Status</string>

@@ -1,11 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <item
+        android:id="@+id/enable"
+        android:title="@string/workflow_detail_activity_enable"
+        android:visible="false"
+        app:showAsAction="never"
+        tools:visible="true" />
+
+    <item
+        android:id="@+id/disable"
+        android:title="@string/workflow_detail_activity_disable"
+        android:visible="false"
+        app:showAsAction="never"
+        tools:visible="true" />
+
+    <item
+        android:id="@+id/open"
+        android:title="@string/workflow_detail_activity_open"
+        android:visible="false"
+        app:showAsAction="never"
+        tools:visible="true" />
+
+    <item
+        android:id="@+id/close"
+        android:title="@string/workflow_detail_activity_close"
+        android:visible="false"
+        app:showAsAction="never"
+        tools:visible="true" />
 
     <item
         android:id="@+id/export_pdf"
-        android:icon="@drawable/ic_picture_as_pdf_black_24dp"
-        app:showAsAction="never"
-        app:iconTint="@color/colorAccent"
-        android:title="@string/workflow_detail_activity_export_pdf"/>
+        android:title="@string/workflow_detail_activity_export_pdf"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/share"
+        android:title="@string/workflow_detail_activity_share"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/delete"
+        android:title="@string/workflow_detail_activity_delete"
+        app:showAsAction="never" />
 </menu>

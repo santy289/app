@@ -11,11 +11,18 @@
     <string name="loading_message">Cargando</string>
     <string name="username">Usuario</string>
     <string name="password">Clave</string>
+    <string name="new_password">Nueva clave</string>
+    <string name="confirm_password">Confirmar clave</string>
     <string name="change_domain">Cambiar Compañía</string>
     <string name="login">Ingresar</string>
+    <string name="logout">Cerrar sesión</string>
+    <string name="logout_confirmation">¿Está seguro que desea cerrar sesión?</string>
     <string name="empty_domain">El dominio no puede estar sin valor</string>
     <string name="empty_user">Por favor ingrese un usuario para continuar</string>
     <string name="empty_password">Por favor ingrese una clave para continuar</string>
+    <string name="empty_confirm_password">Por favor confirme su clave para continuar</string>
+    <string name="passwords_dont_match">Las claves no coinciden</string>
+    <string name="password_changed_successfully">Su contraseña ha sido cambiada con éxito.</string>
     <string name="forgot_password">Olvidó su clave?</string>
     <string name="recover_password">Recuperar Clave</string>
     <string name="accept">Aceptar</string>
@@ -252,8 +259,16 @@
     <string name="workflow_detail_activity_no_pdf_reader">Su dispositivo no puede abrir archivos PDF. Por favor instale un lector de PDF.</string>
     <string name="workflow_detail_activity_permissions_not_granted">No es posible exportar el PDF debido a que los permisos no fueron otorgados.</string>
     <string name="workflow_detail_activity_workflow_not_found">Este workflow no existe.</string>
+    <string name="workflow_detail_activity_enable">Activar</string>
+    <string name="workflow_detail_activity_disable">Desactivar</string>
+    <string name="workflow_detail_activity_open">Abrir</string>
+    <string name="workflow_detail_activity_close">Cerrar</string>
     <string name="workflow_detail_activity_export_pdf">Exportar PDF</string>
-    <string name="workflow_detail_activity_view_tree">Ver Diagrama</string>
+    <string name="workflow_detail_activity_share">Compartir</string>
+    <string name="workflow_detail_activity_delete">Eliminar</string>
+    <string name="workflow_detail_activity_delete_dialog_title">Eliminar Workflow</string>
+    <string name="workflow_detail_activity_delete_dialog_msg">¿Está seguro que desea eliminar el workflow %s?</string>
+    <string name="workflow_detail_activity_share_chooser">Compartir mediante</string>
     <!--StatusFragment-->
     <string name="workflow_detail_status_fragment_title">Estatus</string>
     <string name="workflow_detail_status_fragment_status_summary">Estatus del Workflow</string>

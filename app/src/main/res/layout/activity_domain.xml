@@ -2,6 +2,7 @@
 <layout>
 
     <data>
+
         <variable
             name="DomainViewModel"
             type="com.rootnetapp.rootnetintranet.ui.domain.DomainViewModel" />
@@ -23,12 +24,14 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:paddingBottom="100dp"
-                android:paddingTop="100dp">
+                android:paddingTop="100dp"
+                android:paddingBottom="100dp">
 
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
                     android:adjustViewBounds="true"
                     android:cropToPadding="false"
                     android:focusableInTouchMode="true"
@@ -38,39 +41,39 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/marginVertical_domain"
-                    android:layout_marginEnd="@dimen/marginHorizontal_domain"
                     android:layout_marginStart="@dimen/marginHorizontal_domain"
                     android:layout_marginTop="@dimen/marginVertical_domain"
+                    android:layout_marginEnd="@dimen/marginHorizontal_domain"
+                    android:layout_marginBottom="@dimen/marginVertical_domain"
                     android:text="@string/cloud_based"
                     android:textColor="@color/white" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/marginVertical_domain"
-                    android:layout_marginEnd="@dimen/marginHorizontal_domain"
                     android:layout_marginStart="@dimen/marginHorizontal_domain"
                     android:layout_marginTop="@dimen/marginVertical_domain"
+                    android:layout_marginEnd="@dimen/marginHorizontal_domain"
+                    android:layout_marginBottom="@dimen/marginVertical_domain"
                     android:orientation="horizontal"
                     android:weightSum="10">
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/til_domain"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="6"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:textColorHint="@color/colorAccent">
 
                         <androidx.appcompat.widget.AppCompatEditText
                             android:id="@+id/input_domain"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:maxLines="1"
                             android:hint="@string/subdomain"
-                            android:textColor="@color/white"
-                            android:inputType="textUri"/>
+                            android:inputType="textUri"
+                            android:maxLines="1"
+                            android:textColor="@color/white" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -88,10 +91,10 @@
                     android:id="@+id/btn_check_domain"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/marginVertical_domain"
-                    android:layout_marginEnd="@dimen/marginHorizontal_domain"
                     android:layout_marginStart="@dimen/marginHorizontal_domain"
                     android:layout_marginTop="@dimen/marginVertical_domain"
+                    android:layout_marginEnd="@dimen/marginHorizontal_domain"
+                    android:layout_marginBottom="@dimen/marginVertical_domain"
                     android:onClick="onClick"
                     android:text="@string/check_domain"
                     android:textColor="@color/white" />
@@ -101,9 +104,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/marginVertical_domain"
+                    android:onClick="onClick"
                     android:text="@string/get_plan"
-                    android:textColor="@color/colorAccent"
-                    android:onClick="onClick" />
+                    android:textColor="@color/colorAccent" />
 
             </LinearLayout>
 

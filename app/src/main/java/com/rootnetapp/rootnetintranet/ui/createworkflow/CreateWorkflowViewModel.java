@@ -28,6 +28,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePostDetail;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PhoneFieldData;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostContact;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCurrency;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostPhone;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
@@ -1491,6 +1492,10 @@ class CreateWorkflowViewModel extends ViewModel {
                     case FormSettings.TYPE_GEOLOCATION:
                         fillGeolocationFormItem(meta);
                         break;
+
+                    case FormSettings.TYPE_ACCOUNT:
+                        fillAccountFormItem(meta);
+                        break;
                     default:
                         Log.d(TAG, "format: invalid type. Not Known.");
                 }
@@ -1702,6 +1707,26 @@ class CreateWorkflowViewModel extends ViewModel {
                 .findOption(singleChoiceFormItem.getOptions(), usersMetaData.getId());
 
         singleChoiceFormItem.setValue(value);
+    }
+
+    private void fillAccountFormItem(Meta meta) throws IOException {
+        if (meta.getValue() == null || meta.getValue().isEmpty()
+                || meta.getValue().equals("\"\"")) {
+            return;
+        }
+
+        JsonAdapter<PostContact> jsonAdapter = moshi.adapter(PostContact.class);
+        PostContact contactMetaData = jsonAdapter.fromJson(meta.getValue());
+
+        if (contactMetaData == null) return;
+
+        AutocompleteFormItem autocompleteFormItem = (AutocompleteFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        Option value = new Option(contactMetaData.getId(), contactMetaData.getCompany());
+
+        autocompleteFormItem.setQuery(contactMetaData.getCompany());
+        autocompleteFormItem.setValue(value);
     }
     //endregion
 

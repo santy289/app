@@ -16,6 +16,7 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.Profile;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.DefaultRoleApprover;
@@ -768,9 +769,9 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
-                    buildFieldCompleted();
+                    Log.d(TAG, "createProjectsFormItem: " + throwable.getMessage());
                     mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
-                    Log.d(TAG, "createProductsFormItem: " + throwable.getMessage());
+                    buildFieldCompleted();
                 });
 
         mDisposables.add(disposable);
@@ -828,9 +829,9 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
-                    buildFieldCompleted();
-                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
                     Log.d(TAG, "createRolesFormItem: " + throwable.getMessage());
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+                    buildFieldCompleted();
                 });
 
         mDisposables.add(disposable);
@@ -887,10 +888,10 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
-                    buildFieldCompleted();
-                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
                     Log.d(TAG,
                             "createServicesFormItem: can't get service: " + throwable.getMessage());
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+                    buildFieldCompleted();
                 });
         mDisposables.add(disposable);
     }
@@ -950,9 +951,9 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
-                    buildFieldCompleted();
-                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
                     Log.d(TAG, "createProjectsFormItem: " + throwable.getMessage());
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+                    buildFieldCompleted();
                 });
 
         mDisposables.add(disposable);
@@ -1018,11 +1019,10 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
-                    buildFieldCompleted();
+                    Log.d(TAG, "createSystemUsersFormItem: can't get users: " + throwable
+                            .getMessage());
                     mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
-                    Log.d(TAG,
-                            "createSystemUsersFormItem: can't get users: " + throwable
-                                    .getMessage());
+                    buildFieldCompleted();
                 });
         mDisposables.add(disposable);
     }
@@ -1067,9 +1067,9 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
-                    buildFieldCompleted();
-                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
                     Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+                    buildFieldCompleted();
                 });
 
         mDisposables.add(disposable);
@@ -1115,9 +1115,9 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(multipleChoiceFormItem);
                 }, throwable -> {
-                    buildFieldCompleted();
-                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
                     Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+                    buildFieldCompleted();
                 });
 
         mDisposables.add(disposable);
@@ -1442,6 +1442,10 @@ class CreateWorkflowViewModel extends ViewModel {
                         }
                         break;
 
+                    case FormSettings.TYPE_SYSTEM_USERS:
+                        fillUsersFormItem(meta);
+                        break;
+
                     case FormSettings.TYPE_CURRENCY:
                         fillCurrencyFormItem(meta);
                         break;
@@ -1500,11 +1504,9 @@ class CreateWorkflowViewModel extends ViewModel {
         Integer intValue = null;
         String stringValue = null;
 
-        if (meta.getDisplayValue() instanceof String){
+        if (meta.getDisplayValue() instanceof String) {
             stringValue = (String) meta.getDisplayValue();
-        }
-
-        else if (meta.getDisplayValue() instanceof List) {
+        } else if (meta.getDisplayValue() instanceof List) {
             List<String> values = (List<String>) meta.getDisplayValue();
 
             if (values == null || values.isEmpty()) {
@@ -1649,6 +1651,27 @@ class CreateWorkflowViewModel extends ViewModel {
                 geolocationMetaData.getValue().getLatLng().get(1));
         geolocationFormItem.setValue(latLng);
         geolocationFormItem.setName(geolocationMetaData.getValue().getAddress());
+    }
+
+    private void fillUsersFormItem(Meta meta) throws IOException {
+        if (meta.getValue() == null || meta.getValue().isEmpty()
+                || meta.getValue().equals("\"\"")) {
+            return;
+        }
+
+        JsonAdapter<FormCreateProfile> jsonAdapter = moshi.adapter(FormCreateProfile.class);
+        FormCreateProfile usersMetaData = jsonAdapter.fromJson(meta.getValue());
+
+        if (usersMetaData == null) return;
+
+        SingleChoiceFormItem singleChoiceFormItem = (SingleChoiceFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        //find by id
+        Option value = formSettings
+                .findOption(singleChoiceFormItem.getOptions(), usersMetaData.getId());
+
+        singleChoiceFormItem.setValue(value);
     }
     //endregion
 

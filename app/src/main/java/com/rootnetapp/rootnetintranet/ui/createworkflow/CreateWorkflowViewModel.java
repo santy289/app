@@ -53,6 +53,7 @@ import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMet
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
 import com.rootnetapp.rootnetintranet.models.responses.downloadfile.DownloadFileResponse;
+import com.rootnetapp.rootnetintranet.models.responses.project.Project;
 import com.rootnetapp.rootnetintranet.models.responses.role.Role;
 import com.rootnetapp.rootnetintranet.models.responses.services.Service;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
@@ -79,6 +80,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -555,9 +557,9 @@ class CreateWorkflowViewModel extends ViewModel {
                 createServicesFormItem(field);
                 break;
 
-            /*case FormSettings.TYPE_PROJECT:
+            case FormSettings.TYPE_PROJECT:
                 createProjectsFormItem(field);
-                break;*/
+                break;
 
             case FormSettings.TYPE_SYSTEM_USERS:
                 createSystemUsersFormItem(field);
@@ -766,6 +768,7 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
+                    buildFieldCompleted();
                     mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
                     Log.d(TAG, "createProductsFormItem: " + throwable.getMessage());
                 });
@@ -825,6 +828,7 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
+                    buildFieldCompleted();
                     mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
                     Log.d(TAG, "createRolesFormItem: " + throwable.getMessage());
                 });
@@ -883,6 +887,7 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
+                    buildFieldCompleted();
                     mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
                     Log.d(TAG,
                             "createServicesFormItem: can't get service: " + throwable.getMessage());
@@ -895,41 +900,62 @@ class CreateWorkflowViewModel extends ViewModel {
      * then send the form item to the UI.
      */
     private void createProjectsFormItem(FormFieldsByWorkflowType field) {
-//        // TODO endpoint at this point returns an empty array.
-//        Disposable disposable = mRepository
-//                .getProjects(mToken)
-//                .subscribe(projectResponse -> {
-//                    if (projectResponse.getCode() != 200) {
-//                        return;
-//                    }
-//                    List<Project> list = projectResponse.getProjects();
-//
-//                    List<Option> options = new ArrayList<>();
-//                    for (int i = 0; i < list.size(); i++) {
-//                        String name = list.get(i).getName();
-//                        Integer id = list.get(i).getId();
-//
-//                        Option option = new Option(id, name);
-//                        options.add(option);
-//                    }
-//
-//                    if (options.isEmpty()) return;
-//
-//                    SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
-//                            .setTitle(field.getFieldName())
-//                            .setRequired(field.isRequired())
-//                            .setTag(field.getId())
-//                            .setOptions(options)
-//                            .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
-//                            .setMachineName(field.getFieldConfigObject().getMachineName())
-//                            .build();
-//
-//                    mAddFormItemLiveData.setValue(singleChoiceFormItem);
-//                }, throwable -> {
-//                    Log.d(TAG, "handeBuildRoles: " + throwable.getMessage());
-//                });
-//
-//        mDisposables.add(disposable);
+        Disposable disposable = mRepository
+                .getProjects(mToken)
+                .subscribe(projectResponse -> {
+                    buildFieldCompleted();
+
+                    List<Project> list = projectResponse.getProjects();
+
+                    List<Option> options = new ArrayList<>();
+                    for (int i = 0; i < list.size(); i++) {
+                        String name = list.get(i).getTitle();
+                        Integer id = list.get(i).getId();
+
+                        Option option = new Option(id, name);
+                        options.add(option);
+                    }
+
+                    if (options.isEmpty()) return;
+
+                    //sort alphabetically
+                    options = options
+                            .stream()
+                            .sorted((o1, o2) -> o1.getName().toLowerCase()
+                                    .compareTo(o2.getName().toLowerCase()))
+                            .collect(Collectors.toList());
+
+                    //check if multiple selection
+                    if (field.getFieldConfigObject().getMultiple()) {
+                        MultipleChoiceFormItem multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
+                                .setTitle(field.getFieldName())
+                                .setRequired(field.isRequired())
+                                .setTag(field.getId())
+                                .setOptions(options)
+                                .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                                .setMachineName(field.getFieldConfigObject().getMachineName())
+                                .build();
+                        mAddFormItemLiveData.setValue(multipleChoiceFormItem);
+                        return;
+                    }
+
+                    SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
+                            .setTitle(field.getFieldName())
+                            .setRequired(field.isRequired())
+                            .setTag(field.getId())
+                            .setOptions(options)
+                            .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                            .setMachineName(field.getFieldConfigObject().getMachineName())
+                            .build();
+
+                    mAddFormItemLiveData.setValue(singleChoiceFormItem);
+                }, throwable -> {
+                    buildFieldCompleted();
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+                    Log.d(TAG, "createProjectsFormItem: " + throwable.getMessage());
+                });
+
+        mDisposables.add(disposable);
     }
 
     /**
@@ -937,7 +963,7 @@ class CreateWorkflowViewModel extends ViewModel {
      * then send the form item to the UI.
      */
     private void createSystemUsersFormItem(FormFieldsByWorkflowType field) {
-        if (mClientId == null){
+        if (mClientId == null) {
             buildFieldCompleted();
             return;
         }
@@ -992,9 +1018,11 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
+                    buildFieldCompleted();
                     mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
                     Log.d(TAG,
-                            "createSystemUsersFormItem: can't get users: " + throwable.getMessage());
+                            "createSystemUsersFormItem: can't get users: " + throwable
+                                    .getMessage());
                 });
         mDisposables.add(disposable);
     }
@@ -1039,6 +1067,7 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
+                    buildFieldCompleted();
                     mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
                     Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
                 });
@@ -1086,6 +1115,7 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(multipleChoiceFormItem);
                 }, throwable -> {
+                    buildFieldCompleted();
                     mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
                     Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
                 });
@@ -1221,9 +1251,8 @@ class CreateWorkflowViewModel extends ViewModel {
                     mAddFormItemLiveData.setValue(currencyFormItem);
 
                 }, throwable -> {
+                    buildFieldCompleted();
                     mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
-
-                    showLoading.setValue(false);
                     Log.e(TAG, "handleCurrency: problem getting currency list " + throwable
                             .getMessage());
                 });
@@ -1268,9 +1297,8 @@ class CreateWorkflowViewModel extends ViewModel {
                     mAddFormItemLiveData.setValue(phoneFormItem);
 
                 }, throwable -> {
+                    buildFieldCompleted();
                     mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
-
-                    showLoading.setValue(false);
                     Log.e(TAG,
                             "handlePhone: problem getting country list " + throwable.getMessage());
                 });
@@ -1406,6 +1434,7 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     case FormSettings.TYPE_LIST:
                     case FormSettings.TYPE_SERVICE:
+                    case FormSettings.TYPE_PROJECT:
                         if (fieldConfig.getMultiple()) {
                             fillMultipleChoiceFormItem(meta);
                         } else {
@@ -1468,20 +1497,28 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void fillSingleChoiceFormItem(Meta meta) {
-        List<String> values = (List<String>) meta.getDisplayValue();
         Integer intValue = null;
         String stringValue = null;
-        if (values == null || values.isEmpty()) {
-            //check if we have the ID value
-            if (meta.getValue() == null || meta.getValue().isEmpty()
-                    && !Utils.isInteger(meta.getValue())) {
-                return;
-            }
 
-            intValue = Integer.valueOf(meta.getValue());
-        } else {
-            //use display value
-            stringValue = values.get(0);
+        if (meta.getDisplayValue() instanceof String){
+            stringValue = (String) meta.getDisplayValue();
+        }
+
+        else if (meta.getDisplayValue() instanceof List) {
+            List<String> values = (List<String>) meta.getDisplayValue();
+
+            if (values == null || values.isEmpty()) {
+                //check if we have the ID value
+                if (meta.getValue() == null || meta.getValue().isEmpty()
+                        && !Utils.isInteger(meta.getValue())) {
+                    return;
+                }
+
+                intValue = Integer.valueOf(meta.getValue());
+            } else {
+                //use display value
+                stringValue = values.get(0);
+            }
         }
 
         if (intValue == null && stringValue == null) return;

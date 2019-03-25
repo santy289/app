@@ -204,7 +204,8 @@ public class FormSettings {
         String value = metaData.getUnformattedValue();
         //we allow the FileFormItem even though the value is null because of the editing mode, when the user tries to delete a file.
         //same applies for GeolocationFormItem
-        if (TextUtils.isEmpty(value) && !(formItem instanceof FileFormItem) && !(formItem instanceof GeolocationFormItem)) {
+        if (TextUtils.isEmpty(
+                value) && !(formItem instanceof FileFormItem) && !(formItem instanceof GeolocationFormItem)) {
             return;
         }
 
@@ -245,6 +246,7 @@ public class FormSettings {
                 handleSingleSelection((SingleChoiceFormItem) formItem, metaData);
                 break;
             case FormSettings.VALUE_LIST:
+                //specific for users
                 if (typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
                     String json = isMultiple
                             ? getJsonStringForSystemUserTypeList((MultipleChoiceFormItem) formItem)
@@ -253,6 +255,7 @@ public class FormSettings {
                     break;
                 }
 
+                //specific for product
                 if (typeInfo.getType().equals(TYPE_PRODUCT)) {
                     String json = isMultiple
                             ? getEntityListJson((MultipleChoiceFormItem) formItem, metaData)
@@ -261,6 +264,7 @@ public class FormSettings {
                     break;
                 }
 
+                //general list (others)
                 if (isMultiple) {
                     handleMultipleSelection((MultipleChoiceFormItem) formItem, metaData);
                 } else {
@@ -603,6 +607,7 @@ public class FormSettings {
         Information information = new Information();
         information.setTitle(meta.getWorkflowTypeFieldName());
         TypeInfo typeInfo = fieldConfig.getTypeInfo();
+        String displayValue;
 
         /*
         if multiple is true then value will be an array and probably ids, so we need to go back to the
@@ -691,23 +696,10 @@ public class FormSettings {
                     }
                 }
 
-                return null;
-            case FormSettings.VALUE_ENTITY:
-                if (typeInfo.getType().equals(TYPE_ROLE)) {
-                    String displayValue = getLabelFrom(meta);
-                    information.setDisplayValue(displayValue);
-                    return information;
-                }
-
-                return null;
             case FormSettings.VALUE_LIST:
+            case FormSettings.VALUE_ENTITY:
+
                 if (typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
-                    // TODO implement system user field
-//                    if (fieldConfig.getMultiple()) {
-//                        // {"id":50,"username":"jhonny Garzon","status":true,"email":"jgarzon600@gmail.com"}
-//                    } else {
-//
-//                    }
 
                     Moshi moshi = new Moshi.Builder().build();
                     JsonAdapter<PostSystemUser> jsonAdapter = moshi.adapter(PostSystemUser.class);
@@ -722,7 +714,7 @@ public class FormSettings {
                     }
                 }
 
-                String displayValue = getLabelFrom(meta);
+                displayValue = getLabelFrom(meta);
                 information.setDisplayValue(displayValue);
                 return information;
             case FormSettings.VALUE_STRING:
@@ -786,34 +778,42 @@ public class FormSettings {
     }
 
     private String getLabelFrom(Meta meta) {
-        ArrayList<String> displayValue;
-        try {
-            displayValue = (ArrayList<String>) meta.getDisplayValue();
-        } catch (ClassCastException e) {
-            Log.d(TAG, "formatStringToObject: Value List casting problems");
-            e.printStackTrace();
-            return "";
-        }
+        if (meta.getDisplayValue() instanceof String) {
+            return String.valueOf(meta.getDisplayValue());
 
-        if (displayValue.size() == 0) {
-            return "";
-        }
+        } else if (meta.getDisplayValue() instanceof List) {
 
-        if (displayValue.size() == 1) {
-            return displayValue.get(0);
-        }
-
-        String label;
-        StringBuilder sb = new StringBuilder();
-        int size = displayValue.size();
-        for (int i = 0; i < size; i++) {
-            label = displayValue.get(i);
-            sb.append(label);
-            if (i < size - 1) {
-                sb.append(", ");
+            ArrayList<String> displayValue;
+            try {
+                displayValue = (ArrayList<String>) meta.getDisplayValue();
+            } catch (ClassCastException e) {
+                Log.d(TAG, "formatStringToObject: Value List casting problems");
+                e.printStackTrace();
+                return "";
             }
+
+            if (displayValue.size() == 0) {
+                return "";
+            }
+
+            if (displayValue.size() == 1) {
+                return displayValue.get(0);
+            }
+
+            String label;
+            StringBuilder sb = new StringBuilder();
+            int size = displayValue.size();
+            for (int i = 0; i < size; i++) {
+                label = displayValue.get(i);
+                sb.append(label);
+                if (i < size - 1) {
+                    sb.append(", ");
+                }
+            }
+            return sb.toString();
         }
-        return sb.toString();
+
+        return "";
     }
 
     public String getTitle() {

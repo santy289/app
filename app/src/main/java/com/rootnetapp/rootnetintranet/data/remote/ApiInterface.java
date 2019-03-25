@@ -272,7 +272,7 @@ public interface ApiInterface {
     Observable<RoleResponse> getRoles(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/projects?all=true")
+    @GET("intranet/drafts?all=true")
     Observable<ProjectResponse> getProjects(@Header("Authorization") String authorization);
 
 

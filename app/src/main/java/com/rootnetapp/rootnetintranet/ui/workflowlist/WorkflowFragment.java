@@ -35,7 +35,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
@@ -225,6 +227,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             boolean isChecked = fragmentWorkflowBinding.chbxSelectAll.isChecked();
             workflowViewModel.handleCheckboxAllOnClick(isChecked);
         });
+
+        fragmentWorkflowBinding.ivMassActions.setOnClickListener(v -> showMassPopupMenu());
     }
 
     private void showLoading(Boolean show) {
@@ -260,14 +264,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     }
 
     private void subscribe() {
-
-        final Observer<Integer> errorObserver = ((Integer data) -> {
-            //Utils.hideLoading();
-            if (null != data) {
-                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
-            }
-        });
-
         final Observer<Boolean> addWorkflowsObserver = (setWorkflows -> addWorkflowsObserver());
 
         // Used when we have some filter operation happening.
@@ -320,7 +316,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         });
 
         // Workflow Fragment's ViewModel
-        workflowViewModel.getObservableError().observe(this, errorObserver);
+        workflowViewModel.getObservableError().observe(this, this::showToastMessage);
         workflowViewModel.getObservableShowLoading().observe(this, showLoadingObserver);
         addWorkflowsObserver();
         workflowViewModel.getObservableUpdateWithSortedList()
@@ -357,6 +353,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .observe(this, this::showAddButton);
         workflowViewModel.getObservableShowViewWorkflowButton()
                 .observe(this, this::showViewWorkflowDetailsButton);
+        workflowViewModel.getObservableCompleteMassAction().observe(this, this::handleCompleteMassAction);
 
         // MainActivity's ViewModel
         mainViewModel.messageContainerToWorkflowList
@@ -572,5 +569,50 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     @UiThread
     private void showViewWorkflowDetailsButton(boolean show) {
         adapter.setShowViewWorkflowButton(show);
+    }
+
+    private void showMassPopupMenu() {
+        PopupMenu popup = new PopupMenu(getContext(), fragmentWorkflowBinding.ivMassActions);
+        //Inflating the Popup using xml file
+        popup.getMenuInflater().inflate(R.menu.menu_workflow_list, popup.getMenu());
+
+        popup.setOnMenuItemClickListener(item -> {
+            List<Integer> checkedList = adapter.getCheckedIds();
+            if (checkedList.isEmpty()) showToastMessage(R.string.workflow_list_no_selections);
+
+            switch (item.getItemId()) {
+                case R.id.disable:
+                    break;
+                case R.id.close:
+                    workflowViewModel.openCloseWorkflows(checkedList, false);
+                    break;
+                case R.id.delete:
+                    break;
+            }
+
+            return false;
+        });
+
+        popup.show();
+    }
+
+    @UiThread
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                getContext(),
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
+    }
+
+    @UiThread
+    private void handleCompleteMassAction(boolean refresh) {
+        if (!refresh) return;
+
+        SharedPreferences prefs = getContext()
+                .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+
+        //todo does not refresh
+        workflowViewModel.initWorkflowList(prefs, this);
     }
 }

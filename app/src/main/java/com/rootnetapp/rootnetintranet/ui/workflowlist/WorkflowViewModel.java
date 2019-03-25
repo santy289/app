@@ -8,6 +8,7 @@ import android.util.Log;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -16,6 +17,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.Wo
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
+import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListInfo;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
@@ -79,6 +81,7 @@ public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<Boolean> setAllCheckboxesList;
     private MutableLiveData<Boolean> showAddButtonLiveData;
     private MutableLiveData<Boolean> showViewWorkflowButtonLiveData;
+    private MutableLiveData<Boolean> completeMassAction;
     public MutableLiveData<Boolean> showBottomSheetLoading;
     protected MutableLiveData<Boolean> clearFilters;
     private LiveData<PagedList<WorkflowListItem>> liveWorkflows;
@@ -1037,12 +1040,19 @@ public class WorkflowViewModel extends ViewModel {
             showLoading.postValue(false);
         });
 
+        workflowRepository.getObservableHandleRepoError().removeObservers(lifecycleOwner);
         workflowRepository.getObservableHandleRepoError()
                 .observe(lifecycleOwner, handleRepoErrorObserver);
+
+        workflowRepository.getObservableHandleRepoSuccess().removeObservers(lifecycleOwner);
         workflowRepository.getObservableHandleRepoSuccess()
                 .observe(lifecycleOwner, handleRepoSuccessObserver);
+
+        workflowRepository.getObservableHandleRepoSuccessNoFilter().removeObservers(lifecycleOwner);
         workflowRepository.getObservableHandleRepoSuccessNoFilter()
                 .observe(lifecycleOwner, handleRepoSuccessNoFilterObserver);
+
+        workflowRepository.getObservableHandleRestSuccessWithNoApplyFilter().removeObservers(lifecycleOwner);
         workflowRepository.getObservableHandleRestSuccessWithNoApplyFilter()
                 .observe(lifecycleOwner, handleRestSuccessWithNoApplyFilter);
     }
@@ -1500,6 +1510,25 @@ public class WorkflowViewModel extends ViewModel {
         messageMainToggleSwitch.setValue(toggleSwitch);
     }
 
+    protected void openCloseWorkflows(List<Integer> workflowIds, boolean open) {
+        showLoading.setValue(true);
+        Disposable disposable = workflowRepository
+                .postOpenCloseActivation(token, workflowIds, open)
+                .subscribe(this::onOpenCloseWorkflowsSuccess, this::onFailure);
+
+        disposables.add(disposable);
+    }
+
+    private void onOpenCloseWorkflowsSuccess(WorkflowActivationResponse workflowActivationResponse) {
+        completeMassAction.setValue(true);
+    }
+
+    private void onFailure(Throwable throwable) {
+        Log.d(TAG, "onFailure: " + throwable.getMessage());
+        showLoading.setValue(false);
+        mErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+    }
+
     protected LiveData<Integer> getObservableError() {
         if (mErrorLiveData == null) {
             mErrorLiveData = new MutableLiveData<>();
@@ -1586,6 +1615,13 @@ public class WorkflowViewModel extends ViewModel {
             setSelectType = new MutableLiveData<>();
         }
         return setSelectType;
+    }
+
+    protected LiveData<Boolean> getObservableCompleteMassAction() {
+        if (completeMassAction == null) {
+            completeMassAction = new MutableLiveData<>();
+        }
+        return completeMassAction;
     }
 
 }

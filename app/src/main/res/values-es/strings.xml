@@ -252,6 +252,7 @@
     <string name="double_multiple_choice_form_item_select_both">Necesitas seleccionar ambos valores para añadir una opción.</string>
     <string name="approvers_involved">Aprobadores Involucrados</string>
     <string name="fragment_create_workflow_no_permissions">No tienes suficientes permisos para crear un workflow.</string>
+    <string name="workflow_list_no_selections">No se han seleccionado workflows.</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Detalles de Workflow</string>

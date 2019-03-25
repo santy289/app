@@ -143,7 +143,7 @@ public interface ApiInterface {
                                           @Field("repeated_password") String repeatedPassword);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows?")
+    @GET("intranet/workflows?status=true")
     @Deprecated
     Observable<WorkflowsResponse> getWorkflows(@Header("Authorization") String authorization,
                                                @Query("limit") int limit,
@@ -153,7 +153,7 @@ public interface ApiInterface {
 
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows?order=%7B%22desc%22:true,%22column%22:%22updated%22%7D")
+    @GET("intranet/workflows?status=true&order=%7B%22desc%22:true,%22column%22:%22updated%22%7D")
     Observable<WorkflowResponseDb> getWorkflowsDb(@Header("Authorization") String authorization,
                                                   @Query("limit") int limit,
                                                   @Query("open") boolean open,
@@ -161,7 +161,7 @@ public interface ApiInterface {
                                                   @Query("workflow_type") boolean showTypeDetails);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows?order=%7B%22desc%22:true,%22column%22:%22updated%22%7D")
+    @GET("intranet/workflows?status=true&order=%7B%22desc%22:true,%22column%22:%22updated%22%7D")
     Observable<WorkflowResponseDb> getWorkflowsDbWithSearch(@Header("Authorization") String authorization,
                                                   @Query("limit") int limit,
                                                   @Query("open") boolean open,
@@ -179,7 +179,7 @@ public interface ApiInterface {
                                                   @Query("query") String searchText);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows?order=%7B%22desc%22:true,%22column%22:%22updated%22%7D")
+    @GET("intranet/workflows?status=true&order=%7B%22desc%22:true,%22column%22:%22updated%22%7D")
     Observable<WorkflowResponseDb> getWorkflowsBySearchQuery(@Header("Authorization") String authorization,
                                                              @Query("limit") int limit,
                                                              @Query("page") int page,
@@ -188,7 +188,7 @@ public interface ApiInterface {
                                                              @Query("workflow_type") boolean showTypeDetails);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows?")
+    @GET("intranet/workflows?status=true")
     Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(@Header("Authorization") String authorization,
                                                            @Query("limit") int limit,
                                                            @Query("open") boolean open,
@@ -197,7 +197,7 @@ public interface ApiInterface {
                                                            @QueryMap Map<String, Object> options);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows?")
+    @GET("intranet/workflows?status=true")
     Observable<WorkflowResponseDb> getWorkflowsDbFilteredByDynamicFields(@Header("Authorization") String authorization,
                                                                          @Query("limit") int limit,
                                                                          @Query("open") boolean open,

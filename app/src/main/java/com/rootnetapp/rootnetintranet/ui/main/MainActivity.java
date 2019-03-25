@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -141,7 +142,8 @@ public class MainActivity extends AppCompatActivity
         String token = sharedPref.getString(PreferenceKeys.PREF_TOKEN, "");
         String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
         String port = sharedPref.getString(PreferenceKeys.PREF_PORT, "");
-        Intent broadcastIntent = createIntent(RestartWebsocketReceiver.class, token, port, protocol, Utils.domain);
+        Intent broadcastIntent = createIntent(RestartWebsocketReceiver.class, token, port, protocol,
+                Utils.domain);
         broadcastIntent.setAction("restartservice");
         sendBroadcast(broadcastIntent);
     }
@@ -155,9 +157,11 @@ public class MainActivity extends AppCompatActivity
      * @param port
      * @param protocol
      * @param domain
+     *
      * @return
      */
-    private Intent createIntent(Class<?> className, String token, String port, String protocol, String domain) {
+    private Intent createIntent(Class<?> className, String token, String port, String protocol,
+                                String domain) {
         Intent intent = new Intent(getApplicationContext(), className);
         intent.putExtra(WebsocketSecureHandler.KEY_TOKEN, token);
         intent.putExtra(WebsocketSecureHandler.KEY_PORT, port);
@@ -204,7 +208,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_profile:
-                showFragment(ProfileFragment.newInstance(this), false);
+                showFragment(ProfileFragment.newInstance(), false);
                 return true;
             default:
                 return false;
@@ -229,7 +233,8 @@ public class MainActivity extends AppCompatActivity
     public void onBackPressed() {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
         //check if the fragment has priority over the onBackPressed callback
-        if (fragment instanceof CreateWorkflowFragmentInterface && ((CreateWorkflowFragmentInterface) fragment).onBackPressed()) {
+        if (fragment instanceof CreateWorkflowFragmentInterface && ((CreateWorkflowFragmentInterface) fragment)
+                .onBackPressed()) {
             return;
         }
 
@@ -409,6 +414,9 @@ public class MainActivity extends AppCompatActivity
         mainBinding.rightDrawer.rightDrawerBaseFilters.setOnClickListener(view -> {
             viewModel.sendBaseFiltersClicked();
         });
+
+        mainBinding.toolbarImage.setOnClickListener(
+                v -> showFragment(ProfileFragment.newInstance(), false));
     }
 
     private void openRightDrawer(boolean open) {
@@ -583,22 +591,37 @@ public class MainActivity extends AppCompatActivity
                 break;
             }
             case R.id.nav_profile: {
-                showFragment(ProfileFragment.newInstance(this), false);
+                showFragment(ProfileFragment.newInstance(), false);
                 mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
                 break;
             }
             case R.id.nav_exit: {
-                SharedPreferences sharedPref = getSharedPreferences("Sessions",
-                        Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString("username", "").apply();
-                editor.putString("password", "").apply();
-                startActivity(new Intent(MainActivity.this, DomainActivity.class));
-                // close splash activity
-                finish();
+                showLogoutDialog();
                 break;
             }
         }
+    }
+
+    private void showLogoutDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogTheme);
+        builder.setTitle(R.string.logout);
+        builder.setMessage(R.string.logout_confirmation);
+        builder.setCancelable(false);
+
+        builder.setPositiveButton(R.string.accept, (dialog, which) -> logout());
+        builder.setNegativeButton(R.string.cancel, null);
+        builder.show();
+    }
+
+    private void logout(){
+        SharedPreferences sharedPref = getSharedPreferences("Sessions",
+                Context.MODE_PRIVATE);
+
+        Utils.logout(sharedPref);
+
+        startActivity(new Intent(MainActivity.this, DomainActivity.class));
+        // close splash activity
+        finish();
     }
 
     private void goToDomain(Boolean open) {
@@ -825,8 +848,6 @@ public class MainActivity extends AppCompatActivity
         viewModel.receiveMessageBaseFilterSelected
                 .observe(this, this::handleUpdateBaseFilterSelectionUpdateWith);
         viewModel.openRightDrawer.observe(this, this::openRightDrawer);
-
-
 
 //        viewModel.getObservableStartService().observe(this, result -> startWebsocketServiceIntent());
 

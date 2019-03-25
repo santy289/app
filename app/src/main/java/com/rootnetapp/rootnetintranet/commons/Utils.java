@@ -3,6 +3,7 @@ package com.rootnetapp.rootnetintranet.commons;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -550,5 +551,16 @@ public class Utils {
         Canvas canvas = new Canvas(bitmap);
         vectorDrawable.draw(canvas);
         return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
+    /**
+     * Resets the user configuration upon logout. This needs to be called when the user logs out.
+     *
+     * @param sharedPreferences preferences object.
+     */
+    public static void logout(SharedPreferences sharedPreferences) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("username", "").apply();
+        editor.putString("password", "").apply();
     }
 }

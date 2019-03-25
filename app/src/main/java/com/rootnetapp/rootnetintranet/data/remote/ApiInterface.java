@@ -134,6 +134,14 @@ public interface ApiInterface {
                                           @Field("phone_number") String phoneNumber);
 
     @Headers({"Domain-Name: api"})
+    @PATCH("profiles/{id}")
+    @FormUrlEncoded
+    Observable<EditUserResponse> changeUserPassword(@Header("Authorization") String authorization,
+                                          @Path("id") int id,
+                                          @Field("password") String password,
+                                          @Field("repeated_password") String repeatedPassword);
+
+    @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?")
     @Deprecated
     Observable<WorkflowsResponse> getWorkflows(@Header("Authorization") String authorization,

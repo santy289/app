@@ -12,6 +12,7 @@ import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentDeleteResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.contact.ContactsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountryDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
@@ -472,6 +473,12 @@ public interface ApiInterface {
     @Streaming
     @GET("options?key=socket_protocol")
     Observable<WebSocketSettingResponse> getWsProtocol(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: api"})
+    @GET("contacts/records?")
+    Observable<ContactsResponse> getContacts(@Header("Authorization") String authorization,
+                                             @Query("query") String query,
+                                             @Query("limit") int limit);
 
     //region Google Maps API
     @GET("https://maps.googleapis.com/maps/api/place/nearbysearch/json?rankby=distance")

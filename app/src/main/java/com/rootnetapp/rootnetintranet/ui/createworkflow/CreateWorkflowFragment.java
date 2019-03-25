@@ -21,6 +21,7 @@ import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentCreateWorkflowBinding;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.AutocompleteFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.GeolocationFormItem;
@@ -149,25 +150,37 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     }
 
     private void subscribe() {
-        viewModel.getObservableToastMessage().observe(getViewLifecycleOwner(), this::showToastMessage);
-        viewModel.getObservableAddWorkflowTypeItem().observe(getViewLifecycleOwner(), this::addWorkflowTypeItem);
-        viewModel.getObservableAddPeopleInvolvedItem().observe(getViewLifecycleOwner(), this::addPeopleInvolvedItem);
+        viewModel.getObservableToastMessage()
+                .observe(getViewLifecycleOwner(), this::showToastMessage);
+        viewModel.getObservableAddWorkflowTypeItem()
+                .observe(getViewLifecycleOwner(), this::addWorkflowTypeItem);
+        viewModel.getObservableAddPeopleInvolvedItem()
+                .observe(getViewLifecycleOwner(), this::addPeopleInvolvedItem);
         viewModel.getObservableAddFormItem().observe(getViewLifecycleOwner(), this::addItemToForm);
-        viewModel.getObservableSetFormItemList().observe(getViewLifecycleOwner(), this::setItemListToForm);
+        viewModel.getObservableSetFormItemList()
+                .observe(getViewLifecycleOwner(), this::setItemListToForm);
         viewModel.getObservableAddPeopleInvolvedFormItem()
                 .observe(getViewLifecycleOwner(), this::addItemToPeopleInvolvedForm);
         viewModel.getObservableSetPeopleInvolvedFormItemList()
                 .observe(getViewLifecycleOwner(), this::setItemListToPeopleInvolvedForm);
-        viewModel.getObservableValidationUi().observe(getViewLifecycleOwner(), this::updateValidationUi);
+        viewModel.getObservableValidationUi()
+                .observe(getViewLifecycleOwner(), this::updateValidationUi);
         viewModel.getObservableShowLoading().observe(getViewLifecycleOwner(), this::showLoading);
-        viewModel.getObservableShowDialogMessage().observe(getViewLifecycleOwner(), this::showDialog);
+        viewModel.getObservableShowDialogMessage()
+                .observe(getViewLifecycleOwner(), this::showDialog);
         viewModel.getObservableGoBack().observe(getViewLifecycleOwner(), back -> goBack());
-        viewModel.getObservableUpdateFormItem().observe(getViewLifecycleOwner(), this::updateFormItemUi);
-        viewModel.getObservableDownloadedFileUiData().observe(getViewLifecycleOwner(), this::openDownloadedFile);
-        viewModel.getObservableEnableSubmitButton().observe(getViewLifecycleOwner(), this::enableSubmitButton);
-        viewModel.getObservableShowSubmitButton().observe(getViewLifecycleOwner(), this::showSubmitButton);
-        viewModel.getObservableShowNoPermissionsView().observe(getViewLifecycleOwner(), this::showNoPermissionsView);
-        viewModel.getObservableShowFieldsRecycler().observe(getViewLifecycleOwner(), this::showFieldsRecycler);
+        viewModel.getObservableUpdateFormItem()
+                .observe(getViewLifecycleOwner(), this::updateFormItemUi);
+        viewModel.getObservableDownloadedFileUiData()
+                .observe(getViewLifecycleOwner(), this::openDownloadedFile);
+        viewModel.getObservableEnableSubmitButton()
+                .observe(getViewLifecycleOwner(), this::enableSubmitButton);
+        viewModel.getObservableShowSubmitButton()
+                .observe(getViewLifecycleOwner(), this::showSubmitButton);
+        viewModel.getObservableShowNoPermissionsView()
+                .observe(getViewLifecycleOwner(), this::showNoPermissionsView);
+        viewModel.getObservableShowFieldsRecycler()
+                .observe(getViewLifecycleOwner(), this::showFieldsRecycler);
     }
 
     private void setupSubmitButton() {
@@ -331,7 +344,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
      */
     @UiThread
     private void setItemListToForm(List<BaseFormItem> list) {
-        //for FileFormItem and GeolocationFormItem
+        //for FileFormItem, GeolocationFormItem and AutocompleteFormItem
         for (BaseFormItem item : list) {
             createFormItemListenerIfNeeded(item);
         }
@@ -348,6 +361,10 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         else if (item instanceof GeolocationFormItem) {
             createGeolocationFormItemListener((GeolocationFormItem) item);
         }
+        //check for any AutocompleteFormItem
+        else if (item instanceof AutocompleteFormItem) {
+            createAutocompleteFormItemListener((AutocompleteFormItem) item);
+        }
     }
 
     private void createFileFormItemListener(FileFormItem fileFormItem) {
@@ -360,6 +377,10 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
                     GeolocationActivity.class), CreateWorkflowViewModel.REQUEST_GEOLOCATION);
             viewModel.setCurrentRequestingGeolocationFormItem(geolocationFormItem);
         });
+    }
+
+    private void createAutocompleteFormItemListener(AutocompleteFormItem autocompleteFormItem) {
+        autocompleteFormItem.setOnQueryListener(item -> viewModel.queryAutocompleteFormItem(item));
     }
 
     /**
@@ -418,7 +439,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
 
     @UiThread
     private void updateFormItemUi(BaseFormItem formItem) {
-        mAdapter.notifyItemChanged(mAdapter.getItemPosition(formItem));
+        mAdapter.updateItem(formItem);
     }
 
     /**
@@ -581,12 +602,12 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     }
 
     @UiThread
-    private void showNoPermissionsView(boolean show){
+    private void showNoPermissionsView(boolean show) {
         mBinding.tvNoPermissions.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     @UiThread
-    private void showFieldsRecycler(boolean show){
+    private void showFieldsRecycler(boolean show) {
         mBinding.rvFields.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 

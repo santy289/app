@@ -12,10 +12,12 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.BaseEntityJsonValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostContact;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCountryCodeAndValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCurrency;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostPhone;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.AutocompleteFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
@@ -27,6 +29,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFor
 import com.rootnetapp.rootnetintranet.models.createworkflow.geolocation.GeolocationMetaData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.geolocation.Value;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
+import com.rootnetapp.rootnetintranet.models.responses.contact.Contact;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
@@ -56,6 +59,7 @@ public class FormSettings {
     private long createdTimestamp;
     private final ArrayList<FormCreateProfile> profiles;
     private final ArrayList<WorkflowUser> workflowUsers;
+    private List<Contact> contacts;
     private List<FormFieldsByWorkflowType> fields; // Full info of all fields.
     private final Moshi moshi;
     private List<BaseFormItem> formItems; //new
@@ -67,10 +71,10 @@ public class FormSettings {
     public static final String TYPE_DATE = "date";
     public static final String TYPE_CHECKBOX = "checkbox";
     public static final String TYPE_SYSTEM_USERS = "system_users";
-    public static final String TYPE_PROJECT = "project"; // empty response
+    public static final String TYPE_PROJECT = "project";
     public static final String TYPE_ROLE = "role";
     public static final String TYPE_BIRTH_DATE = "birth_date";
-    public static final String TYPE_ACCOUNT = "account"; // which account
+    public static final String TYPE_ACCOUNT = "account";
     public static final String TYPE_LINK = "link";
     public static final String TYPE_CURRENCY = "currency";
     public static final String TYPE_PHONE = "phone";
@@ -96,6 +100,7 @@ public class FormSettings {
         ids = new ArrayList<>();
         profiles = new ArrayList<>();
         workflowUsers = new ArrayList<>();
+        contacts = new ArrayList<>();
         fields = new ArrayList<>();
         title = "";
         description = "";
@@ -139,6 +144,14 @@ public class FormSettings {
         workflowUsers.add(profile);
     }
 
+    public List<Contact> getContacts() {
+        return contacts;
+    }
+
+    public void setContacts(List<Contact> contacts) {
+        this.contacts = contacts;
+    }
+
     public ArrayList<String> getProfileNames() {
         ArrayList<String> fullNames = new ArrayList<>();
         for (int i = 0; i < profiles.size(); i++) {
@@ -172,6 +185,17 @@ public class FormSettings {
             workflowUser = workflowUsers.get(i);
             if (workflowUser.getId() == id) {
                 return workflowUser;
+            }
+        }
+        return null;
+    }
+
+    protected Contact getContactBy(int id) {
+        Contact contact;
+        for (int i = 0; i < contacts.size(); i++) {
+            contact = contacts.get(i);
+            if (contact.getId() == id) {
+                return contact;
             }
         }
         return null;
@@ -243,6 +267,13 @@ public class FormSettings {
                 metaData.setValue("");
                 break;
             case FormSettings.VALUE_ENTITY:
+                //specific for accounts
+                if (typeInfo.getType().equals(TYPE_ACCOUNT)) {
+                    String json = getJsonStringForContactType((AutocompleteFormItem) formItem);
+                    metaData.setValue(json);
+                    break;
+                }
+
                 handleSingleSelection((SingleChoiceFormItem) formItem, metaData);
                 break;
             case FormSettings.VALUE_LIST:
@@ -487,6 +518,23 @@ public class FormSettings {
         Type type = Types.newParameterizedType(List.class, PostSystemUser.class);
         JsonAdapter<List<PostSystemUser>> jsonAdapter = moshi.adapter(type);
         return jsonAdapter.toJson(postSystemUserList);
+    }
+
+    private String getJsonStringForContactType(AutocompleteFormItem formItem) {
+        Option value = formItem.getValue();
+        if (value == null) return "";
+
+        Contact contact = getContactBy(value.getId());
+        if (contact == null) return "";
+
+        PostContact postContact = new PostContact();
+        postContact.setId(contact.getId());
+        postContact.setFullName(contact.getFullName());
+        postContact.setCompany(contact.getCompany());
+
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<PostContact> jsonAdapter = moshi.adapter(PostContact.class);
+        return jsonAdapter.toJson(postContact);
     }
 
     private void handleBoolean(TypeInfo typeInfo, WorkflowMetas metaData, String value) {

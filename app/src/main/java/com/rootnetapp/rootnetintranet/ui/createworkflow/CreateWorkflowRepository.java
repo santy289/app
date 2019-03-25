@@ -13,6 +13,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.CurrencyFieldData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PhoneFieldData;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
+import com.rootnetapp.rootnetintranet.models.responses.contact.ContactsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
@@ -39,6 +40,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 public class CreateWorkflowRepository {
+
+    private static final int AUTOCOMPLETE_ITEMS_LIMIT = 5;
 
     private final ApiInterface service;
     private final AppDatabase database;
@@ -183,6 +186,11 @@ public class CreateWorkflowRepository {
 
     protected Observable<ProfileResponse> getProfiles(String auth, boolean enabled) {
         return service.getProfiles(auth, enabled).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<ContactsResponse> getContacts(String auth, String query) {
+        return service.getContacts(auth, query, AUTOCOMPLETE_ITEMS_LIMIT).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 }

@@ -32,6 +32,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.PostCurrency;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostPhone;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
 import com.rootnetapp.rootnetintranet.models.createworkflow.StatusSpecific;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.AutocompleteFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseOption;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
@@ -51,6 +52,8 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormIt
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem.InputType;
 import com.rootnetapp.rootnetintranet.models.createworkflow.geolocation.GeolocationMetaData;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
+import com.rootnetapp.rootnetintranet.models.responses.contact.Contact;
+import com.rootnetapp.rootnetintranet.models.responses.contact.ContactsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
 import com.rootnetapp.rootnetintranet.models.responses.downloadfile.DownloadFileResponse;
@@ -104,6 +107,7 @@ import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WOR
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_OWNER;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_STATUS;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_TYPE;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_ACCOUNT;
 
 class CreateWorkflowViewModel extends ViewModel {
 
@@ -164,6 +168,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private boolean hasEditPermissions;
     private List<WorkflowTypeDb> mWorkflowTypeDbList;
     private WorkflowTypeDb mSelectedWorkflowType;
+    private AutocompleteFormItem mCurrentQueryAutocompleteFormItem;
 
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.mRepository = createWorkflowRepository;
@@ -584,6 +589,9 @@ class CreateWorkflowViewModel extends ViewModel {
                 break;
             case FormSettings.TYPE_GEOLOCATION:
                 createGeolocationFormItem(field);
+                break;
+            case FormSettings.TYPE_ACCOUNT:
+                createAccountsFormItem(field);
                 break;
             default:
                 Log.d(TAG, "buildField: Not a generic type: " + typeInfo
@@ -1337,6 +1345,28 @@ class CreateWorkflowViewModel extends ViewModel {
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
 
         GeolocationFormItem item = new GeolocationFormItem.Builder()
+                .setTitle(field.getFieldName())
+                .setRequired(field.isRequired())
+                .setTag(field.getId())
+                .setEscaped(escape(field.getFieldConfigObject()))
+                .setMachineName(field.getFieldConfigObject().getMachineName())
+                .setTypeInfo(typeInfo)
+                .build();
+
+        formSettings.getFormItems().add(item);
+
+        buildFieldCompleted();
+    }
+
+    /**
+     * Creates an autocomplete form item with the specified params and sends the item to the UI.
+     *
+     * @param field item params.
+     */
+    private void createAccountsFormItem(FormFieldsByWorkflowType field) {
+        TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
+
+        AutocompleteFormItem item = new AutocompleteFormItem.Builder()
                 .setTitle(field.getFieldName())
                 .setRequired(field.isRequired())
                 .setTag(field.getId())
@@ -2357,6 +2387,42 @@ class CreateWorkflowViewModel extends ViewModel {
         mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
 
         Log.d(TAG, "onFailure: " + throwable.getMessage());
+    }
+
+    protected void queryAutocompleteFormItem(AutocompleteFormItem formItem) {
+        if (formItem.getQuery() == null) return;
+
+        mCurrentQueryAutocompleteFormItem = formItem;
+
+        switch (formItem.getTypeInfo().getType()){
+            case TYPE_ACCOUNT:
+                queryForContacts(formItem);
+                break;
+        }
+    }
+
+    private void queryForContacts(AutocompleteFormItem formItem) {
+        Disposable disposable = mRepository
+                .getContacts(mToken, formItem.getQuery())
+                .subscribe(this::onContactsQuerySuccess, this::onFailure);
+
+        mDisposables.add(disposable);
+    }
+
+    private void onContactsQuerySuccess(ContactsResponse contactsResponse) {
+        List<Contact> contacts = contactsResponse.getList();
+
+        formSettings.setContacts(contacts);
+
+        //update options
+        List<Option> options = contacts.stream()
+                .map(contact -> new Option(contact.getId(), contact.getCompany()))
+                .collect(Collectors.toList());
+
+        mCurrentQueryAutocompleteFormItem.setOptions(options);
+        mUpdateFormItemLiveData.setValue(mCurrentQueryAutocompleteFormItem);
+
+        mCurrentQueryAutocompleteFormItem = null; //clear reference
     }
 
     protected LiveData<Integer> getObservableError() {

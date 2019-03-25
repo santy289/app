@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.databinding.FormItemAutocompleteBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemBooleanBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemCurrencyBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemDateBinding;
@@ -28,6 +30,7 @@ import com.rootnetapp.rootnetintranet.databinding.FormItemMultipleChoiceBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemPhoneBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemSingleChoiceBinding;
 import com.rootnetapp.rootnetintranet.databinding.FormItemTextInputBinding;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.AutocompleteFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseOption;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
@@ -86,6 +89,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         mDataset = list;
         notifyDataSetChanged();
         getItemCount();
+    }
+
+    public void updateItem(BaseFormItem baseFormItem) {
+        notifyItemChanged(getItemPosition(baseFormItem));
     }
 
     public void setHasToEvaluateValid(boolean hasToEvaluateValid) {
@@ -149,6 +156,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 return new DisplayViewHolder(FormItemDisplayBinding
                         .inflate(layoutInflater, viewGroup, false));
 
+            case FormItemViewType.AUTOCOMPLETE:
+                return new AutocompleteViewHolder(FormItemAutocompleteBinding
+                        .inflate(layoutInflater, viewGroup, false));
+
             default:
                 throw new IllegalStateException("Invalid ViewType");
         }
@@ -208,6 +219,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             case FormItemViewType.DISPLAY:
                 populateDisplayView((DisplayViewHolder) holder, position);
+                break;
+
+            case FormItemViewType.AUTOCOMPLETE:
+                populateAutocompleteView((AutocompleteViewHolder) holder, position);
                 break;
 
             default:
@@ -1309,6 +1324,113 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.show();
         }
     }
+
+    /**
+     * Handles the view for the {@link AutocompleteFormItem}. Displays the UI according to the
+     * visibility, enabled and validation params.
+     *
+     * @param holder   view holder
+     * @param position item position in adapter.
+     */
+    private void populateAutocompleteView(AutocompleteViewHolder holder, int position) {
+        AutocompleteFormItem item = (AutocompleteFormItem) getItem(position);
+
+        //set title
+        String title = item.getTitle();
+        if ((title == null || title.isEmpty()) && item.getTitleRes() != 0) {
+            title = mContext.getString(item.getTitleRes());
+        }
+        holder.getBinding().tvTitle.setText(title);
+
+        //remove text watcher to set value
+        if (item.getTextWatcher() != null) {
+            holder.getBinding().etInput.removeTextChangedListener(item.getTextWatcher());
+        }
+        //set value if user is not searching
+        if (item.getQuery() == null) {
+            holder.getBinding().etInput.setText(item.getStringValue());
+        } else {
+            holder.getBinding().etInput.setText(item.getQuery());
+            holder.getBinding().etInput.setSelection(item.getQuery().length());
+        }
+
+        //set text watcher
+        if (item.getTextWatcher() == null) {
+            item.setTextWatcher(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    item.setQuery(s.toString());
+                    if (item.getOnQueryListener() != null) item.getOnQueryListener().onQuery(item);
+                }
+            });
+        }
+
+        //add the text watcher
+        holder.getBinding().etInput.addTextChangedListener(item.getTextWatcher());
+
+        //setup recycler
+        holder.getBinding().rvSuggestions.setLayoutManager(new LinearLayoutManager(mContext));
+
+        //set suggestions listener
+        AutocompleteSuggestionsAdapter.OnSuggestionSelectedListener onSuggestionSelectedListener = option -> {
+            if (option == null) return;
+
+            item.setValue(option);
+            holder.getBinding().etInput.removeTextChangedListener(item.getTextWatcher());
+            holder.getBinding().etInput.setText(option.getName());
+            holder.getBinding().etInput.setSelection(option.getName().length());
+            holder.getBinding().etInput.addTextChangedListener(item.getTextWatcher());
+            holder.getBinding().rvSuggestions.setVisibility(View.GONE);
+        };
+
+        //set suggestions adapter
+        holder.getBinding().rvSuggestions.setAdapter(
+                new AutocompleteSuggestionsAdapter(item.getOptions(),
+                        onSuggestionSelectedListener));
+
+        holder.getBinding().rvSuggestions.setVisibility(
+                item.getOptions() == null || item.getOptions().isEmpty()
+                        ? View.GONE
+                        : View.VISIBLE);
+
+        // verify visibility
+        if (!item.isVisible()) {
+            holder.hide();
+            return;
+        } else {
+            holder.show();
+        }
+
+        // verify required indicator
+        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+
+        // verify enabled param
+        if (!item.isEnabled()) {
+            holder.getBinding().etInput.setBackgroundResource(R.drawable.spinner_bg_disabled);
+            holder.getBinding().etInput.setEnabled(false);
+            return;
+        } else {
+            holder.getBinding().etInput.setBackgroundResource(R.drawable.spinner_bg);
+            holder.getBinding().etInput.setEnabled(true);
+        }
+
+        // verify validation
+        if (hasToEvaluateValid && !item.isValid()) {
+            holder.getBinding().etInput.setBackgroundResource(R.drawable.spinner_bg_error);
+        } else {
+            holder.getBinding().etInput.setBackgroundResource(R.drawable.spinner_bg);
+        }
+    }
     //endregion
 
     //region Retrieve Values
@@ -1318,13 +1440,13 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
      * DateFormItem} (because they are already set via listeners), and retrieves the selected value
      * from the View to save it into the class object.
      *
-     * @param recylerView the RecyclerView that this adapter is attached to.
+     * @param recyclerView the RecyclerView that this adapter is attached to.
      */
-    public void retrieveValuesFromViews(RecyclerView recylerView) {
+    public void retrieveValuesFromViews(RecyclerView recyclerView) {
         for (int i = 0; i < mDataset.size(); i++) {
             BaseFormItem item = mDataset.get(i);
 
-            RecyclerView.ViewHolder holder = recylerView.findViewHolderForAdapterPosition(i);
+            RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(i);
 
             if (holder == null) continue;
 
@@ -1374,6 +1496,10 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
                 case FormItemViewType.DISPLAY:
                     //this is not an input type field
+                    continue;
+
+                case FormItemViewType.AUTOCOMPLETE:
+                    //the value is saved when the user selects the item
                     continue;
 
                 default:

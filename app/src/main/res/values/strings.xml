@@ -242,7 +242,7 @@
     <string name="select_location">Select a location</string>
     <string name="asterisk" translatable="false">*</string>
     <string name="file_form_item_required_msg">You must add a file in order to continue.</string>
-    <string name="intent_form_item_required_msg">You must complete this in order to continue.</string>
+    <string name="intent_form_item_required_msg">You must complete this section in order to continue.</string>
     <string name="geolocation_form_item_required_msg">You must select a location in order to continue.</string>
     <string name="autocomplete_form_item_required_msg">You must choose an option in order to continue.</string>
     <string name="autocomplete_form_item_hint">Start typing…</string>

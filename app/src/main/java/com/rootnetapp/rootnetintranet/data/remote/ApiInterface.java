@@ -14,6 +14,7 @@ import com.rootnetapp.rootnetintranet.models.responses.comments.CommentDeleteRes
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.contact.ContactsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.contact.SubContactsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountryDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
@@ -507,6 +508,13 @@ public interface ApiInterface {
     Observable<BusinessOpportunitiesResponse> getBusinessOpportunities(@Header("Authorization") String authorization,
                                                                        @Query("query") String query,
                                                                        @Query("limit") int limit);
+
+    @Headers({"Domain-Name: api"})
+    @POST("sub_contacts/records?")
+    @FormUrlEncoded
+    Observable<SubContactsResponse> postSearchSubContacts(@Header("Authorization") String authorization,
+                                                          @Field("query") String query,
+                                                          @Query("limit") int limit);
 
     //region Google Maps API
     @GET("https://maps.googleapis.com/maps/api/place/nearbysearch/json?rankby=distance")

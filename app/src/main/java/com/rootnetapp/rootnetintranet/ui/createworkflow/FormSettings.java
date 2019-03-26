@@ -17,6 +17,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.PostContact;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCountryCodeAndValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCurrency;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostPhone;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostSubContact;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.AutocompleteFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
@@ -32,6 +33,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.geolocation.Value;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.business.BusinessOpportunity;
 import com.rootnetapp.rootnetintranet.models.responses.contact.Contact;
+import com.rootnetapp.rootnetintranet.models.responses.contact.SubContact;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
@@ -63,6 +65,7 @@ public class FormSettings {
     private final ArrayList<WorkflowUser> workflowUsers;
     private List<Contact> contacts;
     private List<BusinessOpportunity> businessOpportunities;
+    private List<SubContact> subContacts;
     private List<FormFieldsByWorkflowType> fields; // Full info of all fields.
     private final Moshi moshi;
     private List<BaseFormItem> formItems; //new
@@ -87,6 +90,7 @@ public class FormSettings {
     public static final String TYPE_FILE = "file";
     public static final String TYPE_GEOLOCATION = "geolocation";
     public static final String TYPE_BUSINESS_OPPORTUNITY = "opportunity";
+    public static final String TYPE_CONTACT = "contact";
     public static final String VALUE_EMAIL = "email";
     public static final String VALUE_INTEGER = "integer";
     public static final String VALUE_BOOLEAN = "boolean";
@@ -165,6 +169,14 @@ public class FormSettings {
         this.businessOpportunities = businessOpportunities;
     }
 
+    public List<SubContact> getSubContacts() {
+        return subContacts;
+    }
+
+    public void setSubContacts(List<SubContact> subContacts) {
+        this.subContacts = subContacts;
+    }
+
     public ArrayList<String> getProfileNames() {
         ArrayList<String> fullNames = new ArrayList<>();
         for (int i = 0; i < profiles.size(); i++) {
@@ -220,6 +232,17 @@ public class FormSettings {
             businessOpportunity = businessOpportunities.get(i);
             if (businessOpportunity.getId() == id) {
                 return businessOpportunity;
+            }
+        }
+        return null;
+    }
+
+    protected SubContact getSubContactBy(int id) {
+        SubContact subContact;
+        for (int i = 0; i < subContacts.size(); i++) {
+            subContact = subContacts.get(i);
+            if (subContact.getId() == id) {
+                return subContact;
             }
         }
         return null;
@@ -308,6 +331,15 @@ public class FormSettings {
                     break;
                 }
 
+                //specific for sub contacts
+                if (typeInfo.getType()
+                        .equals(TYPE_CONTACT) && formItem instanceof AutocompleteFormItem) {
+                    String json = getJsonStringForSubContactType(
+                            (AutocompleteFormItem) formItem);
+                    metaData.setValue(json);
+                    break;
+                }
+
                 handleSingleSelection((SingleChoiceFormItem) formItem, metaData);
                 break;
             case FormSettings.VALUE_LIST:
@@ -366,6 +398,7 @@ public class FormSettings {
                 || typeInfo.getType().equals(TYPE_SYSTEM_USERS)
                 || typeInfo.getType().equals(TYPE_BUSINESS_OPPORTUNITY)
                 || typeInfo.getType().equals(TYPE_ACCOUNT)
+                || typeInfo.getType().equals(TYPE_CONTACT)
                 || typeInfo.getType().equals(TYPE_PHONE)
                 || typeInfo.getType().equals(TYPE_CURRENCY)
                 || typeInfo.getType().equals(TYPE_PRODUCT)
@@ -588,6 +621,22 @@ public class FormSettings {
         JsonAdapter<PostBusinessOpportunity> jsonAdapter = moshi
                 .adapter(PostBusinessOpportunity.class);
         return jsonAdapter.toJson(postBusinessOpportunity);
+    }
+
+    private String getJsonStringForSubContactType(AutocompleteFormItem formItem) {
+        Option value = formItem.getValue();
+        if (value == null) return "";
+
+        SubContact subContact = getSubContactBy(value.getId());
+        if (subContact == null) return "";
+
+        PostSubContact postSubContact = new PostSubContact();
+        postSubContact.setId(subContact.getId());
+        postSubContact.setFullName(subContact.getFullName());
+
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<PostSubContact> jsonAdapter = moshi.adapter(PostSubContact.class);
+        return jsonAdapter.toJson(postSubContact);
     }
 
     private void handleBoolean(TypeInfo typeInfo, WorkflowMetas metaData, String value) {

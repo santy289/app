@@ -15,6 +15,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.PhoneFieldData;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
 import com.rootnetapp.rootnetintranet.models.responses.business.BusinessOpportunitiesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.contact.ContactsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.contact.SubContactsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
@@ -204,6 +205,13 @@ public class CreateWorkflowRepository {
     protected Observable<BusinessOpportunitiesResponse> getBusinessOpportunities(String auth,
                                                                                  String query) {
         return service.getBusinessOpportunities(auth, query, AUTOCOMPLETE_ITEMS_LIMIT)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<SubContactsResponse> postSearchSubContacts(String auth,
+                                                                    String query) {
+        return service.postSearchSubContacts(auth, query, AUTOCOMPLETE_ITEMS_LIMIT)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }

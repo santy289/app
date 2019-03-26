@@ -743,15 +743,12 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     }
 
     private void hideSoftInputKeyboard() {
-        InputMethodManager imm = (InputMethodManager) getActivity()
-                .getSystemService(Context.INPUT_METHOD_SERVICE);
-
         // Check if no view has focus:
         View view = getActivity().getCurrentFocus();
         if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity()
+                    .getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        } else {
-            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
         }
     }
 }

@@ -32,6 +32,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.PostBusinessOpportun
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostContact;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCurrency;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostPhone;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostSubContact;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
 import com.rootnetapp.rootnetintranet.models.createworkflow.StatusSpecific;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.AutocompleteFormItem;
@@ -58,6 +59,8 @@ import com.rootnetapp.rootnetintranet.models.responses.business.BusinessOpportun
 import com.rootnetapp.rootnetintranet.models.responses.business.BusinessOpportunity;
 import com.rootnetapp.rootnetintranet.models.responses.contact.Contact;
 import com.rootnetapp.rootnetintranet.models.responses.contact.ContactsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.contact.SubContact;
+import com.rootnetapp.rootnetintranet.models.responses.contact.SubContactsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
 import com.rootnetapp.rootnetintranet.models.responses.downloadfile.DownloadFileResponse;
@@ -113,6 +116,7 @@ import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACH
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_TYPE;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_ACCOUNT;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_BUSINESS_OPPORTUNITY;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_CONTACT;
 
 class CreateWorkflowViewModel extends ViewModel {
 
@@ -599,6 +603,7 @@ class CreateWorkflowViewModel extends ViewModel {
                 break;
             case FormSettings.TYPE_ACCOUNT:
             case FormSettings.TYPE_BUSINESS_OPPORTUNITY:
+            case FormSettings.TYPE_CONTACT:
                 createAutocompleteFormItem(field);
                 break;
             default:
@@ -1507,6 +1512,10 @@ class CreateWorkflowViewModel extends ViewModel {
                     case FormSettings.TYPE_BUSINESS_OPPORTUNITY:
                         fillBusinessOpportunityFormItem(meta);
                         break;
+
+                    case FormSettings.TYPE_CONTACT:
+                        fillSubContactFormItem(meta);
+                        break;
                     default:
                         Log.d(TAG, "format: invalid type. Not Known.");
                 }
@@ -1756,6 +1765,26 @@ class CreateWorkflowViewModel extends ViewModel {
 
         Option value = new Option(businessOpportunityMeta.getId(),
                 businessOpportunityMeta.getTitle());
+
+        autocompleteFormItem.setValue(value);
+    }
+
+    private void fillSubContactFormItem(Meta meta) throws IOException {
+        if (meta.getValue() == null || meta.getValue().isEmpty()
+                || meta.getValue().equals("\"\"")) {
+            return;
+        }
+
+        JsonAdapter<PostSubContact> jsonAdapter = moshi
+                .adapter(PostSubContact.class);
+        PostSubContact postSubContact = jsonAdapter.fromJson(meta.getValue());
+
+        if (postSubContact == null) return;
+
+        AutocompleteFormItem autocompleteFormItem = (AutocompleteFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        Option value = new Option(postSubContact.getId(), postSubContact.getFullName());
 
         autocompleteFormItem.setValue(value);
     }
@@ -2457,6 +2486,9 @@ class CreateWorkflowViewModel extends ViewModel {
             case TYPE_BUSINESS_OPPORTUNITY:
                 queryForBusinessOpportunities(formItem);
                 break;
+            case TYPE_CONTACT:
+                queryForSubContacts(formItem);
+                break;
         }
     }
 
@@ -2499,6 +2531,28 @@ class CreateWorkflowViewModel extends ViewModel {
         List<Option> options = businessOpportunities.stream()
                 .map(businessOpportunity -> new Option(businessOpportunity.getId(),
                         businessOpportunity.getTitle()))
+                .collect(Collectors.toList());
+
+        onAutocompleteSuccess(options);
+    }
+
+    private void queryForSubContacts(AutocompleteFormItem formItem) {
+        Disposable disposable = mRepository
+                .postSearchSubContacts(mToken, formItem.getQuery())
+                .subscribe(this::onSubContactsQuerySuccess, this::onAutocompleteFailure);
+
+        mDisposables.add(disposable);
+    }
+
+    private void onSubContactsQuerySuccess(SubContactsResponse subContactsResponse) {
+        List<SubContact> subContacts = subContactsResponse.getList();
+
+        formSettings.setSubContacts(subContacts);
+
+        //update options
+        List<Option> options = subContacts.stream()
+                .map(businessOpportunity -> new Option(businessOpportunity.getId(),
+                        businessOpportunity.getFullName()))
                 .collect(Collectors.toList());
 
         onAutocompleteSuccess(options);

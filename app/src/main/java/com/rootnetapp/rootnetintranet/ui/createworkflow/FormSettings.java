@@ -12,6 +12,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.BaseEntityJsonValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostBusinessOpportunity;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostContact;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCountryCodeAndValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCurrency;
@@ -29,6 +30,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFor
 import com.rootnetapp.rootnetintranet.models.createworkflow.geolocation.GeolocationMetaData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.geolocation.Value;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
+import com.rootnetapp.rootnetintranet.models.responses.business.BusinessOpportunity;
 import com.rootnetapp.rootnetintranet.models.responses.contact.Contact;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
@@ -60,6 +62,7 @@ public class FormSettings {
     private final ArrayList<FormCreateProfile> profiles;
     private final ArrayList<WorkflowUser> workflowUsers;
     private List<Contact> contacts;
+    private List<BusinessOpportunity> businessOpportunities;
     private List<FormFieldsByWorkflowType> fields; // Full info of all fields.
     private final Moshi moshi;
     private List<BaseFormItem> formItems; //new
@@ -83,6 +86,7 @@ public class FormSettings {
     public static final String TYPE_LIST = "list";
     public static final String TYPE_FILE = "file";
     public static final String TYPE_GEOLOCATION = "geolocation";
+    public static final String TYPE_BUSINESS_OPPORTUNITY = "opportunity";
     public static final String VALUE_EMAIL = "email";
     public static final String VALUE_INTEGER = "integer";
     public static final String VALUE_BOOLEAN = "boolean";
@@ -101,6 +105,7 @@ public class FormSettings {
         profiles = new ArrayList<>();
         workflowUsers = new ArrayList<>();
         contacts = new ArrayList<>();
+        businessOpportunities = new ArrayList<>();
         fields = new ArrayList<>();
         title = "";
         description = "";
@@ -152,6 +157,14 @@ public class FormSettings {
         this.contacts = contacts;
     }
 
+    public List<BusinessOpportunity> getBusinessOpportunities() {
+        return businessOpportunities;
+    }
+
+    public void setBusinessOpportunities(List<BusinessOpportunity> businessOpportunities) {
+        this.businessOpportunities = businessOpportunities;
+    }
+
     public ArrayList<String> getProfileNames() {
         ArrayList<String> fullNames = new ArrayList<>();
         for (int i = 0; i < profiles.size(); i++) {
@@ -196,6 +209,17 @@ public class FormSettings {
             contact = contacts.get(i);
             if (contact.getId() == id) {
                 return contact;
+            }
+        }
+        return null;
+    }
+
+    protected BusinessOpportunity getBusinessOpportunityBy(int id) {
+        BusinessOpportunity businessOpportunity;
+        for (int i = 0; i < businessOpportunities.size(); i++) {
+            businessOpportunity = businessOpportunities.get(i);
+            if (businessOpportunity.getId() == id) {
+                return businessOpportunity;
             }
         }
         return null;
@@ -268,8 +292,18 @@ public class FormSettings {
                 break;
             case FormSettings.VALUE_ENTITY:
                 //specific for accounts
-                if (typeInfo.getType().equals(TYPE_ACCOUNT)) {
+                if (typeInfo.getType().equals(TYPE_ACCOUNT)
+                        && formItem instanceof AutocompleteFormItem) {
                     String json = getJsonStringForContactType((AutocompleteFormItem) formItem);
+                    metaData.setValue(json);
+                    break;
+                }
+
+                //specific for business opportunities
+                if (typeInfo.getType().equals(TYPE_BUSINESS_OPPORTUNITY)
+                        && formItem instanceof AutocompleteFormItem) {
+                    String json = getJsonStringForBusinessOpportunityType(
+                            (AutocompleteFormItem) formItem);
                     metaData.setValue(json);
                     break;
                 }
@@ -330,6 +364,8 @@ public class FormSettings {
         // Do not escape this fields
         if (!formItem.isEscaped()
                 || typeInfo.getType().equals(TYPE_SYSTEM_USERS)
+                || typeInfo.getType().equals(TYPE_BUSINESS_OPPORTUNITY)
+                || typeInfo.getType().equals(TYPE_ACCOUNT)
                 || typeInfo.getType().equals(TYPE_PHONE)
                 || typeInfo.getType().equals(TYPE_CURRENCY)
                 || typeInfo.getType().equals(TYPE_PRODUCT)
@@ -535,6 +571,23 @@ public class FormSettings {
         Moshi moshi = new Moshi.Builder().build();
         JsonAdapter<PostContact> jsonAdapter = moshi.adapter(PostContact.class);
         return jsonAdapter.toJson(postContact);
+    }
+
+    private String getJsonStringForBusinessOpportunityType(AutocompleteFormItem formItem) {
+        Option value = formItem.getValue();
+        if (value == null) return "";
+
+        BusinessOpportunity businessOpportunity = getBusinessOpportunityBy(value.getId());
+        if (businessOpportunity == null) return "";
+
+        PostBusinessOpportunity postBusinessOpportunity = new PostBusinessOpportunity();
+        postBusinessOpportunity.setId(businessOpportunity.getId());
+        postBusinessOpportunity.setTitle(businessOpportunity.getTitle());
+
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<PostBusinessOpportunity> jsonAdapter = moshi
+                .adapter(PostBusinessOpportunity.class);
+        return jsonAdapter.toJson(postBusinessOpportunity);
     }
 
     private void handleBoolean(TypeInfo typeInfo, WorkflowMetas metaData, String value) {
@@ -753,7 +806,32 @@ public class FormSettings {
                     JsonAdapter<PostSystemUser> jsonAdapter = moshi.adapter(PostSystemUser.class);
                     try {
                         PostSystemUser systemUser = jsonAdapter.fromJson(meta.getValue());
-                        information.setDisplayValue(systemUser.username);
+                        if (systemUser == null) {
+                            information.setDisplayValue("");
+                        } else {
+                            information.setDisplayValue(systemUser.username);
+                        }
+                        return information;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        information.setDisplayValue("");
+                        return information;
+                    }
+                }
+
+                if (typeInfo.getType().equals(TYPE_BUSINESS_OPPORTUNITY)) {
+
+                    Moshi moshi = new Moshi.Builder().build();
+                    JsonAdapter<PostBusinessOpportunity> jsonAdapter = moshi
+                            .adapter(PostBusinessOpportunity.class);
+                    try {
+                        PostBusinessOpportunity businessOpportunity = jsonAdapter
+                                .fromJson(meta.getValue());
+                        if (businessOpportunity == null) {
+                            information.setDisplayValue("");
+                        } else {
+                            information.setDisplayValue(businessOpportunity.getTitle());
+                        }
                         return information;
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -773,7 +851,11 @@ public class FormSettings {
                             .adapter(PostCountryCodeAndValue.class);
                     try {
                         phone = jsonAdapter.fromJson(meta.getValue());
-                        information.setDisplayValue(String.valueOf(phone.value));
+                        if (phone == null) {
+                            information.setDisplayValue("");
+                        } else {
+                            information.setDisplayValue(String.valueOf(phone.value));
+                        }
                         return information;
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -807,7 +889,7 @@ public class FormSettings {
                         .adapter(GeolocationMetaData.class);
                 try {
                     GeolocationMetaData geolocationMetaData = jsonAdapter.fromJson(meta.getValue());
-                    if (geolocationMetaData.getValue() == null) {
+                    if (geolocationMetaData == null || geolocationMetaData.getValue() == null) {
                         information.setDisplayValue("");
                     } else {
                         information.setDisplayValue(geolocationMetaData.getValue().getAddress());

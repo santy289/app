@@ -28,6 +28,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePostDetail;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PhoneFieldData;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostBusinessOpportunity;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostContact;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCurrency;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostPhone;
@@ -53,6 +54,8 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormIt
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem.InputType;
 import com.rootnetapp.rootnetintranet.models.createworkflow.geolocation.GeolocationMetaData;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
+import com.rootnetapp.rootnetintranet.models.responses.business.BusinessOpportunitiesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.business.BusinessOpportunity;
 import com.rootnetapp.rootnetintranet.models.responses.contact.Contact;
 import com.rootnetapp.rootnetintranet.models.responses.contact.ContactsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
@@ -109,6 +112,7 @@ import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACH
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_STATUS;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_TYPE;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_ACCOUNT;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_BUSINESS_OPPORTUNITY;
 
 class CreateWorkflowViewModel extends ViewModel {
 
@@ -592,7 +596,8 @@ class CreateWorkflowViewModel extends ViewModel {
                 createGeolocationFormItem(field);
                 break;
             case FormSettings.TYPE_ACCOUNT:
-                createAccountsFormItem(field);
+            case FormSettings.TYPE_BUSINESS_OPPORTUNITY:
+                createAutocompleteFormItem(field);
                 break;
             default:
                 Log.d(TAG, "buildField: Not a generic type: " + typeInfo
@@ -1364,7 +1369,7 @@ class CreateWorkflowViewModel extends ViewModel {
      *
      * @param field item params.
      */
-    private void createAccountsFormItem(FormFieldsByWorkflowType field) {
+    private void createAutocompleteFormItem(FormFieldsByWorkflowType field) {
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
 
         AutocompleteFormItem item = new AutocompleteFormItem.Builder()
@@ -1495,6 +1500,10 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     case FormSettings.TYPE_ACCOUNT:
                         fillAccountFormItem(meta);
+                        break;
+
+                    case FormSettings.TYPE_BUSINESS_OPPORTUNITY:
+                        fillBusinessOpportunityFormItem(meta);
                         break;
                     default:
                         Log.d(TAG, "format: invalid type. Not Known.");
@@ -1726,6 +1735,26 @@ class CreateWorkflowViewModel extends ViewModel {
         Option value = new Option(contactMetaData.getId(), contactMetaData.getCompany());
 
         autocompleteFormItem.setQuery(contactMetaData.getCompany());
+        autocompleteFormItem.setValue(value);
+    }
+
+    private void fillBusinessOpportunityFormItem(Meta meta) throws IOException {
+        if (meta.getValue() == null || meta.getValue().isEmpty()
+                || meta.getValue().equals("\"\"")) {
+            return;
+        }
+
+        JsonAdapter<PostBusinessOpportunity> jsonAdapter = moshi.adapter(PostBusinessOpportunity.class);
+        PostBusinessOpportunity businessOpportunityMeta = jsonAdapter.fromJson(meta.getValue());
+
+        if (businessOpportunityMeta == null) return;
+
+        AutocompleteFormItem autocompleteFormItem = (AutocompleteFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        Option value = new Option(businessOpportunityMeta.getId(), businessOpportunityMeta.getTitle());
+
+        autocompleteFormItem.setQuery(businessOpportunityMeta.getTitle());
         autocompleteFormItem.setValue(value);
     }
     //endregion
@@ -2419,9 +2448,12 @@ class CreateWorkflowViewModel extends ViewModel {
 
         mCurrentQueryAutocompleteFormItem = formItem;
 
-        switch (formItem.getTypeInfo().getType()){
+        switch (formItem.getTypeInfo().getType()) {
             case TYPE_ACCOUNT:
                 queryForContacts(formItem);
+                break;
+            case TYPE_BUSINESS_OPPORTUNITY:
+                queryForBusinessOpportunities(formItem);
                 break;
         }
     }
@@ -2443,6 +2475,34 @@ class CreateWorkflowViewModel extends ViewModel {
         List<Option> options = contacts.stream()
                 .map(contact -> new Option(contact.getId(), contact.getCompany()))
                 .collect(Collectors.toList());
+
+        if (mCurrentQueryAutocompleteFormItem == null) return;
+
+        mCurrentQueryAutocompleteFormItem.setOptions(options);
+        mUpdateFormItemLiveData.setValue(mCurrentQueryAutocompleteFormItem);
+
+        mCurrentQueryAutocompleteFormItem = null; //clear reference
+    }
+
+    private void queryForBusinessOpportunities(AutocompleteFormItem formItem) {
+        Disposable disposable = mRepository
+                .getBusinessOpportunities(mToken, formItem.getQuery())
+                .subscribe(this::onBusinessOpportunitiesQuerySuccess, this::onFailure);
+
+        mDisposables.add(disposable);
+    }
+
+    private void onBusinessOpportunitiesQuerySuccess(BusinessOpportunitiesResponse businessOpportunitiesResponse) {
+        List<BusinessOpportunity> businessOpportunities = businessOpportunitiesResponse.getList();
+
+        formSettings.setBusinessOpportunities(businessOpportunities);
+
+        //update options
+        List<Option> options = businessOpportunities.stream()
+                .map(businessOpportunity -> new Option(businessOpportunity.getId(), businessOpportunity.getTitle()))
+                .collect(Collectors.toList());
+
+        if (mCurrentQueryAutocompleteFormItem == null) return;
 
         mCurrentQueryAutocompleteFormItem.setOptions(options);
         mUpdateFormItemLiveData.setValue(mCurrentQueryAutocompleteFormItem);

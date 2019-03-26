@@ -13,6 +13,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.CurrencyFieldData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PhoneFieldData;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
+import com.rootnetapp.rootnetintranet.models.responses.business.BusinessOpportunitiesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.contact.ContactsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
@@ -106,7 +107,6 @@ public class CreateWorkflowRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-
     public Observable<ListsResponse> getList(String auth, int id) {
         return service.getListItems(auth, id).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
@@ -145,7 +145,9 @@ public class CreateWorkflowRepository {
     public Observable<CreateWorkflowResponse> createWorkflow(String auth, int workflowTypeId,
                                                              String title, String workflowMetas,
                                                              String start, String description) {
-        return service.createWorkflow(auth, workflowTypeId, title, workflowMetas, start ,description).subscribeOn(Schedulers.newThread())
+        return service
+                .createWorkflow(auth, workflowTypeId, title, workflowMetas, start, description)
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
@@ -154,17 +156,20 @@ public class CreateWorkflowRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<CreateWorkflowResponse> createWorkflow(String token, Map<String, Object> body) {
+    public Observable<CreateWorkflowResponse> createWorkflow(String token,
+                                                             Map<String, Object> body) {
         return service.createWorkflow(token, body).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Observable<CreateWorkflowResponse> editWorkflow(String token, EditRequest request) {
-        return service.editWorkflow(token, request.getWorkflowId(), request).subscribeOn(Schedulers.newThread())
+        return service.editWorkflow(token, request.getWorkflowId(), request)
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<CreateWorkflowResponse> editWorkflow(String token, int workflowId, Map<String, Object> body) {
+    public Observable<CreateWorkflowResponse> editWorkflow(String token, int workflowId,
+                                                           Map<String, Object> body) {
         return service.editWorkflow(token, workflowId, body).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -179,7 +184,8 @@ public class CreateWorkflowRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    protected Observable<DownloadFileResponse> downloadFile(String auth, String entity, int fileId) {
+    protected Observable<DownloadFileResponse> downloadFile(String auth, String entity,
+                                                            int fileId) {
         return service.downloadFile(auth, entity, fileId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -190,7 +196,15 @@ public class CreateWorkflowRepository {
     }
 
     protected Observable<ContactsResponse> getContacts(String auth, String query) {
-        return service.getContacts(auth, query, AUTOCOMPLETE_ITEMS_LIMIT).subscribeOn(Schedulers.newThread())
+        return service.getContacts(auth, query, AUTOCOMPLETE_ITEMS_LIMIT)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<BusinessOpportunitiesResponse> getBusinessOpportunities(String auth,
+                                                                                 String query) {
+        return service.getBusinessOpportunities(auth, query, AUTOCOMPLETE_ITEMS_LIMIT)
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 }

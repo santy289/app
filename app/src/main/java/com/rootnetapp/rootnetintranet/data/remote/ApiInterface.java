@@ -9,6 +9,7 @@ import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest
 import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
+import com.rootnetapp.rootnetintranet.models.responses.business.BusinessOpportunitiesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentDeleteResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
@@ -500,6 +501,12 @@ public interface ApiInterface {
     Observable<ContactsResponse> getContacts(@Header("Authorization") String authorization,
                                              @Query("query") String query,
                                              @Query("limit") int limit);
+
+    @Headers({"Domain-Name: api"})
+    @GET("business/opportunities?")
+    Observable<BusinessOpportunitiesResponse> getBusinessOpportunities(@Header("Authorization") String authorization,
+                                                                       @Query("query") String query,
+                                                                       @Query("limit") int limit);
 
     //region Google Maps API
     @GET("https://maps.googleapis.com/maps/api/place/nearbysearch/json?rankby=distance")

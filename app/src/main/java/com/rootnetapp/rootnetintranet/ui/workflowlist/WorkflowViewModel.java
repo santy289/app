@@ -18,6 +18,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.DeleteWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListInfo;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
@@ -1533,6 +1534,21 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     private void onEnableDisableWorkflowsSuccess(WorkflowActivationResponse workflowActivationResponse) {
+        completeMassAction.setValue(true);
+    }
+
+    protected void deleteWorkflows(List<Integer> workflowIds) {
+        if (workflowIds.isEmpty()) return;
+
+        showLoading.setValue(true);
+        Disposable disposable = workflowRepository
+                .postDeleteWorkflows(token, workflowIds.get(0), workflowIds)
+                .subscribe(this::onDeleteWorkflowsSuccess, this::onFailure);
+
+        disposables.add(disposable);
+    }
+
+    private void onDeleteWorkflowsSuccess(DeleteWorkflowResponse deleteWorkflowResponse) {
         completeMassAction.setValue(true);
     }
 

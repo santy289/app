@@ -588,6 +588,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                     workflowViewModel.openCloseWorkflows(checkedList, false);
                     break;
                 case R.id.delete:
+                    //todo confirmation modal
+                    workflowViewModel.deleteWorkflows(checkedList);
                     break;
             }
 

@@ -14,6 +14,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.Form
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.DeleteWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
 
@@ -549,6 +550,14 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                                                                           List<Integer> workflowIds,
                                                                           boolean enable) {
         return service.postWorkflowActivationEnableDisable(token, workflowIds, enable)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<DeleteWorkflowResponse> postDeleteWorkflows(String token,
+                                                                  int workflowId,
+                                                                  List<Integer> workflowIds){
+        return service.deleteWorkflows(token, workflowId, workflowIds)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }

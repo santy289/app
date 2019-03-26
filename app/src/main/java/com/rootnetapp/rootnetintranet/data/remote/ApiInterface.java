@@ -356,6 +356,13 @@ public interface ApiInterface {
                                                       @Path("id") int workflowId);
 
     @Headers({"Domain-Name: api"})
+    @POST("intranet/workflows/{id}?confirmation=true")
+    @FormUrlEncoded
+    Observable<DeleteWorkflowResponse> deleteWorkflows(@Header("Authorization") String authorization,
+                                                       @Path("id") int workflowId,
+                                                       @Field("workflows_array") List<Integer> workflowIds);
+
+    @Headers({"Domain-Name: api"})
     @GET("intranet/templates/{id}")
     Observable<TemplatesResponse> getTemplate(@Header("Authorization") String authorization,
                                               @Path("id") int templateId);

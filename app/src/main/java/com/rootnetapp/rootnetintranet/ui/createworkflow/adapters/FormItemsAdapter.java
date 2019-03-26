@@ -411,6 +411,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                                 if (item.getOnSelectedListener() != null) {
                                     item.getOnSelectedListener().onSelected(item);
                                 }
+                                holder.getBinding().spInput.setTag(position);
                                 return;
                             }
 

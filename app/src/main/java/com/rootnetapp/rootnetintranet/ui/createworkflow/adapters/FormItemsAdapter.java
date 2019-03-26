@@ -979,7 +979,11 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         //set button click listener
         holder.getBinding().btnAddFile.setOnClickListener(
-                v -> item.getOnButtonClickedListener().onButtonClicked());
+                v -> {
+                    if (item.getOnButtonClickedListener() == null) return;
+
+                    item.getOnButtonClickedListener().onButtonClicked();
+                });
 
         //set value
         if (item.getFileName() != null) {
@@ -1059,7 +1063,11 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         //set button click listener
         holder.getBinding().btnIntent.setOnClickListener(
-                v -> item.getOnButtonClickedListener().onButtonClicked());
+                v -> {
+                    if (item.getOnButtonClickedListener() == null) return;
+
+                    item.getOnButtonClickedListener().onButtonClicked();
+                });
 
         //make sure this view has the focus
         holder.getBinding().btnIntent
@@ -1241,7 +1249,11 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         //set button click listener
         holder.getBinding().btnSelectLocation.setOnClickListener(
-                v -> item.getOnButtonClickedListener().onButtonClicked());
+                v -> {
+                    if (item.getOnButtonClickedListener() == null) return;
+
+                    item.getOnButtonClickedListener().onButtonClicked();
+                });
 
         //set value
         if (item.getStringValue() != null) {

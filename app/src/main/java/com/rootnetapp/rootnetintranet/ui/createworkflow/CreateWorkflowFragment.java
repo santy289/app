@@ -192,6 +192,8 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
                 .observe(getViewLifecycleOwner(), this::showFieldsRecycler);
         viewModel.getObservableSetAutocompleteSuggestions()
                 .observe(getViewLifecycleOwner(), this::setAutocompleteSuggestions);
+        viewModel.getObservableShowAutocompleteNoConnection()
+                .observe(getViewLifecycleOwner(), this::showAutocompleteNoConnectionView);
     }
 
     private void setupSubmitButton() {
@@ -530,9 +532,37 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
 
         List<Option> options = autocompleteFormItem.getOptions();
         if (options == null) return;
+
         mAutocompleteDialogBinding.rvSuggestions
                 .setVisibility(options.isEmpty() ? View.GONE : View.VISIBLE);
+        showAutocompleteNoResultsView(options.isEmpty());
+
         mAutocompleteSuggestionsAdapter.setData(options);
+    }
+
+    @UiThread
+    private void showAutocompleteNoResultsView(boolean show) {
+        if (mAutocompleteDialog == null
+                || !mAutocompleteDialog.isShowing()
+                || mAutocompleteDialogBinding == null
+                || mAutocompleteSuggestionsAdapter == null) {
+            return;
+        }
+
+        mAutocompleteDialogBinding.includeNoResultsView.lytNoResultsView.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    @UiThread
+    private void showAutocompleteNoConnectionView(boolean show) {
+        if (mAutocompleteDialog == null
+                || !mAutocompleteDialog.isShowing()
+                || mAutocompleteDialogBinding == null
+                || mAutocompleteSuggestionsAdapter == null) {
+            return;
+        }
+
+        showAutocompleteNoResultsView(false);
+        mAutocompleteDialogBinding.includeNoConnectionView.lytNoConnectionView.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     /**

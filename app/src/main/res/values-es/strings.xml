@@ -243,6 +243,7 @@
     <string name="geolocation_form_item_required_msg">Necesitas seleccionar una ubicación para poder continuar.</string>
     <string name="autocomplete_form_item_required_msg">Necesitas seleccionar una opción para poder continuar.</string>
     <string name="autocomplete_form_item_hint">Empiece a escribir…</string>
+    <string name="autocomplete_form_item_no_results">Ningún registro encontrado.</string>
     <string name="fill_all_form_items">Necesitas llenar todos los elementos requeridos.</string>
     <string name="action">Acción</string>
     <string name="people_involved_action">Configurar</string>

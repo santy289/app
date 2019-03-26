@@ -34,5 +34,23 @@
             app:layout_constraintStart_toStartOf="@id/et_input"
             app:layout_constraintTop_toBottomOf="@id/et_input"
             tools:visibility="visible" />
+
+        <include
+            android:id="@+id/include_no_connection_view"
+            layout="@layout/no_connection_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="@id/et_input"
+            app:layout_constraintStart_toStartOf="@id/et_input"
+            app:layout_constraintTop_toBottomOf="@id/et_input" />
+
+        <include
+            android:id="@+id/include_no_results_view"
+            layout="@layout/no_results_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="@id/et_input"
+            app:layout_constraintStart_toStartOf="@id/et_input"
+            app:layout_constraintTop_toBottomOf="@id/et_input" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

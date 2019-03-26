@@ -150,6 +150,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<Boolean> mShowFieldsRecyclerLiveData;
     private MutableLiveData<Boolean> mShowSubmitButtonLiveData;
     private MutableLiveData<AutocompleteFormItem> mSetAutocompleteSuggestionsLiveData;
+    private MutableLiveData<Boolean> mShowAutocompleteNoConnectionLiveData;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
@@ -2460,7 +2461,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private void queryForContacts(AutocompleteFormItem formItem) {
         Disposable disposable = mRepository
                 .getContacts(mToken, formItem.getQuery())
-                .subscribe(this::onContactsQuerySuccess, this::onFailure);
+                .subscribe(this::onContactsQuerySuccess, this::onAutocompleteFailure);
 
         mDisposables.add(disposable);
     }
@@ -2486,7 +2487,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private void queryForBusinessOpportunities(AutocompleteFormItem formItem) {
         Disposable disposable = mRepository
                 .getBusinessOpportunities(mToken, formItem.getQuery())
-                .subscribe(this::onBusinessOpportunitiesQuerySuccess, this::onFailure);
+                .subscribe(this::onBusinessOpportunitiesQuerySuccess, this::onAutocompleteFailure);
 
         mDisposables.add(disposable);
     }
@@ -2505,8 +2506,14 @@ class CreateWorkflowViewModel extends ViewModel {
 
         mCurrentQueryAutocompleteFormItem.setOptions(options);
         mSetAutocompleteSuggestionsLiveData.setValue(mCurrentQueryAutocompleteFormItem);
+        mShowAutocompleteNoConnectionLiveData.setValue(false);
 
         mCurrentQueryAutocompleteFormItem = null; //clear reference
+    }
+
+    private void onAutocompleteFailure(Throwable throwable) {
+        Log.d(TAG, "onAutocompleteFailure: " + throwable.getMessage());
+        mShowAutocompleteNoConnectionLiveData.setValue(true);
     }
 
     protected LiveData<Integer> getObservableError() {
@@ -2640,5 +2647,12 @@ class CreateWorkflowViewModel extends ViewModel {
             mSetAutocompleteSuggestionsLiveData = new MutableLiveData<>();
         }
         return mSetAutocompleteSuggestionsLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowAutocompleteNoConnection() {
+        if (mShowAutocompleteNoConnectionLiveData == null) {
+            mShowAutocompleteNoConnectionLiveData = new MutableLiveData<>();
+        }
+        return mShowAutocompleteNoConnectionLiveData;
     }
 }

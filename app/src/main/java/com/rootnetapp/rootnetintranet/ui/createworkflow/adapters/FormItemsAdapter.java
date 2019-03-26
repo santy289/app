@@ -4,7 +4,6 @@ import android.content.Context;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -267,6 +266,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             title = mContext.getString(item.getTitleRes());
         }
         holder.getBinding().tvTitle.setText(title);
+        item.setTitle(title);
 
         //set value
         holder.getBinding().etInput.setText(item.getValue());
@@ -369,6 +369,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             title = mContext.getString(item.getTitleRes());
         }
         holder.getBinding().tvTitle.setText(title);
+        item.setTitle(title);
 
         List<Option> options = new ArrayList<>(item.getOptions());
 
@@ -481,6 +482,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             title = mContext.getString(item.getTitleRes());
         }
         holder.getBinding().switchInput.setText(title);
+        item.setTitle(title);
 
         holder.getBinding().switchInput.setChecked(item.getValue());
         holder.getBinding().switchInput.setOnCheckedChangeListener(
@@ -518,6 +520,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
         final String finalTitle = title;
         holder.getBinding().tvTitle.setText(finalTitle);
+        item.setTitle(finalTitle);
 
         holder.getBinding().tvSelectedDate.setOnClickListener(v -> {
             // make sure this view has the focus
@@ -599,6 +602,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             title = mContext.getString(item.getTitleRes());
         }
         holder.getBinding().tvTitle.setText(title);
+        item.setTitle(title);
 
         //fill value
         if (item.getValue() != null) {
@@ -729,6 +733,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             title = mContext.getString(item.getTitleRes());
         }
         holder.getBinding().tvTitle.setText(title);
+        item.setTitle(title);
 
         //creates the selected items adapter
         MultipleChoiceSelectionsAdapter selectionsAdapter = new MultipleChoiceSelectionsAdapter(
@@ -838,6 +843,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             title = mContext.getString(item.getTitleRes());
         }
         holder.getBinding().tvTitle.setText(title);
+        item.setTitle(title);
 
         //fill value
         if (item.getValue() != null) {
@@ -968,6 +974,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             title = mContext.getString(item.getTitleRes());
         }
         holder.getBinding().tvTitle.setText(title);
+        item.setTitle(title);
 
         //set button click listener
         holder.getBinding().btnAddFile.setOnClickListener(
@@ -1039,6 +1046,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             title = mContext.getString(item.getTitleRes());
         }
         holder.getBinding().tvTitle.setText(title);
+        item.setTitle(title);
 
         //set button text
         String btnText = item.getButtonActionText();
@@ -1094,6 +1102,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             title = mContext.getString(item.getTitleRes());
         }
         holder.getBinding().tvTitle.setText(title);
+        item.setTitle(title);
 
         //creates the selected items adapter
         MultipleChoiceSelectionsAdapter selectionsAdapter = new MultipleChoiceSelectionsAdapter(
@@ -1341,69 +1350,40 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             title = mContext.getString(item.getTitleRes());
         }
         holder.getBinding().tvTitle.setText(title);
+        item.setTitle(title);
 
-        //remove text watcher to set value
-        if (item.getTextWatcher() != null) {
-            holder.getBinding().etInput.removeTextChangedListener(item.getTextWatcher());
-        }
-        //set value if user is not searching
-        if (item.getQuery() == null) {
-            holder.getBinding().etInput.setText(item.getStringValue());
+        //set button click listener
+        holder.getBinding().btnChooseOption.setOnClickListener(
+                v -> {
+                    if (item.getOnButtonClickedListener() == null) return;
+
+                    item.getOnButtonClickedListener().onButtonClicked(item);
+                });
+
+        //set value
+        if (item.getStringValue() != null) {
+            holder.getBinding().chipValue.setText(item.getStringValue());
+            holder.getBinding().chipValue.setVisibility(View.VISIBLE);
+            holder.getBinding().btnChooseOption.setVisibility(View.GONE);
         } else {
-            holder.getBinding().etInput.setText(item.getQuery());
-            holder.getBinding().etInput.setSelection(item.getQuery().length());
+            holder.getBinding().chipValue.setVisibility(View.GONE);
+            holder.getBinding().btnChooseOption.setVisibility(View.VISIBLE);
         }
 
-        //set text watcher
-        if (item.getTextWatcher() == null) {
-            item.setTextWatcher(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        //handle chip close icon
+        holder.getBinding().chipValue.setOnCloseIconClickListener(v -> {
+            item.clearValues();
+            notifyItemChanged(getItemPosition(item));
+        });
 
-                }
+        //make sure this view has the focus
+        holder.getBinding().btnChooseOption
+                .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
 
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
+        // verify required indicator
+        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
 
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                    item.setQuery(s.toString());
-                    if (item.getOnQueryListener() != null) item.getOnQueryListener().onQuery(item);
-                }
-            });
-        }
-
-        //add the text watcher
-        holder.getBinding().etInput.addTextChangedListener(item.getTextWatcher());
-
-        //setup recycler
-        holder.getBinding().rvSuggestions.setLayoutManager(new LinearLayoutManager(mContext));
-
-        //set suggestions listener
-        AutocompleteSuggestionsAdapter.OnSuggestionSelectedListener onSuggestionSelectedListener = option -> {
-            if (option == null) return;
-
-            item.setValue(option);
-            holder.getBinding().etInput.removeTextChangedListener(item.getTextWatcher());
-            holder.getBinding().etInput.setText(option.getName());
-            holder.getBinding().etInput.setSelection(option.getName().length());
-            holder.getBinding().etInput.addTextChangedListener(item.getTextWatcher());
-            holder.getBinding().rvSuggestions.setVisibility(View.GONE);
-        };
-
-        //set suggestions adapter
-        holder.getBinding().rvSuggestions.setAdapter(
-                new AutocompleteSuggestionsAdapter(item.getOptions(),
-                        onSuggestionSelectedListener));
-
-        holder.getBinding().rvSuggestions.setVisibility(
-                item.getOptions() == null || item.getOptions().isEmpty()
-                        ? View.GONE
-                        : View.VISIBLE);
-
-        // verify visibility
+        //verify visibility
         if (!item.isVisible()) {
             holder.hide();
             return;
@@ -1411,25 +1391,16 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             holder.show();
         }
 
-        // verify required indicator
-        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
-
-        // verify enabled param
-        if (!item.isEnabled()) {
-            holder.getBinding().etInput.setBackgroundResource(R.drawable.spinner_bg_disabled);
-            holder.getBinding().etInput.setEnabled(false);
-            return;
-        } else {
-            holder.getBinding().etInput.setBackgroundResource(R.drawable.spinner_bg);
-            holder.getBinding().etInput.setEnabled(true);
-        }
-
-        // verify validation
+        //verify validation
         if (hasToEvaluateValid && !item.isValid()) {
-            holder.getBinding().etInput.setBackgroundResource(R.drawable.spinner_bg_error);
+            holder.getBinding().tvRequiredMsg.setVisibility(View.VISIBLE);
         } else {
-            holder.getBinding().etInput.setBackgroundResource(R.drawable.spinner_bg);
+            holder.getBinding().tvRequiredMsg.setVisibility(View.GONE);
         }
+
+        //verify enabled param
+        holder.getBinding().btnChooseOption.setEnabled(item.isEnabled());
+        holder.getBinding().chipValue.setEnabled(item.isEnabled());
     }
     //endregion
 

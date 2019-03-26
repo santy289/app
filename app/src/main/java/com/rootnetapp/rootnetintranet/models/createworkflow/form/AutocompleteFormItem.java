@@ -1,7 +1,5 @@
 package com.rootnetapp.rootnetintranet.models.createworkflow.form;
 
-import android.text.TextWatcher;
-
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 
 import java.util.List;
@@ -14,7 +12,7 @@ public class AutocompleteFormItem extends BaseFormItem {
     private @Nullable String query;
     private List<Option> options;
     private OnQueryListener onQueryListener;
-    private TextWatcher textWatcher;
+    private OnButtonClickedListener onButtonClickedListener;
 
     private AutocompleteFormItem() {
         //Constructor is private for Builder pattern
@@ -67,12 +65,18 @@ public class AutocompleteFormItem extends BaseFormItem {
         this.onQueryListener = onSelectedListener;
     }
 
-    public TextWatcher getTextWatcher() {
-        return textWatcher;
+    public OnButtonClickedListener getOnButtonClickedListener() {
+        return onButtonClickedListener;
     }
 
-    public void setTextWatcher(TextWatcher textWatcher) {
-        this.textWatcher = textWatcher;
+    public void setOnButtonClickedListener(OnButtonClickedListener onButtonClickedListener) {
+        this.onButtonClickedListener = onButtonClickedListener;
+    }
+
+    public void clearValues(){
+        query = null;
+        value = null;
+        options = null;
     }
 
     public static class Builder {
@@ -178,5 +182,10 @@ public class AutocompleteFormItem extends BaseFormItem {
     public interface OnQueryListener {
 
         void onQuery(AutocompleteFormItem item);
+    }
+
+    public interface OnButtonClickedListener {
+
+        void onButtonClicked(AutocompleteFormItem item);
     }
 }

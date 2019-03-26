@@ -15,20 +15,28 @@ import androidx.recyclerview.widget.RecyclerView;
  * Created by root on 04/04/18.
  */
 
-public class AutocompleteSuggestionsAdapter extends RecyclerView.Adapter<AutocompleteSuggestionsViewHolder> {
+public class AutocompleteSuggestionsAdapter extends
+        RecyclerView.Adapter<AutocompleteSuggestionsViewHolder> {
 
     private List<Option> mDataset;
     private OnSuggestionSelectedListener onSuggestionSelectedListener;
 
-    AutocompleteSuggestionsAdapter(List<Option> predictions,
-                                   OnSuggestionSelectedListener onSuggestionSelectedListener) {
+    public AutocompleteSuggestionsAdapter(List<Option> predictions,
+                                          OnSuggestionSelectedListener onSuggestionSelectedListener) {
         this.mDataset = predictions;
         this.onSuggestionSelectedListener = onSuggestionSelectedListener;
     }
 
+    public void setData(List<Option> data) {
+        mDataset = data;
+        notifyDataSetChanged();
+        getItemCount();
+    }
+
     @NonNull
     @Override
-    public AutocompleteSuggestionsViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+    public AutocompleteSuggestionsViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup,
+                                                                int i) {
         LayoutInflater layoutInflater =
                 LayoutInflater.from(viewGroup.getContext());
         FormAutocompleteSuggestionItemBinding itemBinding =

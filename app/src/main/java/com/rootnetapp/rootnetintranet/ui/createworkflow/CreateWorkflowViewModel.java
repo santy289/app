@@ -149,6 +149,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<Boolean> mShowNoPermissionsViewLiveData;
     private MutableLiveData<Boolean> mShowFieldsRecyclerLiveData;
     private MutableLiveData<Boolean> mShowSubmitButtonLiveData;
+    private MutableLiveData<AutocompleteFormItem> mSetAutocompleteSuggestionsLiveData;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
@@ -1734,7 +1735,6 @@ class CreateWorkflowViewModel extends ViewModel {
 
         Option value = new Option(contactMetaData.getId(), contactMetaData.getCompany());
 
-        autocompleteFormItem.setQuery(contactMetaData.getCompany());
         autocompleteFormItem.setValue(value);
     }
 
@@ -1754,7 +1754,6 @@ class CreateWorkflowViewModel extends ViewModel {
 
         Option value = new Option(businessOpportunityMeta.getId(), businessOpportunityMeta.getTitle());
 
-        autocompleteFormItem.setQuery(businessOpportunityMeta.getTitle());
         autocompleteFormItem.setValue(value);
     }
     //endregion
@@ -2479,7 +2478,7 @@ class CreateWorkflowViewModel extends ViewModel {
         if (mCurrentQueryAutocompleteFormItem == null) return;
 
         mCurrentQueryAutocompleteFormItem.setOptions(options);
-        mUpdateFormItemLiveData.setValue(mCurrentQueryAutocompleteFormItem);
+        mSetAutocompleteSuggestionsLiveData.setValue(mCurrentQueryAutocompleteFormItem);
 
         mCurrentQueryAutocompleteFormItem = null; //clear reference
     }
@@ -2505,7 +2504,7 @@ class CreateWorkflowViewModel extends ViewModel {
         if (mCurrentQueryAutocompleteFormItem == null) return;
 
         mCurrentQueryAutocompleteFormItem.setOptions(options);
-        mUpdateFormItemLiveData.setValue(mCurrentQueryAutocompleteFormItem);
+        mSetAutocompleteSuggestionsLiveData.setValue(mCurrentQueryAutocompleteFormItem);
 
         mCurrentQueryAutocompleteFormItem = null; //clear reference
     }
@@ -2634,5 +2633,12 @@ class CreateWorkflowViewModel extends ViewModel {
             mOpenDownloadedFileLiveData = new MutableLiveData<>();
         }
         return mOpenDownloadedFileLiveData;
+    }
+
+    protected LiveData<AutocompleteFormItem> getObservableSetAutocompleteSuggestions() {
+        if (mSetAutocompleteSuggestionsLiveData == null) {
+            mSetAutocompleteSuggestionsLiveData = new MutableLiveData<>();
+        }
+        return mSetAutocompleteSuggestionsLiveData;
     }
 }

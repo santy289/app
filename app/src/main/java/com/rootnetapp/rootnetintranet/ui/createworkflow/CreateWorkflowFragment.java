@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +9,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,15 +23,18 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.databinding.FormAutocompleteDialogBinding;
 import com.rootnetapp.rootnetintranet.databinding.FragmentCreateWorkflowBinding;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.AutocompleteFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.GeolocationFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.IntentFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.adapters.AutocompleteSuggestionsAdapter;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.adapters.FormItemsAdapter;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.ValidateFormDialog;
@@ -70,6 +76,9 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     private FormItemsAdapter mAdapter;
     private FormItemsAdapter mPeopleInvolvedAdapter;
     private WorkflowListItem mWorkflowListItem;
+    private AlertDialog mAutocompleteDialog;
+    private FormAutocompleteDialogBinding mAutocompleteDialogBinding;
+    private AutocompleteSuggestionsAdapter mAutocompleteSuggestionsAdapter;
 
     public CreateWorkflowFragment() { }
 
@@ -181,6 +190,8 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
                 .observe(getViewLifecycleOwner(), this::showNoPermissionsView);
         viewModel.getObservableShowFieldsRecycler()
                 .observe(getViewLifecycleOwner(), this::showFieldsRecycler);
+        viewModel.getObservableSetAutocompleteSuggestions()
+                .observe(getViewLifecycleOwner(), this::setAutocompleteSuggestions);
     }
 
     private void setupSubmitButton() {
@@ -381,6 +392,72 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
 
     private void createAutocompleteFormItemListener(AutocompleteFormItem autocompleteFormItem) {
         autocompleteFormItem.setOnQueryListener(item -> viewModel.queryAutocompleteFormItem(item));
+        autocompleteFormItem.setOnButtonClickedListener(this::showAutocompleteDialog);
+    }
+
+    /**
+     * Displays an AlertDialog with a text input and autocomplete suggestions for the
+     * AutocompleteFormItem.
+     *
+     * @param autocompleteFormItem form item.
+     */
+    public void showAutocompleteDialog(AutocompleteFormItem autocompleteFormItem) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(),
+                R.style.AlertDialogTheme);
+
+        mAutocompleteDialogBinding = DataBindingUtil
+                .inflate(LayoutInflater.from(getContext()), R.layout.form_autocomplete_dialog, null,
+                        false);
+        builder.setView(mAutocompleteDialogBinding.getRoot());
+
+        builder.setTitle(autocompleteFormItem.getTitle());
+
+        builder.setNegativeButton(R.string.cancel, null);
+
+        mAutocompleteDialog = builder.show();
+
+        //setup text watcher
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                autocompleteFormItem.setQuery(s.toString());
+                autocompleteFormItem.getOnQueryListener().onQuery(autocompleteFormItem);
+            }
+        };
+        mAutocompleteDialogBinding.etInput.addTextChangedListener(textWatcher);
+
+        //setup recycler
+        mAutocompleteDialogBinding.rvSuggestions
+                .setLayoutManager(new LinearLayoutManager(getContext()));
+
+        //set suggestions listener
+        AutocompleteSuggestionsAdapter.OnSuggestionSelectedListener onSuggestionSelectedListener = option -> {
+            if (option == null) return;
+
+            hideSoftInputKeyboard();
+
+            autocompleteFormItem.setValue(option);
+
+            updateFormItemUi(autocompleteFormItem);
+
+            mAutocompleteDialog.dismiss();
+        };
+
+        mAutocompleteSuggestionsAdapter = new AutocompleteSuggestionsAdapter(
+                autocompleteFormItem.getOptions(), onSuggestionSelectedListener);
+
+        //set suggestions adapter
+        mAutocompleteDialogBinding.rvSuggestions.setAdapter(mAutocompleteSuggestionsAdapter);
     }
 
     /**
@@ -440,6 +517,22 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     @UiThread
     private void updateFormItemUi(BaseFormItem formItem) {
         mAdapter.updateItem(formItem);
+    }
+
+    @UiThread
+    private void setAutocompleteSuggestions(AutocompleteFormItem autocompleteFormItem) {
+        if (mAutocompleteDialog == null
+                || !mAutocompleteDialog.isShowing()
+                || mAutocompleteDialogBinding == null
+                || mAutocompleteSuggestionsAdapter == null) {
+            return;
+        }
+
+        List<Option> options = autocompleteFormItem.getOptions();
+        if (options == null) return;
+        mAutocompleteDialogBinding.rvSuggestions
+                .setVisibility(options.isEmpty() ? View.GONE : View.VISIBLE);
+        mAutocompleteSuggestionsAdapter.setData(options);
     }
 
     /**
@@ -612,12 +705,15 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     }
 
     private void hideSoftInputKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getActivity()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+
         // Check if no view has focus:
         View view = getActivity().getCurrentFocus();
         if (view != null) {
-            InputMethodManager imm = (InputMethodManager) getActivity()
-                    .getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        } else {
+            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
         }
     }
 }

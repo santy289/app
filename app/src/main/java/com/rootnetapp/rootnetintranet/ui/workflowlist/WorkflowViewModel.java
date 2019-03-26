@@ -1523,6 +1523,19 @@ public class WorkflowViewModel extends ViewModel {
         completeMassAction.setValue(true);
     }
 
+    protected void enableDisableWorkflows(List<Integer> workflowIds, boolean enable) {
+        showLoading.setValue(true);
+        Disposable disposable = workflowRepository
+                .postEnableDisableActivation(token, workflowIds, enable)
+                .subscribe(this::onEnableDisableWorkflowsSuccess, this::onFailure);
+
+        disposables.add(disposable);
+    }
+
+    private void onEnableDisableWorkflowsSuccess(WorkflowActivationResponse workflowActivationResponse) {
+        completeMassAction.setValue(true);
+    }
+
     private void onFailure(Throwable throwable) {
         Log.d(TAG, "onFailure: " + throwable.getMessage());
         showLoading.setValue(false);

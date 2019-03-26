@@ -582,6 +582,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
             switch (item.getItemId()) {
                 case R.id.disable:
+                    workflowViewModel.enableDisableWorkflows(checkedList, false);
                     break;
                 case R.id.close:
                     workflowViewModel.openCloseWorkflows(checkedList, false);

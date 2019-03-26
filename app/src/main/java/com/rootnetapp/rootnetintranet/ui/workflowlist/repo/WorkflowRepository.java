@@ -545,6 +545,14 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    public Observable<WorkflowActivationResponse> postEnableDisableActivation(String token,
+                                                                          List<Integer> workflowIds,
+                                                                          boolean enable) {
+        return service.postWorkflowActivationEnableDisable(token, workflowIds, enable)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     public Observable<ListsResponse> getCategoryList(String auth, int id) {
         return service.getListItems(auth, id).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());

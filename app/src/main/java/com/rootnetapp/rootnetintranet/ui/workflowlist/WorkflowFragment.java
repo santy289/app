@@ -15,6 +15,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -353,7 +354,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .observe(this, this::showAddButton);
         workflowViewModel.getObservableShowViewWorkflowButton()
                 .observe(this, this::showViewWorkflowDetailsButton);
-        workflowViewModel.getObservableCompleteMassAction().observe(this, this::handleCompleteMassAction);
+        workflowViewModel.getObservableCompleteMassAction()
+                .observe(this, this::handleCompleteMassAction);
 
         // MainActivity's ViewModel
         mainViewModel.messageContainerToWorkflowList
@@ -588,8 +590,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                     workflowViewModel.openCloseWorkflows(checkedList, false);
                     break;
                 case R.id.delete:
-                    //todo confirmation modal
-                    workflowViewModel.deleteWorkflows(checkedList);
+                    showDeleteConfirmationDialog(checkedList);
                     break;
             }
 
@@ -597,6 +598,44 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         });
 
         popup.show();
+    }
+
+    private void showDeleteConfirmationDialog(List<Integer> checkedList) {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext(),
+                R.style.AlertDialogTheme);
+
+        int titleResId;
+        int messageResId;
+        //check for plurals
+        if (checkedList.size() > 1) {
+            titleResId = R.string.workflow_list_delete_dialog_title;
+            messageResId = R.string.workflow_list_delete_dialog_msg;
+        } else {
+            titleResId = R.string.workflow_detail_activity_delete_dialog_title;
+            messageResId = R.string.workflow_detail_activity_delete_dialog_msg;
+        }
+
+        builder.setTitle(titleResId);
+
+        final String separator = ", ";
+        StringBuilder stringBuilder = new StringBuilder();
+        adapter.getCheckedNames().forEach(s -> {
+            stringBuilder.append(s);
+            stringBuilder.append(separator);
+        });
+        stringBuilder.delete(stringBuilder.length() - separator.length(), stringBuilder.length());
+        String workflowsString = stringBuilder.toString();
+
+        builder.setMessage(getString(
+                messageResId,
+                workflowsString
+        ));
+        builder.setCancelable(false);
+
+        builder.setPositiveButton(R.string.accept,
+                (dialog, which) -> workflowViewModel.deleteWorkflows(checkedList));
+        builder.setNegativeButton(R.string.cancel, null);
+        builder.show();
     }
 
     @UiThread

@@ -256,6 +256,8 @@
     <string name="approvers_involved">Approvers Involved</string>
     <string name="fragment_create_workflow_no_permissions">You do not have permissions to create a workflow.</string>
     <string name="workflow_list_no_selections">You have not selected any workflows.</string>
+    <string name="workflow_list_delete_dialog_title">Delete Workflows</string>
+    <string name="workflow_list_delete_dialog_msg">Are you sure you want to delete the workflows %s?</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Workflow Details</string>

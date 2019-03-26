@@ -28,6 +28,7 @@ public class WorkflowExpandableAdapter extends
 
     private ArrayMap<Integer, Boolean> expandedItems;
     private ArrayMap<Integer, Boolean> checkedItems;
+    private ArrayMap<String, Boolean> checkedItemsNames;
 
     private final int VIEW_ITEM = 1;
     private final int VIEW_PROG = 0;
@@ -40,6 +41,7 @@ public class WorkflowExpandableAdapter extends
         this.anInterface = anInterface;
         this.expandedItems = new ArrayMap<>();
         this.checkedItems = new ArrayMap<>();
+        this.checkedItemsNames = new ArrayMap<>();
     }
 
     public void setShowViewWorkflowButton(boolean showViewWorkflowButton) {
@@ -51,6 +53,17 @@ public class WorkflowExpandableAdapter extends
 
         for (int key : checkedItems.keySet()) {
             Boolean isChecked = checkedItems.get(key);
+            if (isChecked != null && isChecked) checkedList.add(key);
+        }
+
+        return checkedList;
+    }
+
+    public List<String> getCheckedNames(){
+        List<String> checkedList = new ArrayList<>();
+
+        for (String key : checkedItemsNames.keySet()) {
+            Boolean isChecked = checkedItemsNames.get(key);
             if (isChecked != null && isChecked) checkedList.add(key);
         }
 
@@ -158,10 +171,13 @@ public class WorkflowExpandableAdapter extends
             WorkflowListItem checkedItem = getItem(positionChecked);
             if (checkedItem != null) {
                 int checkedItemId = checkedItem.getWorkflowId();
+                String checkedItemTitle = checkedItem.getTitle();
                 if (!checkedItems.containsKey(checkedItemId)) {
                     checkedItems.put(checkedItemId, true);
+                    checkedItemsNames.put(checkedItemTitle, true);
                 } else {
                     checkedItems.put(checkedItemId, b);
+                    checkedItemsNames.put(checkedItemTitle, b);
                 }
             }
         });
@@ -229,6 +245,7 @@ public class WorkflowExpandableAdapter extends
                 continue;
             }
             checkedItems.put(item.getWorkflowId(), isCheck);
+            checkedItemsNames.put(item.getTitle(), isCheck);
         }
         notifyDataSetChanged();
     }

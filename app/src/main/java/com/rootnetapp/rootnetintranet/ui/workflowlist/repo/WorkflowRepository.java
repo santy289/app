@@ -15,6 +15,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.Wo
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.DeleteWorkflowResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.PostDeleteWorkflows;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListsResponse;
 
@@ -556,8 +557,8 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
 
     public Observable<DeleteWorkflowResponse> postDeleteWorkflows(String token,
                                                                   int workflowId,
-                                                                  List<Integer> workflowIds){
-        return service.deleteWorkflows(token, workflowId, workflowIds)
+                                                                  PostDeleteWorkflows postDeleteWorkflows){
+        return service.deleteWorkflows(token, workflowId, postDeleteWorkflows)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }

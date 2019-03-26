@@ -44,6 +44,7 @@ import com.rootnetapp.rootnetintranet.models.responses.websocket.WebSocketSettin
 import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.DeleteWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.WorkflowApproveRejectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowoverview.WorkflowOverviewResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.PostDeleteWorkflows;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
@@ -355,12 +356,11 @@ public interface ApiInterface {
     Observable<DeleteWorkflowResponse> deleteWorkflow(@Header("Authorization") String authorization,
                                                       @Path("id") int workflowId);
 
-    @Headers({"Domain-Name: api"})
+    @Headers({"Domain-Name: api", "Content-Type: application/json;charset=UTF-8"})
     @POST("intranet/workflows/{id}?confirmation=true")
-    @FormUrlEncoded
     Observable<DeleteWorkflowResponse> deleteWorkflows(@Header("Authorization") String authorization,
                                                        @Path("id") int workflowId,
-                                                       @Field("workflows_array") List<Integer> workflowIds);
+                                                       @Body PostDeleteWorkflows postDeleteWorkflows);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/templates/{id}")

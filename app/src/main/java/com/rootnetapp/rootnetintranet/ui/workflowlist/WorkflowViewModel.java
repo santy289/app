@@ -19,6 +19,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.DeleteWorkflowResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.PostDeleteWorkflows;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListInfo;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
@@ -1540,9 +1541,12 @@ public class WorkflowViewModel extends ViewModel {
     protected void deleteWorkflows(List<Integer> workflowIds) {
         if (workflowIds.isEmpty()) return;
 
+        PostDeleteWorkflows postDeleteWorkflows = new PostDeleteWorkflows();
+        postDeleteWorkflows.setWorkflowsArray(workflowIds);
+
         showLoading.setValue(true);
         Disposable disposable = workflowRepository
-                .postDeleteWorkflows(token, workflowIds.get(0), workflowIds)
+                .postDeleteWorkflows(token, workflowIds.get(0), postDeleteWorkflows)
                 .subscribe(this::onDeleteWorkflowsSuccess, this::onFailure);
 
         disposables.add(disposable);

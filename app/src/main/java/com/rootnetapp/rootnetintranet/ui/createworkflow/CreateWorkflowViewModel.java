@@ -1740,6 +1740,16 @@ class CreateWorkflowViewModel extends ViewModel {
 
         if (contactMetaData == null) return;
 
+        //pass the selected value to the FormSettings list
+        Contact contact = new Contact();
+        contact.setId(contactMetaData.getId());
+        contact.setCompany(contactMetaData.getCompany());
+        contact.setFullName(contactMetaData.getFullName());
+        List<Contact> contactList = new ArrayList<>();
+        contactList.add(contact);
+        formSettings.setContacts(contactList);
+
+        //find the form item
         AutocompleteFormItem autocompleteFormItem = (AutocompleteFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
 
@@ -1760,6 +1770,15 @@ class CreateWorkflowViewModel extends ViewModel {
 
         if (businessOpportunityMeta == null) return;
 
+        //pass the selected value to the FormSettings list
+        BusinessOpportunity businessOpportunity = new BusinessOpportunity();
+        businessOpportunity.setId(businessOpportunityMeta.getId());
+        businessOpportunity.setTitle(businessOpportunityMeta.getTitle());
+        List<BusinessOpportunity> businessOpportunityList = new ArrayList<>();
+        businessOpportunityList.add(businessOpportunity);
+        formSettings.setBusinessOpportunities(businessOpportunityList);
+
+        //find the form item
         AutocompleteFormItem autocompleteFormItem = (AutocompleteFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
 
@@ -1781,6 +1800,15 @@ class CreateWorkflowViewModel extends ViewModel {
 
         if (postSubContact == null) return;
 
+        //pass the selected value to the FormSettings list
+        SubContact subContact = new SubContact();
+        subContact.setId(postSubContact.getId());
+        subContact.setFullName(postSubContact.getFullName());
+        List<SubContact> subContactList = new ArrayList<>();
+        subContactList.add(subContact);
+        formSettings.setSubContacts(subContactList);
+
+        //find the form item
         AutocompleteFormItem autocompleteFormItem = (AutocompleteFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
 

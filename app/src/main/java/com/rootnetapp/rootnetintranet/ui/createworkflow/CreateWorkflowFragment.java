@@ -9,6 +9,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -421,19 +423,23 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         //setup text watcher
         TextWatcher textWatcher = new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
 
-            }
+            private Handler handler = new Handler(Looper.getMainLooper());
+            private Runnable workRunnable;
+            private final int DELAY = 500;
 
             @Override
             public void afterTextChanged(Editable s) {
-                autocompleteFormItem.setQuery(s.toString());
-                autocompleteFormItem.getOnQueryListener().onQuery(autocompleteFormItem);
+                handler.removeCallbacks(workRunnable);
+                workRunnable = () -> {
+                    autocompleteFormItem.setQuery(s.toString());
+                    autocompleteFormItem.getOnQueryListener().onQuery(autocompleteFormItem);
+                };
+                handler.postDelayed(workRunnable, DELAY);
             }
         };
         mAutocompleteDialogBinding.etInput.addTextChangedListener(textWatcher);
@@ -549,7 +555,8 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
             return;
         }
 
-        mAutocompleteDialogBinding.includeNoResultsView.lytNoResultsView.setVisibility(show ? View.VISIBLE : View.GONE);
+        mAutocompleteDialogBinding.includeNoResultsView.lytNoResultsView
+                .setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     @UiThread
@@ -561,8 +568,9 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
             return;
         }
 
-        showAutocompleteNoResultsView(false);
-        mAutocompleteDialogBinding.includeNoConnectionView.lytNoConnectionView.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (show) showAutocompleteNoResultsView(false);
+        mAutocompleteDialogBinding.includeNoConnectionView.lytNoConnectionView
+                .setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     /**

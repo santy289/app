@@ -1745,7 +1745,8 @@ class CreateWorkflowViewModel extends ViewModel {
             return;
         }
 
-        JsonAdapter<PostBusinessOpportunity> jsonAdapter = moshi.adapter(PostBusinessOpportunity.class);
+        JsonAdapter<PostBusinessOpportunity> jsonAdapter = moshi
+                .adapter(PostBusinessOpportunity.class);
         PostBusinessOpportunity businessOpportunityMeta = jsonAdapter.fromJson(meta.getValue());
 
         if (businessOpportunityMeta == null) return;
@@ -1753,7 +1754,8 @@ class CreateWorkflowViewModel extends ViewModel {
         AutocompleteFormItem autocompleteFormItem = (AutocompleteFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
 
-        Option value = new Option(businessOpportunityMeta.getId(), businessOpportunityMeta.getTitle());
+        Option value = new Option(businessOpportunityMeta.getId(),
+                businessOpportunityMeta.getTitle());
 
         autocompleteFormItem.setValue(value);
     }
@@ -2476,12 +2478,7 @@ class CreateWorkflowViewModel extends ViewModel {
                 .map(contact -> new Option(contact.getId(), contact.getCompany()))
                 .collect(Collectors.toList());
 
-        if (mCurrentQueryAutocompleteFormItem == null) return;
-
-        mCurrentQueryAutocompleteFormItem.setOptions(options);
-        mSetAutocompleteSuggestionsLiveData.setValue(mCurrentQueryAutocompleteFormItem);
-
-        mCurrentQueryAutocompleteFormItem = null; //clear reference
+        onAutocompleteSuccess(options);
     }
 
     private void queryForBusinessOpportunities(AutocompleteFormItem formItem) {
@@ -2492,16 +2489,22 @@ class CreateWorkflowViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
-    private void onBusinessOpportunitiesQuerySuccess(BusinessOpportunitiesResponse businessOpportunitiesResponse) {
+    private void onBusinessOpportunitiesQuerySuccess(
+            BusinessOpportunitiesResponse businessOpportunitiesResponse) {
         List<BusinessOpportunity> businessOpportunities = businessOpportunitiesResponse.getList();
 
         formSettings.setBusinessOpportunities(businessOpportunities);
 
         //update options
         List<Option> options = businessOpportunities.stream()
-                .map(businessOpportunity -> new Option(businessOpportunity.getId(), businessOpportunity.getTitle()))
+                .map(businessOpportunity -> new Option(businessOpportunity.getId(),
+                        businessOpportunity.getTitle()))
                 .collect(Collectors.toList());
 
+        onAutocompleteSuccess(options);
+    }
+
+    private void onAutocompleteSuccess(List<Option> options) {
         if (mCurrentQueryAutocompleteFormItem == null) return;
 
         mCurrentQueryAutocompleteFormItem.setOptions(options);

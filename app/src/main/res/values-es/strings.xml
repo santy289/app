@@ -202,7 +202,7 @@
     <string name="created">Creado</string>
     <string name="workflow_created">El workflow %s ha sido creado.</string>
     <string name="edited">Actualizado</string>
-    <string name="workflow_edit">Has actualizado el workflow:</string>
+    <string name="workflow_edit">El workflow %s ha sido editado.</string>
     <string name="error">Error</string>
     <string name="error_create_workflow">Algo ocurrió al intentar crear el nuevo workflow. Intente de nuevo más tarde.</string>
     <string name="error_edit_workflow">Algo ocurrió al intentar guardar el workflow. Intente de nuevo más tarde.</string>

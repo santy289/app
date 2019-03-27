@@ -79,6 +79,14 @@ public class SyncHelper {
         this.saveStringToPreference = new MutableLiveData<>();
     }
 
+    protected ApiInterface getApiInterface() {
+        return apiInterface;
+    }
+
+    protected AppDatabase getDatabase() {
+        return database;
+    }
+
     protected void syncData(String token) {
         this.auth = token;
 

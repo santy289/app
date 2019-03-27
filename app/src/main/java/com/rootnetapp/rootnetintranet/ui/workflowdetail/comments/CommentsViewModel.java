@@ -183,6 +183,13 @@ public class CommentsViewModel extends ViewModel {
                             return;
                         }
 
+                        String fileType = Utils.getMimeType(data.getData(), context);
+
+                        if (fileType.contains(Utils.VIDEO_MIME_TYPE_CHECK)) {
+                            mToastMessageLiveData.setValue(R.string.file_video_not_allowed);
+                            return;
+                        }
+
                         Cursor returnCursor = context.getContentResolver()
                                 .query(uri, null, null, null, null);
 
@@ -204,7 +211,6 @@ public class CommentsViewModel extends ViewModel {
                         byte[] bytes = Utils.fileToByte(context.getContentResolver(), uri);
 
                         String encodedFile = Base64.encodeToString(bytes, Base64.DEFAULT);
-                        String fileType = Utils.getMimeType(data.getData(), context);
 
                         if (mCommentFiles == null) mCommentFiles = new ArrayList<>();
 

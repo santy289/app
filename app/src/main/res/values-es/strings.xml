@@ -139,6 +139,8 @@
     <string name="attach">ADJUNTAR</string>
     <string name="remove_file">REMOVER ARCHIVO</string>
     <string name="select_file">Seleccionar un archivo para subir</string>
+    <string name="error_selecting_file">Error al seleccionar el archivo</string>
+    <string name="file_video_not_allowed">No está permitido adjuntar un video</string>
     <string name="select_preset">Seleccionar el tipo de documento para subir</string>
     <string name="month">Mes</string>
     <string name="week">Semana</string>

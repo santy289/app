@@ -1639,6 +1639,13 @@ class CreateWorkflowViewModel extends ViewModel {
                             return;
                         }
 
+                        String fileType = Utils.getMimeType(data.getData(), context);
+
+                        if (fileType.contains(Utils.VIDEO_MIME_TYPE_CHECK)) {
+                            mToastMessageLiveData.setValue(R.string.file_video_not_allowed);
+                            return;
+                        }
+
                         if (!Utils.checkFileSize(UPLOAD_FILE_SIZE_LIMIT, new File(uri.getPath()))) {
                             DialogMessage message = new DialogMessage();
                             message.message = R.string.file_too_big;
@@ -1668,7 +1675,6 @@ class CreateWorkflowViewModel extends ViewModel {
                         byte[] bytes = Utils.fileToByte(context.getContentResolver(), uri);
 
                         String encodedFile = Base64.encodeToString(bytes, Base64.DEFAULT);
-                        String fileType = Utils.getMimeType(data.getData(), context);
 
                         FileFormItem formItem = getCurrentRequestingFileFormItem();
                         formItem.setValue(encodedFile);

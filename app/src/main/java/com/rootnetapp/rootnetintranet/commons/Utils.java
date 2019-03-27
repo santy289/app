@@ -72,6 +72,8 @@ public class Utils {
             "application/vnd.openxmlformats-officedocument.presentationml.presentation"
     };
 
+    public static final String VIDEO_MIME_TYPE_CHECK = "video";
+
     public static String getImgDomain() {
         return imgDomain;
     }

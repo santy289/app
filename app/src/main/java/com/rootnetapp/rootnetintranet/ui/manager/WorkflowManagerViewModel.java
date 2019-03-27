@@ -251,7 +251,7 @@ public class WorkflowManagerViewModel extends ViewModel {
         List<WorkflowDb> workflowList = workflowResponseDb.getList();
 
         mHideWorkflowListLiveData.setValue(workflowList.isEmpty());
-        mHideMoreButtonLiveData.setValue(workflowResponseDb.getPager().isIsLastPage());
+        mHideMoreButtonLiveData.setValue(workflowList.isEmpty() || workflowResponseDb.getPager().isIsLastPage());
         mWorkflowListLiveData.setValue(workflowList);
     }
     //endregion
@@ -289,7 +289,7 @@ public class WorkflowManagerViewModel extends ViewModel {
         List<WorkflowDb> workflowList = workflowResponseDb.getList();
 
         mHidePendingWorkflowListLiveData.setValue(workflowList.isEmpty());
-        mHidePendingMoreButtonLiveData.setValue(workflowResponseDb.getPager().isIsLastPage());
+        mHidePendingMoreButtonLiveData.setValue(workflowList.isEmpty() || workflowResponseDb.getPager().isIsLastPage());
         mUserPendingWorkflowsListLiveData.setValue(workflowList);
     }
 

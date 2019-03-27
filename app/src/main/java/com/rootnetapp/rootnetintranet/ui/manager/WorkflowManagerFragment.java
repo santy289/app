@@ -52,6 +52,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     private FragmentWorkflowManagerBinding mBinding;
     private MainActivityInterface anInterface;
     private PendingWorkflowsAdapter mWorkflowsAdapter;
+    private PendingWorkflowsAdapter mPendingWorkflowsAdapter;
 
     public WorkflowManagerFragment() {
         // Required empty public constructor
@@ -91,7 +92,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
 
         subscribe();
         setOnClickListeners();
-        setupRecycler();
+        setupRecyclers();
 
         viewModel.init(token, start, end);
 
@@ -104,17 +105,20 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     private void subscribe() {
         viewModel.getObservableShowLoading().observe(getViewLifecycleOwner(), this::showLoading);
         viewModel.getObservableError().observe(getViewLifecycleOwner(), this::showToastMessage);
-        viewModel.getObservableWorkflows().observe(getViewLifecycleOwner(), this::populatePendingWorkflows);
+        viewModel.getObservableWorkflows().observe(getViewLifecycleOwner(), this::populateWorkflows);
         viewModel.getObservableHideMoreButton().observe(getViewLifecycleOwner(), this::hideMoreButton);
         viewModel.getObservableHideWorkflowList().observe(getViewLifecycleOwner(), this::hideWorkflowList);
         viewModel.getObservableWorkflowTypeItem().observe(getViewLifecycleOwner(), this::setupWorkflowTypeFormItem);
+        viewModel.getObservableUserPendingWorkflowsList().observe(getViewLifecycleOwner(), this::populatePendingWorkflows);
+        viewModel.getObservableHidePendingMoreButton().observe(getViewLifecycleOwner(), this::hidePendingMoreButton);
+        viewModel.getObservableHidePendingWorkflowList().observe(getViewLifecycleOwner(), this::hidePendingWorkflowList);
 
         viewModel.getObservableUserPendingCount().observe(getViewLifecycleOwner(), this::updateUserPendingWorkflowsCount);
         viewModel.getObservableUserOpenCount().observe(getViewLifecycleOwner(), this::updateUserOpenWorkflowsCount);
         viewModel.getObservableUserClosedCount().observe(getViewLifecycleOwner(), this::updateUserClosedWorkflowsCount);
         viewModel.getObservableUserOutOfTimeCount().observe(getViewLifecycleOwner(), this::updateUserOutOfTimeWorkflowsCount);
         viewModel.getObservableUserUpdatedCount().observe(getViewLifecycleOwner(), this::updateUserUpdatedWorkflowsCount);
-        viewModel.getObservableUserPendingWorkflows().observe(getViewLifecycleOwner(), this::showUserPendingWorkflowsDialog);
+        viewModel.getObservableUserPendingWorkflowsDialog().observe(getViewLifecycleOwner(), this::showUserPendingWorkflowsDialog);
         viewModel.getObservableUserOpenWorkflows().observe(getViewLifecycleOwner(), this::showUserOpenWorkflowsDialog);
         viewModel.getObservableUserClosedWorkflows().observe(getViewLifecycleOwner(), this::showUserClosedWorkflowsDialog);
         viewModel.getObservableUserOutOfTimeWorkflows().observe(getViewLifecycleOwner(), this::showUserOutOfTimeWorkflowsDialog);
@@ -142,6 +146,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         mBinding.tvDay.setOnClickListener(v -> filterDayClicked());
         mBinding.btnSelectDates.setOnClickListener(v -> selectDates());
         mBinding.btnShowMore.setOnClickListener(v -> showMoreClicked());
+        mBinding.btnMyPendingShowMore.setOnClickListener(v -> showMoreClickedPending());
 
         mBinding.btnUserPendingApproval.setOnClickListener(v -> getUserPendingWorkflows());
         mBinding.llUserOpenWorkflows.setOnClickListener(v -> getUserOpenWorkflows());
@@ -159,9 +164,12 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     /**
      * Initializes the workflows RecyclerView.
      */
-    private void setupRecycler() {
-        mBinding.recPendingworkflows.setLayoutManager(new LinearLayoutManager(getContext()));
-        mBinding.recPendingworkflows.setNestedScrollingEnabled(false);
+    private void setupRecyclers() {
+        mBinding.rvMyPendingWorkflows.setLayoutManager(new LinearLayoutManager(getContext()));
+        mBinding.rvMyPendingWorkflows.setNestedScrollingEnabled(false);
+
+        mBinding.rvWorkflows.setLayoutManager(new LinearLayoutManager(getContext()));
+        mBinding.rvWorkflows.setNestedScrollingEnabled(false);
     }
 
     /**
@@ -268,6 +276,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
      * @param endDate   end date filter.
      */
     private void updateDashboard(String startDate, String endDate) {
+        mPendingWorkflowsAdapter = null; //reset the adapter
         mWorkflowsAdapter = null; //reset the adapter
         viewModel.updateDashboard(startDate, endDate);
     }
@@ -279,6 +288,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
      * @param workflowTypeId workflow type filter.
      */
     private void updateDashboard(Integer workflowTypeId) {
+        mPendingWorkflowsAdapter = null; //reset the adapter
         mWorkflowsAdapter = null; //reset the adapter
         viewModel.updateDashboard(workflowTypeId);
     }
@@ -296,6 +306,14 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     private void showMoreClicked() {
         viewModel.incrementCurrentPage();
         viewModel.getWorkflows();
+    }
+
+    /**
+     * Performs a request to the ViewModel to retrieve more pending workflows.
+     */
+    private void showMoreClickedPending() {
+        viewModel.incrementCurrentPagePending();
+        viewModel.getUserPendingWorkflowsList();
     }
 
     //region Date Filters
@@ -439,13 +457,14 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     //region Workflows Dialog
 
     //region User Workflows
+
     /**
      * Sends a request to the ViewModel to retrieve the user's pending workflows. This is invoked by
      * the user interaction onClick and the flow ends with the dialog display called by {@link
      * #showUserPendingWorkflowsDialog(List)}.
      */
     private void getUserPendingWorkflows() {
-        viewModel.getUserPendingWorkflows();
+        viewModel.getUserPendingWorkflowsDialog();
     }
 
     /**
@@ -541,6 +560,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     //endregion
 
     //region Company Workflows
+
     /**
      * Sends a request to the ViewModel to retrieve the user's pending workflows. This is invoked by
      * the user interaction onClick and the flow ends with the dialog display called by {@link
@@ -644,7 +664,8 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     //endregion
 
     /**
-     * Adds data to the workflows adapter. Checks whether the adapter needs to be created or not.
+     * Adds data to the pending workflows adapter. Checks whether the adapter needs to be created or
+     * not.
      *
      * @param workflowList data to add to the adapter.
      */
@@ -652,10 +673,29 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     private void populatePendingWorkflows(List<WorkflowDb> workflowList) {
         if (workflowList == null) return;
 
+        if (mPendingWorkflowsAdapter == null) {
+            //create a new adapter
+            mPendingWorkflowsAdapter = new PendingWorkflowsAdapter(workflowList, this);
+            mBinding.rvMyPendingWorkflows.setAdapter(mPendingWorkflowsAdapter);
+        } else {
+            //append a list to the current adapter
+            mPendingWorkflowsAdapter.addData(workflowList);
+        }
+    }
+
+    /**
+     * Adds data to the workflows adapter. Checks whether the adapter needs to be created or not.
+     *
+     * @param workflowList data to add to the adapter.
+     */
+    @UiThread
+    private void populateWorkflows(List<WorkflowDb> workflowList) {
+        if (workflowList == null) return;
+
         if (mWorkflowsAdapter == null) {
             //create a new adapter
             mWorkflowsAdapter = new PendingWorkflowsAdapter(workflowList, this);
-            mBinding.recPendingworkflows.setAdapter(mWorkflowsAdapter);
+            mBinding.rvWorkflows.setAdapter(mWorkflowsAdapter);
         } else {
             //append a list to the current adapter
             mWorkflowsAdapter.addData(workflowList);
@@ -663,7 +703,39 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     }
 
     /**
-     * Hides or shows the "SHOW MORE" button based on the parameter.
+     * Hides or shows the "SHOW MORE" button of the pending workflows list based on the parameter.
+     *
+     * @param hide true: hide; false: show.
+     */
+    @UiThread
+    private void hidePendingMoreButton(boolean hide) {
+        if (hide) {
+            mBinding.btnMyPendingShowMore.setVisibility(View.GONE);
+        } else {
+            mBinding.btnMyPendingShowMore.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Hides or shows the pending workflows list based on the parameter.
+     *
+     * @param hide true: hide; false: show.
+     */
+    @UiThread
+    private void hidePendingWorkflowList(boolean hide) {
+        hidePendingMoreButton(hide);
+
+        if (hide) {
+            mBinding.rvMyPendingWorkflows.setVisibility(View.GONE);
+            mBinding.tvNoPendingWorkflows.setVisibility(View.VISIBLE);
+        } else {
+            mBinding.rvMyPendingWorkflows.setVisibility(View.VISIBLE);
+            mBinding.tvNoPendingWorkflows.setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * Hides or shows the "SHOW MORE" button of the general workflows list based on the parameter.
      *
      * @param hide true: hide; false: show.
      */
@@ -677,7 +749,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
     }
 
     /**
-     * Hides or shows the workflow list based on the parameter.
+     * Hides or shows the general workflows list based on the parameter.
      *
      * @param hide true: hide; false: show.
      */
@@ -686,18 +758,20 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         hideMoreButton(hide);
 
         if (hide) {
-            mBinding.recPendingworkflows.setVisibility(View.GONE);
+            mBinding.rvWorkflows.setVisibility(View.GONE);
             mBinding.lytNoworkflows.setVisibility(View.VISIBLE);
         } else {
-            mBinding.recPendingworkflows.setVisibility(View.VISIBLE);
+            mBinding.rvWorkflows.setVisibility(View.VISIBLE);
             mBinding.lytNoworkflows.setVisibility(View.GONE);
         }
     }
 
     @UiThread
     private void updateSelectedDatesUi(String startDate, String endDate) {
-        startDate = Utils.getFormattedDate(startDate, Utils.SERVER_DATE_FORMAT, Utils.SHORT_DATE_DISPLAY_FORMAT);
-        endDate = Utils.getFormattedDate(endDate, Utils.SERVER_DATE_FORMAT, Utils.SHORT_DATE_DISPLAY_FORMAT);
+        startDate = Utils.getFormattedDate(startDate, Utils.SERVER_DATE_FORMAT,
+                Utils.SHORT_DATE_DISPLAY_FORMAT);
+        endDate = Utils.getFormattedDate(endDate, Utils.SERVER_DATE_FORMAT,
+                Utils.SHORT_DATE_DISPLAY_FORMAT);
 
         mBinding.tvSelectedDate.setText(String.format(Locale.US, "(%s - %s)", startDate, endDate));
     }

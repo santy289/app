@@ -59,7 +59,7 @@ public class WorkflowExpandableAdapter extends
         return checkedList;
     }
 
-    public List<String> getCheckedNames(){
+    public List<String> getCheckedNames() {
         List<String> checkedList = new ArrayList<>();
 
         for (String key : checkedItemsNames.keySet()) {
@@ -68,6 +68,11 @@ public class WorkflowExpandableAdapter extends
         }
 
         return checkedList;
+    }
+
+    public void clearCheckedItems() {
+        this.checkedItems = new ArrayMap<>();
+        this.checkedItemsNames = new ArrayMap<>();
     }
 
     private static final DiffUtil.ItemCallback<WorkflowListItem> DIFF_CALLBACK =

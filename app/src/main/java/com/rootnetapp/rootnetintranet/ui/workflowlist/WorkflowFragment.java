@@ -216,6 +216,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     private void updateAdapterList(PagedList<WorkflowListItem> workflowDbList) {
         adapter.submitList(workflowDbList);
+        adapter.clearCheckedItems();
     }
 
     private void scrollRecyclerToTop(boolean scroll){

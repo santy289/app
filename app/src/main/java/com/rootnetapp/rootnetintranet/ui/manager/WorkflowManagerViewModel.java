@@ -299,8 +299,9 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's pending workflows for the dialog.
      */
     protected void getUserPendingWorkflowsDialog() {
-        if (Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getPending()
-                .getCount()) == 0) {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getPending().getCount()) == 0) {
             //do not request if there is no data
             return;
         }
@@ -341,8 +342,9 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's open workflows.
      */
     protected void getUserOpenWorkflows() {
-        if (Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getOpen()
-                .getCount()) == 0) {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getOpen().getCount()) == 0) {
             //do not request if there is no data
             return;
         }
@@ -381,8 +383,9 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's closed workflows.
      */
     protected void getUserClosedWorkflows() {
-        if (Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getClosed()
-                .getCount()) == 0) {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getClosed().getCount()) == 0) {
             //do not request if there is no data
             return;
         }
@@ -422,8 +425,9 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's out of time workflows.
      */
     protected void getUserOutOfTimeWorkflows() {
-        if (workflowOverviewResponse.getOverview().getUserWorkflows().getOutOfTime()
-                .getCount() == 0) {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || workflowOverviewResponse.getOverview().getUserWorkflows().getOutOfTime().getCount() == 0) {
             //do not request if there is no data
             return;
         }
@@ -464,8 +468,9 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's updated workflows.
      */
     protected void getUserUpdatedWorkflows() {
-        if (Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getUpdated()
-                .getCount()) == 0) {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getUpdated().getCount()) == 0) {
             //do not request if there is no data
             return;
         }
@@ -508,9 +513,9 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's pending workflows.
      */
     protected void getCompanyPendingWorkflows() {
-        if (Integer
-                .parseInt(workflowOverviewResponse.getOverview().getCompanyWorkflows().getPending()
-                        .getCount()) == 0) {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || Integer.parseInt(workflowOverviewResponse.getOverview().getCompanyWorkflows().getPending().getCount()) == 0) {
             //do not request if there is no data
             return;
         }
@@ -550,8 +555,9 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's open workflows.
      */
     protected void getCompanyOpenWorkflows() {
-        if (Integer.parseInt(workflowOverviewResponse.getOverview().getCompanyWorkflows().getOpen()
-                .getCount()) == 0) {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || Integer.parseInt(workflowOverviewResponse.getOverview().getCompanyWorkflows().getOpen().getCount()) == 0) {
             //do not request if there is no data
             return;
         }
@@ -588,9 +594,9 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's closed workflows.
      */
     protected void getCompanyClosedWorkflows() {
-        if (Integer
-                .parseInt(workflowOverviewResponse.getOverview().getCompanyWorkflows().getClosed()
-                        .getCount()) == 0) {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || Integer.parseInt(workflowOverviewResponse.getOverview().getCompanyWorkflows().getClosed().getCount()) == 0) {
             //do not request if there is no data
             return;
         }
@@ -628,8 +634,9 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's out of time workflows.
      */
     protected void getCompanyOutOfTimeWorkflows() {
-        if (workflowOverviewResponse.getOverview().getCompanyWorkflows().getOutOfTime()
-                .getCount() == 0) {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || workflowOverviewResponse.getOverview().getCompanyWorkflows().getOutOfTime().getCount() == 0) {
             //do not request if there is no data
             return;
         }
@@ -669,9 +676,9 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's updated workflows.
      */
     protected void getCompanyUpdatedWorkflows() {
-        if (Integer
-                .parseInt(workflowOverviewResponse.getOverview().getCompanyWorkflows().getUpdated()
-                        .getCount()) == 0) {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || Integer.parseInt(workflowOverviewResponse.getOverview().getCompanyWorkflows().getUpdated().getCount()) == 0) {
             //do not request if there is no data
             return;
         }

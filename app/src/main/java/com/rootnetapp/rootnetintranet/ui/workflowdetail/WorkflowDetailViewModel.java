@@ -57,6 +57,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<Boolean> mShowOpenCloseLiveData;
     private MutableLiveData<String> mShareWorkflowLiveData;
     private LiveData<WorkflowListItem> handleRepoWorkflowRequest;
+    private LiveData<Boolean> handleFetchFromServer;
     protected LiveData<Boolean> updateOpenClosedStatusFromUserAction;
     protected LiveData<Boolean> updateEnabledDisabledStatusFromUserAction;
     protected LiveData<Boolean> deleteWorkflowRepsonseLiveData;
@@ -123,8 +124,16 @@ public class WorkflowDetailViewModel extends ViewModel {
                 mRepository.getObservableRetrieveFromDbWorkflow(),
                 workflowDb -> {
                     initUiWithWorkflowListItem.setValue(workflowDb);
-                    getWorkflow(token, workflowDb.getWorkflowId());
+                    getWorkflow(mToken, workflowDb.getWorkflowId());
                     return workflowDb;
+                }
+        );
+
+        handleFetchFromServer = Transformations.map(
+                mRepository.getObservableFetchWorkflowFromServer(),
+                needToFetch -> {
+                    getWorkflow(mToken, Integer.parseInt(id));
+                    return needToFetch;
                 }
         );
 
@@ -160,9 +169,11 @@ public class WorkflowDetailViewModel extends ViewModel {
     protected boolean hasDeletePermissions() {
         return hasDeletePermissions;
     }
+
     protected boolean hasEnableDisablePermissions() {
         return hasEnableDisablePermissions;
     }
+
     protected boolean hasOpenClosePermissions() {
         return hasOpenClosePermissions;
     }
@@ -346,7 +357,9 @@ public class WorkflowDetailViewModel extends ViewModel {
         mShowNotFoundViewLiveData.setValue(false);
         showLoading.setValue(false);
         mWorkflow = workflowResponse.getWorkflow();
+
         mWorkflowListItem = new WorkflowListItem(mWorkflow);
+        initUiWithWorkflowListItem.setValue(mWorkflowListItem);
 
         int version = mWorkflow.getWorkflowType().getVersion();
         String versionString = String.format(Locale.US, "v%d", version);
@@ -531,5 +544,9 @@ public class WorkflowDetailViewModel extends ViewModel {
 
     protected LiveData<WorkflowListItem> getObservableHandleRepoWorkflowRequest() {
         return handleRepoWorkflowRequest;
+    }
+
+    protected LiveData<Boolean> getObservableFetchFromServer() {
+        return handleFetchFromServer;
     }
 }

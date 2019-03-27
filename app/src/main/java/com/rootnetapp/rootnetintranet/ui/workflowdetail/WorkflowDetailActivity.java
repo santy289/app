@@ -112,6 +112,14 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                     workflowDetailViewModel.getObservableHandleRepoWorkflowRequest()
                             .removeObservers(this);
                 });
+
+        workflowDetailViewModel.getObservableFetchFromServer().observe(
+                this,
+                needToFetch -> {
+                    Log.d(TAG, "subscribeForIdInit: need to fetch from server");
+                    workflowDetailViewModel.getObservableFetchFromServer()
+                            .removeObservers(this);
+                });
     }
 
     private void setActionBar(WorkflowListItem workflowListItem) {

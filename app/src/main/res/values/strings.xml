@@ -212,7 +212,7 @@
     <string name="file_too_big">File is too big, limit is 10MB</string>
     <string name="clear_filters">Clear Filters</string>
     <string name="no_category">No Category</string>
-    <string name="base_filters">Base Filters</string>
+    <string name="base_filters">Standard Filters</string>
     <string name="all">All</string>
     <string name="on_time">On Time</string>
     <string name="latest">Latest</string>

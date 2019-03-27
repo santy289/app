@@ -70,6 +70,7 @@ public class WorkflowViewModel extends ViewModel {
 
     public static final int NO_TYPE_SELECTED = 0;
     public static final int WORKFLOW_TYPE_FIELD = -98;
+    public static final int REQUEST_WORKFLOW_DETAIL = 26;
 
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
@@ -84,6 +85,7 @@ public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<Boolean> showAddButtonLiveData;
     private MutableLiveData<Boolean> showViewWorkflowButtonLiveData;
     private MutableLiveData<Boolean> completeMassAction;
+    private MutableLiveData<Boolean> handleScrollRecyclerToTop;
     public MutableLiveData<Boolean> showBottomSheetLoading;
     protected MutableLiveData<Boolean> clearFilters;
     private LiveData<PagedList<WorkflowListItem>> liveWorkflows;
@@ -124,6 +126,7 @@ public class WorkflowViewModel extends ViewModel {
     private static final String TAG = "WorkflowViewModel";
     private boolean hasViewDetailsPermissions;
     private List<Integer> mWorkflowIdsToDelete;
+    private Boolean isSwipe;
 
     public WorkflowViewModel(WorkflowRepository workflowRepository) {
         this.workflowRepository = workflowRepository;
@@ -207,10 +210,16 @@ public class WorkflowViewModel extends ViewModel {
         workflowRepository.insertWorkflow(workflow);
     }
 
+    protected void resetGetAllWorkflows(boolean isSwipe){
+        this.isSwipe = isSwipe;
+        if (!isSwipe) showLoading.setValue(true);
+        workflowRepository.getAllWorkflowsDb(token);
+    }
+
     protected void initWorkflowList(SharedPreferences sharedPreferences,
                                     LifecycleOwner lifecycleOwner) {
         if (!TextUtils.isEmpty(token)) {
-            showLoading.setValue(true);
+//            showLoading.setValue(true);
             int baseFilterId = filterSettings.getBaseFilterSelectedId();
             loadWorkflowsByBaseFilters(baseFilterId, filterSettings, lifecycleOwner);
             return;
@@ -1039,13 +1048,11 @@ public class WorkflowViewModel extends ViewModel {
             applyFilters(filterSettings);
         });
 
-        final Observer<Boolean> handleRestSuccessWithNoApplyFilter = (success -> {
-            showLoading.postValue(false);
-        });
+        final Observer<Boolean> handleRestSuccessWithNoApplyFilter = (success -> showLoading.postValue(false));
 
-        final Observer<Boolean> handleDeleteWorkflows = (success -> {
-            completeMassAction.setValue(true);
-        });
+        final Observer<Boolean> handleDeleteWorkflows = (success -> completeMassAction.setValue(success));
+
+        final Observer<Boolean> handleRefreshWorkflows = (success -> completeMassAction.setValue(success));
 
         workflowRepository.getObservableHandleRepoError().removeObservers(lifecycleOwner);
         workflowRepository.getObservableHandleRepoError()
@@ -1067,6 +1074,10 @@ public class WorkflowViewModel extends ViewModel {
         workflowRepository.getObservableHandleDeleteWorkflows().removeObservers(lifecycleOwner);
         workflowRepository.getObservableHandleDeleteWorkflows()
                 .observe(lifecycleOwner, handleDeleteWorkflows);
+
+        workflowRepository.getObservableHandleGetAllWorkflows().removeObservers(lifecycleOwner);
+        workflowRepository.getObservableHandleGetAllWorkflows()
+                .observe(lifecycleOwner, handleRefreshWorkflows);
     }
 
     protected LiveData<Boolean> getObservableLoadMore() {
@@ -1479,6 +1490,11 @@ public class WorkflowViewModel extends ViewModel {
             return;
         }
         updateWithSortedList.setValue(listWorkflows);
+        if (isSwipe != null && isSwipe) {
+            //only scroll to top if it was a swipe refresh
+            handleScrollRecyclerToTop.setValue(true);
+            isSwipe = null; //clear value
+        }
         showList.setValue(true);
     }
 
@@ -1688,6 +1704,13 @@ public class WorkflowViewModel extends ViewModel {
             completeMassAction = new MutableLiveData<>();
         }
         return completeMassAction;
+    }
+
+    protected LiveData<Boolean> getObservableHandleScrollRecyclerToTop() {
+        if (handleScrollRecyclerToTop == null) {
+            handleScrollRecyclerToTop = new MutableLiveData<>();
+        }
+        return handleScrollRecyclerToTop;
     }
 
 }

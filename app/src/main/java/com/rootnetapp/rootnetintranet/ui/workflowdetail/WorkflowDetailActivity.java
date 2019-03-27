@@ -322,6 +322,7 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     private void finishActivityWorkflowDeleted(boolean isDeleted) {
         if (!isDeleted) return;
 
+        setResult(RESULT_OK);
         finish();
     }
 
@@ -436,6 +437,13 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 (dialog, which) -> workflowDetailViewModel.deleteWorkflow());
         builder.setNegativeButton(R.string.cancel, null);
         builder.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        setResult(RESULT_OK);
+
+        super.onBackPressed();
     }
 
     /**

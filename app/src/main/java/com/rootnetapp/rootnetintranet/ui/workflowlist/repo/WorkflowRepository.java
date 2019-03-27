@@ -58,6 +58,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     private MutableLiveData<Boolean> handleRepoSuccessNoFilters;
     private MutableLiveData<Boolean> handleRestSuccessWithNoApplyFilter;
     private MutableLiveData<Boolean> handleDeleteWorkflows;
+    private MutableLiveData<Boolean> handleGetAllWorkflows;
     public MutableLiveData<Boolean> showLoadMore;
     private WorkflowListBoundaryCallback callback;
     private PagedList.Config pagedListConfig;
@@ -603,6 +604,43 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         disposables.add(disposable);
     }
 
+    public void getAllWorkflowsDb(String token) {
+        Disposable disposable = service
+                .getWorkflowsDb(
+                        token,
+                        100,
+                        true,
+                        1,
+                        false)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::getWorkflowDbSuccess, throwable -> {
+                    Log.d(TAG, "getAllWorkflowsDb: error: " + throwable.getMessage());
+                    handleRepoError.postValue(true);
+                });
+        disposables.add(disposable);
+    }
+
+    private void getWorkflowDbSuccess(WorkflowResponseDb workflowsResponse) {
+        Disposable disposable = Observable.fromCallable(() -> {
+            workflowDbDao.deleteAllWorkflows();
+            workflowDbDao.insertWorkflows(workflowsResponse.getList());
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        success -> {
+                            Log.d(TAG, "getWorkflowDbSuccess: ");
+                            // No apply filters
+                            handleGetAllWorkflows.postValue(true);
+                        }, throwable -> {
+                            Log.d(TAG, "getWorkflowDbSuccess: error " + throwable.getMessage());
+                            handleRepoError.postValue(true);
+                        }
+                );
+        disposables.add(disposable);
+    }
+
     public LiveData<Boolean> getObservableHandleRepoError() {
         if (handleRepoError == null) {
             handleRepoError = new MutableLiveData<>();
@@ -638,4 +676,10 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         return handleDeleteWorkflows;
     }
 
+    public LiveData<Boolean> getObservableHandleGetAllWorkflows() {
+        if (handleGetAllWorkflows == null) {
+            handleGetAllWorkflows = new MutableLiveData<>();
+        }
+        return handleGetAllWorkflows;
+    }
 }

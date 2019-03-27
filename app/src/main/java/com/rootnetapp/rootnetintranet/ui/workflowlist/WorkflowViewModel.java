@@ -123,6 +123,7 @@ public class WorkflowViewModel extends ViewModel {
     private List<ListItem> categoryList;
     private static final String TAG = "WorkflowViewModel";
     private boolean hasViewDetailsPermissions;
+    private List<Integer> mWorkflowIdsToDelete;
 
     public WorkflowViewModel(WorkflowRepository workflowRepository) {
         this.workflowRepository = workflowRepository;
@@ -1042,6 +1043,10 @@ public class WorkflowViewModel extends ViewModel {
             showLoading.postValue(false);
         });
 
+        final Observer<Boolean> handleDeleteWorkflows = (success -> {
+            completeMassAction.setValue(true);
+        });
+
         workflowRepository.getObservableHandleRepoError().removeObservers(lifecycleOwner);
         workflowRepository.getObservableHandleRepoError()
                 .observe(lifecycleOwner, handleRepoErrorObserver);
@@ -1054,9 +1059,14 @@ public class WorkflowViewModel extends ViewModel {
         workflowRepository.getObservableHandleRepoSuccessNoFilter()
                 .observe(lifecycleOwner, handleRepoSuccessNoFilterObserver);
 
-        workflowRepository.getObservableHandleRestSuccessWithNoApplyFilter().removeObservers(lifecycleOwner);
+        workflowRepository.getObservableHandleRestSuccessWithNoApplyFilter()
+                .removeObservers(lifecycleOwner);
         workflowRepository.getObservableHandleRestSuccessWithNoApplyFilter()
                 .observe(lifecycleOwner, handleRestSuccessWithNoApplyFilter);
+
+        workflowRepository.getObservableHandleDeleteWorkflows().removeObservers(lifecycleOwner);
+        workflowRepository.getObservableHandleDeleteWorkflows()
+                .observe(lifecycleOwner, handleDeleteWorkflows);
     }
 
     protected LiveData<Boolean> getObservableLoadMore() {
@@ -1521,8 +1531,15 @@ public class WorkflowViewModel extends ViewModel {
         disposables.add(disposable);
     }
 
-    private void onOpenCloseWorkflowsSuccess(WorkflowActivationResponse workflowActivationResponse) {
-        completeMassAction.setValue(true);
+    private void onOpenCloseWorkflowsSuccess(
+            WorkflowActivationResponse workflowActivationResponse) {
+        if (workflowActivationResponse.getData() == null
+                || workflowActivationResponse.getData().isEmpty()) {
+            completeMassAction.setValue(true);
+            return;
+        }
+
+        workflowRepository.deleteWorkflowsLocal(workflowActivationResponse.getData().get(0));
     }
 
     protected void enableDisableWorkflows(List<Integer> workflowIds, boolean enable) {
@@ -1534,12 +1551,21 @@ public class WorkflowViewModel extends ViewModel {
         disposables.add(disposable);
     }
 
-    private void onEnableDisableWorkflowsSuccess(WorkflowActivationResponse workflowActivationResponse) {
-        completeMassAction.setValue(true);
+    private void onEnableDisableWorkflowsSuccess(
+            WorkflowActivationResponse workflowActivationResponse) {
+        if (workflowActivationResponse.getData() == null
+                || workflowActivationResponse.getData().isEmpty()) {
+            completeMassAction.setValue(true);
+            return;
+        }
+
+        workflowRepository.deleteWorkflowsLocal(workflowActivationResponse.getData().get(0));
     }
 
     protected void deleteWorkflows(List<Integer> workflowIds) {
         if (workflowIds.isEmpty()) return;
+
+        mWorkflowIdsToDelete = workflowIds;
 
         PostDeleteWorkflows postDeleteWorkflows = new PostDeleteWorkflows();
         postDeleteWorkflows.setWorkflowsArray(workflowIds);
@@ -1553,7 +1579,14 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     private void onDeleteWorkflowsSuccess(DeleteWorkflowResponse deleteWorkflowResponse) {
-        completeMassAction.setValue(true);
+        if (deleteWorkflowResponse.getCode() != 200 || mWorkflowIdsToDelete == null
+                || mWorkflowIdsToDelete.isEmpty()) {
+            completeMassAction.setValue(true);
+            return;
+        }
+
+        workflowRepository.deleteWorkflowsLocalByIds(mWorkflowIdsToDelete);
+        mWorkflowIdsToDelete = null;
     }
 
     private void onFailure(Throwable throwable) {

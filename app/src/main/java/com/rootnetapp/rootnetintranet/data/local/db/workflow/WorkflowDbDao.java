@@ -32,6 +32,12 @@ public interface WorkflowDbDao {
     @Delete
     public void deleteWorkflows(WorkflowDb... workflowDbs);
 
+    @Delete
+    public void deleteWorkflows(List<WorkflowDb> workflowDbs);
+
+    @Query("DELETE FROM workflowdb WHERE workflowdb.id IN (:workflowIds)")
+    public void deleteWorkflowsByIds(List<Integer> workflowIds);
+
     @Query("DELETE FROM workflowdb")
     public int deleteAllWorkflows();
 

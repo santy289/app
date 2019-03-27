@@ -57,6 +57,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     private MutableLiveData<Boolean> handleRepoSuccess;
     private MutableLiveData<Boolean> handleRepoSuccessNoFilters;
     private MutableLiveData<Boolean> handleRestSuccessWithNoApplyFilter;
+    private MutableLiveData<Boolean> handleDeleteWorkflows;
     public MutableLiveData<Boolean> showLoadMore;
     private WorkflowListBoundaryCallback callback;
     private PagedList.Config pagedListConfig;
@@ -568,6 +569,40 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    public void deleteWorkflowsLocal(List<WorkflowDb> workflowDbs) {
+        Disposable disposable = Observable.fromCallable(() -> {
+            workflowDbDao.deleteWorkflows(workflowDbs);
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(success -> {
+                    Log.d(TAG, "deleteWorkflowsLocal: ");
+                    // No apply filters
+                    handleDeleteWorkflows.postValue(true);
+                }, throwable -> {
+                    Log.d(TAG, "deleteWorkflowsLocal: error " + throwable.getMessage());
+                    handleRepoError.postValue(true);
+                });
+        disposables.add(disposable);
+    }
+
+    public void deleteWorkflowsLocalByIds(List<Integer> workflowIds) {
+        Disposable disposable = Observable.fromCallable(() -> {
+            workflowDbDao.deleteWorkflowsByIds(workflowIds);
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(success -> {
+                    Log.d(TAG, "deleteWorkflowsLocalByIds: ");
+                    // No apply filters
+                    handleDeleteWorkflows.postValue(true);
+                }, throwable -> {
+                    Log.d(TAG, "deleteWorkflowsLocalByIds: error " + throwable.getMessage());
+                    handleRepoError.postValue(true);
+                });
+        disposables.add(disposable);
+    }
+
     public LiveData<Boolean> getObservableHandleRepoError() {
         if (handleRepoError == null) {
             handleRepoError = new MutableLiveData<>();
@@ -594,6 +629,13 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
             handleRestSuccessWithNoApplyFilter = new MutableLiveData<>();
         }
         return handleRestSuccessWithNoApplyFilter;
+    }
+
+    public LiveData<Boolean> getObservableHandleDeleteWorkflows() {
+        if (handleDeleteWorkflows == null) {
+            handleDeleteWorkflows = new MutableLiveData<>();
+        }
+        return handleDeleteWorkflows;
     }
 
 }

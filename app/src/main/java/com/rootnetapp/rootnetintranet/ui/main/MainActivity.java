@@ -1,7 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
 import android.app.ActivityManager;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -27,6 +26,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.BuildConfig;
 import com.rootnetapp.rootnetintranet.R;
@@ -603,7 +603,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void showLogoutDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogTheme);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this, R.style.AlertDialogTheme);
         builder.setTitle(R.string.logout);
         builder.setMessage(R.string.logout_confirmation);
         builder.setCancelable(false);

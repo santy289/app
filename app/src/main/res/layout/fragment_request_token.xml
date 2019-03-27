@@ -8,12 +8,13 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/til_username"
+            style="@style/LoginTextInputLayoutStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/marginVertical_domain"
-            android:layout_marginEnd="@dimen/marginHorizontal_domain"
             android:layout_marginStart="@dimen/marginHorizontal_domain"
             android:layout_marginTop="@dimen/marginVertical_domain"
+            android:layout_marginEnd="@dimen/marginHorizontal_domain"
+            android:layout_marginBottom="@dimen/marginVertical_domain"
             android:textColorHint="@color/colorAccent">
 
             <androidx.appcompat.widget.AppCompatEditText
@@ -30,12 +31,12 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/marginVertical_domain"
-            android:layout_marginEnd="@dimen/marginHorizontal_domain"
             android:layout_marginStart="@dimen/marginHorizontal_domain"
             android:layout_marginTop="@dimen/marginVertical_domain"
+            android:layout_marginEnd="@dimen/marginHorizontal_domain"
+            android:layout_marginBottom="@dimen/marginVertical_domain"
             android:text="@string/link_will_be_sent"
-            android:textColor="@color/colorAccent"/>
+            android:textColor="@color/colorAccent" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -46,17 +47,21 @@
                 android:id="@+id/btn_accept"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="5dp"
                 android:layout_weight="1"
                 android:text="@string/accept"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
             <Button
                 android:id="@+id/btn_cancel"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="10dp"
                 android:layout_weight="1"
                 android:text="@string/cancel"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
         </LinearLayout>
     </LinearLayout>
 </layout>

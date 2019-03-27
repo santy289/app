@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -83,7 +84,8 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         //TODO preferences inyectadas con Dagger
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String token = "Bearer " + prefs.getString("token", "");
+        String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
+        String loggedUserId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
 
         String start = Utils.getCurrentFormattedDateDaysDiff(MONTH_AGO_DAYS);
         String end = Utils.getCurrentFormattedDate();
@@ -94,7 +96,7 @@ public class WorkflowManagerFragment extends Fragment implements ManagerInterfac
         setOnClickListeners();
         setupRecyclers();
 
-        viewModel.init(token, start, end);
+        viewModel.init(token, loggedUserId, start, end);
 
         return view;
     }

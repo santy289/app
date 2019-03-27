@@ -231,7 +231,9 @@
                 android:layout_gravity="end"
                 android:layout_margin="15dp"
                 android:text="@string/show_more"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:visibility="gone"
+                tools:visibility="visible" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -1033,7 +1035,9 @@
                 android:layout_gravity="end"
                 android:layout_margin="15dp"
                 android:text="@string/show_more"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:visibility="gone"
+                tools:visibility="visible" />
 
             <Space
                 android:layout_width="wrap_content"

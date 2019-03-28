@@ -167,6 +167,7 @@
     <string name="analytics">Analíticas</string>
     <string name="user_analytics">Mis Analíticas</string>
     <string name="company_overview">Informacion de la Compañía</string>
+    <string name="my_pending_workflows_for_approval">Workflows Pendientes de Aprobación</string>
     <string name="date">Fecha</string>
     <string name="title">Título</string>
     <string name="author">Autor</string>

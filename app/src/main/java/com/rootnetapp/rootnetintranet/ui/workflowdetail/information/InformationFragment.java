@@ -30,10 +30,10 @@ import java.util.List;
 import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -85,17 +85,10 @@ public class InformationFragment extends Fragment {
     }
 
     private void subscribe() {
-        final Observer<Integer> errorObserver = ((Integer data) -> {
-            showLoading(false);
-            if (null != data) {
-                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
-            }
-        });
-
-        informationViewModel.getObservableError().observe(getViewLifecycleOwner(), errorObserver);
+        informationViewModel.getObservableError().observe(getViewLifecycleOwner(), this::showToastMessage);
         informationViewModel.getObservableUpdateOwnerUi()
                 .observe(getViewLifecycleOwner(), this::updateOwnerUi);
-//
+
         informationViewModel.showLoading.observe(getViewLifecycleOwner(), this::showLoading);
         informationViewModel.updateInformationListUi
                 .observe(getViewLifecycleOwner(), this::updateInformationListUi);
@@ -179,5 +172,14 @@ public class InformationFragment extends Fragment {
         }
 
         mBinding.tvOwnerName.setText(owner.getFullName());
+    }
+
+    @UiThread
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                getContext(),
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
     }
 }

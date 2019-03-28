@@ -31,24 +31,55 @@
             app:layout_constraintStart_toStartOf="@id/map"
             app:layout_constraintTop_toTopOf="@id/map" />
 
-        <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/et_search"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/lyt_search_input"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
             android:layout_marginTop="30dp"
             android:layout_marginEnd="30dp"
-            android:background="@drawable/edit_text_bg"
-            android:hint="@string/search"
-            android:maxLines="3"
-            android:paddingStart="10dp"
-            android:paddingTop="10dp"
-            android:paddingEnd="10dp"
-            android:paddingBottom="10dp"
-            android:textSize="15sp"
+            android:background="@drawable/spinner_bg_white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_search"
+                style="@style/Widget.MaterialComponents.TextInputEditText.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:hint="@string/search"
+                android:maxLines="3"
+                android:paddingStart="10dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="10dp"
+                android:textSize="15sp"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/btn_clear"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="TEST TEST TEST TEST TEST TEST TEST TEST TEST" />
+
+            <Button
+                android:id="@+id/btn_clear"
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                android:layout_width="35dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
+                app:backgroundTint="@color/white"
+                app:icon="@drawable/ic_close_black_24dp"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="20sp"
+                app:iconTint="@color/text_red"
+                app:layout_constraintBottom_toBottomOf="@+id/et_search"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/et_search"
+                app:rippleColor="@color/dark_gray" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_suggestions"
@@ -56,10 +87,10 @@
             android:layout_height="wrap_content"
             android:background="@drawable/spinner_bg_white"
             android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="@id/et_search"
+            app:layout_constraintEnd_toEndOf="@id/lyt_search_input"
             app:layout_constraintHeight_max="200dp"
-            app:layout_constraintStart_toStartOf="@id/et_search"
-            app:layout_constraintTop_toBottomOf="@id/et_search"
+            app:layout_constraintStart_toStartOf="@id/lyt_search_input"
+            app:layout_constraintTop_toBottomOf="@id/lyt_search_input"
             tools:visibility="visible" />
 
         <include
@@ -67,10 +98,10 @@
             layout="@layout/no_connection_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="@id/et_search"
+            app:layout_constraintEnd_toEndOf="@id/lyt_search_input"
             app:layout_constraintHeight_max="200dp"
-            app:layout_constraintStart_toStartOf="@id/et_search"
-            app:layout_constraintTop_toBottomOf="@id/et_search" />
+            app:layout_constraintStart_toStartOf="@id/lyt_search_input"
+            app:layout_constraintTop_toBottomOf="@id/lyt_search_input" />
 
         <Button
             android:id="@+id/btn_confirm"

@@ -103,6 +103,7 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
         mBinding.btnConfirm.setOnClickListener(v -> confirmLocation());
         mBinding.btnNavigate
                 .setOnClickListener(v -> navigateToLocation(viewModel.getSelectedLocation()));
+        mBinding.btnClear.setOnClickListener(v -> mBinding.etSearch.setText(null));
     }
 
     private void setupInputSearch() {

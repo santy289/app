@@ -179,7 +179,7 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
 
     @UiThread
     private void showNoConnectionView(boolean show){
-        mBinding.lytNoConnectionView.setVisibility(show ? View.VISIBLE : View.GONE);
+        mBinding.includeNoConnectionView.lytNoConnectionView.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     //region Map

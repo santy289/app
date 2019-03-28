@@ -348,7 +348,7 @@ public class TimelineViewModel extends ViewModel {
     private void getWorkflowUsers() {
         mWebCount++;
 
-        Disposable disposable = mRepository.getWorkflowUsers(mToken)
+        Disposable disposable = mRepository.getWorkflowUsers(mToken) //todo proper clientId
                 .subscribe(this::onWorkflowUsersSuccess, this::onFailure);
 
         mDisposables.add(disposable);

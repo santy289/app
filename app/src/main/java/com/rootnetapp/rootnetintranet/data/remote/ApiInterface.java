@@ -9,9 +9,12 @@ import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest
 import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
+import com.rootnetapp.rootnetintranet.models.responses.business.BusinessOpportunitiesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentDeleteResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.contact.ContactsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.contact.SubContactsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountryDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
@@ -281,14 +284,18 @@ public interface ApiInterface {
     Observable<RoleResponse> getRoles(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/projects?all=true")
+    @GET("intranet/drafts?all=true")
     Observable<ProjectResponse> getProjects(@Header("Authorization") String authorization);
-
 
 
     @Headers({"Domain-Name: api"})
     @GET("client/35/users")
     Observable<WorkflowUserResponse> getWorkflowUsers(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: api"})
+    @GET("client/{clientId}/users")
+    Observable<WorkflowUserResponse> getWorkflowUsers(@Header("Authorization") String authorization,
+                                                      @Path("clientId") int clientId);
 
     @GET("check/countries")
     Observable<CountriesResponse> getCountries(@Header("Authorization") String authorization);
@@ -489,6 +496,25 @@ public interface ApiInterface {
     @Streaming
     @GET("options?key=socket_protocol")
     Observable<WebSocketSettingResponse> getWsProtocol(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: api"})
+    @GET("contacts/records?")
+    Observable<ContactsResponse> getContacts(@Header("Authorization") String authorization,
+                                             @Query("query") String query,
+                                             @Query("limit") int limit);
+
+    @Headers({"Domain-Name: api"})
+    @GET("business/opportunities?")
+    Observable<BusinessOpportunitiesResponse> getBusinessOpportunities(@Header("Authorization") String authorization,
+                                                                       @Query("query") String query,
+                                                                       @Query("limit") int limit);
+
+    @Headers({"Domain-Name: api"})
+    @POST("sub_contacts/records?")
+    @FormUrlEncoded
+    Observable<SubContactsResponse> postSearchSubContacts(@Header("Authorization") String authorization,
+                                                          @Field("query") String query,
+                                                          @Query("limit") int limit);
 
     //region Google Maps API
     @GET("https://maps.googleapis.com/maps/api/place/nearbysearch/json?rankby=distance")

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -15,6 +16,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -35,7 +37,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
@@ -46,6 +51,9 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import static android.app.Activity.RESULT_OK;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.REQUEST_WORKFLOW_DETAIL;
 
 public class WorkflowFragment extends Fragment implements WorkflowFragmentInterface,
         SwipeRefreshLayout.OnRefreshListener {
@@ -151,13 +159,21 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.resetFilterSettings();
         Intent intent = new Intent(getActivity(), WorkflowDetailActivity.class);
         intent.putExtra(WorkflowDetailActivity.EXTRA_WORKFLOW_LIST_ITEM, item);
-        mainActivityInterface.showActivity(intent);
+        startActivityForResult(intent, REQUEST_WORKFLOW_DETAIL);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_WORKFLOW_DETAIL && resultCode == RESULT_OK) {
+            workflowViewModel.resetGetAllWorkflows(false);
+        }
     }
 
     // swipe down to refresh - SwipeRefreshLayout
     @Override
     public void onRefresh() {
-        workflowViewModel.swipeToRefresh(this);
+        workflowViewModel.resetGetAllWorkflows(true);
     }
 
     private void setupSearchListener() {
@@ -200,6 +216,16 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     private void updateAdapterList(PagedList<WorkflowListItem> workflowDbList) {
         adapter.submitList(workflowDbList);
+        adapter.clearCheckedItems();
+    }
+
+    private void scrollRecyclerToTop(boolean scroll){
+        if (!scroll) return;
+
+        //scroll to top after a tiny delay
+        new Handler().postDelayed(
+                () -> fragmentWorkflowBinding.recWorkflows.scrollToPosition(0),
+                500);
     }
 
     private void createFilterListRightDrawer(List<WorkflowTypeMenu> menus) {
@@ -225,6 +251,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             boolean isChecked = fragmentWorkflowBinding.chbxSelectAll.isChecked();
             workflowViewModel.handleCheckboxAllOnClick(isChecked);
         });
+
+        fragmentWorkflowBinding.ivMassActions.setOnClickListener(v -> showMassPopupMenu());
     }
 
     private void showLoading(Boolean show) {
@@ -260,20 +288,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     }
 
     private void subscribe() {
-
-        final Observer<Integer> errorObserver = ((Integer data) -> {
-            //Utils.hideLoading();
-            if (null != data) {
-                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
-            }
-        });
-
         final Observer<Boolean> addWorkflowsObserver = (setWorkflows -> addWorkflowsObserver());
 
         // Used when we have some filter operation happening.
-        final Observer<PagedList<WorkflowListItem>> updateWithSortedListObserver = (list -> {
-            updateAdapterList(list);
-        });
+        final Observer<PagedList<WorkflowListItem>> updateWithSortedListObserver = (this::updateAdapterList);
 
         final Observer<int[]> toggleRadioButtonObserver = (toggle -> {
             if (toggle == null || toggle.length < 1) {
@@ -320,12 +338,13 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         });
 
         // Workflow Fragment's ViewModel
-        workflowViewModel.getObservableError().observe(this, errorObserver);
+        workflowViewModel.getObservableError().observe(this, this::showToastMessage);
         workflowViewModel.getObservableShowLoading().observe(this, showLoadingObserver);
         addWorkflowsObserver();
         workflowViewModel.getObservableUpdateWithSortedList()
                 .observe(this, updateWithSortedListObserver);
-        workflowViewModel.getObservableToggleRadioButton().observe(this, toggleRadioButtonObserver);
+        workflowViewModel.getObservableToggleRadioButton()
+                .observe(this, toggleRadioButtonObserver);
         workflowViewModel.getObservableToggleSwitch().observe(this, toggleSwitchObserver);
         workflowViewModel.getObservableShowList().observe(this, showListObserver);
         workflowViewModel.getObservableAddWorkflowObserver().observe(this, aBoolean -> {
@@ -340,8 +359,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.getObservableLoadMore().observe(this, this::showBottomSheetLoading);
         workflowViewModel.clearFilters.observe(this, this::clearFilters);
         subscribeToTypeMenu();
-        workflowViewModel.rightDrawerFilterMenus.observe(this, this::createFilterListRightDrawer);
-        workflowViewModel.rightDrawerOptionMenus.observe(this, this::createOptionListRightDrawer);
+        workflowViewModel.rightDrawerFilterMenus
+                .observe(this, this::createFilterListRightDrawer);
+        workflowViewModel.rightDrawerOptionMenus
+                .observe(this, this::createOptionListRightDrawer);
         workflowViewModel.invalidateDrawerOptionsList
                 .observe(this, this::handleInvalidateOptionsList);
         workflowViewModel.messageMainToggleRadioButton
@@ -350,13 +371,18 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .observe(this, this::handleMessageMainToggleSwitch);
         workflowViewModel.messageMainUpdateSortSelection
                 .observe(this, this::handleMessageMainUpdateSortSelection);
-        workflowViewModel.messageMainBaseFilters.observe(this, this::handleMessageMainBaseFilters);
+        workflowViewModel.messageMainBaseFilters
+                .observe(this, this::handleMessageMainBaseFilters);
         workflowViewModel.messageMainBaseFilterSelectionToFilterList
                 .observe(this, this::handleMessageMainBaseFilterSelected);
         workflowViewModel.getObservableShowAddButton()
                 .observe(this, this::showAddButton);
         workflowViewModel.getObservableShowViewWorkflowButton()
                 .observe(this, this::showViewWorkflowDetailsButton);
+        workflowViewModel.getObservableCompleteMassAction()
+                .observe(this, this::handleCompleteMassAction);
+        workflowViewModel.getObservableHandleScrollRecyclerToTop()
+                .observe(this, this::scrollRecyclerToTop);
 
         // MainActivity's ViewModel
         mainViewModel.messageContainerToWorkflowList
@@ -457,7 +483,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         }
 
         LayoutInflater inflater = LayoutInflater.from(getContext());
-        WorkflowTypeSpinnerAdapter adapter = new WorkflowTypeSpinnerAdapter(inflater, itemMenus);
+        WorkflowTypeSpinnerAdapter adapter = new WorkflowTypeSpinnerAdapter(inflater,
+                itemMenus);
 
         workflowFiltersMenuBinding.spnWorkflowtype
                 .setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -496,7 +523,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         }
         workflowFiltersMenuBinding.swchMyworkflows.setChecked(false);
         workflowFiltersMenuBinding.swchStatus.setChecked(true);
-        workflowFiltersMenuBinding.spnWorkflowtype.setSelection(WorkflowViewModel.NO_TYPE_SELECTED);
+        workflowFiltersMenuBinding.spnWorkflowtype
+                .setSelection(WorkflowViewModel.NO_TYPE_SELECTED);
     }
 
     private void toggleAscendingDescendingSwitch(int switchType, boolean check) {
@@ -508,11 +536,13 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 break;
             case SWITCH_CREATED_DATE:
                 workflowFiltersMenuBinding.swchCreatedate.setChecked(check);
-                setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchCreatedate, check);
+                setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchCreatedate,
+                        check);
                 break;
             case SWITCH_UPDATED_DATE:
                 workflowFiltersMenuBinding.swchUpdatedate.setChecked(check);
-                setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchUpdatedate, check);
+                setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchUpdatedate,
+                        check);
                 break;
             default:
                 Log.d(TAG,
@@ -572,5 +602,90 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     @UiThread
     private void showViewWorkflowDetailsButton(boolean show) {
         adapter.setShowViewWorkflowButton(show);
+    }
+
+    private void showMassPopupMenu() {
+        PopupMenu popup = new PopupMenu(getContext(), fragmentWorkflowBinding.ivMassActions);
+        //Inflating the Popup using xml file
+        popup.getMenuInflater().inflate(R.menu.menu_workflow_list, popup.getMenu());
+
+        popup.setOnMenuItemClickListener(item -> {
+            List<Integer> checkedList = adapter.getCheckedIds();
+            if (checkedList.isEmpty()) showToastMessage(R.string.workflow_list_no_selections);
+
+            switch (item.getItemId()) {
+                case R.id.disable:
+                    workflowViewModel.enableDisableWorkflows(checkedList, false);
+                    break;
+                case R.id.close:
+                    workflowViewModel.openCloseWorkflows(checkedList, false);
+                    break;
+                case R.id.delete:
+                    showDeleteConfirmationDialog(checkedList);
+                    break;
+            }
+
+            return false;
+        });
+
+        popup.show();
+    }
+
+    private void showDeleteConfirmationDialog(List<Integer> checkedList) {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getContext(),
+                R.style.AlertDialogTheme);
+
+        int titleResId;
+        int messageResId;
+        //check for plurals
+        if (checkedList.size() > 1) {
+            titleResId = R.string.workflow_list_delete_dialog_title;
+            messageResId = R.string.workflow_list_delete_dialog_msg;
+        } else {
+            titleResId = R.string.workflow_detail_activity_delete_dialog_title;
+            messageResId = R.string.workflow_detail_activity_delete_dialog_msg;
+        }
+
+        builder.setTitle(titleResId);
+
+        final String separator = ", ";
+        StringBuilder stringBuilder = new StringBuilder();
+        adapter.getCheckedNames().forEach(s -> {
+            stringBuilder.append(s);
+            stringBuilder.append(separator);
+        });
+        stringBuilder
+                .delete(stringBuilder.length() - separator.length(), stringBuilder.length());
+        String workflowsString = stringBuilder.toString();
+
+        builder.setMessage(getString(
+                messageResId,
+                workflowsString
+        ));
+        builder.setCancelable(false);
+
+        builder.setPositiveButton(R.string.accept,
+                (dialog, which) -> workflowViewModel.deleteWorkflows(checkedList));
+        builder.setNegativeButton(R.string.cancel, null);
+        builder.show();
+    }
+
+    @UiThread
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                getContext(),
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
+    }
+
+    @UiThread
+    private void handleCompleteMassAction(boolean refresh) {
+        if (!refresh) return;
+
+        SharedPreferences prefs = getContext()
+                .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+
+        workflowViewModel.initWorkflowList(prefs, this);
     }
 }

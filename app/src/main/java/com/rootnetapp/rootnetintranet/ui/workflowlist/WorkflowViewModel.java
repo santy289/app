@@ -8,6 +8,7 @@ import android.util.Log;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -16,6 +17,9 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.Wo
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
+import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.DeleteWorkflowResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.PostDeleteWorkflows;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListInfo;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
@@ -66,6 +70,7 @@ public class WorkflowViewModel extends ViewModel {
 
     public static final int NO_TYPE_SELECTED = 0;
     public static final int WORKFLOW_TYPE_FIELD = -98;
+    public static final int REQUEST_WORKFLOW_DETAIL = 26;
 
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
@@ -79,6 +84,8 @@ public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<Boolean> setAllCheckboxesList;
     private MutableLiveData<Boolean> showAddButtonLiveData;
     private MutableLiveData<Boolean> showViewWorkflowButtonLiveData;
+    private MutableLiveData<Boolean> completeMassAction;
+    private MutableLiveData<Boolean> handleScrollRecyclerToTop;
     public MutableLiveData<Boolean> showBottomSheetLoading;
     protected MutableLiveData<Boolean> clearFilters;
     private LiveData<PagedList<WorkflowListItem>> liveWorkflows;
@@ -118,6 +125,8 @@ public class WorkflowViewModel extends ViewModel {
     private List<ListItem> categoryList;
     private static final String TAG = "WorkflowViewModel";
     private boolean hasViewDetailsPermissions;
+    private List<Integer> mWorkflowIdsToDelete;
+    private Boolean isSwipe;
 
     public WorkflowViewModel(WorkflowRepository workflowRepository) {
         this.workflowRepository = workflowRepository;
@@ -201,10 +210,16 @@ public class WorkflowViewModel extends ViewModel {
         workflowRepository.insertWorkflow(workflow);
     }
 
+    protected void resetGetAllWorkflows(boolean isSwipe){
+        this.isSwipe = isSwipe;
+        if (!isSwipe) showLoading.setValue(true);
+        workflowRepository.getAllWorkflowsDb(token);
+    }
+
     protected void initWorkflowList(SharedPreferences sharedPreferences,
                                     LifecycleOwner lifecycleOwner) {
         if (!TextUtils.isEmpty(token)) {
-            showLoading.setValue(true);
+//            showLoading.setValue(true);
             int baseFilterId = filterSettings.getBaseFilterSelectedId();
             loadWorkflowsByBaseFilters(baseFilterId, filterSettings, lifecycleOwner);
             return;
@@ -1033,18 +1048,36 @@ public class WorkflowViewModel extends ViewModel {
             applyFilters(filterSettings);
         });
 
-        final Observer<Boolean> handleRestSuccessWithNoApplyFilter = (success -> {
-            showLoading.postValue(false);
-        });
+        final Observer<Boolean> handleRestSuccessWithNoApplyFilter = (success -> showLoading.postValue(false));
 
+        final Observer<Boolean> handleDeleteWorkflows = (success -> completeMassAction.setValue(success));
+
+        final Observer<Boolean> handleRefreshWorkflows = (success -> completeMassAction.setValue(success));
+
+        workflowRepository.getObservableHandleRepoError().removeObservers(lifecycleOwner);
         workflowRepository.getObservableHandleRepoError()
                 .observe(lifecycleOwner, handleRepoErrorObserver);
+
+        workflowRepository.getObservableHandleRepoSuccess().removeObservers(lifecycleOwner);
         workflowRepository.getObservableHandleRepoSuccess()
                 .observe(lifecycleOwner, handleRepoSuccessObserver);
+
+        workflowRepository.getObservableHandleRepoSuccessNoFilter().removeObservers(lifecycleOwner);
         workflowRepository.getObservableHandleRepoSuccessNoFilter()
                 .observe(lifecycleOwner, handleRepoSuccessNoFilterObserver);
+
+        workflowRepository.getObservableHandleRestSuccessWithNoApplyFilter()
+                .removeObservers(lifecycleOwner);
         workflowRepository.getObservableHandleRestSuccessWithNoApplyFilter()
                 .observe(lifecycleOwner, handleRestSuccessWithNoApplyFilter);
+
+        workflowRepository.getObservableHandleDeleteWorkflows().removeObservers(lifecycleOwner);
+        workflowRepository.getObservableHandleDeleteWorkflows()
+                .observe(lifecycleOwner, handleDeleteWorkflows);
+
+        workflowRepository.getObservableHandleGetAllWorkflows().removeObservers(lifecycleOwner);
+        workflowRepository.getObservableHandleGetAllWorkflows()
+                .observe(lifecycleOwner, handleRefreshWorkflows);
     }
 
     protected LiveData<Boolean> getObservableLoadMore() {
@@ -1457,6 +1490,11 @@ public class WorkflowViewModel extends ViewModel {
             return;
         }
         updateWithSortedList.setValue(listWorkflows);
+        if (isSwipe != null && isSwipe) {
+            //only scroll to top if it was a swipe refresh
+            handleScrollRecyclerToTop.setValue(true);
+            isSwipe = null; //clear value
+        }
         showList.setValue(true);
     }
 
@@ -1498,6 +1536,79 @@ public class WorkflowViewModel extends ViewModel {
         toggleSwitch[INDEX_TYPE] = viewSwitchType;
         toggleSwitch[INDEX_CHECK] = viewIsCheckType;
         messageMainToggleSwitch.setValue(toggleSwitch);
+    }
+
+    protected void openCloseWorkflows(List<Integer> workflowIds, boolean open) {
+        showLoading.setValue(true);
+        Disposable disposable = workflowRepository
+                .postOpenCloseActivation(token, workflowIds, open)
+                .subscribe(this::onOpenCloseWorkflowsSuccess, this::onFailure);
+
+        disposables.add(disposable);
+    }
+
+    private void onOpenCloseWorkflowsSuccess(
+            WorkflowActivationResponse workflowActivationResponse) {
+        if (workflowActivationResponse.getData() == null
+                || workflowActivationResponse.getData().isEmpty()) {
+            completeMassAction.setValue(true);
+            return;
+        }
+
+        workflowRepository.deleteWorkflowsLocal(workflowActivationResponse.getData().get(0));
+    }
+
+    protected void enableDisableWorkflows(List<Integer> workflowIds, boolean enable) {
+        showLoading.setValue(true);
+        Disposable disposable = workflowRepository
+                .postEnableDisableActivation(token, workflowIds, enable)
+                .subscribe(this::onEnableDisableWorkflowsSuccess, this::onFailure);
+
+        disposables.add(disposable);
+    }
+
+    private void onEnableDisableWorkflowsSuccess(
+            WorkflowActivationResponse workflowActivationResponse) {
+        if (workflowActivationResponse.getData() == null
+                || workflowActivationResponse.getData().isEmpty()) {
+            completeMassAction.setValue(true);
+            return;
+        }
+
+        workflowRepository.deleteWorkflowsLocal(workflowActivationResponse.getData().get(0));
+    }
+
+    protected void deleteWorkflows(List<Integer> workflowIds) {
+        if (workflowIds.isEmpty()) return;
+
+        mWorkflowIdsToDelete = workflowIds;
+
+        PostDeleteWorkflows postDeleteWorkflows = new PostDeleteWorkflows();
+        postDeleteWorkflows.setWorkflowsArray(workflowIds);
+
+        showLoading.setValue(true);
+        Disposable disposable = workflowRepository
+                .postDeleteWorkflows(token, workflowIds.get(0), postDeleteWorkflows)
+                .subscribe(this::onDeleteWorkflowsSuccess, this::onFailure);
+
+        disposables.add(disposable);
+    }
+
+    private void onDeleteWorkflowsSuccess(DeleteWorkflowResponse deleteWorkflowResponse) {
+        if (deleteWorkflowResponse.getCode() != 200 || mWorkflowIdsToDelete == null
+                || mWorkflowIdsToDelete.isEmpty()) {
+            completeMassAction.setValue(true);
+            return;
+        }
+
+        workflowRepository.deleteWorkflowsLocalByIds(mWorkflowIdsToDelete);
+        mWorkflowIdsToDelete = null;
+    }
+
+    private void onFailure(Throwable throwable) {
+        Log.d(TAG, "onFailure: " + throwable.getMessage());
+        showLoading.setValue(false);
+        mErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
     }
 
     protected LiveData<Integer> getObservableError() {
@@ -1586,6 +1697,20 @@ public class WorkflowViewModel extends ViewModel {
             setSelectType = new MutableLiveData<>();
         }
         return setSelectType;
+    }
+
+    protected LiveData<Boolean> getObservableCompleteMassAction() {
+        if (completeMassAction == null) {
+            completeMassAction = new MutableLiveData<>();
+        }
+        return completeMassAction;
+    }
+
+    protected LiveData<Boolean> getObservableHandleScrollRecyclerToTop() {
+        if (handleScrollRecyclerToTop == null) {
+            handleScrollRecyclerToTop = new MutableLiveData<>();
+        }
+        return handleScrollRecyclerToTop;
     }
 
 }

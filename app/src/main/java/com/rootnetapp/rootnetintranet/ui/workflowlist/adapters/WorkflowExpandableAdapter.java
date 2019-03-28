@@ -12,6 +12,9 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.databinding.WorkflowItemBinding;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragmentInterface;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,9 +23,12 @@ import androidx.paging.PagedList;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 
-public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem, WorkflowViewholder> {
+public class WorkflowExpandableAdapter extends
+        PagedListAdapter<WorkflowListItem, WorkflowViewholder> {
+
     private ArrayMap<Integer, Boolean> expandedItems;
     private ArrayMap<Integer, Boolean> checkedItems;
+    private ArrayMap<String, Boolean> checkedItemsNames;
 
     private final int VIEW_ITEM = 1;
     private final int VIEW_PROG = 0;
@@ -35,10 +41,38 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
         this.anInterface = anInterface;
         this.expandedItems = new ArrayMap<>();
         this.checkedItems = new ArrayMap<>();
+        this.checkedItemsNames = new ArrayMap<>();
     }
 
-    public void setShowViewWorkflowButton(boolean showViewWorkflowButton){
+    public void setShowViewWorkflowButton(boolean showViewWorkflowButton) {
         this.showViewWorkflowButton = showViewWorkflowButton;
+    }
+
+    public List<Integer> getCheckedIds() {
+        List<Integer> checkedList = new ArrayList<>();
+
+        for (int key : checkedItems.keySet()) {
+            Boolean isChecked = checkedItems.get(key);
+            if (isChecked != null && isChecked) checkedList.add(key);
+        }
+
+        return checkedList;
+    }
+
+    public List<String> getCheckedNames() {
+        List<String> checkedList = new ArrayList<>();
+
+        for (String key : checkedItemsNames.keySet()) {
+            Boolean isChecked = checkedItemsNames.get(key);
+            if (isChecked != null && isChecked) checkedList.add(key);
+        }
+
+        return checkedList;
+    }
+
+    public void clearCheckedItems() {
+        this.checkedItems = new ArrayMap<>();
+        this.checkedItemsNames = new ArrayMap<>();
     }
 
     private static final DiffUtil.ItemCallback<WorkflowListItem> DIFF_CALLBACK =
@@ -48,6 +82,7 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
                         @NonNull WorkflowListItem oldUser, @NonNull WorkflowListItem newUser) {
                     return oldUser.getWorkflowId() == newUser.getWorkflowId();
                 }
+
                 @Override
                 public boolean areContentsTheSame(
                         @NonNull WorkflowListItem oldUser, @NonNull WorkflowListItem newUser) {
@@ -92,7 +127,6 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
             anInterface.showDetail(selectedItem);
         });
 
-
         //Details
         holder.binding.tvWorkflowtype.setText(item.getWorkflowTypeName());
 
@@ -100,7 +134,7 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
         if (!TextUtils.isEmpty(fullName)) {
             holder.binding.tvOwner.setText(fullName);
         }
-        if(item.getCurrentStatusName() != null){
+        if (item.getCurrentStatusName() != null) {
             holder.binding.tvActualstate.setText(item.getCurrentStatusName());
         }
         Context context = holder.binding.tvStatus.getContext();
@@ -142,10 +176,13 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
             WorkflowListItem checkedItem = getItem(positionChecked);
             if (checkedItem != null) {
                 int checkedItemId = checkedItem.getWorkflowId();
-                if(!checkedItems.containsKey(checkedItemId)) {
+                String checkedItemTitle = checkedItem.getTitle();
+                if (!checkedItems.containsKey(checkedItemId)) {
                     checkedItems.put(checkedItemId, true);
+                    checkedItemsNames.put(checkedItemTitle, true);
                 } else {
                     checkedItems.put(checkedItemId, b);
+                    checkedItemsNames.put(checkedItemTitle, b);
                 }
             }
         });
@@ -177,8 +214,9 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
         Boolean hasValue = expandedItems.containsKey(workflowId);
         if (!hasValue) {
             holder.binding.btnArrow.setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
-            holder.binding.btnArrow.setColorFilter(ContextCompat.getColor(context, R.color.transparentArrow),
-                    android.graphics.PorterDuff.Mode.SRC_IN);
+            holder.binding.btnArrow
+                    .setColorFilter(ContextCompat.getColor(context, R.color.transparentArrow),
+                            android.graphics.PorterDuff.Mode.SRC_IN);
             holder.binding.layoutDetails.setVisibility(View.GONE);
             return;
         }
@@ -189,15 +227,15 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
             holder.binding.btnArrow.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
             holder.binding.btnArrow.setColorFilter(ContextCompat.getColor(context, R.color.arrow),
                     android.graphics.PorterDuff.Mode.SRC_IN);
-                    holder.binding.layoutDetails.setVisibility(View.VISIBLE);
+            holder.binding.layoutDetails.setVisibility(View.VISIBLE);
         } else {
             holder.binding.btnArrow.setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
-            holder.binding.btnArrow.setColorFilter(ContextCompat.getColor(context, R.color.transparentArrow),
-                    android.graphics.PorterDuff.Mode.SRC_IN);
+            holder.binding.btnArrow
+                    .setColorFilter(ContextCompat.getColor(context, R.color.transparentArrow),
+                            android.graphics.PorterDuff.Mode.SRC_IN);
             holder.binding.layoutDetails.setVisibility(View.GONE);
         }
     }
-
 
     @Override
     public void submitList(@Nullable PagedList<WorkflowListItem> list) {
@@ -212,6 +250,7 @@ public class WorkflowExpandableAdapter extends PagedListAdapter<WorkflowListItem
                 continue;
             }
             checkedItems.put(item.getWorkflowId(), isCheck);
+            checkedItemsNames.put(item.getTitle(), isCheck);
         }
         notifyDataSetChanged();
     }

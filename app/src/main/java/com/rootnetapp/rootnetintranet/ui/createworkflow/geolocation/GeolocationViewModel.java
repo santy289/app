@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation;
 
 import android.content.pm.PackageManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -44,7 +45,7 @@ public class GeolocationViewModel extends ViewModel {
     private MutableLiveData<String> mSelectedAddressLiveData;
     private MutableLiveData<SelectedLocation> mConfirmLocationLiveData;
     private MutableLiveData<List<Prediction>> mPredictionsLiveData;
-    private MutableLiveData<Place> mPlaceDetailsLiveData;
+    private MutableLiveData<LatLng> mMoveMapLiveData;
     private MutableLiveData<Boolean> mHideSuggestionsLiveData;
     private MutableLiveData<Boolean> mShowNoConnectionViewLiveData;
 
@@ -57,6 +58,7 @@ public class GeolocationViewModel extends ViewModel {
     private boolean isSearchingForPlace;
     private boolean isConfirmQueued;
     private String mSearchQuery;
+    private boolean isNearbySearch;
 
     protected GeolocationViewModel(GeolocationRepository repository) {
         this.mRepository = repository;
@@ -169,16 +171,13 @@ public class GeolocationViewModel extends ViewModel {
 
     private void onSuccessNearbyPlaces(NearbySearchResponse nearbySearchResponse) {
         mShowLoadingLiveData.setValue(false);
-        isSearchingForPlace = false;
-
         if (nearbySearchResponse.getPlaces().isEmpty()) return;
 
         Place first = nearbySearchResponse.getPlaces().get(0);
-        setSelectedAddress(first.getName());
 
-        if (isConfirmQueued) {
-            confirmLocation();
-        }
+        //retrieve full address
+        isNearbySearch = true;
+        getPlaceDetails(first.getPlaceId());
     }
 
     private void onFailureNearbyPlaces(Throwable throwable) {
@@ -238,7 +237,9 @@ public class GeolocationViewModel extends ViewModel {
      * @param placeId {@link Place#id}.
      */
     protected void getPlaceDetails(String placeId) {
-        mShowLoadingLiveData.setValue(true);
+        if (!isNearbySearch) {
+            mShowLoadingLiveData.setValue(true);
+        }
 
         Disposable disposable = mRepository.getPlaceDetails(mApiKey, placeId)
                 .subscribe(this::onSuccessPlaceDetails, this::onFailurePlaceDetails);
@@ -247,11 +248,35 @@ public class GeolocationViewModel extends ViewModel {
     }
 
     private void onSuccessPlaceDetails(PlaceDetailsResponse placeDetailsResponse) {
+        isSearchingForPlace = false;
+
         mShowLoadingLiveData.setValue(false);
         mHideSuggestionsLiveData.setValue(true);
         mShowNoConnectionViewLiveData.setValue(false);
 
-        mPlaceDetailsLiveData.setValue(placeDetailsResponse.getPlace());
+        Place place = placeDetailsResponse.getPlace();
+        String address = place.getName();
+        if (!TextUtils.isEmpty(place.getFormattedAddress())) {
+            address += ", " + place.getFormattedAddress();
+        }
+        setSelectedAddress(address);
+
+        if (isNearbySearch) {
+            isNearbySearch = false;
+
+            if (isConfirmQueued) {
+                confirmLocation();
+            }
+            return;
+        }
+
+        LatLng latLng = new LatLng(
+                place.getGeometry().getLocation().getLat(),
+                place.getGeometry().getLocation().getLng()
+        );
+        mMoveMapLiveData.setValue(latLng);
+
+        setSelectedLocation(latLng, false);
     }
 
     private void onFailurePlaceDetails(Throwable throwable) {
@@ -312,11 +337,11 @@ public class GeolocationViewModel extends ViewModel {
         return mPredictionsLiveData;
     }
 
-    protected LiveData<Place> getObservablePlaceDetails() {
-        if (mPlaceDetailsLiveData == null) {
-            mPlaceDetailsLiveData = new MutableLiveData<>();
+    protected LiveData<LatLng> getObservableMoveMap() {
+        if (mMoveMapLiveData == null) {
+            mMoveMapLiveData = new MutableLiveData<>();
         }
-        return mPlaceDetailsLiveData;
+        return mMoveMapLiveData;
     }
 
     protected LiveData<Boolean> getObservableHideSuggestions() {

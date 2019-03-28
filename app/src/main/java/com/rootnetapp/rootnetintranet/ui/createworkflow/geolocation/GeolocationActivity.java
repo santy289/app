@@ -9,6 +9,8 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -28,7 +30,6 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ActivityGeolocationBinding;
 import com.rootnetapp.rootnetintranet.models.responses.googlemaps.autocomplete.Prediction;
-import com.rootnetapp.rootnetintranet.models.responses.googlemaps.nearbysearch.Place;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.adapter.SuggestionsAdapter;
 
@@ -93,7 +94,7 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
         viewModel.getObservableSelectedAddress().observe(this, this::updateSelectedAddressUi);
         viewModel.getObservableConfirmLocation().observe(this, this::returnLocation);
         viewModel.getObservablePredictions().observe(this, this::updateSuggestionsData);
-        viewModel.getObservablePlaceDetails().observe(this, this::handlePlaceDetails);
+        viewModel.getObservableMoveMap().observe(this, this::moveMap);
         viewModel.getObservableHideSuggestions().observe(this, this::hideSuggestions);
         viewModel.getObservableShowNoConnectionView().observe(this, this::showNoConnectionView);
     }
@@ -107,22 +108,27 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
     private void setupInputSearch() {
         mTextWatcher = new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
 
-            }
+            private Handler handler = new Handler(Looper.getMainLooper());
+            private Runnable workRunnable;
+            private final int DELAY = 500;
 
             @Override
             public void afterTextChanged(Editable s) {
-                //only perform the search if on user input
-                if (mBinding.etSearch.hasFocus()) {
-                    String input = String.valueOf(s);
-                    viewModel.setSearchQuery(input);
-                }
+                //wait until the user is done typing
+                handler.removeCallbacks(workRunnable);
+                workRunnable = () -> {
+                    //only perform the search if on user input
+                    if (mBinding.etSearch.hasFocus()) {
+                        String input = String.valueOf(s);
+                        viewModel.setSearchQuery(input);
+                    }
+                };
+                handler.postDelayed(workRunnable, DELAY);
             }
         };
 
@@ -433,23 +439,6 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
         mBinding.etSearch.clearFocus();
 
         viewModel.getPlaceDetails(prediction.getPlaceId());
-    }
-
-    /**
-     * Moves the camera to the selected location and save the data into the ViewModel
-     *
-     * @param place selected location from autocomplete.
-     */
-    @UiThread
-    private void handlePlaceDetails(Place place) {
-        LatLng latLng = new LatLng(
-                place.getGeometry().getLocation().getLat(),
-                place.getGeometry().getLocation().getLng()
-        );
-        moveMap(latLng);
-
-        viewModel.setSelectedLocation(latLng, false);
-        viewModel.setSelectedAddress(place.getName());
     }
 
     /**

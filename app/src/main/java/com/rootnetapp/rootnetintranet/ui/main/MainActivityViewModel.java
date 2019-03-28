@@ -129,7 +129,7 @@ public class MainActivityViewModel extends ViewModel {
             JsonAdapter<ClientResponse> jsonAdapter = moshi.adapter(ClientResponse.class);
             ClientResponse domain;
             domain = jsonAdapter.fromJson(json);
-            Utils.domain = "https://" + domain.getClient().getApiUrl();
+            Utils.domain = Utils.WEB_PROTOCOL + domain.getClient().getApiUrl();
             Utils.setImgDomain(domain.getClient().getApiUrl());
             String[] content = new String[2];
             content[0] = MainActivityViewModel.IMG_LOGO;

@@ -438,7 +438,7 @@ public class WorkflowDetailViewModel extends ViewModel {
         try {
             domain = jsonAdapter.fromJson(domainJson);
 
-            String workflowUrl = "https://" + domain.getClient().getDomain()
+            String workflowUrl = Utils.WEB_PROTOCOL + domain.getClient().getDomain()
                     + "/Intranet/workflow/" + mWorkflowListItem.getWorkflowId();
             String shareText = String.format(
                     Locale.US,

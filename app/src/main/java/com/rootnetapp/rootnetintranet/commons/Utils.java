@@ -54,6 +54,7 @@ public class Utils {
     public static final String remainderOfDomain = ".rootnetapp.com";
 
     public static String domain;
+    public static final String WEB_PROTOCOL = "http://";
 
     public static final String SERVER_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
     public static final String SERVER_DATE_FORMAT_NO_TIMEZONE = "yyyy-MM-dd'T'HH:mm:ss";
@@ -80,7 +81,7 @@ public class Utils {
 
     public static void setImgDomain(String newImgDomain) {
         if (TextUtils.isEmpty(Utils.imgDomain)) {
-            Utils.imgDomain = "http://" + newImgDomain;
+            Utils.imgDomain = Utils.WEB_PROTOCOL + newImgDomain;
             Utils.imgDomain = Utils.imgDomain.replace("v1/", "");
         }
     }

@@ -2148,8 +2148,8 @@ class CreateWorkflowViewModel extends ViewModel {
                             .setTag(TAG_OWNER)
                             .setOptions(userOptions)
                             .setValue(selection)
-                            //enable only if the user has permissions and it's not edit mode
-                            .setEnabled(hasEditPermissions && mWorkflow == null)
+                            //enable only if the user has permissions
+                            .setEnabled(hasEditPermissions)
                             .setMachineName(MACHINE_NAME_OWNER)
                             .build();
 

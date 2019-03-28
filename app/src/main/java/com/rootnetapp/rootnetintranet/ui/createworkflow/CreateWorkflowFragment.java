@@ -149,6 +149,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
             Log.e(TAG, "Problems getting the client domain: " + e.getMessage());
         }
 
+        setupTitle();
         setupSubmitButton();
         setOnClickListeners();
         setupFormRecycler();
@@ -196,6 +197,11 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
                 .observe(getViewLifecycleOwner(), this::setAutocompleteSuggestions);
         viewModel.getObservableShowAutocompleteNoConnection()
                 .observe(getViewLifecycleOwner(), this::showAutocompleteNoConnectionView);
+    }
+
+    private void setupTitle() {
+        mBinding.tvTitle.setText(
+                mWorkflowListItem == null ? R.string.create_workflow : R.string.edit_workflow);
     }
 
     private void setupSubmitButton() {

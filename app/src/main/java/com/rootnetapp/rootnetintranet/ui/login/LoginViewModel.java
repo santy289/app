@@ -58,7 +58,7 @@ public class LoginViewModel extends ViewModel {
                 Utils.setImgDomain(domain.getClient().getApiUrl());
                 showLogo.setValue(domain.getClient().getLogoUrl());
                 String newApiUrl = domain.getClient().getApiUrl();
-                Utils.domain = Utils.WEB_PROTOCOL + newApiUrl;
+                Utils.domain = Utils.getWebProtocol(newApiUrl) + newApiUrl;
                 RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
             } catch (IOException e) {
                 e.printStackTrace();

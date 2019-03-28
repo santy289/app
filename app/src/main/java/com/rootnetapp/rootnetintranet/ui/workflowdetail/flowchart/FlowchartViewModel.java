@@ -51,7 +51,7 @@ public class FlowchartViewModel extends ViewModel {
         try {
             domain = jsonAdapter.fromJson(json);
 
-            String url = Utils.WEB_PROTOCOL + domain.getClient().getDomain()
+            String url = Utils.getWebProtocol(domain.getClient().getDomain()) + domain.getClient().getDomain()
                     + "/Intranet/workflow/tree/" + workflow.getWorkflowId();
 
             WebViewData data = new WebViewData(url, getLocalStorageItemScripts());

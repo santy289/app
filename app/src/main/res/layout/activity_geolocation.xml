@@ -1,117 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:focusableInTouchMode="true"
         tools:context=".ui.quickactions.QuickActionsActivity">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:context=".ui.createworkflow.geolocation.GeolocationActivity" />
 
-            <fragment
-                android:id="@+id/map"
-                android:name="com.google.android.gms.maps.SupportMapFragment"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:context=".ui.createworkflow.geolocation.GeolocationActivity" />
+        <ImageView
+            android:id="@+id/iv_center_marker"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginBottom="36dp"
+            android:src="@drawable/ic_location_pin_black_36dp"
+            android:tint="@color/dark_blue"
+            app:layout_constraintBottom_toBottomOf="@id/map"
+            app:layout_constraintEnd_toEndOf="@id/map"
+            app:layout_constraintStart_toStartOf="@id/map"
+            app:layout_constraintTop_toTopOf="@id/map" />
 
-            <ImageView
-                android:id="@+id/iv_center_marker"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_marginBottom="36dp"
-                android:src="@drawable/ic_location_pin_black_36dp"
-                android:tint="@color/dark_blue"
-                app:layout_constraintBottom_toBottomOf="@id/map"
-                app:layout_constraintEnd_toEndOf="@id/map"
-                app:layout_constraintStart_toStartOf="@id/map"
-                app:layout_constraintTop_toTopOf="@id/map" />
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/et_search"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="30dp"
+            android:background="@drawable/edit_text_bg"
+            android:hint="@string/search"
+            android:maxLines="3"
+            android:paddingStart="10dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="10dp"
+            android:textSize="15sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.appcompat.widget.AppCompatEditText
-                android:id="@+id/et_search"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                android:layout_marginTop="30dp"
-                android:layout_marginEnd="30dp"
-                android:background="@drawable/edit_text_bg"
-                android:hint="@string/search"
-                android:maxLines="3"
-                android:paddingStart="10dp"
-                android:paddingTop="10dp"
-                android:paddingEnd="10dp"
-                android:paddingBottom="10dp"
-                android:textSize="15sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_suggestions"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/spinner_bg_white"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@id/et_search"
+            app:layout_constraintHeight_max="200dp"
+            app:layout_constraintStart_toStartOf="@id/et_search"
+            app:layout_constraintTop_toBottomOf="@id/et_search"
+            tools:visibility="visible" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_suggestions"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:background="@drawable/spinner_bg_white"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="@id/et_search"
-                app:layout_constraintHeight_max="200dp"
-                app:layout_constraintStart_toStartOf="@id/et_search"
-                app:layout_constraintTop_toBottomOf="@id/et_search"
-                tools:visibility="visible" />
+        <include
+            android:id="@+id/include_no_connection_view"
+            layout="@layout/no_connection_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="@id/et_search"
+            app:layout_constraintHeight_max="200dp"
+            app:layout_constraintStart_toStartOf="@id/et_search"
+            app:layout_constraintTop_toBottomOf="@id/et_search" />
 
-            <include
-                android:id="@+id/include_no_connection_view"
-                layout="@layout/no_connection_view"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="@id/et_search"
-                app:layout_constraintHeight_max="200dp"
-                app:layout_constraintStart_toStartOf="@id/et_search"
-                app:layout_constraintTop_toBottomOf="@id/et_search" />
+        <Button
+            android:id="@+id/btn_confirm"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="24dp"
+            android:ellipsize="end"
+            android:enabled="false"
+            android:maxLines="1"
+            android:padding="10dp"
+            android:text="@string/geolocation_activity_confirm_location"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintWidth_default="wrap" />
 
-            <Button
-                android:id="@+id/btn_confirm"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="24dp"
-                android:ellipsize="end"
-                android:enabled="false"
-                android:maxLines="1"
-                android:padding="10dp"
-                android:text="@string/geolocation_activity_confirm_location"
-                android:textColor="@color/white"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintWidth_default="wrap" />
-
-            <Button
-                android:id="@+id/btn_navigate"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="24dp"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:padding="10dp"
-                android:text="@string/geolocation_activity_navigate"
-                android:textColor="@color/white"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintWidth_default="wrap" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+        <Button
+            android:id="@+id/btn_navigate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="24dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:padding="10dp"
+            android:text="@string/geolocation_activity_navigate"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintWidth_default="wrap" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

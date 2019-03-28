@@ -164,7 +164,7 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
 
     @UiThread
     private void hideSearchInput(boolean hide) {
-        mBinding.etSearch.setVisibility(hide ? View.GONE : View.VISIBLE);
+        mBinding.lytSearchInput.setVisibility(hide ? View.GONE : View.VISIBLE);
     }
 
     @UiThread

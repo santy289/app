@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.information;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -21,6 +22,9 @@ import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailInformat
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Step;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.GeolocationActivity;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.GeolocationViewModel;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.SelectedLocation;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.Information;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.InformationAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters.StepsAdapter;
@@ -37,7 +41,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-public class InformationFragment extends Fragment {
+public class InformationFragment extends Fragment implements InformationFragmentInterface {
 
     @Inject
     InformationViewModelFactory informationViewModelFactory;
@@ -118,7 +122,7 @@ public class InformationFragment extends Fragment {
     @UiThread
     private void updateInformationListUi(List<Information> informationList) {
         mBinding.rvInformation.setLayoutManager(new LinearLayoutManager(getContext()));
-        mBinding.rvInformation.setAdapter(new InformationAdapter(informationList));
+        mBinding.rvInformation.setAdapter(new InformationAdapter(this, informationList));
         mBinding.rvInformation.setNestedScrollingEnabled(false);
     }
 
@@ -189,5 +193,14 @@ public class InformationFragment extends Fragment {
     private void showNoConnectionView(boolean show) {
         mBinding.includeNoConnectionView.lytNoConnectionView
                 .setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void showLocation(SelectedLocation selectedLocation) {
+        if (selectedLocation == null) return;
+
+        Intent intent = new Intent(getActivity(), GeolocationActivity.class);
+        intent.putExtra(GeolocationViewModel.EXTRA_SHOW_LOCATION, selectedLocation);
+        startActivity(intent);
     }
 }

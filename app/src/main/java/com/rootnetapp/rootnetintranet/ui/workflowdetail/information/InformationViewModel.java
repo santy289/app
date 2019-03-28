@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.information;
 
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -9,7 +10,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowUser;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
-import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
+import com.rootnetapp.rootnetintranet.models.createworkflow.geolocation.GeolocationMetaData;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
@@ -18,7 +19,9 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Step;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.SelectedLocation;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.Information;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.InformationAdapter;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
@@ -70,7 +73,8 @@ public class InformationViewModel extends ViewModel {
         this.formSettings = new FormSettings();
     }
 
-    protected void initDetails(String token, String userId, String userPermissions, WorkflowListItem workflow) {
+    protected void initDetails(String token, String userId, String userPermissions,
+                               WorkflowListItem workflow) {
         this.mToken = token;
         this.mWorkflowListItem = workflow;
         showLoading.setValue(true);
@@ -138,18 +142,13 @@ public class InformationViewModel extends ViewModel {
         }
 
         List<Meta> metaList = workflow.getMetas();
-        Meta meta;
-        WorkflowMetas metaData;
         Moshi moshi = new Moshi.Builder().build();
-        FieldConfig config;
-        TypeInfo typeInfo;
-        String value;
         JsonAdapter<FieldConfig> jsonAdapter = moshi.adapter(FieldConfig.class);
         for (int i = 0; i < metaList.size(); i++) {
-            meta = metaList.get(i);
+            Meta meta = metaList.get(i);
             try {
-                config = jsonAdapter.fromJson(meta.getWorkflowTypeFieldConfig());
-                typeInfo = config.getTypeInfo();
+                FieldConfig config = jsonAdapter.fromJson(meta.getWorkflowTypeFieldConfig());
+                TypeInfo typeInfo = config.getTypeInfo();
                 if (typeInfo == null) {
                     continue;
                 }
@@ -160,11 +159,32 @@ public class InformationViewModel extends ViewModel {
                     continue;
                 }
 
-                informationList.add(info);
+                //for geolocation only, set the view type and the selected location
+                if (typeInfo.getType().equals(FormSettings.TYPE_GEOLOCATION)) {
+                    info.setViewType(InformationAdapter.ViewType.GEOLOCATION);
 
-//                value = (String) meta.getDisplayValue();
-//
-//                infoList.add(new Information(item.getWorkflowTypeFieldName(), value));
+                    JsonAdapter<GeolocationMetaData> geolocationMetaDataJsonAdapter = moshi
+                            .adapter(GeolocationMetaData.class);
+                    GeolocationMetaData geolocationMetaData = geolocationMetaDataJsonAdapter
+                            .fromJson(meta.getValue());
+
+                    if (geolocationMetaData == null
+                            || geolocationMetaData.getValue() == null
+                            || geolocationMetaData.getValue().getLatLng() == null
+                            || geolocationMetaData.getValue().getLatLng().size() < 2) {
+                        return;
+                    }
+
+                    LatLng latLng = new LatLng(geolocationMetaData.getValue().getLatLng().get(0),
+                            geolocationMetaData.getValue().getLatLng().get(1));
+                    String addressName = geolocationMetaData.getValue().getAddress();
+
+                    SelectedLocation selectedLocation = new SelectedLocation(latLng, addressName);
+
+                    info.setSelectedLocation(selectedLocation);
+                }
+
+                informationList.add(info);
 
             } catch (IOException e) {
                 e.printStackTrace();

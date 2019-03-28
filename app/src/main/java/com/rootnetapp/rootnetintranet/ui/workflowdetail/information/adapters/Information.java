@@ -1,27 +1,28 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters;
 
-import androidx.annotation.StringRes;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.SelectedLocation;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Information{
+import javax.annotation.Nullable;
+
+import androidx.annotation.StringRes;
+
+public class Information {
 
     private String title;
-
-    @StringRes
-    private int resTitle;
-
+    private @StringRes int resTitle;
     private String displayValue;
-
-    @StringRes
-    private int resDisplayValue;
-
+    private @StringRes int resDisplayValue;
     private boolean isMultiple;
-
     private List<Integer> listOfResStrings;
-
     private Object unformattedValue;
+    private @InformationAdapter.ViewType int viewType;
+    /**
+     * Only used by {@link InformationAdapter.ViewType#GEOLOCATION}.
+     */
+    private @Nullable SelectedLocation selectedLocation;
 
     public Information() {
         this.title = "";
@@ -105,5 +106,23 @@ public class Information{
 
     public void addResStringToResList(@StringRes int resString) {
         listOfResStrings.add(resString);
+    }
+
+    public int getViewType() {
+        return viewType;
+    }
+
+    public void setViewType(int viewType) {
+        this.viewType = viewType;
+    }
+
+    @Nullable
+    public SelectedLocation getSelectedLocation() {
+        return selectedLocation;
+    }
+
+    public void setSelectedLocation(
+            @Nullable SelectedLocation selectedLocation) {
+        this.selectedLocation = selectedLocation;
     }
 }

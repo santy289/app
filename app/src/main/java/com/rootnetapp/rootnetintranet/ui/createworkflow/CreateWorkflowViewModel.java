@@ -2103,7 +2103,6 @@ class CreateWorkflowViewModel extends ViewModel {
 
     private void onWorkflowTypeSuccess(WorkflowTypeResponse workflowTypeResponse) {
         showPeopleInvolvedFields(workflowTypeResponse.getWorkflowType());
-        fillPeopleInvolvedFields(workflowTypeResponse.getWorkflowType());
     }
 
     /**
@@ -2388,10 +2387,6 @@ class CreateWorkflowViewModel extends ViewModel {
         }
 
         return isValid;
-    }
-
-    private void fillPeopleInvolvedFields(WorkflowTypeDb workflowType) {
-
     }
     //endregion
 

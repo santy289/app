@@ -88,6 +88,8 @@ public class InformationFragment extends Fragment {
         informationViewModel.getObservableError().observe(getViewLifecycleOwner(), this::showToastMessage);
         informationViewModel.getObservableUpdateOwnerUi()
                 .observe(getViewLifecycleOwner(), this::updateOwnerUi);
+        informationViewModel.getObservableShowNoConnectionView()
+                .observe(getViewLifecycleOwner(), this::showNoConnectionView);
 
         informationViewModel.showLoading.observe(getViewLifecycleOwner(), this::showLoading);
         informationViewModel.updateInformationListUi
@@ -109,11 +111,7 @@ public class InformationFragment extends Fragment {
 
     @UiThread
     private void showLoading(boolean show) {
-        if (show) {
-            Utils.showLoading(getContext());
-        } else {
-            Utils.hideLoading();
-        }
+        mBinding.progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     @UiThread
@@ -172,6 +170,10 @@ public class InformationFragment extends Fragment {
         }
 
         mBinding.tvOwnerName.setText(owner.getFullName());
+
+        mBinding.ivOwner.setVisibility(View.VISIBLE);
+        mBinding.tvOwnerName.setVisibility(View.VISIBLE);
+        mBinding.tvOwnerDescription.setVisibility(View.VISIBLE);
     }
 
     @UiThread
@@ -181,5 +183,10 @@ public class InformationFragment extends Fragment {
                 getString(messageRes),
                 Toast.LENGTH_SHORT)
                 .show();
+    }
+
+    @UiThread
+    private void showNoConnectionView(boolean show){
+        mBinding.includeNoConnectionView.lytNoConnectionView.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 }

@@ -46,6 +46,7 @@ public class InformationViewModel extends ViewModel {
 
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<WorkflowUser> mUpdateOwnerUiLiveData;
+    private MutableLiveData<Boolean> mShowNoConnectionViewLiveData;
 
     protected MutableLiveData<Boolean> showLoading;
     protected MutableLiveData<List<Information>> updateInformationListUi;
@@ -72,6 +73,7 @@ public class InformationViewModel extends ViewModel {
     protected void initDetails(String token, String userId, String userPermissions, WorkflowListItem workflow) {
         this.mToken = token;
         this.mWorkflowListItem = workflow;
+        showLoading.setValue(true);
         getWorkflow(mToken, mWorkflowListItem.getWorkflowId());
         checkEditPermissions(userId == null ? 0 : Integer.parseInt(userId), userPermissions);
     }
@@ -246,6 +248,8 @@ public class InformationViewModel extends ViewModel {
 
         updateWorkflowInformation(mWorkflow, currentWorkflowType);
         mUpdateOwnerUiLiveData.setValue(mWorkflow.getAuthor());
+        showLoading.setValue(false);
+        mShowNoConnectionViewLiveData.setValue(false);
     }
 
     /**
@@ -275,6 +279,7 @@ public class InformationViewModel extends ViewModel {
     private void onFailure(Throwable throwable) {
         showLoading.setValue(false);
         mErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+        mShowNoConnectionViewLiveData.setValue(true);
     }
 
     protected LiveData<Integer> getObservableError() {
@@ -289,5 +294,12 @@ public class InformationViewModel extends ViewModel {
             mUpdateOwnerUiLiveData = new MutableLiveData<>();
         }
         return mUpdateOwnerUiLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowNoConnectionView() {
+        if (mShowNoConnectionViewLiveData == null) {
+            mShowNoConnectionViewLiveData = new MutableLiveData<>();
+        }
+        return mShowNoConnectionViewLiveData;
     }
 }

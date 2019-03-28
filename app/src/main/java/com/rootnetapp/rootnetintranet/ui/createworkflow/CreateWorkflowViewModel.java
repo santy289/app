@@ -494,11 +494,13 @@ class CreateWorkflowViewModel extends ViewModel {
      */
     private void showFields(FormSettings formSettings) {
         List<FormFieldsByWorkflowType> fields = formSettings.getFields();
+        List<FormFieldsByWorkflowType> fieldsToBuild = new ArrayList<>();
 
         //used to make sure all fields are created before proceeding
         mFieldCount = fields.size();
         mFieldCompleted = 0;
 
+        //group the fields to build
         for (int i = 0; i < fields.size(); i++) {
             FormFieldsByWorkflowType field = fields.get(i);
             if (!field.isShowForm()) {
@@ -525,8 +527,11 @@ class CreateWorkflowViewModel extends ViewModel {
                 continue;
             }
 
-            buildField(field);
+            fieldsToBuild.add(field);
         }
+
+        //build all of the wanted fields
+        fieldsToBuild.forEach(this::buildField);
 
         mEnableSubmitButtonLiveData.setValue(true);
         showLoading.setValue(false); //the fields will be created on the background

@@ -169,6 +169,7 @@
     <string name="analytics">Analíticas</string>
     <string name="user_analytics">Mis Analíticas</string>
     <string name="company_overview">Informacion de la Compañía</string>
+    <string name="my_pending_workflows_for_approval">Workflows Pendientes de Aprobación</string>
     <string name="date">Fecha</string>
     <string name="title">Título</string>
     <string name="author">Autor</string>
@@ -204,7 +205,7 @@
     <string name="created">Creado</string>
     <string name="workflow_created">El workflow %s ha sido creado.</string>
     <string name="edited">Actualizado</string>
-    <string name="workflow_edit">Has actualizado el workflow:</string>
+    <string name="workflow_edit">El workflow %s ha sido editado.</string>
     <string name="error">Error</string>
     <string name="error_create_workflow">Algo ocurrió al intentar crear el nuevo workflow. Intente de nuevo más tarde.</string>
     <string name="error_edit_workflow">Algo ocurrió al intentar guardar el workflow. Intente de nuevo más tarde.</string>
@@ -213,7 +214,7 @@
     <string name="file_too_big">El archivo es muy grande, límite de 10MB</string>
     <string name="clear_filters">Limpiar Filtros</string>
     <string name="no_category">Sin Categoría</string>
-    <string name="base_filters">Filtros Base</string>
+    <string name="base_filters">Filtros Estándar</string>
     <string name="all">Todos</string>
     <string name="on_time">A Tiempo</string>
     <string name="latest">Últimos</string>
@@ -238,10 +239,14 @@
     <string name="request_successfully">Pedido realizado exitosamente.</string>
     <string name="functionality_not_available">Esta función aún no está disponible.</string>
     <string name="add_file">Añadir Archivo</string>
+    <string name="choose_option">Elegir</string>
     <string name="select_location">Elija una ubicación</string>
     <string name="file_form_item_required_msg">Necesitas añadir un archivo para continuar.</string>
-    <string name="intent_form_item_required_msg">Necesitas completar esto para poder continuar.</string>
+    <string name="intent_form_item_required_msg">Necesitas completar esta sección para poder continuar.</string>
     <string name="geolocation_form_item_required_msg">Necesitas seleccionar una ubicación para poder continuar.</string>
+    <string name="autocomplete_form_item_required_msg">Necesitas seleccionar una opción para poder continuar.</string>
+    <string name="autocomplete_form_item_hint">Empiece a escribir…</string>
+    <string name="autocomplete_form_item_no_results">Ningún registro encontrado.</string>
     <string name="fill_all_form_items">Necesitas llenar todos los elementos requeridos.</string>
     <string name="action">Acción</string>
     <string name="people_involved_action">Configurar</string>
@@ -254,6 +259,9 @@
     <string name="double_multiple_choice_form_item_select_both">Necesitas seleccionar ambos valores para añadir una opción.</string>
     <string name="approvers_involved">Aprobadores Involucrados</string>
     <string name="fragment_create_workflow_no_permissions">No tienes suficientes permisos para crear un workflow.</string>
+    <string name="workflow_list_no_selections">No se han seleccionado workflows.</string>
+    <string name="workflow_list_delete_dialog_title">Eliminar Workflows</string>
+    <string name="workflow_list_delete_dialog_msg">¿Está seguro que desea eliminar los workflows %s?</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Detalles de Workflow</string>

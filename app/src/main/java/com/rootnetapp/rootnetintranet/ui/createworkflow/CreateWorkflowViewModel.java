@@ -28,10 +28,14 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePostDetail;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PhoneFieldData;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostBusinessOpportunity;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostContact;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCurrency;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostPhone;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostSubContact;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ProductFormList;
 import com.rootnetapp.rootnetintranet.models.createworkflow.StatusSpecific;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.AutocompleteFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseOption;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
@@ -51,9 +55,16 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormIt
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem.InputType;
 import com.rootnetapp.rootnetintranet.models.createworkflow.geolocation.GeolocationMetaData;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
+import com.rootnetapp.rootnetintranet.models.responses.business.BusinessOpportunitiesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.business.BusinessOpportunity;
+import com.rootnetapp.rootnetintranet.models.responses.contact.Contact;
+import com.rootnetapp.rootnetintranet.models.responses.contact.ContactsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.contact.SubContact;
+import com.rootnetapp.rootnetintranet.models.responses.contact.SubContactsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
 import com.rootnetapp.rootnetintranet.models.responses.downloadfile.DownloadFileResponse;
+import com.rootnetapp.rootnetintranet.models.responses.project.Project;
 import com.rootnetapp.rootnetintranet.models.responses.role.Role;
 import com.rootnetapp.rootnetintranet.models.responses.services.Service;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
@@ -65,6 +76,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.dialog.DialogMessage;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.GeolocationViewModel;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.SelectedLocation;
@@ -79,6 +91,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -101,6 +114,9 @@ import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WOR
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_OWNER;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_STATUS;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_TYPE;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_ACCOUNT;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_BUSINESS_OPPORTUNITY;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_CONTACT;
 
 class CreateWorkflowViewModel extends ViewModel {
 
@@ -137,6 +153,8 @@ class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<Boolean> mShowNoPermissionsViewLiveData;
     private MutableLiveData<Boolean> mShowFieldsRecyclerLiveData;
     private MutableLiveData<Boolean> mShowSubmitButtonLiveData;
+    private MutableLiveData<AutocompleteFormItem> mSetAutocompleteSuggestionsLiveData;
+    private MutableLiveData<Boolean> mShowAutocompleteNoConnectionLiveData;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
@@ -147,6 +165,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private FormSettings formSettings;
 
     private String mToken;
+    private Integer mClientId;
     private WorkflowListItem mWorkflowListItem;
     private WorkflowDb mWorkflow;
     private final Moshi moshi;
@@ -160,6 +179,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private boolean hasEditPermissions;
     private List<WorkflowTypeDb> mWorkflowTypeDbList;
     private WorkflowTypeDb mSelectedWorkflowType;
+    private AutocompleteFormItem mCurrentQueryAutocompleteFormItem;
 
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.mRepository = createWorkflowRepository;
@@ -167,13 +187,14 @@ class CreateWorkflowViewModel extends ViewModel {
         moshi = new Moshi.Builder().build();
     }
 
-    protected void initForm(String token, @Nullable WorkflowListItem item, String userId,
-                            String userPermissions) {
+    protected void initForm(String token, Integer clientId, @Nullable WorkflowListItem item,
+                            String userId, String userPermissions) {
         showLoading.setValue(true);
         if (formSettings == null) {
             formSettings = new FormSettings();
         }
         this.mToken = token;
+        this.mClientId = clientId;
         this.mWorkflowListItem = item;
 
         if (userId != null && !userId.isEmpty()) mUserId = Integer.parseInt(userId);
@@ -491,9 +512,15 @@ class CreateWorkflowViewModel extends ViewModel {
                 continue;
             }
 
-            //does not show the Status field
+            //do not show the Status field
             String machineName = fieldConfig.getMachineName();
             if (machineName != null && machineName.equals(MACHINE_NAME_STATUS)) {
+                mFieldCount--;
+                continue;
+            }
+
+            //do not show the Owner field (it is separated on the people involved form)
+            if (machineName != null && machineName.equals(MACHINE_NAME_OWNER)) {
                 mFieldCount--;
                 continue;
             }
@@ -547,9 +574,9 @@ class CreateWorkflowViewModel extends ViewModel {
                 createServicesFormItem(field);
                 break;
 
-            /*case FormSettings.TYPE_PROJECT:
+            case FormSettings.TYPE_PROJECT:
                 createProjectsFormItem(field);
-                break;*/
+                break;
 
             case FormSettings.TYPE_SYSTEM_USERS:
                 createSystemUsersFormItem(field);
@@ -573,6 +600,11 @@ class CreateWorkflowViewModel extends ViewModel {
                 break;
             case FormSettings.TYPE_GEOLOCATION:
                 createGeolocationFormItem(field);
+                break;
+            case FormSettings.TYPE_ACCOUNT:
+            case FormSettings.TYPE_BUSINESS_OPPORTUNITY:
+            case FormSettings.TYPE_CONTACT:
+                createAutocompleteFormItem(field);
                 break;
             default:
                 Log.d(TAG, "buildField: Not a generic type: " + typeInfo
@@ -758,8 +790,9 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
+                    Log.d(TAG, "createProjectsFormItem: " + throwable.getMessage());
                     mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
-                    Log.d(TAG, "createProductsFormItem: " + throwable.getMessage());
+                    buildFieldCompleted();
                 });
 
         mDisposables.add(disposable);
@@ -817,8 +850,9 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
-                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
                     Log.d(TAG, "createRolesFormItem: " + throwable.getMessage());
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+                    buildFieldCompleted();
                 });
 
         mDisposables.add(disposable);
@@ -875,9 +909,10 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
-                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
                     Log.d(TAG,
                             "createServicesFormItem: can't get service: " + throwable.getMessage());
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+                    buildFieldCompleted();
                 });
         mDisposables.add(disposable);
     }
@@ -887,41 +922,62 @@ class CreateWorkflowViewModel extends ViewModel {
      * then send the form item to the UI.
      */
     private void createProjectsFormItem(FormFieldsByWorkflowType field) {
-//        // TODO endpoint at this point returns an empty array.
-//        Disposable disposable = mRepository
-//                .getProjects(mToken)
-//                .subscribe(projectResponse -> {
-//                    if (projectResponse.getCode() != 200) {
-//                        return;
-//                    }
-//                    List<Project> list = projectResponse.getProjects();
-//
-//                    List<Option> options = new ArrayList<>();
-//                    for (int i = 0; i < list.size(); i++) {
-//                        String name = list.get(i).getName();
-//                        Integer id = list.get(i).getId();
-//
-//                        Option option = new Option(id, name);
-//                        options.add(option);
-//                    }
-//
-//                    if (options.isEmpty()) return;
-//
-//                    SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
-//                            .setTitle(field.getFieldName())
-//                            .setRequired(field.isRequired())
-//                            .setTag(field.getId())
-//                            .setOptions(options)
-//                            .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
-//                            .setMachineName(field.getFieldConfigObject().getMachineName())
-//                            .build();
-//
-//                    mAddFormItemLiveData.setValue(singleChoiceFormItem);
-//                }, throwable -> {
-//                    Log.d(TAG, "handeBuildRoles: " + throwable.getMessage());
-//                });
-//
-//        mDisposables.add(disposable);
+        Disposable disposable = mRepository
+                .getProjects(mToken)
+                .subscribe(projectResponse -> {
+                    buildFieldCompleted();
+
+                    List<Project> list = projectResponse.getProjects();
+
+                    List<Option> options = new ArrayList<>();
+                    for (int i = 0; i < list.size(); i++) {
+                        String name = list.get(i).getTitle();
+                        Integer id = list.get(i).getId();
+
+                        Option option = new Option(id, name);
+                        options.add(option);
+                    }
+
+                    if (options.isEmpty()) return;
+
+                    //sort alphabetically
+                    options = options
+                            .stream()
+                            .sorted((o1, o2) -> o1.getName().toLowerCase()
+                                    .compareTo(o2.getName().toLowerCase()))
+                            .collect(Collectors.toList());
+
+                    //check if multiple selection
+                    if (field.getFieldConfigObject().getMultiple()) {
+                        MultipleChoiceFormItem multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
+                                .setTitle(field.getFieldName())
+                                .setRequired(field.isRequired())
+                                .setTag(field.getId())
+                                .setOptions(options)
+                                .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                                .setMachineName(field.getFieldConfigObject().getMachineName())
+                                .build();
+                        mAddFormItemLiveData.setValue(multipleChoiceFormItem);
+                        return;
+                    }
+
+                    SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
+                            .setTitle(field.getFieldName())
+                            .setRequired(field.isRequired())
+                            .setTag(field.getId())
+                            .setOptions(options)
+                            .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                            .setMachineName(field.getFieldConfigObject().getMachineName())
+                            .build();
+
+                    mAddFormItemLiveData.setValue(singleChoiceFormItem);
+                }, throwable -> {
+                    Log.d(TAG, "createProjectsFormItem: " + throwable.getMessage());
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+                    buildFieldCompleted();
+                });
+
+        mDisposables.add(disposable);
     }
 
     /**
@@ -929,57 +985,66 @@ class CreateWorkflowViewModel extends ViewModel {
      * then send the form item to the UI.
      */
     private void createSystemUsersFormItem(FormFieldsByWorkflowType field) {
-        Disposable disposable = Observable.fromCallable(() -> {
-            List<FormCreateProfile> list = mRepository.getProfiles();
-
+        if (mClientId == null) {
             buildFieldCompleted();
+            return;
+        }
 
-            if (list == null || list.size() < 1) {
-                return false;
-            }
+        Disposable disposable = mRepository
+                .getUsers(mToken, mClientId)
+                .subscribe(workflowUsersResponse -> {
+                    buildFieldCompleted();
 
-            List<Option> options = new ArrayList<>();
-            for (int i = 0; i < list.size(); i++) {
-                FormCreateProfile profile = list.get(i);
+                    if (workflowUsersResponse.getCode() != 200) {
+                        return;
+                    }
 
-                formSettings.setProfile(profile);
+                    List<WorkflowUser> list = workflowUsersResponse.getUsers();
+                    List<Option> options = new ArrayList<>();
+                    for (int i = 0; i < list.size(); i++) {
+                        WorkflowUser workflowUser = list.get(i);
 
-                String name = profile.getFullName();
-                Integer id = profile.getId();
+                        String name = workflowUser.getUsername();
+                        Integer id = workflowUser.getId();
 
-                Option option = new Option(id, name);
-                options.add(option);
-            }
+                        Option option = new Option(id, name);
+                        options.add(option);
 
-            if (options.isEmpty()) return false;
+                        formSettings.addWorkflowUser(workflowUser);
+                    }
 
-            if (field.getFieldConfigObject().getMultiple()) {
-                return new MultipleChoiceFormItem.Builder()
-                        .setTitle(field.getFieldName())
-                        .setRequired(field.isRequired())
-                        .setTag(field.getId())
-                        .setOptions(options)
-                        .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
-                        .setMachineName(field.getFieldConfigObject().getMachineName())
-                        .build();
-            }
+                    if (options.isEmpty()) return;
 
-            return new SingleChoiceFormItem.Builder()
-                    .setTitle(field.getFieldName())
-                    .setRequired(field.isRequired())
-                    .setTag(field.getId())
-                    .setOptions(options)
-                    .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
-                    .setMachineName(field.getFieldConfigObject().getMachineName())
-                    .build();
+                    //check if multiple selection
+                    if (field.getFieldConfigObject().getMultiple()) {
+                        MultipleChoiceFormItem multipleChoiceFormItem = new MultipleChoiceFormItem.Builder()
+                                .setTitle(field.getFieldName())
+                                .setRequired(field.isRequired())
+                                .setTag(field.getId())
+                                .setOptions(options)
+                                .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                                .setMachineName(field.getFieldConfigObject().getMachineName())
+                                .build();
+                        mAddFormItemLiveData.setValue(multipleChoiceFormItem);
+                        return;
+                    }
 
-        }).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(singleChoiceFormItem -> mAddFormItemLiveData
-                                .setValue((BaseFormItem) singleChoiceFormItem),
-                        throwable -> Log.d(TAG,
-                                "createSystemUsersFormItem: can't get users: " + throwable
-                                        .getMessage()));
+                    SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
+                            .setTitle(field.getFieldName())
+                            .setRequired(field.isRequired())
+                            .setTag(field.getId())
+                            .setOptions(options)
+                            .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
+                            .setMachineName(field.getFieldConfigObject().getMachineName())
+                            .build();
+
+                    mAddFormItemLiveData.setValue(singleChoiceFormItem);
+                }, throwable -> {
+                    Log.d(TAG, "createSystemUsersFormItem: can't get users: " + throwable
+                            .getMessage());
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+                    buildFieldCompleted();
+                });
         mDisposables.add(disposable);
     }
 
@@ -1023,8 +1088,9 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(singleChoiceFormItem);
                 }, throwable -> {
-                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
                     Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+                    buildFieldCompleted();
                 });
 
         mDisposables.add(disposable);
@@ -1070,8 +1136,9 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     mAddFormItemLiveData.setValue(multipleChoiceFormItem);
                 }, throwable -> {
-                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
                     Log.e(TAG, "handleList: problem getting list " + throwable.getMessage());
+                    mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
+                    buildFieldCompleted();
                 });
 
         mDisposables.add(disposable);
@@ -1205,9 +1272,8 @@ class CreateWorkflowViewModel extends ViewModel {
                     mAddFormItemLiveData.setValue(currencyFormItem);
 
                 }, throwable -> {
+                    buildFieldCompleted();
                     mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
-
-                    showLoading.setValue(false);
                     Log.e(TAG, "handleCurrency: problem getting currency list " + throwable
                             .getMessage());
                 });
@@ -1252,9 +1318,8 @@ class CreateWorkflowViewModel extends ViewModel {
                     mAddFormItemLiveData.setValue(phoneFormItem);
 
                 }, throwable -> {
+                    buildFieldCompleted();
                     mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
-
-                    showLoading.setValue(false);
                     Log.e(TAG,
                             "handlePhone: problem getting country list " + throwable.getMessage());
                 });
@@ -1293,6 +1358,28 @@ class CreateWorkflowViewModel extends ViewModel {
         TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
 
         GeolocationFormItem item = new GeolocationFormItem.Builder()
+                .setTitle(field.getFieldName())
+                .setRequired(field.isRequired())
+                .setTag(field.getId())
+                .setEscaped(escape(field.getFieldConfigObject()))
+                .setMachineName(field.getFieldConfigObject().getMachineName())
+                .setTypeInfo(typeInfo)
+                .build();
+
+        formSettings.getFormItems().add(item);
+
+        buildFieldCompleted();
+    }
+
+    /**
+     * Creates an autocomplete form item with the specified params and sends the item to the UI.
+     *
+     * @param field item params.
+     */
+    private void createAutocompleteFormItem(FormFieldsByWorkflowType field) {
+        TypeInfo typeInfo = field.getFieldConfigObject().getTypeInfo();
+
+        AutocompleteFormItem item = new AutocompleteFormItem.Builder()
                 .setTitle(field.getFieldName())
                 .setRequired(field.isRequired())
                 .setTag(field.getId())
@@ -1390,11 +1477,16 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     case FormSettings.TYPE_LIST:
                     case FormSettings.TYPE_SERVICE:
+                    case FormSettings.TYPE_PROJECT:
                         if (fieldConfig.getMultiple()) {
                             fillMultipleChoiceFormItem(meta);
                         } else {
                             fillSingleChoiceFormItem(meta);
                         }
+                        break;
+
+                    case FormSettings.TYPE_SYSTEM_USERS:
+                        fillUsersFormItem(meta);
                         break;
 
                     case FormSettings.TYPE_CURRENCY:
@@ -1411,6 +1503,18 @@ class CreateWorkflowViewModel extends ViewModel {
 
                     case FormSettings.TYPE_GEOLOCATION:
                         fillGeolocationFormItem(meta);
+                        break;
+
+                    case FormSettings.TYPE_ACCOUNT:
+                        fillAccountFormItem(meta);
+                        break;
+
+                    case FormSettings.TYPE_BUSINESS_OPPORTUNITY:
+                        fillBusinessOpportunityFormItem(meta);
+                        break;
+
+                    case FormSettings.TYPE_CONTACT:
+                        fillSubContactFormItem(meta);
                         break;
                     default:
                         Log.d(TAG, "format: invalid type. Not Known.");
@@ -1452,20 +1556,26 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     private void fillSingleChoiceFormItem(Meta meta) {
-        List<String> values = (List<String>) meta.getDisplayValue();
         Integer intValue = null;
         String stringValue = null;
-        if (values == null || values.isEmpty()) {
-            //check if we have the ID value
-            if (meta.getValue() == null || meta.getValue().isEmpty()
-                    && !Utils.isInteger(meta.getValue())) {
-                return;
-            }
 
-            intValue = Integer.valueOf(meta.getValue());
-        } else {
-            //use display value
-            stringValue = values.get(0);
+        if (meta.getDisplayValue() instanceof String) {
+            stringValue = (String) meta.getDisplayValue();
+        } else if (meta.getDisplayValue() instanceof List) {
+            List<String> values = (List<String>) meta.getDisplayValue();
+
+            if (values == null || values.isEmpty()) {
+                //check if we have the ID value
+                if (meta.getValue() == null || meta.getValue().isEmpty()
+                        && !Utils.isInteger(meta.getValue())) {
+                    return;
+                }
+
+                intValue = Integer.valueOf(meta.getValue());
+            } else {
+                //use display value
+                stringValue = values.get(0);
+            }
         }
 
         if (intValue == null && stringValue == null) return;
@@ -1596,6 +1706,115 @@ class CreateWorkflowViewModel extends ViewModel {
                 geolocationMetaData.getValue().getLatLng().get(1));
         geolocationFormItem.setValue(latLng);
         geolocationFormItem.setName(geolocationMetaData.getValue().getAddress());
+    }
+
+    private void fillUsersFormItem(Meta meta) throws IOException {
+        if (meta.getValue() == null || meta.getValue().isEmpty()
+                || meta.getValue().equals("\"\"")) {
+            return;
+        }
+
+        JsonAdapter<FormCreateProfile> jsonAdapter = moshi.adapter(FormCreateProfile.class);
+        FormCreateProfile usersMetaData = jsonAdapter.fromJson(meta.getValue());
+
+        if (usersMetaData == null) return;
+
+        SingleChoiceFormItem singleChoiceFormItem = (SingleChoiceFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        //find by id
+        Option value = formSettings
+                .findOption(singleChoiceFormItem.getOptions(), usersMetaData.getId());
+
+        singleChoiceFormItem.setValue(value);
+    }
+
+    private void fillAccountFormItem(Meta meta) throws IOException {
+        if (meta.getValue() == null || meta.getValue().isEmpty()
+                || meta.getValue().equals("\"\"")) {
+            return;
+        }
+
+        JsonAdapter<PostContact> jsonAdapter = moshi.adapter(PostContact.class);
+        PostContact contactMetaData = jsonAdapter.fromJson(meta.getValue());
+
+        if (contactMetaData == null) return;
+
+        //pass the selected value to the FormSettings list
+        Contact contact = new Contact();
+        contact.setId(contactMetaData.getId());
+        contact.setCompany(contactMetaData.getCompany());
+        contact.setFullName(contactMetaData.getFullName());
+        List<Contact> contactList = new ArrayList<>();
+        contactList.add(contact);
+        formSettings.setContacts(contactList);
+
+        //find the form item
+        AutocompleteFormItem autocompleteFormItem = (AutocompleteFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        Option value = new Option(contactMetaData.getId(), contactMetaData.getCompany());
+
+        autocompleteFormItem.setValue(value);
+    }
+
+    private void fillBusinessOpportunityFormItem(Meta meta) throws IOException {
+        if (meta.getValue() == null || meta.getValue().isEmpty()
+                || meta.getValue().equals("\"\"")) {
+            return;
+        }
+
+        JsonAdapter<PostBusinessOpportunity> jsonAdapter = moshi
+                .adapter(PostBusinessOpportunity.class);
+        PostBusinessOpportunity businessOpportunityMeta = jsonAdapter.fromJson(meta.getValue());
+
+        if (businessOpportunityMeta == null) return;
+
+        //pass the selected value to the FormSettings list
+        BusinessOpportunity businessOpportunity = new BusinessOpportunity();
+        businessOpportunity.setId(businessOpportunityMeta.getId());
+        businessOpportunity.setTitle(businessOpportunityMeta.getTitle());
+        List<BusinessOpportunity> businessOpportunityList = new ArrayList<>();
+        businessOpportunityList.add(businessOpportunity);
+        formSettings.setBusinessOpportunities(businessOpportunityList);
+
+        //find the form item
+        AutocompleteFormItem autocompleteFormItem = (AutocompleteFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        Option value = new Option(businessOpportunityMeta.getId(),
+                businessOpportunityMeta.getTitle());
+
+        autocompleteFormItem.setValue(value);
+    }
+
+    private void fillSubContactFormItem(Meta meta) throws IOException {
+        if (meta.getValue() == null || meta.getValue().isEmpty()
+                || meta.getValue().equals("\"\"")) {
+            return;
+        }
+
+        JsonAdapter<PostSubContact> jsonAdapter = moshi
+                .adapter(PostSubContact.class);
+        PostSubContact postSubContact = jsonAdapter.fromJson(meta.getValue());
+
+        if (postSubContact == null) return;
+
+        //pass the selected value to the FormSettings list
+        SubContact subContact = new SubContact();
+        subContact.setId(postSubContact.getId());
+        subContact.setFullName(postSubContact.getFullName());
+        List<SubContact> subContactList = new ArrayList<>();
+        subContactList.add(subContact);
+        formSettings.setSubContacts(subContactList);
+
+        //find the form item
+        AutocompleteFormItem autocompleteFormItem = (AutocompleteFormItem) formSettings
+                .findItem(meta.getWorkflowTypeFieldId());
+
+        Option value = new Option(postSubContact.getId(), postSubContact.getFullName());
+
+        autocompleteFormItem.setValue(value);
     }
     //endregion
 
@@ -2249,8 +2468,10 @@ class CreateWorkflowViewModel extends ViewModel {
         DialogMessage dialogMessage = new DialogMessage();
         dialogMessage.title = R.string.edited;
         dialogMessage.message = R.string.workflow_edit;
-        dialogMessage.messageAggregate = " " + createWorkflowResponse.getWorkflow()
-                .getWorkflowTypeKey();
+        if (createWorkflowResponse != null && createWorkflowResponse.getWorkflow() != null) {
+            dialogMessage.messageAggregate = createWorkflowResponse.getWorkflow()
+                    .getWorkflowTypeKey();
+        }
         showDialogMessage.setValue(dialogMessage);
         goBack.setValue(true);
     }
@@ -2287,6 +2508,105 @@ class CreateWorkflowViewModel extends ViewModel {
         mToastMessageLiveData.setValue(Utils.getOnFailureStringRes(throwable));
 
         Log.d(TAG, "onFailure: " + throwable.getMessage());
+    }
+
+    protected void queryAutocompleteFormItem(AutocompleteFormItem formItem) {
+        if (formItem.getQuery() == null) return;
+
+        mCurrentQueryAutocompleteFormItem = formItem;
+
+        switch (formItem.getTypeInfo().getType()) {
+            case TYPE_ACCOUNT:
+                queryForContacts(formItem);
+                break;
+            case TYPE_BUSINESS_OPPORTUNITY:
+                queryForBusinessOpportunities(formItem);
+                break;
+            case TYPE_CONTACT:
+                queryForSubContacts(formItem);
+                break;
+        }
+    }
+
+    private void queryForContacts(AutocompleteFormItem formItem) {
+        Disposable disposable = mRepository
+                .getContacts(mToken, formItem.getQuery())
+                .subscribe(this::onContactsQuerySuccess, this::onAutocompleteFailure);
+
+        mDisposables.add(disposable);
+    }
+
+    private void onContactsQuerySuccess(ContactsResponse contactsResponse) {
+        List<Contact> contacts = contactsResponse.getList();
+
+        formSettings.setContacts(contacts);
+
+        //update options
+        List<Option> options = contacts.stream()
+                .map(contact -> new Option(contact.getId(), contact.getCompany()))
+                .collect(Collectors.toList());
+
+        onAutocompleteSuccess(options);
+    }
+
+    private void queryForBusinessOpportunities(AutocompleteFormItem formItem) {
+        Disposable disposable = mRepository
+                .getBusinessOpportunities(mToken, formItem.getQuery())
+                .subscribe(this::onBusinessOpportunitiesQuerySuccess, this::onAutocompleteFailure);
+
+        mDisposables.add(disposable);
+    }
+
+    private void onBusinessOpportunitiesQuerySuccess(
+            BusinessOpportunitiesResponse businessOpportunitiesResponse) {
+        List<BusinessOpportunity> businessOpportunities = businessOpportunitiesResponse.getList();
+
+        formSettings.setBusinessOpportunities(businessOpportunities);
+
+        //update options
+        List<Option> options = businessOpportunities.stream()
+                .map(businessOpportunity -> new Option(businessOpportunity.getId(),
+                        businessOpportunity.getTitle()))
+                .collect(Collectors.toList());
+
+        onAutocompleteSuccess(options);
+    }
+
+    private void queryForSubContacts(AutocompleteFormItem formItem) {
+        Disposable disposable = mRepository
+                .postSearchSubContacts(mToken, formItem.getQuery())
+                .subscribe(this::onSubContactsQuerySuccess, this::onAutocompleteFailure);
+
+        mDisposables.add(disposable);
+    }
+
+    private void onSubContactsQuerySuccess(SubContactsResponse subContactsResponse) {
+        List<SubContact> subContacts = subContactsResponse.getList();
+
+        formSettings.setSubContacts(subContacts);
+
+        //update options
+        List<Option> options = subContacts.stream()
+                .map(businessOpportunity -> new Option(businessOpportunity.getId(),
+                        businessOpportunity.getFullName()))
+                .collect(Collectors.toList());
+
+        onAutocompleteSuccess(options);
+    }
+
+    private void onAutocompleteSuccess(List<Option> options) {
+        if (mCurrentQueryAutocompleteFormItem == null) return;
+
+        mCurrentQueryAutocompleteFormItem.setOptions(options);
+        mSetAutocompleteSuggestionsLiveData.setValue(mCurrentQueryAutocompleteFormItem);
+        mShowAutocompleteNoConnectionLiveData.setValue(false);
+
+        mCurrentQueryAutocompleteFormItem = null; //clear reference
+    }
+
+    private void onAutocompleteFailure(Throwable throwable) {
+        Log.d(TAG, "onAutocompleteFailure: " + throwable.getMessage());
+        mShowAutocompleteNoConnectionLiveData.setValue(true);
     }
 
     protected LiveData<Integer> getObservableError() {
@@ -2413,5 +2733,19 @@ class CreateWorkflowViewModel extends ViewModel {
             mOpenDownloadedFileLiveData = new MutableLiveData<>();
         }
         return mOpenDownloadedFileLiveData;
+    }
+
+    protected LiveData<AutocompleteFormItem> getObservableSetAutocompleteSuggestions() {
+        if (mSetAutocompleteSuggestionsLiveData == null) {
+            mSetAutocompleteSuggestionsLiveData = new MutableLiveData<>();
+        }
+        return mSetAutocompleteSuggestionsLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowAutocompleteNoConnection() {
+        if (mShowAutocompleteNoConnectionLiveData == null) {
+            mShowAutocompleteNoConnectionLiveData = new MutableLiveData<>();
+        }
+        return mShowAutocompleteNoConnectionLiveData;
     }
 }

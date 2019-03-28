@@ -3,12 +3,13 @@ package com.rootnetapp.rootnetintranet.models.responses.project;
 import com.squareup.moshi.Json;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ProjectResponse {
-    @Json(name = "projects")
-    private ArrayList<Project> projects;
+    @Json(name = "list")
+    private List<Project> projects;
 
-    public ArrayList<Project> getProjects() {
+    public List<Project> getProjects() {
         return projects;
     }
 

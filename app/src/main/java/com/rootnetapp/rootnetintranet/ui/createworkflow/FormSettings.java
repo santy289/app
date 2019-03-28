@@ -12,10 +12,14 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.BaseEntityJsonValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.createworkflow.ListFieldItemMeta;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostBusinessOpportunity;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostContact;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCountryCodeAndValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostCurrency;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostPhone;
+import com.rootnetapp.rootnetintranet.models.createworkflow.PostSubContact;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PostSystemUser;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.AutocompleteFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.FileFormItem;
@@ -27,10 +31,14 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFor
 import com.rootnetapp.rootnetintranet.models.createworkflow.geolocation.GeolocationMetaData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.geolocation.Value;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
+import com.rootnetapp.rootnetintranet.models.responses.business.BusinessOpportunity;
+import com.rootnetapp.rootnetintranet.models.responses.contact.Contact;
+import com.rootnetapp.rootnetintranet.models.responses.contact.SubContact;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.Meta;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ListItem;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.TypeInfo;
+import com.rootnetapp.rootnetintranet.models.responses.workflowuser.WorkflowUser;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.Information;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonDataException;
@@ -54,6 +62,10 @@ public class FormSettings {
     private String description;
     private long createdTimestamp;
     private final ArrayList<FormCreateProfile> profiles;
+    private final ArrayList<WorkflowUser> workflowUsers;
+    private List<Contact> contacts;
+    private List<BusinessOpportunity> businessOpportunities;
+    private List<SubContact> subContacts;
     private List<FormFieldsByWorkflowType> fields; // Full info of all fields.
     private final Moshi moshi;
     private List<BaseFormItem> formItems; //new
@@ -65,10 +77,10 @@ public class FormSettings {
     public static final String TYPE_DATE = "date";
     public static final String TYPE_CHECKBOX = "checkbox";
     public static final String TYPE_SYSTEM_USERS = "system_users";
-    public static final String TYPE_PROJECT = "project"; // empty response
+    public static final String TYPE_PROJECT = "project";
     public static final String TYPE_ROLE = "role";
     public static final String TYPE_BIRTH_DATE = "birth_date";
-    public static final String TYPE_ACCOUNT = "account"; // which account
+    public static final String TYPE_ACCOUNT = "account";
     public static final String TYPE_LINK = "link";
     public static final String TYPE_CURRENCY = "currency";
     public static final String TYPE_PHONE = "phone";
@@ -77,6 +89,8 @@ public class FormSettings {
     public static final String TYPE_LIST = "list";
     public static final String TYPE_FILE = "file";
     public static final String TYPE_GEOLOCATION = "geolocation";
+    public static final String TYPE_BUSINESS_OPPORTUNITY = "opportunity";
+    public static final String TYPE_CONTACT = "contact";
     public static final String VALUE_EMAIL = "email";
     public static final String VALUE_INTEGER = "integer";
     public static final String VALUE_BOOLEAN = "boolean";
@@ -93,6 +107,9 @@ public class FormSettings {
         names = new ArrayList<>();
         ids = new ArrayList<>();
         profiles = new ArrayList<>();
+        workflowUsers = new ArrayList<>();
+        contacts = new ArrayList<>();
+        businessOpportunities = new ArrayList<>();
         fields = new ArrayList<>();
         title = "";
         description = "";
@@ -128,6 +145,38 @@ public class FormSettings {
         profiles.add(profile);
     }
 
+    public ArrayList<WorkflowUser> getWorkflowUsers() {
+        return workflowUsers;
+    }
+
+    public void addWorkflowUser(WorkflowUser profile) {
+        workflowUsers.add(profile);
+    }
+
+    public List<Contact> getContacts() {
+        return contacts;
+    }
+
+    public void setContacts(List<Contact> contacts) {
+        this.contacts = contacts;
+    }
+
+    public List<BusinessOpportunity> getBusinessOpportunities() {
+        return businessOpportunities;
+    }
+
+    public void setBusinessOpportunities(List<BusinessOpportunity> businessOpportunities) {
+        this.businessOpportunities = businessOpportunities;
+    }
+
+    public List<SubContact> getSubContacts() {
+        return subContacts;
+    }
+
+    public void setSubContacts(List<SubContact> subContacts) {
+        this.subContacts = subContacts;
+    }
+
     public ArrayList<String> getProfileNames() {
         ArrayList<String> fullNames = new ArrayList<>();
         for (int i = 0; i < profiles.size(); i++) {
@@ -150,6 +199,50 @@ public class FormSettings {
             profile = profiles.get(i);
             if (profile.username.equals(userName)) {
                 return profile;
+            }
+        }
+        return null;
+    }
+
+    protected WorkflowUser getWorkflowUserBy(int id) {
+        WorkflowUser workflowUser;
+        for (int i = 0; i < workflowUsers.size(); i++) {
+            workflowUser = workflowUsers.get(i);
+            if (workflowUser.getId() == id) {
+                return workflowUser;
+            }
+        }
+        return null;
+    }
+
+    protected Contact getContactBy(int id) {
+        Contact contact;
+        for (int i = 0; i < contacts.size(); i++) {
+            contact = contacts.get(i);
+            if (contact.getId() == id) {
+                return contact;
+            }
+        }
+        return null;
+    }
+
+    protected BusinessOpportunity getBusinessOpportunityBy(int id) {
+        BusinessOpportunity businessOpportunity;
+        for (int i = 0; i < businessOpportunities.size(); i++) {
+            businessOpportunity = businessOpportunities.get(i);
+            if (businessOpportunity.getId() == id) {
+                return businessOpportunity;
+            }
+        }
+        return null;
+    }
+
+    protected SubContact getSubContactBy(int id) {
+        SubContact subContact;
+        for (int i = 0; i < subContacts.size(); i++) {
+            subContact = subContacts.get(i);
+            if (subContact.getId() == id) {
+                return subContact;
             }
         }
         return null;
@@ -182,7 +275,8 @@ public class FormSettings {
         String value = metaData.getUnformattedValue();
         //we allow the FileFormItem even though the value is null because of the editing mode, when the user tries to delete a file.
         //same applies for GeolocationFormItem
-        if (TextUtils.isEmpty(value) && !(formItem instanceof FileFormItem) && !(formItem instanceof GeolocationFormItem)) {
+        if (TextUtils.isEmpty(
+                value) && !(formItem instanceof FileFormItem) && !(formItem instanceof GeolocationFormItem)) {
             return;
         }
 
@@ -220,9 +314,36 @@ public class FormSettings {
                 metaData.setValue("");
                 break;
             case FormSettings.VALUE_ENTITY:
+                //specific for accounts
+                if (typeInfo.getType().equals(TYPE_ACCOUNT)
+                        && formItem instanceof AutocompleteFormItem) {
+                    String json = getJsonStringForContactType((AutocompleteFormItem) formItem);
+                    metaData.setValue(json);
+                    break;
+                }
+
+                //specific for business opportunities
+                if (typeInfo.getType().equals(TYPE_BUSINESS_OPPORTUNITY)
+                        && formItem instanceof AutocompleteFormItem) {
+                    String json = getJsonStringForBusinessOpportunityType(
+                            (AutocompleteFormItem) formItem);
+                    metaData.setValue(json);
+                    break;
+                }
+
+                //specific for sub contacts
+                if (typeInfo.getType()
+                        .equals(TYPE_CONTACT) && formItem instanceof AutocompleteFormItem) {
+                    String json = getJsonStringForSubContactType(
+                            (AutocompleteFormItem) formItem);
+                    metaData.setValue(json);
+                    break;
+                }
+
                 handleSingleSelection((SingleChoiceFormItem) formItem, metaData);
                 break;
             case FormSettings.VALUE_LIST:
+                //specific for users
                 if (typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
                     String json = isMultiple
                             ? getJsonStringForSystemUserTypeList((MultipleChoiceFormItem) formItem)
@@ -231,6 +352,7 @@ public class FormSettings {
                     break;
                 }
 
+                //specific for product
                 if (typeInfo.getType().equals(TYPE_PRODUCT)) {
                     String json = isMultiple
                             ? getEntityListJson((MultipleChoiceFormItem) formItem, metaData)
@@ -239,6 +361,7 @@ public class FormSettings {
                     break;
                 }
 
+                //general list (others)
                 if (isMultiple) {
                     handleMultipleSelection((MultipleChoiceFormItem) formItem, metaData);
                 } else {
@@ -273,6 +396,9 @@ public class FormSettings {
         // Do not escape this fields
         if (!formItem.isEscaped()
                 || typeInfo.getType().equals(TYPE_SYSTEM_USERS)
+                || typeInfo.getType().equals(TYPE_BUSINESS_OPPORTUNITY)
+                || typeInfo.getType().equals(TYPE_ACCOUNT)
+                || typeInfo.getType().equals(TYPE_CONTACT)
                 || typeInfo.getType().equals(TYPE_PHONE)
                 || typeInfo.getType().equals(TYPE_CURRENCY)
                 || typeInfo.getType().equals(TYPE_PRODUCT)
@@ -413,14 +539,13 @@ public class FormSettings {
         Option value = formItem.getValue();
         if (value == null) return "";
 
-        String username = value.getName();
-        FormCreateProfile profile = getProfileBy(username);
-        if (profile == null) return "";
+        WorkflowUser workflowUser = getWorkflowUserBy(value.getId());
+        if (workflowUser == null) return "";
 
         PostSystemUser postSystemUser = new PostSystemUser();
-        postSystemUser.id = profile.getId();
-        postSystemUser.username = profile.getUsername();
-        postSystemUser.email = profile.getEmail();
+        postSystemUser.id = workflowUser.getId();
+        postSystemUser.username = workflowUser.getUsername();
+        postSystemUser.email = workflowUser.getEmail();
 
         Moshi moshi = new Moshi.Builder().build();
         JsonAdapter<PostSystemUser> jsonAdapter = moshi.adapter(PostSystemUser.class);
@@ -445,15 +570,15 @@ public class FormSettings {
         for (int i = 0; i < formItem.getValues().size(); i++) {
             Option value = (Option) formItem.getValues().get(i);
 
-            FormCreateProfile profile = getProfileBy(value.getName());
-            if (profile == null) {
-                continue;
-            }
+            if (value == null) continue;
+
+            WorkflowUser workflowUser = getWorkflowUserBy(value.getId());
+            if (workflowUser == null) continue;
 
             PostSystemUser postSystemUser = new PostSystemUser();
-            postSystemUser.id = profile.getId();
-            postSystemUser.username = profile.getUsername();
-            postSystemUser.email = profile.getEmail();
+            postSystemUser.id = workflowUser.getId();
+            postSystemUser.username = workflowUser.getUsername();
+            postSystemUser.email = workflowUser.getEmail();
 
             postSystemUserList.add(postSystemUser);
         }
@@ -462,6 +587,56 @@ public class FormSettings {
         Type type = Types.newParameterizedType(List.class, PostSystemUser.class);
         JsonAdapter<List<PostSystemUser>> jsonAdapter = moshi.adapter(type);
         return jsonAdapter.toJson(postSystemUserList);
+    }
+
+    private String getJsonStringForContactType(AutocompleteFormItem formItem) {
+        Option value = formItem.getValue();
+        if (value == null) return "";
+
+        Contact contact = getContactBy(value.getId());
+        if (contact == null) return "";
+
+        PostContact postContact = new PostContact();
+        postContact.setId(contact.getId());
+        postContact.setFullName(contact.getFullName());
+        postContact.setCompany(contact.getCompany());
+
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<PostContact> jsonAdapter = moshi.adapter(PostContact.class);
+        return jsonAdapter.toJson(postContact);
+    }
+
+    private String getJsonStringForBusinessOpportunityType(AutocompleteFormItem formItem) {
+        Option value = formItem.getValue();
+        if (value == null) return "";
+
+        BusinessOpportunity businessOpportunity = getBusinessOpportunityBy(value.getId());
+        if (businessOpportunity == null) return "";
+
+        PostBusinessOpportunity postBusinessOpportunity = new PostBusinessOpportunity();
+        postBusinessOpportunity.setId(businessOpportunity.getId());
+        postBusinessOpportunity.setTitle(businessOpportunity.getTitle());
+
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<PostBusinessOpportunity> jsonAdapter = moshi
+                .adapter(PostBusinessOpportunity.class);
+        return jsonAdapter.toJson(postBusinessOpportunity);
+    }
+
+    private String getJsonStringForSubContactType(AutocompleteFormItem formItem) {
+        Option value = formItem.getValue();
+        if (value == null) return "";
+
+        SubContact subContact = getSubContactBy(value.getId());
+        if (subContact == null) return "";
+
+        PostSubContact postSubContact = new PostSubContact();
+        postSubContact.setId(subContact.getId());
+        postSubContact.setFullName(subContact.getFullName());
+
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<PostSubContact> jsonAdapter = moshi.adapter(PostSubContact.class);
+        return jsonAdapter.toJson(postSubContact);
     }
 
     private void handleBoolean(TypeInfo typeInfo, WorkflowMetas metaData, String value) {
@@ -582,6 +757,7 @@ public class FormSettings {
         Information information = new Information();
         information.setTitle(meta.getWorkflowTypeFieldName());
         TypeInfo typeInfo = fieldConfig.getTypeInfo();
+        String displayValue;
 
         /*
         if multiple is true then value will be an array and probably ids, so we need to go back to the
@@ -670,29 +846,20 @@ public class FormSettings {
                     }
                 }
 
-                return null;
-            case FormSettings.VALUE_ENTITY:
-                if (typeInfo.getType().equals(TYPE_ROLE)) {
-                    String displayValue = getLabelFrom(meta);
-                    information.setDisplayValue(displayValue);
-                    return information;
-                }
-
-                return null;
             case FormSettings.VALUE_LIST:
+            case FormSettings.VALUE_ENTITY:
+
                 if (typeInfo.getType().equals(TYPE_SYSTEM_USERS)) {
-                    // TODO implement system user field
-//                    if (fieldConfig.getMultiple()) {
-//                        // {"id":50,"username":"jhonny Garzon","status":true,"email":"jgarzon600@gmail.com"}
-//                    } else {
-//
-//                    }
 
                     Moshi moshi = new Moshi.Builder().build();
                     JsonAdapter<PostSystemUser> jsonAdapter = moshi.adapter(PostSystemUser.class);
                     try {
                         PostSystemUser systemUser = jsonAdapter.fromJson(meta.getValue());
-                        information.setDisplayValue(systemUser.username);
+                        if (systemUser == null) {
+                            information.setDisplayValue("");
+                        } else {
+                            information.setDisplayValue(systemUser.username);
+                        }
                         return information;
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -701,7 +868,28 @@ public class FormSettings {
                     }
                 }
 
-                String displayValue = getLabelFrom(meta);
+                if (typeInfo.getType().equals(TYPE_BUSINESS_OPPORTUNITY)) {
+
+                    Moshi moshi = new Moshi.Builder().build();
+                    JsonAdapter<PostBusinessOpportunity> jsonAdapter = moshi
+                            .adapter(PostBusinessOpportunity.class);
+                    try {
+                        PostBusinessOpportunity businessOpportunity = jsonAdapter
+                                .fromJson(meta.getValue());
+                        if (businessOpportunity == null) {
+                            information.setDisplayValue("");
+                        } else {
+                            information.setDisplayValue(businessOpportunity.getTitle());
+                        }
+                        return information;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        information.setDisplayValue("");
+                        return information;
+                    }
+                }
+
+                displayValue = getLabelFrom(meta);
                 information.setDisplayValue(displayValue);
                 return information;
             case FormSettings.VALUE_STRING:
@@ -712,7 +900,11 @@ public class FormSettings {
                             .adapter(PostCountryCodeAndValue.class);
                     try {
                         phone = jsonAdapter.fromJson(meta.getValue());
-                        information.setDisplayValue(String.valueOf(phone.value));
+                        if (phone == null) {
+                            information.setDisplayValue("");
+                        } else {
+                            information.setDisplayValue(String.valueOf(phone.value));
+                        }
                         return information;
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -746,7 +938,7 @@ public class FormSettings {
                         .adapter(GeolocationMetaData.class);
                 try {
                     GeolocationMetaData geolocationMetaData = jsonAdapter.fromJson(meta.getValue());
-                    if (geolocationMetaData.getValue() == null) {
+                    if (geolocationMetaData == null || geolocationMetaData.getValue() == null) {
                         information.setDisplayValue("");
                     } else {
                         information.setDisplayValue(geolocationMetaData.getValue().getAddress());
@@ -765,34 +957,42 @@ public class FormSettings {
     }
 
     private String getLabelFrom(Meta meta) {
-        ArrayList<String> displayValue;
-        try {
-            displayValue = (ArrayList<String>) meta.getDisplayValue();
-        } catch (ClassCastException e) {
-            Log.d(TAG, "formatStringToObject: Value List casting problems");
-            e.printStackTrace();
-            return "";
-        }
+        if (meta.getDisplayValue() instanceof String) {
+            return String.valueOf(meta.getDisplayValue());
 
-        if (displayValue.size() == 0) {
-            return "";
-        }
+        } else if (meta.getDisplayValue() instanceof List) {
 
-        if (displayValue.size() == 1) {
-            return displayValue.get(0);
-        }
-
-        String label;
-        StringBuilder sb = new StringBuilder();
-        int size = displayValue.size();
-        for (int i = 0; i < size; i++) {
-            label = displayValue.get(i);
-            sb.append(label);
-            if (i < size - 1) {
-                sb.append(", ");
+            ArrayList<String> displayValue;
+            try {
+                displayValue = (ArrayList<String>) meta.getDisplayValue();
+            } catch (ClassCastException e) {
+                Log.d(TAG, "formatStringToObject: Value List casting problems");
+                e.printStackTrace();
+                return "";
             }
+
+            if (displayValue.size() == 0) {
+                return "";
+            }
+
+            if (displayValue.size() == 1) {
+                return displayValue.get(0);
+            }
+
+            String label;
+            StringBuilder sb = new StringBuilder();
+            int size = displayValue.size();
+            for (int i = 0; i < size; i++) {
+                label = displayValue.get(i);
+                sb.append(label);
+                if (i < size - 1) {
+                    sb.append(", ");
+                }
+            }
+            return sb.toString();
         }
-        return sb.toString();
+
+        return "";
     }
 
     public String getTitle() {

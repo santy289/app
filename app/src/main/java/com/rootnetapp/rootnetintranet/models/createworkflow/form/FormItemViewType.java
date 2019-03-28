@@ -7,6 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 
 import androidx.annotation.IntDef;
 
+import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.AUTOCOMPLETE;
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.BOOLEAN;
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.CURRENCY;
 import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItemViewType.DATE;
@@ -37,7 +38,8 @@ import static com.rootnetapp.rootnetintranet.models.createworkflow.form.FormItem
         INTENT,
         DOUBLE_MULTIPLE_CHOICE,
         GEOLOCATION,
-        DISPLAY
+        DISPLAY,
+        AUTOCOMPLETE
 })
 public @interface FormItemViewType {
 
@@ -53,4 +55,5 @@ public @interface FormItemViewType {
     int DOUBLE_MULTIPLE_CHOICE = 10;
     int GEOLOCATION = 11;
     int DISPLAY = 12;
+    int AUTOCOMPLETE = 13;
 }

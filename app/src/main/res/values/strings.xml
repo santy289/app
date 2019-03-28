@@ -168,6 +168,7 @@
     <string name="analytics">Analytics</string>
     <string name="user_analytics">My Analytics</string>
     <string name="company_overview">Company Overview</string>
+    <string name="my_pending_workflows_for_approval">Pending Workflows for Approval</string>
     <string name="date">Date</string>
     <string name="title">Title</string>
     <string name="author">Author</string>
@@ -205,7 +206,7 @@
     <string name="created">Created</string>
     <string name="workflow_created">The workflow %s has been created.</string>
     <string name="edited">Edited</string>
-    <string name="workflow_edit">You have edited the workflow:</string>
+    <string name="workflow_edit">The workflow %s has been edited.</string>
     <string name="error">Error</string>
     <string name="error_create_workflow">Something happened while saving your new workflow. Try again later.</string>
     <string name="error_edit_workflow">Something happened while saving the workflow. Try again later.</string>
@@ -214,7 +215,7 @@
     <string name="file_too_big">File is too big, limit is 10MB</string>
     <string name="clear_filters">Clear Filters</string>
     <string name="no_category">No Category</string>
-    <string name="base_filters">Base Filters</string>
+    <string name="base_filters">Standard Filters</string>
     <string name="all">All</string>
     <string name="on_time">On Time</string>
     <string name="latest">Latest</string>
@@ -240,11 +241,15 @@
     <string name="request_successfully">Request done successfully.</string>
     <string name="functionality_not_available">This functionality is not available yet</string>
     <string name="add_file">Add File</string>
+    <string name="choose_option">Choose</string>
     <string name="select_location">Select a location</string>
     <string name="asterisk" translatable="false">*</string>
     <string name="file_form_item_required_msg">You must add a file in order to continue.</string>
-    <string name="intent_form_item_required_msg">You must complete this in order to continue.</string>
+    <string name="intent_form_item_required_msg">You must complete this section in order to continue.</string>
     <string name="geolocation_form_item_required_msg">You must select a location in order to continue.</string>
+    <string name="autocomplete_form_item_required_msg">You must choose an option in order to continue.</string>
+    <string name="autocomplete_form_item_hint">Start typing…</string>
+    <string name="autocomplete_form_item_no_results">No records found.</string>
     <string name="fill_all_form_items">You need to fill out all of the required elements.</string>
     <string name="action">Action</string>
     <string name="people_involved_action">Configure</string>
@@ -257,6 +262,9 @@
     <string name="double_multiple_choice_form_item_select_both">You need to select both values to add an option.</string>
     <string name="approvers_involved">Approvers Involved</string>
     <string name="fragment_create_workflow_no_permissions">You do not have permissions to create a workflow.</string>
+    <string name="workflow_list_no_selections">You have not selected any workflows.</string>
+    <string name="workflow_list_delete_dialog_title">Delete Workflows</string>
+    <string name="workflow_list_delete_dialog_msg">Are you sure you want to delete the workflows %s?</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Workflow Details</string>

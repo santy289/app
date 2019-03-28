@@ -45,6 +45,7 @@ public class WorkflowManagerViewModel extends ViewModel {
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<List<WorkflowDb>> mWorkflowListLiveData;
+    private MutableLiveData<List<WorkflowDb>> mUserPendingWorkflowsDialogLiveData;
     private MutableLiveData<List<WorkflowDb>> mUserPendingWorkflowsListLiveData;
     private MutableLiveData<List<WorkflowDb>> mUserOpenWorkflowsListLiveData;
     private MutableLiveData<List<WorkflowDb>> mUserClosedWorkflowsListLiveData;
@@ -68,6 +69,8 @@ public class WorkflowManagerViewModel extends ViewModel {
     private MutableLiveData<Integer> mCompanyPeopleInvolvedCountLiveData;
     private MutableLiveData<Boolean> mHideMoreButtonLiveData;
     private MutableLiveData<Boolean> mHideWorkflowListLiveData;
+    private MutableLiveData<Boolean> mHidePendingMoreButtonLiveData;
+    private MutableLiveData<Boolean> mHidePendingWorkflowListLiveData;
     private MutableLiveData<SingleChoiceFormItem> mAddWorkflowTypeItemLiveData;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
@@ -76,23 +79,28 @@ public class WorkflowManagerViewModel extends ViewModel {
     private String mToken;
     private String mStartDate, mEndDate;
     private Integer mWorkflowTypeId;
+    private int mCurrentPagePending;
     private int mCurrentPage;
     private int mWebCount, mWebCompleted;
     private WorkflowOverviewResponse workflowOverviewResponse;
+    private String mUserId;
 
     public WorkflowManagerViewModel(WorkflowManagerRepository repository) {
         this.mRepository = repository;
+        mCurrentPagePending = 1;
         mCurrentPage = 1;
     }
 
     /**
      * Initializes the ViewModel data with pre-selected dates.
-     * @param token auth token.
+     *
+     * @param token     auth token.
      * @param startDate start date filter.
-     * @param endDate end date filter.
+     * @param endDate   end date filter.
      */
-    protected void init(String token, String startDate, String endDate) {
+    protected void init(String token, String loggedUserId, String startDate, String endDate) {
         mToken = token;
+        mUserId = loggedUserId;
         updateDashboard(startDate, endDate);
         createWorkflowTypeItem();
     }
@@ -116,7 +124,11 @@ public class WorkflowManagerViewModel extends ViewModel {
         setEndDate(endDate);
         setWorkflowTypeId(workflowTypeId);
 
+        resetCurrentPagePending();
         resetCurrentPage();
+
+        getUserPendingWorkflowsList();
+        mWebCount++;
 
         getWorkflows();
         mWebCount++;
@@ -167,12 +179,15 @@ public class WorkflowManagerViewModel extends ViewModel {
      *
      * @return common filters.
      */
-    private Map<String, Object> getCommonFilters() {
+    private Map<String, Object> getCommonFilters(boolean includeDate) {
         Map<String, Object> options = new ArrayMap<>();
 
         options.put("status", true); //always true
-        options.put("start", getStartDate());
-        options.put("end", getEndDate());
+
+        if (includeDate) {
+            options.put("start", getStartDate());
+            options.put("end", getEndDate());
+        }
 
         if (getWorkflowTypeId() != null) {
             options.put("workflow_type_id", getWorkflowTypeId());
@@ -182,14 +197,32 @@ public class WorkflowManagerViewModel extends ViewModel {
     }
 
     /**
-     * Resets the current page to its initial value. Called when the dashboard filters change.
+     * Resets the current page for the pending workflows to its initial value. Called when the
+     * dashboard filters change.
+     */
+    protected void resetCurrentPagePending() {
+        this.mCurrentPagePending = 1;
+    }
+
+    /**
+     * Increments the current page for the pending workflows by one. Called when the user requests
+     * more pending workflows.
+     */
+    protected void incrementCurrentPagePending() {
+        mCurrentPagePending++;
+    }
+
+    /**
+     * Resets the current page for the general workflows to its initial value. Called when the
+     * dashboard filters change.
      */
     protected void resetCurrentPage() {
         this.mCurrentPage = 1;
     }
 
     /**
-     * Increments the current page by one. Called when the user requests more workflows.
+     * Increments the current page for the general workflows by one. Called when the user requests
+     * more workflows.
      */
     protected void incrementCurrentPage() {
         mCurrentPage++;
@@ -202,7 +235,7 @@ public class WorkflowManagerViewModel extends ViewModel {
         showLoading.setValue(true);
 
         Disposable disposable = mRepository
-                .getWorkflowsByBaseFilters(mToken, mCurrentPage, getCommonFilters())
+                .getWorkflowsByBaseFilters(mToken, mCurrentPage, getCommonFilters(true))
                 .subscribe(this::onWorkflowsSuccess, this::onFailure);
 
         mDisposables.add(disposable);
@@ -220,7 +253,7 @@ public class WorkflowManagerViewModel extends ViewModel {
         List<WorkflowDb> workflowList = workflowResponseDb.getList();
 
         mHideWorkflowListLiveData.setValue(workflowList.isEmpty());
-        mHideMoreButtonLiveData.setValue(workflowResponseDb.getPager().isIsLastPage());
+        mHideMoreButtonLiveData.setValue(workflowList.isEmpty() || workflowResponseDb.getPager().isIsLastPage());
         mWorkflowListLiveData.setValue(workflowList);
     }
     //endregion
@@ -229,42 +262,77 @@ public class WorkflowManagerViewModel extends ViewModel {
     //region Pending Workflows
 
     /**
-     * Performs a request to the server to obtain the user's pending workflows.
+     * Performs a request to the server to obtain the user's pending workflows for the list.
      */
-    protected void getUserPendingWorkflows() {
-        if (Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getPending()
-                .getCount()) == 0) {
-            //do not request if there is no data
-            return;
-        }
+    protected void getUserPendingWorkflowsList() {
+        Map<String, Object> options = getCommonFilters(false);
 
-        Map<String, Object> options = getCommonFilters();
-
-        options.put("profile_related", 1);
+        options.put("profile_related", mUserId);
         options.put("pending", true);
 
         showLoading.setValue(true);
         Disposable disposable = mRepository
-                .getWorkflowsByBaseFilters(mToken, options)
-                .subscribe(this::onUserPendingSuccess, this::onFailure);
+                .getWorkflowsByBaseFilters(mToken, mCurrentPagePending, options)
+                .subscribe(this::onUserPendingSuccessList, this::onFailure);
 
         mDisposables.add(disposable);
     }
 
     /**
      * Sets the LiveData that will update the UI and display a dialog with a list of the user's
-     * pending workflows. Callback of the {@link #getUserPendingWorkflows()} request when it's
+     * pending workflows. Callback of the {@link #getUserPendingWorkflowsList()} request when it's
      * successful.
      *
      * @param workflowResponseDb server response
      */
-    private void onUserPendingSuccess(WorkflowResponseDb workflowResponseDb) {
+    private void onUserPendingSuccessList(WorkflowResponseDb workflowResponseDb) {
+        updateCompleted();
+
+        List<WorkflowDb> workflowList = workflowResponseDb.getList();
+
+        mHidePendingWorkflowListLiveData.setValue(workflowList.isEmpty());
+        mHidePendingMoreButtonLiveData.setValue(workflowList.isEmpty() || workflowResponseDb.getPager().isIsLastPage());
+        mUserPendingWorkflowsListLiveData.setValue(workflowList);
+    }
+
+    /**
+     * Performs a request to the server to obtain the user's pending workflows for the dialog.
+     */
+    protected void getUserPendingWorkflowsDialog() {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getPending().getCount()) == 0) {
+            //do not request if there is no data
+            return;
+        }
+
+        Map<String, Object> options = getCommonFilters(true);
+
+        options.put("profile_related", mUserId);
+        options.put("pending", true);
+
+        showLoading.setValue(true);
+        Disposable disposable = mRepository
+                .getWorkflowsByBaseFilters(mToken, options)
+                .subscribe(this::onUserPendingSuccessDialog, this::onFailure);
+
+        mDisposables.add(disposable);
+    }
+
+    /**
+     * Sets the LiveData that will update the UI and display a dialog with a list of the user's
+     * pending workflows. Callback of the {@link #getUserPendingWorkflowsDialog()} request when it's
+     * successful.
+     *
+     * @param workflowResponseDb server response
+     */
+    private void onUserPendingSuccessDialog(WorkflowResponseDb workflowResponseDb) {
         showLoading.setValue(false);
 
         List<WorkflowDb> list = workflowResponseDb.getList();
         if (list == null) return;
 
-        mUserPendingWorkflowsListLiveData.setValue(list);
+        mUserPendingWorkflowsDialogLiveData.setValue(list);
     }
     //endregion
 
@@ -274,15 +342,16 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's open workflows.
      */
     protected void getUserOpenWorkflows() {
-        if (Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getOpen()
-                .getCount()) == 0) {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getOpen().getCount()) == 0) {
             //do not request if there is no data
             return;
         }
 
-        Map<String, Object> options = getCommonFilters();
+        Map<String, Object> options = getCommonFilters(true);
 
-        options.put("profile_related", 1);
+        options.put("profile_related", mUserId);
 
         showLoading.setValue(true);
         Disposable disposable = mRepository
@@ -314,15 +383,16 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's closed workflows.
      */
     protected void getUserClosedWorkflows() {
-        if (Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getClosed()
-                .getCount()) == 0) {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getClosed().getCount()) == 0) {
             //do not request if there is no data
             return;
         }
 
-        Map<String, Object> options = getCommonFilters();
+        Map<String, Object> options = getCommonFilters(true);
 
-        options.put("profile_related", 1);
+        options.put("profile_related", mUserId);
 
         showLoading.setValue(true);
         Disposable disposable = mRepository
@@ -355,15 +425,16 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's out of time workflows.
      */
     protected void getUserOutOfTimeWorkflows() {
-        if (workflowOverviewResponse.getOverview().getUserWorkflows().getOutOfTime()
-                .getCount() == 0) {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || workflowOverviewResponse.getOverview().getUserWorkflows().getOutOfTime().getCount() == 0) {
             //do not request if there is no data
             return;
         }
 
-        Map<String, Object> options = getCommonFilters();
+        Map<String, Object> options = getCommonFilters(true);
 
-        options.put("profile_related", 1);
+        options.put("profile_related", mUserId);
         options.put("out_of_time", true);
 
         showLoading.setValue(true);
@@ -397,15 +468,16 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's updated workflows.
      */
     protected void getUserUpdatedWorkflows() {
-        if (Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getUpdated()
-                .getCount()) == 0) {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || Integer.parseInt(workflowOverviewResponse.getOverview().getUserWorkflows().getUpdated().getCount()) == 0) {
             //do not request if there is no data
             return;
         }
 
-        Map<String, Object> options = getCommonFilters();
+        Map<String, Object> options = getCommonFilters(true);
 
-        options.put("profile_related", 1);
+        options.put("profile_related", mUserId);
         options.put("latest", true);
 
         showLoading.setValue(true);
@@ -441,13 +513,14 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's pending workflows.
      */
     protected void getCompanyPendingWorkflows() {
-        if (Integer.parseInt(workflowOverviewResponse.getOverview().getCompanyWorkflows().getPending()
-                .getCount()) == 0) {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || Integer.parseInt(workflowOverviewResponse.getOverview().getCompanyWorkflows().getPending().getCount()) == 0) {
             //do not request if there is no data
             return;
         }
 
-        Map<String, Object> options = getCommonFilters();
+        Map<String, Object> options = getCommonFilters(true);
 
         options.put("pending", true);
 
@@ -482,13 +555,14 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's open workflows.
      */
     protected void getCompanyOpenWorkflows() {
-        if (Integer.parseInt(workflowOverviewResponse.getOverview().getCompanyWorkflows().getOpen()
-                .getCount()) == 0) {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || Integer.parseInt(workflowOverviewResponse.getOverview().getCompanyWorkflows().getOpen().getCount()) == 0) {
             //do not request if there is no data
             return;
         }
 
-        Map<String, Object> options = getCommonFilters();
+        Map<String, Object> options = getCommonFilters(true);
 
         showLoading.setValue(true);
         Disposable disposable = mRepository
@@ -520,13 +594,14 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's closed workflows.
      */
     protected void getCompanyClosedWorkflows() {
-        if (Integer.parseInt(workflowOverviewResponse.getOverview().getCompanyWorkflows().getClosed()
-                .getCount()) == 0) {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || Integer.parseInt(workflowOverviewResponse.getOverview().getCompanyWorkflows().getClosed().getCount()) == 0) {
             //do not request if there is no data
             return;
         }
 
-        Map<String, Object> options = getCommonFilters();
+        Map<String, Object> options = getCommonFilters(true);
 
         showLoading.setValue(true);
         Disposable disposable = mRepository
@@ -559,13 +634,14 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's out of time workflows.
      */
     protected void getCompanyOutOfTimeWorkflows() {
-        if (workflowOverviewResponse.getOverview().getCompanyWorkflows().getOutOfTime()
-                .getCount() == 0) {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || workflowOverviewResponse.getOverview().getCompanyWorkflows().getOutOfTime().getCount() == 0) {
             //do not request if there is no data
             return;
         }
 
-        Map<String, Object> options = getCommonFilters();
+        Map<String, Object> options = getCommonFilters(true);
 
         options.put("out_of_time", true);
 
@@ -600,13 +676,14 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's updated workflows.
      */
     protected void getCompanyUpdatedWorkflows() {
-        if (Integer.parseInt(workflowOverviewResponse.getOverview().getCompanyWorkflows().getUpdated()
-                .getCount()) == 0) {
+        if (workflowOverviewResponse == null
+                || workflowOverviewResponse.getOverview() == null
+                || Integer.parseInt(workflowOverviewResponse.getOverview().getCompanyWorkflows().getUpdated().getCount()) == 0) {
             //do not request if there is no data
             return;
         }
 
-        Map<String, Object> options = getCommonFilters();
+        Map<String, Object> options = getCommonFilters(true);
 
         options.put("latest", true);
 
@@ -644,7 +721,7 @@ public class WorkflowManagerViewModel extends ViewModel {
     protected void getOverviewWorkflowsCount() {
         showLoading.setValue(true);
         Disposable disposable = mRepository
-                .getOverviewWorkflowsCount(mToken, getCommonFilters())
+                .getOverviewWorkflowsCount(mToken, getCommonFilters(true))
                 .subscribe(this::onOverviewSuccess, this::onFailure);
 
         mDisposables.add(disposable);
@@ -739,7 +816,8 @@ public class WorkflowManagerViewModel extends ViewModel {
             for (int i = 0; i < types.size(); i++) {
                 WorkflowTypeItemMenu typeItemMenu = types.get(i);
 
-                String name = String.format(Locale.US, "%s (%d)", typeItemMenu.getName(), typeItemMenu.getWorkflowCount());
+                String name = String.format(Locale.US, "%s (%d)", typeItemMenu.getName(),
+                        typeItemMenu.getWorkflowCount());
                 Integer id = typeItemMenu.getId();
 
                 Option option = new Option(id, name);
@@ -777,7 +855,14 @@ public class WorkflowManagerViewModel extends ViewModel {
     }
 
     //region User Observables
-    protected LiveData<List<WorkflowDb>> getObservableUserPendingWorkflows() {
+    protected LiveData<List<WorkflowDb>> getObservableUserPendingWorkflowsDialog() {
+        if (mUserPendingWorkflowsDialogLiveData == null) {
+            mUserPendingWorkflowsDialogLiveData = new MutableLiveData<>();
+        }
+        return mUserPendingWorkflowsDialogLiveData;
+    }
+
+    protected LiveData<List<WorkflowDb>> getObservableUserPendingWorkflowsList() {
         if (mUserPendingWorkflowsListLiveData == null) {
             mUserPendingWorkflowsListLiveData = new MutableLiveData<>();
         }
@@ -939,6 +1024,20 @@ public class WorkflowManagerViewModel extends ViewModel {
             mHideWorkflowListLiveData = new MutableLiveData<>();
         }
         return mHideWorkflowListLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableHidePendingMoreButton() {
+        if (mHidePendingMoreButtonLiveData == null) {
+            mHidePendingMoreButtonLiveData = new MutableLiveData<>();
+        }
+        return mHidePendingMoreButtonLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableHidePendingWorkflowList() {
+        if (mHidePendingWorkflowListLiveData == null) {
+            mHidePendingWorkflowListLiveData = new MutableLiveData<>();
+        }
+        return mHidePendingWorkflowListLiveData;
     }
 
     protected LiveData<SingleChoiceFormItem> getObservableWorkflowTypeItem() {

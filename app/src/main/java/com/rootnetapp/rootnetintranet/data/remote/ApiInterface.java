@@ -9,9 +9,12 @@ import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest
 import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
+import com.rootnetapp.rootnetintranet.models.responses.business.BusinessOpportunitiesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentDeleteResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.comments.CommentsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.contact.ContactsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.contact.SubContactsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountryDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
@@ -44,6 +47,7 @@ import com.rootnetapp.rootnetintranet.models.responses.websocket.WebSocketSettin
 import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.DeleteWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.WorkflowApproveRejectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowoverview.WorkflowOverviewResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflows.PostDeleteWorkflows;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
@@ -143,7 +147,7 @@ public interface ApiInterface {
                                           @Field("repeated_password") String repeatedPassword);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows?")
+    @GET("intranet/workflows?status=true")
     @Deprecated
     Observable<WorkflowsResponse> getWorkflows(@Header("Authorization") String authorization,
                                                @Query("limit") int limit,
@@ -153,7 +157,7 @@ public interface ApiInterface {
 
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows?order=%7B%22desc%22:true,%22column%22:%22updated%22%7D")
+    @GET("intranet/workflows?status=true&order=%7B%22desc%22:true,%22column%22:%22updated%22%7D")
     Observable<WorkflowResponseDb> getWorkflowsDb(@Header("Authorization") String authorization,
                                                   @Query("limit") int limit,
                                                   @Query("open") boolean open,
@@ -161,7 +165,7 @@ public interface ApiInterface {
                                                   @Query("workflow_type") boolean showTypeDetails);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows?order=%7B%22desc%22:true,%22column%22:%22updated%22%7D")
+    @GET("intranet/workflows?status=true&order=%7B%22desc%22:true,%22column%22:%22updated%22%7D")
     Observable<WorkflowResponseDb> getWorkflowsDbWithSearch(@Header("Authorization") String authorization,
                                                   @Query("limit") int limit,
                                                   @Query("open") boolean open,
@@ -179,7 +183,7 @@ public interface ApiInterface {
                                                   @Query("query") String searchText);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows?order=%7B%22desc%22:true,%22column%22:%22updated%22%7D")
+    @GET("intranet/workflows?status=true&order=%7B%22desc%22:true,%22column%22:%22updated%22%7D")
     Observable<WorkflowResponseDb> getWorkflowsBySearchQuery(@Header("Authorization") String authorization,
                                                              @Query("limit") int limit,
                                                              @Query("page") int page,
@@ -188,7 +192,7 @@ public interface ApiInterface {
                                                              @Query("workflow_type") boolean showTypeDetails);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows?")
+    @GET("intranet/workflows?status=true")
     Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(@Header("Authorization") String authorization,
                                                            @Query("limit") int limit,
                                                            @Query("open") boolean open,
@@ -197,7 +201,7 @@ public interface ApiInterface {
                                                            @QueryMap Map<String, Object> options);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows?")
+    @GET("intranet/workflows?status=true")
     Observable<WorkflowResponseDb> getWorkflowsDbFilteredByDynamicFields(@Header("Authorization") String authorization,
                                                                          @Query("limit") int limit,
                                                                          @Query("open") boolean open,
@@ -281,14 +285,18 @@ public interface ApiInterface {
     Observable<RoleResponse> getRoles(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/projects?all=true")
+    @GET("intranet/drafts?all=true")
     Observable<ProjectResponse> getProjects(@Header("Authorization") String authorization);
-
 
 
     @Headers({"Domain-Name: api"})
     @GET("client/35/users")
     Observable<WorkflowUserResponse> getWorkflowUsers(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: api"})
+    @GET("client/{clientId}/users")
+    Observable<WorkflowUserResponse> getWorkflowUsers(@Header("Authorization") String authorization,
+                                                      @Path("clientId") int clientId);
 
     @GET("check/countries")
     Observable<CountriesResponse> getCountries(@Header("Authorization") String authorization);
@@ -354,6 +362,12 @@ public interface ApiInterface {
     @POST("intranet/workflows/{id}?confirmation=true")
     Observable<DeleteWorkflowResponse> deleteWorkflow(@Header("Authorization") String authorization,
                                                       @Path("id") int workflowId);
+
+    @Headers({"Domain-Name: api", "Content-Type: application/json;charset=UTF-8"})
+    @POST("intranet/workflows/{id}?confirmation=true")
+    Observable<DeleteWorkflowResponse> deleteWorkflows(@Header("Authorization") String authorization,
+                                                       @Path("id") int workflowId,
+                                                       @Body PostDeleteWorkflows postDeleteWorkflows);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/templates/{id}")
@@ -489,6 +503,25 @@ public interface ApiInterface {
     @Streaming
     @GET("options?key=socket_protocol")
     Observable<WebSocketSettingResponse> getWsProtocol(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: api"})
+    @GET("contacts/records?")
+    Observable<ContactsResponse> getContacts(@Header("Authorization") String authorization,
+                                             @Query("query") String query,
+                                             @Query("limit") int limit);
+
+    @Headers({"Domain-Name: api"})
+    @GET("business/opportunities?")
+    Observable<BusinessOpportunitiesResponse> getBusinessOpportunities(@Header("Authorization") String authorization,
+                                                                       @Query("query") String query,
+                                                                       @Query("limit") int limit);
+
+    @Headers({"Domain-Name: api"})
+    @POST("sub_contacts/records?")
+    @FormUrlEncoded
+    Observable<SubContactsResponse> postSearchSubContacts(@Header("Authorization") String authorization,
+                                                          @Field("query") String query,
+                                                          @Query("limit") int limit);
 
     //region Google Maps API
     @GET("https://maps.googleapis.com/maps/api/place/nearbysearch/json?rankby=distance")

@@ -2,8 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow;
 
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDBDao;
-import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
-import com.rootnetapp.rootnetintranet.data.local.db.user.UserDao;
+import com.rootnetapp.rootnetintranet.data.local.db.profile.ProfileDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
@@ -14,6 +13,9 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.CurrencyFieldData;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FilePost;
 import com.rootnetapp.rootnetintranet.models.createworkflow.PhoneFieldData;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
+import com.rootnetapp.rootnetintranet.models.responses.business.BusinessOpportunitiesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.contact.ContactsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.contact.SubContactsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountriesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.CreateWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.createworkflow.FileUploadResponse;
@@ -41,10 +43,12 @@ import io.reactivex.schedulers.Schedulers;
 
 public class CreateWorkflowRepository {
 
+    private static final int AUTOCOMPLETE_ITEMS_LIMIT = 5;
+
     private final ApiInterface service;
     private final AppDatabase database;
     private final WorkflowTypeDbDao workflowTypeDbDao;
-    private final UserDao profileDao;
+    private final ProfileDao profileDao;
     private final CountryDBDao countryDBDao;
 
     private final LiveData<List<WorkflowTypeItemMenu>> workflowTypeMenuItems;
@@ -53,7 +57,7 @@ public class CreateWorkflowRepository {
         this.service = service;
         this.database = database;
         this.workflowTypeDbDao = this.database.workflowTypeDbDao();
-        this.profileDao = this.database.userDao();
+        this.profileDao = this.database.profileDao();
         this.countryDBDao = this.database.countryDBDao();
         this.workflowTypeMenuItems = workflowTypeDbDao.getObservableTypesForMenu();
     }
@@ -68,10 +72,6 @@ public class CreateWorkflowRepository {
 
     protected WorkflowTypeDb getWorklowType(int workflowTypeId) {
         return workflowTypeDbDao.getWorkflowTypeBy(workflowTypeId);
-    }
-
-    protected List<FormCreateProfile> getProfiles() {
-        return profileDao.getAllProfiles();
     }
 
     protected List<FormFieldsByWorkflowType> getFiedsByWorkflowType(int byId) {
@@ -108,7 +108,6 @@ public class CreateWorkflowRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-
     public Observable<ListsResponse> getList(String auth, int id) {
         return service.getListItems(auth, id).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
@@ -134,8 +133,8 @@ public class CreateWorkflowRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<WorkflowUserResponse> getUsers(String auth) {
-        return service.getWorkflowUsers(auth).subscribeOn(Schedulers.newThread())
+    public Observable<WorkflowUserResponse> getUsers(String auth, int clientId) {
+        return service.getWorkflowUsers(auth, clientId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
@@ -147,7 +146,9 @@ public class CreateWorkflowRepository {
     public Observable<CreateWorkflowResponse> createWorkflow(String auth, int workflowTypeId,
                                                              String title, String workflowMetas,
                                                              String start, String description) {
-        return service.createWorkflow(auth, workflowTypeId, title, workflowMetas, start ,description).subscribeOn(Schedulers.newThread())
+        return service
+                .createWorkflow(auth, workflowTypeId, title, workflowMetas, start, description)
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
@@ -156,17 +157,20 @@ public class CreateWorkflowRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<CreateWorkflowResponse> createWorkflow(String token, Map<String, Object> body) {
+    public Observable<CreateWorkflowResponse> createWorkflow(String token,
+                                                             Map<String, Object> body) {
         return service.createWorkflow(token, body).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Observable<CreateWorkflowResponse> editWorkflow(String token, EditRequest request) {
-        return service.editWorkflow(token, request.getWorkflowId(), request).subscribeOn(Schedulers.newThread())
+        return service.editWorkflow(token, request.getWorkflowId(), request)
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<CreateWorkflowResponse> editWorkflow(String token, int workflowId, Map<String, Object> body) {
+    public Observable<CreateWorkflowResponse> editWorkflow(String token, int workflowId,
+                                                           Map<String, Object> body) {
         return service.editWorkflow(token, workflowId, body).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -181,13 +185,34 @@ public class CreateWorkflowRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    protected Observable<DownloadFileResponse> downloadFile(String auth, String entity, int fileId) {
+    protected Observable<DownloadFileResponse> downloadFile(String auth, String entity,
+                                                            int fileId) {
         return service.downloadFile(auth, entity, fileId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     protected Observable<ProfileResponse> getProfiles(String auth, boolean enabled) {
         return service.getProfiles(auth, enabled).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<ContactsResponse> getContacts(String auth, String query) {
+        return service.getContacts(auth, query, AUTOCOMPLETE_ITEMS_LIMIT)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<BusinessOpportunitiesResponse> getBusinessOpportunities(String auth,
+                                                                                 String query) {
+        return service.getBusinessOpportunities(auth, query, AUTOCOMPLETE_ITEMS_LIMIT)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<SubContactsResponse> postSearchSubContacts(String auth,
+                                                                    String query) {
+        return service.postSearchSubContacts(auth, query, AUTOCOMPLETE_ITEMS_LIMIT)
+                .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 }

@@ -267,7 +267,7 @@ public class WorkflowManagerViewModel extends ViewModel {
     protected void getUserPendingWorkflowsList() {
         Map<String, Object> options = getCommonFilters(false);
 
-        options.put("profile_related", mUserId);
+        options.put("responsible_id", mUserId);
         options.put("pending", true);
 
         showLoading.setValue(true);

@@ -168,7 +168,7 @@
     <string name="analytics">Analytics</string>
     <string name="user_analytics">My Analytics</string>
     <string name="company_overview">Company Overview</string>
-    <string name="my_pending_workflows_for_approval">Pending Workflows for Approval</string>
+    <string name="my_pending_workflows_for_approval">Pending Workflows for my Approval</string>
     <string name="date">Date</string>
     <string name="title">Title</string>
     <string name="author">Author</string>

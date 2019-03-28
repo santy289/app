@@ -3,14 +3,19 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.information;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.request.RequestOptions;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowUser;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailInformationBinding;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Step;
@@ -88,17 +93,24 @@ public class InformationFragment extends Fragment {
         });
 
         informationViewModel.getObservableError().observe(getViewLifecycleOwner(), errorObserver);
+        informationViewModel.getObservableUpdateOwnerUi()
+                .observe(getViewLifecycleOwner(), this::updateOwnerUi);
 //
         informationViewModel.showLoading.observe(getViewLifecycleOwner(), this::showLoading);
-        informationViewModel.updateInformationListUi.observe(getViewLifecycleOwner(), this::updateInformationListUi);
-        informationViewModel.showImportantInfoSection.observe(getViewLifecycleOwner(), this::showImportantInfoSection);
-        informationViewModel.loadImportantInfoSection.observe(getViewLifecycleOwner(), this::loadImportantInfoSection);
-        informationViewModel.showEditButtonLiveData.observe(getViewLifecycleOwner(), this::showEditButton);
+        informationViewModel.updateInformationListUi
+                .observe(getViewLifecycleOwner(), this::updateInformationListUi);
+        informationViewModel.showImportantInfoSection
+                .observe(getViewLifecycleOwner(), this::showImportantInfoSection);
+        informationViewModel.loadImportantInfoSection
+                .observe(getViewLifecycleOwner(), this::loadImportantInfoSection);
+        informationViewModel.showEditButtonLiveData
+                .observe(getViewLifecycleOwner(), this::showEditButton);
     }
 
     private void setOnClickListeners() {
         mBinding.btnEdit.setOnClickListener(v -> {
-            mBaseInformationFragmentInterface.showFragment(CreateWorkflowFragment.newInstance(mWorkflowListItem), true);
+            mBaseInformationFragmentInterface
+                    .showFragment(CreateWorkflowFragment.newInstance(mWorkflowListItem), true);
         });
     }
 
@@ -145,5 +157,27 @@ public class InformationFragment extends Fragment {
     @UiThread
     private void showEditButton(boolean show) {
         mBinding.btnEdit.setVisibility(show ? View.VISIBLE : View.GONE);
+        mBinding.viewInformation.setVisibility(show && mBinding.tvTitleInformation
+                .getVisibility() == View.VISIBLE ? View.VISIBLE : View.GONE);
+    }
+
+    @UiThread
+    private void updateOwnerUi(WorkflowUser owner) {
+        if (owner == null) return;
+
+        if (!TextUtils.isEmpty(owner.getPicture())) {
+            String path = Utils.imgDomain + owner.getPicture();
+            GlideUrl url = new GlideUrl(path);
+            Glide.with(getContext())
+                    .load(url.toStringUrl())
+                    .apply(
+                            new RequestOptions()
+                                    .placeholder(R.drawable.default_profile_avatar)
+                                    .error(R.drawable.default_profile_avatar)
+                    )
+                    .into(mBinding.ivOwner);
+        }
+
+        mBinding.tvOwnerName.setText(owner.getFullName());
     }
 }

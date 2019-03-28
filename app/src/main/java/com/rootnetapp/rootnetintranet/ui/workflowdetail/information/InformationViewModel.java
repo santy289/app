@@ -6,6 +6,7 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowUser;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
@@ -44,6 +45,7 @@ public class InformationViewModel extends ViewModel {
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
     private MutableLiveData<Integer> mErrorLiveData;
+    private MutableLiveData<WorkflowUser> mUpdateOwnerUiLiveData;
 
     protected MutableLiveData<Boolean> showLoading;
     protected MutableLiveData<List<Information>> updateInformationListUi;
@@ -243,6 +245,7 @@ public class InformationViewModel extends ViewModel {
         setImportantInfoSection(currentStatus);
 
         updateWorkflowInformation(mWorkflow, currentWorkflowType);
+        mUpdateOwnerUiLiveData.setValue(mWorkflow.getAuthor());
     }
 
     /**
@@ -279,5 +282,12 @@ public class InformationViewModel extends ViewModel {
             mErrorLiveData = new MutableLiveData<>();
         }
         return mErrorLiveData;
+    }
+
+    protected LiveData<WorkflowUser> getObservableUpdateOwnerUi() {
+        if (mUpdateOwnerUiLiveData == null) {
+            mUpdateOwnerUiLiveData = new MutableLiveData<>();
+        }
+        return mUpdateOwnerUiLiveData;
     }
 }

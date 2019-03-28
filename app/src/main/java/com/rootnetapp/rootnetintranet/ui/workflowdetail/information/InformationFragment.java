@@ -85,7 +85,8 @@ public class InformationFragment extends Fragment {
     }
 
     private void subscribe() {
-        informationViewModel.getObservableError().observe(getViewLifecycleOwner(), this::showToastMessage);
+        informationViewModel.getObservableError()
+                .observe(getViewLifecycleOwner(), this::showToastMessage);
         informationViewModel.getObservableUpdateOwnerUi()
                 .observe(getViewLifecycleOwner(), this::updateOwnerUi);
         informationViewModel.getObservableShowNoConnectionView()
@@ -148,8 +149,7 @@ public class InformationFragment extends Fragment {
     @UiThread
     private void showEditButton(boolean show) {
         mBinding.btnEdit.setVisibility(show ? View.VISIBLE : View.GONE);
-        mBinding.viewInformation.setVisibility(show && mBinding.tvTitleInformation
-                .getVisibility() == View.VISIBLE ? View.VISIBLE : View.GONE);
+        mBinding.viewInformation.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     @UiThread
@@ -186,7 +186,8 @@ public class InformationFragment extends Fragment {
     }
 
     @UiThread
-    private void showNoConnectionView(boolean show){
-        mBinding.includeNoConnectionView.lytNoConnectionView.setVisibility(show ? View.VISIBLE : View.GONE);
+    private void showNoConnectionView(boolean show) {
+        mBinding.includeNoConnectionView.lytNoConnectionView
+                .setVisibility(show ? View.VISIBLE : View.GONE);
     }
 }

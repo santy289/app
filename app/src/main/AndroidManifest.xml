@@ -45,6 +45,9 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
+        <!--Crashlytics release build only-->
+        <meta-data android:name="firebase_crashlytics_collection_enabled" android:value="${enableCrashReporting}" />
+
         <activity
             android:name=".ui.createworkflow.geolocation.GeolocationActivity"
             android:label="@string/title_activity_geolocation"

@@ -7,17 +7,19 @@ android {
         applicationId "com.rootnetapp.rootnetintranet"
         minSdkVersion 24
         targetSdkVersion 28
-        versionCode 26
-        versionName "1.1.10"
+        versionCode 27
+        versionName "1.1.11"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         debug {
             buildConfigField "String", "BASE_URL", API_DEV_BASE_URL
+            manifestPlaceholders = [enableCrashReporting:"false"]
         }
         release {
             buildConfigField "String", "BASE_URL", API_PROD_BASE_URL
+            manifestPlaceholders = [enableCrashReporting:"true"]
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -66,6 +68,12 @@ dependencies {
     implementation "com.google.dagger:dagger:$rootProject.daggerLibraryVersion"
     implementation "com.google.android.gms:play-services-maps:$rootProject.googleMapsVersion"
     implementation "com.google.android.libraries.places:places:$rootProject.placesVersion"
+    implementation "com.google.firebase:firebase-core:$rootProject.firebaseVersion"
+    implementation "com.google.firebase:firebase-messaging:$rootProject.firebaseMessagingVersion"
+    implementation "com.google.firebase:firebase-crash:$rootProject.firebaseCrashVersion"
+
+    //Crashlytics
+    implementation "com.crashlytics.sdk.android:crashlytics:$rootProject.crashlyticsVersion"
 
     //3rd party
     implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofit"
@@ -108,3 +116,6 @@ configurations {
         resolutionStrategy.force 'com.google.code.findbugs:jsr305:2.0.1'
     }
 }
+
+apply plugin: 'com.google.gms.google-services'
+apply plugin: "io.fabric"

@@ -168,7 +168,7 @@ public class WorkflowDetailViewModel extends ViewModel {
 
         List<String> permissionsToCheck = new ArrayList<>();
 
-        if (mWorkflowListItem.getOwnerId() == userId) {
+        if (mWorkflowListItem != null && mWorkflowListItem.getOwnerId() == userId) {
             permissionsToCheck.add(WORKFLOW_EDIT_MY_OWN);
             permissionsToCheck.add(WORKFLOW_EDIT_OWN);
         } else {

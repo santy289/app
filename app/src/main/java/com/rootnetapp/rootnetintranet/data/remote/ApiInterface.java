@@ -7,6 +7,7 @@ import com.rootnetapp.rootnetintranet.models.requests.comment.EditCommentRequest
 import com.rootnetapp.rootnetintranet.models.requests.comment.PostCommentRequest;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
 import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
+import com.rootnetapp.rootnetintranet.models.requests.resetpassword.ResetPasswordRequest;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
 import com.rootnetapp.rootnetintranet.models.responses.business.BusinessOpportunitiesResponse;
@@ -105,11 +106,7 @@ public interface ApiInterface {
 
     @Headers({"Domain-Name: api"})
     @POST("check/reset/password")
-    @FormUrlEncoded
-    Observable<ResetPasswordResponse> resetPassword(@Field("token") String token,
-                                                    @Field("username") String username,
-                                                    @Field("password") String password,
-                                                    @Field("repeat_new_password") String repeatNewPassword);
+    Observable<ResetPasswordResponse> resetPassword(@Body ResetPasswordRequest resetPasswordRequest);
 
     @Headers({"Domain-Name: api"})
     @GET("profiles?enabled=all")

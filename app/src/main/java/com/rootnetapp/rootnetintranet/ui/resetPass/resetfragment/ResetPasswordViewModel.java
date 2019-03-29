@@ -1,11 +1,12 @@
 package com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment;
 
+import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.models.requests.resetpassword.ResetPasswordRequest;
+import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordResponse;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-
-import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordResponse;
 
 /**
  * Created by Propietario on 12/03/2018.
@@ -27,7 +28,13 @@ public class ResetPasswordViewModel extends ViewModel {
     }
 
     protected void resetPassword(String token, String username, String password, String repeatNewPassword) {
-        resetPasswordRepository.resetPassword(token, username, password, repeatNewPassword).subscribe(this::onResetSuccess, this::onResetFailure);
+        ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest();
+        resetPasswordRequest.setToken(token);
+        resetPasswordRequest.setPassword(password);
+        resetPasswordRequest.setRepeatNewPassword(repeatNewPassword);
+        resetPasswordRequest.setIsValidated(true);
+
+        resetPasswordRepository.resetPassword(resetPasswordRequest).subscribe(this::onResetSuccess, this::onResetFailure);
     }
 
     private void onValidateSuccess(ResetPasswordResponse resetPasswordResponse) {

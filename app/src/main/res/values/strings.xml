@@ -354,6 +354,7 @@
     <string name="quick_actions_approve_workflow">Approve Workflow</string>
     <string name="quick_actions_change_status">Change Status</string>
     <string name="quick_actions_comment">Comment</string>
+    <string name="quick_actions_upload_file">Upload File</string>
 
     <!--QuickActionsActivity-->
     <string name="quick_actions_activity_title">Quick Actions</string>

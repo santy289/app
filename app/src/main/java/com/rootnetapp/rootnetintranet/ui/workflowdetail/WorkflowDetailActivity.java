@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,12 +16,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.ActivityWorkflowDetailBinding;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
+import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.WorkflowDetailViewPagerAdapter;
 
 import java.io.File;
@@ -27,6 +32,8 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
@@ -96,6 +103,7 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     private void initUiWith(WorkflowListItem workflowListItem) {
         setActionBar(workflowListItem);
         setupViewPager(workflowListItem);
+        setupSpeedDialFab();
         workflowDetailViewModel.getObservableWorflowListItem().removeObservers(this);
     }
 
@@ -446,6 +454,73 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         builder.setNegativeButton(R.string.cancel, null);
         builder.show();
     }
+
+    //region SpeedDial
+    private void setupSpeedDialFab() {
+        //reverse order
+        addActionItem(R.id.fab_comment, R.string.quick_actions_comment,
+                R.drawable.ic_message_black_24dp);
+        addActionItem(R.id.fab_change_status, R.string.quick_actions_change_status,
+                R.drawable.ic_compare_arrows_black_24dp);
+        addActionItem(R.id.fab_approve_workflow, R.string.quick_actions_approve_workflow,
+                R.drawable.ic_like_black_24dp);
+        addActionItem(R.id.fab_edit_workflow, R.string.quick_actions_edit_workflow,
+                R.drawable.ic_workflow_black_24dp);
+        addActionItem(R.id.fab_upload_file, R.string.quick_actions_upload_file,
+                R.drawable.ic_file_upload_white_24dp);
+
+        mBinding.fabSpeedDial.setOnActionSelectedListener(this::handleSpeedDialClick);
+        mBinding.fabSpeedDial.getMainFab().setSupportImageTintList(ColorStateList.valueOf(
+                Color.WHITE)); //this is the only way to change the icon color
+    }
+
+    private void addActionItem(@IdRes int idRes, @StringRes int titleRes,
+                               @DrawableRes int drawableRes) {
+        mBinding.fabSpeedDial.addActionItem(
+                new SpeedDialActionItem.Builder(idRes, drawableRes)
+                        .setLabel(getString(titleRes))
+                        .setFabBackgroundColor(ContextCompat.getColor(this, R.color.white))
+                        .setFabImageTintColor(ContextCompat.getColor(this, R.color.black))
+                        .setLabelBackgroundColor(ContextCompat.getColor(this, R.color.white))
+                        .setLabelColor(ContextCompat.getColor(this, R.color.dark_gray))
+                        .setLabelClickable(false)
+                        .create()
+        );
+    }
+
+    private boolean handleSpeedDialClick(SpeedDialActionItem speedDialActionItem) {
+        int itemPosition;
+        switch (speedDialActionItem.getId()) {
+
+            case R.id.fab_upload_file:
+                itemPosition = WorkflowDetailViewPagerAdapter.FILES;
+                break;
+
+            case R.id.fab_edit_workflow:
+                itemPosition = WorkflowDetailViewPagerAdapter.INFORMATION;
+                break;
+
+            case R.id.fab_approve_workflow:
+                itemPosition = WorkflowDetailViewPagerAdapter.STATUS;
+                break;
+
+            case R.id.fab_change_status:
+                itemPosition = WorkflowDetailViewPagerAdapter.FLOWCHART;
+                break;
+
+            case R.id.fab_comment:
+                itemPosition = WorkflowDetailViewPagerAdapter.COMMENTS;
+                break;
+
+            default:
+                return false;
+        }
+
+        mBinding.viewPager.setCurrentItem(itemPosition);
+
+        return false; // true to keep the Speed Dial open
+    }
+    //endregion
 
     @Override
     public void onBackPressed() {

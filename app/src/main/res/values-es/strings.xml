@@ -351,6 +351,7 @@
     <string name="quick_actions_approve_workflow">Aprobar Workflow</string>
     <string name="quick_actions_change_status">Cambiar Estatus</string>
     <string name="quick_actions_comment">Comentar</string>
+    <string name="quick_actions_upload_file">Subir Archivo</string>
 
     <!--QuickActionsActivity-->
     <string name="quick_actions_activity_title">Acciones rápidas</string>

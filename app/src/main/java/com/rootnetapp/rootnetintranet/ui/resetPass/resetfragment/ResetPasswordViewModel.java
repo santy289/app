@@ -27,7 +27,7 @@ public class ResetPasswordViewModel extends ViewModel {
         resetPasswordRepository.validateToken(token).subscribe(this::onValidateSuccess, this::onResetFailure);
     }
 
-    protected void resetPassword(String token, String username, String password, String repeatNewPassword) {
+    protected void resetPassword(String token, String password, String repeatNewPassword) {
         ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest();
         resetPasswordRequest.setToken(token);
         resetPasswordRequest.setPassword(password);

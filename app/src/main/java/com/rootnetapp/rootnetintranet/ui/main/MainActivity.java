@@ -16,8 +16,10 @@ import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Switch;
@@ -26,6 +28,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
+import com.crashlytics.android.Crashlytics;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.BuildConfig;
@@ -616,7 +619,7 @@ public class MainActivity extends AppCompatActivity
         builder.show();
     }
 
-    private void logout(){
+    private void logout() {
         SharedPreferences sharedPref = getSharedPreferences("Sessions",
                 Context.MODE_PRIVATE);
 

@@ -130,26 +130,12 @@ public class MainActivity extends AppCompatActivity
             viewModel.getWorkflow(Integer.parseInt(workflowId));
         }
 
-        //fixme remove this method once we are done testing crashlytics impl
-        if (BuildConfig.DEBUG) createCrashTestButton();
-
         //fixme temporary setup of Workflows as the initial tab
         showFragment(WorkflowFragment.newInstance(this), false);
 //        showFragment(TimelineFragment.newInstance(this), false);
         setFilterBoxListeners();
         setupBottomNavigation();
         setupSpeedDialFab();
-    }
-
-    private void createCrashTestButton() {
-        Button crashButton = new Button(this);
-        crashButton.setText("Crash!");
-        crashButton.setOnClickListener(view -> {
-            Crashlytics.getInstance().crash(); // Force a crash
-        });
-        addContentView(crashButton,
-                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT));
     }
 
     /**

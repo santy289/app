@@ -730,6 +730,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         fragmentWorkflowBinding.ivMassActions.setVisibility(show ? View.VISIBLE : View.GONE);
         fragmentWorkflowBinding.chbxSelectAll.setVisibility(show ? View.VISIBLE : View.GONE);
 
+        adapter.setShowCheckbox(show);
+
         verifyHeaderLineVisibility();
     }
 

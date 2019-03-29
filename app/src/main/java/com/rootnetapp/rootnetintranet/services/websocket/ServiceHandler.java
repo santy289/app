@@ -8,6 +8,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.rootnetapp.rootnetintranet.notifications.NotificationHandler;
 import com.rootnetapp.rootnetintranet.notifications.NotificationIds;
 
@@ -126,6 +127,9 @@ public class ServiceHandler extends Handler {
             if (webSocketHandler != null) {
                 webSocketHandler.completeClient();
             }
+
+            String message = TAG + " - Service was destroyed. Reason: " + errorMessage;
+            Crashlytics.logException(new ServiceDestroyedException(message));
 
             service.stopSelf(startId);
         });

@@ -26,6 +26,7 @@ import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -299,7 +300,11 @@ public class InformationViewModel extends ViewModel {
     private void onFailure(Throwable throwable) {
         showLoading.setValue(false);
         mErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
-        mShowNoConnectionViewLiveData.setValue(true);
+
+        if (throwable instanceof UnknownHostException) {
+            mShowNoConnectionViewLiveData.setValue(true);
+            showEditButtonLiveData.setValue(false);
+        }
     }
 
     protected LiveData<Integer> getObservableError() {

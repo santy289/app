@@ -112,6 +112,7 @@ public class WebSocketService extends Service {
 
     @Override
     public void onDestroy() {
+        //todo GoogleAnalytics
 //        Toast.makeText(getApplicationContext(), "onDestroy Service " + startId , Toast.LENGTH_LONG).show();
         Log.d(TAG, "onDestroy: SERVICE DESTROYED");
         serviceCleanup();

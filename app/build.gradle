@@ -66,6 +66,8 @@ dependencies {
     implementation "com.google.dagger:dagger:$rootProject.daggerLibraryVersion"
     implementation "com.google.android.gms:play-services-maps:$rootProject.googleMapsVersion"
     implementation "com.google.android.libraries.places:places:$rootProject.placesVersion"
+    implementation "com.google.firebase:firebase-core:$rootProject.firebaseVersion"
+    implementation "com.google.firebase:firebase-messaging:$rootProject.firebaseMessagingVersion"
 
     //3rd party
     implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofit"
@@ -108,3 +110,5 @@ configurations {
         resolutionStrategy.force 'com.google.code.findbugs:jsr305:2.0.1'
     }
 }
+
+apply plugin: 'com.google.gms.google-services'

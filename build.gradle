@@ -69,6 +69,7 @@ ext {
     firebaseMessagingVersion        = "17.5.0"
     googlePlayServicesVersion       = "15.0.1"
     crashlyticsVersion              = "2.9.9"
+    firebaseCrashVersion            = "16.2.1"
     PLATFORM = project.properties.get('buildPlatform', 'android')
     PLATFORM_ANDROID = 'android'
     PLATFORM_NETTY = 'netty'

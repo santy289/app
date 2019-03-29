@@ -17,8 +17,10 @@ import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Switch;
@@ -27,6 +29,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
+import com.crashlytics.android.Crashlytics;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.BuildConfig;
 import com.rootnetapp.rootnetintranet.R;
@@ -126,12 +129,26 @@ public class MainActivity extends AppCompatActivity
             viewModel.getWorkflow(Integer.parseInt(workflowId));
         }
 
+        //fixme remove this method once we are done testing crashlytics impl
+        if (BuildConfig.DEBUG) createCrashTestButton();
+
         //fixme temporary setup of Workflows as the initial tab
         showFragment(WorkflowFragment.newInstance(this), false);
 //        showFragment(TimelineFragment.newInstance(this), false);
         setFilterBoxListeners();
         setupBottomNavigation();
         setupSpeedDialFab();
+    }
+
+    private void createCrashTestButton() {
+        Button crashButton = new Button(this);
+        crashButton.setText("Crash!");
+        crashButton.setOnClickListener(view -> {
+            Crashlytics.getInstance().crash(); // Force a crash
+        });
+        addContentView(crashButton,
+                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
     }
 
     /**
@@ -613,7 +630,7 @@ public class MainActivity extends AppCompatActivity
         builder.show();
     }
 
-    private void logout(){
+    private void logout() {
         SharedPreferences sharedPref = getSharedPreferences("Sessions",
                 Context.MODE_PRIVATE);
 

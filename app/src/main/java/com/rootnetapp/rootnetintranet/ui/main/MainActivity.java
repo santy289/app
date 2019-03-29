@@ -417,6 +417,11 @@ public class MainActivity extends AppCompatActivity
             viewModel.sendBaseFiltersClicked();
         });
 
+        // Using the base field filter.
+        mainBinding.rightDrawer.rightDrawerStatusFilters.setOnClickListener(view -> {
+            viewModel.sendStatusFiltersClicked();
+        });
+
         mainBinding.toolbarImage.setOnClickListener(
                 v -> showFragment(ProfileFragment.newInstance(), false));
     }
@@ -438,6 +443,7 @@ public class MainActivity extends AppCompatActivity
             mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.GONE);
             mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
             hideBaseFilters(true);
+            hideStatusFilters(true);
             hideTitleDynamicFilters(true);
             sortingActive = true;
         } else {
@@ -447,6 +453,7 @@ public class MainActivity extends AppCompatActivity
             mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.VISIBLE);
             mainBinding.rightDrawer.drawerBackButton.setVisibility(View.GONE);
             hideBaseFilters(false);
+            hideStatusFilters(false);
             hideTitleDynamicFilters(false);
             sortingActive = false;
         }
@@ -680,6 +687,7 @@ public class MainActivity extends AppCompatActivity
         mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.filters));
         hideSortingViews(false);
         hideBaseFilters(false);
+        hideStatusFilters(false);
         hideTitleDynamicFilters(false);
         LayoutInflater inflater = LayoutInflater.from(this);
         rightDrawerFiltersAdapter = new RightDrawerFiltersAdapter(inflater, menus);
@@ -728,6 +736,25 @@ public class MainActivity extends AppCompatActivity
         setRightDrawerOptionsAdapter(optionsList.optionsList, listener);
     }
 
+    private void setRightDrawerStatusFilters(OptionsList optionsList) {
+        if (optionsList == null) {
+            Log.d(TAG, "setRightDrawerOptions: Not able to set Drawer Options. OptionList is NULL");
+            return;
+        }
+
+        if (TextUtils.isEmpty(optionsList.titleLabel)) {
+            prepareUIForOptionList(getString(optionsList.titleLabelRes));
+        } else {
+            prepareUIForOptionList(optionsList.titleLabel);
+        }
+
+        AdapterView.OnItemClickListener listener = (parent, view, position, id) -> {
+            // Clicks on Option List
+            viewModel.sendStatusFilterPositionClicked(position);
+        };
+        setRightDrawerOptionsAdapter(optionsList.optionsList, listener);
+    }
+
     private void setRightDrawerOptionsAdapter(List<WorkflowTypeMenu> optionsList,
                                               AdapterView.OnItemClickListener listener) {
         LayoutInflater inflater = LayoutInflater.from(this);
@@ -739,6 +766,7 @@ public class MainActivity extends AppCompatActivity
     private void prepareUIForOptionList(String title) {
         hideSortingViews(true);
         hideBaseFilters(true);
+        hideStatusFilters(true);
         hideTitleDynamicFilters(true);
         mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
         mainBinding.rightDrawer.rightDrawerTitle.setText(title);
@@ -746,6 +774,10 @@ public class MainActivity extends AppCompatActivity
 
     private void handleUpdateBaseFilterSelectionUpdateWith(@StringRes int resLabel) {
         mainBinding.rightDrawer.rightDrawerBaseSubtitle.setText(resLabel);
+    }
+
+    private void handleUpdateStatusFilterSelectionUpdateWith(@StringRes int resLabel) {
+        mainBinding.rightDrawer.rightDrawerStatusSubtitle.setText(resLabel);
     }
 
     private void invalidateOptionList() {
@@ -773,6 +805,14 @@ public class MainActivity extends AppCompatActivity
             mainBinding.rightDrawer.rightDrawerBaseFilters.setVisibility(View.GONE);
         } else {
             mainBinding.rightDrawer.rightDrawerBaseFilters.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void hideStatusFilters(boolean hide) {
+        if (hide) {
+            mainBinding.rightDrawer.rightDrawerStatusFilters.setVisibility(View.GONE);
+        } else {
+            mainBinding.rightDrawer.rightDrawerStatusFilters.setVisibility(View.VISIBLE);
         }
     }
 
@@ -848,8 +888,12 @@ public class MainActivity extends AppCompatActivity
         viewModel.receiveMessageUpdateSortSelected.observe(this, this::updateSortFieldSelection);
         viewModel.receiveMessageCreateBaseFiltersAdapter
                 .observe(this, this::setRightDrawerBaseFilters);
+        viewModel.receiveMessageCreateStatusFiltersAdapter
+                .observe(this, this::setRightDrawerStatusFilters);
         viewModel.receiveMessageBaseFilterSelected
                 .observe(this, this::handleUpdateBaseFilterSelectionUpdateWith);
+        viewModel.receiveMessageStatusFilterSelected
+                .observe(this, this::handleUpdateStatusFilterSelectionUpdateWith);
         viewModel.openRightDrawer.observe(this, this::openRightDrawer);
 
 //        viewModel.getObservableStartService().observe(this, result -> startWebsocketServiceIntent());

@@ -373,8 +373,12 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .observe(this, this::handleMessageMainUpdateSortSelection);
         workflowViewModel.messageMainBaseFilters
                 .observe(this, this::handleMessageMainBaseFilters);
+        workflowViewModel.messageMainStatusFilters
+                .observe(this, this::handleMessageMainStatusFilters);
         workflowViewModel.messageMainBaseFilterSelectionToFilterList
                 .observe(this, this::handleMessageMainBaseFilterSelected);
+        workflowViewModel.messageMainStatusFilterSelectionToFilterList
+                .observe(this, this::handleMessageMainStatusFilterSelected);
         workflowViewModel.getObservableShowAddButton()
                 .observe(this, this::showAddButton);
         workflowViewModel.getObservableShowViewWorkflowButton()
@@ -397,24 +401,44 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .observe(this, this::handleMessageSortSwitchActionToWorkflowList);
         mainViewModel.messageBaseFiltersClickedToWorkflowList
                 .observe(this, this::handleMessageBaseFiltersClicked);
+        mainViewModel.messageStatusFiltersClickedToWorkflowList
+                .observe(this, this::handleMessageStatusFiltersClicked);
         mainViewModel.messageBaseFilterPositionSelectedToWorkflowList
                 .observe(this, this::handleMessageBaseFilterPositionSelected);
+        mainViewModel.messageStatusFilterPositionSelectedToWorkflowList
+                .observe(this, this::handleMessageStatusFilterPositionSelected);
     }
 
     private void handleMessageMainBaseFilterSelected(Integer resLabel) {
         mainViewModel.receiveMessageBaseFilterSelectedToListUi(resLabel);
     }
 
+    private void handleMessageMainStatusFilterSelected(Integer resLabel) {
+        mainViewModel.receiveMessageStatusFilterSelectedToListUi(resLabel);
+    }
+
     private void handleMessageBaseFilterPositionSelected(Integer position) {
         workflowViewModel.handleBaseFieldPositionSelected(position, this);
+    }
+
+    private void handleMessageStatusFilterPositionSelected(Integer position) {
+        workflowViewModel.handleStatusFieldPositionSelected(position, this);
     }
 
     private void handleMessageMainBaseFilters(OptionsList optionsList) {
         mainViewModel.createDrawerBaseFiltersOptionListAdapter(optionsList);
     }
 
+    private void handleMessageMainStatusFilters(OptionsList optionsList) {
+        mainViewModel.createDrawerStatusFiltersOptionListAdapter(optionsList);
+    }
+
     private void handleMessageBaseFiltersClicked(Boolean clicked) {
         workflowViewModel.handleBaseFieldClick();
+    }
+
+    private void handleMessageStatusFiltersClicked(Boolean clicked) {
+        workflowViewModel.handleStatusFieldClick();
     }
 
     private void handleMessageMainUpdateSortSelection(int sortType) {

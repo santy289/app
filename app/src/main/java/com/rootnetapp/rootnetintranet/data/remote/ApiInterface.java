@@ -202,6 +202,14 @@ public interface ApiInterface {
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?status=true")
+    Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(@Header("Authorization") String authorization,
+                                                           @Query("limit") int limit,
+                                                           @Query("page") int page,
+                                                           @Query("workflow_type") boolean showTypeDetails,
+                                                           @QueryMap Map<String, Object> options);
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?status=true")
     Observable<WorkflowResponseDb> getWorkflowsDbFilteredByDynamicFields(@Header("Authorization") String authorization,
                                                                          @Query("limit") int limit,
                                                                          @Query("open") boolean open,

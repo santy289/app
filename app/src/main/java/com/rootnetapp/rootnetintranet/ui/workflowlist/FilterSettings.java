@@ -17,6 +17,7 @@ import java.util.List;
 
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.BASE_FILTER_ALL_ID;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.NO_TYPE_SELECTED;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.STATUS_FILTER_ALL_ID;
 
 public class FilterSettings {
     private boolean isCheckedMyPending;
@@ -40,7 +41,9 @@ public class FilterSettings {
     private List<WorkflowTypeMenu> filterDrawerList;
 
     private List<WorkflowTypeMenu> baseFilterOptionsList;
+    private List<WorkflowTypeMenu> statusFilterOptionList;
     private int baseFilterIndexSelected;
+    private int statusFilterIndexSelected;
 
     public FilterSettings() {
         this.isCheckedMyPending = false;
@@ -53,7 +56,9 @@ public class FilterSettings {
         this.rightDrawerOptionsList = new ArrayMap<>();
         this.filterDrawerList = new ArrayList<>();
         this.baseFilterOptionsList = new ArrayList<>();
+        this.statusFilterOptionList = new ArrayList<>();
         this.baseFilterIndexSelected = 0;
+        this.statusFilterIndexSelected = 1;
     }
 
     public void resetFilterSettings() {
@@ -98,6 +103,14 @@ public class FilterSettings {
 
     public void setBaseFilterOptionsList(List<WorkflowTypeMenu> baseFilterOptionsList) {
         this.baseFilterOptionsList = baseFilterOptionsList;
+    }
+
+    public int getSizeStatusFilterOptionList() {
+        return statusFilterOptionList.size();
+    }
+
+    public void setStatusFilterOptionList(List<WorkflowTypeMenu> statusFilterOptionList) {
+        this.statusFilterOptionList = statusFilterOptionList;
     }
 
     public int getWorkflowTypeId() {
@@ -486,6 +499,16 @@ public class FilterSettings {
         return optionsList;
     }
 
+    protected OptionsList handleOptionListForStatusFilters() {
+        if (statusFilterOptionList == null) {
+            return null;
+        }
+        OptionsList optionsList = new OptionsList();
+        optionsList.titleLabelRes = R.string.status_filters;
+        optionsList.optionsList = statusFilterOptionList;
+        return optionsList;
+    }
+
     protected OptionsList handleFilterListPositionSelected(int position) {
         WorkflowTypeMenu menuSelected = filterDrawerList.get(position);
         filterListIndexSelected = position;
@@ -500,11 +523,20 @@ public class FilterSettings {
     }
 
     protected void resetBaseFilterSelectionToAll() {
-        baseFilterIndexSelected = NO_TYPE_SELECTED;
+        baseFilterIndexSelected = 0; //all index
         if (baseFilterOptionsList.size() < 1) {
             return;
         }
         WorkflowTypeMenu baseFilter = baseFilterOptionsList.get(baseFilterIndexSelected);
+        baseFilter.setSelected(true);
+    }
+
+    protected void resetStatusFilterSelectionToOpen() {
+        statusFilterIndexSelected = 1; //open index
+        if (statusFilterOptionList.size() < 1) {
+            return;
+        }
+        WorkflowTypeMenu baseFilter = statusFilterOptionList.get(statusFilterIndexSelected);
         baseFilter.setSelected(true);
     }
 
@@ -517,6 +549,18 @@ public class FilterSettings {
             return BASE_FILTER_ALL_ID;
         }
         WorkflowTypeMenu baseFilter = baseFilterOptionsList.get(baseFilterIndexSelected);
+        return baseFilter.getId();
+    }
+
+    /**
+     * Finds which base filter is selected in statusFilterOptionList.
+     * @return Returns the base filter selected
+     */
+    protected int getStatusFilterSelectedId() {
+        if (statusFilterOptionList.size() < 1) {
+            return STATUS_FILTER_ALL_ID;
+        }
+        WorkflowTypeMenu baseFilter = statusFilterOptionList.get(statusFilterIndexSelected);
         return baseFilter.getId();
     }
 
@@ -542,6 +586,33 @@ public class FilterSettings {
         // Setting new selected base filter.
         baseFilterIndexSelected = position;
         filterSelected = baseFilterOptionsList.get(baseFilterIndexSelected);
+        filterSelected.setSelected(true);
+
+        return filterSelected;
+    }
+
+    /**
+     * FilterSettings updates baseFilterIndexSelected, and clears any other items selected. Updates
+     * baseFilterOptionsList and marks as selected on the position given.
+     * @param position Index position to mark as selected in baseFilterOptionsList.
+     * @return Returns a WorkflowTypeMenu as selected or not selected if it was previously selected.
+     */
+    protected WorkflowTypeMenu handleStatusFilterPositionSelected(int position) {
+        WorkflowTypeMenu filterSelected;
+        if (position == statusFilterIndexSelected) {
+            filterSelected = statusFilterOptionList.get(position);
+            filterSelected.setSelected(false);
+            statusFilterIndexSelected = 0;
+            return filterSelected;
+        }
+
+        // Clear previously selected base filter.
+        filterSelected = statusFilterOptionList.get(statusFilterIndexSelected);
+        filterSelected.setSelected(false);
+
+        // Setting new selected base filter.
+        statusFilterIndexSelected = position;
+        filterSelected = statusFilterOptionList.get(statusFilterIndexSelected);
         filterSelected.setSelected(true);
 
         return filterSelected;

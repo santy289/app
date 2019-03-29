@@ -532,7 +532,7 @@ public interface ApiInterface {
     Observable<AutocompleteResponse> getAutocompletePlaces(@Query("input") String input,
                                                            @Query("key") String apiKey);
 
-    @GET("https://maps.googleapis.com/maps/api/place/details/json?fields=name,geometry")
+    @GET("https://maps.googleapis.com/maps/api/place/details/json?fields=name,geometry,formatted_address")
     Observable<PlaceDetailsResponse> getPlaceDetails(@Query("placeid") String placeId,
                                                      @Query("key") String apiKey);
     //endregion

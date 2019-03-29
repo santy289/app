@@ -89,6 +89,21 @@
                 app:layout_constraintWidth_default="wrap" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <com.leinardi.android.speeddial.SpeedDialOverlayLayout
+            android:id="@+id/overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+        <com.leinardi.android.speeddial.SpeedDialView
+            android:id="@+id/fab_speed_dial"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            app:sdExpansionMode="top"
+            app:sdMainFabClosedSrc="@drawable/ic_diamond_black_24dp"
+            app:sdOverlayLayout="@id/overlay" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>
 

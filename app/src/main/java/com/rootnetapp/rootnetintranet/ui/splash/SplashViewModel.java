@@ -1,8 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.splash;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.Log;
@@ -14,6 +11,9 @@ import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
@@ -60,7 +60,8 @@ public class SplashViewModel extends ViewModel {
                 goToDomain.setValue(true);
                 return;
             }
-            Utils.domain = "https://" + domain.getClient().getApiUrl();
+            String apiUrl = domain.getClient().getApiUrl();
+            Utils.domain = Utils.getWebProtocol(apiUrl) + apiUrl;
             Utils.setImgDomain(domain.getClient().getApiUrl());
             RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
         } catch (IOException e) {

@@ -139,6 +139,8 @@
     <string name="attach">ADJUNTAR</string>
     <string name="remove_file">REMOVER ARCHIVO</string>
     <string name="select_file">Seleccionar un archivo para subir</string>
+    <string name="error_selecting_file">Error al seleccionar el archivo</string>
+    <string name="file_video_not_allowed">No está permitido adjuntar un video</string>
     <string name="select_preset">Seleccionar el tipo de documento para subir</string>
     <string name="month">Mes</string>
     <string name="week">Semana</string>
@@ -167,7 +169,7 @@
     <string name="analytics">Analíticas</string>
     <string name="user_analytics">Mis Analíticas</string>
     <string name="company_overview">Informacion de la Compañía</string>
-    <string name="my_pending_workflows_for_approval">Workflows Pendientes de Aprobación</string>
+    <string name="my_pending_workflows_for_approval">Workflows Pendientes de mi Aprobación</string>
     <string name="date">Fecha</string>
     <string name="title">Título</string>
     <string name="author">Autor</string>
@@ -349,6 +351,7 @@
     <string name="quick_actions_approve_workflow">Aprobar Workflow</string>
     <string name="quick_actions_change_status">Cambiar Estatus</string>
     <string name="quick_actions_comment">Comentar</string>
+    <string name="quick_actions_upload_file">Subir Archivo</string>
 
     <!--QuickActionsActivity-->
     <string name="quick_actions_activity_title">Acciones rápidas</string>

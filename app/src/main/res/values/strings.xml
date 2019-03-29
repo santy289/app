@@ -138,6 +138,8 @@
     <string name="attach">ATTACH</string>
     <string name="remove_file">REMOVE FILE</string>
     <string name="select_file">Please select a file to upload</string>
+    <string name="error_selecting_file">Error selecting the file</string>
+    <string name="file_video_not_allowed">Video files are not allowed</string>
     <string name="select_preset">Select what type of document you are uploading</string>
     <string name="month">Month</string>
     <string name="week">Week</string>
@@ -166,7 +168,7 @@
     <string name="analytics">Analytics</string>
     <string name="user_analytics">My Analytics</string>
     <string name="company_overview">Company Overview</string>
-    <string name="my_pending_workflows_for_approval">Pending Workflows for Approval</string>
+    <string name="my_pending_workflows_for_approval">Pending Workflows for my Approval</string>
     <string name="date">Date</string>
     <string name="title">Title</string>
     <string name="author">Author</string>
@@ -352,6 +354,7 @@
     <string name="quick_actions_approve_workflow">Approve Workflow</string>
     <string name="quick_actions_change_status">Change Status</string>
     <string name="quick_actions_comment">Comment</string>
+    <string name="quick_actions_upload_file">Upload File</string>
 
     <!--QuickActionsActivity-->
     <string name="quick_actions_activity_title">Quick Actions</string>

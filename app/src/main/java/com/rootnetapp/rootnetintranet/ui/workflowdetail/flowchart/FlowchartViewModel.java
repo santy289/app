@@ -3,6 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.flowchart;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.squareup.moshi.JsonAdapter;
@@ -50,7 +51,7 @@ public class FlowchartViewModel extends ViewModel {
         try {
             domain = jsonAdapter.fromJson(json);
 
-            String url = "https://" + domain.getClient().getDomain()
+            String url = Utils.getWebProtocol(domain.getClient().getDomain()) + domain.getClient().getDomain()
                     + "/Intranet/workflow/tree/" + workflow.getWorkflowId();
 
             WebViewData data = new WebViewData(url, getLocalStorageItemScripts());

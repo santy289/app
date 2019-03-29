@@ -16,6 +16,7 @@ import java.util.List;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.room.EmptyResultSetException;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -32,6 +33,7 @@ public class WorkflowDetailRepository {
     private MutableLiveData<WorkflowActivationResponse> openCloseResponseLiveData;
     private MutableLiveData<WorkflowActivationResponse> enableDisableResponseLiveData;
     private MutableLiveData<WorkflowListItem> retrieveFromDbWorkflow;
+    private MutableLiveData<Boolean> fetchWorkflowFromServer;
     private MutableLiveData<DeleteWorkflowResponse> deleteWorkflowResponseLiveData;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
@@ -75,12 +77,18 @@ public class WorkflowDetailRepository {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(workflowListItem -> {
                     if (workflowListItem == null) {
-                        // TODO go to network
+                        //go to network
+                        fetchWorkflowFromServer.setValue(true);
                         Log.d(TAG, "getWorkflowFromDataSources: ");
                     } else {
                         retrieveFromDbWorkflow.setValue(workflowListItem);
                     }
                 }, throwable -> {
+                    if (throwable instanceof EmptyResultSetException){
+                        //go to network
+                        fetchWorkflowFromServer.setValue(true);
+                    }
+
                     Log.d(TAG, "Error: " + throwable.getMessage());
                 });
 
@@ -211,5 +219,12 @@ public class WorkflowDetailRepository {
             deleteWorkflowResponseLiveData = new MutableLiveData<>();
         }
         return deleteWorkflowResponseLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableFetchWorkflowFromServer() {
+        if (fetchWorkflowFromServer == null) {
+            fetchWorkflowFromServer = new MutableLiveData<>();
+        }
+        return fetchWorkflowFromServer;
     }
 }

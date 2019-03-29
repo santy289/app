@@ -8,6 +8,10 @@
         android:title="@string/workflow_detail_activity_disable"/>
 
     <item
+        android:id="@+id/open"
+        android:title="@string/workflow_detail_activity_open" />
+
+    <item
         android:id="@+id/close"
         android:title="@string/workflow_detail_activity_close" />
 

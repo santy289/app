@@ -129,6 +129,8 @@ public class WorkflowViewModel extends ViewModel {
     private boolean hasViewDetailsPermissions;
     private List<Integer> mWorkflowIdsToDelete;
     private Boolean isSwipe;
+    private boolean isShowOpenActionMenu;
+    private boolean isShowCloseActionMenu;
 
     public WorkflowViewModel(WorkflowRepository workflowRepository) {
         this.workflowRepository = workflowRepository;
@@ -149,6 +151,10 @@ public class WorkflowViewModel extends ViewModel {
         messageMainStatusFilters = new MutableLiveData<>();
         messageMainBaseFilterSelectionToFilterList = new MutableLiveData<>();
         messageMainStatusFilterSelectionToFilterList = new MutableLiveData<>();
+
+        //Open filter is selected by default
+        isShowOpenActionMenu = false;
+        isShowCloseActionMenu = true;
     }
 
     @Override
@@ -178,6 +184,14 @@ public class WorkflowViewModel extends ViewModel {
 
     protected boolean hasViewDetailsPermissions() {
         return hasViewDetailsPermissions;
+    }
+
+    protected boolean isShowOpenActionMenu(){
+        return isShowOpenActionMenu;
+    }
+
+    protected boolean isShowCloseActionMenu(){
+        return isShowCloseActionMenu;
     }
 
     private void getWorkflowTypesFromDb() {
@@ -589,12 +603,18 @@ public class WorkflowViewModel extends ViewModel {
         switch (filterSettings.getStatusFilterSelectedId()) {
             case STATUS_FILTER_ALL_ID:
                 // Nothing to do add to options.
+                isShowOpenActionMenu = true;
+                isShowCloseActionMenu = true;
                 break;
             case STATUS_FILTER_OPEN_ID:
                 options.put("open", true);
+                isShowOpenActionMenu = false;
+                isShowCloseActionMenu = true;
                 break;
             case STATUS_FILTER_CLOSED_ID:
                 options.put("open", false);
+                isShowOpenActionMenu = true;
+                isShowCloseActionMenu = false;
                 break;
         }
 
@@ -1799,5 +1819,4 @@ public class WorkflowViewModel extends ViewModel {
         }
         return handleScrollRecyclerToTop;
     }
-
 }

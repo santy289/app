@@ -219,7 +219,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         adapter.clearCheckedItems();
     }
 
-    private void scrollRecyclerToTop(boolean scroll){
+    private void scrollRecyclerToTop(boolean scroll) {
         if (!scroll) return;
 
         //scroll to top after a tiny delay
@@ -633,6 +633,9 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         //Inflating the Popup using xml file
         popup.getMenuInflater().inflate(R.menu.menu_workflow_list, popup.getMenu());
 
+        popup.getMenu().findItem(R.id.open).setVisible(workflowViewModel.isShowOpenActionMenu());
+        popup.getMenu().findItem(R.id.close).setVisible(workflowViewModel.isShowCloseActionMenu());
+
         popup.setOnMenuItemClickListener(item -> {
             List<Integer> checkedList = adapter.getCheckedIds();
             if (checkedList.isEmpty()) showToastMessage(R.string.workflow_list_no_selections);
@@ -640,6 +643,9 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             switch (item.getItemId()) {
                 case R.id.disable:
                     workflowViewModel.enableDisableWorkflows(checkedList, false);
+                    break;
+                case R.id.open:
+                    workflowViewModel.openCloseWorkflows(checkedList, true);
                     break;
                 case R.id.close:
                     workflowViewModel.openCloseWorkflows(checkedList, false);

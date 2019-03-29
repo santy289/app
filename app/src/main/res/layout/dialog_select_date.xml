@@ -11,13 +11,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-
             <TextView
                 android:id="@+id/square"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@color/colorAccent"
-                android:padding="20dp"
+                android:ellipsize="end"
+                android:maxWidth="250dp"
+                android:maxLines="2"
+                android:padding="15dp"
                 android:text="@string/select_date"
                 android:textAllCaps="true"
                 android:textColor="@color/white"
@@ -29,8 +31,8 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:paddingEnd="20dp"
                 android:paddingStart="20dp"
+                android:paddingEnd="20dp"
                 android:src="@drawable/ic_close_black_24dp" />
 
             <View
@@ -39,10 +41,6 @@
                 android:layout_below="@+id/square"
                 android:background="@color/detailsColor" />
         </RelativeLayout>
-
-
-
-
 
         <ScrollView
             android:id="@+id/scroll"
@@ -54,14 +52,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingEnd="15sp"
-                android:paddingStart="15dp">
+                android:paddingStart="15dp"
+                android:paddingEnd="15sp">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingBottom="5dp"
                     android:paddingTop="10dp"
+                    android:paddingBottom="5dp"
                     android:text="@string/start_date"
                     android:textColor="@color/colorAccent" />
 
@@ -70,14 +68,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:datePickerMode="calendar"
-                    android:paddingEnd="20dp"
-                    android:paddingStart="20dp" />
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingBottom="5dp"
                     android:paddingTop="10dp"
+                    android:paddingBottom="5dp"
                     android:text="@string/end_date"
                     android:textColor="@color/colorAccent" />
 
@@ -86,8 +84,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:datePickerMode="calendar"
-                    android:paddingEnd="20dp"
-                    android:paddingStart="20dp" />
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp" />
 
                 <Button
                     android:id="@+id/btn_accept"
@@ -96,12 +94,10 @@
                     android:layout_gravity="end"
                     android:layout_margin="20dp"
                     android:backgroundTint="@color/green"
-                    android:textColor="@color/white"
-                    android:text="@string/accept"/>
+                    android:text="@string/accept"
+                    android:textColor="@color/white" />
 
             </LinearLayout>
-
         </ScrollView>
-
     </RelativeLayout>
 </layout>

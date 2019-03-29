@@ -15,6 +15,25 @@
             android:padding="16dp"
             android:visibility="visible">
 
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:indeterminate="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <include
+                android:id="@+id/include_no_connection_view"
+                layout="@layout/no_connection_view_borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
             <TextView
                 android:id="@+id/tv_title_important_steps"
                 android:layout_width="wrap_content"
@@ -24,8 +43,10 @@
                 android:textColor="@color/workflow_details_section_title"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
 
             <View
                 android:id="@+id/view_important_steps"
@@ -34,18 +55,22 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:background="@color/workflow_details_section_title_bar"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@id/tv_title_important_steps"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/tv_title_important_steps"
-                app:layout_constraintTop_toTopOf="@id/tv_title_important_steps" />
+                app:layout_constraintTop_toTopOf="@id/tv_title_important_steps"
+                tools:visibility="visible" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_steps"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
+                android:visibility="gone"
                 app:layout_constraintStart_toStartOf="@id/tv_title_important_steps"
-                app:layout_constraintTop_toBottomOf="@id/tv_title_important_steps" />
+                app:layout_constraintTop_toBottomOf="@id/tv_title_important_steps"
+                tools:visibility="visible" />
 
             <TextView
                 android:id="@+id/tv_title_information"
@@ -56,9 +81,11 @@
                 android:textColor="@color/workflow_details_section_title"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@+id/btn_edit"
                 app:layout_constraintStart_toStartOf="@id/rv_steps"
-                app:layout_constraintTop_toTopOf="@+id/btn_edit" />
+                app:layout_constraintTop_toTopOf="@+id/btn_edit"
+                tools:visibility="visible" />
 
             <View
                 android:id="@+id/view_information"
@@ -67,16 +94,19 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:background="@color/workflow_details_section_title_bar"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@+id/btn_edit"
                 app:layout_constraintEnd_toStartOf="@+id/btn_edit"
                 app:layout_constraintStart_toEndOf="@id/tv_title_information"
-                app:layout_constraintTop_toTopOf="@+id/btn_edit" />
+                app:layout_constraintTop_toTopOf="@+id/btn_edit"
+                tools:visibility="visible" />
 
             <Button
                 android:id="@+id/btn_edit"
                 style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
                 android:layout_width="35dp"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 app:backgroundTint="@color/white"
                 app:icon="@drawable/ic_edit_black_24dp"
                 app:iconGravity="textStart"
@@ -86,17 +116,70 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/view_information"
                 app:layout_constraintTop_toBottomOf="@+id/rv_steps"
-                app:rippleColor="@color/dark_gray" />
+                app:rippleColor="@color/dark_gray"
+                tools:visibility="visible" />
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier_information"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="tv_title_information,view_information,btn_edit" />
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/iv_owner"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/default_profile_avatar"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/barrier_information"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/tv_owner_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:textColor="@color/text_blue"
+                android:textStyle="bold"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/iv_owner"
+                app:layout_constraintTop_toTopOf="@id/iv_owner"
+                tools:text="Jon Doe"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/tv_owner_description"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="@string/owner"
+                android:textColor="@color/dark_gray"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/iv_owner"
+                app:layout_constraintTop_toBottomOf="@id/tv_owner_name"
+                tools:visibility="visible" />
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier_owner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="iv_owner,tv_owner_name,tv_owner_description" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_information"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:padding="5dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btn_edit" />
-
-            <!--android:layout_height="@dimen/workflow_detail_standard_height-->
+                app:layout_constraintTop_toBottomOf="@id/barrier_owner" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>

@@ -423,48 +423,49 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
                     .getName();
         }
 
-        int remainingTimeSeconds = item.getDescription().getArguments().getRemainingTime();
-        boolean isOutOfTime = remainingTimeSeconds < 0;
-        remainingTimeSeconds = Math.abs(remainingTimeSeconds);
+        String remainingTimeString = "";
+        Integer remainingTimeSeconds = item.getDescription().getArguments().getRemainingTime();
+        if (remainingTimeSeconds != null) {
+            boolean isOutOfTime = remainingTimeSeconds < 0;
+            remainingTimeSeconds = Math.abs(remainingTimeSeconds);
 
-        String remainingTimeString;
+            Duration duration = Duration.ofSeconds(remainingTimeSeconds);
 
-        Duration duration = Duration.ofSeconds(remainingTimeSeconds);
+            int days = (int) duration.toDays();
+            duration = duration.minusDays(days);
+            int hours = (int) duration.toHours();
 
-        int days = (int) duration.toDays();
-        duration = duration.minusDays(days);
-        int hours = (int) duration.toHours();
+            String daysString = context.getResources().getQuantityString(
+                    R.plurals.timeline_description_out_of_time_days,
+                    days,
+                    days);
 
-        String daysString = context.getResources().getQuantityString(
-                R.plurals.timeline_description_out_of_time_days,
-                days,
-                days);
+            String hoursString = context.getResources().getQuantityString(
+                    R.plurals.timeline_description_out_of_time_hours,
+                    hours,
+                    hours);
 
-        String hoursString = context.getResources().getQuantityString(
-                R.plurals.timeline_description_out_of_time_hours,
-                hours,
-                hours);
+            String formattedTime = String.format(Locale.US, "%s, %s", daysString, hoursString);
 
-        String formattedTime = String.format(Locale.US, "%s, %s", daysString, hoursString);
-
-        if (isOutOfTime) {
-            if (days == 0) {
-                remainingTimeString = context.getString(
-                        R.string.timeline_description_workflow_created_out_of_time,
-                        hoursString
-                );
+            if (isOutOfTime) {
+                if (days == 0) {
+                    remainingTimeString = context.getString(
+                            R.string.timeline_description_workflow_created_out_of_time,
+                            hoursString
+                    );
+                } else {
+                    remainingTimeString = context.getString(
+                            R.string.timeline_description_workflow_created_out_of_time,
+                            formattedTime
+                    );
+                }
             } else {
-                remainingTimeString = context.getString(
-                        R.string.timeline_description_workflow_created_out_of_time,
-                        formattedTime
-                );
-            }
-        } else {
-            if (days == 0) {
-                remainingTimeString = String.format(Locale.US, "%s", hoursString);
+                if (days == 0) {
+                    remainingTimeString = String.format(Locale.US, "%s", hoursString);
 
-            } else {
-                remainingTimeString = formattedTime;
+                } else {
+                    remainingTimeString = formattedTime;
+                }
             }
         }
 

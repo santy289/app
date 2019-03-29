@@ -25,6 +25,14 @@ import androidx.viewpager.widget.ViewPager;
  */
 public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
 
+    public static final int STATUS = 0;
+    public static final int FLOWCHART = 1;
+    public static final int INFORMATION = 2;
+    public static final int PEOPLE_INVOLVED = 3;
+    public static final int APPROVAL_HISTORY = 4;
+    public static final int COMMENTS = 5;
+    public static final int FILES = 6;
+
     private final Context mContext;
     private final WorkflowListItem mWorkflowItem;
     private int mCommentsCounter;
@@ -48,19 +56,19 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
 
         switch (position) {
-            case 0:
+            case STATUS:
                 return StatusFragment.newInstance(mWorkflowItem);
-            case 1:
+            case FLOWCHART:
                 return FlowchartFragment.newInstance(mWorkflowItem);
-            case 2:
+            case INFORMATION:
                 return BaseInformationFragment.newInstance(mWorkflowItem);
-            case 3:
+            case PEOPLE_INVOLVED:
                 return BasePeopleInvolvedFragment.newInstance(mWorkflowItem);
-            case 4:
+            case APPROVAL_HISTORY:
                 return ApprovalHistoryFragment.newInstance(mWorkflowItem);
-            case 5:
+            case COMMENTS:
                 return CommentsFragment.newInstance(mWorkflowItem, true);
-            case 6:
+            case FILES:
                 return FilesFragment.newInstance(mWorkflowItem);
             default:
                 return null;
@@ -91,23 +99,23 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
 
         // Generate title based on item position
         switch (position) {
-            case 0:
+            case STATUS:
                 return mContext.getString(R.string.workflow_detail_status_fragment_title);
-            case 1:
+            case FLOWCHART:
                 return mContext.getString(R.string.workflow_detail_flowchart_fragment_title);
-            case 2:
+            case INFORMATION:
                 return mContext.getString(R.string.workflow_detail_information_fragment_title);
-            case 3:
+            case PEOPLE_INVOLVED:
                 return mContext.getString(R.string.workflow_detail_people_involved_fragment_title);
-            case 4:
+            case APPROVAL_HISTORY:
                 return mContext.getString(R.string.workflow_detail_approval_history_fragment_title);
-            case 5:
+            case COMMENTS:
                 title = mContext.getString(R.string.workflow_detail_comments_fragment_title);
                 if (getCommentsCounter() > 0) {
                     title += " (" + getCommentsCounter() + ")";
                 }
                 return title;
-            case 6:
+            case FILES:
                 title = mContext.getString(R.string.workflow_detail_files_fragment_title);
                 if (getFilesCounter() > 0) {
                     title += " (" + getFilesCounter() + ")";

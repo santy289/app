@@ -1,21 +1,30 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.information;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.request.RequestOptions;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowUser;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailInformationBinding;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Step;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.GeolocationActivity;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.GeolocationViewModel;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.SelectedLocation;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.Information;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.adapters.InformationAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters.StepsAdapter;
@@ -25,14 +34,14 @@ import java.util.List;
 import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-public class InformationFragment extends Fragment {
+public class InformationFragment extends Fragment implements InformationFragmentInterface {
 
     @Inject
     InformationViewModelFactory informationViewModelFactory;
@@ -80,41 +89,40 @@ public class InformationFragment extends Fragment {
     }
 
     private void subscribe() {
-        final Observer<Integer> errorObserver = ((Integer data) -> {
-            showLoading(false);
-            if (null != data) {
-                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
-            }
-        });
+        informationViewModel.getObservableError()
+                .observe(getViewLifecycleOwner(), this::showToastMessage);
+        informationViewModel.getObservableUpdateOwnerUi()
+                .observe(getViewLifecycleOwner(), this::updateOwnerUi);
+        informationViewModel.getObservableShowNoConnectionView()
+                .observe(getViewLifecycleOwner(), this::showNoConnectionView);
 
-        informationViewModel.getObservableError().observe(getViewLifecycleOwner(), errorObserver);
-//
         informationViewModel.showLoading.observe(getViewLifecycleOwner(), this::showLoading);
-        informationViewModel.updateInformationListUi.observe(getViewLifecycleOwner(), this::updateInformationListUi);
-        informationViewModel.showImportantInfoSection.observe(getViewLifecycleOwner(), this::showImportantInfoSection);
-        informationViewModel.loadImportantInfoSection.observe(getViewLifecycleOwner(), this::loadImportantInfoSection);
-        informationViewModel.showEditButtonLiveData.observe(getViewLifecycleOwner(), this::showEditButton);
+        informationViewModel.updateInformationListUi
+                .observe(getViewLifecycleOwner(), this::updateInformationListUi);
+        informationViewModel.showImportantInfoSection
+                .observe(getViewLifecycleOwner(), this::showImportantInfoSection);
+        informationViewModel.loadImportantInfoSection
+                .observe(getViewLifecycleOwner(), this::loadImportantInfoSection);
+        informationViewModel.showEditButtonLiveData
+                .observe(getViewLifecycleOwner(), this::showEditButton);
     }
 
     private void setOnClickListeners() {
         mBinding.btnEdit.setOnClickListener(v -> {
-            mBaseInformationFragmentInterface.showFragment(CreateWorkflowFragment.newInstance(mWorkflowListItem), true);
+            mBaseInformationFragmentInterface
+                    .showFragment(CreateWorkflowFragment.newInstance(mWorkflowListItem), true);
         });
     }
 
     @UiThread
     private void showLoading(boolean show) {
-        if (show) {
-            Utils.showLoading(getContext());
-        } else {
-            Utils.hideLoading();
-        }
+        mBinding.progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     @UiThread
     private void updateInformationListUi(List<Information> informationList) {
         mBinding.rvInformation.setLayoutManager(new LinearLayoutManager(getContext()));
-        mBinding.rvInformation.setAdapter(new InformationAdapter(informationList));
+        mBinding.rvInformation.setAdapter(new InformationAdapter(this, informationList));
         mBinding.rvInformation.setNestedScrollingEnabled(false);
     }
 
@@ -145,5 +153,54 @@ public class InformationFragment extends Fragment {
     @UiThread
     private void showEditButton(boolean show) {
         mBinding.btnEdit.setVisibility(show ? View.VISIBLE : View.GONE);
+        mBinding.viewInformation.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    @UiThread
+    private void updateOwnerUi(WorkflowUser owner) {
+        if (owner == null) return;
+
+        if (!TextUtils.isEmpty(owner.getPicture())) {
+            String path = Utils.imgDomain + owner.getPicture();
+            GlideUrl url = new GlideUrl(path);
+            Glide.with(getContext())
+                    .load(url.toStringUrl())
+                    .apply(
+                            new RequestOptions()
+                                    .placeholder(R.drawable.default_profile_avatar)
+                                    .error(R.drawable.default_profile_avatar)
+                    )
+                    .into(mBinding.ivOwner);
+        }
+
+        mBinding.tvOwnerName.setText(owner.getFullName());
+
+        mBinding.ivOwner.setVisibility(View.VISIBLE);
+        mBinding.tvOwnerName.setVisibility(View.VISIBLE);
+        mBinding.tvOwnerDescription.setVisibility(View.VISIBLE);
+    }
+
+    @UiThread
+    private void showToastMessage(@StringRes int messageRes) {
+        Toast.makeText(
+                getContext(),
+                getString(messageRes),
+                Toast.LENGTH_SHORT)
+                .show();
+    }
+
+    @UiThread
+    private void showNoConnectionView(boolean show) {
+        mBinding.includeNoConnectionView.lytNoConnectionView
+                .setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void showLocation(SelectedLocation selectedLocation) {
+        if (selectedLocation == null) return;
+
+        Intent intent = new Intent(getActivity(), GeolocationActivity.class);
+        intent.putExtra(GeolocationViewModel.EXTRA_SHOW_LOCATION, selectedLocation);
+        startActivity(intent);
     }
 }

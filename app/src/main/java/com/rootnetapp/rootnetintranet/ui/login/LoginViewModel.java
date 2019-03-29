@@ -1,9 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.login;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
-
 import android.content.SharedPreferences;
 import android.util.Log;
 
@@ -19,6 +15,9 @@ import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
@@ -59,7 +58,7 @@ public class LoginViewModel extends ViewModel {
                 Utils.setImgDomain(domain.getClient().getApiUrl());
                 showLogo.setValue(domain.getClient().getLogoUrl());
                 String newApiUrl = domain.getClient().getApiUrl();
-                Utils.domain = "https://" + newApiUrl;
+                Utils.domain = Utils.getWebProtocol(newApiUrl) + newApiUrl;
                 RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
             } catch (IOException e) {
                 e.printStackTrace();

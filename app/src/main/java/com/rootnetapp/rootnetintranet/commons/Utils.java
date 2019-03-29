@@ -72,13 +72,15 @@ public class Utils {
             "application/vnd.openxmlformats-officedocument.presentationml.presentation"
     };
 
+    public static final String VIDEO_MIME_TYPE_CHECK = "video";
+
     public static String getImgDomain() {
         return imgDomain;
     }
 
     public static void setImgDomain(String newImgDomain) {
         if (TextUtils.isEmpty(Utils.imgDomain)) {
-            Utils.imgDomain = "http://" + newImgDomain;
+            Utils.imgDomain = Utils.getWebProtocol(newImgDomain) + newImgDomain;
             Utils.imgDomain = Utils.imgDomain.replace("v1/", "");
         }
     }
@@ -562,5 +564,16 @@ public class Utils {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("username", "").apply();
         editor.putString("password", "").apply();
+    }
+
+    public static String getWebProtocol(String domain) {
+        //todo temporary while the example API is not fixed.
+        if (domain.contains("example-api.dev")
+                || domain.contains("example.dev")
+                || domain.contains("example")) {
+            return "http://";
+        }
+
+        return "https://";
     }
 }

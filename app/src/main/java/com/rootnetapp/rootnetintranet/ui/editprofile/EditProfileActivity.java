@@ -1,6 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.editprofile;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -12,6 +11,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -24,6 +24,7 @@ import javax.inject.Inject;
 
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
@@ -106,7 +107,7 @@ public class EditProfileActivity extends AppCompatActivity {
      * Displays an AlertDialog with two password inputs, prompting the user's new desired password.
      */
     private void showChangePasswordDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogTheme);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this, R.style.AlertDialogTheme);
 
         DialogChangePasswordBinding binding = DataBindingUtil
                 .inflate(LayoutInflater.from(this), R.layout.dialog_change_password, null, false);

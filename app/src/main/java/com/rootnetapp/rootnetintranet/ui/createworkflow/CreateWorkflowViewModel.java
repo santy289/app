@@ -494,11 +494,13 @@ class CreateWorkflowViewModel extends ViewModel {
      */
     private void showFields(FormSettings formSettings) {
         List<FormFieldsByWorkflowType> fields = formSettings.getFields();
+        List<FormFieldsByWorkflowType> fieldsToBuild = new ArrayList<>();
 
         //used to make sure all fields are created before proceeding
         mFieldCount = fields.size();
         mFieldCompleted = 0;
 
+        //group the fields to build
         for (int i = 0; i < fields.size(); i++) {
             FormFieldsByWorkflowType field = fields.get(i);
             if (!field.isShowForm()) {
@@ -525,8 +527,11 @@ class CreateWorkflowViewModel extends ViewModel {
                 continue;
             }
 
-            buildField(field);
+            fieldsToBuild.add(field);
         }
+
+        //build all of the wanted fields
+        fieldsToBuild.forEach(this::buildField);
 
         mEnableSubmitButtonLiveData.setValue(true);
         showLoading.setValue(false); //the fields will be created on the background
@@ -1858,6 +1863,13 @@ class CreateWorkflowViewModel extends ViewModel {
                             return;
                         }
 
+                        String fileType = Utils.getMimeType(data.getData(), context);
+
+                        if (fileType.contains(Utils.VIDEO_MIME_TYPE_CHECK)) {
+                            mToastMessageLiveData.setValue(R.string.file_video_not_allowed);
+                            return;
+                        }
+
                         if (!Utils.checkFileSize(UPLOAD_FILE_SIZE_LIMIT, new File(uri.getPath()))) {
                             DialogMessage message = new DialogMessage();
                             message.message = R.string.file_too_big;
@@ -1887,7 +1899,6 @@ class CreateWorkflowViewModel extends ViewModel {
                         byte[] bytes = Utils.fileToByte(context.getContentResolver(), uri);
 
                         String encodedFile = Base64.encodeToString(bytes, Base64.DEFAULT);
-                        String fileType = Utils.getMimeType(data.getData(), context);
 
                         FileFormItem formItem = getCurrentRequestingFileFormItem();
                         formItem.setValue(encodedFile);
@@ -2097,7 +2108,6 @@ class CreateWorkflowViewModel extends ViewModel {
 
     private void onWorkflowTypeSuccess(WorkflowTypeResponse workflowTypeResponse) {
         showPeopleInvolvedFields(workflowTypeResponse.getWorkflowType());
-        fillPeopleInvolvedFields(workflowTypeResponse.getWorkflowType());
     }
 
     /**
@@ -2142,8 +2152,8 @@ class CreateWorkflowViewModel extends ViewModel {
                             .setTag(TAG_OWNER)
                             .setOptions(userOptions)
                             .setValue(selection)
-                            //enable only if the user has permissions and it's not edit mode
-                            .setEnabled(hasEditPermissions && mWorkflow == null)
+                            //enable only if the user has permissions
+                            .setEnabled(hasEditPermissions)
                             .setMachineName(MACHINE_NAME_OWNER)
                             .build();
 
@@ -2382,10 +2392,6 @@ class CreateWorkflowViewModel extends ViewModel {
         }
 
         return isValid;
-    }
-
-    private void fillPeopleInvolvedFields(WorkflowTypeDb workflowType) {
-
     }
     //endregion
 

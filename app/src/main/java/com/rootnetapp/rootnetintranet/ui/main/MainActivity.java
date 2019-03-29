@@ -1,7 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
 import android.app.ActivityManager;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -30,6 +29,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.crashlytics.android.Crashlytics;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.BuildConfig;
 import com.rootnetapp.rootnetintranet.R;
@@ -50,6 +50,7 @@ import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerFragment;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
+import com.rootnetapp.rootnetintranet.ui.sync.SyncActivity;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
@@ -412,6 +413,7 @@ public class MainActivity extends AppCompatActivity
 
     private void initActionListeners() {
         mainBinding.leftDrawer.navWorkflows.setOnClickListener(this::drawerClicks);
+        mainBinding.leftDrawer.navSync.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navProfile.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navExit.setOnClickListener(this::drawerClicks);
         mainBinding.rightDrawer.drawerBackButton.setOnClickListener(view -> {
@@ -601,26 +603,27 @@ public class MainActivity extends AppCompatActivity
     private void drawerClicks(View view) {
         int id = view.getId();
         switch (id) {
-            case R.id.nav_workflows: {
+            case R.id.nav_workflows:
                 mainBinding.bottomNavigation.setSelectedItemId(R.id.menu_workflow_list);
                 showFragment(WorkflowFragment.newInstance(this), false);
                 mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
                 break;
-            }
-            case R.id.nav_profile: {
+            case R.id.nav_sync:
+                startActivity(new Intent(this, SyncActivity.class));
+                finishAffinity();
+                break;
+            case R.id.nav_profile:
                 showFragment(ProfileFragment.newInstance(), false);
                 mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
                 break;
-            }
-            case R.id.nav_exit: {
+            case R.id.nav_exit:
                 showLogoutDialog();
                 break;
-            }
         }
     }
 
     private void showLogoutDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogTheme);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this, R.style.AlertDialogTheme);
         builder.setTitle(R.string.logout);
         builder.setMessage(R.string.logout_confirmation);
         builder.setCancelable(false);

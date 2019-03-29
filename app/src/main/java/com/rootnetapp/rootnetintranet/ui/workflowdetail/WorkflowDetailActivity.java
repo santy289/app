@@ -77,6 +77,7 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
         String permissionsString = prefs.getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
+        String loggedUserId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
 
         subscribe();
 
@@ -87,10 +88,11 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         if (mWorkflowListItem == null) {
             String workflowId;
             workflowId = getIntent().getStringExtra(INTENT_EXTRA_ID);
-            workflowDetailViewModel.initWithId(token, workflowId, permissionsString);
+            workflowDetailViewModel.initWithId(token, workflowId, loggedUserId, permissionsString);
             subscribeForIdInit();
         } else {
-            workflowDetailViewModel.initWithDetails(token, mWorkflowListItem, permissionsString);
+            workflowDetailViewModel
+                    .initWithDetails(token, mWorkflowListItem, loggedUserId, permissionsString);
         }
     }
 
@@ -464,8 +466,12 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 R.drawable.ic_compare_arrows_black_24dp);
         addActionItem(R.id.fab_approve_workflow, R.string.quick_actions_approve_workflow,
                 R.drawable.ic_like_black_24dp);
-        addActionItem(R.id.fab_edit_workflow, R.string.quick_actions_edit_workflow,
-                R.drawable.ic_workflow_black_24dp);
+
+        if (workflowDetailViewModel.hasEditPermissions()) {
+            addActionItem(R.id.fab_edit_workflow, R.string.quick_actions_edit_workflow,
+                    R.drawable.ic_workflow_black_24dp);
+        }
+
         addActionItem(R.id.fab_upload_file, R.string.quick_actions_upload_file,
                 R.drawable.ic_file_upload_white_24dp);
 

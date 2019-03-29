@@ -52,7 +52,10 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_ACTIVATE_ALL;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_CREATE;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_DELETE;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_OPEN_ALL;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_VIEW;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.CHECK;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.INDEX_CHECK;
@@ -86,6 +89,7 @@ public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<Boolean> showViewWorkflowButtonLiveData;
     private MutableLiveData<Boolean> completeMassAction;
     private MutableLiveData<Boolean> handleScrollRecyclerToTop;
+    private MutableLiveData<Boolean> showBulkActionMenuLiveData;
     public MutableLiveData<Boolean> showBottomSheetLoading;
     protected MutableLiveData<Boolean> clearFilters;
     private LiveData<PagedList<WorkflowListItem>> liveWorkflows;
@@ -127,6 +131,9 @@ public class WorkflowViewModel extends ViewModel {
     private List<ListItem> categoryList;
     private static final String TAG = "WorkflowViewModel";
     private boolean hasViewDetailsPermissions;
+    private boolean hasBulkDeletePermissions;
+    private boolean hasBulkOpenClosePermissions;
+    private boolean hasBulkActivationPermissions;
     private List<Integer> mWorkflowIdsToDelete;
     private Boolean isSwipe;
     private boolean isShowOpenActionMenu;
@@ -177,6 +184,12 @@ public class WorkflowViewModel extends ViewModel {
 
         boolean hasCreatePermissions = permissionsUtils.hasPermission(WORKFLOW_CREATE);
         hasViewDetailsPermissions = permissionsUtils.hasPermission(WORKFLOW_VIEW);
+        hasBulkDeletePermissions = permissionsUtils.hasPermission(WORKFLOW_DELETE);
+        hasBulkOpenClosePermissions = permissionsUtils.hasPermission(WORKFLOW_OPEN_ALL);
+        hasBulkActivationPermissions = permissionsUtils.hasPermission(WORKFLOW_ACTIVATE_ALL);
+
+        showBulkActionMenuLiveData.setValue(
+                hasBulkDeletePermissions || hasBulkOpenClosePermissions || hasBulkActivationPermissions);
 
         showAddButtonLiveData.setValue(hasCreatePermissions);
         showViewWorkflowButtonLiveData.setValue(hasViewDetailsPermissions);
@@ -186,11 +199,23 @@ public class WorkflowViewModel extends ViewModel {
         return hasViewDetailsPermissions;
     }
 
-    protected boolean isShowOpenActionMenu(){
+    protected boolean hasBulkDeletePermissions() {
+        return hasBulkDeletePermissions;
+    }
+
+    protected boolean hasBulkOpenClosePermissions() {
+        return hasBulkOpenClosePermissions;
+    }
+
+    protected boolean hasBulkActivationPermissions() {
+        return hasBulkActivationPermissions;
+    }
+
+    protected boolean isShowOpenActionMenu() {
         return isShowOpenActionMenu;
     }
 
-    protected boolean isShowCloseActionMenu(){
+    protected boolean isShowCloseActionMenu() {
         return isShowCloseActionMenu;
     }
 
@@ -228,7 +253,7 @@ public class WorkflowViewModel extends ViewModel {
         workflowRepository.insertWorkflow(workflow);
     }
 
-    protected void resetGetAllWorkflows(boolean isSwipe){
+    protected void resetGetAllWorkflows(boolean isSwipe) {
         this.isSwipe = isSwipe;
         if (!isSwipe) showLoading.setValue(true);
         workflowRepository.getAllWorkflowsDb(token);
@@ -567,10 +592,11 @@ public class WorkflowViewModel extends ViewModel {
      * Request for filtered data to workflow repository. This function handles all the different
      * filtering scenarios. It handles cases with base filters, meta data, workflow type filters.
      *
-     * @param filterSettings       Instance of FilterSettings.
-     * @param lifecycleOwner       Fragment with observer that we need to remove.
+     * @param filterSettings Instance of FilterSettings.
+     * @param lifecycleOwner Fragment with observer that we need to remove.
      */
-    private void loadWorkflowsByFilters(FilterSettings filterSettings, LifecycleOwner lifecycleOwner) {
+    private void loadWorkflowsByFilters(FilterSettings filterSettings,
+                                        LifecycleOwner lifecycleOwner) {
         String metaDataString = filterSettings.getAllItemIdsSelectedAsString();
         int workflowTypeSelected = filterSettings.getWorkflowTypeId();
 
@@ -1155,11 +1181,14 @@ public class WorkflowViewModel extends ViewModel {
             applyFilters(filterSettings);
         });
 
-        final Observer<Boolean> handleRestSuccessWithNoApplyFilter = (success -> showLoading.postValue(false));
+        final Observer<Boolean> handleRestSuccessWithNoApplyFilter = (success -> showLoading
+                .postValue(false));
 
-        final Observer<Boolean> handleDeleteWorkflows = (success -> completeMassAction.setValue(success));
+        final Observer<Boolean> handleDeleteWorkflows = (success -> completeMassAction
+                .setValue(success));
 
-        final Observer<Boolean> handleRefreshWorkflows = (success -> completeMassAction.setValue(success));
+        final Observer<Boolean> handleRefreshWorkflows = (success -> completeMassAction
+                .setValue(success));
 
         workflowRepository.getObservableHandleRepoError().removeObservers(lifecycleOwner);
         workflowRepository.getObservableHandleRepoError()
@@ -1818,5 +1847,12 @@ public class WorkflowViewModel extends ViewModel {
             handleScrollRecyclerToTop = new MutableLiveData<>();
         }
         return handleScrollRecyclerToTop;
+    }
+
+    protected LiveData<Boolean> getObservableShowBulkActionMenu() {
+        if (showBulkActionMenuLiveData == null) {
+            showBulkActionMenuLiveData = new MutableLiveData<>();
+        }
+        return showBulkActionMenuLiveData;
     }
 }

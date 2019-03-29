@@ -387,6 +387,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .observe(this, this::handleCompleteMassAction);
         workflowViewModel.getObservableHandleScrollRecyclerToTop()
                 .observe(this, this::scrollRecyclerToTop);
+        workflowViewModel.getObservableShowBulkActionMenu()
+                .observe(this, this::showMassActionMenuIcon);
 
         // MainActivity's ViewModel
         mainViewModel.messageContainerToWorkflowList
@@ -621,6 +623,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     @UiThread
     private void showAddButton(boolean show) {
         fragmentWorkflowBinding.btnAdd.setVisibility(show ? View.VISIBLE : View.GONE);
+
+        verifyHeaderLineVisibility();
     }
 
     @UiThread
@@ -633,8 +637,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         //Inflating the Popup using xml file
         popup.getMenuInflater().inflate(R.menu.menu_workflow_list, popup.getMenu());
 
-        popup.getMenu().findItem(R.id.open).setVisible(workflowViewModel.isShowOpenActionMenu());
-        popup.getMenu().findItem(R.id.close).setVisible(workflowViewModel.isShowCloseActionMenu());
+        popup.getMenu().findItem(R.id.disable).setVisible(workflowViewModel.hasBulkActivationPermissions());
+        popup.getMenu().findItem(R.id.open).setVisible(workflowViewModel.isShowOpenActionMenu() && workflowViewModel.hasBulkOpenClosePermissions());
+        popup.getMenu().findItem(R.id.close).setVisible(workflowViewModel.isShowCloseActionMenu() && workflowViewModel.hasBulkOpenClosePermissions());
+        popup.getMenu().findItem(R.id.delete).setVisible(workflowViewModel.hasBulkDeletePermissions());
 
         popup.setOnMenuItemClickListener(item -> {
             List<Integer> checkedList = adapter.getCheckedIds();
@@ -717,5 +723,22 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
 
         workflowViewModel.initWorkflowList(prefs, this);
+    }
+
+    @UiThread
+    private void showMassActionMenuIcon(boolean show){
+        fragmentWorkflowBinding.ivMassActions.setVisibility(show ? View.VISIBLE : View.GONE);
+        fragmentWorkflowBinding.chbxSelectAll.setVisibility(show ? View.VISIBLE : View.GONE);
+
+        verifyHeaderLineVisibility();
+    }
+
+    @UiThread
+    private void verifyHeaderLineVisibility(){
+        boolean show = fragmentWorkflowBinding.ivMassActions.getVisibility() == View.VISIBLE
+                || fragmentWorkflowBinding.chbxSelectAll.getVisibility() == View.VISIBLE
+                || fragmentWorkflowBinding.btnAdd.getVisibility() == View.VISIBLE;
+
+        fragmentWorkflowBinding.viewLineHeader.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 }

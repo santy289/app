@@ -210,7 +210,7 @@ public class WorkflowViewModel extends ViewModel {
         workflowRepository.insertWorkflow(workflow);
     }
 
-    protected void resetGetAllWorkflows(boolean isSwipe){
+    protected void resetGetAllWorkflows(boolean isSwipe) {
         this.isSwipe = isSwipe;
         if (!isSwipe) showLoading.setValue(true);
         workflowRepository.getAllWorkflowsDb(token);
@@ -489,13 +489,12 @@ public class WorkflowViewModel extends ViewModel {
         liveWorkflows.removeObservers(lifecycleOwner);
     }
 
-    protected void loadWorkflowsByType(WorkflowTypeMenu menu, LifecycleOwner lifecycleOwner) {
+    protected void loadWorkflowsByTypeId(int workflowTypeId, LifecycleOwner lifecycleOwner) {
 //        showLoading.postValue(true);
-        int typeId = menu.getWorkflowTypeId();
-        if (typeId == NO_TYPE_SELECTED) {
+        if (workflowTypeId == NO_TYPE_SELECTED) {
             workflowRepository.getAllWorkflowsNoFilters(token);
         } else {
-            workflowRepository.getWorkflowsByType(token, typeId, false);
+            workflowRepository.getWorkflowsByType(token, workflowTypeId, false);
         }
         liveWorkflows.removeObservers(lifecycleOwner);
     }
@@ -606,7 +605,7 @@ public class WorkflowViewModel extends ViewModel {
         // Selecting workflow type no need to update other items.
         // Clear all fields if we are selecting a new workflow type.
         if (filterSettings.getFilterListIndexSelected() == DRAWER_FILTER_LIST_INDEX_TYPE) {
-            handleFilterByWorkflowType(menu, lifecycleOwner);
+//            handleFilterByWorkflowType(menu, lifecycleOwner);
             return;
         }
 
@@ -618,17 +617,22 @@ public class WorkflowViewModel extends ViewModel {
         loadWorkflowsByBaseFilters(baseFilterId, filterSettings, lifecycleOwner);
     }
 
-    private void handleFilterByWorkflowType(WorkflowTypeMenu menu, LifecycleOwner lifecycleOwner) {
+    protected void handleWorkflowTypeSelected(int workflowTypeId, LifecycleOwner lifecycleOwner) {
+        showLoading.setValue(true);
+        handleFilterByWorkflowType(workflowTypeId, lifecycleOwner);
+    }
+
+    private void handleFilterByWorkflowType(int workflowTypeId, LifecycleOwner lifecycleOwner) {
         filterSettings.clearDynamicFields();
 
-        if (filterSettings.isTypeAlreadySelected(menu.getWorkflowTypeId())) {
+        if (filterSettings.isTypeAlreadySelected(workflowTypeId)) {
             // Update FilterSettings and Right Drawer UI.
             filterSettings.setWorkflowTypeId(NO_TYPE_SELECTED);
             sendMessageUpdateSelectionToWorkflowList(Sort.sortType.NONE);
 
             filterSettings.updateWorkflowTypeListFilterItem(null);
-            filterSettings.updateRightDrawerOptionListWithSelected(menu, false); //TEST
-            updateSelectedMenuItem(menu);
+//            filterSettings.updateRightDrawerOptionListWithSelected(menu, false); //TEST
+//            updateSelectedMenuItem(menu);
 //                filterSettings.updateFilterListItemSelected(menu);
             showLoading.setValue(false);
             applyFilters(filterSettings);
@@ -637,19 +641,19 @@ public class WorkflowViewModel extends ViewModel {
 
         // Choosing some workflow type from the filter Workflow Type.
         // Update Filter Settings with new workflow type id.
-        filterSettings.setWorkflowTypeId(menu.getOriginalId());
-        loadWorkflowsByType(menu, lifecycleOwner);
+        filterSettings.setWorkflowTypeId(workflowTypeId);
+        loadWorkflowsByTypeId(workflowTypeId, lifecycleOwner);
 
         // clear any selected items if any
         filterSettings.clearworklowTypeSelection();
 
         // Filter List Update with new selection
-        filterSettings.updateWorkflowTypeListFilterItem(menu);
+//        filterSettings.updateWorkflowTypeListFilterItem(menu);
 
         // Update Drawer Options List
-        filterSettings.updateRightDrawerOptionListWithSelected(menu, false);
+//        filterSettings.updateRightDrawerOptionListWithSelected(menu, false);
 
-        updateSelectedMenuItem(menu);
+//        updateSelectedMenuItem(menu);
 //            filterSettings.updateFilterListItemSelected(menu);
 
         // Allowing single selection on the UI for this list.
@@ -659,7 +663,6 @@ public class WorkflowViewModel extends ViewModel {
         liveWorkflows.removeObservers(lifecycleOwner);
         applyFilters(filterSettings);
 
-        int workflowTypeId = menu.getWorkflowTypeId();
         findDynamicFieldsBy(workflowTypeId);
     }
 
@@ -1048,11 +1051,14 @@ public class WorkflowViewModel extends ViewModel {
             applyFilters(filterSettings);
         });
 
-        final Observer<Boolean> handleRestSuccessWithNoApplyFilter = (success -> showLoading.postValue(false));
+        final Observer<Boolean> handleRestSuccessWithNoApplyFilter = (success -> showLoading
+                .postValue(false));
 
-        final Observer<Boolean> handleDeleteWorkflows = (success -> completeMassAction.setValue(success));
+        final Observer<Boolean> handleDeleteWorkflows = (success -> completeMassAction
+                .setValue(success));
 
-        final Observer<Boolean> handleRefreshWorkflows = (success -> completeMassAction.setValue(success));
+        final Observer<Boolean> handleRefreshWorkflows = (success -> completeMassAction
+                .setValue(success));
 
         workflowRepository.getObservableHandleRepoError().removeObservers(lifecycleOwner);
         workflowRepository.getObservableHandleRepoError()

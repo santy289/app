@@ -180,6 +180,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private List<WorkflowTypeDb> mWorkflowTypeDbList;
     private WorkflowTypeDb mSelectedWorkflowType;
     private AutocompleteFormItem mCurrentQueryAutocompleteFormItem;
+    private boolean isDynamicFilter;
 
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.mRepository = createWorkflowRepository;
@@ -188,6 +189,7 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     protected void initForm(String token, Integer clientId, @Nullable WorkflowListItem item,
+                            boolean isFilter,
                             String userId, String userPermissions) {
         showLoading.setValue(true);
         if (formSettings == null) {
@@ -196,6 +198,7 @@ class CreateWorkflowViewModel extends ViewModel {
         this.mToken = token;
         this.mClientId = clientId;
         this.mWorkflowListItem = item;
+        this.isDynamicFilter = isFilter;
 
         if (userId != null && !userId.isEmpty()) mUserId = Integer.parseInt(userId);
 
@@ -604,6 +607,12 @@ class CreateWorkflowViewModel extends ViewModel {
                 createFileFormItem(field);
                 break;
             case FormSettings.TYPE_GEOLOCATION:
+                if (isDynamicFilter) {
+                    //do not include in the dynamic filters
+                    buildFieldCompleted();
+                    break;
+                }
+
                 createGeolocationFormItem(field);
                 break;
             case FormSettings.TYPE_ACCOUNT:
@@ -681,8 +690,10 @@ class CreateWorkflowViewModel extends ViewModel {
             }
         }
 
+        int titleRes = isDynamicFilter ? R.string.workflow_type : R.string.create_workflow_form_workflow_type;
+
         SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
-                .setTitleRes(R.string.type)
+                .setTitleRes(titleRes)
                 .setRequired(true)
                 .setTag(TAG_WORKFLOW_TYPE)
                 .setOptions(options)
@@ -722,6 +733,12 @@ class CreateWorkflowViewModel extends ViewModel {
      * workflow type and then send the form item to the UI.
      */
     private void createPeopleInvolvedItem() {
+        if (isDynamicFilter) {
+            //do not create people involved item if it's from dynamic filters.
+            showFields(formSettings);
+            return;
+        }
+
         Disposable disposable = Observable.fromCallable(() -> {
             WorkflowTypeDb workflowTypeDbSingle = mRepository
                     .getWorklowType(formSettings.getWorkflowTypeIdSelected());

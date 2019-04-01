@@ -16,10 +16,8 @@ import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Switch;
@@ -28,7 +26,6 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
-import com.crashlytics.android.Crashlytics;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.BuildConfig;
@@ -37,6 +34,9 @@ import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.services.websocket.RestartWebsocketReceiver;
@@ -44,7 +44,9 @@ import com.rootnetapp.rootnetintranet.services.websocket.WebSocketIntentService;
 import com.rootnetapp.rootnetintranet.services.websocket.WebSocketService;
 import com.rootnetapp.rootnetintranet.services.websocket.WebsocketSecureHandler;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragmentInterface;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerFragment;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
@@ -91,7 +93,8 @@ import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SW
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_UPDATED_DATE;
 
 public class MainActivity extends AppCompatActivity
-        implements MainActivityInterface, PopupMenu.OnMenuItemClickListener {
+        implements MainActivityInterface, PopupMenu.OnMenuItemClickListener,
+        CreateWorkflowFragment.OnValueSelectedListener {
 
     @Inject
     MainActivityViewModelFactory profileViewModelFactory;
@@ -226,6 +229,19 @@ public class MainActivity extends AppCompatActivity
         transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out,
                 android.R.anim.fade_in, android.R.anim.fade_out);
         transaction.replace(R.id.container, fragment);
+        if (addtobackstack) {
+            transaction.addToBackStack(tag);
+        }
+        transaction.commit();
+        hideSoftInputKeyboard();
+    }
+
+    public void showFragmentDrawer(Fragment fragment, boolean addtobackstack) {
+        String tag = fragment.getClass().getSimpleName();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out,
+                android.R.anim.fade_in, android.R.anim.fade_out);
+        transaction.replace(R.id.fl_dynamic_filters, fragment);
         if (addtobackstack) {
             transaction.addToBackStack(tag);
         }
@@ -422,6 +438,8 @@ public class MainActivity extends AppCompatActivity
 
         mainBinding.toolbarImage.setOnClickListener(
                 v -> showFragment(ProfileFragment.newInstance(), false));
+
+        showFragmentDrawer(CreateWorkflowFragment.newInstance(true, this), false);
     }
 
     private void openRightDrawer(boolean open) {
@@ -609,7 +627,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void showLogoutDialog() {
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this, R.style.AlertDialogTheme);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this,
+                R.style.AlertDialogTheme);
         builder.setTitle(R.string.logout);
         builder.setMessage(R.string.logout_confirmation);
         builder.setCancelable(false);
@@ -879,6 +898,17 @@ public class MainActivity extends AppCompatActivity
             InputMethodManager imm = (InputMethodManager) getSystemService(
                     Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    @Override
+    public void onValueSelected(BaseFormItem baseFormItem) {
+        if (baseFormItem instanceof SingleChoiceFormItem) {
+            if (baseFormItem.getMachineName().equals(FormSettings.MACHINE_NAME_TYPE)) {
+                Option value = ((SingleChoiceFormItem) baseFormItem).getValue();
+                if (value == null) return;
+                viewModel.sendWorkflowTypeSelectedToWorkflowList(value.getId());
+            }
         }
     }
 }

@@ -80,7 +80,7 @@
     <string name="description">Descripción</string>
     <string name="lastname">Apellido</string>
     <string name="creator">Autor</string>
-    <string name="type">Seleccione un tipo de workflow</string>
+    <string name="create_workflow_form_workflow_type">Seleccione un tipo de workflow</string>
     <string name="created_at">Creado En</string>
     <string name="condition">Condición</string>
     <string name="country">País</string>

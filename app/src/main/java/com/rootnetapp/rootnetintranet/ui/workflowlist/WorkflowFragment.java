@@ -390,6 +390,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         mainViewModel.messageBackActionToWorkflowList.observe(this, this::handleBackAction);
         mainViewModel.messageOptionSelectedToWorkflowList
                 .observe(this, this::handleRightDrawerOptionSelectedClick);
+        mainViewModel.messageWorkflowTypeSelectedToWorkflowList
+                .observe(this, this::handleRightDrawerWorkflowTypeSelectedClick);
         mainViewModel.messageInitSortByToWorkflowList.observe(this, this::handleInitSortBy);
         mainViewModel.messageRadioButtonClickedToWorkflowList
                 .observe(this, this::handleMessageRadioButtonClickedToWorkflowList);
@@ -450,6 +452,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     private void handleRightDrawerOptionSelectedClick(int position) {
         workflowViewModel.handleOptionSelected(position, WorkflowFragment.this);
+    }
+
+    private void handleRightDrawerWorkflowTypeSelectedClick(int workflowTypeId) {
+        workflowViewModel.handleWorkflowTypeSelected(workflowTypeId, WorkflowFragment.this);
     }
 
     private void handleRightDrawerFilterClick(int position) {

@@ -79,7 +79,7 @@
     <string name="description">Description</string>
     <string name="lastname">Last Name</string>
     <string name="creator">Creator</string>
-    <string name="type">Please select a workflow type</string>
+    <string name="create_workflow_form_workflow_type">Please select a workflow type</string>
     <string name="created_at">Created At</string>
     <string name="condition">Condition</string>
     <string name="country">Country</string>

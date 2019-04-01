@@ -68,6 +68,7 @@ public class MainActivityViewModel extends ViewModel {
     // send message to WorkflowList
     public MutableLiveData<Integer> messageContainerToWorkflowList;
     public MutableLiveData<Integer> messageOptionSelectedToWorkflowList;
+    public MutableLiveData<Integer> messageWorkflowTypeSelectedToWorkflowList;
     public MutableLiveData<Boolean> messageBackActionToWorkflowList;
     public MutableLiveData<Boolean> messageInitSortByToWorkflowList;
     public MutableLiveData<int[]> messageRadioButtonClickedToWorkflowList;
@@ -94,6 +95,7 @@ public class MainActivityViewModel extends ViewModel {
         this.messageContainerToWorkflowList = new MutableLiveData<>();
         this.messageBackActionToWorkflowList = new MutableLiveData<>();
         this.messageOptionSelectedToWorkflowList = new MutableLiveData<>();
+        this.messageWorkflowTypeSelectedToWorkflowList = new MutableLiveData<>();
         this.invalidateOptionsList = new MutableLiveData<>();
         this.messageInitSortByToWorkflowList = new MutableLiveData<>();
         this.receiveMessageToggleRadioButton = new MutableLiveData<>();
@@ -155,6 +157,10 @@ public class MainActivityViewModel extends ViewModel {
 
     protected void sendOptionSelectedToWorkflowList(int position) {
         messageOptionSelectedToWorkflowList.setValue(position);
+    }
+
+    protected void sendWorkflowTypeSelectedToWorkflowList(int workflowTypeId) {
+        messageWorkflowTypeSelectedToWorkflowList.setValue(workflowTypeId);
     }
 
     protected void sendRightDrawerBackButtonClick() {

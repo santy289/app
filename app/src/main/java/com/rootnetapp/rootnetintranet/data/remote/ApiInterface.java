@@ -44,7 +44,7 @@ import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.SubC
 import com.rootnetapp.rootnetintranet.models.responses.user.LoggedProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
-import com.rootnetapp.rootnetintranet.models.responses.websocket.WebSocketSettingResponse;
+import com.rootnetapp.rootnetintranet.models.responses.websocket.OptionsSettingsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.DeleteWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.WorkflowApproveRejectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowoverview.WorkflowOverviewResponse;
@@ -502,12 +502,17 @@ public interface ApiInterface {
     @Headers({"Domain-Name: api"})
     @Streaming
     @GET("options?key=socket_main")
-    Observable<WebSocketSettingResponse> getWsPort(@Header("Authorization") String authorization);
+    Observable<OptionsSettingsResponse> getWsPort(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
     @Streaming
     @GET("options?key=socket_protocol")
-    Observable<WebSocketSettingResponse> getWsProtocol(@Header("Authorization") String authorization);
+    Observable<OptionsSettingsResponse> getWsProtocol(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: api"})
+    @Streaming
+    @GET("options?key=google_maps_apikey")
+    Observable<OptionsSettingsResponse> getGoogleMapsApiKey(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
     @GET("contacts/records?")

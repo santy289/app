@@ -10,4 +10,5 @@ public class PreferenceKeys {
     public static final String PREF_PROTOCOL = "ws_protocol";
     public static final String PREF_PORT = "ws_port";
     public static final String PREF_USER_PERMISSIONS = "user_permissions";
+    public static final String PREF_GOOGLE_MAPS_API_KEY = "maps_api_key";
 }

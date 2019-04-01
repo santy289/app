@@ -16,10 +16,8 @@ import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Switch;
@@ -28,7 +26,6 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
-import com.crashlytics.android.Crashlytics;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.BuildConfig;
@@ -40,7 +37,6 @@ import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.services.websocket.RestartWebsocketReceiver;
-import com.rootnetapp.rootnetintranet.services.websocket.WebSocketIntentService;
 import com.rootnetapp.rootnetintranet.services.websocket.WebSocketService;
 import com.rootnetapp.rootnetintranet.services.websocket.WebsocketSecureHandler;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
@@ -174,23 +170,7 @@ public class MainActivity extends AppCompatActivity
         return intent;
     }
 
-    private void startWebsocketServiceIntent() {
-        SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String token = sharedPref.getString(PreferenceKeys.PREF_TOKEN, "");
-        String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
-        String port = sharedPref.getString(PreferenceKeys.PREF_PORT, "");
-
-        Intent intent = new Intent(getApplicationContext(), WebSocketIntentService.class);
-        intent.putExtra(WebsocketSecureHandler.KEY_TOKEN, token);
-        intent.putExtra(WebsocketSecureHandler.KEY_PORT, port);
-        intent.putExtra(WebsocketSecureHandler.KEY_PROTOCOL, protocol);
-        intent.putExtra(WebsocketSecureHandler.KEY_DOMAIN, Utils.domain);
-        intent.putExtra(WebsocketSecureHandler.KEY_BACKGROUND, false);
-        startService(intent);
-    }
-
     private void stopWebsocketService() {
-//        Intent intent = new Intent(getApplicationContext(), WebSocketIntentService.class);
         Intent intent = new Intent(getApplicationContext(), WebSocketService.class);
 
         stopService(intent);
@@ -898,8 +878,6 @@ public class MainActivity extends AppCompatActivity
         viewModel.receiveMessageStatusFilterSelected
                 .observe(this, this::handleUpdateStatusFilterSelectionUpdateWith);
         viewModel.openRightDrawer.observe(this, this::openRightDrawer);
-
-//        viewModel.getObservableStartService().observe(this, result -> startWebsocketServiceIntent());
 
         viewModel.getObservableStartService().observe(this, result -> sendBroadcastWebsocket());
 

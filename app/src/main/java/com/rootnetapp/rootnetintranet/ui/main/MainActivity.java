@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity
      */
     private Intent createIntent(Class<?> className, String token, String port, String protocol,
                                 String domain) {
-        Intent intent = new Intent(getApplicationContext(), className);
+        Intent intent = new Intent(getBaseContext(), className);
         intent.putExtra(WebsocketSecureHandler.KEY_TOKEN, token);
         intent.putExtra(WebsocketSecureHandler.KEY_PORT, port);
         intent.putExtra(WebsocketSecureHandler.KEY_PROTOCOL, protocol);
@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void stopWebsocketService() {
-        Intent intent = new Intent(getApplicationContext(), WebSocketService.class);
+        Intent intent = new Intent(getBaseContext(), WebSocketService.class);
 
         stopService(intent);
     }

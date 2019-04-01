@@ -15,6 +15,7 @@ import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.services.websocket.RestartWebsocketReceiver;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.DynamicFilter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
@@ -71,6 +72,7 @@ public class MainActivityViewModel extends ViewModel {
     public MutableLiveData<Integer> messageContainerToWorkflowList;
     public MutableLiveData<Integer> messageOptionSelectedToWorkflowList;
     public MutableLiveData<Integer> messageWorkflowTypeSelectedToWorkflowList;
+    public MutableLiveData<DynamicFilter> messageDynamicFilterSelectedToWorkflowList;
     public MutableLiveData<Boolean> messageBackActionToWorkflowList;
     public MutableLiveData<Boolean> messageInitSortByToWorkflowList;
     public MutableLiveData<int[]> messageRadioButtonClickedToWorkflowList;
@@ -100,6 +102,7 @@ public class MainActivityViewModel extends ViewModel {
         this.messageBackActionToWorkflowList = new MutableLiveData<>();
         this.messageOptionSelectedToWorkflowList = new MutableLiveData<>();
         this.messageWorkflowTypeSelectedToWorkflowList = new MutableLiveData<>();
+        this.messageDynamicFilterSelectedToWorkflowList = new MutableLiveData<>();
         this.invalidateOptionsList = new MutableLiveData<>();
         this.messageInitSortByToWorkflowList = new MutableLiveData<>();
         this.receiveMessageToggleRadioButton = new MutableLiveData<>();
@@ -169,6 +172,10 @@ public class MainActivityViewModel extends ViewModel {
 
     protected void sendWorkflowTypeSelectedToWorkflowList(int workflowTypeId) {
         messageWorkflowTypeSelectedToWorkflowList.setValue(workflowTypeId);
+    }
+
+    protected void sendDynamicFilterSelectedToWorkflowList(DynamicFilter dynamicFilter) {
+        messageDynamicFilterSelectedToWorkflowList.setValue(dynamicFilter);
     }
 
     protected void sendRightDrawerBackButtonClick() {

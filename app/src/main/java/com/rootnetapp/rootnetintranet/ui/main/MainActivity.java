@@ -37,6 +37,7 @@ import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.services.websocket.RestartWebsocketReceiver;
@@ -53,6 +54,7 @@ import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
 import com.rootnetapp.rootnetintranet.ui.sync.SyncActivity;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.DynamicFilter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
@@ -928,12 +930,25 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onValueSelected(BaseFormItem baseFormItem) {
+        String key = String.valueOf(baseFormItem.getFieldId());
+        DynamicFilter dynamicFilter = null;
+
         if (baseFormItem instanceof SingleChoiceFormItem) {
+            Option value = ((SingleChoiceFormItem) baseFormItem).getValue();
+            if (value == null) return;
+
             if (baseFormItem.getMachineName().equals(FormSettings.MACHINE_NAME_TYPE)) {
-                Option value = ((SingleChoiceFormItem) baseFormItem).getValue();
-                if (value == null) return;
                 viewModel.sendWorkflowTypeSelectedToWorkflowList(value.getId());
+                return;
             }
+
+            dynamicFilter = new DynamicFilter(key, value);
+
+        } else if (baseFormItem instanceof TextInputFormItem) {
+            dynamicFilter = new DynamicFilter(key, ((TextInputFormItem) baseFormItem).getValue());
         }
+
+        if (dynamicFilter == null) return;
+        viewModel.sendDynamicFilterSelectedToWorkflowList(dynamicFilter);
     }
 }

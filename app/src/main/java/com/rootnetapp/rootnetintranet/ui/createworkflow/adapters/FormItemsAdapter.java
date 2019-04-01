@@ -47,6 +47,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragmentInterface;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
@@ -70,6 +71,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private boolean hasToEvaluateValid;
     private final CreateWorkflowFragmentInterface mFragmentInterface;
     private boolean showRequiredIndicator;
+    private CreateWorkflowFragment.OnValueSelectedListener mOnValueSelectedListener;
 
     public FormItemsAdapter(Context context, FragmentManager fragmentManager,
                             List<BaseFormItem> dataset,
@@ -103,6 +105,11 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     public void setShowRequiredIndicator(boolean show) {
         showRequiredIndicator = show;
+    }
+
+    public void setOnValueSelectedListener(
+            CreateWorkflowFragment.OnValueSelectedListener onValueSelectedListener) {
+        mOnValueSelectedListener = onValueSelectedListener;
     }
 
     @NonNull
@@ -277,6 +284,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         //set value
         holder.getBinding().etInput.setText(item.getValue());
 
+        //input params
         setTextInputParams(holder.getBinding().etInput, item.getInputType());
 
         // verify visibility

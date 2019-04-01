@@ -34,6 +34,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowTypeSpinn
 import com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowRepository;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
+import com.squareup.moshi.Types;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -679,6 +680,17 @@ public class WorkflowViewModel extends ViewModel {
                 break;
         }
 
+        Map<String, Object> dynamicFiltersMap = filterSettings.getDynamicFilters();
+        if (!dynamicFiltersMap.isEmpty()) {
+            Moshi moshi = new Moshi.Builder().build();
+            JsonAdapter<Map<String, Object>> jsonAdapter = moshi
+                    .adapter(Types.newParameterizedType(Map.class, String.class, Object.class));
+            String dynamicFiltersString = jsonAdapter.toJson(dynamicFiltersMap);
+            if (!TextUtils.isEmpty(dynamicFiltersString)) {
+                options.put("workflow_metadata", dynamicFiltersString);
+            }
+        }
+
         workflowRepository.getWorkflowsByBaseFilters(token, options);
         liveWorkflows.removeObservers(lifecycleOwner);
         sendFiltersCounterToUi();
@@ -790,6 +802,12 @@ public class WorkflowViewModel extends ViewModel {
     protected void handleWorkflowTypeSelected(int workflowTypeId, LifecycleOwner lifecycleOwner) {
         showLoading.setValue(true);
         handleFilterByWorkflowType(workflowTypeId, lifecycleOwner);
+    }
+
+    protected void handleDynamicFilterSelected(DynamicFilter dynamicFilter, LifecycleOwner lifecycleOwner) {
+        showLoading.setValue(true);
+        filterSettings.addDynamicFilter(dynamicFilter.getKey(), dynamicFilter.getValue());
+        loadWorkflowsByFilters(filterSettings, lifecycleOwner);
     }
 
     private void handleFilterByWorkflowType(int workflowTypeId, LifecycleOwner lifecycleOwner) {

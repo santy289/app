@@ -13,13 +13,16 @@ import com.rootnetapp.rootnetintranet.ui.createworkflow.FieldData;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.BASE_FILTER_ALL_ID;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.NO_TYPE_SELECTED;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.STATUS_FILTER_OPEN_ID;
 
 public class FilterSettings {
+
     private boolean isCheckedMyPending;
     private boolean isCheckedStatus;
     private int typeIdPositionInArray;
@@ -42,6 +45,7 @@ public class FilterSettings {
 
     private List<WorkflowTypeMenu> baseFilterOptionsList;
     private List<WorkflowTypeMenu> statusFilterOptionList;
+    private Map<String, Object> dynamicFilters;
     private int baseFilterIndexSelected;
     private int statusFilterIndexSelected;
 
@@ -57,6 +61,7 @@ public class FilterSettings {
         this.filterDrawerList = new ArrayList<>();
         this.baseFilterOptionsList = new ArrayList<>();
         this.statusFilterOptionList = new ArrayList<>();
+        this.dynamicFilters = new HashMap<>();
         this.baseFilterIndexSelected = 0;
         this.statusFilterIndexSelected = 1;
     }
@@ -129,11 +134,22 @@ public class FilterSettings {
         this.searchText = searchText;
     }
 
+    public Map<String, Object> getDynamicFilters() {
+        return dynamicFilters;
+    }
+
+    public void addDynamicFilter(String key, Object value) {
+        if (dynamicFilters.containsKey(key)) dynamicFilters.remove(key);
+
+        dynamicFilters.put(key, value);
+    }
+
     public ArrayMap<Integer, RightDrawerOptionList> getRightDrawerOptionsList() {
         return rightDrawerOptionsList;
     }
 
-    public void setRightDrawerOptionsList(ArrayMap<Integer, RightDrawerOptionList> rightDrawerOptionsList) {
+    public void setRightDrawerOptionsList(
+            ArrayMap<Integer, RightDrawerOptionList> rightDrawerOptionsList) {
         this.rightDrawerOptionsList = rightDrawerOptionsList;
     }
 
@@ -213,11 +229,14 @@ public class FilterSettings {
         filterDrawerList.add(workflowTypeMenu);
     }
 
-    protected void updateRightDrawerOptionListWithSelected(WorkflowTypeMenu menu, boolean isMultipleChoice) {
+    protected void updateRightDrawerOptionListWithSelected(WorkflowTypeMenu menu,
+                                                           boolean isMultipleChoice) {
         WorkflowTypeMenu dynamicFieldInFilterList = filterDrawerList.get(filterListIndexSelected);
-        RightDrawerOptionList drawerOptionList = getRightDrawerOptionList(dynamicFieldInFilterList.getId());
+        RightDrawerOptionList drawerOptionList = getRightDrawerOptionList(
+                dynamicFieldInFilterList.getId());
         if (drawerOptionList == null) {
-            Log.d(TAG, "updateRightDrawerOptionListWithSelected: Not able to find a RightDrawerOption");
+            Log.d(TAG,
+                    "updateRightDrawerOptionListWithSelected: Not able to find a RightDrawerOption");
             return;
         }
         Integer fieldId = menu.getId();
@@ -259,7 +278,8 @@ public class FilterSettings {
     }
 
     protected void clearworklowTypeSelection() {
-        RightDrawerOptionList typeOptionDrawerList = rightDrawerOptionsList.get(RIGHT_DRAWER_FILTER_TYPE_ITEM_ID);
+        RightDrawerOptionList typeOptionDrawerList = rightDrawerOptionsList
+                .get(RIGHT_DRAWER_FILTER_TYPE_ITEM_ID);
         //we always have only one this is Workflow Type options.
         List<Integer> selectedArray = typeOptionDrawerList.getFieldIdOptionsSelected();
         if (selectedArray.isEmpty()) {
@@ -278,12 +298,13 @@ public class FilterSettings {
         }
     }
 
-
     protected String getAllOptionsSelectedAsString() {
         WorkflowTypeMenu dynamicFieldInFilterList = filterDrawerList.get(filterListIndexSelected);
-        RightDrawerOptionList drawerOptionList = getRightDrawerOptionList(dynamicFieldInFilterList.getId());
+        RightDrawerOptionList drawerOptionList = getRightDrawerOptionList(
+                dynamicFieldInFilterList.getId());
         if (drawerOptionList == null) {
-            Log.d(TAG, "updateRightDrawerOptionListWithSelected: Not able to find a RightDrawerOption");
+            Log.d(TAG,
+                    "updateRightDrawerOptionListWithSelected: Not able to find a RightDrawerOption");
             return "";
         }
 
@@ -301,11 +322,11 @@ public class FilterSettings {
         return resultString.toString();
     }
 
-
     protected int[] arrayOfIdsSelected() {
         String result = "";
         WorkflowTypeMenu dynamicFieldInFilterList = filterDrawerList.get(filterListIndexSelected);
-        RightDrawerOptionList drawerOptionList = getRightDrawerOptionList(dynamicFieldInFilterList.getId());
+        RightDrawerOptionList drawerOptionList = getRightDrawerOptionList(
+                dynamicFieldInFilterList.getId());
 
         ArrayList<Integer> ids = drawerOptionList.getFieldIdOptionsSelected();
         if (ids.size() < 1) {
@@ -383,11 +404,10 @@ public class FilterSettings {
         return result;
     }
 
-
-
     protected String getAllValuesSelectedInOptionList() {
         WorkflowTypeMenu dynamicFieldInFilterList = filterDrawerList.get(filterListIndexSelected);
-        RightDrawerOptionList drawerOptionList = getRightDrawerOptionList(dynamicFieldInFilterList.getId());
+        RightDrawerOptionList drawerOptionList = getRightDrawerOptionList(
+                dynamicFieldInFilterList.getId());
         ArrayList<String> stringOfOptionsSelected = drawerOptionList.getStringOptionsSelected();
         if (stringOfOptionsSelected.size() < 1) {
             return "";
@@ -408,7 +428,8 @@ public class FilterSettings {
 
     protected FieldData getFieldDataFromSelectedOptionList() {
         WorkflowTypeMenu dynamicFieldInFilterList = filterDrawerList.get(filterListIndexSelected);
-        RightDrawerOptionList drawerOptionList = getRightDrawerOptionList(dynamicFieldInFilterList.getId());
+        RightDrawerOptionList drawerOptionList = getRightDrawerOptionList(
+                dynamicFieldInFilterList.getId());
         if (drawerOptionList == null) {
             return null;
         }
@@ -419,10 +440,10 @@ public class FilterSettings {
         return fieldData;
     }
 
-
     protected FieldConfig getFieldConfigFromDrawerOptionList() {
         WorkflowTypeMenu dynamicFieldInFilterList = filterDrawerList.get(filterListIndexSelected);
-        RightDrawerOptionList drawerOptionList = getRightDrawerOptionList(dynamicFieldInFilterList.getId());
+        RightDrawerOptionList drawerOptionList = getRightDrawerOptionList(
+                dynamicFieldInFilterList.getId());
         if (drawerOptionList == null) {
             return null;
         }
@@ -432,7 +453,6 @@ public class FilterSettings {
         }
         return fieldConfig;
     }
-
 
     protected List<WorkflowTypeMenu> getOptionsListAtSelectedFilterIndex() {
         WorkflowTypeMenu filterMenu = filterDrawerList.get(filterListIndexSelected);
@@ -453,7 +473,8 @@ public class FilterSettings {
         rightDrawerOptionsList.put(fieldId, drawerOptionList);
     }
 
-    protected void updateFilterListWithDynamicField(ListField listField, FieldData fieldData, FieldConfig fieldConfig) {
+    protected void updateFilterListWithDynamicField(ListField listField, FieldData fieldData,
+                                                    FieldConfig fieldConfig) {
         // TODO use
         //saveOptionsListFor(int filterFieldId, ArrayList<WorkflowTypeMenu> optionsList) {
 
@@ -481,7 +502,6 @@ public class FilterSettings {
         );
         addFilterListMenu(filterMenuItem);
     }
-
 
     private int filterListIndexSelected;
 
@@ -542,6 +562,7 @@ public class FilterSettings {
 
     /**
      * Finds which base filter is selected in baseFilterOptionsList.
+     *
      * @return Returns the base filter selected
      */
     protected int getBaseFilterSelectedId() {
@@ -554,6 +575,7 @@ public class FilterSettings {
 
     /**
      * Finds which base filter is selected in statusFilterOptionList.
+     *
      * @return Returns the base filter selected
      */
     protected int getStatusFilterSelectedId() {
@@ -567,7 +589,9 @@ public class FilterSettings {
     /**
      * FilterSettings updates baseFilterIndexSelected, and clears any other items selected. Updates
      * baseFilterOptionsList and marks as selected on the position given.
+     *
      * @param position Index position to mark as selected in baseFilterOptionsList.
+     *
      * @return Returns a WorkflowTypeMenu as selected or not selected if it was previously selected.
      */
     protected WorkflowTypeMenu handleBaseFilterPositionSelected(int position) {
@@ -594,7 +618,9 @@ public class FilterSettings {
     /**
      * FilterSettings updates baseFilterIndexSelected, and clears any other items selected. Updates
      * baseFilterOptionsList and marks as selected on the position given.
+     *
      * @param position Index position to mark as selected in baseFilterOptionsList.
+     *
      * @return Returns a WorkflowTypeMenu as selected or not selected if it was previously selected.
      */
     protected WorkflowTypeMenu handleStatusFilterPositionSelected(int position) {
@@ -637,7 +663,7 @@ public class FilterSettings {
             // TODO mejorar se puede llamar directamente al rightDrawerOptionsList y pasar el filterListItemId
             if (menu.getId() == filterListItemId) {
                 optionsObj = rightDrawerOptionsList.get(filterListItemId);
-                return  optionsObj;
+                return optionsObj;
             }
         }
         return null;

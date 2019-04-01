@@ -245,7 +245,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     private void setupSubmitButton() {
         if (isDynamicFilter) {
             //hide the button if it's instantiated on the dynamic filters section
-            mBinding.btnCreate.setVisibility(View.GONE);
+            mBinding.btnCreate.setText(R.string.filters);
             return;
         }
 
@@ -279,6 +279,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         mAdapter = new FormItemsAdapter(getContext(), getChildFragmentManager(), new ArrayList<>(),
                 this);
         mAdapter.setShowRequiredIndicator(!isDynamicFilter);
+        mAdapter.setOnValueSelectedListener(mOnValueSelectedListener);
         mBinding.rvFields.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvFields.setAdapter(mAdapter);
         mBinding.rvFields.setNestedScrollingEnabled(false);
@@ -287,6 +288,13 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     private void setOnClickListeners() {
         mBinding.btnCreate.setOnClickListener(v -> {
             mAdapter.retrieveValuesFromViews(mBinding.rvFields);
+
+            if (isDynamicFilter){
+                    viewModel.getFormItemsToFilter().forEach(
+                            formItem -> mOnValueSelectedListener.onValueSelected(formItem));
+                    return;
+            }
+
             viewModel.handleCreateWorkflowAction();
         });
 
@@ -354,7 +362,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         mAdapter.addItem(singleChoiceFormItem);
 
         singleChoiceFormItem.setOnSelectedListener(item -> {
-            mOnValueSelectedListener.onValueSelected(item);
+            if (isDynamicFilter) mOnValueSelectedListener.onValueSelected(item);
 
             if (item.getValue() == null) {
                 viewModel.clearForm();

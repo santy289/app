@@ -91,6 +91,7 @@
     <string name="active">Active</string>
     <string name="inactive">Inactive</string>
     <string name="filters">Filters</string>
+    <string name="filters_counter">Filters (%d)</string>
     <string name="my_workflows">Pending Workflows</string>
     <string name="sorting">Sort By</string>
     <string name="workflow_number">Workflow Number</string>

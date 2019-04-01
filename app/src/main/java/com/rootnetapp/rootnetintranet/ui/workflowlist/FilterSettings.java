@@ -17,7 +17,7 @@ import java.util.List;
 
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.BASE_FILTER_ALL_ID;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.NO_TYPE_SELECTED;
-import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.STATUS_FILTER_ALL_ID;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.STATUS_FILTER_OPEN_ID;
 
 public class FilterSettings {
     private boolean isCheckedMyPending;
@@ -558,7 +558,7 @@ public class FilterSettings {
      */
     protected int getStatusFilterSelectedId() {
         if (statusFilterOptionList.size() < 1) {
-            return STATUS_FILTER_ALL_ID;
+            return STATUS_FILTER_OPEN_ID;
         }
         WorkflowTypeMenu baseFilter = statusFilterOptionList.get(statusFilterIndexSelected);
         return baseFilter.getId();

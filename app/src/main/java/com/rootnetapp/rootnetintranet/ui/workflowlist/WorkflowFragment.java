@@ -389,6 +389,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .observe(this, this::scrollRecyclerToTop);
         workflowViewModel.getObservableShowBulkActionMenu()
                 .observe(this, this::showMassActionMenuIcon);
+        workflowViewModel.getObservableFiltersCounter()
+                .observe(this, this::updateFiltersCounterUi);
 
         // MainActivity's ViewModel
         mainViewModel.messageContainerToWorkflowList
@@ -637,10 +639,16 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         //Inflating the Popup using xml file
         popup.getMenuInflater().inflate(R.menu.menu_workflow_list, popup.getMenu());
 
-        popup.getMenu().findItem(R.id.disable).setVisible(workflowViewModel.hasBulkActivationPermissions());
-        popup.getMenu().findItem(R.id.open).setVisible(workflowViewModel.isShowOpenActionMenu() && workflowViewModel.hasBulkOpenClosePermissions());
-        popup.getMenu().findItem(R.id.close).setVisible(workflowViewModel.isShowCloseActionMenu() && workflowViewModel.hasBulkOpenClosePermissions());
-        popup.getMenu().findItem(R.id.delete).setVisible(workflowViewModel.hasBulkDeletePermissions());
+        popup.getMenu().findItem(R.id.disable)
+                .setVisible(workflowViewModel.hasBulkActivationPermissions());
+        popup.getMenu().findItem(R.id.open).setVisible(
+                workflowViewModel.isShowOpenActionMenu() && workflowViewModel
+                        .hasBulkOpenClosePermissions());
+        popup.getMenu().findItem(R.id.close).setVisible(
+                workflowViewModel.isShowCloseActionMenu() && workflowViewModel
+                        .hasBulkOpenClosePermissions());
+        popup.getMenu().findItem(R.id.delete)
+                .setVisible(workflowViewModel.hasBulkDeletePermissions());
 
         popup.setOnMenuItemClickListener(item -> {
             List<Integer> checkedList = adapter.getCheckedIds();
@@ -726,7 +734,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     }
 
     @UiThread
-    private void showMassActionMenuIcon(boolean show){
+    private void showMassActionMenuIcon(boolean show) {
         fragmentWorkflowBinding.ivMassActions.setVisibility(show ? View.VISIBLE : View.GONE);
         fragmentWorkflowBinding.chbxSelectAll.setVisibility(show ? View.VISIBLE : View.GONE);
 
@@ -736,11 +744,20 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     }
 
     @UiThread
-    private void verifyHeaderLineVisibility(){
+    private void verifyHeaderLineVisibility() {
         boolean show = fragmentWorkflowBinding.ivMassActions.getVisibility() == View.VISIBLE
                 || fragmentWorkflowBinding.chbxSelectAll.getVisibility() == View.VISIBLE
                 || fragmentWorkflowBinding.btnAdd.getVisibility() == View.VISIBLE;
 
         fragmentWorkflowBinding.viewLineHeader.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    @UiThread
+    private void updateFiltersCounterUi(int count) {
+        if (count == 0) {
+            fragmentWorkflowBinding.btnFilters.setText(R.string.filters);
+        } else {
+            fragmentWorkflowBinding.btnFilters.setText(getString(R.string.filters_counter, count));
+        }
     }
 }

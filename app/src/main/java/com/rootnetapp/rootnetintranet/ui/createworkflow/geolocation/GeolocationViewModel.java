@@ -171,7 +171,10 @@ public class GeolocationViewModel extends ViewModel {
 
     private void onSuccessNearbyPlaces(NearbySearchResponse nearbySearchResponse) {
         mShowLoadingLiveData.setValue(false);
-        if (nearbySearchResponse.getPlaces().isEmpty()) return;
+        if (nearbySearchResponse.getPlaces().isEmpty()) {
+            isSearchingForPlace = false;
+            return;
+        }
 
         Place first = nearbySearchResponse.getPlaces().get(0);
 
@@ -181,6 +184,7 @@ public class GeolocationViewModel extends ViewModel {
     }
 
     private void onFailureNearbyPlaces(Throwable throwable) {
+        mShowLoadingLiveData.setValue(false);
         isSearchingForPlace = false;
 
         mToastMessageLiveData.setValue(R.string.failure_connect);

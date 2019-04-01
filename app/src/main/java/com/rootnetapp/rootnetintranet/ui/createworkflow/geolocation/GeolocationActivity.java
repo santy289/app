@@ -3,6 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -27,6 +28,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ActivityGeolocationBinding;
 import com.rootnetapp.rootnetintranet.models.responses.googlemaps.autocomplete.Prediction;
@@ -72,7 +74,9 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
                 .of(this, geolocationViewModelFactory)
                 .get(GeolocationViewModel.class);
 
-        viewModel.init(getString(R.string.google_maps_key));
+        SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        String googleMapsApiKey = prefs.getString(PreferenceKeys.PREF_GOOGLE_MAPS_API_KEY, "");
+        viewModel.init(googleMapsApiKey);
 
         subscribe();
         setOnClickListeners();
@@ -185,8 +189,9 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
     }
 
     @UiThread
-    private void showNoConnectionView(boolean show){
-        mBinding.includeNoConnectionView.lytNoConnectionView.setVisibility(show ? View.VISIBLE : View.GONE);
+    private void showNoConnectionView(boolean show) {
+        mBinding.includeNoConnectionView.lytNoConnectionView
+                .setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     //region Map
@@ -444,6 +449,7 @@ public class GeolocationActivity extends AppCompatActivity implements Geolocatio
 
     /**
      * Creates an IntentChooser to navigate to the specified location.
+     *
      * @param latLng location to navigate to.
      */
     private void navigateToLocation(LatLng latLng) {

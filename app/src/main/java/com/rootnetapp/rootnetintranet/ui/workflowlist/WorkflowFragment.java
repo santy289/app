@@ -219,7 +219,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         adapter.clearCheckedItems();
     }
 
-    private void scrollRecyclerToTop(boolean scroll){
+    private void scrollRecyclerToTop(boolean scroll) {
         if (!scroll) return;
 
         //scroll to top after a tiny delay
@@ -373,8 +373,12 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .observe(this, this::handleMessageMainUpdateSortSelection);
         workflowViewModel.messageMainBaseFilters
                 .observe(this, this::handleMessageMainBaseFilters);
+        workflowViewModel.messageMainStatusFilters
+                .observe(this, this::handleMessageMainStatusFilters);
         workflowViewModel.messageMainBaseFilterSelectionToFilterList
                 .observe(this, this::handleMessageMainBaseFilterSelected);
+        workflowViewModel.messageMainStatusFilterSelectionToFilterList
+                .observe(this, this::handleMessageMainStatusFilterSelected);
         workflowViewModel.getObservableShowAddButton()
                 .observe(this, this::showAddButton);
         workflowViewModel.getObservableShowViewWorkflowButton()
@@ -383,6 +387,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .observe(this, this::handleCompleteMassAction);
         workflowViewModel.getObservableHandleScrollRecyclerToTop()
                 .observe(this, this::scrollRecyclerToTop);
+        workflowViewModel.getObservableShowBulkActionMenu()
+                .observe(this, this::showMassActionMenuIcon);
+        workflowViewModel.getObservableFiltersCounter()
+                .observe(this, this::updateFiltersCounterUi);
 
         // MainActivity's ViewModel
         mainViewModel.messageContainerToWorkflowList
@@ -397,24 +405,44 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .observe(this, this::handleMessageSortSwitchActionToWorkflowList);
         mainViewModel.messageBaseFiltersClickedToWorkflowList
                 .observe(this, this::handleMessageBaseFiltersClicked);
+        mainViewModel.messageStatusFiltersClickedToWorkflowList
+                .observe(this, this::handleMessageStatusFiltersClicked);
         mainViewModel.messageBaseFilterPositionSelectedToWorkflowList
                 .observe(this, this::handleMessageBaseFilterPositionSelected);
+        mainViewModel.messageStatusFilterPositionSelectedToWorkflowList
+                .observe(this, this::handleMessageStatusFilterPositionSelected);
     }
 
     private void handleMessageMainBaseFilterSelected(Integer resLabel) {
         mainViewModel.receiveMessageBaseFilterSelectedToListUi(resLabel);
     }
 
+    private void handleMessageMainStatusFilterSelected(Integer resLabel) {
+        mainViewModel.receiveMessageStatusFilterSelectedToListUi(resLabel);
+    }
+
     private void handleMessageBaseFilterPositionSelected(Integer position) {
         workflowViewModel.handleBaseFieldPositionSelected(position, this);
+    }
+
+    private void handleMessageStatusFilterPositionSelected(Integer position) {
+        workflowViewModel.handleStatusFieldPositionSelected(position, this);
     }
 
     private void handleMessageMainBaseFilters(OptionsList optionsList) {
         mainViewModel.createDrawerBaseFiltersOptionListAdapter(optionsList);
     }
 
+    private void handleMessageMainStatusFilters(OptionsList optionsList) {
+        mainViewModel.createDrawerStatusFiltersOptionListAdapter(optionsList);
+    }
+
     private void handleMessageBaseFiltersClicked(Boolean clicked) {
         workflowViewModel.handleBaseFieldClick();
+    }
+
+    private void handleMessageStatusFiltersClicked(Boolean clicked) {
+        workflowViewModel.handleStatusFieldClick();
     }
 
     private void handleMessageMainUpdateSortSelection(int sortType) {
@@ -597,6 +625,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     @UiThread
     private void showAddButton(boolean show) {
         fragmentWorkflowBinding.btnAdd.setVisibility(show ? View.VISIBLE : View.GONE);
+
+        verifyHeaderLineVisibility();
     }
 
     @UiThread
@@ -609,6 +639,17 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         //Inflating the Popup using xml file
         popup.getMenuInflater().inflate(R.menu.menu_workflow_list, popup.getMenu());
 
+        popup.getMenu().findItem(R.id.disable)
+                .setVisible(workflowViewModel.hasBulkActivationPermissions());
+        popup.getMenu().findItem(R.id.open).setVisible(
+                workflowViewModel.isShowOpenActionMenu() && workflowViewModel
+                        .hasBulkOpenClosePermissions());
+        popup.getMenu().findItem(R.id.close).setVisible(
+                workflowViewModel.isShowCloseActionMenu() && workflowViewModel
+                        .hasBulkOpenClosePermissions());
+        popup.getMenu().findItem(R.id.delete)
+                .setVisible(workflowViewModel.hasBulkDeletePermissions());
+
         popup.setOnMenuItemClickListener(item -> {
             List<Integer> checkedList = adapter.getCheckedIds();
             if (checkedList.isEmpty()) showToastMessage(R.string.workflow_list_no_selections);
@@ -616,6 +657,9 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
             switch (item.getItemId()) {
                 case R.id.disable:
                     workflowViewModel.enableDisableWorkflows(checkedList, false);
+                    break;
+                case R.id.open:
+                    workflowViewModel.openCloseWorkflows(checkedList, true);
                     break;
                 case R.id.close:
                     workflowViewModel.openCloseWorkflows(checkedList, false);
@@ -687,5 +731,33 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
 
         workflowViewModel.initWorkflowList(prefs, this);
+    }
+
+    @UiThread
+    private void showMassActionMenuIcon(boolean show) {
+        fragmentWorkflowBinding.ivMassActions.setVisibility(show ? View.VISIBLE : View.GONE);
+        fragmentWorkflowBinding.chbxSelectAll.setVisibility(show ? View.VISIBLE : View.GONE);
+
+        adapter.setShowCheckbox(show);
+
+        verifyHeaderLineVisibility();
+    }
+
+    @UiThread
+    private void verifyHeaderLineVisibility() {
+        boolean show = fragmentWorkflowBinding.ivMassActions.getVisibility() == View.VISIBLE
+                || fragmentWorkflowBinding.chbxSelectAll.getVisibility() == View.VISIBLE
+                || fragmentWorkflowBinding.btnAdd.getVisibility() == View.VISIBLE;
+
+        fragmentWorkflowBinding.viewLineHeader.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    @UiThread
+    private void updateFiltersCounterUi(int count) {
+        if (count == 0) {
+            fragmentWorkflowBinding.btnFilters.setText(R.string.filters);
+        } else {
+            fragmentWorkflowBinding.btnFilters.setText(getString(R.string.filters_counter, count));
+        }
     }
 }

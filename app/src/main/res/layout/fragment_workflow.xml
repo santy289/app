@@ -114,6 +114,7 @@
                     android:tint="@color/colorAccent" />
 
                 <View
+                    android:id="@+id/view_line_header"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_centerVertical="true"

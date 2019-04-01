@@ -445,6 +445,24 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         }
     }
 
+    private void workflowDbSuccessFilter(WorkflowResponseDb workflowsResponse) {
+        Disposable disposable = Observable.fromCallable(() -> {
+            workflowDbDao.deleteAllWorkflows();
+            workflowDbDao.insertWorkflows(workflowsResponse.getList());
+            return true;
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(success -> {
+                    Log.d(TAG, "workflowDbSuccessFilter: ");
+                    handleRepoSuccessNoFilters.postValue(true);
+                }, throwable -> {
+                    Log.d(TAG, "workflowDbSuccessFilter: error " + throwable.getMessage());
+                    handleRepoError.postValue(true);
+                });
+
+        disposables.add(disposable);
+    }
+
     private void workflowDbSuccessNoFilter(WorkflowResponseDb workflowsResponse) {
         Disposable disposable = Observable.fromCallable(() -> {
             workflowDbDao.insertWorkflows(workflowsResponse.getList());
@@ -492,13 +510,12 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 .getWorkflowsByBaseFilters(
                         token,
                         50,
-                        true,
                         1,
                         false,
                         options)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::workflowDbSuccessNoFilter, throwable -> {
+                .subscribe(this::workflowDbSuccessFilter, throwable -> {
                     Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
                     handleRepoError.postValue(true);
                 });

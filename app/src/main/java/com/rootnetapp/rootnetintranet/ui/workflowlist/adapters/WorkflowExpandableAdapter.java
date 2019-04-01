@@ -35,6 +35,7 @@ public class WorkflowExpandableAdapter extends
 
     private WorkflowFragmentInterface anInterface;
     private boolean showViewWorkflowButton;
+    private boolean showCheckbox;
 
     public WorkflowExpandableAdapter(WorkflowFragmentInterface anInterface) {
         super(WorkflowExpandableAdapter.DIFF_CALLBACK);
@@ -46,6 +47,10 @@ public class WorkflowExpandableAdapter extends
 
     public void setShowViewWorkflowButton(boolean showViewWorkflowButton) {
         this.showViewWorkflowButton = showViewWorkflowButton;
+    }
+
+    public void setShowCheckbox(boolean showCheckbox) {
+        this.showCheckbox = showCheckbox;
     }
 
     public List<Integer> getCheckedIds() {
@@ -187,6 +192,7 @@ public class WorkflowExpandableAdapter extends
             }
         });
 
+        holder.binding.chbxSelected.setVisibility(showCheckbox ? View.VISIBLE : View.GONE);
         holder.binding.btnDetail.setVisibility(showViewWorkflowButton ? View.VISIBLE : View.GONE);
 
         holder.binding.btnDetail.setOnClickListener(view -> {

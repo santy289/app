@@ -53,33 +53,7 @@ public class ServiceHandler extends Handler {
 
         NotificationManager notificationManager = (NotificationManager) service.getSystemService(NOTIFICATION_SERVICE);
         NotificationHandler.createNotificationChannel(notificationManager);
-        initWebsocket(protocol, port, token, domain);
-    }
-
-    public void testDebug(Service service) {
-        NotificationManager notificationManager = (NotificationManager) service.getSystemService(NOTIFICATION_SERVICE);
-
-        String TAG = "ServiceHandler";
-        try {
-            Log.d(TAG, "handleMessage: GOING TO SLEEP 30 SEC");
-            Thread.sleep(30 * 1000);
-        } catch (InterruptedException e) {
-            // Restore interrupt status.
-            Thread.currentThread().interrupt();
-            Log.d(TAG, "handleMessage: Thread error " + e.getMessage());
-            return;
-        }
-        Log.d(TAG, "testDebug: ");
-        counter += 1;
-        NotificationHandler.prepareNotification(
-                "199",
-                "TITLE Alive" ,
-                "ALIVE ALIve " + startId,
-                "Name test",
-                service,
-                notificationManager,
-                counter
-        );
+        initWebSocket(protocol, port, token, domain);
     }
 
     /**
@@ -91,7 +65,7 @@ public class ServiceHandler extends Handler {
      * @param port
      * @param token
      */
-    void initWebsocket(String protocol, String port, String token, String domain) {
+    private void initWebSocket(String protocol, String port, String token, String domain) {
         Service service = serviceWeakReference.get();
         if (service == null) {
             return;
@@ -115,15 +89,13 @@ public class ServiceHandler extends Handler {
                 case REASON_AUTH_FAILURE:
                     break;
                 case REASON_CLOSE:
-                    restartWebSocket(protocol, port, token, domain);
-                    return;
+                    break;
                 case REASON_GOODBYE:
                     return;
                 default:
                     Log.d(TAG, "websocket disconnected: not managed leave resason");
             }
 
-            // TODO if it disconnects try to connect again. Check if dosconnected message is given.
             if (webSocketHandler != null) {
                 webSocketHandler.completeClient();
             }
@@ -132,6 +104,8 @@ public class ServiceHandler extends Handler {
             Crashlytics.logException(new ServiceDestroyedException(message));
 
             service.stopSelf(startId);
+
+            initWebSocket(protocol, port, token, domain);
         });
     }
 
@@ -143,56 +117,5 @@ public class ServiceHandler extends Handler {
             return;
         }
         webSocketHandler.cancelClient();
-    }
-
-    /**
-     * Restarts the websocket by creating a new NotificationManager and new WebsocketHandler.
-     *
-     * @param protocol
-     * @param port
-     * @param token
-     * @param domain
-     */
-    private void restartWebSocket(String protocol, String port, String token, String domain) {
-        Service service = serviceWeakReference.get();
-
-        counter = 0;
-        if (webSocketHandler != null) {
-            webSocketHandler.completeClient();
-        }
-
-        NotificationManager notificationManager = (NotificationManager) service.getSystemService(NOTIFICATION_SERVICE);
-        webSocketHandler = new WebsocketSecureHandler(protocol, port, token, domain);
-        webSocketHandler.initNotificationsWithCallback(messageArray -> {
-            counter += 1;
-            NotificationHandler.prepareNotification(
-                    messageArray[WebsocketSecureHandler.INDEX_ID],
-                    messageArray[WebsocketSecureHandler.INDEX_TITLE],
-                    messageArray[WebsocketSecureHandler.INDEX_MESSAGE],
-                    messageArray[WebsocketSecureHandler.INDEX_NAME],
-                    service,
-                    notificationManager,
-                    counter
-
-            );
-        }, errorMessage -> {
-            switch (errorMessage) {
-                case "thruway.error.authentication_failure":
-                    break;
-                case "wamp.close.normal":
-                    break;
-                default:
-
-//                    Log.d(TAG, "initNotifications: not managed leave resason");
-            }
-
-            // TODO if it disconnects try to connect again. Check if dosconnected message is given.
-            if (webSocketHandler != null) {
-                webSocketHandler.completeClient();
-            }
-
-//            stopSelf();
-        });
-
     }
 }

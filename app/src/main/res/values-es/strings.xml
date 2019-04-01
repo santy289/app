@@ -92,6 +92,7 @@
     <string name="active">Activo</string>
     <string name="inactive">Inactivo</string>
     <string name="filters">Filtros</string>
+    <string name="filters_counter">Filtros (%d)</string>
     <string name="my_workflows">Pendientes</string>
     <string name="sorting">Ordenar Por</string>
     <string name="workflow_number">Número de Workflow</string>
@@ -214,7 +215,8 @@
     <string name="file_too_big">El archivo es muy grande, límite de 10MB</string>
     <string name="clear_filters">Limpiar Filtros</string>
     <string name="no_category">Sin Categoría</string>
-    <string name="base_filters">Filtros Estándar</string>
+    <string name="base_filters">Estado Actual</string>
+    <string name="status_filters">Estatus</string>
     <string name="all">Todos</string>
     <string name="on_time">A Tiempo</string>
     <string name="latest">Últimos</string>

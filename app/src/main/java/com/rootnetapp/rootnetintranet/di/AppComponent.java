@@ -1,7 +1,5 @@
 package com.rootnetapp.rootnetintranet.di;
 
-import com.rootnetapp.rootnetintranet.services.background.WorkflowManagerService;
-import com.rootnetapp.rootnetintranet.services.background.WorkflowManagerServiceModule;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowModule;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.GeolocationActivity;
@@ -73,7 +71,6 @@ import dagger.Component;
                 CreateWorkflowModule.class,
                 WorkflowDetailModule.class,
                 TimelineModule.class,
-                WorkflowManagerServiceModule.class,
                 WorkflowManagerModule.class,
                 SplashModule.class,
                 StatusModule.class,
@@ -117,8 +114,6 @@ public interface AppComponent {
     void inject(WorkflowDetailActivity workflowDetailActivity);
 
     void inject(TimelineFragment timelineFragment);
-
-    void inject(WorkflowManagerService workflowManagerService);
 
     void inject(WorkflowManagerFragment workflowManagerFragment);
 

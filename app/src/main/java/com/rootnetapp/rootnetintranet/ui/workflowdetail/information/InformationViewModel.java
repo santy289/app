@@ -164,6 +164,11 @@ public class InformationViewModel extends ViewModel {
                 if (typeInfo.getType().equals(FormSettings.TYPE_GEOLOCATION)) {
                     info.setViewType(InformationAdapter.ViewType.GEOLOCATION);
 
+                    if (meta.getValue() == null || meta.getValue().isEmpty()
+                            || meta.getValue().equals("\"\"")) {
+                        continue;
+                    }
+
                     JsonAdapter<GeolocationMetaData> geolocationMetaDataJsonAdapter = moshi
                             .adapter(GeolocationMetaData.class);
                     GeolocationMetaData geolocationMetaData = geolocationMetaDataJsonAdapter
@@ -173,7 +178,7 @@ public class InformationViewModel extends ViewModel {
                             || geolocationMetaData.getValue() == null
                             || geolocationMetaData.getValue().getLatLng() == null
                             || geolocationMetaData.getValue().getLatLng().size() < 2) {
-                        return;
+                        continue;
                     }
 
                     LatLng latLng = new LatLng(geolocationMetaData.getValue().getLatLng().get(0),

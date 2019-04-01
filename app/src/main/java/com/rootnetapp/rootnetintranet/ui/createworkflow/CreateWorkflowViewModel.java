@@ -87,6 +87,7 @@ import com.squareup.moshi.Moshi;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -112,6 +113,7 @@ import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WOR
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_MY_OWN;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_OWN;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_OWNER;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_START_DATE;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_STATUS;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_TYPE;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_ACCOUNT;
@@ -222,7 +224,7 @@ class CreateWorkflowViewModel extends ViewModel {
 
         List<String> permissionsToCheck = new ArrayList<>();
 
-        if (mWorkflowListItem == null || mWorkflowListItem.getOwnerId() == userId) {
+        if (mWorkflowListItem != null && mWorkflowListItem.getOwnerId() == userId) {
             permissionsToCheck.add(WORKFLOW_EDIT_MY_OWN);
             permissionsToCheck.add(WORKFLOW_EDIT_OWN);
         } else {
@@ -1216,6 +1218,11 @@ class CreateWorkflowViewModel extends ViewModel {
             return;
         }
 
+        Date defaultValue = null;
+        if (field.getFieldConfigObject().getMachineName().equals(MACHINE_NAME_START_DATE)) {
+            defaultValue = Calendar.getInstance().getTime();
+        }
+
         DateFormItem item = new DateFormItem.Builder()
                 .setTitle(field.getFieldName())
                 .setRequired(field.isRequired())
@@ -1223,6 +1230,7 @@ class CreateWorkflowViewModel extends ViewModel {
                 .setEscaped(escape(field.getFieldConfigObject()))
                 .setMachineName(field.getFieldConfigObject().getMachineName())
                 .setTypeInfo(typeInfo)
+                .setValue(defaultValue)
                 .build();
 
         formSettings.getFormItems().add(item);

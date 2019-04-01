@@ -7,6 +7,7 @@ import com.rootnetapp.rootnetintranet.models.requests.comment.EditCommentRequest
 import com.rootnetapp.rootnetintranet.models.requests.comment.PostCommentRequest;
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
 import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
+import com.rootnetapp.rootnetintranet.models.requests.resetpassword.ResetPasswordRequest;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
 import com.rootnetapp.rootnetintranet.models.responses.business.BusinessOpportunitiesResponse;
@@ -43,7 +44,7 @@ import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.SubC
 import com.rootnetapp.rootnetintranet.models.responses.user.LoggedProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.UserResponse;
-import com.rootnetapp.rootnetintranet.models.responses.websocket.WebSocketSettingResponse;
+import com.rootnetapp.rootnetintranet.models.responses.websocket.OptionsSettingsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.DeleteWorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.WorkflowApproveRejectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowoverview.WorkflowOverviewResponse;
@@ -105,11 +106,7 @@ public interface ApiInterface {
 
     @Headers({"Domain-Name: api"})
     @POST("check/reset/password")
-    @FormUrlEncoded
-    Observable<ResetPasswordResponse> resetPassword(@Field("token") String token,
-                                                    @Field("username") String username,
-                                                    @Field("password") String password,
-                                                    @Field("repeat_new_password") String repeatNewPassword);
+    Observable<ResetPasswordResponse> resetPassword(@Body ResetPasswordRequest resetPasswordRequest);
 
     @Headers({"Domain-Name: api"})
     @GET("profiles?enabled=all")
@@ -196,6 +193,14 @@ public interface ApiInterface {
     Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(@Header("Authorization") String authorization,
                                                            @Query("limit") int limit,
                                                            @Query("open") boolean open,
+                                                           @Query("page") int page,
+                                                           @Query("workflow_type") boolean showTypeDetails,
+                                                           @QueryMap Map<String, Object> options);
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?status=true")
+    Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(@Header("Authorization") String authorization,
+                                                           @Query("limit") int limit,
                                                            @Query("page") int page,
                                                            @Query("workflow_type") boolean showTypeDetails,
                                                            @QueryMap Map<String, Object> options);
@@ -497,12 +502,17 @@ public interface ApiInterface {
     @Headers({"Domain-Name: api"})
     @Streaming
     @GET("options?key=socket_main")
-    Observable<WebSocketSettingResponse> getWsPort(@Header("Authorization") String authorization);
+    Observable<OptionsSettingsResponse> getWsPort(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
     @Streaming
     @GET("options?key=socket_protocol")
-    Observable<WebSocketSettingResponse> getWsProtocol(@Header("Authorization") String authorization);
+    Observable<OptionsSettingsResponse> getWsProtocol(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: api"})
+    @Streaming
+    @GET("options?key=google_maps_apikey")
+    Observable<OptionsSettingsResponse> getGoogleMapsApiKey(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
     @GET("contacts/records?")

@@ -23,7 +23,7 @@ import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.country.CountryDbResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.LoggedProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
-import com.rootnetapp.rootnetintranet.models.responses.websocket.WebSocketSettingResponse;
+import com.rootnetapp.rootnetintranet.models.responses.websocket.OptionsSettingsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
@@ -67,7 +67,7 @@ public class SyncHelper {
     public final static int INDEX_KEY_STRING = 0;
     public final static int INDEX_KEY_VALUE = 1;
     private final static String TAG = "SyncHelper";
-    protected static final int MAX_ENDPOINT_CALLS = 6;
+    protected static final int MAX_ENDPOINT_CALLS = 7;
 
     public SyncHelper(ApiInterface apiInterface, AppDatabase database) {
         this.apiInterface = apiInterface;
@@ -91,6 +91,7 @@ public class SyncHelper {
         this.auth = token;
 
         getWsSettings(token);
+        getGoogleMapsSettings(token);
         getUser(token);
         getAllWorkflows(token, 1);
         getWorkflowTypesDb(token);
@@ -130,20 +131,42 @@ public class SyncHelper {
     private void getWsSettings(String token) {
         Disposable disposable = apiInterface
                 .getWsPort(token)
-                .doOnNext(response -> saveWebsocketSettingsToPreference(response,
+                .doOnNext(response -> saveSettingsToPreference(response,
                         PreferenceKeys.PREF_PORT))
                 .flatMap(response -> apiInterface.getWsProtocol(token))
-                .doOnNext(response -> saveWebsocketSettingsToPreference(response,
+                .doOnNext(response -> saveSettingsToPreference(response,
                         PreferenceKeys.PREF_PROTOCOL))
 //                .retryWhen(observable -> Observable.timer(3, TimeUnit.SECONDS))
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(response -> {
-                    success(true);
-                }, throwable -> {
+                .subscribe(response -> success(true), throwable -> {
                     Log.d(TAG, "getWsSettings: " + throwable.getMessage());
                     if (throwable instanceof UnknownHostException) {
                         Log.d(TAG, "getWsSettings: network is down probably");
+                    }
+                    failure(throwable);
+                });
+
+        disposables.add(disposable);
+    }
+
+    /**
+     * RxJava implementation to change 2 network requests for obtaining webSocket settings such as
+     * port number and protocol type. Finally it saves to SharedPreferences all these settings.
+     *
+     * @param token Token network request.
+     */
+    private void getGoogleMapsSettings(String token) {
+        Disposable disposable = apiInterface
+                .getGoogleMapsApiKey(token)
+                .doOnNext(response -> saveSettingsToPreference(response,
+                        PreferenceKeys.PREF_GOOGLE_MAPS_API_KEY))
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(response -> success(true), throwable -> {
+                    Log.d(TAG, "getGoogleMapsSettings: " + throwable.getMessage());
+                    if (throwable instanceof UnknownHostException) {
+                        Log.d(TAG, "getGoogleMapsSettings: network is down probably");
                     }
                     failure(throwable);
                 });
@@ -158,15 +181,15 @@ public class SyncHelper {
      * @param response      Incoming response with values.
      * @param preferenceKey Expecting static variables from class PreferenceKeys.
      */
-    private void saveWebsocketSettingsToPreference(WebSocketSettingResponse response,
-                                                   String preferenceKey) {
+    private void saveSettingsToPreference(OptionsSettingsResponse response,
+                                          String preferenceKey) {
         String status = response.getStatus();
         if (TextUtils.isEmpty(status) || !status.equals("success")) {
             return;
         }
-        String portNumber = response.getData().getValue();
-        String[] value = new String[]{preferenceKey, portNumber};
-        saveStringToPreference.postValue(value);
+        String value = response.getData().getValue();
+        String[] preferencesValue = new String[]{preferenceKey, value};
+        saveStringToPreference.postValue(preferencesValue);
     }
 
     private void saveCountriesToDatabase(CountryDbResponse response) {

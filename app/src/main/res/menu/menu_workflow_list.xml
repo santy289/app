@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
         android:id="@+id/disable"
         android:title="@string/workflow_detail_activity_disable"/>
+
+    <item
+        android:id="@+id/open"
+        android:title="@string/workflow_detail_activity_open" />
 
     <item
         android:id="@+id/close"

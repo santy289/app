@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:minWidth="300dp">
 
         <LinearLayout
             android:id="@+id/layout_pager"
@@ -20,9 +22,9 @@
 
             <androidx.viewpager.widget.ViewPager
                 android:id="@+id/viewpager"
+                style="@style/viewPagerStyle"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
-                style="@style/viewPagerStyle"
                 app:tabIndicatorColor="@color/colorAccent" />
         </LinearLayout>
 
@@ -30,8 +32,10 @@
             android:id="@+id/layout_progress"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:background="@color/transparent"
+            android:gravity="center"
+            android:layout_gravity="center"
             android:visibility="gone">
+
             <ProgressBar
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

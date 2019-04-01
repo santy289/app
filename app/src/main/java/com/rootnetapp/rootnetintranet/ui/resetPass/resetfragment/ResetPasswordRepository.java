@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment;
 
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
+import com.rootnetapp.rootnetintranet.models.requests.resetpassword.ResetPasswordRequest;
 import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordResponse;
 
 import io.reactivex.Observable;
@@ -24,8 +25,8 @@ public class ResetPasswordRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<ResetPasswordResponse> resetPassword(String token, String username, String password, String repeatNewPassword) {
-        return services.resetPassword(token, username, password, repeatNewPassword).subscribeOn(Schedulers.newThread())
+    public Observable<ResetPasswordResponse> resetPassword(ResetPasswordRequest resetPasswordRequest) {
+        return services.resetPassword(resetPasswordRequest).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 

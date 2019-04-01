@@ -112,12 +112,10 @@ public class WebSocketService extends Service {
 
     @Override
     public void onDestroy() {
-//        Toast.makeText(getApplicationContext(), "onDestroy Service " + startId , Toast.LENGTH_LONG).show();
         Log.d(TAG, "onDestroy: SERVICE DESTROYED");
+
         serviceCleanup();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            stopForeground(true); //true will remove notification
-        }
+
         super.onDestroy();
     }
 
@@ -133,6 +131,9 @@ public class WebSocketService extends Service {
         serviceHandler.removeMessages(what);
         stopSelf(startId);
         looper.quit();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            stopForeground(true); //true will remove notification
+        }
 //        sendBroadcastWebsocket();
     }
 

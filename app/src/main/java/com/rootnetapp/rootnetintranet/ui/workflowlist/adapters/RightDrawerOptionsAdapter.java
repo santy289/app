@@ -86,7 +86,7 @@ public class RightDrawerOptionsAdapter extends BaseAdapter {
                 }
                 break;
             case CATEGORY:
-                convertView = inflater.inflate(R.layout.right_drawer_filter_item, null);
+                convertView = inflater.inflate(R.layout.right_drawer_filter_category_item, null);
                 textView = convertView.findViewById(R.id.right_drawer_item_title);
                 String label;
                 if (menu.getLabel().equals(NO_CATEGORY_LABEL)) {

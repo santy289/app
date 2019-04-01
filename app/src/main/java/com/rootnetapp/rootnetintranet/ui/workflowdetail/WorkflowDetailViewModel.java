@@ -17,6 +17,7 @@ import com.squareup.moshi.Moshi;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -32,6 +33,9 @@ import retrofit2.HttpException;
 
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_ACTIVATE_ALL;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_DELETE;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_ALL;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_MY_OWN;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_OWN;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EXPORT;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_OPEN_ALL;
 
@@ -76,6 +80,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     private boolean hasDeletePermissions;
     private boolean hasEnableDisablePermissions;
     private boolean hasOpenClosePermissions;
+    private boolean hasEditPermissions;
 
     public WorkflowDetailViewModel(WorkflowDetailRepository workflowDetailRepository) {
         this.mRepository = workflowDetailRepository;
@@ -96,15 +101,17 @@ public class WorkflowDetailViewModel extends ViewModel {
      *
      * @param token             auth token
      * @param workflow          workflow item
+     * @param loggedUserId      user id
      * @param permissionsString user permissions
      */
-    protected void initWithDetails(String token, WorkflowListItem workflow,
+    protected void initWithDetails(String token, WorkflowListItem workflow, String loggedUserId,
                                    String permissionsString) {
         this.mToken = token;
         this.mWorkflowListItem = workflow;
         initUiWithWorkflowListItem.setValue(workflow);
 
-        checkPermissions(permissionsString);
+        int userId = loggedUserId == null ? 0 : Integer.parseInt(loggedUserId);
+        checkPermissions(permissionsString, userId);
 
         getWorkflow(this.mToken, this.mWorkflowListItem.getWorkflowId());
     }
@@ -115,9 +122,11 @@ public class WorkflowDetailViewModel extends ViewModel {
      *
      * @param token             auth token
      * @param id                workflow id
+     * @param loggedUserId      user id
      * @param permissionsString user permissions
      */
-    protected void initWithId(String token, String id, String permissionsString) {
+    protected void initWithId(String token, String id, String loggedUserId,
+                              String permissionsString) {
         this.mToken = token;
 
         handleRepoWorkflowRequest = Transformations.map(
@@ -137,7 +146,8 @@ public class WorkflowDetailViewModel extends ViewModel {
                 }
         );
 
-        checkPermissions(permissionsString);
+        int userId = loggedUserId == null ? 0 : Integer.parseInt(loggedUserId);
+        checkPermissions(permissionsString, userId);
 
         mRepository.getWorkflowFromDataSources(token, Integer.valueOf(id));
     }
@@ -148,13 +158,23 @@ public class WorkflowDetailViewModel extends ViewModel {
      *
      * @param permissionsString users permissions.
      */
-    private void checkPermissions(String permissionsString) {
+    private void checkPermissions(String permissionsString, int userId) {
         RootnetPermissionsUtils permissionsUtils = new RootnetPermissionsUtils(permissionsString);
 
         hasExportPermissions = permissionsUtils.hasPermission(WORKFLOW_EXPORT);
         hasDeletePermissions = permissionsUtils.hasPermission(WORKFLOW_DELETE);
         hasEnableDisablePermissions = permissionsUtils.hasPermission(WORKFLOW_ACTIVATE_ALL);
         hasOpenClosePermissions = permissionsUtils.hasPermission(WORKFLOW_OPEN_ALL);
+
+        List<String> permissionsToCheck = new ArrayList<>();
+
+        if (mWorkflowListItem != null && mWorkflowListItem.getOwnerId() == userId) {
+            permissionsToCheck.add(WORKFLOW_EDIT_MY_OWN);
+            permissionsToCheck.add(WORKFLOW_EDIT_OWN);
+        } else {
+            permissionsToCheck.add(WORKFLOW_EDIT_ALL);
+        }
+        hasEditPermissions = permissionsUtils.hasPermissions(permissionsToCheck);
 
         mShowExportPdfButtonLiveData.setValue(hasExportPermissions);
         mShowDeleteLiveData.setValue(hasDeletePermissions);
@@ -176,6 +196,10 @@ public class WorkflowDetailViewModel extends ViewModel {
 
     protected boolean hasOpenClosePermissions() {
         return hasOpenClosePermissions;
+    }
+
+    protected boolean hasEditPermissions() {
+        return hasEditPermissions;
     }
 
     protected WorkflowListItem getWorkflowListItem() {
@@ -438,7 +462,8 @@ public class WorkflowDetailViewModel extends ViewModel {
         try {
             domain = jsonAdapter.fromJson(domainJson);
 
-            String workflowUrl = Utils.getWebProtocol(domain.getClient().getDomain()) + domain.getClient().getDomain()
+            String workflowUrl = Utils.getWebProtocol(domain.getClient().getDomain()) + domain
+                    .getClient().getDomain()
                     + "/Intranet/workflow/" + mWorkflowListItem.getWorkflowId();
             String shareText = String.format(
                     Locale.US,

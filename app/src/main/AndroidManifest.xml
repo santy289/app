@@ -108,10 +108,6 @@
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize|stateHidden" />
 
-        <service
-            android:name=".services.background.WorkflowManagerService"
-            android:enabled="true"
-            android:exported="false"></service>
         <service android:name=".notifications.MessageReceiver">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -123,9 +119,6 @@
             </intent-filter>
         </service>
         <service android:name=".services.websocket.WebSocketService" />
-        <service
-            android:name=".services.websocket.WebSocketIntentService"
-            android:stopWithTask="false" />
 
         <receiver
             android:name=".services.websocket.RestartWebsocketReceiver"

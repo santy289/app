@@ -52,7 +52,10 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_ACTIVATE_ALL;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_CREATE;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_DELETE;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_OPEN_ALL;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_VIEW;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.CHECK;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.INDEX_CHECK;
@@ -86,6 +89,8 @@ public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<Boolean> showViewWorkflowButtonLiveData;
     private MutableLiveData<Boolean> completeMassAction;
     private MutableLiveData<Boolean> handleScrollRecyclerToTop;
+    private MutableLiveData<Boolean> showBulkActionMenuLiveData;
+    private MutableLiveData<Integer> filtersCounterLiveData;
     public MutableLiveData<Boolean> showBottomSheetLoading;
     protected MutableLiveData<Boolean> clearFilters;
     private LiveData<PagedList<WorkflowListItem>> liveWorkflows;
@@ -106,7 +111,9 @@ public class WorkflowViewModel extends ViewModel {
     protected MutableLiveData<Integer> messageMainUpdateSortSelection;
 
     protected MutableLiveData<OptionsList> messageMainBaseFilters;
+    protected MutableLiveData<OptionsList> messageMainStatusFilters;
     protected MutableLiveData<Integer> messageMainBaseFilterSelectionToFilterList;
+    protected MutableLiveData<Integer> messageMainStatusFilterSelectionToFilterList;
 
     // MOVED TO FILTERSETTINGS
     //protected List<WorkflowTypeMenu> rightDrawerFilters;
@@ -125,8 +132,17 @@ public class WorkflowViewModel extends ViewModel {
     private List<ListItem> categoryList;
     private static final String TAG = "WorkflowViewModel";
     private boolean hasViewDetailsPermissions;
+    private boolean hasBulkDeletePermissions;
+    private boolean hasBulkOpenClosePermissions;
+    private boolean hasBulkActivationPermissions;
     private List<Integer> mWorkflowIdsToDelete;
     private Boolean isSwipe;
+    private boolean isShowOpenActionMenu;
+    private boolean isShowCloseActionMenu;
+    private boolean isSortFilterApplied;
+    private boolean isBaseFilterApplied;
+    private boolean isStatusFilterApplied;
+    private boolean isWorkflowTypeFilterApplied;
 
     public WorkflowViewModel(WorkflowRepository workflowRepository) {
         this.workflowRepository = workflowRepository;
@@ -144,7 +160,13 @@ public class WorkflowViewModel extends ViewModel {
         messageMainToggleSwitch = new MutableLiveData<>();
         messageMainUpdateSortSelection = new MutableLiveData<>();
         messageMainBaseFilters = new MutableLiveData<>();
+        messageMainStatusFilters = new MutableLiveData<>();
         messageMainBaseFilterSelectionToFilterList = new MutableLiveData<>();
+        messageMainStatusFilterSelectionToFilterList = new MutableLiveData<>();
+
+        //Open filter is selected by default
+        isShowOpenActionMenu = false;
+        isShowCloseActionMenu = true;
     }
 
     @Override
@@ -167,6 +189,12 @@ public class WorkflowViewModel extends ViewModel {
 
         boolean hasCreatePermissions = permissionsUtils.hasPermission(WORKFLOW_CREATE);
         hasViewDetailsPermissions = permissionsUtils.hasPermission(WORKFLOW_VIEW);
+        hasBulkDeletePermissions = permissionsUtils.hasPermission(WORKFLOW_DELETE);
+        hasBulkOpenClosePermissions = permissionsUtils.hasPermission(WORKFLOW_OPEN_ALL);
+        hasBulkActivationPermissions = permissionsUtils.hasPermission(WORKFLOW_ACTIVATE_ALL);
+
+        showBulkActionMenuLiveData.setValue(
+                hasBulkDeletePermissions || hasBulkOpenClosePermissions || hasBulkActivationPermissions);
 
         showAddButtonLiveData.setValue(hasCreatePermissions);
         showViewWorkflowButtonLiveData.setValue(hasViewDetailsPermissions);
@@ -174,6 +202,26 @@ public class WorkflowViewModel extends ViewModel {
 
     protected boolean hasViewDetailsPermissions() {
         return hasViewDetailsPermissions;
+    }
+
+    protected boolean hasBulkDeletePermissions() {
+        return hasBulkDeletePermissions;
+    }
+
+    protected boolean hasBulkOpenClosePermissions() {
+        return hasBulkOpenClosePermissions;
+    }
+
+    protected boolean hasBulkActivationPermissions() {
+        return hasBulkActivationPermissions;
+    }
+
+    protected boolean isShowOpenActionMenu() {
+        return isShowOpenActionMenu;
+    }
+
+    protected boolean isShowCloseActionMenu() {
+        return isShowCloseActionMenu;
     }
 
     private void getWorkflowTypesFromDb() {
@@ -214,6 +262,23 @@ public class WorkflowViewModel extends ViewModel {
         this.isSwipe = isSwipe;
         if (!isSwipe) showLoading.setValue(true);
         workflowRepository.getAllWorkflowsDb(token);
+
+        isSortFilterApplied = false;
+        isBaseFilterApplied = false;
+        isStatusFilterApplied = false;
+        isWorkflowTypeFilterApplied = false;
+        sendFiltersCounterToUi();
+    }
+
+    private void sendFiltersCounterToUi() {
+        int count = 0;
+
+        if (isSortFilterApplied) count++;
+        if (isBaseFilterApplied) count++;
+        if (isStatusFilterApplied) count++;
+        if (isWorkflowTypeFilterApplied) count++;
+
+        filtersCounterLiveData.setValue(count);
     }
 
     protected void initWorkflowList(SharedPreferences sharedPreferences,
@@ -221,7 +286,7 @@ public class WorkflowViewModel extends ViewModel {
         if (!TextUtils.isEmpty(token)) {
 //            showLoading.setValue(true);
             int baseFilterId = filterSettings.getBaseFilterSelectedId();
-            loadWorkflowsByBaseFilters(baseFilterId, filterSettings, lifecycleOwner);
+            loadWorkflowsByFilters(filterSettings, lifecycleOwner);
             return;
         }
         token = "Bearer " + sharedPreferences.getString("token", "");
@@ -240,6 +305,7 @@ public class WorkflowViewModel extends ViewModel {
         getCategories(categoryId);
         initRightDrawerFilterList();
         initBaseFilters();
+        initStatusFilters();
         initSortBy();
     }
 
@@ -329,6 +395,50 @@ public class WorkflowViewModel extends ViewModel {
         baseFilterOptionsList.add(baseMenu);
 
         filterSettings.setBaseFilterOptionsList(baseFilterOptionsList);
+    }
+
+    public static final int STATUS_FILTER_TYPE = -99;
+    public static final int STATUS_FILTER_ALL_ID = 95;
+    public static final int STATUS_FILTER_OPEN_ID = 96;
+    public static final int STATUS_FILTER_CLOSED_ID = 97;
+
+    /**
+     * Creates a new list of status filter options only if FilterSettings.statusFilterOptionList is
+     * empty.
+     */
+    private void initStatusFilters() {
+        if (filterSettings.getSizeStatusFilterOptionList() > 0) {
+            // It already exists.
+            return;
+        }
+
+        List<WorkflowTypeMenu> statusFilterOptionList = new ArrayList<>();
+        WorkflowTypeMenu menu = new WorkflowTypeMenu(
+                STATUS_FILTER_ALL_ID,
+                R.string.all,
+                WorkflowTypeSpinnerAdapter.TYPE,
+                STATUS_FILTER_TYPE
+        );
+        statusFilterOptionList.add(menu);
+
+        menu = new WorkflowTypeMenu(
+                STATUS_FILTER_OPEN_ID,
+                R.string.open,
+                WorkflowTypeSpinnerAdapter.TYPE,
+                STATUS_FILTER_TYPE
+        );
+        menu.setSelected(true);
+        statusFilterOptionList.add(menu);
+
+        menu = new WorkflowTypeMenu(
+                STATUS_FILTER_CLOSED_ID,
+                R.string.closed,
+                WorkflowTypeSpinnerAdapter.TYPE,
+                STATUS_FILTER_TYPE
+        );
+        statusFilterOptionList.add(menu);
+
+        filterSettings.setStatusFilterOptionList(statusFilterOptionList);
     }
 
     private void getCategories(int id) {
@@ -482,35 +592,38 @@ public class WorkflowViewModel extends ViewModel {
         WorkflowTypeMenu menu = spinnerMenuArray.get(position);
         int typeId = menu.getWorkflowTypeId();
         if (typeId == NO_TYPE_SELECTED) {
+            isWorkflowTypeFilterApplied = false;
             workflowRepository.getAllWorkflowsNoFilters(token);
         } else {
+            isWorkflowTypeFilterApplied = true;
             workflowRepository.getWorkflowsByType(token, typeId, false);
         }
         liveWorkflows.removeObservers(lifecycleOwner);
+        sendFiltersCounterToUi();
     }
 
     protected void loadWorkflowsByTypeId(int workflowTypeId, LifecycleOwner lifecycleOwner) {
 //        showLoading.postValue(true);
         if (workflowTypeId == NO_TYPE_SELECTED) {
+            isWorkflowTypeFilterApplied = false;
             workflowRepository.getAllWorkflowsNoFilters(token);
         } else {
+            isWorkflowTypeFilterApplied = true;
             workflowRepository.getWorkflowsByType(token, workflowTypeId, false);
         }
         liveWorkflows.removeObservers(lifecycleOwner);
+        sendFiltersCounterToUi();
     }
 
     /**
      * Request for filtered data to workflow repository. This function handles all the different
      * filtering scenarios. It handles cases with base filters, meta data, workflow type filters.
      *
-     * @param selectedBaseFilterId Id of selected base filter.
-     * @param filterSettings       Instance of FilterSettings.
-     * @param lifecycleOwner       Fragment with observer that we need to remove.
+     * @param filterSettings Instance of FilterSettings.
+     * @param lifecycleOwner Fragment with observer that we need to remove.
      */
-    private void loadWorkflowsByBaseFilters(
-            int selectedBaseFilterId,
-            FilterSettings filterSettings,
-            LifecycleOwner lifecycleOwner) {
+    private void loadWorkflowsByFilters(FilterSettings filterSettings,
+                                        LifecycleOwner lifecycleOwner) {
         String metaDataString = filterSettings.getAllItemIdsSelectedAsString();
         int workflowTypeSelected = filterSettings.getWorkflowTypeId();
 
@@ -522,31 +635,63 @@ public class WorkflowViewModel extends ViewModel {
             options.put("workflow_metadata", metaDataString);
         }
 
-        switch (selectedBaseFilterId) {
+        switch (filterSettings.getBaseFilterSelectedId()) {
             case BASE_FILTER_ALL_ID:
                 // Nothing to do add to options.
+                isBaseFilterApplied = false;
                 break;
             case BASE_FILTER_OUT_OF_TIME_ID:
+                isBaseFilterApplied = true;
                 options.put("out_of_time", true);
                 break;
             case BASE_FILTER_ON_TIME_ID:
+                isBaseFilterApplied = true;
                 options.put("out_of_time", false);
                 break;
             case BASE_FILTER_PENDING_BY_ME_ID:
+                isBaseFilterApplied = true;
                 options.put("responsible_id", userId);
                 break;
             case BASE_FILTER_LATEST_ID:
+                isBaseFilterApplied = true;
                 options.put("latest", true);
+                break;
+        }
+
+        switch (filterSettings.getStatusFilterSelectedId()) {
+            case STATUS_FILTER_ALL_ID:
+                // Nothing to do add to options.
+                isShowOpenActionMenu = true;
+                isShowCloseActionMenu = true;
+                isStatusFilterApplied = true;
+                break;
+            case STATUS_FILTER_OPEN_ID:
+                options.put("open", true);
+                isShowOpenActionMenu = false;
+                isShowCloseActionMenu = true;
+                isStatusFilterApplied = false;
+                break;
+            case STATUS_FILTER_CLOSED_ID:
+                options.put("open", false);
+                isShowOpenActionMenu = true;
+                isShowCloseActionMenu = false;
+                isStatusFilterApplied = true;
                 break;
         }
 
         workflowRepository.getWorkflowsByBaseFilters(token, options);
         liveWorkflows.removeObservers(lifecycleOwner);
+        sendFiltersCounterToUi();
     }
 
     protected void handleBaseFieldClick() {
         OptionsList optionsList = filterSettings.handleOptionListForBaseFilters();
         messageMainBaseFilters.setValue(optionsList);
+    }
+
+    protected void handleStatusFieldClick() {
+        OptionsList optionsList = filterSettings.handleOptionListForStatusFilters();
+        messageMainStatusFilters.setValue(optionsList);
     }
 
     /**
@@ -571,7 +716,32 @@ public class WorkflowViewModel extends ViewModel {
             messageMainBaseFilterSelectionToFilterList.setValue(filterSelected.getResLabel());
         }
         invalidateDrawerOptionsList.setValue(true);
-        loadWorkflowsByBaseFilters(baseFilterId, filterSettings, lifecycleOwner);
+        loadWorkflowsByFilters(filterSettings, lifecycleOwner);
+    }
+
+    /**
+     * Handles a position tapped on the List of StatusFilters. This function will update
+     * FilterSettings with the latest position selected and make a network call to update the
+     * database with the selected base filter.
+     *
+     * @param position       Selection done by the user on the list of base filters.
+     * @param lifecycleOwner Fragment has an observer that we need to remove and use a new one.
+     */
+    protected void handleStatusFieldPositionSelected(int position, LifecycleOwner lifecycleOwner) {
+        showLoading.setValue(true);
+        WorkflowTypeMenu filterSelected;
+        filterSelected = filterSettings.handleStatusFilterPositionSelected(position);
+        int filterId = filterSelected.getId();
+        if (!filterSelected.isSelected()) {
+            // Unselected, no items selected. Filter by Open.
+            filterSettings.resetStatusFilterSelectionToOpen();
+            filterId = STATUS_FILTER_OPEN_ID;
+            messageMainStatusFilterSelectionToFilterList.setValue(R.string.open);
+        } else {
+            messageMainStatusFilterSelectionToFilterList.setValue(filterSelected.getResLabel());
+        }
+        invalidateDrawerOptionsList.setValue(true);
+        loadWorkflowsByFilters(filterSettings, lifecycleOwner);
     }
 
     /**
@@ -614,7 +784,7 @@ public class WorkflowViewModel extends ViewModel {
         filterSettings.updateFilterListItemSelected(menu);
 
         int baseFilterId = filterSettings.getBaseFilterSelectedId();
-        loadWorkflowsByBaseFilters(baseFilterId, filterSettings, lifecycleOwner);
+        loadWorkflowsByFilters(filterSettings, lifecycleOwner);
     }
 
     protected void handleWorkflowTypeSelected(int workflowTypeId, LifecycleOwner lifecycleOwner) {
@@ -1135,6 +1305,7 @@ public class WorkflowViewModel extends ViewModel {
     private void applyFilters(FilterSettings filterSettings, String id) {
         switch (sort.getSortingType()) {
             case NONE: {
+                isSortFilterApplied = false;
                 if (filterSettings.getWorkflowTypeId() == NO_TYPE_SELECTED) {
                     workflowRepository.rawQueryWorkflowListByFilters(
                             filterSettings.isCheckedStatus(),
@@ -1153,6 +1324,7 @@ public class WorkflowViewModel extends ViewModel {
                 break;
             }
             case BYNUMBER: {
+                isSortFilterApplied = true;
                 if (filterSettings.getWorkflowTypeId() == NO_TYPE_SELECTED) {
                     boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
                     workflowRepository.rawQueryWorkflowListByFilters(
@@ -1177,6 +1349,7 @@ public class WorkflowViewModel extends ViewModel {
                 break;
             }
             case BYCREATE: {
+                isSortFilterApplied = true;
                 if (filterSettings.getWorkflowTypeId() == NO_TYPE_SELECTED) {
                     boolean isDescending = !sort.getCreatedSortOrder().equals(Sort.sortOrder.ASC);
                     workflowRepository.rawQueryWorkflowListByFilters(
@@ -1201,6 +1374,7 @@ public class WorkflowViewModel extends ViewModel {
                 break;
             }
             case BYUPDATE: {
+                isSortFilterApplied = true;
                 if (filterSettings.getWorkflowTypeId() == NO_TYPE_SELECTED) {
                     boolean isDescending = !sort.getUpdatedSortOrder().equals(Sort.sortOrder.ASC);
                     workflowRepository.rawQueryWorkflowListByFilters(
@@ -1225,6 +1399,8 @@ public class WorkflowViewModel extends ViewModel {
                 break;
             }
         }
+
+        sendFiltersCounterToUi();
     }
 
     private void reloadWorkflowsList() {
@@ -1719,4 +1895,17 @@ public class WorkflowViewModel extends ViewModel {
         return handleScrollRecyclerToTop;
     }
 
+    protected LiveData<Boolean> getObservableShowBulkActionMenu() {
+        if (showBulkActionMenuLiveData == null) {
+            showBulkActionMenuLiveData = new MutableLiveData<>();
+        }
+        return showBulkActionMenuLiveData;
+    }
+
+    protected LiveData<Integer> getObservableFiltersCounter() {
+        if (filtersCounterLiveData == null) {
+            filtersCounterLiveData = new MutableLiveData<>();
+        }
+        return filtersCounterLiveData;
+    }
 }

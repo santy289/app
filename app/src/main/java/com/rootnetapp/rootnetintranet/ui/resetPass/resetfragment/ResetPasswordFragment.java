@@ -1,11 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment;
 
-
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +14,11 @@ import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetpassdialog.ResetPasswordDialog;
 
 import javax.inject.Inject;
+
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 
 public class ResetPasswordFragment extends Fragment {
 
@@ -78,13 +78,15 @@ public class ResetPasswordFragment extends Fragment {
                 resetPasswordBinding.layoutNewPassword.setVisibility(View.VISIBLE);
                 resetPasswordBinding.layoutToken.setVisibility(View.GONE);
                 token = resetPasswordBinding.inputToken.getText().toString().trim();
-                Toast.makeText(getContext(), getString(R.string.enter_password), Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), getString(R.string.enter_password), Toast.LENGTH_LONG)
+                        .show();
             }
         });
         final Observer<ResetPasswordResponse> resetObserver = ((ResetPasswordResponse data) -> {
             dialog.hideLoading();
             if (null != data) {
-                Toast.makeText(getContext(), getString(R.string.password_changed), Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), getString(R.string.password_changed),
+                        Toast.LENGTH_LONG).show();
                 dialog.dismiss();
             }
         });
@@ -112,17 +114,11 @@ public class ResetPasswordFragment extends Fragment {
     }
 
     private void changePassword() {
-        String user = resetPasswordBinding.inputUsername.getText().toString().trim(),
-                password = resetPasswordBinding.inputPassword.getText().toString().trim(),
+        String password = resetPasswordBinding.inputPassword.getText().toString().trim(),
                 repassword = resetPasswordBinding.inputRepassword.getText().toString().trim();
         boolean canRequest = true;
-        resetPasswordBinding.tilUsername.setError(null);
         resetPasswordBinding.tilPassword.setError(null);
         resetPasswordBinding.tilRepassword.setError(null);
-        if (TextUtils.isEmpty(user)) {
-            canRequest = false;
-            resetPasswordBinding.tilUsername.setError(getString(R.string.empty_user));
-        }
         if (TextUtils.isEmpty(password)) {
             canRequest = false;
             resetPasswordBinding.tilPassword.setError(getString(R.string.empty_password));
@@ -138,7 +134,7 @@ public class ResetPasswordFragment extends Fragment {
         }
         if (canRequest) {
             dialog.showLoading();
-            resetPasswordViewModel.resetPassword(token, user, password, repassword);
+            resetPasswordViewModel.resetPassword(token, password, repassword);
         }
     }
 

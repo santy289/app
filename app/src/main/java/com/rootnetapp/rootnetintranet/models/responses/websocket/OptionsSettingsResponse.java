@@ -2,7 +2,7 @@ package com.rootnetapp.rootnetintranet.models.responses.websocket;
 
 import com.squareup.moshi.Json;
 
-public class WebSocketSettingResponse {
+public class OptionsSettingsResponse {
     @Json(name = "status")
     private String status;
 

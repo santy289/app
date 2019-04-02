@@ -67,7 +67,7 @@ public class GeolocationViewModel extends ViewModel {
     }
 
     protected void init(String apiKey) {
-        mApiKey = apiKey;
+        mApiKey = apiKey.replace("\"", "");
     }
 
     @Override

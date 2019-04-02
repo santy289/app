@@ -117,7 +117,6 @@ import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACH
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_END_DATE;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_KEY;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_OWNER;
-import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_REMAINING_TIME;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_START_DATE;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_STATUS;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_TITLE;
@@ -723,31 +722,22 @@ class CreateWorkflowViewModel extends ViewModel {
                 continue;
             }
 
-            if (mFormType == FormType.STANDARD_FILTERS) {
-                if (TextUtils.isEmpty(machineName)) {
-                    mFieldCount--;
-                    continue;
-                }
+            //do not show the pre-calculated fields
+            if (fieldConfig.isPrecalculated()) {
+                mFieldCount--;
+                continue;
+            }
 
-            } else {
-                //for every form but the standard filters
+            //do not show the Status field
+            if (machineName != null && machineName.equals(MACHINE_NAME_STATUS)) {
+                mFieldCount--;
+                continue;
+            }
 
-                if (fieldConfig.isPrecalculated()) {
-                    mFieldCount--;
-                    continue;
-                }
-
-                //do not show the Status field
-                if (machineName != null && machineName.equals(MACHINE_NAME_STATUS)) {
-                    mFieldCount--;
-                    continue;
-                }
-
-                //do not show the Owner field (it is separated on the people involved form)
-                if (machineName != null && machineName.equals(MACHINE_NAME_OWNER)) {
-                    mFieldCount--;
-                    continue;
-                }
+            //do not show the Owner field (it is separated on the people involved form)
+            if (machineName != null && machineName.equals(MACHINE_NAME_OWNER)) {
+                mFieldCount--;
+                continue;
             }
 
             if (mFormType == FormType.DYNAMIC_FILTERS) {
@@ -760,16 +750,6 @@ class CreateWorkflowViewModel extends ViewModel {
                     mFieldCount--;
                     continue;
                 }
-            }
-
-            //do not show the Remaining Time field
-            if ((machineName != null && machineName.equals(MACHINE_NAME_REMAINING_TIME))
-                    //do not show the Current Status field
-                    || (machineName != null && machineName.equals(MACHINE_NAME_CURRENT_STATUS))
-                    //do not show the Type field
-                    || (machineName != null && machineName.equals(MACHINE_NAME_TYPE))) {
-                mFieldCount--;
-                continue;
             }
 
             fieldsToBuild.add(field);

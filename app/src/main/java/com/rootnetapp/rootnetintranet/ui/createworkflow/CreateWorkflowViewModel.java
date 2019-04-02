@@ -175,7 +175,6 @@ class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<AutocompleteFormItem> mSetAutocompleteSuggestionsLiveData;
     private MutableLiveData<Boolean> mShowAutocompleteNoConnectionLiveData;
     private MutableLiveData<Boolean> mShowDynamicFiltersNoTypeLiveData;
-    private MutableLiveData<Boolean> mShowDynamicFiltersNoFieldsLiveData;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
@@ -762,14 +761,8 @@ class CreateWorkflowViewModel extends ViewModel {
         showLoading.setValue(false); //the fields will be created on the background
         mShowDynamicFiltersNoTypeLiveData.setValue(false);
 
-        if (mFormType == FormType.DYNAMIC_FILTERS && mFieldCount == 0){
-            mShowDynamicFiltersNoFieldsLiveData.setValue(true);
-            return;
-        }
-
         mEnableSubmitButtonLiveData.setValue(true);
         mShowSubmitButtonLiveData.setValue(true);
-        mShowDynamicFiltersNoFieldsLiveData.setValue(false);
     }
 
     /**
@@ -3063,12 +3056,5 @@ class CreateWorkflowViewModel extends ViewModel {
             mShowDynamicFiltersNoTypeLiveData = new MutableLiveData<>();
         }
         return mShowDynamicFiltersNoTypeLiveData;
-    }
-
-    protected LiveData<Boolean> getObservableShowDynamicFiltersNoFields() {
-        if (mShowDynamicFiltersNoFieldsLiveData == null) {
-            mShowDynamicFiltersNoFieldsLiveData = new MutableLiveData<>();
-        }
-        return mShowDynamicFiltersNoFieldsLiveData;
     }
 }

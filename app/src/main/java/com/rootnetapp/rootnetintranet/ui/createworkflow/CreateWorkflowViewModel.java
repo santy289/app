@@ -483,7 +483,10 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     protected void generateFieldsByType(String typeName) {
-        int id = formSettings.findIdByTypeName(typeName);
+        generateFieldsByType(formSettings.findIdByTypeName(typeName));
+    }
+
+    protected void generateFieldsByType(int id) {
         if (id == 0) {
             showLoading.setValue(false);
             return;
@@ -790,6 +793,13 @@ class CreateWorkflowViewModel extends ViewModel {
             }
         }
 
+        showLoading.setValue(false);
+
+        if (isFilterFragment()) {
+            //do not show the workflow type field for the filter fragment
+            return;
+        }
+
         SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
                 .setTitleRes(R.string.create_workflow_form_workflow_type)
                 .setRequired(true)
@@ -804,7 +814,6 @@ class CreateWorkflowViewModel extends ViewModel {
 
         formSettings.getFormItems().add(singleChoiceFormItem);
 
-        showLoading.setValue(false);
         mAddWorkflowTypeItemLiveData.setValue(singleChoiceFormItem);
     }
 

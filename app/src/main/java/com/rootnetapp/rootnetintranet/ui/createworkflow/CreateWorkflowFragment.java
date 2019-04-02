@@ -367,11 +367,6 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         mAdapter.addItem(singleChoiceFormItem);
 
         singleChoiceFormItem.setOnSelectedListener(item -> {
-            if (mOnValueSelectedListener != null) {
-                //send filter by workflow type
-                mOnValueSelectedListener.onValueSelected(item);
-            }
-
             if (item.getValue() == null) {
                 viewModel.clearForm();
                 return;
@@ -811,6 +806,10 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         mBinding.rvFields.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
+    public void generateFieldsByWorkflowType(int workflowTypeId){
+        viewModel.generateFieldsByType(workflowTypeId);
+    }
+
     private void hideSoftInputKeyboard() {
         // Check if no view has focus:
         View view = getActivity().getCurrentFocus();
@@ -823,7 +822,6 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
 
     public interface OnValueSelectedListener {
 
-        void onValueSelected(BaseFormItem baseFormItem);
         void onValuesSelected(List<BaseFormItem> baseFormItems);
     }
 }

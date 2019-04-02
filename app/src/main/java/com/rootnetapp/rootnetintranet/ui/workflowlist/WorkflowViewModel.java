@@ -104,6 +104,7 @@ public class WorkflowViewModel extends ViewModel {
     protected MutableLiveData<OptionsList> messageMainBaseFilters;
     protected MutableLiveData<OptionsList> messageMainStatusFilters;
     protected MutableLiveData<String> messageMainWorkflowTypeFilterSelectionToFilterList;
+    protected MutableLiveData<Integer> messageMainWorkflowTypeIdFilterSelectionToFilterList;
     protected MutableLiveData<Integer> messageMainBaseFilterSelectionToFilterList;
     protected MutableLiveData<Integer> messageMainStatusFilterSelectionToFilterList;
 
@@ -154,6 +155,7 @@ public class WorkflowViewModel extends ViewModel {
         messageMainBaseFilters = new MutableLiveData<>();
         messageMainStatusFilters = new MutableLiveData<>();
         messageMainWorkflowTypeFilterSelectionToFilterList = new MutableLiveData<>();
+        messageMainWorkflowTypeIdFilterSelectionToFilterList = new MutableLiveData<>();
         messageMainBaseFilterSelectionToFilterList = new MutableLiveData<>();
         messageMainStatusFilterSelectionToFilterList = new MutableLiveData<>();
 
@@ -730,6 +732,7 @@ public class WorkflowViewModel extends ViewModel {
             filterSettings.setWorkflowTypeId(filterSelected.getWorkflowTypeId());
         }
         messageMainWorkflowTypeFilterSelectionToFilterList.setValue(filterSelected.getLabel());
+        messageMainWorkflowTypeIdFilterSelectionToFilterList.setValue(filterSelected.getWorkflowTypeId());
         invalidateDrawerOptionsList.setValue(true);
         handleFilterByWorkflowType(filterSelected, lifecycleOwner);
     }

@@ -379,6 +379,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .observe(this, this::handleMessageMainStatusFilters);
         workflowViewModel.messageMainWorkflowTypeFilterSelectionToFilterList
                 .observe(this, this::handleMessageMainWorkflowTypeFilterSelected);
+        workflowViewModel.messageMainWorkflowTypeIdFilterSelectionToFilterList
+                .observe(this, this::handleMessageMainWorkflowTypeIdFilterSelected);
         workflowViewModel.messageMainBaseFilterSelectionToFilterList
                 .observe(this, this::handleMessageMainBaseFilterSelected);
         workflowViewModel.messageMainStatusFilterSelectionToFilterList
@@ -427,6 +429,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     private void handleMessageMainWorkflowTypeFilterSelected(String label) {
         mainViewModel.receiveMessageWorkflowTypeFilterSelectedToListUi(label);
+    }
+
+    private void handleMessageMainWorkflowTypeIdFilterSelected(Integer workflowTypeId) {
+        mainViewModel.receiveMessageWorkflowTypeIdFilterSelectedToListUi(workflowTypeId);
     }
 
     private void handleMessageMainBaseFilterSelected(Integer resLabel) {

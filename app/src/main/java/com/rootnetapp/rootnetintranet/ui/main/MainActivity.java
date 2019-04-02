@@ -64,6 +64,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
+import androidx.annotation.UiThread;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
@@ -104,6 +105,7 @@ public class MainActivity extends AppCompatActivity
     RightDrawerFiltersAdapter rightDrawerFiltersAdapter;
 
     private static final String TAG = "MainActivity";
+    private CreateWorkflowFragment mDynamicFiltersFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -430,7 +432,8 @@ public class MainActivity extends AppCompatActivity
         mainBinding.toolbarImage.setOnClickListener(
                 v -> showFragment(ProfileFragment.newInstance(), false));
 
-        showFragmentDrawer(CreateWorkflowFragment.newInstance(FormType.DYNAMIC_FILTERS, this), false);
+        mDynamicFiltersFragment = CreateWorkflowFragment.newInstance(FormType.DYNAMIC_FILTERS, this);
+        showFragmentDrawer(mDynamicFiltersFragment, false);
     }
 
     private void openRightDrawer(boolean open) {
@@ -939,6 +942,8 @@ public class MainActivity extends AppCompatActivity
                 .observe(this, this::setRightDrawerBaseFilters);
         viewModel.receiveMessageCreateStatusFiltersAdapter
                 .observe(this, this::setRightDrawerStatusFilters);
+        viewModel.receiveMessageWorkflowTypeIdFilterSelected
+                .observe(this, this::sendMessageGenerateWorkflowFieldsByType);
         viewModel.receiveMessageWorkflowTypeFilterSelected
                 .observe(this, this::handleUpdateWorkflowTypeFilterSelectionUpdateWith);
         viewModel.receiveMessageBaseFilterSelected
@@ -972,9 +977,9 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public void onValueSelected(BaseFormItem baseFormItem) {
-        viewModel.onValueSelected(baseFormItem);
+    @UiThread
+    private void sendMessageGenerateWorkflowFieldsByType(int workflowTypeId){
+        mDynamicFiltersFragment.generateFieldsByWorkflowType(workflowTypeId);
     }
 
     @Override

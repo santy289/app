@@ -25,7 +25,6 @@ import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.services.websocket.RestartWebsocketReceiver;
-import com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.DynamicFilter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.squareup.moshi.JsonAdapter;
@@ -79,6 +78,7 @@ public class MainActivityViewModel extends ViewModel {
     protected MutableLiveData<OptionsList> receiveMessageCreateWorkflowTypeFiltersAdapter;
     protected MutableLiveData<OptionsList> receiveMessageCreateBaseFiltersAdapter;
     protected MutableLiveData<OptionsList> receiveMessageCreateStatusFiltersAdapter;
+    protected MutableLiveData<Integer> receiveMessageWorkflowTypeIdFilterSelected;
     protected MutableLiveData<String> receiveMessageWorkflowTypeFilterSelected;
     protected MutableLiveData<Integer> receiveMessageBaseFilterSelected;
     protected MutableLiveData<Integer> receiveMessageStatusFilterSelected;
@@ -136,6 +136,7 @@ public class MainActivityViewModel extends ViewModel {
         this.messageWorkflowTypeFilterPositionSelectedToWorkflowList = new MutableLiveData<>();
         this.messageBaseFilterPositionSelectedToWorkflowList = new MutableLiveData<>();
         this.messageStatusFilterPositionSelectedToWorkflowList = new MutableLiveData<>();
+        this.receiveMessageWorkflowTypeIdFilterSelected = new MutableLiveData<>();
         this.receiveMessageWorkflowTypeFilterSelected = new MutableLiveData<>();
         this.receiveMessageBaseFilterSelected = new MutableLiveData<>();
         this.receiveMessageStatusFilterSelected = new MutableLiveData<>();
@@ -270,6 +271,10 @@ public class MainActivityViewModel extends ViewModel {
         receiveMessageWorkflowTypeFilterSelected.setValue(label);
     }
 
+    public void receiveMessageWorkflowTypeIdFilterSelectedToListUi(int workflowTypeId) {
+        receiveMessageWorkflowTypeIdFilterSelected.setValue(workflowTypeId);
+    }
+
     public void receiveMessageBaseFilterSelectedToListUi(int resLabel) {
         receiveMessageBaseFilterSelected.setValue(resLabel);
     }
@@ -378,19 +383,6 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     //region Dynamic Filters
-    protected  void onValueSelected(BaseFormItem baseFormItem){
-        if (baseFormItem instanceof SingleChoiceFormItem
-                && baseFormItem.getMachineName().equals(FormSettings.MACHINE_NAME_TYPE)) {
-            Option value = ((SingleChoiceFormItem) baseFormItem).getValue();
-            if (value == null) return;
-
-//            sendWorkflowTypeSelectedToWorkflowList(value.getId());
-            return;
-        }
-
-        sendDynamicFilterSelectedToWorkflowList(
-                getDynamicFilterFromFormItem(baseFormItem));
-    }
 
     protected void onValuesSelected(List<BaseFormItem> baseFormItems){
         List<DynamicFilter> dynamicFilters = baseFormItems

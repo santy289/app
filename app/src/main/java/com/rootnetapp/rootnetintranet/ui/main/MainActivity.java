@@ -755,6 +755,7 @@ public class MainActivity extends AppCompatActivity
         hideWorkflowTypeFilters(false);
         hideBaseFilters(false);
         hideStatusFilters(false);
+        hideStandardFilters(false);
         hideDynamicFilters(false);
         LayoutInflater inflater = LayoutInflater.from(this);
         rightDrawerFiltersAdapter = new RightDrawerFiltersAdapter(inflater, menus);

@@ -265,7 +265,18 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     private void sendFiltersCounterToUi() {
-        int count = 0;
+        int count = filterSettings.getDynamicFilters().size();
+
+        if (isSortFilterApplied) count++;
+        if (isBaseFilterApplied) count++;
+        if (isStatusFilterApplied) count++;
+        if (isWorkflowTypeFilterApplied) count++;
+
+        filtersCounterLiveData.setValue(count);
+    }
+
+    private void sendFiltersCounterToUi(int baseCount) {
+        int count = baseCount;
 
         if (isSortFilterApplied) count++;
         if (isBaseFilterApplied) count++;
@@ -681,7 +692,6 @@ public class WorkflowViewModel extends ViewModel {
         }
 
         Map<String, Object> dynamicFiltersMap = filterSettings.getDynamicFilters();
-        //todo add to filters count
         if (!dynamicFiltersMap.isEmpty()) {
             Moshi moshi = new Moshi.Builder().build();
             JsonAdapter<Map<String, Object>> jsonAdapter = moshi

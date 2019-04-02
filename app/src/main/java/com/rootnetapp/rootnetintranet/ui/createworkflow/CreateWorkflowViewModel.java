@@ -114,6 +114,8 @@ import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WOR
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_OWN;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_CURRENT_STATUS;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_DESCRIPTION;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_END_DATE;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_KEY;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_OWNER;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_REMAINING_TIME;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_START_DATE;
@@ -135,6 +137,18 @@ class CreateWorkflowViewModel extends ViewModel {
     protected static final int TAG_ADDITIONAL_PROFILES = 2774;
     protected static final int TAG_GLOBAL_APPROVERS = 2775;
     protected static final int TAG_SPECIFIC_APPROVERS = 2776;
+
+    private static final int TAG_STANDARD_TITLE = 200;
+    private static final int TAG_STANDARD_KEY = 201;
+    private static final int TAG_STANDARD_DESCRIPTION = 202;
+    private static final int TAG_STANDARD_START_DATE = 203;
+    private static final int TAG_STANDARD_END_DATE = 204;
+    private static final int TAG_STANDARD_STATUS = 205;
+    private static final int TAG_STANDARD_CURRENT_STATUS = 206;
+    private static final int TAG_STANDARD_OWNER = 207;
+    private static final int TAG_STANDARD_TYPE = 208;
+    private static final int TOTAL_STANDARD_FIELDS = 7;
+
     protected static final int FORM_BASE_INFO = 1;
     protected static final int FORM_PEOPLE_INVOLVED = 2;
 
@@ -212,7 +226,11 @@ class CreateWorkflowViewModel extends ViewModel {
 
         checkPermissions(mUserId, userPermissions);
 
-        createWorkflowTypeItem();
+        if (mFormType == FormType.STANDARD_FILTERS) {
+            showStandardFieldsOnly();
+        } else {
+            createWorkflowTypeItem();
+        }
     }
 
     protected void onCleared() {
@@ -263,6 +281,7 @@ class CreateWorkflowViewModel extends ViewModel {
             case FormType.EDIT:
                 return R.string.edit_workflow;
             case FormType.STANDARD_FILTERS:
+                return R.string.apply_filters;
             case FormType.DYNAMIC_FILTERS:
                 return R.string.apply_dynamic_filters;
             default:
@@ -533,6 +552,146 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     /**
+     * Generates the standard fields. This is used for the filters fragment only, standard filters
+     * section.
+     */
+    private void showStandardFieldsOnly() {
+        //used to make sure all fields are created before proceeding
+        mFieldCount = TOTAL_STANDARD_FIELDS;
+        mFieldCompleted = 0;
+
+        TextInputFormItem textInputFormItem;
+        DateFormItem dateFormItem;
+        BooleanFormItem booleanFormItem;
+
+        textInputFormItem = new TextInputFormItem.Builder()
+                .setTitleRes(R.string.title)
+                .setTag(TAG_STANDARD_TITLE)
+                .setFieldId(TAG_STANDARD_TITLE)
+                .setEscaped(true)
+                .setMachineName(MACHINE_NAME_TITLE)
+                .setInputType(InputType.TEXT)
+                .build();
+        formSettings.getFormItems().add(textInputFormItem);
+        buildFieldCompleted();
+
+        textInputFormItem = new TextInputFormItem.Builder()
+                .setTitleRes(R.string.key)
+                .setTag(TAG_STANDARD_KEY)
+                .setFieldId(TAG_STANDARD_KEY)
+                .setEscaped(true)
+                .setMachineName(MACHINE_NAME_KEY)
+                .setInputType(InputType.TEXT)
+                .build();
+        formSettings.getFormItems().add(textInputFormItem);
+        buildFieldCompleted();
+
+        textInputFormItem = new TextInputFormItem.Builder()
+                .setTitleRes(R.string.description)
+                .setTag(TAG_STANDARD_DESCRIPTION)
+                .setFieldId(TAG_STANDARD_DESCRIPTION)
+                .setEscaped(true)
+                .setMachineName(MACHINE_NAME_DESCRIPTION)
+                .setInputType(InputType.TEXT)
+                .build();
+        formSettings.getFormItems().add(textInputFormItem);
+        buildFieldCompleted();
+
+        textInputFormItem = new TextInputFormItem.Builder()
+                .setTitleRes(R.string.current_status)
+                .setTag(TAG_STANDARD_CURRENT_STATUS)
+                .setFieldId(TAG_STANDARD_CURRENT_STATUS)
+                .setEscaped(true)
+                .setMachineName(MACHINE_NAME_CURRENT_STATUS)
+                .setInputType(InputType.TEXT)
+                .build();
+        formSettings.getFormItems().add(textInputFormItem);
+        buildFieldCompleted();
+
+        textInputFormItem = new TextInputFormItem.Builder()
+                .setTitleRes(R.string.type)
+                .setTag(TAG_STANDARD_TYPE)
+                .setFieldId(TAG_STANDARD_TYPE)
+                .setEscaped(true)
+                .setMachineName(MACHINE_NAME_TYPE)
+                .setInputType(InputType.TEXT)
+                .build();
+        formSettings.getFormItems().add(textInputFormItem);
+        buildFieldCompleted();
+
+        dateFormItem = new DateFormItem.Builder()
+                .setTitleRes(R.string.start_date)
+                .setTag(TAG_STANDARD_START_DATE)
+                .setFieldId(TAG_STANDARD_START_DATE)
+                .setEscaped(true)
+                .setMachineName(MACHINE_NAME_START_DATE)
+                .build();
+        formSettings.getFormItems().add(dateFormItem);
+        buildFieldCompleted();
+
+        dateFormItem = new DateFormItem.Builder()
+                .setTitleRes(R.string.end_date)
+                .setTag(TAG_STANDARD_END_DATE)
+                .setFieldId(TAG_STANDARD_END_DATE)
+                .setEscaped(true)
+                .setMachineName(MACHINE_NAME_END_DATE)
+                .build();
+        formSettings.getFormItems().add(dateFormItem);
+        buildFieldCompleted();
+
+        booleanFormItem = new BooleanFormItem.Builder()
+                .setTitleRes(R.string.active)
+                .setTag(TAG_STANDARD_STATUS)
+                .setFieldId(TAG_STANDARD_STATUS)
+                .setEscaped(false)
+                .setMachineName(MACHINE_NAME_STATUS)
+                .setValue(true)
+                .build();
+        formSettings.getFormItems().add(booleanFormItem);
+        buildFieldCompleted();
+
+        createStandardOwnerFormItem();
+
+        mEnableSubmitButtonLiveData.setValue(true);
+        showLoading.setValue(false);
+    }
+
+    private void createStandardOwnerFormItem() {
+
+        Disposable disposable = mRepository
+                .getProfiles(mToken, true)
+                .subscribe(profileResponse -> {
+
+                    List<Profile> profiles = profileResponse.getProfiles();
+                    if (profiles == null || profiles.isEmpty()) return;
+
+                    List<Option> userOptions = new ArrayList<>();
+                    for (int i = 0; i < profiles.size(); i++) {
+                        String name = profiles.get(i).getFullName();
+                        Integer id = profiles.get(i).getId();
+
+                        Option option = new Option(id, name);
+                        userOptions.add(option);
+                    }
+
+                    SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
+                            .setTitleRes(R.string.owner)
+                            .setTag(TAG_STANDARD_OWNER)
+                            .setFieldId(TAG_STANDARD_OWNER)
+                            .setOptions(userOptions)
+                            .setMachineName(MACHINE_NAME_OWNER)
+                            .build();
+
+                    formSettings.getFormItems().add(singleChoiceFormItem);
+                    buildFieldCompleted();
+
+                }, throwable -> Log
+                        .e(TAG, "createStandardOwnerFormItem: error " + throwable.getMessage()));
+
+        mDisposables.add(disposable);
+    }
+
+    /**
      * Creates all of the form items according to their params. Sends each form item to the UI.
      *
      * @param formSettings holder of the current form params.
@@ -557,7 +716,7 @@ class CreateWorkflowViewModel extends ViewModel {
             }
 
             if (mFormType == FormType.STANDARD_FILTERS) {
-                if (TextUtils.isEmpty(machineName)){
+                if (TextUtils.isEmpty(machineName)) {
                     mFieldCount--;
                     continue;
                 }

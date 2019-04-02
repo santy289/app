@@ -84,6 +84,7 @@
     <string name="created_at">Creado En</string>
     <string name="condition">Condición</string>
     <string name="country">País</string>
+    <string name="type">Tipo</string>
     <string name="workflow_type">Tipo de Workflow</string>
     <string name="owner">Dueño</string>
     <string name="actual_state">Estado Actual</string>
@@ -93,6 +94,7 @@
     <string name="inactive">Inactivo</string>
     <string name="filters">Filtros</string>
     <string name="apply_dynamic_filters">Aplicar Filtros Dinámicos</string>
+    <string name="apply_filters">Aplicar Filtros</string>
     <string name="filters_counter">Filtros (%d)</string>
     <string name="my_workflows">Pendientes</string>
     <string name="sorting">Ordenar Por</string>
@@ -174,6 +176,7 @@
     <string name="my_pending_workflows_for_approval">Workflows Pendientes de mi Aprobación</string>
     <string name="date">Fecha</string>
     <string name="title">Título</string>
+    <string name="key">Código</string>
     <string name="author">Autor</string>
     <string name="days_open">Días abierto</string>
     <string name="pending_approval">Pendiente por Aprobación</string>

@@ -219,12 +219,25 @@ public class MainActivity extends AppCompatActivity
         hideSoftInputKeyboard();
     }
 
-    public void showFragmentDrawer(Fragment fragment, boolean addtobackstack) {
+    public void showDynamicFiltersFragment(Fragment fragment, boolean addtobackstack) {
         String tag = fragment.getClass().getSimpleName();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out,
                 android.R.anim.fade_in, android.R.anim.fade_out);
         transaction.replace(R.id.fl_dynamic_filters, fragment);
+        if (addtobackstack) {
+            transaction.addToBackStack(tag);
+        }
+        transaction.commit();
+        hideSoftInputKeyboard();
+    }
+
+    public void showStandardFiltersFragment(Fragment fragment, boolean addtobackstack) {
+        String tag = fragment.getClass().getSimpleName();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out,
+                android.R.anim.fade_in, android.R.anim.fade_out);
+        transaction.replace(R.id.fl_standard_filters, fragment);
         if (addtobackstack) {
             transaction.addToBackStack(tag);
         }
@@ -405,7 +418,9 @@ public class MainActivity extends AppCompatActivity
             if (sortingActive) {
                 showSortByViews(false);
             }
-            //todo if standardFiltersActive
+            if (standardFiltersActive) {
+                showStandardFiltersView(false);
+            }
             viewModel.sendRightDrawerBackButtonClick();
         });
 
@@ -438,8 +453,8 @@ public class MainActivity extends AppCompatActivity
                 v -> showFragment(ProfileFragment.newInstance(), false));
 
         mDynamicFiltersFragment = CreateWorkflowFragment.newInstance(FormType.DYNAMIC_FILTERS, this);
-        showFragmentDrawer(mDynamicFiltersFragment, false);
-        showFragmentDrawer(CreateWorkflowFragment.newInstance(FormType.STANDARD_FILTERS, this), false);
+        showDynamicFiltersFragment(mDynamicFiltersFragment, false);
+        showStandardFiltersFragment(CreateWorkflowFragment.newInstance(FormType.STANDARD_FILTERS, this), false);
     }
 
     private void openRightDrawer(boolean open) {

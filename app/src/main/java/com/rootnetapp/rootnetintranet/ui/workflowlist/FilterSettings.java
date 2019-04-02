@@ -4,13 +4,11 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.models.createworkflow.ListField;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerOptionList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.FieldData;
-import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,9 +41,11 @@ public class FilterSettings {
     // Filter List with each item UI data and Id reference to use look for options in rightDrawerOptionsList.
     private List<WorkflowTypeMenu> filterDrawerList;
 
+    private List<WorkflowTypeMenu> workflowTypeOptionsList;
     private List<WorkflowTypeMenu> baseFilterOptionsList;
     private List<WorkflowTypeMenu> statusFilterOptionList;
     private Map<String, Object> dynamicFilters;
+    private int workflowTypeFilterIndexSelected;
     private int baseFilterIndexSelected;
     private int statusFilterIndexSelected;
 
@@ -59,9 +59,11 @@ public class FilterSettings {
         this.latest = true;
         this.rightDrawerOptionsList = new ArrayMap<>();
         this.filterDrawerList = new ArrayList<>();
+        this.workflowTypeOptionsList = new ArrayList<>();
         this.baseFilterOptionsList = new ArrayList<>();
         this.statusFilterOptionList = new ArrayList<>();
         this.dynamicFilters = new HashMap<>();
+        this.workflowTypeFilterIndexSelected = 0;
         this.baseFilterIndexSelected = 0;
         this.statusFilterIndexSelected = 1;
     }
@@ -100,6 +102,18 @@ public class FilterSettings {
 
     public List<WorkflowTypeMenu> getBaseFilterOptionsList() {
         return baseFilterOptionsList;
+    }
+
+    public List<WorkflowTypeMenu> getWorkflowTypeOptionsList() {
+        return workflowTypeOptionsList;
+    }
+
+    public int getSizeWorkflowTypeOptionList() {
+        return workflowTypeOptionsList.size();
+    }
+
+    public void setWorkflowTypeOptionsList(List<WorkflowTypeMenu> workflowTypeOptionsList) {
+        this.workflowTypeOptionsList = workflowTypeOptionsList;
     }
 
     public int getSizeBseFilterOptionList() {
@@ -473,40 +487,20 @@ public class FilterSettings {
         rightDrawerOptionsList.put(fieldId, drawerOptionList);
     }
 
-    protected void updateFilterListWithDynamicField(ListField listField, FieldData fieldData,
-                                                    FieldConfig fieldConfig) {
-        // TODO use
-        //saveOptionsListFor(int filterFieldId, ArrayList<WorkflowTypeMenu> optionsList) {
-
-//        example
-//        WorkflowTypeMenu noSelection = new WorkflowTypeMenu(
-//                0,
-//                "NO SELECTION",
-//                WorkflowTypeSpinnerAdapter.NO_SELECTION
-//        );
-//        spinnerMenuArray.add(0, noSelection);
-//        filterSettings.saveOptionsListFor(FilterSettings.RIGHT_DRAWER_FILTER_TYPE_ITEM_ID, spinnerMenuArray);
-
-        RightDrawerOptionList drawerOptionList = new RightDrawerOptionList();
-        drawerOptionList.updateValuesWith(listField);
-        drawerOptionList.setFieldData(fieldData);
-        drawerOptionList.setFieldConfig(fieldConfig);
-        rightDrawerOptionsList.put(listField.customFieldId, drawerOptionList);
-
-        WorkflowTypeMenu filterMenuItem = new WorkflowTypeMenu(
-                listField.customFieldId,
-                listField.customLabel,
-                "",
-                RightDrawerFiltersAdapter.TYPE,
-                0
-        );
-        addFilterListMenu(filterMenuItem);
-    }
-
     private int filterListIndexSelected;
 
     public int getFilterListIndexSelected() {
         return filterListIndexSelected;
+    }
+
+    protected OptionsList handleOptionListForWorkflowTypeFilters() {
+        if (baseFilterOptionsList == null) {
+            return null;
+        }
+        OptionsList optionsList = new OptionsList();
+        optionsList.titleLabelRes = R.string.workflow_type;
+        optionsList.optionsList = workflowTypeOptionsList;
+        return optionsList;
     }
 
     protected OptionsList handleOptionListForBaseFilters() {
@@ -540,6 +534,15 @@ public class FilterSettings {
         optionsList.titleLabel = optionsObj.getOptionListTitle();
         optionsList.optionsList = optionsObj.getOptionItems();
         return optionsList;
+    }
+
+    protected void resetWorkflowTypeFilterSelectionToAll() {
+        workflowTypeFilterIndexSelected = 0; //all index
+        if (workflowTypeOptionsList.size() < 1) {
+            return;
+        }
+        WorkflowTypeMenu filter = workflowTypeOptionsList.get(workflowTypeFilterIndexSelected);
+        filter.setSelected(true);
     }
 
     protected void resetBaseFilterSelectionToAll() {
@@ -584,6 +587,35 @@ public class FilterSettings {
         }
         WorkflowTypeMenu baseFilter = statusFilterOptionList.get(statusFilterIndexSelected);
         return baseFilter.getId();
+    }
+
+    /**
+     * FilterSettings updates workflowTypeFilterIndexSelected, and clears any other items selected. Updates
+     * workflowTypeOptionsList and marks as selected on the position given.
+     *
+     * @param position Index position to mark as selected in workflowTypeOptionsList.
+     *
+     * @return Returns a WorkflowTypeMenu as selected or not selected if it was previously selected.
+     */
+    protected WorkflowTypeMenu handleWorkflowTypeFilterPositionSelected(int position) {
+        WorkflowTypeMenu filterSelected;
+        if (position == workflowTypeFilterIndexSelected) {
+            filterSelected = workflowTypeOptionsList.get(position);
+            filterSelected.setSelected(false);
+            workflowTypeFilterIndexSelected = 0;
+            return filterSelected;
+        }
+
+        // Clear previously selected base filter.
+        filterSelected = workflowTypeOptionsList.get(workflowTypeFilterIndexSelected);
+        filterSelected.setSelected(false);
+
+        // Setting new selected base filter.
+        workflowTypeFilterIndexSelected = position;
+        filterSelected = workflowTypeOptionsList.get(workflowTypeFilterIndexSelected);
+        filterSelected.setSelected(true);
+
+        return filterSelected;
     }
 
     /**

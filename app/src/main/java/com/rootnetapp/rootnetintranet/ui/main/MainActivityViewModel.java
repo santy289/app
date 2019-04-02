@@ -76,15 +76,16 @@ public class MainActivityViewModel extends ViewModel {
     protected MutableLiveData<int[]> receiveMessageToggleRadioButton;
     protected MutableLiveData<int[]> receiveMessageToggleSwitch;
     protected MutableLiveData<Integer> receiveMessageUpdateSortSelected;
+    protected MutableLiveData<OptionsList> receiveMessageCreateWorkflowTypeFiltersAdapter;
     protected MutableLiveData<OptionsList> receiveMessageCreateBaseFiltersAdapter;
     protected MutableLiveData<OptionsList> receiveMessageCreateStatusFiltersAdapter;
+    protected MutableLiveData<String> receiveMessageWorkflowTypeFilterSelected;
     protected MutableLiveData<Integer> receiveMessageBaseFilterSelected;
     protected MutableLiveData<Integer> receiveMessageStatusFilterSelected;
 
     // send message to WorkflowList
     public MutableLiveData<Integer> messageContainerToWorkflowList;
     public MutableLiveData<Integer> messageOptionSelectedToWorkflowList;
-    public MutableLiveData<Integer> messageWorkflowTypeSelectedToWorkflowList;
     public MutableLiveData<DynamicFilter> messageDynamicFilterSelectedToWorkflowList;
     public MutableLiveData<List<DynamicFilter>> messageDynamicFilterListSelectedToWorkflowList;
     public MutableLiveData<Boolean> messageBackActionToWorkflowList;
@@ -92,7 +93,9 @@ public class MainActivityViewModel extends ViewModel {
     public MutableLiveData<int[]> messageRadioButtonClickedToWorkflowList;
     public MutableLiveData<RightDrawerSortSwitchAction> messageSortSwitchActionToWorkflowList;
     public MutableLiveData<Boolean> messageBaseFiltersClickedToWorkflowList;
+    public MutableLiveData<Boolean> messageWorkflowTypeFilterClickedToWorkflowList;
     public MutableLiveData<Boolean> messageStatusFiltersClickedToWorkflowList;
+    public MutableLiveData<Integer> messageWorkflowTypeFilterPositionSelectedToWorkflowList;
     public MutableLiveData<Integer> messageBaseFilterPositionSelectedToWorkflowList;
     public MutableLiveData<Integer> messageStatusFilterPositionSelectedToWorkflowList;
     public MutableLiveData<Boolean> invalidateOptionsList;
@@ -115,7 +118,6 @@ public class MainActivityViewModel extends ViewModel {
         this.messageContainerToWorkflowList = new MutableLiveData<>();
         this.messageBackActionToWorkflowList = new MutableLiveData<>();
         this.messageOptionSelectedToWorkflowList = new MutableLiveData<>();
-        this.messageWorkflowTypeSelectedToWorkflowList = new MutableLiveData<>();
         this.messageDynamicFilterSelectedToWorkflowList = new MutableLiveData<>();
         this.messageDynamicFilterListSelectedToWorkflowList = new MutableLiveData<>();
         this.invalidateOptionsList = new MutableLiveData<>();
@@ -126,11 +128,15 @@ public class MainActivityViewModel extends ViewModel {
         this.messageRadioButtonClickedToWorkflowList = new MutableLiveData<>();
         this.messageSortSwitchActionToWorkflowList = new MutableLiveData<>();
         this.messageBaseFiltersClickedToWorkflowList = new MutableLiveData<>();
+        this.messageWorkflowTypeFilterClickedToWorkflowList = new MutableLiveData<>();
         this.messageStatusFiltersClickedToWorkflowList = new MutableLiveData<>();
+        this.receiveMessageCreateWorkflowTypeFiltersAdapter = new MutableLiveData<>();
         this.receiveMessageCreateBaseFiltersAdapter = new MutableLiveData<>();
         this.receiveMessageCreateStatusFiltersAdapter = new MutableLiveData<>();
+        this.messageWorkflowTypeFilterPositionSelectedToWorkflowList = new MutableLiveData<>();
         this.messageBaseFilterPositionSelectedToWorkflowList = new MutableLiveData<>();
         this.messageStatusFilterPositionSelectedToWorkflowList = new MutableLiveData<>();
+        this.receiveMessageWorkflowTypeFilterSelected = new MutableLiveData<>();
         this.receiveMessageBaseFilterSelected = new MutableLiveData<>();
         this.receiveMessageStatusFilterSelected = new MutableLiveData<>();
         this.openRightDrawer = new MutableLiveData<>();
@@ -185,10 +191,6 @@ public class MainActivityViewModel extends ViewModel {
         messageOptionSelectedToWorkflowList.setValue(position);
     }
 
-    protected void sendWorkflowTypeSelectedToWorkflowList(int workflowTypeId) {
-        messageWorkflowTypeSelectedToWorkflowList.setValue(workflowTypeId);
-    }
-
     protected void sendDynamicFilterSelectedToWorkflowList(DynamicFilter dynamicFilter) {
         messageDynamicFilterSelectedToWorkflowList.setValue(dynamicFilter);
     }
@@ -205,8 +207,16 @@ public class MainActivityViewModel extends ViewModel {
         messageBaseFiltersClickedToWorkflowList.setValue(true);
     }
 
+    protected void sendWorkflowTypeFilterClicked() {
+        messageWorkflowTypeFilterClickedToWorkflowList.setValue(true);
+    }
+
     protected void sendStatusFiltersClicked() {
         messageStatusFiltersClickedToWorkflowList.setValue(true);
+    }
+
+    protected void sendWorkflowTypeFilterPositionClicked(int position) {
+        messageWorkflowTypeFilterPositionSelectedToWorkflowList.setValue(position);
     }
 
     protected void sendBaseFilterPositionClicked(int position) {
@@ -254,6 +264,10 @@ public class MainActivityViewModel extends ViewModel {
 
     public void receiveMessageUpdateSortSelection(int sorType) {
         receiveMessageUpdateSortSelected.setValue(sorType);
+    }
+
+    public void receiveMessageWorkflowTypeFilterSelectedToListUi(String label) {
+        receiveMessageWorkflowTypeFilterSelected.setValue(label);
     }
 
     public void receiveMessageBaseFilterSelectedToListUi(int resLabel) {
@@ -319,6 +333,10 @@ public class MainActivityViewModel extends ViewModel {
         setRightDrawerOptionList.setValue(rightOptionsList);
     }
 
+    public void createDrawerWorkflowTypeFiltersOptionListAdapter(OptionsList optionsList) {
+        receiveMessageCreateWorkflowTypeFiltersAdapter.setValue(optionsList);
+    }
+
     public void createDrawerBaseFiltersOptionListAdapter(OptionsList optionsList) {
         receiveMessageCreateBaseFiltersAdapter.setValue(optionsList);
     }
@@ -366,7 +384,7 @@ public class MainActivityViewModel extends ViewModel {
             Option value = ((SingleChoiceFormItem) baseFormItem).getValue();
             if (value == null) return;
 
-            sendWorkflowTypeSelectedToWorkflowList(value.getId());
+//            sendWorkflowTypeSelectedToWorkflowList(value.getId());
             return;
         }
 

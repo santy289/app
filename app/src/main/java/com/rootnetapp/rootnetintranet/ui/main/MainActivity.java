@@ -413,6 +413,11 @@ public class MainActivity extends AppCompatActivity
         });
 
         // Using the base field filter.
+        mainBinding.rightDrawer.rightDrawerWorkflowType.setOnClickListener(view -> {
+            viewModel.sendWorkflowTypeFilterClicked();
+        });
+
+        // Using the base field filter.
         mainBinding.rightDrawer.rightDrawerBaseFilters.setOnClickListener(view -> {
             viewModel.sendBaseFiltersClicked();
         });
@@ -444,9 +449,10 @@ public class MainActivity extends AppCompatActivity
             mainBinding.rightDrawer.rightDrawerFilters.setVisibility(View.GONE);
             mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.GONE);
             mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
+            hideWorkflowTypeFilters(true);
             hideBaseFilters(true);
             hideStatusFilters(true);
-            hideTitleDynamicFilters(true);
+            hideDynamicFilters(true);
             sortingActive = true;
         } else {
             mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.filters));
@@ -454,9 +460,10 @@ public class MainActivity extends AppCompatActivity
             mainBinding.rightDrawer.rightDrawerFilters.setVisibility(View.VISIBLE);
             mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.VISIBLE);
             mainBinding.rightDrawer.drawerBackButton.setVisibility(View.GONE);
+            hideWorkflowTypeFilters(false);
             hideBaseFilters(false);
             hideStatusFilters(false);
-            hideTitleDynamicFilters(false);
+            hideDynamicFilters(false);
             sortingActive = false;
         }
     }
@@ -689,9 +696,10 @@ public class MainActivity extends AppCompatActivity
         mainBinding.rightDrawer.drawerBackButton.setVisibility(View.GONE);
         mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.filters));
         hideSortingViews(false);
+        hideWorkflowTypeFilters(false);
         hideBaseFilters(false);
         hideStatusFilters(false);
-        hideTitleDynamicFilters(false);
+        hideDynamicFilters(false);
         LayoutInflater inflater = LayoutInflater.from(this);
         rightDrawerFiltersAdapter = new RightDrawerFiltersAdapter(inflater, menus);
 
@@ -715,6 +723,26 @@ public class MainActivity extends AppCompatActivity
             // Clicks on Option List
             updateViewSelected(view); // adds check mark UI.
             viewModel.sendOptionSelectedToWorkflowList(position);
+        };
+        setRightDrawerOptionsAdapter(optionsList.optionsList, listener);
+    }
+
+    // Populates Options List for WorkflowType Filters.
+    private void setRightDrawerWorkflowTypeFilters(OptionsList optionsList) {
+        if (optionsList == null) {
+            Log.d(TAG, "setRightDrawerOptions: Not able to set Drawer Options. OptionList is NULL");
+            return;
+        }
+
+        if (TextUtils.isEmpty(optionsList.titleLabel)) {
+            prepareUIForOptionList(getString(optionsList.titleLabelRes));
+        } else {
+            prepareUIForOptionList(optionsList.titleLabel);
+        }
+
+        AdapterView.OnItemClickListener listener = (parent, view, position, id) -> {
+            // Clicks on Option List
+            viewModel.sendWorkflowTypeFilterPositionClicked(position);
         };
         setRightDrawerOptionsAdapter(optionsList.optionsList, listener);
     }
@@ -764,15 +792,21 @@ public class MainActivity extends AppCompatActivity
         rightDrawerOptionsAdapter = new RightDrawerOptionsAdapter(inflater, optionsList);
         mainBinding.rightDrawer.rightDrawerFilters.setOnItemClickListener(listener);
         mainBinding.rightDrawer.rightDrawerFilters.setAdapter(rightDrawerOptionsAdapter);
+        mainBinding.rightDrawer.rightDrawerFilters.setVisibility(View.VISIBLE);
     }
 
     private void prepareUIForOptionList(String title) {
         hideSortingViews(true);
+        hideWorkflowTypeFilters(true);
         hideBaseFilters(true);
         hideStatusFilters(true);
-        hideTitleDynamicFilters(true);
+        hideDynamicFilters(true);
         mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
         mainBinding.rightDrawer.rightDrawerTitle.setText(title);
+    }
+
+    private void handleUpdateWorkflowTypeFilterSelectionUpdateWith(String label) {
+        mainBinding.rightDrawer.rightDrawerWorkflowTypeSubtitle.setText(label);
     }
 
     private void handleUpdateBaseFilterSelectionUpdateWith(@StringRes int resLabel) {
@@ -803,6 +837,14 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void hideWorkflowTypeFilters(boolean hide) {
+        if (hide) {
+            mainBinding.rightDrawer.rightDrawerWorkflowType.setVisibility(View.GONE);
+        } else {
+            mainBinding.rightDrawer.rightDrawerWorkflowType.setVisibility(View.VISIBLE);
+        }
+    }
+
     private void hideBaseFilters(boolean hide) {
         if (hide) {
             mainBinding.rightDrawer.rightDrawerBaseFilters.setVisibility(View.GONE);
@@ -819,11 +861,13 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void hideTitleDynamicFilters(boolean hide) {
+    private void hideDynamicFilters(boolean hide) {
         if (hide) {
             mainBinding.rightDrawer.titleDynamicField.setVisibility(View.GONE);
+            mainBinding.rightDrawer.flDynamicFilters.setVisibility(View.GONE);
         } else {
             mainBinding.rightDrawer.titleDynamicField.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.flDynamicFilters.setVisibility(View.VISIBLE);
         }
     }
 
@@ -889,10 +933,14 @@ public class MainActivity extends AppCompatActivity
         viewModel.receiveMessageToggleRadioButton.observe(this, toggleRadioButtonObserver);
         viewModel.receiveMessageToggleSwitch.observe(this, toggleSwitchObserver);
         viewModel.receiveMessageUpdateSortSelected.observe(this, this::updateSortFieldSelection);
+        viewModel.receiveMessageCreateWorkflowTypeFiltersAdapter
+                .observe(this, this::setRightDrawerWorkflowTypeFilters);
         viewModel.receiveMessageCreateBaseFiltersAdapter
                 .observe(this, this::setRightDrawerBaseFilters);
         viewModel.receiveMessageCreateStatusFiltersAdapter
                 .observe(this, this::setRightDrawerStatusFilters);
+        viewModel.receiveMessageWorkflowTypeFilterSelected
+                .observe(this, this::handleUpdateWorkflowTypeFilterSelectionUpdateWith);
         viewModel.receiveMessageBaseFilterSelected
                 .observe(this, this::handleUpdateBaseFilterSelectionUpdateWith);
         viewModel.receiveMessageStatusFilterSelected

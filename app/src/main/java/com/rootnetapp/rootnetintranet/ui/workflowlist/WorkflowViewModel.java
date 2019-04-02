@@ -614,19 +614,6 @@ public class WorkflowViewModel extends ViewModel {
         sendFiltersCounterToUi();
     }
 
-    protected void loadWorkflowsByTypeId(int workflowTypeId, LifecycleOwner lifecycleOwner) {
-//        showLoading.postValue(true);
-        if (workflowTypeId == NO_TYPE_SELECTED) {
-            isWorkflowTypeFilterApplied = false;
-            workflowRepository.getAllWorkflowsNoFilters(token);
-        } else {
-            isWorkflowTypeFilterApplied = true;
-            workflowRepository.getWorkflowsByType(token, workflowTypeId, false);
-        }
-        liveWorkflows.removeObservers(lifecycleOwner);
-        sendFiltersCounterToUi();
-    }
-
     /**
      * Request for filtered data to workflow repository. This function handles all the different
      * filtering scenarios. It handles cases with base filters, meta data, workflow type filters.
@@ -636,15 +623,12 @@ public class WorkflowViewModel extends ViewModel {
      */
     private void loadWorkflowsByFilters(FilterSettings filterSettings,
                                         LifecycleOwner lifecycleOwner) {
-        String metaDataString = filterSettings.getAllItemIdsSelectedAsString();
         int workflowTypeSelected = filterSettings.getWorkflowTypeId();
 
         Map<String, Object> options = new ArrayMap<>();
-        if (workflowTypeSelected != NO_TYPE_SELECTED) {
+        isWorkflowTypeFilterApplied = workflowTypeSelected != NO_TYPE_SELECTED;
+        if (isWorkflowTypeFilterApplied) {
             options.put("workflow_type_id", workflowTypeSelected);
-        }
-        if (!TextUtils.isEmpty(metaDataString)) {
-            options.put("workflow_metadata", metaDataString);
         }
 
         switch (filterSettings.getBaseFilterSelectedId()) {
@@ -858,8 +842,6 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     private void handleFilterByWorkflowType(WorkflowTypeMenu menu, LifecycleOwner lifecycleOwner) {
-//        filterSettings.clearDynamicFields();
-
         int workflowTypeId = menu.getWorkflowTypeId();
         if (filterSettings.isTypeAlreadySelected(workflowTypeId)) {
             // Update FilterSettings and Right Drawer UI.
@@ -867,9 +849,7 @@ public class WorkflowViewModel extends ViewModel {
             sendMessageUpdateSelectionToWorkflowList(Sort.sortType.NONE);
 
             filterSettings.updateWorkflowTypeListFilterItem(null);
-//            filterSettings.updateRightDrawerOptionListWithSelected(menu, false); //TEST
-//            updateSelectedMenuItem(menu);
-//                filterSettings.updateFilterListItemSelected(menu);
+
             showLoading.setValue(false);
             applyFilters(filterSettings);
             return;
@@ -878,18 +858,11 @@ public class WorkflowViewModel extends ViewModel {
         // Choosing some workflow type from the filter Workflow Type.
         // Update Filter Settings with new workflow type id.
         filterSettings.setWorkflowTypeId(workflowTypeId);
-        loadWorkflowsByTypeId(workflowTypeId, lifecycleOwner);
-
-        // clear any selected items if any
-//        filterSettings.clearworklowTypeSelection();
+        loadWorkflowsByFilters(filterSettings, lifecycleOwner);
 
         // Filter List Update with new selection
         filterSettings.updateWorkflowTypeListFilterItem(menu);
 
-        // Update Drawer Options List
-//        filterSettings.updateRightDrawerOptionListWithSelected(menu, false);
-
-//        updateSelectedMenuItem(menu);
         filterSettings.updateFilterListItemSelected(menu);
 
         // Allowing single selection on the UI for this list.
@@ -897,7 +870,6 @@ public class WorkflowViewModel extends ViewModel {
 
         // TODO double check if we need this removeObservers() we call already in loadWorkflowByType() something similar.
         liveWorkflows.removeObservers(lifecycleOwner);
-        applyFilters(filterSettings);
     }
 
     /**

@@ -4,11 +4,9 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerOptionList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
-import com.rootnetapp.rootnetintranet.ui.createworkflow.FieldData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -334,138 +332,6 @@ public class FilterSettings {
             }
         }
         return resultString.toString();
-    }
-
-    protected int[] arrayOfIdsSelected() {
-        String result = "";
-        WorkflowTypeMenu dynamicFieldInFilterList = filterDrawerList.get(filterListIndexSelected);
-        RightDrawerOptionList drawerOptionList = getRightDrawerOptionList(
-                dynamicFieldInFilterList.getId());
-
-        ArrayList<Integer> ids = drawerOptionList.getFieldIdOptionsSelected();
-        if (ids.size() < 1) {
-            return null;
-        }
-
-        int[] selectedIds = new int[ids.size()];
-        for (int i = 0; i < ids.size(); i++) {
-            selectedIds[i] = ids.get(i);
-        }
-        return selectedIds;
-    }
-
-    protected String getAllItemIdsSelectedAsString() {
-        if (rightDrawerOptionsList.isEmpty()) {
-            return "";
-        }
-
-        StringBuilder responseString = new StringBuilder();
-        responseString.append("{");
-        RightDrawerOptionList dynamicFieldOptions;
-        int fieldOptionId, fieldId, idOptionSelected, selectedSize2;
-        ArrayList<Integer> optionSelectedIds;
-        int optionsSize = rightDrawerOptionsList.size();
-        for (int i = 0; i < optionsSize; i++) {
-            dynamicFieldOptions = rightDrawerOptionsList.valueAt(i);
-            fieldOptionId = dynamicFieldOptions.getId();
-            if (fieldOptionId == RIGHT_DRAWER_FILTER_TYPE_ITEM_ID) {
-                continue;
-            }
-            optionSelectedIds = dynamicFieldOptions.getFieldIdOptionsSelected();
-            if (optionSelectedIds.size() == 0) {
-                continue;
-            }
-
-            if (optionSelectedIds.size() == 1) {
-                if (i > 1) {
-                    responseString.append(",");
-                }
-                // Builds single values "1":2
-                fieldId = rightDrawerOptionsList.keyAt(i);
-                responseString
-                        .append("\"")
-                        .append(fieldId)
-                        .append("\":");
-                responseString.append(optionSelectedIds.get(0));
-                continue;
-            }
-            if (i > 1) {
-                responseString.append(",");
-            }
-            fieldId = rightDrawerOptionsList.keyAt(i);
-            responseString
-                    .append("\"")
-                    .append(fieldId)
-                    .append("\":")
-                    .append("[");
-            selectedSize2 = optionSelectedIds.size();
-            // Builds array [item, item2, ...]
-            for (int j = 0; j < optionSelectedIds.size(); j++) {
-                idOptionSelected = optionSelectedIds.get(j);
-                responseString.append(idOptionSelected);
-                if (j < selectedSize2 - 1) {
-                    responseString.append(",");
-                }
-            }
-            responseString.append("]");
-        }
-        responseString.append("}");
-
-        String result = responseString.toString();
-        if (result.equals("{}")) {
-            return "";
-        }
-        return result;
-    }
-
-    protected String getAllValuesSelectedInOptionList() {
-        WorkflowTypeMenu dynamicFieldInFilterList = filterDrawerList.get(filterListIndexSelected);
-        RightDrawerOptionList drawerOptionList = getRightDrawerOptionList(
-                dynamicFieldInFilterList.getId());
-        ArrayList<String> stringOfOptionsSelected = drawerOptionList.getStringOptionsSelected();
-        if (stringOfOptionsSelected.size() < 1) {
-            return "";
-        }
-        if (stringOfOptionsSelected.size() == 1) {
-            return stringOfOptionsSelected.get(0);
-        }
-        StringBuilder stringBuilder = new StringBuilder();
-        int size = stringOfOptionsSelected.size();
-        for (int i = 0; i < size; i++) {
-            stringBuilder.append(stringOfOptionsSelected.get(i));
-            if (i < size - 1) {
-                stringBuilder.append(",");
-            }
-        }
-        return stringBuilder.toString();
-    }
-
-    protected FieldData getFieldDataFromSelectedOptionList() {
-        WorkflowTypeMenu dynamicFieldInFilterList = filterDrawerList.get(filterListIndexSelected);
-        RightDrawerOptionList drawerOptionList = getRightDrawerOptionList(
-                dynamicFieldInFilterList.getId());
-        if (drawerOptionList == null) {
-            return null;
-        }
-        FieldData fieldData = drawerOptionList.getFieldData();
-        if (fieldData == null) {
-            return null;
-        }
-        return fieldData;
-    }
-
-    protected FieldConfig getFieldConfigFromDrawerOptionList() {
-        WorkflowTypeMenu dynamicFieldInFilterList = filterDrawerList.get(filterListIndexSelected);
-        RightDrawerOptionList drawerOptionList = getRightDrawerOptionList(
-                dynamicFieldInFilterList.getId());
-        if (drawerOptionList == null) {
-            return null;
-        }
-        FieldConfig fieldConfig = drawerOptionList.getFieldConfig();
-        if (fieldConfig == null) {
-            return null;
-        }
-        return fieldConfig;
     }
 
     protected List<WorkflowTypeMenu> getOptionsListAtSelectedFilterIndex() {

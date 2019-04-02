@@ -175,6 +175,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<Boolean> mShowSubmitButtonLiveData;
     private MutableLiveData<AutocompleteFormItem> mSetAutocompleteSuggestionsLiveData;
     private MutableLiveData<Boolean> mShowAutocompleteNoConnectionLiveData;
+    private MutableLiveData<Boolean> mShowDynamicFiltersNoTypeLiveData;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
@@ -224,12 +225,17 @@ class CreateWorkflowViewModel extends ViewModel {
 
         if (userId != null && !userId.isEmpty()) mUserId = Integer.parseInt(userId);
 
-        checkPermissions(mUserId, userPermissions);
+        if (!isFilterFragment()) checkPermissions(mUserId, userPermissions);
 
         if (mFormType == FormType.STANDARD_FILTERS) {
             showStandardFieldsOnly();
         } else {
             createWorkflowTypeItem();
+        }
+
+        if (mFormType == FormType.DYNAMIC_FILTERS) {
+            mShowSubmitButtonLiveData.setValue(false);
+            mShowDynamicFiltersNoTypeLiveData.setValue(true);
         }
     }
 
@@ -653,6 +659,8 @@ class CreateWorkflowViewModel extends ViewModel {
         createStandardOwnerFormItem();
 
         mEnableSubmitButtonLiveData.setValue(true);
+        mShowSubmitButtonLiveData.setValue(true);
+        mShowDynamicFiltersNoTypeLiveData.setValue(false);
         showLoading.setValue(false);
     }
 
@@ -771,6 +779,8 @@ class CreateWorkflowViewModel extends ViewModel {
         fieldsToBuild.forEach(this::buildField);
 
         mEnableSubmitButtonLiveData.setValue(true);
+        mShowSubmitButtonLiveData.setValue(true);
+        mShowDynamicFiltersNoTypeLiveData.setValue(false);
         showLoading.setValue(false); //the fields will be created on the background
     }
 
@@ -3057,5 +3067,12 @@ class CreateWorkflowViewModel extends ViewModel {
             mShowAutocompleteNoConnectionLiveData = new MutableLiveData<>();
         }
         return mShowAutocompleteNoConnectionLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowDynamicFiltersNoType() {
+        if (mShowDynamicFiltersNoTypeLiveData == null) {
+            mShowDynamicFiltersNoTypeLiveData = new MutableLiveData<>();
+        }
+        return mShowDynamicFiltersNoTypeLiveData;
     }
 }

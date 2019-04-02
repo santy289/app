@@ -708,10 +708,6 @@ class CreateWorkflowViewModel extends ViewModel {
         List<FormFieldsByWorkflowType> fields = formSettings.getFields();
         List<FormFieldsByWorkflowType> fieldsToBuild = new ArrayList<>();
 
-        //used to make sure all fields are created before proceeding
-        mFieldCount = fields.size();
-        mFieldCompleted = 0;
-
         //group the fields to build
         for (int i = 0; i < fields.size(); i++) {
             FormFieldsByWorkflowType field = fields.get(i);
@@ -755,6 +751,10 @@ class CreateWorkflowViewModel extends ViewModel {
 
             fieldsToBuild.add(field);
         }
+
+        //used to make sure all fields are created before proceeding
+        mFieldCount = fieldsToBuild.size();
+        mFieldCompleted = 0;
 
         //build all of the wanted fields
         fieldsToBuild.forEach(this::buildField);
@@ -1486,8 +1486,9 @@ class CreateWorkflowViewModel extends ViewModel {
         }
 
         Date defaultValue = null;
-        if (field.getFieldConfigObject().getMachineName()
-                .equals(MACHINE_NAME_START_DATE) && !isFilterFragment()) {
+        if (field.getFieldConfigObject().getMachineName() != null
+                && field.getFieldConfigObject().getMachineName().equals(MACHINE_NAME_START_DATE)
+                && !isFilterFragment()) {
             defaultValue = Calendar.getInstance().getTime();
         }
 
@@ -1522,8 +1523,8 @@ class CreateWorkflowViewModel extends ViewModel {
             return;
         }
 
-        boolean defaultValue = field.getFieldConfigObject().getMachineName()
-                .equals(MACHINE_NAME_STATUS);
+        boolean defaultValue = field.getFieldConfigObject().getMachineName() != null
+                && field.getFieldConfigObject().getMachineName().equals(MACHINE_NAME_STATUS);
 
         BooleanFormItem item = new BooleanFormItem.Builder()
                 .setTitle(field.getFieldName())

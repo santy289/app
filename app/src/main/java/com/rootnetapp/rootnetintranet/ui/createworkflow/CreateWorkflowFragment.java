@@ -78,7 +78,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     private FormItemsAdapter mAdapter;
     private FormItemsAdapter mPeopleInvolvedAdapter;
     private WorkflowListItem mWorkflowListItem;
-    private boolean isDynamicFilter;
+    private @FormType int mFormType;
     private OnValueSelectedListener mOnValueSelectedListener;
     private AlertDialog mAutocompleteDialog;
     private FormAutocompleteDialogBinding mAutocompleteDialogBinding;
@@ -92,7 +92,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
      * @return this fragment.
      */
     public static CreateWorkflowFragment newInstance() {
-        return newInstance(null);
+        return newInstance(null, FormType.CREATE, null);
     }
 
     /**
@@ -103,36 +103,36 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
      * @return this fragment.
      */
     public static CreateWorkflowFragment newInstance(@Nullable WorkflowListItem itemToEdit) {
-        return newInstance(itemToEdit, false, null);
+        return newInstance(itemToEdit, FormType.EDIT, null);
     }
 
     /**
-     * Creates a new instance of this fragment for the workflow list dynamic filters.
+     * Creates a new instance of this fragment for the workflow list filters.
      *
-     * @param isDynamicFilter this fragment was instantiated form the filters drawer
+     * @param formType this fragment was instantiated form the filters drawer
      *
      * @return this fragment.
      */
-    public static CreateWorkflowFragment newInstance(boolean isDynamicFilter,
+    public static CreateWorkflowFragment newInstance(@FormType int formType,
                                                      OnValueSelectedListener onValueSelectedListener) {
-        return newInstance(null, isDynamicFilter, onValueSelectedListener);
+        return newInstance(null, formType, onValueSelectedListener);
     }
 
     /**
      * Creates a new instance of this fragment.
      *
      * @param itemToEdit              the workflow that will be edited.
-     * @param isDynamicFilter         this fragment was instantiated form the filters drawer.
+     * @param formType                how this fragment should behave.
      * @param onValueSelectedListener listener that will trigger when a value is selected.
      *
      * @return this fragment.
      */
     public static CreateWorkflowFragment newInstance(@Nullable WorkflowListItem itemToEdit,
-                                                     boolean isDynamicFilter,
+                                                     @FormType int formType,
                                                      OnValueSelectedListener onValueSelectedListener) {
         CreateWorkflowFragment fragment = new CreateWorkflowFragment();
         fragment.mWorkflowListItem = itemToEdit;
-        fragment.isDynamicFilter = isDynamicFilter;
+        fragment.mFormType = formType;
         fragment.mOnValueSelectedListener = onValueSelectedListener;
         return fragment;
     }
@@ -180,6 +180,8 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
             Log.e(TAG, "Problems getting the client domain: " + e.getMessage());
         }
 
+        viewModel.setFormType(mFormType);
+
         setupTitle();
         setupSubmitButton();
         setOnClickListeners();
@@ -187,7 +189,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         setupPeopleInvolvedRecycler();
         subscribe();
 
-        viewModel.initForm(token, clientId, mWorkflowListItem, isDynamicFilter, loggedUserId,
+        viewModel.initForm(token, clientId, mWorkflowListItem, loggedUserId,
                 permissionsString);
 
         return view;
@@ -232,26 +234,23 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     }
 
     private void setupTitle() {
-        if (isDynamicFilter) {
-            //hide the title if it's instantiated on the dynamic filters section
+        int titleRes = viewModel.getFragmentTitle();
+        if (titleRes == 0) {
+            //hide the title if it's not set
             mBinding.tvTitle.setVisibility(View.GONE);
             mBinding.separator.setVisibility(View.GONE);
             return;
         }
 
-        mBinding.tvTitle.setText(
-                mWorkflowListItem == null ? R.string.create_workflow : R.string.edit_workflow);
+        mBinding.tvTitle.setText(titleRes);
     }
 
     private void setupSubmitButton() {
-        if (isDynamicFilter) {
-            //dynamic filters section
-            mBinding.btnCreate.setText(R.string.apply_dynamic_filters);
+        int stringRes = viewModel.getSubmitButtonText();
+        if (stringRes == 0){
             return;
         }
-
-        mBinding.btnCreate.setText(
-                mWorkflowListItem == null ? R.string.create_workflow : R.string.edit_workflow);
+        mBinding.btnCreate.setText(stringRes);
     }
 
     /**
@@ -279,7 +278,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     private void setupFormRecycler() {
         mAdapter = new FormItemsAdapter(getContext(), getChildFragmentManager(), new ArrayList<>(),
                 this);
-        mAdapter.setShowRequiredIndicator(!isDynamicFilter);
+        mAdapter.setShowRequiredIndicator(!viewModel.isFilterFragment());
         mAdapter.setOnValueSelectedListener(mOnValueSelectedListener);
         mBinding.rvFields.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvFields.setAdapter(mAdapter);
@@ -290,7 +289,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         mBinding.btnCreate.setOnClickListener(v -> {
             mAdapter.retrieveValuesFromViews(mBinding.rvFields);
 
-            if (isDynamicFilter) {
+            if (viewModel.isFilterFragment()) {
                 sendItemsToFilter();
                 return;
             }
@@ -368,7 +367,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         mAdapter.addItem(singleChoiceFormItem);
 
         singleChoiceFormItem.setOnSelectedListener(item -> {
-            if (isDynamicFilter && mOnValueSelectedListener != null) {
+            if (mOnValueSelectedListener != null) {
                 //send filter by workflow type
                 mOnValueSelectedListener.onValueSelected(item);
             }

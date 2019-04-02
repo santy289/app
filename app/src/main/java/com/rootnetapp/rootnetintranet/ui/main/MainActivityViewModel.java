@@ -10,11 +10,22 @@ import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.AutocompleteFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseOption;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.services.websocket.RestartWebsocketReceiver;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.DynamicFilter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.squareup.moshi.JsonAdapter;
@@ -22,6 +33,8 @@ import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import androidx.annotation.IdRes;
 import androidx.lifecycle.LiveData;
@@ -345,6 +358,76 @@ public class MainActivityViewModel extends ViewModel {
         mWorkfErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
         mWorkfErrorLiveData.setValue(R.string.failure_connect);
     }
+
+    //region Dynamic Filters
+    protected  void onValueSelected(BaseFormItem baseFormItem){
+        if (baseFormItem instanceof SingleChoiceFormItem
+                && baseFormItem.getMachineName().equals(FormSettings.MACHINE_NAME_TYPE)) {
+            Option value = ((SingleChoiceFormItem) baseFormItem).getValue();
+            if (value == null) return;
+
+            sendWorkflowTypeSelectedToWorkflowList(value.getId());
+            return;
+        }
+
+        sendDynamicFilterSelectedToWorkflowList(
+                getDynamicFilterFromFormItem(baseFormItem));
+    }
+
+    protected void onValuesSelected(List<BaseFormItem> baseFormItems){
+        List<DynamicFilter> dynamicFilters = baseFormItems
+                .stream()
+                .map(this::getDynamicFilterFromFormItem)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        sendDynamicFilterListSelectedToWorkflowList(dynamicFilters);
+    }
+
+    private DynamicFilter getDynamicFilterFromFormItem(BaseFormItem baseFormItem) {
+        String key = String.valueOf(baseFormItem.getFieldId());
+        DynamicFilter dynamicFilter = null;
+
+        if (baseFormItem instanceof SingleChoiceFormItem) {
+            Option value = ((SingleChoiceFormItem) baseFormItem).getValue();
+            if (value == null) return null;
+
+            dynamicFilter = new DynamicFilter(key, value.getId());
+
+        } else if (baseFormItem instanceof TextInputFormItem) {
+            dynamicFilter = new DynamicFilter(key, ((TextInputFormItem) baseFormItem).getValue());
+
+        } else if (baseFormItem instanceof AutocompleteFormItem) {
+            Option value = ((AutocompleteFormItem) baseFormItem).getValue();
+            if (value == null) return null;
+
+            dynamicFilter = new DynamicFilter(key, value.getId());
+
+        } else if (baseFormItem instanceof BooleanFormItem) {
+            dynamicFilter = new DynamicFilter(key, ((BooleanFormItem) baseFormItem).getValue());
+
+        } else if (baseFormItem instanceof CurrencyFormItem) {
+            dynamicFilter = new DynamicFilter(key, ((CurrencyFormItem) baseFormItem).getValue());
+
+        } else if (baseFormItem instanceof MultipleChoiceFormItem) {
+            List<BaseOption> values = ((MultipleChoiceFormItem) baseFormItem).getValues();
+
+            List<Integer> intValues = values
+                    .stream()
+                    .map(option -> ((Option) option).getId())
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            dynamicFilter = new DynamicFilter(key, intValues);
+
+        } else if (baseFormItem instanceof PhoneFormItem) {
+            dynamicFilter = new DynamicFilter(key, ((PhoneFormItem) baseFormItem).getValue());
+
+        }
+
+        return dynamicFilter;
+    }
+    //endregion
 
     public LiveData<Cursor> getObservableWorkflows() {
         if (mWorkflowsLiveData == null) {

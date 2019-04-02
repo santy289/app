@@ -113,10 +113,12 @@ import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WOR
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_MY_OWN;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_OWN;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_CURRENT_STATUS;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_DESCRIPTION;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_OWNER;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_REMAINING_TIME;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_START_DATE;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_STATUS;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_TITLE;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_TYPE;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_ACCOUNT;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_BUSINESS_OPPORTUNITY;
@@ -184,7 +186,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private List<WorkflowTypeDb> mWorkflowTypeDbList;
     private WorkflowTypeDb mSelectedWorkflowType;
     private AutocompleteFormItem mCurrentQueryAutocompleteFormItem;
-    private boolean isDynamicFilter;
+    private @FormType int mFormType;
 
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.mRepository = createWorkflowRepository;
@@ -192,8 +194,11 @@ class CreateWorkflowViewModel extends ViewModel {
         moshi = new Moshi.Builder().build();
     }
 
+    protected void setFormType(@FormType int formType){
+        this.mFormType = formType;
+    }
+
     protected void initForm(String token, Integer clientId, @Nullable WorkflowListItem item,
-                            boolean isFilter,
                             String userId, String userPermissions) {
         showLoading.setValue(true);
         if (formSettings == null) {
@@ -202,7 +207,6 @@ class CreateWorkflowViewModel extends ViewModel {
         this.mToken = token;
         this.mClientId = clientId;
         this.mWorkflowListItem = item;
-        this.isDynamicFilter = isFilter;
 
         if (userId != null && !userId.isEmpty()) mUserId = Integer.parseInt(userId);
 
@@ -237,6 +241,37 @@ class CreateWorkflowViewModel extends ViewModel {
 
         hasDefineSpecificApproverPermissions = permissionsUtils
                 .hasPermission(WORKFLOW_DEFINE_SPECIFIC);
+    }
+
+    protected int getFragmentTitle() {
+        switch (mFormType) {
+            case FormType.CREATE:
+                return R.string.create_workflow;
+            case FormType.EDIT:
+                return R.string.edit_workflow;
+            case FormType.STANDARD_FILTERS:
+            case FormType.DYNAMIC_FILTERS:
+            default:
+                return 0;
+        }
+    }
+
+    protected int getSubmitButtonText() {
+        switch (mFormType) {
+            case FormType.CREATE:
+                return R.string.create_workflow;
+            case FormType.EDIT:
+                return R.string.edit_workflow;
+            case FormType.STANDARD_FILTERS:
+            case FormType.DYNAMIC_FILTERS:
+                return R.string.apply_dynamic_filters;
+            default:
+                return 0;
+        }
+    }
+
+    protected boolean isFilterFragment() {
+        return mFormType == FormType.STANDARD_FILTERS || mFormType == FormType.DYNAMIC_FILTERS;
     }
 
     private WorkflowMetas createMetaData(BaseFormItem formItem) {
@@ -518,7 +553,8 @@ class CreateWorkflowViewModel extends ViewModel {
                 continue;
             }
 
-            if (!isDynamicFilter) {
+            if (mFormType != FormType.STANDARD_FILTERS) {
+                //for every form but the standard filters
 
                 if (fieldConfig.isPrecalculated()) {
                     mFieldCount--;
@@ -533,6 +569,26 @@ class CreateWorkflowViewModel extends ViewModel {
 
                 //do not show the Owner field (it is separated on the people involved form)
                 if (machineName != null && machineName.equals(MACHINE_NAME_OWNER)) {
+                    mFieldCount--;
+                    continue;
+                }
+            }
+
+            if (mFormType == FormType.DYNAMIC_FILTERS){
+                //do not show the Title field
+                if (machineName != null && machineName.equals(MACHINE_NAME_TITLE)) {
+                    mFieldCount--;
+                    continue;
+                }
+
+                //do not show the Description field
+                if (machineName != null && machineName.equals(MACHINE_NAME_DESCRIPTION)) {
+                    mFieldCount--;
+                    continue;
+                }
+
+                //do not show the Start Date field
+                if (machineName != null && machineName.equals(MACHINE_NAME_START_DATE)) {
                     mFieldCount--;
                     continue;
                 }
@@ -624,7 +680,7 @@ class CreateWorkflowViewModel extends ViewModel {
                 }
                 break;
             case FormSettings.TYPE_CURRENCY:
-                if (isDynamicFilter) {
+                if (isFilterFragment()) {
                     //do not include in the dynamic filters
                     buildFieldCompleted();
                     break;
@@ -633,7 +689,7 @@ class CreateWorkflowViewModel extends ViewModel {
                 createCurrencyFormItem(field);
                 break;
             case FormSettings.TYPE_PHONE:
-                if (isDynamicFilter) {
+                if (isFilterFragment()) {
                     //do not include in the dynamic filters
                     buildFieldCompleted();
                     break;
@@ -642,7 +698,7 @@ class CreateWorkflowViewModel extends ViewModel {
                 createPhoneFormItem(field);
                 break;
             case FormSettings.TYPE_FILE:
-                if (isDynamicFilter) {
+                if (isFilterFragment()) {
                     //do not include in the dynamic filters
                     buildFieldCompleted();
                     break;
@@ -651,7 +707,7 @@ class CreateWorkflowViewModel extends ViewModel {
                 createFileFormItem(field);
                 break;
             case FormSettings.TYPE_GEOLOCATION:
-                if (isDynamicFilter) {
+                if (isFilterFragment()) {
                     //do not include in the dynamic filters
                     buildFieldCompleted();
                     break;
@@ -734,10 +790,8 @@ class CreateWorkflowViewModel extends ViewModel {
             }
         }
 
-        int titleRes = isDynamicFilter ? R.string.workflow_type : R.string.create_workflow_form_workflow_type;
-
         SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
-                .setTitleRes(titleRes)
+                .setTitleRes(R.string.create_workflow_form_workflow_type)
                 .setRequired(true)
                 .setTag(TAG_WORKFLOW_TYPE)
                 .setFieldId(TAG_WORKFLOW_TYPE)
@@ -778,7 +832,7 @@ class CreateWorkflowViewModel extends ViewModel {
      * workflow type and then send the form item to the UI.
      */
     private void createPeopleInvolvedItem() {
-        if (isDynamicFilter) {
+        if (isFilterFragment()) {
             //do not create people involved item if it's from dynamic filters.
             showFields(formSettings);
             return;
@@ -1276,7 +1330,8 @@ class CreateWorkflowViewModel extends ViewModel {
         }
 
         Date defaultValue = null;
-        if (field.getFieldConfigObject().getMachineName().equals(MACHINE_NAME_START_DATE) && !isDynamicFilter) {
+        if (field.getFieldConfigObject().getMachineName()
+                .equals(MACHINE_NAME_START_DATE) && !isFilterFragment()) {
             defaultValue = Calendar.getInstance().getTime();
         }
 
@@ -1311,7 +1366,8 @@ class CreateWorkflowViewModel extends ViewModel {
             return;
         }
 
-        boolean defaultValue= field.getFieldConfigObject().getMachineName().equals(MACHINE_NAME_STATUS);
+        boolean defaultValue = field.getFieldConfigObject().getMachineName()
+                .equals(MACHINE_NAME_STATUS);
 
         BooleanFormItem item = new BooleanFormItem.Builder()
                 .setTitle(field.getFieldName())

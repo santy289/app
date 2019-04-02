@@ -233,6 +233,8 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
                 .observe(getViewLifecycleOwner(), this::showAutocompleteNoConnectionView);
         viewModel.getObservableShowDynamicFiltersNoType()
                 .observe(getViewLifecycleOwner(), this::showDynamicFiltersNoTypeView);
+        viewModel.getObservableShowDynamicFiltersNoFields()
+                .observe(getViewLifecycleOwner(), this::showDynamicFiltersNoFieldsView);
     }
 
     private void setupTitle() {
@@ -811,6 +813,11 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     @UiThread
     private void showDynamicFiltersNoTypeView(boolean show) {
         mBinding.tvDynamicFiltersNoType.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    @UiThread
+    private void showDynamicFiltersNoFieldsView(boolean show) {
+        mBinding.tvDynamicFiltersNoFields.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     public void generateFieldsByWorkflowType(int workflowTypeId){

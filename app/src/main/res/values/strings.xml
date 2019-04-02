@@ -270,6 +270,7 @@
     <string name="approvers_involved">Approvers Involved</string>
     <string name="fragment_create_workflow_no_permissions">You do not have permissions to create a workflow.</string>
     <string name="fragment_create_workflow_dynamic_filters_no_type">You must select a workflow type in order to filter by the dynamic fields.</string>
+    <string name="fragment_create_workflow_dynamic_filters_no_fields">The selected workflow type does not have any dynamic filters available.</string>
     <string name="workflow_list_no_selections">You have not selected any workflows.</string>
     <string name="workflow_list_delete_dialog_title">Delete Workflows</string>
     <string name="workflow_list_delete_dialog_msg">Are you sure you want to delete the workflows %s?</string>

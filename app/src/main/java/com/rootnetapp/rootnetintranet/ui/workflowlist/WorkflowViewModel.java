@@ -226,7 +226,6 @@ public class WorkflowViewModel extends ViewModel {
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> {
-
                 }, throwable -> {
                     Log.d(TAG, "failure: Can't access to DB: " + throwable.getMessage());
                 });
@@ -463,7 +462,7 @@ public class WorkflowViewModel extends ViewModel {
      * Groups workflow types in their respective categories and saves results in FilterSettings.
      */
     private void initWorkflowTypeMenus() {
-        if (filterSettings.getSizeWorkflowTypeOptionList() > 0){
+        if (filterSettings.getSizeWorkflowTypeOptionList() > 0) {
             //already exists
             return;
         }
@@ -721,7 +720,8 @@ public class WorkflowViewModel extends ViewModel {
      * @param position       Selection done by the user on the list of workflow type filters.
      * @param lifecycleOwner Fragment has an observer that we need to remove and use a new one.
      */
-    protected void handleWorkflowTypeFieldPositionSelected(int position, LifecycleOwner lifecycleOwner) {
+    protected void handleWorkflowTypeFieldPositionSelected(int position,
+                                                           LifecycleOwner lifecycleOwner) {
         showLoading.setValue(true);
         WorkflowTypeMenu filterSelected;
         filterSelected = filterSettings.handleWorkflowTypeFilterPositionSelected(position);
@@ -732,7 +732,8 @@ public class WorkflowViewModel extends ViewModel {
             filterSettings.setWorkflowTypeId(filterSelected.getWorkflowTypeId());
         }
         messageMainWorkflowTypeFilterSelectionToFilterList.setValue(filterSelected.getLabel());
-        messageMainWorkflowTypeIdFilterSelectionToFilterList.setValue(filterSelected.getWorkflowTypeId());
+        messageMainWorkflowTypeIdFilterSelectionToFilterList
+                .setValue(filterSelected.getWorkflowTypeId());
         invalidateDrawerOptionsList.setValue(true);
         handleFilterByWorkflowType(filterSelected, lifecycleOwner);
     }
@@ -829,16 +830,19 @@ public class WorkflowViewModel extends ViewModel {
         loadWorkflowsByFilters(filterSettings, lifecycleOwner);
     }
 
-    protected void handleDynamicFilterSelected(DynamicFilter dynamicFilter, LifecycleOwner lifecycleOwner) {
+    protected void handleDynamicFilterSelected(DynamicFilter dynamicFilter,
+                                               LifecycleOwner lifecycleOwner) {
         showLoading.setValue(true);
         filterSettings.addDynamicFilter(dynamicFilter.getKey(), dynamicFilter.getValue());
         loadWorkflowsByFilters(filterSettings, lifecycleOwner);
     }
 
-    protected void handleDynamicFilterListSelected(List<DynamicFilter> dynamicFilters, LifecycleOwner lifecycleOwner) {
+    protected void handleDynamicFilterListSelected(List<DynamicFilter> dynamicFilters,
+                                                   LifecycleOwner lifecycleOwner) {
         showLoading.setValue(true);
 
-        dynamicFilters.forEach(dynamicFilter -> filterSettings.addDynamicFilter(dynamicFilter.getKey(), dynamicFilter.getValue()));
+        dynamicFilters.forEach(dynamicFilter -> filterSettings
+                .addDynamicFilter(dynamicFilter.getKey(), dynamicFilter.getValue()));
 
         loadWorkflowsByFilters(filterSettings, lifecycleOwner);
     }
@@ -876,7 +880,7 @@ public class WorkflowViewModel extends ViewModel {
 //        filterSettings.updateRightDrawerOptionListWithSelected(menu, false);
 
 //        updateSelectedMenuItem(menu);
-            filterSettings.updateFilterListItemSelected(menu);
+        filterSettings.updateFilterListItemSelected(menu);
 
         // Allowing single selection on the UI for this list.
         invalidateDrawerOptionsList.setValue(true);

@@ -405,6 +405,7 @@ public class MainActivity extends AppCompatActivity
             if (sortingActive) {
                 showSortByViews(false);
             }
+            //todo if standardFiltersActive
             viewModel.sendRightDrawerBackButtonClick();
         });
 
@@ -412,6 +413,10 @@ public class MainActivity extends AppCompatActivity
             // TODO tell WorkflowViewModel to show next Sort By Views
             // right now main activity is doing it on its own, it is better that the viewModel does this.
             showSortByViews(true);
+        });
+
+        mainBinding.rightDrawer.rightDrawerStandardFilters.setOnClickListener(view -> {
+            showStandardFiltersView(true);
         });
 
         // Using the base field filter.
@@ -434,6 +439,7 @@ public class MainActivity extends AppCompatActivity
 
         mDynamicFiltersFragment = CreateWorkflowFragment.newInstance(FormType.DYNAMIC_FILTERS, this);
         showFragmentDrawer(mDynamicFiltersFragment, false);
+        showFragmentDrawer(CreateWorkflowFragment.newInstance(FormType.STANDARD_FILTERS, this), false);
     }
 
     private void openRightDrawer(boolean open) {
@@ -455,6 +461,7 @@ public class MainActivity extends AppCompatActivity
             hideWorkflowTypeFilters(true);
             hideBaseFilters(true);
             hideStatusFilters(true);
+            hideStandardFilters(true);
             hideDynamicFilters(true);
             sortingActive = true;
         } else {
@@ -466,8 +473,39 @@ public class MainActivity extends AppCompatActivity
             hideWorkflowTypeFilters(false);
             hideBaseFilters(false);
             hideStatusFilters(false);
+            hideStandardFilters(false);
             hideDynamicFilters(false);
             sortingActive = false;
+        }
+    }
+
+    boolean standardFiltersActive = false;
+
+    private void showStandardFiltersView(boolean show) {
+        if (show) {
+            mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.standard_filters));
+            mainBinding.rightDrawer.flStandardFilters.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.rightDrawerFilters.setVisibility(View.GONE);
+            mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.GONE);
+            mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
+            hideWorkflowTypeFilters(true);
+            hideBaseFilters(true);
+            hideStatusFilters(true);
+            hideStandardFilters(true);
+            hideDynamicFilters(true);
+            standardFiltersActive = true;
+        } else {
+            mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.filters));
+            mainBinding.rightDrawer.flStandardFilters.setVisibility(View.GONE);
+            mainBinding.rightDrawer.rightDrawerFilters.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.drawerBackButton.setVisibility(View.GONE);
+            hideWorkflowTypeFilters(false);
+            hideBaseFilters(false);
+            hideStatusFilters(false);
+            hideStandardFilters(false);
+            hideDynamicFilters(false);
+            standardFiltersActive = false;
         }
     }
 
@@ -803,6 +841,7 @@ public class MainActivity extends AppCompatActivity
         hideWorkflowTypeFilters(true);
         hideBaseFilters(true);
         hideStatusFilters(true);
+        hideStandardFilters(true);
         hideDynamicFilters(true);
         mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
         mainBinding.rightDrawer.rightDrawerTitle.setText(title);
@@ -861,6 +900,14 @@ public class MainActivity extends AppCompatActivity
             mainBinding.rightDrawer.rightDrawerStatusFilters.setVisibility(View.GONE);
         } else {
             mainBinding.rightDrawer.rightDrawerStatusFilters.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void hideStandardFilters(boolean hide) {
+        if (hide) {
+            mainBinding.rightDrawer.rightDrawerStandardFilters.setVisibility(View.GONE);
+        } else {
+            mainBinding.rightDrawer.rightDrawerStandardFilters.setVisibility(View.VISIBLE);
         }
     }
 

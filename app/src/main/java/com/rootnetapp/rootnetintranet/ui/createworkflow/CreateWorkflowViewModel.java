@@ -194,7 +194,7 @@ class CreateWorkflowViewModel extends ViewModel {
         moshi = new Moshi.Builder().build();
     }
 
-    protected void setFormType(@FormType int formType){
+    protected void setFormType(@FormType int formType) {
         this.mFormType = formType;
     }
 
@@ -556,7 +556,13 @@ class CreateWorkflowViewModel extends ViewModel {
                 continue;
             }
 
-            if (mFormType != FormType.STANDARD_FILTERS) {
+            if (mFormType == FormType.STANDARD_FILTERS) {
+                if (TextUtils.isEmpty(machineName)){
+                    mFieldCount--;
+                    continue;
+                }
+
+            } else {
                 //for every form but the standard filters
 
                 if (fieldConfig.isPrecalculated()) {
@@ -577,40 +583,24 @@ class CreateWorkflowViewModel extends ViewModel {
                 }
             }
 
-            if (mFormType == FormType.DYNAMIC_FILTERS){
+            if (mFormType == FormType.DYNAMIC_FILTERS) {
                 //do not show the Title field
-                if (machineName != null && machineName.equals(MACHINE_NAME_TITLE)) {
-                    mFieldCount--;
-                    continue;
-                }
-
-                //do not show the Description field
-                if (machineName != null && machineName.equals(MACHINE_NAME_DESCRIPTION)) {
-                    mFieldCount--;
-                    continue;
-                }
-
-                //do not show the Start Date field
-                if (machineName != null && machineName.equals(MACHINE_NAME_START_DATE)) {
+                if ((machineName != null && machineName.equals(MACHINE_NAME_TITLE))
+                        //do not show the Description field
+                        || (machineName != null && machineName.equals(MACHINE_NAME_DESCRIPTION))
+                        //do not show the Start Date field
+                        || (machineName != null && machineName.equals(MACHINE_NAME_START_DATE))) {
                     mFieldCount--;
                     continue;
                 }
             }
 
             //do not show the Remaining Time field
-            if (machineName != null && machineName.equals(MACHINE_NAME_REMAINING_TIME)) {
-                mFieldCount--;
-                continue;
-            }
-
-            //do not show the Current Status field
-            if (machineName != null && machineName.equals(MACHINE_NAME_CURRENT_STATUS)) {
-                mFieldCount--;
-                continue;
-            }
-
-            //do not show the Type field
-            if (machineName != null && machineName.equals(MACHINE_NAME_TYPE)) {
+            if ((machineName != null && machineName.equals(MACHINE_NAME_REMAINING_TIME))
+                    //do not show the Current Status field
+                    || (machineName != null && machineName.equals(MACHINE_NAME_CURRENT_STATUS))
+                    //do not show the Type field
+                    || (machineName != null && machineName.equals(MACHINE_NAME_TYPE))) {
                 mFieldCount--;
                 continue;
             }

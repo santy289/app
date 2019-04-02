@@ -525,6 +525,7 @@ public class MainActivity extends AppCompatActivity
             mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.GONE);
             mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
             mainBinding.rightDrawer.rightDrawerFilters.setVisibility(View.GONE);
+            hideSortingViews(true);
             hideWorkflowTypeFilters(true);
             hideBaseFilters(true);
             hideStatusFilters(true);
@@ -533,6 +534,7 @@ public class MainActivity extends AppCompatActivity
         } else {
             mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.VISIBLE);
             mainBinding.rightDrawer.drawerBackButton.setVisibility(View.GONE);
+            hideSortingViews(false);
             hideWorkflowTypeFilters(false);
             hideBaseFilters(false);
             hideStatusFilters(false);
@@ -915,32 +917,40 @@ public class MainActivity extends AppCompatActivity
     private void hideWorkflowTypeFilters(boolean hide) {
         if (hide) {
             mainBinding.rightDrawer.rightDrawerWorkflowType.setVisibility(View.GONE);
+            mainBinding.rightDrawer.separatorWorkflowType.setVisibility(View.GONE);
         } else {
             mainBinding.rightDrawer.rightDrawerWorkflowType.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.separatorWorkflowType.setVisibility(View.VISIBLE);
         }
     }
 
     private void hideBaseFilters(boolean hide) {
         if (hide) {
             mainBinding.rightDrawer.rightDrawerBaseFilters.setVisibility(View.GONE);
+            mainBinding.rightDrawer.separatorBase.setVisibility(View.GONE);
         } else {
             mainBinding.rightDrawer.rightDrawerBaseFilters.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.separatorBase.setVisibility(View.VISIBLE);
         }
     }
 
     private void hideStatusFilters(boolean hide) {
         if (hide) {
             mainBinding.rightDrawer.rightDrawerStatusFilters.setVisibility(View.GONE);
+            mainBinding.rightDrawer.separatorStatus.setVisibility(View.GONE);
         } else {
             mainBinding.rightDrawer.rightDrawerStatusFilters.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.separatorStatus.setVisibility(View.VISIBLE);
         }
     }
 
     private void hideStandardFilters(boolean hide) {
         if (hide) {
             mainBinding.rightDrawer.rightDrawerStandardFilters.setVisibility(View.GONE);
+            mainBinding.rightDrawer.separatorStandard.setVisibility(View.GONE);
         } else {
             mainBinding.rightDrawer.rightDrawerStandardFilters.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.separatorStandard.setVisibility(View.VISIBLE);
         }
     }
 
@@ -959,9 +969,11 @@ public class MainActivity extends AppCompatActivity
         if (hide) {
             sortTitle.setVisibility(View.GONE);
             sortSubtitle.setVisibility(View.GONE);
+            mainBinding.rightDrawer.separatorSortBy.setVisibility(View.GONE);
         } else {
             sortTitle.setVisibility(View.VISIBLE);
             sortSubtitle.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.separatorSortBy.setVisibility(View.VISIBLE);
         }
     }
 

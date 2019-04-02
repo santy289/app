@@ -118,7 +118,8 @@
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
-        <service android:name=".services.websocket.WebSocketService" />
+        <service android:name=".services.websocket.WebSocketService"
+            android:stopWithTask="false"/>
 
         <receiver
             android:name=".services.websocket.RestartWebsocketReceiver"

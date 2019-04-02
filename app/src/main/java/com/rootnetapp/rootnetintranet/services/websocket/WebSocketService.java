@@ -15,6 +15,7 @@ import android.os.Message;
 import android.os.Process;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
 
@@ -126,6 +127,8 @@ public class WebSocketService extends Service {
     }
 
     private void serviceCleanup() {
+        Crashlytics.logException(new ServiceDestroyedException("onDestroy: SERVICE DESTROYED"));
+
         RestartWebsocketReceiver.resetReceiverRunningIndicator();
         serviceHandler.stopWebsocket();
         serviceHandler.removeMessages(what);

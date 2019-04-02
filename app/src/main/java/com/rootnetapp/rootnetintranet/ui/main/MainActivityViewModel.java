@@ -73,6 +73,7 @@ public class MainActivityViewModel extends ViewModel {
     public MutableLiveData<Integer> messageOptionSelectedToWorkflowList;
     public MutableLiveData<Integer> messageWorkflowTypeSelectedToWorkflowList;
     public MutableLiveData<DynamicFilter> messageDynamicFilterSelectedToWorkflowList;
+    public MutableLiveData<List<DynamicFilter>> messageDynamicFilterListSelectedToWorkflowList;
     public MutableLiveData<Boolean> messageBackActionToWorkflowList;
     public MutableLiveData<Boolean> messageInitSortByToWorkflowList;
     public MutableLiveData<int[]> messageRadioButtonClickedToWorkflowList;
@@ -103,6 +104,7 @@ public class MainActivityViewModel extends ViewModel {
         this.messageOptionSelectedToWorkflowList = new MutableLiveData<>();
         this.messageWorkflowTypeSelectedToWorkflowList = new MutableLiveData<>();
         this.messageDynamicFilterSelectedToWorkflowList = new MutableLiveData<>();
+        this.messageDynamicFilterListSelectedToWorkflowList = new MutableLiveData<>();
         this.invalidateOptionsList = new MutableLiveData<>();
         this.messageInitSortByToWorkflowList = new MutableLiveData<>();
         this.receiveMessageToggleRadioButton = new MutableLiveData<>();
@@ -176,6 +178,10 @@ public class MainActivityViewModel extends ViewModel {
 
     protected void sendDynamicFilterSelectedToWorkflowList(DynamicFilter dynamicFilter) {
         messageDynamicFilterSelectedToWorkflowList.setValue(dynamicFilter);
+    }
+
+    protected void sendDynamicFilterListSelectedToWorkflowList(List<DynamicFilter> dynamicFilterList) {
+        messageDynamicFilterListSelectedToWorkflowList.setValue(dynamicFilterList);
     }
 
     protected void sendRightDrawerBackButtonClick() {

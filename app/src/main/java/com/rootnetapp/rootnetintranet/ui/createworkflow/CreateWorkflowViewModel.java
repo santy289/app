@@ -112,7 +112,9 @@ import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WOR
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_ALL;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_MY_OWN;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_OWN;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_CURRENT_STATUS;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_OWNER;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_REMAINING_TIME;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_START_DATE;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_STATUS;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_TYPE;
@@ -508,26 +510,48 @@ class CreateWorkflowViewModel extends ViewModel {
         //group the fields to build
         for (int i = 0; i < fields.size(); i++) {
             FormFieldsByWorkflowType field = fields.get(i);
+            FieldConfig fieldConfig = field.getFieldConfigObject();
+            String machineName = fieldConfig.getMachineName();
+
             if (!field.isShowForm()) {
                 mFieldCount--;
                 continue;
             }
 
-            FieldConfig fieldConfig = field.getFieldConfigObject();
-            if (fieldConfig.isPrecalculated()) {
+            if (!isDynamicFilter) {
+
+                if (fieldConfig.isPrecalculated()) {
+                    mFieldCount--;
+                    continue;
+                }
+
+                //do not show the Status field
+                if (machineName != null && machineName.equals(MACHINE_NAME_STATUS)) {
+                    mFieldCount--;
+                    continue;
+                }
+
+                //do not show the Owner field (it is separated on the people involved form)
+                if (machineName != null && machineName.equals(MACHINE_NAME_OWNER)) {
+                    mFieldCount--;
+                    continue;
+                }
+            }
+
+            //do not show the Remaining Time field
+            if (machineName != null && machineName.equals(MACHINE_NAME_REMAINING_TIME)) {
                 mFieldCount--;
                 continue;
             }
 
-            //do not show the Status field
-            String machineName = fieldConfig.getMachineName();
-            if (machineName != null && machineName.equals(MACHINE_NAME_STATUS)) {
+            //do not show the Current Status field
+            if (machineName != null && machineName.equals(MACHINE_NAME_CURRENT_STATUS)) {
                 mFieldCount--;
                 continue;
             }
 
-            //do not show the Owner field (it is separated on the people involved form)
-            if (machineName != null && machineName.equals(MACHINE_NAME_OWNER)) {
+            //do not show the Type field
+            if (machineName != null && machineName.equals(MACHINE_NAME_TYPE)) {
                 mFieldCount--;
                 continue;
             }
@@ -600,12 +624,30 @@ class CreateWorkflowViewModel extends ViewModel {
                 }
                 break;
             case FormSettings.TYPE_CURRENCY:
+                if (isDynamicFilter) {
+                    //do not include in the dynamic filters
+                    buildFieldCompleted();
+                    break;
+                }
+
                 createCurrencyFormItem(field);
                 break;
             case FormSettings.TYPE_PHONE:
+                if (isDynamicFilter) {
+                    //do not include in the dynamic filters
+                    buildFieldCompleted();
+                    break;
+                }
+
                 createPhoneFormItem(field);
                 break;
             case FormSettings.TYPE_FILE:
+                if (isDynamicFilter) {
+                    //do not include in the dynamic filters
+                    buildFieldCompleted();
+                    break;
+                }
+
                 createFileFormItem(field);
                 break;
             case FormSettings.TYPE_GEOLOCATION:
@@ -1234,7 +1276,7 @@ class CreateWorkflowViewModel extends ViewModel {
         }
 
         Date defaultValue = null;
-        if (field.getFieldConfigObject().getMachineName().equals(MACHINE_NAME_START_DATE)) {
+        if (field.getFieldConfigObject().getMachineName().equals(MACHINE_NAME_START_DATE) && !isDynamicFilter) {
             defaultValue = Calendar.getInstance().getTime();
         }
 
@@ -1269,6 +1311,8 @@ class CreateWorkflowViewModel extends ViewModel {
             return;
         }
 
+        boolean defaultValue= field.getFieldConfigObject().getMachineName().equals(MACHINE_NAME_STATUS);
+
         BooleanFormItem item = new BooleanFormItem.Builder()
                 .setTitle(field.getFieldName())
                 .setRequired(field.isRequired())
@@ -1277,6 +1321,7 @@ class CreateWorkflowViewModel extends ViewModel {
                 .setEscaped(escape(field.getFieldConfigObject()))
                 .setMachineName(field.getFieldConfigObject().getMachineName())
                 .setTypeInfo(typeInfo)
+                .setValue(defaultValue)
                 .build();
 
         formSettings.getFormItems().add(item);

@@ -92,6 +92,7 @@
     <string name="active">Activo</string>
     <string name="inactive">Inactivo</string>
     <string name="filters">Filtros</string>
+    <string name="apply_dynamic_filters">Aplicar Filtros Dinámicos</string>
     <string name="filters_counter">Filtros (%d)</string>
     <string name="my_workflows">Pendientes</string>
     <string name="sorting">Ordenar Por</string>

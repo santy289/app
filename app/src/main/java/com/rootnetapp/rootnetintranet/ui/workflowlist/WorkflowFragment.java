@@ -402,6 +402,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .observe(this, this::handleRightDrawerWorkflowTypeSelectedClick);
         mainViewModel.messageDynamicFilterSelectedToWorkflowList
                 .observe(this, this::handleRightDrawerDynamicFilterSelectedClick);
+        mainViewModel.messageDynamicFilterListSelectedToWorkflowList
+                .observe(this, this::handleRightDrawerDynamicFilterListSelectedClick);
         mainViewModel.messageInitSortByToWorkflowList.observe(this, this::handleInitSortBy);
         mainViewModel.messageRadioButtonClickedToWorkflowList
                 .observe(this, this::handleMessageRadioButtonClickedToWorkflowList);
@@ -490,6 +492,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     private void handleRightDrawerDynamicFilterSelectedClick(DynamicFilter dynamicFilter) {
         workflowViewModel.handleDynamicFilterSelected(dynamicFilter, WorkflowFragment.this);
+    }
+
+    private void handleRightDrawerDynamicFilterListSelectedClick(List<DynamicFilter> dynamicFilters) {
+        workflowViewModel.handleDynamicFilterListSelected(dynamicFilters, WorkflowFragment.this);
     }
 
     private void handleRightDrawerFilterClick(int position) {

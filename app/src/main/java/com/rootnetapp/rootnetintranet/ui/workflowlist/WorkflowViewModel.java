@@ -681,6 +681,7 @@ public class WorkflowViewModel extends ViewModel {
         }
 
         Map<String, Object> dynamicFiltersMap = filterSettings.getDynamicFilters();
+        //todo add to filters count
         if (!dynamicFiltersMap.isEmpty()) {
             Moshi moshi = new Moshi.Builder().build();
             JsonAdapter<Map<String, Object>> jsonAdapter = moshi
@@ -807,6 +808,14 @@ public class WorkflowViewModel extends ViewModel {
     protected void handleDynamicFilterSelected(DynamicFilter dynamicFilter, LifecycleOwner lifecycleOwner) {
         showLoading.setValue(true);
         filterSettings.addDynamicFilter(dynamicFilter.getKey(), dynamicFilter.getValue());
+        loadWorkflowsByFilters(filterSettings, lifecycleOwner);
+    }
+
+    protected void handleDynamicFilterListSelected(List<DynamicFilter> dynamicFilters, LifecycleOwner lifecycleOwner) {
+        showLoading.setValue(true);
+
+        dynamicFilters.forEach(dynamicFilter -> filterSettings.addDynamicFilter(dynamicFilter.getKey(), dynamicFilter.getValue()));
+
         loadWorkflowsByFilters(filterSettings, lifecycleOwner);
     }
 

@@ -1139,29 +1139,19 @@ public class FormSettings {
     }
 
     protected List<BaseFormItem> getFormItemsToFilter() {
-        //todo check people involved
         List<BaseFormItem> formItemsToPost = new ArrayList<>(getFormItems());
-        BaseFormItem formItem;
-        int tag;
-        String machineName;
         ArrayList<Integer> toRemove = new ArrayList<>();
 
-        //todo improve this algorithm
         for (int i = 0; i < formItemsToPost.size(); i++) {
-            formItem = formItemsToPost.get(i);
-            tag = formItem.getTag();
+            BaseFormItem formItem = formItemsToPost.get(i);
+            int tag = formItem.getTag();
             if (tag == CreateWorkflowViewModel.TAG_WORKFLOW_TYPE) {
                 toRemove.add(tag);
                 continue;
             }
-            machineName = formItem.getMachineName();
-            if (TextUtils.isEmpty(machineName)) {
-                toRemove.add(tag);
-                continue;
-            }
+
             if (TextUtils.isEmpty(formItem.getStringValue())) {
                 toRemove.add(tag);
-                continue;
             }
         }
         int removeTag;

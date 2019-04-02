@@ -113,15 +113,16 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
      *
      * @return this fragment.
      */
-    public static CreateWorkflowFragment newInstance(boolean isDynamicFilter, OnValueSelectedListener onValueSelectedListener) {
+    public static CreateWorkflowFragment newInstance(boolean isDynamicFilter,
+                                                     OnValueSelectedListener onValueSelectedListener) {
         return newInstance(null, isDynamicFilter, onValueSelectedListener);
     }
 
     /**
      * Creates a new instance of this fragment.
      *
-     * @param itemToEdit      the workflow that will be edited.
-     * @param isDynamicFilter this fragment was instantiated form the filters drawer.
+     * @param itemToEdit              the workflow that will be edited.
+     * @param isDynamicFilter         this fragment was instantiated form the filters drawer.
      * @param onValueSelectedListener listener that will trigger when a value is selected.
      *
      * @return this fragment.
@@ -244,8 +245,8 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
 
     private void setupSubmitButton() {
         if (isDynamicFilter) {
-            //hide the button if it's instantiated on the dynamic filters section
-            mBinding.btnCreate.setText(R.string.filters);
+            //dynamic filters section
+            mBinding.btnCreate.setText(R.string.apply_dynamic_filters);
             return;
         }
 
@@ -289,16 +290,21 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         mBinding.btnCreate.setOnClickListener(v -> {
             mAdapter.retrieveValuesFromViews(mBinding.rvFields);
 
-            if (isDynamicFilter){
-                    viewModel.getFormItemsToFilter().forEach(
-                            formItem -> mOnValueSelectedListener.onValueSelected(formItem));
-                    return;
+            if (isDynamicFilter) {
+                sendItemsToFilter();
+                return;
             }
 
             viewModel.handleCreateWorkflowAction();
         });
 
         mBinding.btnBack.setOnClickListener(v -> onBackPressed());
+    }
+
+    private void sendItemsToFilter() {
+        if (mOnValueSelectedListener == null) return;
+
+        mOnValueSelectedListener.onValuesSelected(viewModel.getFormItemsToFilter());
     }
 
     @Override
@@ -362,7 +368,10 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         mAdapter.addItem(singleChoiceFormItem);
 
         singleChoiceFormItem.setOnSelectedListener(item -> {
-            if (isDynamicFilter) mOnValueSelectedListener.onValueSelected(item);
+            if (isDynamicFilter && mOnValueSelectedListener != null) {
+                //send filter by workflow type
+                mOnValueSelectedListener.onValueSelected(item);
+            }
 
             if (item.getValue() == null) {
                 viewModel.clearForm();
@@ -816,5 +825,6 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     public interface OnValueSelectedListener {
 
         void onValueSelected(BaseFormItem baseFormItem);
+        void onValuesSelected(List<BaseFormItem> baseFormItems);
     }
 }

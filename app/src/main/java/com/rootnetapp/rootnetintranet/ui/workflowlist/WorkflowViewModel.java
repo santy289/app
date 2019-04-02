@@ -569,8 +569,6 @@ public class WorkflowViewModel extends ViewModel {
         spinnerMenuArray.add(0, noSelection);
 
         filterSettings.setWorkflowTypeOptionsList(spinnerMenuArray);
-
-//        filterSettings.saveOptionsListFor(FilterSettings.RIGHT_DRAWER_FILTER_TYPE_ITEM_ID, spinnerMenuArray);
     }
 
     /**

@@ -1,6 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.sync;
 
-import android.database.sqlite.SQLiteConstraintException;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -27,7 +26,6 @@ import com.rootnetapp.rootnetintranet.models.responses.websocket.OptionsSettings
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypesResponse;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -61,7 +59,7 @@ public class SyncHelper {
     private List<Profile> profiles;
     private final CompositeDisposable disposables = new CompositeDisposable();
 
-    private int queriesDoneSoFar = 0;
+    private int queriesDoneSoFar;
     private String auth;
 
     public final static int INDEX_KEY_STRING = 0;
@@ -89,6 +87,7 @@ public class SyncHelper {
 
     protected void syncData(String token) {
         this.auth = token;
+        queriesDoneSoFar = 0;
 
         getWsSettings(token);
         getGoogleMapsSettings(token);
@@ -96,8 +95,6 @@ public class SyncHelper {
         getAllWorkflows(token, 1);
         getWorkflowTypesDb(token);
         getLoggedProfile(token);
-
-        //getProfiles(token);
     }
 
     /**
@@ -117,6 +114,7 @@ public class SyncHelper {
                 .subscribe(this::saveCountriesToDatabase, throwable -> {
                     Log.d(TAG, "getCountryData: " + throwable.getMessage());
                     RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
+                    handleNetworkError(throwable);
                 });
 
         disposables.add(disposable);
@@ -144,7 +142,7 @@ public class SyncHelper {
                     if (throwable instanceof UnknownHostException) {
                         Log.d(TAG, "getWsSettings: network is down probably");
                     }
-                    failure(throwable);
+                    handleNetworkError(throwable);
                 });
 
         disposables.add(disposable);
@@ -168,7 +166,7 @@ public class SyncHelper {
                     if (throwable instanceof UnknownHostException) {
                         Log.d(TAG, "getGoogleMapsSettings: network is down probably");
                     }
-                    failure(throwable);
+                    handleNetworkError(throwable);
                 });
 
         disposables.add(disposable);
@@ -205,7 +203,7 @@ public class SyncHelper {
             return true;
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::success, this::onWorkflowTypesDbFailure);
+                .subscribe(this::success, this::handleNetworkError);
         disposables.add(disposable);
     }
 
@@ -238,33 +236,6 @@ public class SyncHelper {
         disposables.add(disposable);
     }
 
-    private void getProfiles(String token) {
-//        Disposable disposable = apiInterface
-//                .getProfiles(token)
-//                .subscribeOn(Schedulers.newThread())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(this::onProfileSuccess, throwable -> {
-//                    Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
-//                    handleNetworkError(throwable);
-//                });
-//        disposables.add(disposable);
-    }
-
-    private void onProfileSuccess(ProfileResponse userResponse) {
-//        Disposable disposable = Observable.fromCallable(() -> {
-//            List<Profile> profiles = userResponse.getProfiles();
-//            if (profiles == null) {
-//                return false;
-//            }
-//            database.profileDao().deleteAllProfiles();
-//            database.profileDao().insertProfiles(profiles);
-//            return true;
-//        }).subscribeOn(Schedulers.newThread())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(this::success, this::userfailure);
-//        disposables.add(disposable);
-    }
-
     private void onWorkflowTypesDbSuccess(WorkflowTypeDbResponse response) {
         Disposable disposable = Observable.fromCallable(() -> {
             List<WorkflowTypeDb> workflowTypes = response.getList();
@@ -288,7 +259,7 @@ public class SyncHelper {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         success -> onDatabaseSavedWorkflowTypeDb(),
-                        this::onWorkflowTypesDbFailure
+                        this::handleNetworkError
                 );
         disposables.add(disposable);
     }
@@ -322,21 +293,9 @@ public class SyncHelper {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         success -> getCountryData(auth),
-                        this::worflowDbDaoTransactionsFailure
+                        this::handleNetworkError
                 );
         disposables.add(disposable);
-    }
-
-    private void worflowDbDaoTransactionsFailure(Throwable throwable) {
-        if (throwable instanceof SQLiteConstraintException) {
-            // TODO log and flag this using some analytics tool and send to server.
-            Log.d(TAG, "SQL Error: " + throwable.getMessage());
-        }
-        mSyncLiveData.setValue(false);
-    }
-
-    private void onWorkflowTypesDbFailure(Throwable throwable) {
-        mSyncLiveData.setValue(false);
     }
 
     protected void clearDisposables() {
@@ -367,27 +326,18 @@ public class SyncHelper {
     }
 
     private void handleNetworkError(Throwable throwable) {
-        if (throwable instanceof UnknownHostException) {
-            // TODO go to timeline but fail because there is no internet connection.
-            return;
-        }
-
         if (!(throwable instanceof HttpException)) {
+            proceedWithUnhandledException();
             return;
         }
 
         HttpException networkError = (HttpException) throwable;
-        mSyncLiveData.setValue(false);
 
-        if (networkError.code() == 500) {
-            failure(throwable);
-            return;
-        }
-
-        if (networkError.code() != 401) {
+        if (networkError.code() == 500 || networkError.code() != 401) {
             proceedWithUnhandledException();
             return;
         }
+
         disposables.clear();
         attemptTokenRefresh.setValue(true);
     }
@@ -396,7 +346,7 @@ public class SyncHelper {
         mSyncLiveData.setValue(false);
     }
 
-    public void attemptLogin(String username, String password) {
+    protected void attemptLogin(String username, String password) {
         Disposable disposable = apiInterface.login(username, password)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -430,41 +380,13 @@ public class SyncHelper {
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::success,
-                        this::userfailure);
+                        this::handleNetworkError);
         disposables.add(disposable);
-    }
-
-    private void userfailure(Throwable throwable) {
-        mSyncLiveData.setValue(false);
-    }
-
-    private void error(String message) {
-        Log.d(TAG, "error: Something happened " + message);
-    }
-
-    private void onWorkflowTypesSuccess(WorkflowTypesResponse response) {
-//        Disposable disposable = Observable.fromCallable(() -> {
-//            List<WorkflowType> workflowTypes = response.getList();
-//            if (workflowTypes == null) {
-//                return false;
-//            }
-////            database.workflowDao().
-////            database.workflowDao().insertWorkflow(workflowTypes);
-//            return true;
-//        }).subscribeOn(Schedulers.newThread())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe( success -> {
-//
-//                }, this::failure);
-//        disposables.add(disposable);
     }
 
     @Deprecated
     private void onWorkflowsSuccess(WorkflowsResponse workflowsResponse) {
         workflows.addAll(workflowsResponse.getList());
-//        if(!workflowsResponse.getPager().isIsLastPage()){
-//            getAllWorkflows(auth, workflowsResponse.getPager().getNextPage());
-//        }else{
         Disposable disposable = Observable.fromCallable(() -> {
             database.workflowDao().clearWorkflows();
             database.workflowDao().insertAll(workflows);
@@ -472,9 +394,8 @@ public class SyncHelper {
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::success,
-                        this::failure);
+                        this::handleNetworkError);
         disposables.add(disposable);
-//        }
     }
 
     private void getLoggedProfile(String token) {
@@ -491,7 +412,7 @@ public class SyncHelper {
     private void onLoggedProfileSuccess(LoggedProfileResponse loggedProfileResponse) {
         if (loggedProfileResponse.getUser() == null || loggedProfileResponse.getUser()
                 .getPermissions() == null) {
-            failure(null);
+            proceedWithUnhandledException();
             return;
         }
 
@@ -501,7 +422,7 @@ public class SyncHelper {
         Object permissionsObj = loggedUser.getPermissions();
 
         if (!(permissionsObj instanceof Map)) {
-            failure(null);
+            proceedWithUnhandledException();
             return;
         }
 
@@ -521,7 +442,7 @@ public class SyncHelper {
             return true;
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::success,
-                        this::failure);
+                        this::handleNetworkError);
         disposables.add(disposable);
     }
 
@@ -531,10 +452,6 @@ public class SyncHelper {
         if (MAX_ENDPOINT_CALLS == queriesDoneSoFar) {
             mSyncLiveData.setValue(true);
         }
-    }
-
-    private void failure(Throwable throwable) {
-        mSyncLiveData.setValue(false);
     }
 
     public LiveData<Boolean> getObservableSync() {

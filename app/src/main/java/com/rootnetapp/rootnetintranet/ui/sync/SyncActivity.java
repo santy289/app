@@ -37,7 +37,7 @@ public class SyncActivity extends AppCompatActivity {
             actionBar.setDisplayShowTitleEnabled(false);
         }
         SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String token = "Bearer " + prefs.getString("token", "");
+        String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
 
         if (syncHelper != null) {
             syncHelper = new SyncHelper(syncHelper.getApiInterface(), syncHelper.getDatabase());
@@ -74,12 +74,6 @@ public class SyncActivity extends AppCompatActivity {
     private void subscribe() {
         subscribeForLogin();
         final Observer<Boolean> syncObserver = ((Boolean data) -> {
-            if (data) {
-//                Toast.makeText(this, "Success", Toast.LENGTH_LONG).show();
-            } else {
-//                Toast.makeText(this, "Failure", Toast.LENGTH_LONG).show();
-            }
-
             syncHelper.clearDisposables();
             syncHelper.getObservableSync().removeObservers(this);
             startActivity(new Intent(this, MainActivity.class));

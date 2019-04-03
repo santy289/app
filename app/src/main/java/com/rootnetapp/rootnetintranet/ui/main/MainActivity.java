@@ -34,13 +34,16 @@ import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.services.websocket.RestartWebsocketReceiver;
 import com.rootnetapp.rootnetintranet.services.websocket.WebSocketService;
 import com.rootnetapp.rootnetintranet.services.websocket.WebsocketSecureHandler;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragmentInterface;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.FormType;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerFragment;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
@@ -61,6 +64,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
+import androidx.annotation.UiThread;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
@@ -87,7 +91,8 @@ import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SW
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_UPDATED_DATE;
 
 public class MainActivity extends AppCompatActivity
-        implements MainActivityInterface, PopupMenu.OnMenuItemClickListener {
+        implements MainActivityInterface, PopupMenu.OnMenuItemClickListener,
+        CreateWorkflowFragment.OnValueSelectedListener {
 
     @Inject
     MainActivityViewModelFactory profileViewModelFactory;
@@ -100,6 +105,7 @@ public class MainActivity extends AppCompatActivity
     RightDrawerFiltersAdapter rightDrawerFiltersAdapter;
 
     private static final String TAG = "MainActivity";
+    private CreateWorkflowFragment mDynamicFiltersFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -206,6 +212,32 @@ public class MainActivity extends AppCompatActivity
         transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out,
                 android.R.anim.fade_in, android.R.anim.fade_out);
         transaction.replace(R.id.container, fragment);
+        if (addtobackstack) {
+            transaction.addToBackStack(tag);
+        }
+        transaction.commit();
+        hideSoftInputKeyboard();
+    }
+
+    public void showDynamicFiltersFragment(Fragment fragment, boolean addtobackstack) {
+        String tag = fragment.getClass().getSimpleName();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out,
+                android.R.anim.fade_in, android.R.anim.fade_out);
+        transaction.replace(R.id.fl_dynamic_filters, fragment);
+        if (addtobackstack) {
+            transaction.addToBackStack(tag);
+        }
+        transaction.commit();
+        hideSoftInputKeyboard();
+    }
+
+    public void showStandardFiltersFragment(Fragment fragment, boolean addtobackstack) {
+        String tag = fragment.getClass().getSimpleName();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out,
+                android.R.anim.fade_in, android.R.anim.fade_out);
+        transaction.replace(R.id.fl_standard_filters, fragment);
         if (addtobackstack) {
             transaction.addToBackStack(tag);
         }
@@ -386,6 +418,13 @@ public class MainActivity extends AppCompatActivity
             if (sortingActive) {
                 showSortByViews(false);
             }
+            if (standardFiltersActive) {
+                showStandardFiltersView(false);
+            }
+            if (dynamicFiltersActive) {
+                showDynamicFiltersView(false);
+            }
+            mainBinding.rightDrawer.rightDrawerFilters.setVisibility(View.GONE);
             viewModel.sendRightDrawerBackButtonClick();
         });
 
@@ -393,6 +432,19 @@ public class MainActivity extends AppCompatActivity
             // TODO tell WorkflowViewModel to show next Sort By Views
             // right now main activity is doing it on its own, it is better that the viewModel does this.
             showSortByViews(true);
+        });
+
+        mainBinding.rightDrawer.rightDrawerStandardFilters.setOnClickListener(view -> {
+            showStandardFiltersView(true);
+        });
+
+        mainBinding.rightDrawer.rightDrawerDynamicFilters.setOnClickListener(view -> {
+            showDynamicFiltersView(true);
+        });
+
+        // Using the base field filter.
+        mainBinding.rightDrawer.rightDrawerWorkflowType.setOnClickListener(view -> {
+            viewModel.sendWorkflowTypeFilterClicked();
         });
 
         // Using the base field filter.
@@ -407,6 +459,10 @@ public class MainActivity extends AppCompatActivity
 
         mainBinding.toolbarImage.setOnClickListener(
                 v -> showFragment(ProfileFragment.newInstance(), false));
+
+        mDynamicFiltersFragment = CreateWorkflowFragment.newInstance(FormType.DYNAMIC_FILTERS, this);
+        showDynamicFiltersFragment(mDynamicFiltersFragment, false);
+        showStandardFiltersFragment(CreateWorkflowFragment.newInstance(FormType.STANDARD_FILTERS, this), false);
     }
 
     private void openRightDrawer(boolean open) {
@@ -422,23 +478,68 @@ public class MainActivity extends AppCompatActivity
         if (show) {
             mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.sorting));
             mainBinding.rightDrawer.sortOptions.sortingLayout.setVisibility(View.VISIBLE);
-            mainBinding.rightDrawer.rightDrawerFilters.setVisibility(View.GONE);
-            mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.GONE);
-            mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
-            hideBaseFilters(true);
-            hideStatusFilters(true);
-            hideTitleDynamicFilters(true);
             sortingActive = true;
         } else {
             mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.filters));
             mainBinding.rightDrawer.sortOptions.sortingLayout.setVisibility(View.GONE);
-            mainBinding.rightDrawer.rightDrawerFilters.setVisibility(View.VISIBLE);
+            sortingActive = false;
+        }
+
+        baseShowSecondFiltersView(show);
+    }
+
+    boolean standardFiltersActive = false;
+
+    private void showStandardFiltersView(boolean show) {
+        if (show) {
+            mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.standard_filters));
+            mainBinding.rightDrawer.flStandardFilters.setVisibility(View.VISIBLE);
+            standardFiltersActive = true;
+        } else {
+            mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.filters));
+            mainBinding.rightDrawer.flStandardFilters.setVisibility(View.GONE);
+            standardFiltersActive = false;
+        }
+
+        baseShowSecondFiltersView(show);
+    }
+
+    boolean dynamicFiltersActive = false;
+
+    private void showDynamicFiltersView(boolean show) {
+        if (show) {
+            mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.dynamic_filters));
+            mainBinding.rightDrawer.flDynamicFilters.setVisibility(View.VISIBLE);
+            dynamicFiltersActive = true;
+        } else {
+            mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.filters));
+            mainBinding.rightDrawer.flDynamicFilters.setVisibility(View.GONE);
+            dynamicFiltersActive = false;
+        }
+
+        baseShowSecondFiltersView(show);
+    }
+
+    private void baseShowSecondFiltersView(boolean show){
+        if (show) {
+            mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.GONE);
+            mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.rightDrawerFilters.setVisibility(View.GONE);
+            hideSortingViews(true);
+            hideWorkflowTypeFilters(true);
+            hideBaseFilters(true);
+            hideStatusFilters(true);
+            hideStandardFilters(true);
+            hideDynamicFilters(true);
+        } else {
             mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.VISIBLE);
             mainBinding.rightDrawer.drawerBackButton.setVisibility(View.GONE);
+            hideSortingViews(false);
+            hideWorkflowTypeFilters(false);
             hideBaseFilters(false);
             hideStatusFilters(false);
-            hideTitleDynamicFilters(false);
-            sortingActive = false;
+            hideStandardFilters(false);
+            hideDynamicFilters(false);
         }
     }
 
@@ -596,7 +697,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void showLogoutDialog() {
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this, R.style.AlertDialogTheme);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this,
+                R.style.AlertDialogTheme);
         builder.setTitle(R.string.logout);
         builder.setMessage(R.string.logout_confirmation);
         builder.setCancelable(false);
@@ -669,9 +771,11 @@ public class MainActivity extends AppCompatActivity
         mainBinding.rightDrawer.drawerBackButton.setVisibility(View.GONE);
         mainBinding.rightDrawer.rightDrawerTitle.setText(getString(R.string.filters));
         hideSortingViews(false);
+        hideWorkflowTypeFilters(false);
         hideBaseFilters(false);
         hideStatusFilters(false);
-        hideTitleDynamicFilters(false);
+        hideStandardFilters(false);
+        hideDynamicFilters(false);
         LayoutInflater inflater = LayoutInflater.from(this);
         rightDrawerFiltersAdapter = new RightDrawerFiltersAdapter(inflater, menus);
 
@@ -695,6 +799,26 @@ public class MainActivity extends AppCompatActivity
             // Clicks on Option List
             updateViewSelected(view); // adds check mark UI.
             viewModel.sendOptionSelectedToWorkflowList(position);
+        };
+        setRightDrawerOptionsAdapter(optionsList.optionsList, listener);
+    }
+
+    // Populates Options List for WorkflowType Filters.
+    private void setRightDrawerWorkflowTypeFilters(OptionsList optionsList) {
+        if (optionsList == null) {
+            Log.d(TAG, "setRightDrawerOptions: Not able to set Drawer Options. OptionList is NULL");
+            return;
+        }
+
+        if (TextUtils.isEmpty(optionsList.titleLabel)) {
+            prepareUIForOptionList(getString(optionsList.titleLabelRes));
+        } else {
+            prepareUIForOptionList(optionsList.titleLabel);
+        }
+
+        AdapterView.OnItemClickListener listener = (parent, view, position, id) -> {
+            // Clicks on Option List
+            viewModel.sendWorkflowTypeFilterPositionClicked(position);
         };
         setRightDrawerOptionsAdapter(optionsList.optionsList, listener);
     }
@@ -744,15 +868,22 @@ public class MainActivity extends AppCompatActivity
         rightDrawerOptionsAdapter = new RightDrawerOptionsAdapter(inflater, optionsList);
         mainBinding.rightDrawer.rightDrawerFilters.setOnItemClickListener(listener);
         mainBinding.rightDrawer.rightDrawerFilters.setAdapter(rightDrawerOptionsAdapter);
+        mainBinding.rightDrawer.rightDrawerFilters.setVisibility(View.VISIBLE);
     }
 
     private void prepareUIForOptionList(String title) {
         hideSortingViews(true);
+        hideWorkflowTypeFilters(true);
         hideBaseFilters(true);
         hideStatusFilters(true);
-        hideTitleDynamicFilters(true);
+        hideStandardFilters(true);
+        hideDynamicFilters(true);
         mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
         mainBinding.rightDrawer.rightDrawerTitle.setText(title);
+    }
+
+    private void handleUpdateWorkflowTypeFilterSelectionUpdateWith(String label) {
+        mainBinding.rightDrawer.rightDrawerWorkflowTypeSubtitle.setText(label);
     }
 
     private void handleUpdateBaseFilterSelectionUpdateWith(@StringRes int resLabel) {
@@ -783,27 +914,51 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void hideWorkflowTypeFilters(boolean hide) {
+        if (hide) {
+            mainBinding.rightDrawer.rightDrawerWorkflowType.setVisibility(View.GONE);
+            mainBinding.rightDrawer.separatorWorkflowType.setVisibility(View.GONE);
+        } else {
+            mainBinding.rightDrawer.rightDrawerWorkflowType.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.separatorWorkflowType.setVisibility(View.VISIBLE);
+        }
+    }
+
     private void hideBaseFilters(boolean hide) {
         if (hide) {
             mainBinding.rightDrawer.rightDrawerBaseFilters.setVisibility(View.GONE);
+            mainBinding.rightDrawer.separatorBase.setVisibility(View.GONE);
         } else {
             mainBinding.rightDrawer.rightDrawerBaseFilters.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.separatorBase.setVisibility(View.VISIBLE);
         }
     }
 
     private void hideStatusFilters(boolean hide) {
         if (hide) {
             mainBinding.rightDrawer.rightDrawerStatusFilters.setVisibility(View.GONE);
+            mainBinding.rightDrawer.separatorStatus.setVisibility(View.GONE);
         } else {
             mainBinding.rightDrawer.rightDrawerStatusFilters.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.separatorStatus.setVisibility(View.VISIBLE);
         }
     }
 
-    private void hideTitleDynamicFilters(boolean hide) {
+    private void hideStandardFilters(boolean hide) {
         if (hide) {
-            mainBinding.rightDrawer.titleDynamicField.setVisibility(View.GONE);
+            mainBinding.rightDrawer.rightDrawerStandardFilters.setVisibility(View.GONE);
+            mainBinding.rightDrawer.separatorStandard.setVisibility(View.GONE);
         } else {
-            mainBinding.rightDrawer.titleDynamicField.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.rightDrawerStandardFilters.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.separatorStandard.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void hideDynamicFilters(boolean hide) {
+        if (hide) {
+            mainBinding.rightDrawer.rightDrawerDynamicFilters.setVisibility(View.GONE);
+        } else {
+            mainBinding.rightDrawer.rightDrawerDynamicFilters.setVisibility(View.VISIBLE);
         }
     }
 
@@ -814,9 +969,11 @@ public class MainActivity extends AppCompatActivity
         if (hide) {
             sortTitle.setVisibility(View.GONE);
             sortSubtitle.setVisibility(View.GONE);
+            mainBinding.rightDrawer.separatorSortBy.setVisibility(View.GONE);
         } else {
             sortTitle.setVisibility(View.VISIBLE);
             sortSubtitle.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.separatorSortBy.setVisibility(View.VISIBLE);
         }
     }
 
@@ -869,10 +1026,16 @@ public class MainActivity extends AppCompatActivity
         viewModel.receiveMessageToggleRadioButton.observe(this, toggleRadioButtonObserver);
         viewModel.receiveMessageToggleSwitch.observe(this, toggleSwitchObserver);
         viewModel.receiveMessageUpdateSortSelected.observe(this, this::updateSortFieldSelection);
+        viewModel.receiveMessageCreateWorkflowTypeFiltersAdapter
+                .observe(this, this::setRightDrawerWorkflowTypeFilters);
         viewModel.receiveMessageCreateBaseFiltersAdapter
                 .observe(this, this::setRightDrawerBaseFilters);
         viewModel.receiveMessageCreateStatusFiltersAdapter
                 .observe(this, this::setRightDrawerStatusFilters);
+        viewModel.receiveMessageWorkflowTypeIdFilterSelected
+                .observe(this, this::sendMessageGenerateWorkflowFieldsByType);
+        viewModel.receiveMessageWorkflowTypeFilterSelected
+                .observe(this, this::handleUpdateWorkflowTypeFilterSelectionUpdateWith);
         viewModel.receiveMessageBaseFilterSelected
                 .observe(this, this::handleUpdateBaseFilterSelectionUpdateWith);
         viewModel.receiveMessageStatusFilterSelected
@@ -902,5 +1065,15 @@ public class MainActivity extends AppCompatActivity
                     Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+    @UiThread
+    private void sendMessageGenerateWorkflowFieldsByType(int workflowTypeId){
+        mDynamicFiltersFragment.generateFieldsByWorkflowType(workflowTypeId);
+    }
+
+    @Override
+    public void onValuesSelected(List<BaseFormItem> baseFormItems) {
+        viewModel.onValuesSelected(baseFormItems);
     }
 }

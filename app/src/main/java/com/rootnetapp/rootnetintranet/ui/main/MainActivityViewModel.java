@@ -10,17 +10,28 @@ import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.AutocompleteFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseOption;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 import com.rootnetapp.rootnetintranet.services.websocket.RestartWebsocketReceiver;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.DynamicFilter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import androidx.annotation.IdRes;
 import androidx.lifecycle.LiveData;
@@ -62,20 +73,27 @@ public class MainActivityViewModel extends ViewModel {
     protected MutableLiveData<int[]> receiveMessageToggleRadioButton;
     protected MutableLiveData<int[]> receiveMessageToggleSwitch;
     protected MutableLiveData<Integer> receiveMessageUpdateSortSelected;
+    protected MutableLiveData<OptionsList> receiveMessageCreateWorkflowTypeFiltersAdapter;
     protected MutableLiveData<OptionsList> receiveMessageCreateBaseFiltersAdapter;
     protected MutableLiveData<OptionsList> receiveMessageCreateStatusFiltersAdapter;
+    protected MutableLiveData<Integer> receiveMessageWorkflowTypeIdFilterSelected;
+    protected MutableLiveData<String> receiveMessageWorkflowTypeFilterSelected;
     protected MutableLiveData<Integer> receiveMessageBaseFilterSelected;
     protected MutableLiveData<Integer> receiveMessageStatusFilterSelected;
 
     // send message to WorkflowList
     public MutableLiveData<Integer> messageContainerToWorkflowList;
     public MutableLiveData<Integer> messageOptionSelectedToWorkflowList;
+    public MutableLiveData<DynamicFilter> messageDynamicFilterSelectedToWorkflowList;
+    public MutableLiveData<List<DynamicFilter>> messageDynamicFilterListSelectedToWorkflowList;
     public MutableLiveData<Boolean> messageBackActionToWorkflowList;
     public MutableLiveData<Boolean> messageInitSortByToWorkflowList;
     public MutableLiveData<int[]> messageRadioButtonClickedToWorkflowList;
     public MutableLiveData<RightDrawerSortSwitchAction> messageSortSwitchActionToWorkflowList;
     public MutableLiveData<Boolean> messageBaseFiltersClickedToWorkflowList;
+    public MutableLiveData<Boolean> messageWorkflowTypeFilterClickedToWorkflowList;
     public MutableLiveData<Boolean> messageStatusFiltersClickedToWorkflowList;
+    public MutableLiveData<Integer> messageWorkflowTypeFilterPositionSelectedToWorkflowList;
     public MutableLiveData<Integer> messageBaseFilterPositionSelectedToWorkflowList;
     public MutableLiveData<Integer> messageStatusFilterPositionSelectedToWorkflowList;
     public MutableLiveData<Boolean> invalidateOptionsList;
@@ -98,6 +116,8 @@ public class MainActivityViewModel extends ViewModel {
         this.messageContainerToWorkflowList = new MutableLiveData<>();
         this.messageBackActionToWorkflowList = new MutableLiveData<>();
         this.messageOptionSelectedToWorkflowList = new MutableLiveData<>();
+        this.messageDynamicFilterSelectedToWorkflowList = new MutableLiveData<>();
+        this.messageDynamicFilterListSelectedToWorkflowList = new MutableLiveData<>();
         this.invalidateOptionsList = new MutableLiveData<>();
         this.messageInitSortByToWorkflowList = new MutableLiveData<>();
         this.receiveMessageToggleRadioButton = new MutableLiveData<>();
@@ -106,11 +126,16 @@ public class MainActivityViewModel extends ViewModel {
         this.messageRadioButtonClickedToWorkflowList = new MutableLiveData<>();
         this.messageSortSwitchActionToWorkflowList = new MutableLiveData<>();
         this.messageBaseFiltersClickedToWorkflowList = new MutableLiveData<>();
+        this.messageWorkflowTypeFilterClickedToWorkflowList = new MutableLiveData<>();
         this.messageStatusFiltersClickedToWorkflowList = new MutableLiveData<>();
+        this.receiveMessageCreateWorkflowTypeFiltersAdapter = new MutableLiveData<>();
         this.receiveMessageCreateBaseFiltersAdapter = new MutableLiveData<>();
         this.receiveMessageCreateStatusFiltersAdapter = new MutableLiveData<>();
+        this.messageWorkflowTypeFilterPositionSelectedToWorkflowList = new MutableLiveData<>();
         this.messageBaseFilterPositionSelectedToWorkflowList = new MutableLiveData<>();
         this.messageStatusFilterPositionSelectedToWorkflowList = new MutableLiveData<>();
+        this.receiveMessageWorkflowTypeIdFilterSelected = new MutableLiveData<>();
+        this.receiveMessageWorkflowTypeFilterSelected = new MutableLiveData<>();
         this.receiveMessageBaseFilterSelected = new MutableLiveData<>();
         this.receiveMessageStatusFilterSelected = new MutableLiveData<>();
         this.openRightDrawer = new MutableLiveData<>();
@@ -165,6 +190,14 @@ public class MainActivityViewModel extends ViewModel {
         messageOptionSelectedToWorkflowList.setValue(position);
     }
 
+    protected void sendDynamicFilterSelectedToWorkflowList(DynamicFilter dynamicFilter) {
+        messageDynamicFilterSelectedToWorkflowList.setValue(dynamicFilter);
+    }
+
+    protected void sendDynamicFilterListSelectedToWorkflowList(List<DynamicFilter> dynamicFilterList) {
+        messageDynamicFilterListSelectedToWorkflowList.setValue(dynamicFilterList);
+    }
+
     protected void sendRightDrawerBackButtonClick() {
         messageBackActionToWorkflowList.setValue(true);
     }
@@ -173,8 +206,16 @@ public class MainActivityViewModel extends ViewModel {
         messageBaseFiltersClickedToWorkflowList.setValue(true);
     }
 
+    protected void sendWorkflowTypeFilterClicked() {
+        messageWorkflowTypeFilterClickedToWorkflowList.setValue(true);
+    }
+
     protected void sendStatusFiltersClicked() {
         messageStatusFiltersClickedToWorkflowList.setValue(true);
+    }
+
+    protected void sendWorkflowTypeFilterPositionClicked(int position) {
+        messageWorkflowTypeFilterPositionSelectedToWorkflowList.setValue(position);
     }
 
     protected void sendBaseFilterPositionClicked(int position) {
@@ -222,6 +263,14 @@ public class MainActivityViewModel extends ViewModel {
 
     public void receiveMessageUpdateSortSelection(int sorType) {
         receiveMessageUpdateSortSelected.setValue(sorType);
+    }
+
+    public void receiveMessageWorkflowTypeFilterSelectedToListUi(String label) {
+        receiveMessageWorkflowTypeFilterSelected.setValue(label);
+    }
+
+    public void receiveMessageWorkflowTypeIdFilterSelectedToListUi(int workflowTypeId) {
+        receiveMessageWorkflowTypeIdFilterSelected.setValue(workflowTypeId);
     }
 
     public void receiveMessageBaseFilterSelectedToListUi(int resLabel) {
@@ -287,6 +336,10 @@ public class MainActivityViewModel extends ViewModel {
         setRightDrawerOptionList.setValue(rightOptionsList);
     }
 
+    public void createDrawerWorkflowTypeFiltersOptionListAdapter(OptionsList optionsList) {
+        receiveMessageCreateWorkflowTypeFiltersAdapter.setValue(optionsList);
+    }
+
     public void createDrawerBaseFiltersOptionListAdapter(OptionsList optionsList) {
         receiveMessageCreateBaseFiltersAdapter.setValue(optionsList);
     }
@@ -326,6 +379,58 @@ public class MainActivityViewModel extends ViewModel {
         mWorkfErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
         mWorkfErrorLiveData.setValue(R.string.failure_connect);
     }
+
+    //region Dynamic Filters
+
+    protected void onValuesSelected(List<BaseFormItem> baseFormItems){
+        List<DynamicFilter> dynamicFilters = baseFormItems
+                .stream()
+                .map(this::getDynamicFilterFromFormItem)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        sendDynamicFilterListSelectedToWorkflowList(dynamicFilters);
+    }
+
+    private DynamicFilter getDynamicFilterFromFormItem(BaseFormItem baseFormItem) {
+        String key = String.valueOf(baseFormItem.getFieldId());
+        DynamicFilter dynamicFilter = null;
+
+        if (baseFormItem instanceof SingleChoiceFormItem) {
+            Option value = ((SingleChoiceFormItem) baseFormItem).getValue();
+            Integer idValue = null;
+            if (value != null) idValue = value.getId();
+
+            dynamicFilter = new DynamicFilter(key, idValue);
+
+        } else if (baseFormItem instanceof TextInputFormItem) {
+            dynamicFilter = new DynamicFilter(key, ((TextInputFormItem) baseFormItem).getValue());
+
+        } else if (baseFormItem instanceof AutocompleteFormItem) {
+            Option value = ((AutocompleteFormItem) baseFormItem).getValue();
+            if (value == null) return null;
+
+            dynamicFilter = new DynamicFilter(key, value.getId());
+
+        } else if (baseFormItem instanceof BooleanFormItem) {
+            dynamicFilter = new DynamicFilter(key, ((BooleanFormItem) baseFormItem).getValue());
+
+        } else if (baseFormItem instanceof MultipleChoiceFormItem) {
+            List<BaseOption> values = ((MultipleChoiceFormItem) baseFormItem).getValues();
+
+            List<Integer> intValues = values
+                    .stream()
+                    .map(option -> ((Option) option).getId())
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            dynamicFilter = new DynamicFilter(key, intValues);
+
+        }
+
+        return dynamicFilter;
+    }
+    //endregion
 
     public LiveData<Cursor> getObservableWorkflows() {
         if (mWorkflowsLiveData == null) {

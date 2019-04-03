@@ -14,11 +14,11 @@
             android:background="?selectableItemBackgroundBorderless"
             android:padding="10dp"
             android:src="@drawable/ic_arrow_back_gray_24dp"
-            android:visibility="gone"
             android:tint="@color/dark_blue"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/right_drawer_title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/right_drawer_title"
-            app:layout_constraintBottom_toBottomOf="@+id/right_drawer_title"
             tools:visibility="visible" />
 
         <TextView
@@ -26,11 +26,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginTop="40dp"
+            android:layout_marginEnd="16dp"
             android:text="@string/filters"
-            android:textSize="20sp"
             android:textColor="@color/dark_blue"
+            android:textSize="20sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/drawer_back_button"
@@ -47,12 +47,15 @@
             android:id="@+id/right_drawer_sort"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
+            android:layout_marginTop="16dp"
+            android:background="?selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
             android:orientation="vertical"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/barrier_title"
@@ -65,7 +68,8 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
                 android:text="@string/sorting"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/right_drawer_sort_selection"
@@ -74,23 +78,81 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
                 android:text="@string/no_selection"
-                android:textColor="@color/dark_gray"
+                android:textColor="@color/colorAccent"
                 android:textSize="12sp" />
         </LinearLayout>
+
+        <View
+            android:id="@+id/separator_sort_by"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@color/low_gray_text"
+            app:layout_constraintTop_toBottomOf="@+id/right_drawer_sort" />
+
+        <LinearLayout
+            android:id="@+id/right_drawer_workflow_type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/separator_sort_by"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/right_drawer_workflow_type_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/workflow_type"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/right_drawer_workflow_type_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/no_selection"
+                android:textColor="@color/colorAccent"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <View
+            android:id="@+id/separator_workflow_type"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@color/low_gray_text"
+            app:layout_constraintTop_toBottomOf="@+id/right_drawer_workflow_type" />
 
         <LinearLayout
             android:id="@+id/right_drawer_base_filters"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
+            android:background="?selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
             android:orientation="vertical"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/right_drawer_sort"
+            app:layout_constraintTop_toBottomOf="@+id/separator_workflow_type"
             tools:visibility="visible">
 
             <TextView
@@ -100,7 +162,8 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
                 android:text="@string/base_filters"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/right_drawer_base_subtitle"
@@ -113,19 +176,30 @@
                 android:textSize="12sp" />
         </LinearLayout>
 
+        <View
+            android:id="@+id/separator_base"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@color/low_gray_text"
+            app:layout_constraintTop_toBottomOf="@+id/right_drawer_base_filters" />
+
         <LinearLayout
             android:id="@+id/right_drawer_status_filters"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
+            android:layout_height="47dp"
+            android:background="?selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
             android:orientation="vertical"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/right_drawer_base_filters"
+            app:layout_constraintTop_toBottomOf="@+id/separator_base"
             tools:visibility="visible">
 
             <TextView
@@ -135,7 +209,8 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
                 android:text="@string/status_filters"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/right_drawer_status_subtitle"
@@ -148,20 +223,79 @@
                 android:textSize="12sp" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/title_dynamic_field"
+        <View
+            android:id="@+id/separator_status"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:background="@color/selected_filter"
-            android:padding="15dp"
-            android:text="@string/dynamic_filters"
-            android:textAllCaps="true"
-            android:textColor="@color/white"
-            android:textStyle="bold"
+            android:layout_height="0.5dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@color/low_gray_text"
+            app:layout_constraintTop_toBottomOf="@+id/right_drawer_status_filters" />
+
+        <LinearLayout
+            android:id="@+id/right_drawer_standard_filters"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="?selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:paddingStart="10dp"
+            android:paddingTop="14dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="14dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/right_drawer_status_filters" />
+            app:layout_constraintTop_toBottomOf="@+id/separator_status"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/right_drawer_standard_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/standard_filters"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <View
+            android:id="@+id/separator_standard"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@color/low_gray_text"
+            app:layout_constraintTop_toBottomOf="@+id/right_drawer_standard_filters" />
+
+        <LinearLayout
+            android:id="@+id/right_drawer_dynamic_filters"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:paddingStart="10dp"
+            android:paddingTop="14dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="14dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/separator_standard"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/right_drawer_dynamic_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/dynamic_filters"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <include
             android:id="@+id/sort_options"
@@ -187,11 +321,36 @@
             android:layout_marginTop="10dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="16dp"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/title_dynamic_field"
-            tools:visibility="visible" />
+            app:layout_constraintTop_toBottomOf="@+id/barrier_title" />
+
+        <FrameLayout
+            android:id="@+id/fl_dynamic_filters"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/barrier_title" />
+
+        <FrameLayout
+            android:id="@+id/fl_standard_filters"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/barrier_title" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -47,6 +47,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragmentInterface;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
@@ -69,6 +70,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private List<BaseFormItem> mDataset;
     private boolean hasToEvaluateValid;
     private final CreateWorkflowFragmentInterface mFragmentInterface;
+    private boolean showRequiredIndicator;
+    private CreateWorkflowFragment.OnValueSelectedListener mOnValueSelectedListener;
 
     public FormItemsAdapter(Context context, FragmentManager fragmentManager,
                             List<BaseFormItem> dataset,
@@ -77,6 +80,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         this.mFragmentManager = fragmentManager;
         this.mDataset = dataset;
         this.mFragmentInterface = fragmentInterface;
+        showRequiredIndicator = true;
     }
 
     public void addItem(BaseFormItem item) {
@@ -97,6 +101,15 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public void setHasToEvaluateValid(boolean hasToEvaluateValid) {
         this.hasToEvaluateValid = hasToEvaluateValid;
         notifyDataSetChanged();
+    }
+
+    public void setShowRequiredIndicator(boolean show) {
+        showRequiredIndicator = show;
+    }
+
+    public void setOnValueSelectedListener(
+            CreateWorkflowFragment.OnValueSelectedListener onValueSelectedListener) {
+        mOnValueSelectedListener = onValueSelectedListener;
     }
 
     @NonNull
@@ -271,6 +284,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         //set value
         holder.getBinding().etInput.setText(item.getValue());
 
+        //input params
         setTextInputParams(holder.getBinding().etInput, item.getInputType());
 
         // verify visibility
@@ -282,7 +296,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
 
         // verify required indicator
-        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+        holder.getBinding().tvRequired.setVisibility(
+                item.isRequired() && showRequiredIndicator ? View.VISIBLE : View.GONE);
 
         // verify enabled param
         if (!item.isEnabled()) {
@@ -438,7 +453,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
 
         // verify required indicator
-        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+        holder.getBinding().tvRequired.setVisibility(
+                item.isRequired() && showRequiredIndicator ? View.VISIBLE : View.GONE);
 
         // verify visibility
         if (!item.isVisible()) {
@@ -490,7 +506,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 (buttonView, isChecked) -> item.setValue(isChecked));
 
         // verify required indicator
-        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+        holder.getBinding().tvRequired.setVisibility(
+                item.isRequired() && showRequiredIndicator ? View.VISIBLE : View.GONE);
 
         // verify visibility
         if (!item.isVisible()) {
@@ -566,7 +583,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
 
         // verify required indicator
-        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+        holder.getBinding().tvRequired.setVisibility(
+                item.isRequired() && showRequiredIndicator ? View.VISIBLE : View.GONE);
 
         // verify visibility
         if (!item.isVisible()) {
@@ -683,7 +701,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
 
         // verify required indicator
-        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+        holder.getBinding().tvRequired.setVisibility(
+                item.isRequired() && showRequiredIndicator ? View.VISIBLE : View.GONE);
 
         // verify visibility
         if (!item.isVisible()) {
@@ -806,7 +825,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 option -> spinnerAdapter.remove((Option) option));
 
         // verify required indicator
-        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+        holder.getBinding().tvRequired.setVisibility(
+                item.isRequired() && showRequiredIndicator ? View.VISIBLE : View.GONE);
 
         // verify visibility
         if (!item.isVisible()) {
@@ -923,7 +943,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
 
         // verify required indicator
-        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+        holder.getBinding().tvRequired.setVisibility(
+                item.isRequired() && showRequiredIndicator ? View.VISIBLE : View.GONE);
 
         // verify visibility
         if (!item.isVisible()) {
@@ -1013,7 +1034,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
 
         // verify required indicator
-        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+        holder.getBinding().tvRequired.setVisibility(
+                item.isRequired() && showRequiredIndicator ? View.VISIBLE : View.GONE);
 
         //verify visibility
         if (!item.isVisible()) {
@@ -1074,7 +1096,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
 
         // verify required indicator
-        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+        holder.getBinding().tvRequired.setVisibility(
+                item.isRequired() && showRequiredIndicator ? View.VISIBLE : View.GONE);
 
         //verify visibility
         if (!item.isVisible()) {
@@ -1187,7 +1210,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         });
 
         // verify required indicator
-        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+        holder.getBinding().tvRequired.setVisibility(
+                item.isRequired() && showRequiredIndicator ? View.VISIBLE : View.GONE);
 
         // verify visibility
         if (!item.isVisible()) {
@@ -1283,7 +1307,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
 
         // verify required indicator
-        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+        holder.getBinding().tvRequired.setVisibility(
+                item.isRequired() && showRequiredIndicator ? View.VISIBLE : View.GONE);
 
         //verify visibility
         if (!item.isVisible()) {
@@ -1394,7 +1419,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 .setOnTouchListener(new OnTouchClickListener(holder.getBinding().root));
 
         // verify required indicator
-        holder.getBinding().tvRequired.setVisibility(item.isRequired() ? View.VISIBLE : View.GONE);
+        holder.getBinding().tvRequired.setVisibility(
+                item.isRequired() && showRequiredIndicator ? View.VISIBLE : View.GONE);
 
         //verify visibility
         if (!item.isVisible()) {

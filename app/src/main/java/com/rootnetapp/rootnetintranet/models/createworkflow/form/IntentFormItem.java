@@ -62,6 +62,7 @@ public class IntentFormItem extends BaseFormItem {
         private String title;
         private int titleRes;
         private int tag;
+        private int fieldId;
         private boolean isRequired;
         private boolean isEscaped;
         private boolean isEnabled = true;
@@ -86,6 +87,12 @@ public class IntentFormItem extends BaseFormItem {
 
         public Builder setTag(int tag) {
             this.tag = tag;
+
+            return this;
+        }
+
+        public Builder setFieldId(int fieldId) {
+            this.fieldId = fieldId;
 
             return this;
         }
@@ -150,6 +157,7 @@ public class IntentFormItem extends BaseFormItem {
             item.setTitle(title);
             item.setTitleRes(titleRes);
             item.setTag(tag);
+            item.setFieldId(fieldId);
             item.setRequired(isRequired);
             item.setEscaped(isEscaped);
             item.setEnabled(isEnabled);

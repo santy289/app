@@ -112,9 +112,14 @@ import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WOR
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_ALL;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_MY_OWN;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_OWN;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_CURRENT_STATUS;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_DESCRIPTION;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_END_DATE;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_KEY;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_OWNER;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_START_DATE;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_STATUS;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_TITLE;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_TYPE;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_ACCOUNT;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_BUSINESS_OPPORTUNITY;
@@ -131,6 +136,18 @@ class CreateWorkflowViewModel extends ViewModel {
     protected static final int TAG_ADDITIONAL_PROFILES = 2774;
     protected static final int TAG_GLOBAL_APPROVERS = 2775;
     protected static final int TAG_SPECIFIC_APPROVERS = 2776;
+
+    private static final int TAG_STANDARD_TITLE = 200;
+    private static final int TAG_STANDARD_KEY = 201;
+    private static final int TAG_STANDARD_DESCRIPTION = 202;
+    private static final int TAG_STANDARD_START_DATE = 203;
+    private static final int TAG_STANDARD_END_DATE = 204;
+    private static final int TAG_STANDARD_STATUS = 205;
+    private static final int TAG_STANDARD_CURRENT_STATUS = 206;
+    private static final int TAG_STANDARD_OWNER = 207;
+    private static final int TAG_STANDARD_TYPE = 208;
+    private static final int TOTAL_STANDARD_FIELDS = 7;
+
     protected static final int FORM_BASE_INFO = 1;
     protected static final int FORM_PEOPLE_INVOLVED = 2;
 
@@ -157,6 +174,7 @@ class CreateWorkflowViewModel extends ViewModel {
     private MutableLiveData<Boolean> mShowSubmitButtonLiveData;
     private MutableLiveData<AutocompleteFormItem> mSetAutocompleteSuggestionsLiveData;
     private MutableLiveData<Boolean> mShowAutocompleteNoConnectionLiveData;
+    private MutableLiveData<Boolean> mShowDynamicFiltersNoTypeLiveData;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
@@ -182,11 +200,16 @@ class CreateWorkflowViewModel extends ViewModel {
     private List<WorkflowTypeDb> mWorkflowTypeDbList;
     private WorkflowTypeDb mSelectedWorkflowType;
     private AutocompleteFormItem mCurrentQueryAutocompleteFormItem;
+    private @FormType int mFormType;
 
     public CreateWorkflowViewModel(CreateWorkflowRepository createWorkflowRepository) {
         this.mRepository = createWorkflowRepository;
         goBack = new MutableLiveData<>();
         moshi = new Moshi.Builder().build();
+    }
+
+    protected void setFormType(@FormType int formType) {
+        this.mFormType = formType;
     }
 
     protected void initForm(String token, Integer clientId, @Nullable WorkflowListItem item,
@@ -201,9 +224,18 @@ class CreateWorkflowViewModel extends ViewModel {
 
         if (userId != null && !userId.isEmpty()) mUserId = Integer.parseInt(userId);
 
-        checkPermissions(mUserId, userPermissions);
+        if (!isFilterFragment()) checkPermissions(mUserId, userPermissions);
 
-        createWorkflowTypeItem();
+        if (mFormType == FormType.STANDARD_FILTERS) {
+            showStandardFieldsOnly();
+        } else {
+            createWorkflowTypeItem();
+        }
+
+        if (mFormType == FormType.DYNAMIC_FILTERS) {
+            mShowSubmitButtonLiveData.setValue(false);
+            mShowDynamicFiltersNoTypeLiveData.setValue(true);
+        }
     }
 
     protected void onCleared() {
@@ -232,6 +264,38 @@ class CreateWorkflowViewModel extends ViewModel {
 
         hasDefineSpecificApproverPermissions = permissionsUtils
                 .hasPermission(WORKFLOW_DEFINE_SPECIFIC);
+    }
+
+    protected int getFragmentTitle() {
+        switch (mFormType) {
+            case FormType.CREATE:
+                return R.string.create_workflow;
+            case FormType.EDIT:
+                return R.string.edit_workflow;
+            case FormType.STANDARD_FILTERS:
+            case FormType.DYNAMIC_FILTERS:
+            default:
+                return 0;
+        }
+    }
+
+    protected int getSubmitButtonText() {
+        switch (mFormType) {
+            case FormType.CREATE:
+                return R.string.create_workflow;
+            case FormType.EDIT:
+                return R.string.edit_workflow;
+            case FormType.STANDARD_FILTERS:
+                return R.string.apply_filters;
+            case FormType.DYNAMIC_FILTERS:
+                return R.string.apply_dynamic_filters;
+            default:
+                return 0;
+        }
+    }
+
+    protected boolean isFilterFragment() {
+        return mFormType == FormType.STANDARD_FILTERS || mFormType == FormType.DYNAMIC_FILTERS;
     }
 
     private WorkflowMetas createMetaData(BaseFormItem formItem) {
@@ -443,7 +507,10 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     protected void generateFieldsByType(String typeName) {
-        int id = formSettings.findIdByTypeName(typeName);
+        generateFieldsByType(formSettings.findIdByTypeName(typeName));
+    }
+
+    protected void generateFieldsByType(int id) {
         if (id == 0) {
             showLoading.setValue(false);
             return;
@@ -490,6 +557,148 @@ class CreateWorkflowViewModel extends ViewModel {
     }
 
     /**
+     * Generates the standard fields. This is used for the filters fragment only, standard filters
+     * section.
+     */
+    private void showStandardFieldsOnly() {
+        //used to make sure all fields are created before proceeding
+        mFieldCount = TOTAL_STANDARD_FIELDS;
+        mFieldCompleted = 0;
+
+        TextInputFormItem textInputFormItem;
+        DateFormItem dateFormItem;
+        BooleanFormItem booleanFormItem;
+
+        textInputFormItem = new TextInputFormItem.Builder()
+                .setTitleRes(R.string.title)
+                .setTag(TAG_STANDARD_TITLE)
+                .setFieldId(TAG_STANDARD_TITLE)
+                .setEscaped(true)
+                .setMachineName(MACHINE_NAME_TITLE)
+                .setInputType(InputType.TEXT)
+                .build();
+        formSettings.getFormItems().add(textInputFormItem);
+        buildFieldCompleted();
+
+        textInputFormItem = new TextInputFormItem.Builder()
+                .setTitleRes(R.string.key)
+                .setTag(TAG_STANDARD_KEY)
+                .setFieldId(TAG_STANDARD_KEY)
+                .setEscaped(true)
+                .setMachineName(MACHINE_NAME_KEY)
+                .setInputType(InputType.TEXT)
+                .build();
+        formSettings.getFormItems().add(textInputFormItem);
+        buildFieldCompleted();
+
+        textInputFormItem = new TextInputFormItem.Builder()
+                .setTitleRes(R.string.description)
+                .setTag(TAG_STANDARD_DESCRIPTION)
+                .setFieldId(TAG_STANDARD_DESCRIPTION)
+                .setEscaped(true)
+                .setMachineName(MACHINE_NAME_DESCRIPTION)
+                .setInputType(InputType.TEXT)
+                .build();
+        formSettings.getFormItems().add(textInputFormItem);
+        buildFieldCompleted();
+
+        textInputFormItem = new TextInputFormItem.Builder()
+                .setTitleRes(R.string.current_status)
+                .setTag(TAG_STANDARD_CURRENT_STATUS)
+                .setFieldId(TAG_STANDARD_CURRENT_STATUS)
+                .setEscaped(true)
+                .setMachineName(MACHINE_NAME_CURRENT_STATUS)
+                .setInputType(InputType.TEXT)
+                .build();
+        formSettings.getFormItems().add(textInputFormItem);
+        buildFieldCompleted();
+
+        textInputFormItem = new TextInputFormItem.Builder()
+                .setTitleRes(R.string.type)
+                .setTag(TAG_STANDARD_TYPE)
+                .setFieldId(TAG_STANDARD_TYPE)
+                .setEscaped(true)
+                .setMachineName(MACHINE_NAME_TYPE)
+                .setInputType(InputType.TEXT)
+                .build();
+        formSettings.getFormItems().add(textInputFormItem);
+        buildFieldCompleted();
+
+        dateFormItem = new DateFormItem.Builder()
+                .setTitleRes(R.string.start_date)
+                .setTag(TAG_STANDARD_START_DATE)
+                .setFieldId(TAG_STANDARD_START_DATE)
+                .setEscaped(true)
+                .setMachineName(MACHINE_NAME_START_DATE)
+                .build();
+        formSettings.getFormItems().add(dateFormItem);
+        buildFieldCompleted();
+
+        dateFormItem = new DateFormItem.Builder()
+                .setTitleRes(R.string.end_date)
+                .setTag(TAG_STANDARD_END_DATE)
+                .setFieldId(TAG_STANDARD_END_DATE)
+                .setEscaped(true)
+                .setMachineName(MACHINE_NAME_END_DATE)
+                .build();
+        formSettings.getFormItems().add(dateFormItem);
+        buildFieldCompleted();
+
+        booleanFormItem = new BooleanFormItem.Builder()
+                .setTitleRes(R.string.active)
+                .setTag(TAG_STANDARD_STATUS)
+                .setFieldId(TAG_STANDARD_STATUS)
+                .setEscaped(false)
+                .setMachineName(MACHINE_NAME_STATUS)
+                .setValue(true)
+                .build();
+        formSettings.getFormItems().add(booleanFormItem);
+        buildFieldCompleted();
+
+        createStandardOwnerFormItem();
+
+        mEnableSubmitButtonLiveData.setValue(true);
+        mShowSubmitButtonLiveData.setValue(true);
+        mShowDynamicFiltersNoTypeLiveData.setValue(false);
+        showLoading.setValue(false);
+    }
+
+    private void createStandardOwnerFormItem() {
+
+        Disposable disposable = mRepository
+                .getProfiles(mToken, true)
+                .subscribe(profileResponse -> {
+
+                    List<Profile> profiles = profileResponse.getProfiles();
+                    if (profiles == null || profiles.isEmpty()) return;
+
+                    List<Option> userOptions = new ArrayList<>();
+                    for (int i = 0; i < profiles.size(); i++) {
+                        String name = profiles.get(i).getFullName();
+                        Integer id = profiles.get(i).getId();
+
+                        Option option = new Option(id, name);
+                        userOptions.add(option);
+                    }
+
+                    SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
+                            .setTitleRes(R.string.owner)
+                            .setTag(TAG_STANDARD_OWNER)
+                            .setFieldId(TAG_STANDARD_OWNER)
+                            .setOptions(userOptions)
+                            .setMachineName(MACHINE_NAME_OWNER)
+                            .build();
+
+                    formSettings.getFormItems().add(singleChoiceFormItem);
+                    buildFieldCompleted();
+
+                }, throwable -> Log
+                        .e(TAG, "createStandardOwnerFormItem: error " + throwable.getMessage()));
+
+        mDisposables.add(disposable);
+    }
+
+    /**
      * Creates all of the form items according to their params. Sends each form item to the UI.
      *
      * @param formSettings holder of the current form params.
@@ -498,26 +707,24 @@ class CreateWorkflowViewModel extends ViewModel {
         List<FormFieldsByWorkflowType> fields = formSettings.getFields();
         List<FormFieldsByWorkflowType> fieldsToBuild = new ArrayList<>();
 
-        //used to make sure all fields are created before proceeding
-        mFieldCount = fields.size();
-        mFieldCompleted = 0;
-
         //group the fields to build
         for (int i = 0; i < fields.size(); i++) {
             FormFieldsByWorkflowType field = fields.get(i);
+            FieldConfig fieldConfig = field.getFieldConfigObject();
+            String machineName = fieldConfig.getMachineName();
+
             if (!field.isShowForm()) {
                 mFieldCount--;
                 continue;
             }
 
-            FieldConfig fieldConfig = field.getFieldConfigObject();
+            //do not show the pre-calculated fields
             if (fieldConfig.isPrecalculated()) {
                 mFieldCount--;
                 continue;
             }
 
             //do not show the Status field
-            String machineName = fieldConfig.getMachineName();
             if (machineName != null && machineName.equals(MACHINE_NAME_STATUS)) {
                 mFieldCount--;
                 continue;
@@ -529,14 +736,33 @@ class CreateWorkflowViewModel extends ViewModel {
                 continue;
             }
 
+            if (mFormType == FormType.DYNAMIC_FILTERS) {
+                //do not show the Title field
+                if ((machineName != null && machineName.equals(MACHINE_NAME_TITLE))
+                        //do not show the Description field
+                        || (machineName != null && machineName.equals(MACHINE_NAME_DESCRIPTION))
+                        //do not show the Start Date field
+                        || (machineName != null && machineName.equals(MACHINE_NAME_START_DATE))) {
+                    mFieldCount--;
+                    continue;
+                }
+            }
+
             fieldsToBuild.add(field);
         }
+
+        //used to make sure all fields are created before proceeding
+        mFieldCount = fieldsToBuild.size();
+        mFieldCompleted = 0;
 
         //build all of the wanted fields
         fieldsToBuild.forEach(this::buildField);
 
-        mEnableSubmitButtonLiveData.setValue(true);
         showLoading.setValue(false); //the fields will be created on the background
+        mShowDynamicFiltersNoTypeLiveData.setValue(false);
+
+        mEnableSubmitButtonLiveData.setValue(true);
+        mShowSubmitButtonLiveData.setValue(true);
     }
 
     /**
@@ -597,15 +823,39 @@ class CreateWorkflowViewModel extends ViewModel {
                 }
                 break;
             case FormSettings.TYPE_CURRENCY:
+                if (isFilterFragment()) {
+                    //do not include in the dynamic filters
+                    buildFieldCompleted();
+                    break;
+                }
+
                 createCurrencyFormItem(field);
                 break;
             case FormSettings.TYPE_PHONE:
+                if (isFilterFragment()) {
+                    //do not include in the dynamic filters
+                    buildFieldCompleted();
+                    break;
+                }
+
                 createPhoneFormItem(field);
                 break;
             case FormSettings.TYPE_FILE:
+                if (isFilterFragment()) {
+                    //do not include in the dynamic filters
+                    buildFieldCompleted();
+                    break;
+                }
+
                 createFileFormItem(field);
                 break;
             case FormSettings.TYPE_GEOLOCATION:
+                if (isFilterFragment()) {
+                    //do not include in the dynamic filters
+                    buildFieldCompleted();
+                    break;
+                }
+
                 createGeolocationFormItem(field);
                 break;
             case FormSettings.TYPE_ACCOUNT:
@@ -683,10 +933,18 @@ class CreateWorkflowViewModel extends ViewModel {
             }
         }
 
+        showLoading.setValue(false);
+
+        if (isFilterFragment()) {
+            //do not show the workflow type field for the filter fragment
+            return;
+        }
+
         SingleChoiceFormItem singleChoiceFormItem = new SingleChoiceFormItem.Builder()
-                .setTitleRes(R.string.type)
+                .setTitleRes(R.string.create_workflow_form_workflow_type)
                 .setRequired(true)
                 .setTag(TAG_WORKFLOW_TYPE)
+                .setFieldId(TAG_WORKFLOW_TYPE)
                 .setOptions(options)
                 .setValue(selectedOption)
                 .setEnabled(selectedOption == null) //if we are in edit mode, disable it
@@ -696,7 +954,6 @@ class CreateWorkflowViewModel extends ViewModel {
 
         formSettings.getFormItems().add(singleChoiceFormItem);
 
-        showLoading.setValue(false);
         mAddWorkflowTypeItemLiveData.setValue(singleChoiceFormItem);
     }
 
@@ -724,6 +981,12 @@ class CreateWorkflowViewModel extends ViewModel {
      * workflow type and then send the form item to the UI.
      */
     private void createPeopleInvolvedItem() {
+        if (isFilterFragment()) {
+            //do not create people involved item if it's from dynamic filters.
+            showFields(formSettings);
+            return;
+        }
+
         Disposable disposable = Observable.fromCallable(() -> {
             WorkflowTypeDb workflowTypeDbSingle = mRepository
                     .getWorklowType(formSettings.getWorkflowTypeIdSelected());
@@ -734,6 +997,7 @@ class CreateWorkflowViewModel extends ViewModel {
                     .setRequired(workflowTypeDbSingle.isDefineRoles())
 //                    .setVisible(mWorkflowListItem == null) //hide in edit mode
                     .setTag(TAG_PEOPLE_INVOLVED)
+                    .setFieldId(TAG_PEOPLE_INVOLVED)
                     .build();
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -777,6 +1041,7 @@ class CreateWorkflowViewModel extends ViewModel {
                                 .setTitle(field.getFieldName())
                                 .setRequired(field.isRequired())
                                 .setTag(field.getId())
+                                .setFieldId(field.getFieldId())
                                 .setOptions(options)
                                 .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
                                 .setMachineName(field.getFieldConfigObject().getMachineName())
@@ -790,6 +1055,7 @@ class CreateWorkflowViewModel extends ViewModel {
                             .setTitle(field.getFieldName())
                             .setRequired(field.isRequired())
                             .setTag(field.getId())
+                            .setFieldId(field.getFieldId())
                             .setOptions(options)
                             .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
                             .setMachineName(field.getFieldConfigObject().getMachineName())
@@ -838,6 +1104,7 @@ class CreateWorkflowViewModel extends ViewModel {
                                 .setTitle(field.getFieldName())
                                 .setRequired(field.isRequired())
                                 .setTag(field.getId())
+                                .setFieldId(field.getFieldId())
                                 .setOptions(options)
                                 .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
                                 .setMachineName(field.getFieldConfigObject().getMachineName())
@@ -850,6 +1117,7 @@ class CreateWorkflowViewModel extends ViewModel {
                             .setTitle(field.getFieldName())
                             .setRequired(field.isRequired())
                             .setTag(field.getId())
+                            .setFieldId(field.getFieldId())
                             .setOptions(options)
                             .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
                             .setMachineName(field.getFieldConfigObject().getMachineName())
@@ -897,6 +1165,7 @@ class CreateWorkflowViewModel extends ViewModel {
                                 .setTitle(field.getFieldName())
                                 .setRequired(field.isRequired())
                                 .setTag(field.getId())
+                                .setFieldId(field.getFieldId())
                                 .setOptions(options)
                                 .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
                                 .setMachineName(field.getFieldConfigObject().getMachineName())
@@ -909,6 +1178,7 @@ class CreateWorkflowViewModel extends ViewModel {
                             .setTitle(field.getFieldName())
                             .setRequired(field.isRequired())
                             .setTag(field.getId())
+                            .setFieldId(field.getFieldId())
                             .setOptions(options)
                             .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
                             .setMachineName(field.getFieldConfigObject().getMachineName())
@@ -960,6 +1230,7 @@ class CreateWorkflowViewModel extends ViewModel {
                                 .setTitle(field.getFieldName())
                                 .setRequired(field.isRequired())
                                 .setTag(field.getId())
+                                .setFieldId(field.getFieldId())
                                 .setOptions(options)
                                 .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
                                 .setMachineName(field.getFieldConfigObject().getMachineName())
@@ -972,6 +1243,7 @@ class CreateWorkflowViewModel extends ViewModel {
                             .setTitle(field.getFieldName())
                             .setRequired(field.isRequired())
                             .setTag(field.getId())
+                            .setFieldId(field.getFieldId())
                             .setOptions(options)
                             .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
                             .setMachineName(field.getFieldConfigObject().getMachineName())
@@ -1028,6 +1300,7 @@ class CreateWorkflowViewModel extends ViewModel {
                                 .setTitle(field.getFieldName())
                                 .setRequired(field.isRequired())
                                 .setTag(field.getId())
+                                .setFieldId(field.getFieldId())
                                 .setOptions(options)
                                 .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
                                 .setMachineName(field.getFieldConfigObject().getMachineName())
@@ -1040,6 +1313,7 @@ class CreateWorkflowViewModel extends ViewModel {
                             .setTitle(field.getFieldName())
                             .setRequired(field.isRequired())
                             .setTag(field.getId())
+                            .setFieldId(field.getFieldId())
                             .setOptions(options)
                             .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
                             .setMachineName(field.getFieldConfigObject().getMachineName())
@@ -1088,6 +1362,7 @@ class CreateWorkflowViewModel extends ViewModel {
                             .setTitle(field.getFieldName())
                             .setRequired(field.isRequired())
                             .setTag(field.getId())
+                            .setFieldId(field.getFieldId())
                             .setOptions(options)
                             .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
                             .setMachineName(field.getFieldConfigObject().getMachineName())
@@ -1136,6 +1411,7 @@ class CreateWorkflowViewModel extends ViewModel {
                             .setTitle(field.getFieldName())
                             .setRequired(field.isRequired())
                             .setTag(field.getId())
+                            .setFieldId(field.getFieldId())
                             .setOptions(options)
                             .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
                             .setMachineName(field.getFieldConfigObject().getMachineName())
@@ -1165,6 +1441,7 @@ class CreateWorkflowViewModel extends ViewModel {
                 .setTitle(field.getFieldName())
                 .setRequired(field.isRequired())
                 .setTag(field.getId())
+                .setFieldId(field.getFieldId())
                 .setEscaped(escape(field.getFieldConfigObject()))
                 .setTypeInfo(typeInfo)
                 .setMachineName(field.getFieldConfigObject().getMachineName())
@@ -1202,7 +1479,9 @@ class CreateWorkflowViewModel extends ViewModel {
         }
 
         Date defaultValue = null;
-        if (field.getFieldConfigObject().getMachineName().equals(MACHINE_NAME_START_DATE)) {
+        if (field.getFieldConfigObject().getMachineName() != null
+                && field.getFieldConfigObject().getMachineName().equals(MACHINE_NAME_START_DATE)
+                && !isFilterFragment()) {
             defaultValue = Calendar.getInstance().getTime();
         }
 
@@ -1210,6 +1489,7 @@ class CreateWorkflowViewModel extends ViewModel {
                 .setTitle(field.getFieldName())
                 .setRequired(field.isRequired())
                 .setTag(field.getId())
+                .setFieldId(field.getFieldId())
                 .setEscaped(escape(field.getFieldConfigObject()))
                 .setMachineName(field.getFieldConfigObject().getMachineName())
                 .setTypeInfo(typeInfo)
@@ -1236,13 +1516,18 @@ class CreateWorkflowViewModel extends ViewModel {
             return;
         }
 
+        boolean defaultValue = field.getFieldConfigObject().getMachineName() != null
+                && field.getFieldConfigObject().getMachineName().equals(MACHINE_NAME_STATUS);
+
         BooleanFormItem item = new BooleanFormItem.Builder()
                 .setTitle(field.getFieldName())
                 .setRequired(field.isRequired())
                 .setTag(field.getId())
+                .setFieldId(field.getFieldId())
                 .setEscaped(escape(field.getFieldConfigObject()))
                 .setMachineName(field.getFieldConfigObject().getMachineName())
                 .setTypeInfo(typeInfo)
+                .setValue(defaultValue)
                 .build();
 
         formSettings.getFormItems().add(item);
@@ -1276,6 +1561,7 @@ class CreateWorkflowViewModel extends ViewModel {
                             .setTitle(field.getFieldName())
                             .setRequired(field.isRequired())
                             .setTag(field.getId())
+                            .setFieldId(field.getFieldId())
                             .setEscaped(escape(field.getFieldConfigObject()))
                             .setOptions(options)
                             .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
@@ -1322,6 +1608,7 @@ class CreateWorkflowViewModel extends ViewModel {
                             .setTitle(field.getFieldName())
                             .setRequired(field.isRequired())
                             .setTag(field.getId())
+                            .setFieldId(field.getFieldId())
                             .setEscaped(escape(field.getFieldConfigObject()))
                             .setOptions(options)
                             .setTypeInfo(field.getFieldConfigObject().getTypeInfo())
@@ -1352,6 +1639,7 @@ class CreateWorkflowViewModel extends ViewModel {
                 .setTitle(field.getFieldName())
                 .setRequired(field.isRequired())
                 .setTag(field.getId())
+                .setFieldId(field.getFieldId())
                 .setEscaped(escape(field.getFieldConfigObject()))
                 .setMachineName(field.getFieldConfigObject().getMachineName())
                 .setTypeInfo(typeInfo)
@@ -1374,6 +1662,7 @@ class CreateWorkflowViewModel extends ViewModel {
                 .setTitle(field.getFieldName())
                 .setRequired(field.isRequired())
                 .setTag(field.getId())
+                .setFieldId(field.getFieldId())
                 .setEscaped(escape(field.getFieldConfigObject()))
                 .setMachineName(field.getFieldConfigObject().getMachineName())
                 .setTypeInfo(typeInfo)
@@ -1396,6 +1685,7 @@ class CreateWorkflowViewModel extends ViewModel {
                 .setTitle(field.getFieldName())
                 .setRequired(field.isRequired())
                 .setTag(field.getId())
+                .setFieldId(field.getFieldId())
                 .setEscaped(escape(field.getFieldConfigObject()))
                 .setMachineName(field.getFieldConfigObject().getMachineName())
                 .setTypeInfo(typeInfo)
@@ -2403,6 +2693,10 @@ class CreateWorkflowViewModel extends ViewModel {
     }
     //endregion
 
+    protected List<BaseFormItem> getFormItemsToFilter() {
+        return formSettings.getFormItemsToFilter();
+    }
+
     /**
      * This is called by the View when the user submits the form.
      */
@@ -2755,5 +3049,12 @@ class CreateWorkflowViewModel extends ViewModel {
             mShowAutocompleteNoConnectionLiveData = new MutableLiveData<>();
         }
         return mShowAutocompleteNoConnectionLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowDynamicFiltersNoType() {
+        if (mShowDynamicFiltersNoTypeLiveData == null) {
+            mShowDynamicFiltersNoTypeLiveData = new MutableLiveData<>();
+        }
+        return mShowDynamicFiltersNoTypeLiveData;
     }
 }

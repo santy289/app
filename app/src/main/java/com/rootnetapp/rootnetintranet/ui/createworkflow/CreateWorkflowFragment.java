@@ -78,6 +78,8 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     private FormItemsAdapter mAdapter;
     private FormItemsAdapter mPeopleInvolvedAdapter;
     private WorkflowListItem mWorkflowListItem;
+    private @FormType int mFormType;
+    private OnValueSelectedListener mOnValueSelectedListener;
     private AlertDialog mAutocompleteDialog;
     private FormAutocompleteDialogBinding mAutocompleteDialogBinding;
     private AutocompleteSuggestionsAdapter mAutocompleteSuggestionsAdapter;
@@ -90,7 +92,7 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
      * @return this fragment.
      */
     public static CreateWorkflowFragment newInstance() {
-        return newInstance(null);
+        return newInstance(null, FormType.CREATE, null);
     }
 
     /**
@@ -101,8 +103,37 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
      * @return this fragment.
      */
     public static CreateWorkflowFragment newInstance(@Nullable WorkflowListItem itemToEdit) {
+        return newInstance(itemToEdit, FormType.EDIT, null);
+    }
+
+    /**
+     * Creates a new instance of this fragment for the workflow list filters.
+     *
+     * @param formType this fragment was instantiated form the filters drawer
+     *
+     * @return this fragment.
+     */
+    public static CreateWorkflowFragment newInstance(@FormType int formType,
+                                                     OnValueSelectedListener onValueSelectedListener) {
+        return newInstance(null, formType, onValueSelectedListener);
+    }
+
+    /**
+     * Creates a new instance of this fragment.
+     *
+     * @param itemToEdit              the workflow that will be edited.
+     * @param formType                how this fragment should behave.
+     * @param onValueSelectedListener listener that will trigger when a value is selected.
+     *
+     * @return this fragment.
+     */
+    public static CreateWorkflowFragment newInstance(@Nullable WorkflowListItem itemToEdit,
+                                                     @FormType int formType,
+                                                     OnValueSelectedListener onValueSelectedListener) {
         CreateWorkflowFragment fragment = new CreateWorkflowFragment();
         fragment.mWorkflowListItem = itemToEdit;
+        fragment.mFormType = formType;
+        fragment.mOnValueSelectedListener = onValueSelectedListener;
         return fragment;
     }
 
@@ -149,6 +180,8 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
             Log.e(TAG, "Problems getting the client domain: " + e.getMessage());
         }
 
+        viewModel.setFormType(mFormType);
+
         setupTitle();
         setupSubmitButton();
         setOnClickListeners();
@@ -156,7 +189,8 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         setupPeopleInvolvedRecycler();
         subscribe();
 
-        viewModel.initForm(token, clientId, mWorkflowListItem, loggedUserId, permissionsString);
+        viewModel.initForm(token, clientId, mWorkflowListItem, loggedUserId,
+                permissionsString);
 
         return view;
     }
@@ -197,16 +231,28 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
                 .observe(getViewLifecycleOwner(), this::setAutocompleteSuggestions);
         viewModel.getObservableShowAutocompleteNoConnection()
                 .observe(getViewLifecycleOwner(), this::showAutocompleteNoConnectionView);
+        viewModel.getObservableShowDynamicFiltersNoType()
+                .observe(getViewLifecycleOwner(), this::showDynamicFiltersNoTypeView);
     }
 
     private void setupTitle() {
-        mBinding.tvTitle.setText(
-                mWorkflowListItem == null ? R.string.create_workflow : R.string.edit_workflow);
+        int titleRes = viewModel.getFragmentTitle();
+        if (titleRes == 0) {
+            //hide the title if it's not set
+            mBinding.tvTitle.setVisibility(View.GONE);
+            mBinding.separator.setVisibility(View.GONE);
+            return;
+        }
+
+        mBinding.tvTitle.setText(titleRes);
     }
 
     private void setupSubmitButton() {
-        mBinding.btnCreate.setText(
-                mWorkflowListItem == null ? R.string.create_workflow : R.string.edit_workflow);
+        int stringRes = viewModel.getSubmitButtonText();
+        if (stringRes == 0){
+            return;
+        }
+        mBinding.btnCreate.setText(stringRes);
     }
 
     /**
@@ -234,6 +280,8 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     private void setupFormRecycler() {
         mAdapter = new FormItemsAdapter(getContext(), getChildFragmentManager(), new ArrayList<>(),
                 this);
+        mAdapter.setShowRequiredIndicator(!viewModel.isFilterFragment());
+        mAdapter.setOnValueSelectedListener(mOnValueSelectedListener);
         mBinding.rvFields.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.rvFields.setAdapter(mAdapter);
         mBinding.rvFields.setNestedScrollingEnabled(false);
@@ -242,10 +290,22 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     private void setOnClickListeners() {
         mBinding.btnCreate.setOnClickListener(v -> {
             mAdapter.retrieveValuesFromViews(mBinding.rvFields);
+
+            if (viewModel.isFilterFragment()) {
+                sendItemsToFilter();
+                return;
+            }
+
             viewModel.handleCreateWorkflowAction();
         });
 
         mBinding.btnBack.setOnClickListener(v -> onBackPressed());
+    }
+
+    private void sendItemsToFilter() {
+        if (mOnValueSelectedListener == null) return;
+
+        mOnValueSelectedListener.onValuesSelected(viewModel.getFormItemsToFilter());
     }
 
     @Override
@@ -748,6 +808,15 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         mBinding.rvFields.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
+    @UiThread
+    private void showDynamicFiltersNoTypeView(boolean show) {
+        mBinding.tvDynamicFiltersNoType.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    public void generateFieldsByWorkflowType(int workflowTypeId){
+        viewModel.generateFieldsByType(workflowTypeId);
+    }
+
     private void hideSoftInputKeyboard() {
         // Check if no view has focus:
         View view = getActivity().getCurrentFocus();
@@ -756,5 +825,10 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
                     .getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+    public interface OnValueSelectedListener {
+
+        void onValuesSelected(List<BaseFormItem> baseFormItems);
     }
 }

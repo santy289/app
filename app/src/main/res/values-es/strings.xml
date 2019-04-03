@@ -80,10 +80,11 @@
     <string name="description">Descripción</string>
     <string name="lastname">Apellido</string>
     <string name="creator">Autor</string>
-    <string name="type">Seleccione un tipo de workflow</string>
+    <string name="create_workflow_form_workflow_type">Seleccione un tipo de workflow</string>
     <string name="created_at">Creado En</string>
     <string name="condition">Condición</string>
     <string name="country">País</string>
+    <string name="type">Tipo</string>
     <string name="workflow_type">Tipo de Workflow</string>
     <string name="owner">Dueño</string>
     <string name="actual_state">Estado Actual</string>
@@ -92,6 +93,8 @@
     <string name="active">Activo</string>
     <string name="inactive">Inactivo</string>
     <string name="filters">Filtros</string>
+    <string name="apply_dynamic_filters">Aplicar Filtros Dinámicos</string>
+    <string name="apply_filters">Aplicar Filtros</string>
     <string name="filters_counter">Filtros (%d)</string>
     <string name="my_workflows">Pendientes</string>
     <string name="sorting">Ordenar Por</string>
@@ -173,6 +176,7 @@
     <string name="my_pending_workflows_for_approval">Workflows Pendientes de mi Aprobación</string>
     <string name="date">Fecha</string>
     <string name="title">Título</string>
+    <string name="key">Código</string>
     <string name="author">Autor</string>
     <string name="days_open">Días abierto</string>
     <string name="pending_approval">Pendiente por Aprobación</string>
@@ -217,6 +221,7 @@
     <string name="no_category">Sin Categoría</string>
     <string name="base_filters">Estado Actual</string>
     <string name="status_filters">Estatus</string>
+    <string name="standard_filters">Filtros Estándares</string>
     <string name="all">Todos</string>
     <string name="on_time">A Tiempo</string>
     <string name="latest">Últimos</string>
@@ -261,6 +266,8 @@
     <string name="double_multiple_choice_form_item_select_both">Necesitas seleccionar ambos valores para añadir una opción.</string>
     <string name="approvers_involved">Aprobadores Involucrados</string>
     <string name="fragment_create_workflow_no_permissions">No tienes suficientes permisos para crear un workflow.</string>
+    <string name="fragment_create_workflow_dynamic_filters_no_type">Debes seleccionar un tipo de workflow para filtrar por campos dinámicos.</string>
+    <string name="fragment_create_workflow_dynamic_filters_no_fields">El tipo de workflow seleccionado no tiene filtros dinámicos disponibles.</string>
     <string name="workflow_list_no_selections">No se han seleccionado workflows.</string>
     <string name="workflow_list_delete_dialog_title">Eliminar Workflows</string>
     <string name="workflow_list_delete_dialog_msg">¿Está seguro que desea eliminar los workflows %s?</string>

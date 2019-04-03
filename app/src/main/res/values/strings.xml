@@ -79,10 +79,11 @@
     <string name="description">Description</string>
     <string name="lastname">Last Name</string>
     <string name="creator">Creator</string>
-    <string name="type">Please select a workflow type</string>
+    <string name="create_workflow_form_workflow_type">Please select a workflow type</string>
     <string name="created_at">Created At</string>
     <string name="condition">Condition</string>
     <string name="country">Country</string>
+    <string name="type">Type</string>
     <string name="workflow_type">Workflow Type</string>
     <string name="owner">Owner</string>
     <string name="actual_state">Actual State</string>
@@ -91,6 +92,8 @@
     <string name="active">Active</string>
     <string name="inactive">Inactive</string>
     <string name="filters">Filters</string>
+    <string name="apply_dynamic_filters">Apply Dynamic Filters</string>
+    <string name="apply_filters">Apply Filters</string>
     <string name="filters_counter">Filters (%d)</string>
     <string name="my_workflows">Pending Workflows</string>
     <string name="sorting">Sort By</string>
@@ -172,6 +175,7 @@
     <string name="my_pending_workflows_for_approval">Pending Workflows for my Approval</string>
     <string name="date">Date</string>
     <string name="title">Title</string>
+    <string name="key">Key</string>
     <string name="author">Author</string>
     <string name="days_open">Days open</string>
     <string name="pending_approval">Pending for Approval</string>
@@ -218,6 +222,7 @@
     <string name="no_category">No Category</string>
     <string name="base_filters">Current Status</string>
     <string name="status_filters">Status</string>
+    <string name="standard_filters">Standard Filters</string>
     <string name="all">All</string>
     <string name="on_time">On Time</string>
     <string name="latest">Latest</string>
@@ -264,6 +269,8 @@
     <string name="double_multiple_choice_form_item_select_both">You need to select both values to add an option.</string>
     <string name="approvers_involved">Approvers Involved</string>
     <string name="fragment_create_workflow_no_permissions">You do not have permissions to create a workflow.</string>
+    <string name="fragment_create_workflow_dynamic_filters_no_type">You must select a workflow type in order to filter by the dynamic fields.</string>
+    <string name="fragment_create_workflow_dynamic_filters_no_fields">The selected workflow type does not have any dynamic filters available.</string>
     <string name="workflow_list_no_selections">You have not selected any workflows.</string>
     <string name="workflow_list_delete_dialog_title">Delete Workflows</string>
     <string name="workflow_list_delete_dialog_msg">Are you sure you want to delete the workflows %s?</string>

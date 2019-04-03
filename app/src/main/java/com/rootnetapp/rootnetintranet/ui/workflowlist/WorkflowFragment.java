@@ -371,10 +371,16 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .observe(this, this::handleMessageMainToggleSwitch);
         workflowViewModel.messageMainUpdateSortSelection
                 .observe(this, this::handleMessageMainUpdateSortSelection);
+        workflowViewModel.messageMainWorkflowTypeFilters
+                .observe(this, this::handleMessageMainWorkflowTypeFilters);
         workflowViewModel.messageMainBaseFilters
                 .observe(this, this::handleMessageMainBaseFilters);
         workflowViewModel.messageMainStatusFilters
                 .observe(this, this::handleMessageMainStatusFilters);
+        workflowViewModel.messageMainWorkflowTypeFilterSelectionToFilterList
+                .observe(this, this::handleMessageMainWorkflowTypeFilterSelected);
+        workflowViewModel.messageMainWorkflowTypeIdFilterSelectionToFilterList
+                .observe(this, this::handleMessageMainWorkflowTypeIdFilterSelected);
         workflowViewModel.messageMainBaseFilterSelectionToFilterList
                 .observe(this, this::handleMessageMainBaseFilterSelected);
         workflowViewModel.messageMainStatusFilterSelectionToFilterList
@@ -398,19 +404,35 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         mainViewModel.messageBackActionToWorkflowList.observe(this, this::handleBackAction);
         mainViewModel.messageOptionSelectedToWorkflowList
                 .observe(this, this::handleRightDrawerOptionSelectedClick);
+        mainViewModel.messageDynamicFilterSelectedToWorkflowList
+                .observe(this, this::handleRightDrawerDynamicFilterSelectedClick);
+        mainViewModel.messageDynamicFilterListSelectedToWorkflowList
+                .observe(this, this::handleRightDrawerDynamicFilterListSelectedClick);
         mainViewModel.messageInitSortByToWorkflowList.observe(this, this::handleInitSortBy);
         mainViewModel.messageRadioButtonClickedToWorkflowList
                 .observe(this, this::handleMessageRadioButtonClickedToWorkflowList);
         mainViewModel.messageSortSwitchActionToWorkflowList
                 .observe(this, this::handleMessageSortSwitchActionToWorkflowList);
+        mainViewModel.messageWorkflowTypeFilterClickedToWorkflowList
+                .observe(this, this::handleMessageWorkflowTypeFilterClicked);
         mainViewModel.messageBaseFiltersClickedToWorkflowList
                 .observe(this, this::handleMessageBaseFiltersClicked);
         mainViewModel.messageStatusFiltersClickedToWorkflowList
                 .observe(this, this::handleMessageStatusFiltersClicked);
+        mainViewModel.messageWorkflowTypeFilterPositionSelectedToWorkflowList
+                .observe(this, this::handleMessageWorkflowTypeFilterPositionSelected);
         mainViewModel.messageBaseFilterPositionSelectedToWorkflowList
                 .observe(this, this::handleMessageBaseFilterPositionSelected);
         mainViewModel.messageStatusFilterPositionSelectedToWorkflowList
                 .observe(this, this::handleMessageStatusFilterPositionSelected);
+    }
+
+    private void handleMessageMainWorkflowTypeFilterSelected(String label) {
+        mainViewModel.receiveMessageWorkflowTypeFilterSelectedToListUi(label);
+    }
+
+    private void handleMessageMainWorkflowTypeIdFilterSelected(Integer workflowTypeId) {
+        mainViewModel.receiveMessageWorkflowTypeIdFilterSelectedToListUi(workflowTypeId);
     }
 
     private void handleMessageMainBaseFilterSelected(Integer resLabel) {
@@ -421,6 +443,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         mainViewModel.receiveMessageStatusFilterSelectedToListUi(resLabel);
     }
 
+    private void handleMessageWorkflowTypeFilterPositionSelected(Integer position) {
+        workflowViewModel.handleWorkflowTypeFieldPositionSelected(position, this);
+    }
+
     private void handleMessageBaseFilterPositionSelected(Integer position) {
         workflowViewModel.handleBaseFieldPositionSelected(position, this);
     }
@@ -429,12 +455,20 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.handleStatusFieldPositionSelected(position, this);
     }
 
+    private void handleMessageMainWorkflowTypeFilters(OptionsList optionsList) {
+        mainViewModel.createDrawerWorkflowTypeFiltersOptionListAdapter(optionsList);
+    }
+
     private void handleMessageMainBaseFilters(OptionsList optionsList) {
         mainViewModel.createDrawerBaseFiltersOptionListAdapter(optionsList);
     }
 
     private void handleMessageMainStatusFilters(OptionsList optionsList) {
         mainViewModel.createDrawerStatusFiltersOptionListAdapter(optionsList);
+    }
+
+    private void handleMessageWorkflowTypeFilterClicked(Boolean clicked) {
+        workflowViewModel.handleWorkflowTypeFieldClick();
     }
 
     private void handleMessageBaseFiltersClicked(Boolean clicked) {
@@ -478,6 +512,14 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     private void handleRightDrawerOptionSelectedClick(int position) {
         workflowViewModel.handleOptionSelected(position, WorkflowFragment.this);
+    }
+
+    private void handleRightDrawerDynamicFilterSelectedClick(DynamicFilter dynamicFilter) {
+        workflowViewModel.handleDynamicFilterSelected(dynamicFilter, WorkflowFragment.this);
+    }
+
+    private void handleRightDrawerDynamicFilterListSelectedClick(List<DynamicFilter> dynamicFilters) {
+        workflowViewModel.handleDynamicFilterListSelected(dynamicFilters, WorkflowFragment.this);
     }
 
     private void handleRightDrawerFilterClick(int position) {

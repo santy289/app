@@ -1,5 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist;
 
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -10,6 +11,7 @@ import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +44,9 @@ public class FilterSettings {
     private List<WorkflowTypeMenu> workflowTypeOptionsList;
     private List<WorkflowTypeMenu> baseFilterOptionsList;
     private List<WorkflowTypeMenu> statusFilterOptionList;
+    /**
+     * Both standard and dynamic filters.
+     */
     private Map<String, Object> dynamicFilters;
     private int workflowTypeFilterIndexSelected;
     private int baseFilterIndexSelected;
@@ -146,7 +151,28 @@ public class FilterSettings {
         this.searchText = searchText;
     }
 
+    /**
+     * Retrieve the active standard and dynamic filters. Remove those filters that do not have a
+     * value set.
+     *
+     * @return active standard and dynamic filters.
+     */
     public Map<String, Object> getDynamicFilters() {
+        if (dynamicFilters == null) return null;
+
+        //remove the filters that do not have a value set
+        Iterator<String> iterator = dynamicFilters.keySet().iterator();
+        while (iterator.hasNext()) {
+            String key = iterator.next();
+            Object value = dynamicFilters.get(key);
+            if (value == null
+                    || (value instanceof String && TextUtils.isEmpty((String) value))
+                    || (value instanceof Integer && (Integer) value == 0)
+                    || (value instanceof List && ((List) value).isEmpty())) {
+                iterator.remove();
+            }
+        }
+
         return dynamicFilters;
     }
 
@@ -456,8 +482,8 @@ public class FilterSettings {
     }
 
     /**
-     * FilterSettings updates workflowTypeFilterIndexSelected, and clears any other items selected. Updates
-     * workflowTypeOptionsList and marks as selected on the position given.
+     * FilterSettings updates workflowTypeFilterIndexSelected, and clears any other items selected.
+     * Updates workflowTypeOptionsList and marks as selected on the position given.
      *
      * @param position Index position to mark as selected in workflowTypeOptionsList.
      *

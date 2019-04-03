@@ -14,10 +14,8 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.AutocompleteFor
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseOption;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
-import com.rootnetapp.rootnetintranet.models.createworkflow.form.CurrencyFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
-import com.rootnetapp.rootnetintranet.models.createworkflow.form.PhoneFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
@@ -400,9 +398,10 @@ public class MainActivityViewModel extends ViewModel {
 
         if (baseFormItem instanceof SingleChoiceFormItem) {
             Option value = ((SingleChoiceFormItem) baseFormItem).getValue();
-            if (value == null) return null;
+            Integer idValue = null;
+            if (value != null) idValue = value.getId();
 
-            dynamicFilter = new DynamicFilter(key, value.getId());
+            dynamicFilter = new DynamicFilter(key, idValue);
 
         } else if (baseFormItem instanceof TextInputFormItem) {
             dynamicFilter = new DynamicFilter(key, ((TextInputFormItem) baseFormItem).getValue());
@@ -416,9 +415,6 @@ public class MainActivityViewModel extends ViewModel {
         } else if (baseFormItem instanceof BooleanFormItem) {
             dynamicFilter = new DynamicFilter(key, ((BooleanFormItem) baseFormItem).getValue());
 
-        } else if (baseFormItem instanceof CurrencyFormItem) {
-            dynamicFilter = new DynamicFilter(key, ((CurrencyFormItem) baseFormItem).getValue());
-
         } else if (baseFormItem instanceof MultipleChoiceFormItem) {
             List<BaseOption> values = ((MultipleChoiceFormItem) baseFormItem).getValues();
 
@@ -429,9 +425,6 @@ public class MainActivityViewModel extends ViewModel {
                     .collect(Collectors.toList());
 
             dynamicFilter = new DynamicFilter(key, intValues);
-
-        } else if (baseFormItem instanceof PhoneFormItem) {
-            dynamicFilter = new DynamicFilter(key, ((PhoneFormItem) baseFormItem).getValue());
 
         }
 

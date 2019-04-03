@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import androidx.collection.ArrayMap;
@@ -1139,35 +1140,18 @@ public class FormSettings {
     }
 
     protected List<BaseFormItem> getFormItemsToFilter() {
-        List<BaseFormItem> formItemsToPost = new ArrayList<>(getFormItems());
-        ArrayList<Integer> toRemove = new ArrayList<>();
+        List<BaseFormItem> formItemsToFilter = new ArrayList<>(getFormItems());
 
-        for (int i = 0; i < formItemsToPost.size(); i++) {
-            BaseFormItem formItem = formItemsToPost.get(i);
+        Iterator<BaseFormItem> iterator = formItemsToFilter.iterator();
+        while (iterator.hasNext()){
+            BaseFormItem formItem = iterator.next();
             int tag = formItem.getTag();
             if (tag == CreateWorkflowViewModel.TAG_WORKFLOW_TYPE) {
-                toRemove.add(tag);
-                continue;
-            }
-
-            if (TextUtils.isEmpty(formItem.getStringValue())) {
-                toRemove.add(tag);
-            }
-        }
-        int removeTag;
-        int id;
-        for (int i = 0; i < toRemove.size(); i++) {
-            removeTag = toRemove.get(i);
-            for (int j = 0; j < formItemsToPost.size(); j++) {
-                id = formItemsToPost.get(j).getTag();
-                if (removeTag == id) {
-                    formItemsToPost.remove(j);
-                    break;
-                }
+                iterator.remove();
             }
         }
 
-        return formItemsToPost;
+        return formItemsToFilter;
     }
 
     protected void clearFormItems() {

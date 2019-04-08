@@ -799,8 +799,11 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                             }
 
                             // the user has selected a valid option
-                            Option selectedOption = spinnerAdapter.getItem(position);
-                            selectionsAdapter.addItem(selectedOption);
+                            if (spinnerAdapter.getCount() > position) {
+                                Option selectedOption = spinnerAdapter.getItem(position);
+                                selectionsAdapter.addItem(selectedOption);
+                            }
+
                             //clear spinner selection
                             holder.getBinding().spInput.setSelection(0, false);
                         }

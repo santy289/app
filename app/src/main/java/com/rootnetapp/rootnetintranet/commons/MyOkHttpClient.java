@@ -1,10 +1,10 @@
 package com.rootnetapp.rootnetintranet.commons;
 
+import com.rootnetapp.rootnetintranet.BuildConfig;
+
 import java.security.cert.CertificateException;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -43,23 +43,16 @@ public class MyOkHttpClient {
 
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
             builder.sslSocketFactory(sslSocketFactory, (X509TrustManager)trustAllCerts[0]);
-            builder.hostnameVerifier(new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-                    return true;
-                }
-            });
+            builder.hostnameVerifier((hostname, session) -> true);
 
-            //for debug, logs every request with the tag OkHttp
-            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+            if (BuildConfig.DEBUG) {
+                //for debug, logs every request with the tag OkHttp
+                HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+                logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+                builder.addInterceptor(logging);
+            }
 
-            OkHttpClient client = RetrofitUrlManager.getInstance().with(builder)
-                    .addInterceptor(logging)
-                    .build();
-
-            //OkHttpClient okHttpClient = builder.build();
-            return client;
+            return RetrofitUrlManager.getInstance().with(builder).build();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

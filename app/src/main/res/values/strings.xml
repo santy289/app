@@ -222,6 +222,7 @@
     <string name="no_category">No Category</string>
     <string name="base_filters">Current Status</string>
     <string name="status_filters">Status</string>
+    <string name="system_status_filters">System Status</string>
     <string name="standard_filters">Standard Filters</string>
     <string name="all">All</string>
     <string name="on_time">On Time</string>

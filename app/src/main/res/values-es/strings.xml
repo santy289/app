@@ -221,6 +221,7 @@
     <string name="no_category">Sin Categoría</string>
     <string name="base_filters">Estado Actual</string>
     <string name="status_filters">Estatus</string>
+    <string name="system_status_filters">Estatus del Sistema</string>
     <string name="standard_filters">Filtros Estándares</string>
     <string name="all">Todos</string>
     <string name="on_time">A Tiempo</string>

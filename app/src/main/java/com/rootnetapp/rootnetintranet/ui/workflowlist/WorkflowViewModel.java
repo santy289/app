@@ -26,6 +26,7 @@ import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +48,7 @@ import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WOR
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_DELETE;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_OPEN_ALL;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_VIEW;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowViewModel.TAG_STANDARD_ACTIVE;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.CHECK;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.INDEX_CHECK;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.INDEX_TYPE;
@@ -103,10 +105,12 @@ public class WorkflowViewModel extends ViewModel {
     protected MutableLiveData<OptionsList> messageMainWorkflowTypeFilters;
     protected MutableLiveData<OptionsList> messageMainBaseFilters;
     protected MutableLiveData<OptionsList> messageMainStatusFilters;
+    protected MutableLiveData<OptionsList> messageMainSystemStatusFilters;
     protected MutableLiveData<String> messageMainWorkflowTypeFilterSelectionToFilterList;
     protected MutableLiveData<Integer> messageMainWorkflowTypeIdFilterSelectionToFilterList;
     protected MutableLiveData<Integer> messageMainBaseFilterSelectionToFilterList;
     protected MutableLiveData<Integer> messageMainStatusFilterSelectionToFilterList;
+    protected MutableLiveData<Integer> messageMainSystemStatusFilterSelectionToFilterList;
 
     // MOVED TO FILTERSETTINGS
     //protected List<WorkflowTypeMenu> rightDrawerFilters;
@@ -132,9 +136,12 @@ public class WorkflowViewModel extends ViewModel {
     private Boolean isSwipe;
     private boolean isShowOpenActionMenu;
     private boolean isShowCloseActionMenu;
+    private boolean isShowEnableActionMenu;
+    private boolean isShowDisableActionMenu;
     private boolean isSortFilterApplied;
     private boolean isBaseFilterApplied;
     private boolean isStatusFilterApplied;
+    private boolean isSystemStatusFilterApplied;
     private boolean isWorkflowTypeFilterApplied;
 
     public WorkflowViewModel(WorkflowRepository workflowRepository) {
@@ -154,14 +161,20 @@ public class WorkflowViewModel extends ViewModel {
         messageMainWorkflowTypeFilters = new MutableLiveData<>();
         messageMainBaseFilters = new MutableLiveData<>();
         messageMainStatusFilters = new MutableLiveData<>();
+        messageMainSystemStatusFilters = new MutableLiveData<>();
         messageMainWorkflowTypeFilterSelectionToFilterList = new MutableLiveData<>();
         messageMainWorkflowTypeIdFilterSelectionToFilterList = new MutableLiveData<>();
         messageMainBaseFilterSelectionToFilterList = new MutableLiveData<>();
         messageMainStatusFilterSelectionToFilterList = new MutableLiveData<>();
+        messageMainSystemStatusFilterSelectionToFilterList = new MutableLiveData<>();
 
         //Open filter is selected by default
         isShowOpenActionMenu = false;
         isShowCloseActionMenu = true;
+
+        //Active filter is selected by default
+        isShowEnableActionMenu = false;
+        isShowDisableActionMenu = true;
     }
 
     @Override
@@ -219,6 +232,14 @@ public class WorkflowViewModel extends ViewModel {
         return isShowCloseActionMenu;
     }
 
+    protected boolean isShowEnableActionMenu() {
+        return isShowEnableActionMenu;
+    }
+
+    protected boolean isShowDisableActionMenu() {
+        return isShowDisableActionMenu;
+    }
+
     private void getWorkflowTypesFromDb() {
         Disposable disposable = Observable.fromCallable(() -> {
             workflowTypeForMenu = this.workflowRepository.getWorkflowTypesForMenu();
@@ -260,6 +281,7 @@ public class WorkflowViewModel extends ViewModel {
         isSortFilterApplied = false;
         isBaseFilterApplied = false;
         isStatusFilterApplied = false;
+        isSystemStatusFilterApplied = false;
         isWorkflowTypeFilterApplied = false;
         sendFiltersCounterToUi();
     }
@@ -270,17 +292,7 @@ public class WorkflowViewModel extends ViewModel {
         if (isSortFilterApplied) count++;
         if (isBaseFilterApplied) count++;
         if (isStatusFilterApplied) count++;
-        if (isWorkflowTypeFilterApplied) count++;
-
-        filtersCounterLiveData.setValue(count);
-    }
-
-    private void sendFiltersCounterToUi(int baseCount) {
-        int count = baseCount;
-
-        if (isSortFilterApplied) count++;
-        if (isBaseFilterApplied) count++;
-        if (isStatusFilterApplied) count++;
+        if (isSystemStatusFilterApplied) count++;
         if (isWorkflowTypeFilterApplied) count++;
 
         filtersCounterLiveData.setValue(count);
@@ -311,6 +323,7 @@ public class WorkflowViewModel extends ViewModel {
         initRightDrawerFilterList();
         initBaseFilters();
         initStatusFilters();
+        initSystemStatusFilters();
         initSortBy();
     }
 
@@ -444,6 +457,50 @@ public class WorkflowViewModel extends ViewModel {
         statusFilterOptionList.add(menu);
 
         filterSettings.setStatusFilterOptionList(statusFilterOptionList);
+    }
+
+    public static final int SYSTEM_STATUS_FILTER_TYPE = -110;
+    public static final int SYSTEM_STATUS_FILTER_ALL_ID = 111;
+    public static final int SYSTEM_STATUS_FILTER_ACTIVE_ID = 112;
+    public static final int SYSTEM_STATUS_FILTER_INACTIVE__ID = 113;
+
+    /**
+     * Creates a new list of system status filter options only if FilterSettings.systemStatusFilterOptionList
+     * is empty.
+     */
+    private void initSystemStatusFilters() {
+        if (filterSettings.getSizeSystemStatusFilterOptionList() > 0) {
+            // It already exists.
+            return;
+        }
+
+        List<WorkflowTypeMenu> systemStatusFilterOptionList = new ArrayList<>();
+        WorkflowTypeMenu menu = new WorkflowTypeMenu(
+                SYSTEM_STATUS_FILTER_ALL_ID,
+                R.string.all,
+                WorkflowTypeSpinnerAdapter.TYPE,
+                SYSTEM_STATUS_FILTER_TYPE
+        );
+        systemStatusFilterOptionList.add(menu);
+
+        menu = new WorkflowTypeMenu(
+                SYSTEM_STATUS_FILTER_ACTIVE_ID,
+                R.string.active,
+                WorkflowTypeSpinnerAdapter.TYPE,
+                SYSTEM_STATUS_FILTER_TYPE
+        );
+        menu.setSelected(true);
+        systemStatusFilterOptionList.add(menu);
+
+        menu = new WorkflowTypeMenu(
+                SYSTEM_STATUS_FILTER_INACTIVE__ID,
+                R.string.inactive,
+                WorkflowTypeSpinnerAdapter.TYPE,
+                SYSTEM_STATUS_FILTER_TYPE
+        );
+        systemStatusFilterOptionList.add(menu);
+
+        filterSettings.setSystemStatusFilterOptionList(systemStatusFilterOptionList);
     }
 
     private void getCategories(int id) {
@@ -673,7 +730,40 @@ public class WorkflowViewModel extends ViewModel {
                 break;
         }
 
-        Map<String, Object> dynamicFiltersMap = filterSettings.getDynamicFilters();
+        Boolean systemStatusFilterValue = null;
+        String systemStatusFilterKey = String.valueOf(TAG_STANDARD_ACTIVE);
+        switch (filterSettings.getSystemStatusFilterSelectedId()) {
+            case SYSTEM_STATUS_FILTER_ALL_ID:
+                systemStatusFilterValue = null;
+                filterSettings.setCheckedStatus(true);
+                isShowEnableActionMenu = true;
+                isShowDisableActionMenu = true;
+                isSystemStatusFilterApplied = true;
+                break;
+            case SYSTEM_STATUS_FILTER_ACTIVE_ID:
+                systemStatusFilterValue = true;
+                filterSettings.setCheckedStatus(true);
+                isShowEnableActionMenu = false;
+                isShowDisableActionMenu = true;
+                isSystemStatusFilterApplied = false;
+                break;
+            case SYSTEM_STATUS_FILTER_INACTIVE__ID:
+                systemStatusFilterValue = false;
+                filterSettings.setCheckedStatus(false);
+                isShowEnableActionMenu = true;
+                isShowDisableActionMenu = false;
+                isSystemStatusFilterApplied = true;
+                break;
+        }
+
+        Map<String, Object> dynamicFiltersMap = new HashMap<>(filterSettings.getDynamicFilters());
+
+        if (systemStatusFilterValue != null) {
+            dynamicFiltersMap.put(systemStatusFilterKey, systemStatusFilterValue);
+        } else {
+            dynamicFiltersMap.remove(systemStatusFilterKey);
+        }
+
         if (!dynamicFiltersMap.isEmpty()) {
             Moshi moshi = new Moshi.Builder().build();
             JsonAdapter<Map<String, Object>> jsonAdapter = moshi
@@ -702,6 +792,11 @@ public class WorkflowViewModel extends ViewModel {
     protected void handleStatusFieldClick() {
         OptionsList optionsList = filterSettings.handleOptionListForStatusFilters();
         messageMainStatusFilters.setValue(optionsList);
+    }
+
+    protected void handleSystemStatusFieldClick() {
+        OptionsList optionsList = filterSettings.handleOptionListForSystemStatusFilters();
+        messageMainSystemStatusFilters.setValue(optionsList);
     }
 
     /**
@@ -760,7 +855,7 @@ public class WorkflowViewModel extends ViewModel {
      * FilterSettings with the latest position selected and make a network call to update the
      * database with the selected base filter.
      *
-     * @param position       Selection done by the user on the list of base filters.
+     * @param position       Selection done by the user on the list of status filters.
      * @param lifecycleOwner Fragment has an observer that we need to remove and use a new one.
      */
     protected void handleStatusFieldPositionSelected(int position, LifecycleOwner lifecycleOwner) {
@@ -775,6 +870,33 @@ public class WorkflowViewModel extends ViewModel {
             messageMainStatusFilterSelectionToFilterList.setValue(R.string.open);
         } else {
             messageMainStatusFilterSelectionToFilterList.setValue(filterSelected.getResLabel());
+        }
+        invalidateDrawerOptionsList.setValue(true);
+        loadWorkflowsByFilters(filterSettings, lifecycleOwner);
+    }
+
+    /**
+     * Handles a position tapped on the List of SystemStatusFilters. This function will update
+     * FilterSettings with the latest position selected and make a network call to update the
+     * database with the selected base filter.
+     *
+     * @param position       Selection done by the user on the list of system status filters.
+     * @param lifecycleOwner Fragment has an observer that we need to remove and use a new one.
+     */
+    protected void handleSystemStatusFieldPositionSelected(int position,
+                                                           LifecycleOwner lifecycleOwner) {
+        showLoading.setValue(true);
+        WorkflowTypeMenu filterSelected;
+        filterSelected = filterSettings.handleSystemStatusFilterPositionSelected(position);
+        int filterId = filterSelected.getId();
+        if (!filterSelected.isSelected()) {
+            // Unselected, no items selected. Filter by Active.
+            filterSettings.resetSystemStatusFilterSelectionToActive();
+            filterId = STATUS_FILTER_OPEN_ID;
+            messageMainSystemStatusFilterSelectionToFilterList.setValue(R.string.active);
+        } else {
+            messageMainSystemStatusFilterSelectionToFilterList
+                    .setValue(filterSelected.getResLabel());
         }
         invalidateDrawerOptionsList.setValue(true);
         loadWorkflowsByFilters(filterSettings, lifecycleOwner);

@@ -76,10 +76,12 @@ public class MainActivityViewModel extends ViewModel {
     protected MutableLiveData<OptionsList> receiveMessageCreateWorkflowTypeFiltersAdapter;
     protected MutableLiveData<OptionsList> receiveMessageCreateBaseFiltersAdapter;
     protected MutableLiveData<OptionsList> receiveMessageCreateStatusFiltersAdapter;
+    protected MutableLiveData<OptionsList> receiveMessageCreateSystemStatusFiltersAdapter;
     protected MutableLiveData<Integer> receiveMessageWorkflowTypeIdFilterSelected;
     protected MutableLiveData<String> receiveMessageWorkflowTypeFilterSelected;
     protected MutableLiveData<Integer> receiveMessageBaseFilterSelected;
     protected MutableLiveData<Integer> receiveMessageStatusFilterSelected;
+    protected MutableLiveData<Integer> receiveMessageSystemStatusFilterSelected;
 
     // send message to WorkflowList
     public MutableLiveData<Integer> messageContainerToWorkflowList;
@@ -93,9 +95,11 @@ public class MainActivityViewModel extends ViewModel {
     public MutableLiveData<Boolean> messageBaseFiltersClickedToWorkflowList;
     public MutableLiveData<Boolean> messageWorkflowTypeFilterClickedToWorkflowList;
     public MutableLiveData<Boolean> messageStatusFiltersClickedToWorkflowList;
+    public MutableLiveData<Boolean> messageSystemStatusFiltersClickedToWorkflowList;
     public MutableLiveData<Integer> messageWorkflowTypeFilterPositionSelectedToWorkflowList;
     public MutableLiveData<Integer> messageBaseFilterPositionSelectedToWorkflowList;
     public MutableLiveData<Integer> messageStatusFilterPositionSelectedToWorkflowList;
+    public MutableLiveData<Integer> messageSystemStatusFilterPositionSelectedToWorkflowList;
     public MutableLiveData<Boolean> invalidateOptionsList;
 
     List<WorkflowTypeMenu> filtersList;
@@ -128,16 +132,20 @@ public class MainActivityViewModel extends ViewModel {
         this.messageBaseFiltersClickedToWorkflowList = new MutableLiveData<>();
         this.messageWorkflowTypeFilterClickedToWorkflowList = new MutableLiveData<>();
         this.messageStatusFiltersClickedToWorkflowList = new MutableLiveData<>();
+        this.messageSystemStatusFiltersClickedToWorkflowList = new MutableLiveData<>();
         this.receiveMessageCreateWorkflowTypeFiltersAdapter = new MutableLiveData<>();
         this.receiveMessageCreateBaseFiltersAdapter = new MutableLiveData<>();
         this.receiveMessageCreateStatusFiltersAdapter = new MutableLiveData<>();
+        this.receiveMessageCreateSystemStatusFiltersAdapter = new MutableLiveData<>();
         this.messageWorkflowTypeFilterPositionSelectedToWorkflowList = new MutableLiveData<>();
         this.messageBaseFilterPositionSelectedToWorkflowList = new MutableLiveData<>();
         this.messageStatusFilterPositionSelectedToWorkflowList = new MutableLiveData<>();
+        this.messageSystemStatusFilterPositionSelectedToWorkflowList = new MutableLiveData<>();
         this.receiveMessageWorkflowTypeIdFilterSelected = new MutableLiveData<>();
         this.receiveMessageWorkflowTypeFilterSelected = new MutableLiveData<>();
         this.receiveMessageBaseFilterSelected = new MutableLiveData<>();
         this.receiveMessageStatusFilterSelected = new MutableLiveData<>();
+        this.receiveMessageSystemStatusFilterSelected = new MutableLiveData<>();
         this.openRightDrawer = new MutableLiveData<>();
     }
 
@@ -214,6 +222,10 @@ public class MainActivityViewModel extends ViewModel {
         messageStatusFiltersClickedToWorkflowList.setValue(true);
     }
 
+    protected void sendSystemStatusFiltersClicked() {
+        messageSystemStatusFiltersClickedToWorkflowList.setValue(true);
+    }
+
     protected void sendWorkflowTypeFilterPositionClicked(int position) {
         messageWorkflowTypeFilterPositionSelectedToWorkflowList.setValue(position);
     }
@@ -224,6 +236,10 @@ public class MainActivityViewModel extends ViewModel {
 
     protected void sendStatusFilterPositionClicked(int position) {
         messageStatusFilterPositionSelectedToWorkflowList.setValue(position);
+    }
+
+    protected void sendSystemStatusFilterPositionClicked(int position) {
+        messageSystemStatusFilterPositionSelectedToWorkflowList.setValue(position);
     }
 
     protected void handleRadioButtonClicked(boolean isChecked, @IdRes int viewId) {
@@ -279,6 +295,10 @@ public class MainActivityViewModel extends ViewModel {
 
     public void receiveMessageStatusFilterSelectedToListUi(int resLabel) {
         receiveMessageStatusFilterSelected.setValue(resLabel);
+    }
+
+    public void receiveMessageSystemStatusFilterSelectedToListUi(int resLabel) {
+        receiveMessageSystemStatusFilterSelected.setValue(resLabel);
     }
 
     public void getUser(int id) {
@@ -346,6 +366,10 @@ public class MainActivityViewModel extends ViewModel {
 
     public void createDrawerStatusFiltersOptionListAdapter(OptionsList optionsList) {
         receiveMessageCreateStatusFiltersAdapter.setValue(optionsList);
+    }
+
+    public void createDrawerSystemStatusFiltersOptionListAdapter(OptionsList optionsList) {
+        receiveMessageCreateSystemStatusFiltersAdapter.setValue(optionsList);
     }
 
     private void onWorkflowSuccess(Workflow workflow) {

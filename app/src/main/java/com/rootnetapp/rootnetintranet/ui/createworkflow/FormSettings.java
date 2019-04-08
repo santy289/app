@@ -1063,6 +1063,7 @@ public class FormSettings {
     public final static String MACHINE_NAME_START_DATE = "wf_start_date";
     public final static String MACHINE_NAME_END_DATE = "wf_end_date";
     public final static String MACHINE_NAME_STATUS = "wf_status";
+    public final static String MACHINE_NAME_ACTIVE = "wf_active";
     public final static String MACHINE_NAME_CURRENT_STATUS = "wf_current_status";
     public final static String MACHINE_NAME_OWNER = "wf_owner";
     public final static String MACHINE_NAME_TYPE = "wf_type";

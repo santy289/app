@@ -198,7 +198,7 @@ public interface ApiInterface {
                                                            @QueryMap Map<String, Object> options);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows?status=true")
+    @GET("intranet/workflows?")
     Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(@Header("Authorization") String authorization,
                                                            @Query("limit") int limit,
                                                            @Query("page") int page,

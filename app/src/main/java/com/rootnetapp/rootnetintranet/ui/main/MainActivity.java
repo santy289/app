@@ -442,7 +442,7 @@ public class MainActivity extends AppCompatActivity
             showDynamicFiltersView(true);
         });
 
-        // Using the base field filter.
+        // Using the workflow type field filter.
         mainBinding.rightDrawer.rightDrawerWorkflowType.setOnClickListener(view -> {
             viewModel.sendWorkflowTypeFilterClicked();
         });
@@ -452,9 +452,14 @@ public class MainActivity extends AppCompatActivity
             viewModel.sendBaseFiltersClicked();
         });
 
-        // Using the base field filter.
+        // Using the status field filter.
         mainBinding.rightDrawer.rightDrawerStatusFilters.setOnClickListener(view -> {
             viewModel.sendStatusFiltersClicked();
+        });
+
+        // Using the system status field filter.
+        mainBinding.rightDrawer.rightDrawerSystemStatusFilters.setOnClickListener(view -> {
+            viewModel.sendSystemStatusFiltersClicked();
         });
 
         mainBinding.toolbarImage.setOnClickListener(
@@ -529,6 +534,7 @@ public class MainActivity extends AppCompatActivity
             hideWorkflowTypeFilters(true);
             hideBaseFilters(true);
             hideStatusFilters(true);
+            hideSystemStatusFilters(true);
             hideStandardFilters(true);
             hideDynamicFilters(true);
         } else {
@@ -538,6 +544,7 @@ public class MainActivity extends AppCompatActivity
             hideWorkflowTypeFilters(false);
             hideBaseFilters(false);
             hideStatusFilters(false);
+            hideSystemStatusFilters(false);
             hideStandardFilters(false);
             hideDynamicFilters(false);
         }
@@ -774,6 +781,7 @@ public class MainActivity extends AppCompatActivity
         hideWorkflowTypeFilters(false);
         hideBaseFilters(false);
         hideStatusFilters(false);
+        hideSystemStatusFilters(false);
         hideStandardFilters(false);
         hideDynamicFilters(false);
         LayoutInflater inflater = LayoutInflater.from(this);
@@ -845,7 +853,7 @@ public class MainActivity extends AppCompatActivity
 
     private void setRightDrawerStatusFilters(OptionsList optionsList) {
         if (optionsList == null) {
-            Log.d(TAG, "setRightDrawerOptions: Not able to set Drawer Options. OptionList is NULL");
+            Log.d(TAG, "setRightDrawerStatusFilters: Not able to set Drawer Options. OptionList is NULL");
             return;
         }
 
@@ -858,6 +866,25 @@ public class MainActivity extends AppCompatActivity
         AdapterView.OnItemClickListener listener = (parent, view, position, id) -> {
             // Clicks on Option List
             viewModel.sendStatusFilterPositionClicked(position);
+        };
+        setRightDrawerOptionsAdapter(optionsList.optionsList, listener);
+    }
+
+    private void setRightDrawerSystemStatusFilters(OptionsList optionsList) {
+        if (optionsList == null) {
+            Log.d(TAG, "setRightDrawerSystemStatusFilters: Not able to set Drawer Options. OptionList is NULL");
+            return;
+        }
+
+        if (TextUtils.isEmpty(optionsList.titleLabel)) {
+            prepareUIForOptionList(getString(optionsList.titleLabelRes));
+        } else {
+            prepareUIForOptionList(optionsList.titleLabel);
+        }
+
+        AdapterView.OnItemClickListener listener = (parent, view, position, id) -> {
+            // Clicks on Option List
+            viewModel.sendSystemStatusFilterPositionClicked(position);
         };
         setRightDrawerOptionsAdapter(optionsList.optionsList, listener);
     }
@@ -876,6 +903,7 @@ public class MainActivity extends AppCompatActivity
         hideWorkflowTypeFilters(true);
         hideBaseFilters(true);
         hideStatusFilters(true);
+        hideSystemStatusFilters(true);
         hideStandardFilters(true);
         hideDynamicFilters(true);
         mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
@@ -892,6 +920,10 @@ public class MainActivity extends AppCompatActivity
 
     private void handleUpdateStatusFilterSelectionUpdateWith(@StringRes int resLabel) {
         mainBinding.rightDrawer.rightDrawerStatusSubtitle.setText(resLabel);
+    }
+
+    private void handleUpdateSystemStatusFilterSelectionUpdateWith(@StringRes int resLabel) {
+        mainBinding.rightDrawer.rightDrawerSystemStatusSubtitle.setText(resLabel);
     }
 
     private void invalidateOptionList() {
@@ -941,6 +973,16 @@ public class MainActivity extends AppCompatActivity
         } else {
             mainBinding.rightDrawer.rightDrawerStatusFilters.setVisibility(View.VISIBLE);
             mainBinding.rightDrawer.separatorStatus.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void hideSystemStatusFilters(boolean hide) {
+        if (hide) {
+            mainBinding.rightDrawer.rightDrawerSystemStatusFilters.setVisibility(View.GONE);
+            mainBinding.rightDrawer.separatorSystemStatus.setVisibility(View.GONE);
+        } else {
+            mainBinding.rightDrawer.rightDrawerSystemStatusFilters.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.separatorSystemStatus.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1032,6 +1074,8 @@ public class MainActivity extends AppCompatActivity
                 .observe(this, this::setRightDrawerBaseFilters);
         viewModel.receiveMessageCreateStatusFiltersAdapter
                 .observe(this, this::setRightDrawerStatusFilters);
+        viewModel.receiveMessageCreateSystemStatusFiltersAdapter
+                .observe(this, this::setRightDrawerSystemStatusFilters);
         viewModel.receiveMessageWorkflowTypeIdFilterSelected
                 .observe(this, this::sendMessageGenerateWorkflowFieldsByType);
         viewModel.receiveMessageWorkflowTypeFilterSelected
@@ -1040,6 +1084,8 @@ public class MainActivity extends AppCompatActivity
                 .observe(this, this::handleUpdateBaseFilterSelectionUpdateWith);
         viewModel.receiveMessageStatusFilterSelected
                 .observe(this, this::handleUpdateStatusFilterSelectionUpdateWith);
+        viewModel.receiveMessageSystemStatusFilterSelected
+                .observe(this, this::handleUpdateSystemStatusFilterSelectionUpdateWith);
         viewModel.openRightDrawer.observe(this, this::openRightDrawer);
 
         viewModel.getObservableStartService().observe(this, result -> sendBroadcastWebsocket());

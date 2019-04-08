@@ -112,6 +112,7 @@ import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WOR
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_ALL;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_MY_OWN;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_OWN;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_ACTIVE;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_CURRENT_STATUS;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_DESCRIPTION;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_END_DATE;
@@ -125,7 +126,7 @@ import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_BUSINESS_OPPORTUNITY;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_CONTACT;
 
-class CreateWorkflowViewModel extends ViewModel {
+public class CreateWorkflowViewModel extends ViewModel {
 
     protected static final int REQUEST_FILE_TO_ATTACH = 27;
     protected static final int REQUEST_GEOLOCATION = 28;
@@ -147,6 +148,8 @@ class CreateWorkflowViewModel extends ViewModel {
     private static final int TAG_STANDARD_OWNER = 207;
     private static final int TAG_STANDARD_TYPE = 208;
     private static final int TOTAL_STANDARD_FIELDS = 7;
+
+    public static final int TAG_STANDARD_ACTIVE = 467;
 
     protected static final int FORM_BASE_INFO = 1;
     protected static final int FORM_PEOPLE_INVOLVED = 2;
@@ -644,17 +647,6 @@ class CreateWorkflowViewModel extends ViewModel {
         formSettings.getFormItems().add(dateFormItem);
         buildFieldCompleted();
 
-        booleanFormItem = new BooleanFormItem.Builder()
-                .setTitleRes(R.string.active)
-                .setTag(TAG_STANDARD_STATUS)
-                .setFieldId(TAG_STANDARD_STATUS)
-                .setEscaped(false)
-                .setMachineName(MACHINE_NAME_STATUS)
-                .setValue(true)
-                .build();
-        formSettings.getFormItems().add(booleanFormItem);
-        buildFieldCompleted();
-
         createStandardOwnerFormItem();
 
         mEnableSubmitButtonLiveData.setValue(true);
@@ -726,6 +718,12 @@ class CreateWorkflowViewModel extends ViewModel {
 
             //do not show the Status field
             if (machineName != null && machineName.equals(MACHINE_NAME_STATUS)) {
+                mFieldCount--;
+                continue;
+            }
+
+            //do not show the Active field
+            if (machineName != null && machineName.equals(MACHINE_NAME_ACTIVE)) {
                 mFieldCount--;
                 continue;
             }
@@ -1481,7 +1479,7 @@ class CreateWorkflowViewModel extends ViewModel {
         Date defaultValue = null;
         if (field.getFieldConfigObject().getMachineName() != null
                 && field.getFieldConfigObject().getMachineName().equals(MACHINE_NAME_START_DATE)
-                && !isFilterFragment()) {
+                && mFormType == FormType.CREATE) {
             defaultValue = Calendar.getInstance().getTime();
         }
 
@@ -2701,6 +2699,8 @@ class CreateWorkflowViewModel extends ViewModel {
      * This is called by the View when the user submits the form.
      */
     protected void handleCreateWorkflowAction() {
+        validatePeopleInvolvedFormItems();
+
         if (validateFormItems()) {
             // all of the items are valid.
             postWorkflow();

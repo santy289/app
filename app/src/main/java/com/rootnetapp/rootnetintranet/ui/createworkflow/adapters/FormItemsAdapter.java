@@ -759,7 +759,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         MultipleChoiceSelectionsAdapter selectionsAdapter = new MultipleChoiceSelectionsAdapter(
                 item.getValues());
         holder.getBinding().rvSelectedItems.setLayoutManager(
-                new LinearLayoutManager(mContext, RecyclerView.HORIZONTAL, false));
+                new LinearLayoutManager(mContext, RecyclerView.VERTICAL, false));
         holder.getBinding().rvSelectedItems.setAdapter(selectionsAdapter);
 
         //generates the options for the form item
@@ -1143,7 +1143,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         MultipleChoiceSelectionsAdapter selectionsAdapter = new MultipleChoiceSelectionsAdapter(
                 item.getValues());
         holder.getBinding().rvSelectedItems.setLayoutManager(
-                new LinearLayoutManager(mContext, RecyclerView.HORIZONTAL, false));
+                new LinearLayoutManager(mContext, RecyclerView.VERTICAL, false));
         holder.getBinding().rvSelectedItems.setAdapter(selectionsAdapter);
 
         //adds a hint to the spinners

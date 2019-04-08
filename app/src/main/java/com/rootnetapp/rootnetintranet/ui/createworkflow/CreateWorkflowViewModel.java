@@ -1481,7 +1481,7 @@ class CreateWorkflowViewModel extends ViewModel {
         Date defaultValue = null;
         if (field.getFieldConfigObject().getMachineName() != null
                 && field.getFieldConfigObject().getMachineName().equals(MACHINE_NAME_START_DATE)
-                && !isFilterFragment()) {
+                && mFormType == FormType.CREATE) {
             defaultValue = Calendar.getInstance().getTime();
         }
 

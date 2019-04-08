@@ -112,6 +112,7 @@ import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WOR
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_ALL;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_MY_OWN;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_OWN;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_ACTIVE;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_CURRENT_STATUS;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_DESCRIPTION;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_END_DATE;
@@ -726,6 +727,12 @@ class CreateWorkflowViewModel extends ViewModel {
 
             //do not show the Status field
             if (machineName != null && machineName.equals(MACHINE_NAME_STATUS)) {
+                mFieldCount--;
+                continue;
+            }
+
+            //do not show the Active field
+            if (machineName != null && machineName.equals(MACHINE_NAME_ACTIVE)) {
                 mFieldCount--;
                 continue;
             }

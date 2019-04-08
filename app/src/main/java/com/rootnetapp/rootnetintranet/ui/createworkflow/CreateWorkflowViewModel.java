@@ -126,7 +126,7 @@ import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_BUSINESS_OPPORTUNITY;
 import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.TYPE_CONTACT;
 
-class CreateWorkflowViewModel extends ViewModel {
+public class CreateWorkflowViewModel extends ViewModel {
 
     protected static final int REQUEST_FILE_TO_ATTACH = 27;
     protected static final int REQUEST_GEOLOCATION = 28;
@@ -148,6 +148,8 @@ class CreateWorkflowViewModel extends ViewModel {
     private static final int TAG_STANDARD_OWNER = 207;
     private static final int TAG_STANDARD_TYPE = 208;
     private static final int TOTAL_STANDARD_FIELDS = 7;
+
+    public static final int TAG_STANDARD_ACTIVE = 467;
 
     protected static final int FORM_BASE_INFO = 1;
     protected static final int FORM_PEOPLE_INVOLVED = 2;
@@ -643,17 +645,6 @@ class CreateWorkflowViewModel extends ViewModel {
                 .setMachineName(MACHINE_NAME_END_DATE)
                 .build();
         formSettings.getFormItems().add(dateFormItem);
-        buildFieldCompleted();
-
-        booleanFormItem = new BooleanFormItem.Builder()
-                .setTitleRes(R.string.active)
-                .setTag(TAG_STANDARD_STATUS)
-                .setFieldId(TAG_STANDARD_STATUS)
-                .setEscaped(false)
-                .setMachineName(MACHINE_NAME_STATUS)
-                .setValue(true)
-                .build();
-        formSettings.getFormItems().add(booleanFormItem);
         buildFieldCompleted();
 
         createStandardOwnerFormItem();

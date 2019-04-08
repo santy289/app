@@ -377,6 +377,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .observe(this, this::handleMessageMainBaseFilters);
         workflowViewModel.messageMainStatusFilters
                 .observe(this, this::handleMessageMainStatusFilters);
+        workflowViewModel.messageMainSystemStatusFilters
+                .observe(this, this::handleMessageMainSystemStatusFilters);
         workflowViewModel.messageMainWorkflowTypeFilterSelectionToFilterList
                 .observe(this, this::handleMessageMainWorkflowTypeFilterSelected);
         workflowViewModel.messageMainWorkflowTypeIdFilterSelectionToFilterList
@@ -385,6 +387,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .observe(this, this::handleMessageMainBaseFilterSelected);
         workflowViewModel.messageMainStatusFilterSelectionToFilterList
                 .observe(this, this::handleMessageMainStatusFilterSelected);
+        workflowViewModel.messageMainSystemStatusFilterSelectionToFilterList
+                .observe(this, this::handleMessageMainSystemStatusFilterSelected);
         workflowViewModel.getObservableShowAddButton()
                 .observe(this, this::showAddButton);
         workflowViewModel.getObservableShowViewWorkflowButton()
@@ -419,12 +423,16 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .observe(this, this::handleMessageBaseFiltersClicked);
         mainViewModel.messageStatusFiltersClickedToWorkflowList
                 .observe(this, this::handleMessageStatusFiltersClicked);
+        mainViewModel.messageSystemStatusFiltersClickedToWorkflowList
+                .observe(this, this::handleMessageSystemStatusFiltersClicked);
         mainViewModel.messageWorkflowTypeFilterPositionSelectedToWorkflowList
                 .observe(this, this::handleMessageWorkflowTypeFilterPositionSelected);
         mainViewModel.messageBaseFilterPositionSelectedToWorkflowList
                 .observe(this, this::handleMessageBaseFilterPositionSelected);
         mainViewModel.messageStatusFilterPositionSelectedToWorkflowList
                 .observe(this, this::handleMessageStatusFilterPositionSelected);
+        mainViewModel.messageSystemStatusFilterPositionSelectedToWorkflowList
+                .observe(this, this::handleMessageSystemStatusFilterPositionSelected);
     }
 
     private void handleMessageMainWorkflowTypeFilterSelected(String label) {
@@ -443,6 +451,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         mainViewModel.receiveMessageStatusFilterSelectedToListUi(resLabel);
     }
 
+    private void handleMessageMainSystemStatusFilterSelected(Integer resLabel) {
+        mainViewModel.receiveMessageSystemStatusFilterSelectedToListUi(resLabel);
+    }
+
     private void handleMessageWorkflowTypeFilterPositionSelected(Integer position) {
         workflowViewModel.handleWorkflowTypeFieldPositionSelected(position, this);
     }
@@ -453,6 +465,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     private void handleMessageStatusFilterPositionSelected(Integer position) {
         workflowViewModel.handleStatusFieldPositionSelected(position, this);
+    }
+
+    private void handleMessageSystemStatusFilterPositionSelected(Integer position) {
+        workflowViewModel.handleSystemStatusFieldPositionSelected(position, this);
     }
 
     private void handleMessageMainWorkflowTypeFilters(OptionsList optionsList) {
@@ -467,6 +483,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         mainViewModel.createDrawerStatusFiltersOptionListAdapter(optionsList);
     }
 
+    private void handleMessageMainSystemStatusFilters(OptionsList optionsList) {
+        mainViewModel.createDrawerSystemStatusFiltersOptionListAdapter(optionsList);
+    }
+
     private void handleMessageWorkflowTypeFilterClicked(Boolean clicked) {
         workflowViewModel.handleWorkflowTypeFieldClick();
     }
@@ -477,6 +497,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     private void handleMessageStatusFiltersClicked(Boolean clicked) {
         workflowViewModel.handleStatusFieldClick();
+    }
+
+    private void handleMessageSystemStatusFiltersClicked(Boolean clicked) {
+        workflowViewModel.handleSystemStatusFieldClick();
     }
 
     private void handleMessageMainUpdateSortSelection(int sortType) {
@@ -681,22 +705,20 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         //Inflating the Popup using xml file
         popup.getMenuInflater().inflate(R.menu.menu_workflow_list, popup.getMenu());
 
-        popup.getMenu().findItem(R.id.disable)
-                .setVisible(workflowViewModel.hasBulkActivationPermissions());
-        popup.getMenu().findItem(R.id.open).setVisible(
-                workflowViewModel.isShowOpenActionMenu() && workflowViewModel
-                        .hasBulkOpenClosePermissions());
-        popup.getMenu().findItem(R.id.close).setVisible(
-                workflowViewModel.isShowCloseActionMenu() && workflowViewModel
-                        .hasBulkOpenClosePermissions());
-        popup.getMenu().findItem(R.id.delete)
-                .setVisible(workflowViewModel.hasBulkDeletePermissions());
+        popup.getMenu().findItem(R.id.enable).setVisible(workflowViewModel.isShowEnableActionMenu() && workflowViewModel.hasBulkActivationPermissions());
+        popup.getMenu().findItem(R.id.disable).setVisible(workflowViewModel.isShowDisableActionMenu() && workflowViewModel.hasBulkActivationPermissions());
+        popup.getMenu().findItem(R.id.open).setVisible(workflowViewModel.isShowOpenActionMenu() && workflowViewModel.hasBulkOpenClosePermissions());
+        popup.getMenu().findItem(R.id.close).setVisible(workflowViewModel.isShowCloseActionMenu() && workflowViewModel.hasBulkOpenClosePermissions());
+        popup.getMenu().findItem(R.id.delete).setVisible(workflowViewModel.hasBulkDeletePermissions());
 
         popup.setOnMenuItemClickListener(item -> {
             List<Integer> checkedList = adapter.getCheckedIds();
             if (checkedList.isEmpty()) showToastMessage(R.string.workflow_list_no_selections);
 
             switch (item.getItemId()) {
+                case R.id.enable:
+                    workflowViewModel.enableDisableWorkflows(checkedList, true);
+                    break;
                 case R.id.disable:
                     workflowViewModel.enableDisableWorkflows(checkedList, false);
                     break;

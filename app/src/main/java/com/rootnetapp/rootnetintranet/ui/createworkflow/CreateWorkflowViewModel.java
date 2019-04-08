@@ -2708,6 +2708,8 @@ class CreateWorkflowViewModel extends ViewModel {
      * This is called by the View when the user submits the form.
      */
     protected void handleCreateWorkflowAction() {
+        validatePeopleInvolvedFormItems();
+
         if (validateFormItems()) {
             // all of the items are valid.
             postWorkflow();

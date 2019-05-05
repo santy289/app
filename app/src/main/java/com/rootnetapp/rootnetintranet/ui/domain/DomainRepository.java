@@ -33,17 +33,4 @@ public class DomainRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public void checkDomain(String domain, LifecycleOwner lifecycleOwner) {
-        OneTimeWorkRequest domainCheck = new OneTimeWorkRequest.Builder(DomainCheckWorker.class).build();
-
-        UUID id = domainCheck.getId();
-//        WorkManager workManager = WorkManager.getInstance();
-//        workManager.enqueue(domainCheck);
-//
-//        workManager.getStatusById(id).observe(lifecycleOwner, workStatus -> {
-//            String test = "test";
-//            Log.d(TAG, "checkDomain: here");
-//        });
-    }
-
 }

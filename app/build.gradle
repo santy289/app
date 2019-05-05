@@ -43,18 +43,20 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha5'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.annotation:annotation:1.0.1'
+    implementation 'androidx.annotation:annotation:1.0.2'
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'com.google.android.material:material:1.1.0-alpha03'
+    implementation 'com.google.android.material:material:1.1.0-alpha06'
 
     //android arch components
     implementation "androidx.lifecycle:lifecycle-runtime:$rootProject.archLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-extensions:$rootProject.archLifecycleVersion"
+
     implementation "android.arch.work:work-runtime:$rootProject.workManager"
+
     implementation "androidx.lifecycle:lifecycle-common-java8:$rootProject.archLifecycleVersion"
     implementation "androidx.paging:paging-runtime:2.1.0"
 
@@ -91,7 +93,6 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation "com.github.bumptech.glide:glide:$rootProject.glideVersion"
     annotationProcessor "com.github.bumptech.glide:compiler:$rootProject.glideVersion"
-    implementation "com.google.firebase:firebase-messaging:$rootProject.firebaseVersion"
     implementation "com.obsez.android.lib.filechooser:filechooser:$rootProject.fileChooser"
 
     implementation 'com.jakewharton.threetenabp:threetenabp:1.1.1'

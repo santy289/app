@@ -54,6 +54,7 @@ public class Utils {
     public static final String remainderOfDomain = ".rootnetapp.com";
 
     public static String domain;
+    private static final String WEB_PROTOCOL = "https://";
 
     public static final String SERVER_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
     public static final String SERVER_DATE_FORMAT_NO_TIMEZONE = "yyyy-MM-dd'T'HH:mm:ss";
@@ -80,7 +81,7 @@ public class Utils {
 
     public static void setImgDomain(String newImgDomain) {
         if (TextUtils.isEmpty(Utils.imgDomain)) {
-            Utils.imgDomain = Utils.getWebProtocol(newImgDomain) + newImgDomain;
+            Utils.imgDomain = WEB_PROTOCOL + newImgDomain;
             Utils.imgDomain = Utils.imgDomain.replace("v1/", "");
         }
     }
@@ -567,13 +568,6 @@ public class Utils {
     }
 
     public static String getWebProtocol(String domain) {
-        //todo temporary while the example API is not fixed.
-        if (domain.contains("example-api.dev")
-                || domain.contains("example.dev")
-                || domain.contains("example")) {
-            return "http://";
-        }
-
-        return "https://";
+        return WEB_PROTOCOL;
     }
 }

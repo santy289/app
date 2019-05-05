@@ -5,8 +5,7 @@ import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.SelectedLoca
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 public class Information {

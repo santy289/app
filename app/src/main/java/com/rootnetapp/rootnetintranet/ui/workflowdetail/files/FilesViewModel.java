@@ -9,6 +9,11 @@ import android.provider.OpenableColumns;
 import android.util.Base64;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -31,10 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
@@ -122,17 +123,18 @@ public class FilesViewModel extends ViewModel {
 
         hasViewPermissions = permissionsUtils.hasPermission(TEMPLATE_VIEW);
         hasViewFilesPermissions = permissionsUtils.hasPermission(WORKFLOW_FILE_VIEW);
-        hasUploadFilesPermissions = hasViewFilesPermissions && permissionsUtils.hasPermission(WORKFLOW_FILE_CREATE);
+        hasUploadFilesPermissions = hasViewFilesPermissions && permissionsUtils
+                .hasPermission(WORKFLOW_FILE_CREATE);
 
         showDownloadTemplateButton.setValue(hasViewPermissions);
         showDownloadFileButton.setValue(hasViewFilesPermissions);
     }
 
-    protected boolean hasViewPermissions(){
+    protected boolean hasViewPermissions() {
         return hasViewPermissions;
     }
 
-    protected boolean hasViewFilesPermissions(){
+    protected boolean hasViewFilesPermissions() {
         return hasViewFilesPermissions;
     }
 
@@ -464,7 +466,11 @@ public class FilesViewModel extends ViewModel {
     }
 
     private void updateUIWithWorkflowType(WorkflowTypeDb currentWorkflowType) {
-        getTemplateBy(currentWorkflowType.getTemplateId());
+        int templateId = 0;
+        if (currentWorkflowType.getTemplateId() != null) {
+            templateId = currentWorkflowType.getTemplateId();
+        }
+        getTemplateBy(templateId);
         this.mPresets = currentWorkflowType.getPresets();
     }
 

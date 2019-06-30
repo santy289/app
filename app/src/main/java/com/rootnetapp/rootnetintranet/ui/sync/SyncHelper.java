@@ -3,6 +3,9 @@ package com.rootnetapp.rootnetintranet.ui.sync;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import com.rootnetapp.rootnetintranet.BuildConfig;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
@@ -32,8 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -338,7 +339,9 @@ public class SyncHelper {
             return;
         }
 
-        disposables.clear();
+        if (!disposables.isDisposed()) {
+            disposables.clear();
+        }
         attemptTokenRefresh.setValue(true);
     }
 
@@ -434,7 +437,7 @@ public class SyncHelper {
         saveStringToPreference.postValue(value);
     }
 
-    private void addLoggedProfileToDatabase(User user){
+    private void addLoggedProfileToDatabase(User user) {
         Disposable disposable = Observable.fromCallable(() -> {
             List<User> list = new ArrayList<>();
             list.add(user);
@@ -488,4 +491,6 @@ public class SyncHelper {
         }
         return saveToPreference;
     }
+
+
 }

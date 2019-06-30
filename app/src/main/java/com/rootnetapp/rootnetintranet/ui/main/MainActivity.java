@@ -24,6 +24,25 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.IdRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
+import androidx.annotation.UiThread;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.databinding.DataBindingUtil;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -59,25 +78,6 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOption
 import java.util.List;
 
 import javax.inject.Inject;
-
-import androidx.annotation.DrawableRes;
-import androidx.annotation.IdRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
-import androidx.annotation.UiThread;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.PopupMenu;
-import androidx.core.content.ContextCompat;
-import androidx.core.view.GravityCompat;
-import androidx.databinding.DataBindingUtil;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
 
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.CHECK;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.INDEX_CHECK;
@@ -137,7 +137,6 @@ public class MainActivity extends AppCompatActivity
 //        showFragment(TimelineFragment.newInstance(this), false);
         setFilterBoxListeners();
         setupBottomNavigation();
-        setupSpeedDialFab();
     }
 
     /**
@@ -347,20 +346,43 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void setupSpeedDialFab() {
-        //reverse order
-        addActionItem(R.id.fab_comment, R.string.quick_actions_comment,
-                R.drawable.ic_message_black_24dp);
-        addActionItem(R.id.fab_change_status, R.string.quick_actions_change_status,
-                R.drawable.ic_compare_arrows_black_24dp);
-        addActionItem(R.id.fab_approve_workflow, R.string.quick_actions_approve_workflow,
-                R.drawable.ic_like_black_24dp);
-        addActionItem(R.id.fab_edit_workflow, R.string.quick_actions_edit_workflow,
-                R.drawable.ic_workflow_black_24dp);
+    private void setupSpeedDialFab(QuickActionsVisibility visibility) {
+        mainBinding.fabSpeedDial.clearActionItems();
 
-        mainBinding.fabSpeedDial.setOnActionSelectedListener(this::handleSpeedDialClick);
-        mainBinding.fabSpeedDial.getMainFab().setSupportImageTintList(ColorStateList.valueOf(
-                Color.WHITE)); //this is the only way to change the icon color
+        int count = 0;
+
+        //reverse order
+        if (visibility.isShowComment()) {
+            addActionItem(R.id.fab_comment, R.string.quick_actions_comment,
+                    R.drawable.ic_message_black_24dp);
+            count++;
+        }
+
+        if (visibility.isShowChangeStatus()) {
+            addActionItem(R.id.fab_change_status, R.string.quick_actions_change_status,
+                    R.drawable.ic_compare_arrows_black_24dp);
+            count++;
+        }
+
+        if (visibility.isShowApprove()) {
+            addActionItem(R.id.fab_approve_workflow, R.string.quick_actions_approve_workflow,
+                    R.drawable.ic_like_black_24dp);
+            count++;
+        }
+
+        if (visibility.isShowEdit()) {
+            addActionItem(R.id.fab_edit_workflow, R.string.quick_actions_edit_workflow,
+                    R.drawable.ic_workflow_black_24dp);
+            count++;
+        }
+
+        if (count > 0) {
+            mainBinding.fabSpeedDial.setOnActionSelectedListener(this::handleSpeedDialClick);
+            mainBinding.fabSpeedDial.getMainFab().setSupportImageTintList(ColorStateList.valueOf(
+                    Color.WHITE)); //this is the only way to change the icon color
+        } else {
+            mainBinding.fabSpeedDial.setVisibility(View.GONE);
+        }
     }
 
     private void addActionItem(@IdRes int idRes, @StringRes int titleRes,
@@ -465,9 +487,11 @@ public class MainActivity extends AppCompatActivity
         mainBinding.toolbarImage.setOnClickListener(
                 v -> showFragment(ProfileFragment.newInstance(), false));
 
-        mDynamicFiltersFragment = CreateWorkflowFragment.newInstance(FormType.DYNAMIC_FILTERS, this);
+        mDynamicFiltersFragment = CreateWorkflowFragment
+                .newInstance(FormType.DYNAMIC_FILTERS, this);
         showDynamicFiltersFragment(mDynamicFiltersFragment, false);
-        showStandardFiltersFragment(CreateWorkflowFragment.newInstance(FormType.STANDARD_FILTERS, this), false);
+        showStandardFiltersFragment(
+                CreateWorkflowFragment.newInstance(FormType.STANDARD_FILTERS, this), false);
     }
 
     private void openRightDrawer(boolean open) {
@@ -525,7 +549,7 @@ public class MainActivity extends AppCompatActivity
         baseShowSecondFiltersView(show);
     }
 
-    private void baseShowSecondFiltersView(boolean show){
+    private void baseShowSecondFiltersView(boolean show) {
         if (show) {
             mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.GONE);
             mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
@@ -853,7 +877,8 @@ public class MainActivity extends AppCompatActivity
 
     private void setRightDrawerStatusFilters(OptionsList optionsList) {
         if (optionsList == null) {
-            Log.d(TAG, "setRightDrawerStatusFilters: Not able to set Drawer Options. OptionList is NULL");
+            Log.d(TAG,
+                    "setRightDrawerStatusFilters: Not able to set Drawer Options. OptionList is NULL");
             return;
         }
 
@@ -872,7 +897,8 @@ public class MainActivity extends AppCompatActivity
 
     private void setRightDrawerSystemStatusFilters(OptionsList optionsList) {
         if (optionsList == null) {
-            Log.d(TAG, "setRightDrawerSystemStatusFilters: Not able to set Drawer Options. OptionList is NULL");
+            Log.d(TAG,
+                    "setRightDrawerSystemStatusFilters: Not able to set Drawer Options. OptionList is NULL");
             return;
         }
 
@@ -1091,6 +1117,8 @@ public class MainActivity extends AppCompatActivity
         viewModel.getObservableStartService().observe(this, result -> sendBroadcastWebsocket());
 
         viewModel.getObservableStopService().observe(this, result -> stopWebsocketService());
+
+        viewModel.getObservableQuickActionsVisibility().observe(this, this::setupSpeedDialFab);
     }
 
     private void subscribeForLogin() {
@@ -1114,7 +1142,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @UiThread
-    private void sendMessageGenerateWorkflowFieldsByType(int workflowTypeId){
+    private void sendMessageGenerateWorkflowFieldsByType(int workflowTypeId) {
         mDynamicFiltersFragment.generateFieldsByWorkflowType(workflowTypeId);
     }
 

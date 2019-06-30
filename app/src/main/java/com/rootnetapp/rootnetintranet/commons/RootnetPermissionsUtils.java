@@ -2,14 +2,14 @@ package com.rootnetapp.rootnetintranet.commons;
 
 import android.text.TextUtils;
 
+import androidx.annotation.StringDef;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import androidx.annotation.StringDef;
 
 public class RootnetPermissionsUtils {
 
@@ -279,7 +279,7 @@ public class RootnetPermissionsUtils {
         return mUserPermissionsList.contains(permissionToCheck);
     }
 
-    public boolean hasPermissions(@RootnetPermission String[] permissionsToCheck) {
+    public boolean hasPermissions(String[] permissionsToCheck) {
         return mUserPermissionsList.containsAll(Arrays.asList(permissionsToCheck));
     }
 

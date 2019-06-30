@@ -3,6 +3,13 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
+import androidx.lifecycle.ViewModel;
+import androidx.viewpager.widget.ViewPager;
+
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -21,12 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Transformations;
-import androidx.lifecycle.ViewModel;
-import androidx.viewpager.widget.ViewPager;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import retrofit2.HttpException;
@@ -38,6 +39,7 @@ import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WOR
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_OWN;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EXPORT;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_OPEN_ALL;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_STATUS_UPDATE_ALL;
 
 public class WorkflowDetailViewModel extends ViewModel {
 
@@ -81,6 +83,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     private boolean hasEnableDisablePermissions;
     private boolean hasOpenClosePermissions;
     private boolean hasEditPermissions;
+    private boolean hasChangeStatusPermissions;
 
     public WorkflowDetailViewModel(WorkflowDetailRepository workflowDetailRepository) {
         this.mRepository = workflowDetailRepository;
@@ -161,6 +164,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     private void checkPermissions(String permissionsString, int userId) {
         RootnetPermissionsUtils permissionsUtils = new RootnetPermissionsUtils(permissionsString);
 
+        hasChangeStatusPermissions = permissionsUtils.hasPermission(WORKFLOW_STATUS_UPDATE_ALL);
         hasExportPermissions = permissionsUtils.hasPermission(WORKFLOW_EXPORT);
         hasDeletePermissions = permissionsUtils.hasPermission(WORKFLOW_DELETE);
         hasEnableDisablePermissions = permissionsUtils.hasPermission(WORKFLOW_ACTIVATE_ALL);
@@ -180,6 +184,10 @@ public class WorkflowDetailViewModel extends ViewModel {
         mShowDeleteLiveData.setValue(hasDeletePermissions);
         mShowEnableDisableLiveData.setValue(hasEnableDisablePermissions);
         mShowOpenCloseLiveData.setValue(hasOpenClosePermissions);
+    }
+
+    protected boolean hasChangeStatusPermissions() {
+        return hasChangeStatusPermissions;
     }
 
     protected boolean hasExportPermissions() {

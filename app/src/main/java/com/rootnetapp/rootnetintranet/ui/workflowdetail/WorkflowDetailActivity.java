@@ -92,19 +92,31 @@ public class WorkflowDetailActivity extends AppCompatActivity {
             workflowDetailViewModel
                     .initWithDetails(token, mWorkflowListItem, loggedUserId, permissionsString);
         }
+
+        mBinding.fabSpeedDial.getMainFab().setSupportImageTintList(ColorStateList.valueOf(
+                Color.WHITE)); //this is the only way to change the icon color
     }
 
     /**
-     * Method will initialize the UI using an WorkflowListItem object coming from the user selection
+     * Method will initialize some UI features using an WorkflowListItem object coming from the user selection
      * in workflow list.
      *
      * @param workflowListItem
      */
-    private void initUiWith(WorkflowListItem workflowListItem) {
+    private void initSoftUiWith(WorkflowListItem workflowListItem) {
         setActionBar(workflowListItem);
+        workflowDetailViewModel.getObservableSoftWorkflowListItem().removeObservers(this);
+    }
+
+    /**
+     * Method will fully initialize the UI with a fetched object from the server.
+     *
+     * @param workflowListItem
+     */
+    private void initUiWith(WorkflowListItem workflowListItem) {
         setupViewPager(workflowListItem);
         setupSpeedDialFab();
-        workflowDetailViewModel.getObservableWorflowListItem().removeObservers(this);
+        workflowDetailViewModel.getObservableWorkflowListItem().removeObservers(this);
     }
 
     /**
@@ -168,7 +180,8 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         workflowDetailViewModel.retrieveWorkflowPdfFile
                 .observe(this, this::openPdfFile);
         workflowDetailViewModel.handleShowLoadingByRepo.observe(this, this::showLoading);
-        workflowDetailViewModel.getObservableWorflowListItem().observe(this, this::initUiWith);
+        workflowDetailViewModel.getObservableWorkflowListItem().observe(this, this::initUiWith);
+        workflowDetailViewModel.getObservableSoftWorkflowListItem().observe(this, this::initSoftUiWith);
         workflowDetailViewModel.getObservableWorkflowTypeVersion()
                 .observe(this, this::updateToolbarSubtitleWithWorkflowVersion);
         workflowDetailViewModel.getObservableShowNotFoundView()

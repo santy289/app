@@ -11,6 +11,13 @@ import android.util.Base64;
 import android.util.Log;
 import android.util.Patterns;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.collection.ArrayMap;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
@@ -94,12 +101,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.collection.ArrayMap;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -1836,7 +1837,9 @@ public class CreateWorkflowViewModel extends ViewModel {
         TextInputFormItem textInputFormItem = (TextInputFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
 
-        textInputFormItem.setValue(value);
+        if (textInputFormItem != null) {
+            textInputFormItem.setValue(value);
+        }
     }
 
     private void fillBooleanFormItem(Meta meta) {
@@ -1844,7 +1847,10 @@ public class CreateWorkflowViewModel extends ViewModel {
 
         BooleanFormItem booleanFormItem = (BooleanFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
-        booleanFormItem.setValue(Boolean.valueOf(value));
+
+        if (booleanFormItem != null) {
+            booleanFormItem.setValue(Boolean.valueOf(value));
+        }
     }
 
     private void fillDateFormItem(Meta meta) {
@@ -1853,7 +1859,10 @@ public class CreateWorkflowViewModel extends ViewModel {
         DateFormItem startDateItem = (DateFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
         Date startDate = Utils.getDateFromString(value, "dd/MM/yyyy");
-        startDateItem.setValue(startDate);
+
+        if (startDateItem != null) {
+            startDateItem.setValue(startDate);
+        }
     }
 
     private void fillSingleChoiceFormItem(Meta meta) {
@@ -1884,16 +1893,18 @@ public class CreateWorkflowViewModel extends ViewModel {
         SingleChoiceFormItem singleChoiceFormItem = (SingleChoiceFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
 
-        Option value;
-        if (intValue != null) {
-            //find by id
-            value = formSettings.findOption(singleChoiceFormItem.getOptions(), intValue);
-        } else {
-            //find by string
-            value = formSettings.findOption(singleChoiceFormItem.getOptions(), stringValue);
-        }
+        if (singleChoiceFormItem != null) {
+            Option value;
+            if (intValue != null) {
+                //find by id
+                value = formSettings.findOption(singleChoiceFormItem.getOptions(), intValue);
+            } else {
+                //find by string
+                value = formSettings.findOption(singleChoiceFormItem.getOptions(), stringValue);
+            }
 
-        singleChoiceFormItem.setValue(value);
+            singleChoiceFormItem.setValue(value);
+        }
     }
 
     private void fillMultipleChoiceFormItem(Meta meta) {
@@ -1913,18 +1924,21 @@ public class CreateWorkflowViewModel extends ViewModel {
         MultipleChoiceFormItem multipleChoiceFormItem = (MultipleChoiceFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
 
-        for (String stringValue : values) {
-            Option value;
-            if (isIntValues) {
-                //find by id
-                value = formSettings.findOption(multipleChoiceFormItem.getOptions(),
-                        Integer.parseInt(stringValue));
-            } else {
-                //find by string
-                value = formSettings.findOption(multipleChoiceFormItem.getOptions(), stringValue);
+        if (multipleChoiceFormItem != null) {
+            for (String stringValue : values) {
+                Option value;
+                if (isIntValues) {
+                    //find by id
+                    value = formSettings.findOption(multipleChoiceFormItem.getOptions(),
+                            Integer.parseInt(stringValue));
+                } else {
+                    //find by string
+                    value = formSettings
+                            .findOption(multipleChoiceFormItem.getOptions(), stringValue);
+                }
+                if (value == null) continue;
+                multipleChoiceFormItem.addValue(value);
             }
-            if (value == null) continue;
-            multipleChoiceFormItem.addValue(value);
         }
     }
 
@@ -1939,12 +1953,14 @@ public class CreateWorkflowViewModel extends ViewModel {
         CurrencyFormItem currencyFormItem = (CurrencyFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
 
-        Option value = formSettings
-                .findOption(currencyFormItem.getOptions(), postCurrency.countryId);
-        if (value == null) return;
+        if (currencyFormItem != null) {
+            Option value = formSettings
+                    .findOption(currencyFormItem.getOptions(), postCurrency.countryId);
+            if (value == null) return;
 
-        currencyFormItem.setSelectedOption(value);
-        currencyFormItem.setValue(postCurrency.value);
+            currencyFormItem.setSelectedOption(value);
+            currencyFormItem.setValue(postCurrency.value);
+        }
     }
 
     private void fillPhoneFormItem(Meta meta) throws IOException {
@@ -1958,12 +1974,14 @@ public class CreateWorkflowViewModel extends ViewModel {
         PhoneFormItem phoneFormItem = (PhoneFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
 
-        Option value = formSettings
-                .findOption(phoneFormItem.getOptions(), postPhone.countryId);
-        if (value == null) return;
+        if (phoneFormItem != null) {
+            Option value = formSettings
+                    .findOption(phoneFormItem.getOptions(), postPhone.countryId);
+            if (value == null) return;
 
-        phoneFormItem.setSelectedOption(value);
-        phoneFormItem.setValue(postPhone.value);
+            phoneFormItem.setSelectedOption(value);
+            phoneFormItem.setValue(postPhone.value);
+        }
     }
 
     private void fillFileFormItem(Meta meta) throws IOException {
@@ -1980,8 +1998,10 @@ public class CreateWorkflowViewModel extends ViewModel {
         FileFormItem fileFormItem = (FileFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
 
-        fileFormItem.setFileName(fileMetaData.name);
-        fileFormItem.setFileId(fileMetaData.value);
+        if (fileFormItem != null) {
+            fileFormItem.setFileName(fileMetaData.name);
+            fileFormItem.setFileId(fileMetaData.value);
+        }
     }
 
     private void fillGeolocationFormItem(Meta meta) throws IOException {
@@ -2003,10 +2023,12 @@ public class CreateWorkflowViewModel extends ViewModel {
         GeolocationFormItem geolocationFormItem = (GeolocationFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
 
-        LatLng latLng = new LatLng(geolocationMetaData.getValue().getLatLng().get(0),
-                geolocationMetaData.getValue().getLatLng().get(1));
-        geolocationFormItem.setValue(latLng);
-        geolocationFormItem.setName(geolocationMetaData.getValue().getAddress());
+        if (geolocationFormItem != null) {
+            LatLng latLng = new LatLng(geolocationMetaData.getValue().getLatLng().get(0),
+                    geolocationMetaData.getValue().getLatLng().get(1));
+            geolocationFormItem.setValue(latLng);
+            geolocationFormItem.setName(geolocationMetaData.getValue().getAddress());
+        }
     }
 
     private void fillUsersFormItem(Meta meta) throws IOException {
@@ -2023,11 +2045,13 @@ public class CreateWorkflowViewModel extends ViewModel {
         SingleChoiceFormItem singleChoiceFormItem = (SingleChoiceFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
 
-        //find by id
-        Option value = formSettings
-                .findOption(singleChoiceFormItem.getOptions(), usersMetaData.getId());
+        if (singleChoiceFormItem != null) {
+            //find by id
+            Option value = formSettings
+                    .findOption(singleChoiceFormItem.getOptions(), usersMetaData.getId());
 
-        singleChoiceFormItem.setValue(value);
+            singleChoiceFormItem.setValue(value);
+        }
     }
 
     private void fillAccountFormItem(Meta meta) throws IOException {
@@ -2054,9 +2078,11 @@ public class CreateWorkflowViewModel extends ViewModel {
         AutocompleteFormItem autocompleteFormItem = (AutocompleteFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
 
-        Option value = new Option(contactMetaData.getId(), contactMetaData.getCompany());
+        if (autocompleteFormItem != null) {
+            Option value = new Option(contactMetaData.getId(), contactMetaData.getCompany());
 
-        autocompleteFormItem.setValue(value);
+            autocompleteFormItem.setValue(value);
+        }
     }
 
     private void fillBusinessOpportunityFormItem(Meta meta) throws IOException {
@@ -2083,10 +2109,12 @@ public class CreateWorkflowViewModel extends ViewModel {
         AutocompleteFormItem autocompleteFormItem = (AutocompleteFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
 
-        Option value = new Option(businessOpportunityMeta.getId(),
-                businessOpportunityMeta.getTitle());
+        if (autocompleteFormItem != null) {
+            Option value = new Option(businessOpportunityMeta.getId(),
+                    businessOpportunityMeta.getTitle());
 
-        autocompleteFormItem.setValue(value);
+            autocompleteFormItem.setValue(value);
+        }
     }
 
     private void fillSubContactFormItem(Meta meta) throws IOException {
@@ -2113,9 +2141,11 @@ public class CreateWorkflowViewModel extends ViewModel {
         AutocompleteFormItem autocompleteFormItem = (AutocompleteFormItem) formSettings
                 .findItem(meta.getWorkflowTypeFieldId());
 
-        Option value = new Option(postSubContact.getId(), postSubContact.getFullName());
+        if (autocompleteFormItem != null) {
+            Option value = new Option(postSubContact.getId(), postSubContact.getFullName());
 
-        autocompleteFormItem.setValue(value);
+            autocompleteFormItem.setValue(value);
+        }
     }
     //endregion
 

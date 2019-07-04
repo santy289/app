@@ -16,22 +16,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.leinardi.android.speeddial.SpeedDialActionItem;
-import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
-import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
-import com.rootnetapp.rootnetintranet.databinding.ActivityWorkflowDetailBinding;
-import com.rootnetapp.rootnetintranet.ui.RootnetApp;
-import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
-import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.WorkflowDetailViewPagerAdapter;
-
-import java.io.File;
-import java.util.Locale;
-
-import javax.inject.Inject;
-
 import androidx.annotation.DrawableRes;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
@@ -46,6 +30,20 @@ import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.viewpager.widget.ViewPager;
+
+import com.leinardi.android.speeddial.SpeedDialActionItem;
+import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
+import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.databinding.ActivityWorkflowDetailBinding;
+import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.WorkflowDetailViewPagerAdapter;
+
+import java.io.File;
+import java.util.Locale;
+
+import javax.inject.Inject;
 
 import static com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailViewModel.REQUEST_EXTERNAL_STORAGE_PERMISSIONS;
 
@@ -462,8 +460,10 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         //reverse order
         addActionItem(R.id.fab_comment, R.string.quick_actions_comment,
                 R.drawable.ic_message_black_24dp);
-        addActionItem(R.id.fab_change_status, R.string.quick_actions_change_status,
-                R.drawable.ic_compare_arrows_black_24dp);
+        if (workflowDetailViewModel.hasChangeStatusPermissions()) {
+            addActionItem(R.id.fab_change_status, R.string.quick_actions_change_status,
+                    R.drawable.ic_compare_arrows_black_24dp);
+        }
         addActionItem(R.id.fab_approve_workflow, R.string.quick_actions_approve_workflow,
                 R.drawable.ic_like_black_24dp);
 

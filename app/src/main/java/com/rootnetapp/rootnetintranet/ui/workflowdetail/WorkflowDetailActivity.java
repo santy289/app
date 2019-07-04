@@ -16,22 +16,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.leinardi.android.speeddial.SpeedDialActionItem;
-import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
-import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
-import com.rootnetapp.rootnetintranet.databinding.ActivityWorkflowDetailBinding;
-import com.rootnetapp.rootnetintranet.ui.RootnetApp;
-import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
-import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.WorkflowDetailViewPagerAdapter;
-
-import java.io.File;
-import java.util.Locale;
-
-import javax.inject.Inject;
-
 import androidx.annotation.DrawableRes;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
@@ -46,6 +30,20 @@ import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.viewpager.widget.ViewPager;
+
+import com.leinardi.android.speeddial.SpeedDialActionItem;
+import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
+import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.databinding.ActivityWorkflowDetailBinding;
+import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters.WorkflowDetailViewPagerAdapter;
+
+import java.io.File;
+import java.util.Locale;
+
+import javax.inject.Inject;
 
 import static com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailViewModel.REQUEST_EXTERNAL_STORAGE_PERMISSIONS;
 
@@ -94,19 +92,31 @@ public class WorkflowDetailActivity extends AppCompatActivity {
             workflowDetailViewModel
                     .initWithDetails(token, mWorkflowListItem, loggedUserId, permissionsString);
         }
+
+        mBinding.fabSpeedDial.getMainFab().setSupportImageTintList(ColorStateList.valueOf(
+                Color.WHITE)); //this is the only way to change the icon color
     }
 
     /**
-     * Method will initialize the UI using an WorkflowListItem object coming from the user selection
+     * Method will initialize some UI features using an WorkflowListItem object coming from the user selection
      * in workflow list.
      *
      * @param workflowListItem
      */
-    private void initUiWith(WorkflowListItem workflowListItem) {
+    private void initSoftUiWith(WorkflowListItem workflowListItem) {
         setActionBar(workflowListItem);
+        workflowDetailViewModel.getObservableSoftWorkflowListItem().removeObservers(this);
+    }
+
+    /**
+     * Method will fully initialize the UI with a fetched object from the server.
+     *
+     * @param workflowListItem
+     */
+    private void initUiWith(WorkflowListItem workflowListItem) {
         setupViewPager(workflowListItem);
         setupSpeedDialFab();
-        workflowDetailViewModel.getObservableWorflowListItem().removeObservers(this);
+        workflowDetailViewModel.getObservableWorkflowListItem().removeObservers(this);
     }
 
     /**
@@ -170,7 +180,8 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         workflowDetailViewModel.retrieveWorkflowPdfFile
                 .observe(this, this::openPdfFile);
         workflowDetailViewModel.handleShowLoadingByRepo.observe(this, this::showLoading);
-        workflowDetailViewModel.getObservableWorflowListItem().observe(this, this::initUiWith);
+        workflowDetailViewModel.getObservableWorkflowListItem().observe(this, this::initUiWith);
+        workflowDetailViewModel.getObservableSoftWorkflowListItem().observe(this, this::initSoftUiWith);
         workflowDetailViewModel.getObservableWorkflowTypeVersion()
                 .observe(this, this::updateToolbarSubtitleWithWorkflowVersion);
         workflowDetailViewModel.getObservableShowNotFoundView()

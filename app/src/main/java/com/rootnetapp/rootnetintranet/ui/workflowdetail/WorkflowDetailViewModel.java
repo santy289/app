@@ -3,6 +3,13 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
+import androidx.lifecycle.ViewModel;
+import androidx.viewpager.widget.ViewPager;
+
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -21,12 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Transformations;
-import androidx.lifecycle.ViewModel;
-import androidx.viewpager.widget.ViewPager;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import retrofit2.HttpException;
@@ -53,6 +54,7 @@ public class WorkflowDetailViewModel extends ViewModel {
     private MutableLiveData<Integer> mFilesTabCounter;
     private MutableLiveData<Integer> mShowToastMessage;
     private MutableLiveData<WorkflowListItem> initUiWithWorkflowListItem;
+    private MutableLiveData<WorkflowListItem> initSoftUiWithWorkflowListItem;
     private MutableLiveData<String> mWorkflowTypeVersionLiveData;
     private MutableLiveData<Boolean> mShowNotFoundViewLiveData;
     private MutableLiveData<Boolean> mShowExportPdfButtonLiveData;
@@ -86,6 +88,7 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.mRepository = workflowDetailRepository;
         this.showLoading = new MutableLiveData<>();
         this.initUiWithWorkflowListItem = new MutableLiveData<>();
+        this.initSoftUiWithWorkflowListItem = new MutableLiveData<>();
         subscribe();
     }
 
@@ -108,7 +111,7 @@ public class WorkflowDetailViewModel extends ViewModel {
                                    String permissionsString) {
         this.mToken = token;
         this.mWorkflowListItem = workflow;
-        initUiWithWorkflowListItem.setValue(workflow);
+        initSoftUiWithWorkflowListItem.setValue(workflow);
 
         int userId = loggedUserId == null ? 0 : Integer.parseInt(loggedUserId);
         checkPermissions(permissionsString, userId);
@@ -132,7 +135,7 @@ public class WorkflowDetailViewModel extends ViewModel {
         handleRepoWorkflowRequest = Transformations.map(
                 mRepository.getObservableRetrieveFromDbWorkflow(),
                 workflowDb -> {
-                    initUiWithWorkflowListItem.setValue(workflowDb);
+                    initSoftUiWithWorkflowListItem.setValue(workflowDb);
                     getWorkflow(mToken, workflowDb.getWorkflowId());
                     return workflowDb;
                 }
@@ -563,8 +566,12 @@ public class WorkflowDetailViewModel extends ViewModel {
         return mShareWorkflowLiveData;
     }
 
-    protected LiveData<WorkflowListItem> getObservableWorflowListItem() {
+    protected LiveData<WorkflowListItem> getObservableWorkflowListItem() {
         return initUiWithWorkflowListItem;
+    }
+
+    protected LiveData<WorkflowListItem> getObservableSoftWorkflowListItem() {
+        return initSoftUiWithWorkflowListItem;
     }
 
     protected LiveData<WorkflowListItem> getObservableHandleRepoWorkflowRequest() {

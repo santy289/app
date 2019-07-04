@@ -4,9 +4,15 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.util.Log;
 
+import androidx.annotation.IdRes;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+
 import com.auth0.android.jwt.JWT;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
+import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
@@ -33,16 +39,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import androidx.annotation.IdRes;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
 
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_COMMENT_BY_PEOPLE_INVOLVED;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_COMMENT_CRUD_ALL;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_COMMENT_CRUD_OWN;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_OWN;
+import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_STATUS_UPDATE_ALL;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.CHECK;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.UNCHECK;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.IS_CHECKED_INDEX;
@@ -63,6 +70,7 @@ public class MainActivityViewModel extends ViewModel {
     private MutableLiveData<Boolean> goToDomain;
     private MutableLiveData<Boolean> startService;
     private MutableLiveData<Boolean> stopService;
+    private MutableLiveData<QuickActionsVisibility> quickActionsVisibilityLiveData;
     protected MutableLiveData<Integer> setSearchMenuLayout;
     protected MutableLiveData<Integer> setUploadMenuLayout;
     protected MutableLiveData<List<WorkflowTypeMenu>> setRightDrawerFilterList;
@@ -170,7 +178,8 @@ public class MainActivityViewModel extends ViewModel {
             JsonAdapter<ClientResponse> jsonAdapter = moshi.adapter(ClientResponse.class);
             ClientResponse domain;
             domain = jsonAdapter.fromJson(json);
-            Utils.domain = Utils.getWebProtocol(domain.getClient().getApiUrl()) + domain.getClient().getApiUrl();
+            Utils.domain = Utils.getWebProtocol(domain.getClient().getApiUrl()) + domain.getClient()
+                    .getApiUrl();
             Utils.setImgDomain(domain.getClient().getApiUrl());
             String[] content = new String[2];
             content[0] = MainActivityViewModel.IMG_LOGO;
@@ -188,6 +197,38 @@ public class MainActivityViewModel extends ViewModel {
         JWT jwt = new JWT(token);
         int id = Integer.parseInt(jwt.getClaim(PreferenceKeys.PREF_PROFILE_ID).asString());
         getUser(id);
+
+        String permissionsString = sharedPreferences
+                .getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
+        checkPermissions(permissionsString);
+    }
+
+    /**
+     * Verifies all of the user permissions related to this ViewModel and {@link MainActivity}. Hide
+     * the UI related to the unauthorized actions.
+     *
+     * @param permissionsString users permissions.
+     */
+    private void checkPermissions(String permissionsString) {
+        RootnetPermissionsUtils permissionsUtils = new RootnetPermissionsUtils(permissionsString);
+
+        String[] permissionsToCheck = {
+                WORKFLOW_COMMENT_CRUD_OWN,
+                WORKFLOW_COMMENT_CRUD_ALL,
+                WORKFLOW_COMMENT_BY_PEOPLE_INVOLVED
+        };
+        boolean hasCommentPermissions = permissionsUtils.hasPermissions(permissionsToCheck);
+        boolean hasChangeStatusPermissions = permissionsUtils
+                .hasPermission(WORKFLOW_STATUS_UPDATE_ALL);
+        boolean hasEditPermissions = permissionsUtils.hasPermission(WORKFLOW_EDIT_OWN);
+
+        QuickActionsVisibility quickActionsVisibility = new QuickActionsVisibility();
+        quickActionsVisibility.setShowComment(hasCommentPermissions);
+        quickActionsVisibility.setShowChangeStatus(hasChangeStatusPermissions);
+        quickActionsVisibility.setShowEdit(hasEditPermissions);
+        quickActionsVisibility.setShowApprove(true);
+
+        quickActionsVisibilityLiveData.setValue(quickActionsVisibility);
     }
 
     protected void sendFilterClickToWorflowList(int position) {
@@ -202,7 +243,8 @@ public class MainActivityViewModel extends ViewModel {
         messageDynamicFilterSelectedToWorkflowList.setValue(dynamicFilter);
     }
 
-    protected void sendDynamicFilterListSelectedToWorkflowList(List<DynamicFilter> dynamicFilterList) {
+    protected void sendDynamicFilterListSelectedToWorkflowList(
+            List<DynamicFilter> dynamicFilterList) {
         messageDynamicFilterListSelectedToWorkflowList.setValue(dynamicFilterList);
     }
 
@@ -302,17 +344,20 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     public void getUser(int id) {
-        Disposable disposable = repository.getUser(id).subscribe(this::onUserSuccess, this::onFailure);
+        Disposable disposable = repository.getUser(id)
+                .subscribe(this::onUserSuccess, this::onFailure);
         disposables.add(disposable);
     }
 
     public void getWorkflowsLike(String text) {
-        Disposable disposable = repository.getWorkflowsLike(text).subscribe(this::onWorkflowsSuccess, this::onWorflowsFailure);
+        Disposable disposable = repository.getWorkflowsLike(text)
+                .subscribe(this::onWorkflowsSuccess, this::onWorflowsFailure);
         disposables.add(disposable);
     }
 
     public void getWorkflow(int id) {
-        Disposable disposable = repository.getWorkflow(id).subscribe(this::onWorkflowSuccess, this::onFailure);
+        Disposable disposable = repository.getWorkflow(id)
+                .subscribe(this::onWorkflowSuccess, this::onFailure);
         disposables.add(disposable);
     }
 
@@ -330,7 +375,9 @@ public class MainActivityViewModel extends ViewModel {
                     String authToken = "Bearer " + token;
 
                 }, throwable -> {
-                    Log.d(TAG, "attemptToLogin: Smomething failed with network request: " + throwable.getMessage());
+                    Log.d(TAG,
+                            "attemptToLogin: Smomething failed with network request: " + throwable
+                                    .getMessage());
                     goToDomain.setValue(true);
                 });
         disposables.add(disposable);
@@ -406,7 +453,7 @@ public class MainActivityViewModel extends ViewModel {
 
     //region Dynamic Filters
 
-    protected void onValuesSelected(List<BaseFormItem> baseFormItems){
+    protected void onValuesSelected(List<BaseFormItem> baseFormItems) {
         List<DynamicFilter> dynamicFilters = baseFormItems
                 .stream()
                 .map(this::getDynamicFilterFromFormItem)
@@ -538,5 +585,12 @@ public class MainActivityViewModel extends ViewModel {
             stopService = new MutableLiveData<>();
         }
         return stopService;
+    }
+
+    LiveData<QuickActionsVisibility> getObservableQuickActionsVisibility() {
+        if (quickActionsVisibilityLiveData == null) {
+            quickActionsVisibilityLiveData = new MutableLiveData<>();
+        }
+        return quickActionsVisibilityLiveData;
     }
 }

@@ -155,6 +155,8 @@ public class MainActivityViewModel extends ViewModel {
         this.receiveMessageStatusFilterSelected = new MutableLiveData<>();
         this.receiveMessageSystemStatusFilterSelected = new MutableLiveData<>();
         this.openRightDrawer = new MutableLiveData<>();
+        this.startService = new MutableLiveData<>();
+        this.stopService = new MutableLiveData<>();
     }
 
     @Override

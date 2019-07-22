@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity
                 .of(this, profileViewModelFactory)
                 .get(MainActivityViewModel.class);
 
-        dozeModeWhitelist();
+//        dozeModeWhitelist(); //todo verify service
 
         fragmentManager = getSupportFragmentManager();
         setActionBar();
@@ -1114,9 +1114,10 @@ public class MainActivity extends AppCompatActivity
                 .observe(this, this::handleUpdateSystemStatusFilterSelectionUpdateWith);
         viewModel.openRightDrawer.observe(this, this::openRightDrawer);
 
-        viewModel.getObservableStartService().observe(this, result -> sendBroadcastWebsocket());
+        //todo verify service
+//        viewModel.getObservableStartService().observe(this, result -> sendBroadcastWebsocket());
 
-        viewModel.getObservableStopService().observe(this, result -> stopWebsocketService());
+//        viewModel.getObservableStopService().observe(this, result -> stopWebsocketService());
 
         viewModel.getObservableQuickActionsVisibility().observe(this, this::setupSpeedDialFab);
     }

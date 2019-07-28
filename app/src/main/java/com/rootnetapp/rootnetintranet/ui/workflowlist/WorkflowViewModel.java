@@ -5,6 +5,14 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import androidx.annotation.IdRes;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModel;
+import androidx.paging.PagedList;
+
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
@@ -30,13 +38,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import androidx.annotation.IdRes;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModel;
-import androidx.paging.PagedList;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -70,9 +71,6 @@ public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<Integer> mErrorLiveData;
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<PagedList<WorkflowListItem>> updateWithSortedList;
-    private MutableLiveData<int[]> toggleRadioButton;
-    private MutableLiveData<int[]> toggleSwitch;
-    private MutableLiveData<int[]> toggleFilterSwitch;
     private MutableLiveData<Integer> setSelectType;
     private MutableLiveData<Boolean> showList;
     private MutableLiveData<Boolean> addWorkflowObserver;
@@ -259,31 +257,8 @@ public class WorkflowViewModel extends ViewModel {
         liveWorkflows = workflowRepository.getAllWorkflows();
     }
 
-    protected void swipeToRefresh(LifecycleOwner lifecycleOwner) {
-        int id = filterSettings.getWorkflowTypeId();
-        if (id > 0) {
-            workflowRepository.getWorkflowsByType(token, id, true);
-        } else {
-            workflowRepository.getAllWorkflowsNoFilters(token);
-        }
-        liveWorkflows.removeObservers(lifecycleOwner);
-    }
-
     protected void insert(WorkflowDb workflow) {
         workflowRepository.insertWorkflow(workflow);
-    }
-
-    protected void resetGetAllWorkflows(boolean isSwipe) {
-        this.isSwipe = isSwipe;
-        if (!isSwipe) showLoading.setValue(true);
-        workflowRepository.getAllWorkflowsDb(token);
-
-        isSortFilterApplied = false;
-        isBaseFilterApplied = false;
-        isStatusFilterApplied = false;
-        isSystemStatusFilterApplied = false;
-        isWorkflowTypeFilterApplied = false;
-        sendFiltersCounterToUi();
     }
 
     private void sendFiltersCounterToUi() {
@@ -653,22 +628,6 @@ public class WorkflowViewModel extends ViewModel {
         return false;
     }
 
-    @Deprecated
-    protected void loadWorkflowsByType(int position, LifecycleOwner lifecycleOwner) {
-        showLoading.postValue(true);
-        WorkflowTypeMenu menu = spinnerMenuArray.get(position);
-        int typeId = menu.getWorkflowTypeId();
-        if (typeId == NO_TYPE_SELECTED) {
-            isWorkflowTypeFilterApplied = false;
-            workflowRepository.getAllWorkflowsNoFilters(token);
-        } else {
-            isWorkflowTypeFilterApplied = true;
-            workflowRepository.getWorkflowsByType(token, typeId, false);
-        }
-        liveWorkflows.removeObservers(lifecycleOwner);
-        sendFiltersCounterToUi();
-    }
-
     /**
      * Request for filtered data to workflow repository. This function handles all the different
      * filtering scenarios. It handles cases with base filters, meta data, workflow type filters.
@@ -971,7 +930,7 @@ public class WorkflowViewModel extends ViewModel {
             filterSettings.updateWorkflowTypeListFilterItem(null);
 
             showLoading.setValue(false);
-            applyFilters(filterSettings);
+            applyFilters(lifecycleOwner, filterSettings);
             return;
         }
 
@@ -1002,11 +961,7 @@ public class WorkflowViewModel extends ViewModel {
     protected void filterBySearchText(String searchText, LifecycleOwner lifecycleOwner) {
         filterSettings.setSearchText(searchText);
         liveWorkflows.removeObservers(lifecycleOwner);
-        applyFilters(filterSettings);
-    }
-
-    protected void clearFilters() {
-        clearFilters.setValue(true);
+        applyFilters(lifecycleOwner, filterSettings);
     }
 
     private void subscribe(LifecycleOwner lifecycleOwner) {
@@ -1016,11 +971,11 @@ public class WorkflowViewModel extends ViewModel {
         final Observer<Boolean> handleRepoSuccessObserver = (success -> {
             showLoading.postValue(false);
             // TODO change data source to new query pointing ONLY to my profile id.
-            applyFilters(filterSettings, userId);
+            applyFilters(lifecycleOwner, filterSettings, userId);
         });
         final Observer<Boolean> handleRepoSuccessNoFilterObserver = (success -> {
             showLoading.postValue(false);
-            applyFilters(filterSettings);
+            applyFilters(lifecycleOwner, filterSettings);
         });
 
         final Observer<Boolean> handleRestSuccessWithNoApplyFilter = (success -> showLoading
@@ -1070,28 +1025,15 @@ public class WorkflowViewModel extends ViewModel {
         filterSettings.setTypeIdPositionInArray(typeIdPositionInArray);
     }
 
-    protected void handleWorkflowTypeFilters(
-            LifecycleOwner lifecycleOwner,
-            //int workflowTypeId,
-            int typeIdPositionInArray,
-            boolean isCheckedMyPendings,
-            boolean isCheckedStatus) {
-        WorkflowTypeMenu menu = spinnerMenuArray.get(typeIdPositionInArray);
-        updateFilterBoxSettings(menu.getWorkflowTypeId(), typeIdPositionInArray,
-                isCheckedMyPendings, isCheckedStatus);
-        liveWorkflows.removeObservers(lifecycleOwner);
-        applyFilters(filterSettings);
-    }
-
-    protected void applyFilters() {
+    protected void applyFilters(LifecycleOwner lifecycleOwner) {
         if (filterSettings == null) {
             return;
         }
-        applyFilters(filterSettings);
+        applyFilters(lifecycleOwner, filterSettings);
     }
 
-    private void applyFilters(FilterSettings filterSettings) {
-        applyFilters(filterSettings, "");
+    private void applyFilters(LifecycleOwner lifecycleOwner, FilterSettings filterSettings) {
+        applyFilters(lifecycleOwner, filterSettings, "");
     }
 
     /**
@@ -1104,7 +1046,8 @@ public class WorkflowViewModel extends ViewModel {
      * @param filterSettings
      * @param id
      */
-    private void applyFilters(FilterSettings filterSettings, String id) {
+    private void applyFilters(LifecycleOwner lifecycleOwner, FilterSettings filterSettings,
+                              String id) {
         switch (sort.getSortingType()) {
             case NONE: {
                 isSortFilterApplied = false;
@@ -1122,7 +1065,7 @@ public class WorkflowViewModel extends ViewModel {
                             id,
                             filterSettings.getSearchText());
                 }
-                reloadWorkflowsList();
+                reloadWorkflowsList(lifecycleOwner);
                 break;
             }
             case BYNUMBER: {
@@ -1147,7 +1090,7 @@ public class WorkflowViewModel extends ViewModel {
                             id,
                             filterSettings.getSearchText());
                 }
-                reloadWorkflowsList();
+                reloadWorkflowsList(lifecycleOwner);
                 break;
             }
             case BYCREATE: {
@@ -1172,7 +1115,7 @@ public class WorkflowViewModel extends ViewModel {
                             id,
                             filterSettings.getSearchText());
                 }
-                reloadWorkflowsList();
+                reloadWorkflowsList(lifecycleOwner);
                 break;
             }
             case BYUPDATE: {
@@ -1197,7 +1140,7 @@ public class WorkflowViewModel extends ViewModel {
                             id,
                             filterSettings.getSearchText());
                 }
-                reloadWorkflowsList();
+                reloadWorkflowsList(lifecycleOwner);
                 break;
             }
         }
@@ -1205,8 +1148,16 @@ public class WorkflowViewModel extends ViewModel {
         sendFiltersCounterToUi();
     }
 
-    private void reloadWorkflowsList() {
-//        liveWorkflows.removeObservers(lifecycleOwner); // TODO try putting this back and maybe it works and delete from handleWorkflowTypeFilters first line.
+    public void reloadWorkflowsList(LifecycleOwner lifecycleOwner) {
+        reloadWorkflowsList(lifecycleOwner, false);
+    }
+
+    public void reloadWorkflowsList(LifecycleOwner lifecycleOwner, boolean isSwipe) {
+        this.isSwipe = isSwipe;
+        if (!isSwipe) showLoading.setValue(true);
+
+        liveWorkflows.removeObservers(
+                lifecycleOwner); // TODO try putting this back and maybe it works and delete from handleWorkflowTypeFilters first line.
         liveWorkflows = workflowRepository.getAllWorkflows();
         addWorkflowObserver.postValue(true);
     }
@@ -1220,91 +1171,6 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     ArrayList<WorkflowTypeMenu> spinnerMenuArray;
-
-    private void initWorkflowtypeMenu() {
-        //init workflow type filter
-        ListItem category;
-        WorkflowTypeItemMenu typeMenu;
-
-        ArrayMap<String, List<WorkflowTypeMenu>> result = new ArrayMap<>();
-
-        String categoryName;
-        List<WorkflowTypeMenu> tempMenus = new ArrayList<>();
-        List<WorkflowTypeMenu> noCategory = new ArrayList<>();
-        int idCat;
-        int catId;
-        for (int i = 0; i < categoryList.size(); i++) {
-            category = categoryList.get(i);
-            categoryName = category.getName();
-            for (int j = 0; j < workflowTypeForMenu.size(); j++) {
-                typeMenu = workflowTypeForMenu.get(j);
-                idCat = typeMenu.getCategory();
-                catId = category.getId();
-                if (idCat == catId) {
-                    String menuLabel = typeMenu.getName();
-                    WorkflowTypeMenu menu = new WorkflowTypeMenu(
-                            typeMenu.id,
-                            menuLabel,
-                            WorkflowTypeSpinnerAdapter.TYPE,
-                            typeMenu.getId()
-                    );
-                    tempMenus.add(menu);
-                }
-            }
-            if (tempMenus.isEmpty()) {
-                continue;
-            }
-            result.put(categoryName, tempMenus);
-            tempMenus = new ArrayList<>();
-        }
-
-        for (int i = 0; i < workflowTypeForMenu.size(); i++) {
-            typeMenu = workflowTypeForMenu.get(i);
-            idCat = typeMenu.getCategory();
-            if (idCat == 0) {
-                String menuLabel = typeMenu.getName();
-                WorkflowTypeMenu menu = new WorkflowTypeMenu(
-                        typeMenu.id,
-                        menuLabel,
-                        WorkflowTypeSpinnerAdapter.TYPE,
-                        typeMenu.getId()
-                );
-                noCategory.add(menu);
-            }
-        }
-
-        if (!noCategory.isEmpty()) {
-            result.put(WorkflowTypeSpinnerAdapter.NO_CATEGORY_LABEL, noCategory);
-        }
-
-        spinnerMenuArray = new ArrayList<>();
-
-        String key;
-        WorkflowTypeMenu menu;
-        for (int i = 0; i < result.size(); i++) {
-            key = result.keyAt(i);
-            menu = new WorkflowTypeMenu(
-                    0,
-                    key,
-                    WorkflowTypeSpinnerAdapter.CATEGORY
-            );
-            spinnerMenuArray.add(menu);
-            List<WorkflowTypeMenu> list = result.get(key);
-            for (int j = 0; j < list.size(); j++) {
-                menu = list.get(j);
-                spinnerMenuArray.add(menu);
-            }
-        }
-
-        WorkflowTypeMenu noSelection = new WorkflowTypeMenu(
-                0,
-                "NO SELECTION",
-                WorkflowTypeSpinnerAdapter.NO_SELECTION
-        );
-        spinnerMenuArray.add(0, noSelection);
-
-        workflowTypeMenuItems.setValue(spinnerMenuArray);
-    }
 
     protected void initSortBy() {
         switch (sort.getSortingType()) {
@@ -1473,6 +1339,7 @@ public class WorkflowViewModel extends ViewModel {
             showList.setValue(false);
             return;
         }
+        showLoading.setValue(false);
         updateWithSortedList.setValue(listWorkflows);
         if (isSwipe != null && isSwipe) {
             //only scroll to top if it was a swipe refresh
@@ -1616,36 +1483,11 @@ public class WorkflowViewModel extends ViewModel {
         return updateWithSortedList;
     }
 
-    protected LiveData<int[]> getObservableToggleRadioButton() {
-        if (toggleRadioButton == null) {
-            toggleRadioButton = new MutableLiveData<>();
-        }
-        return toggleRadioButton;
-    }
-
-    protected LiveData<int[]> getObservableToggleSwitch() {
-        if (toggleSwitch == null) {
-            toggleSwitch = new MutableLiveData<>();
-        }
-        return toggleSwitch;
-    }
-
-    protected LiveData<int[]> getObservableToggleFilterSwitch() {
-        if (toggleFilterSwitch == null) {
-            toggleFilterSwitch = new MutableLiveData<>();
-        }
-        return toggleFilterSwitch;
-    }
-
     public LiveData<Boolean> getObservableShowList() {
         if (showList == null) {
             showList = new MutableLiveData<>();
         }
         return showList;
-    }
-
-    protected LiveData<List<WorkflowTypeMenu>> getObservableTypeItemMenu() {
-        return workflowTypeMenuItems;
     }
 
     protected LiveData<Boolean> getObservableAddWorkflowObserver() {

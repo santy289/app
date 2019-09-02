@@ -5,38 +5,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.Toast;
-
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
-import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowBinding;
-import com.rootnetapp.rootnetintranet.databinding.WorkflowFiltersMenuBinding;
-import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
-import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
-import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
-import com.rootnetapp.rootnetintranet.ui.RootnetApp;
-import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
-import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
-import com.rootnetapp.rootnetintranet.ui.main.MainActivityViewModel;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
-import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowExpandableAdapter;
-import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowTypeSpinnerAdapter;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
@@ -52,6 +28,26 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowBinding;
+import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
+import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
+import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
+import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
+import com.rootnetapp.rootnetintranet.ui.main.MainActivityInterface;
+import com.rootnetapp.rootnetintranet.ui.main.MainActivityViewModel;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.WorkflowExpandableAdapter;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
 import static android.app.Activity.RESULT_OK;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.REQUEST_WORKFLOW_DETAIL;
 
@@ -62,7 +58,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     WorkflowViewModelFactory workflowViewModelFactory;
     WorkflowViewModel workflowViewModel;
     private FragmentWorkflowBinding fragmentWorkflowBinding;
-    private WorkflowFiltersMenuBinding workflowFiltersMenuBinding;
     private MainActivityInterface mainActivityInterface;
     private WorkflowExpandableAdapter adapter;
     private BottomSheetBehavior bottomSheetBehavior;
@@ -148,11 +143,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     }
 
     @Override
-    public void dataAdded() {
-        //workflowViewModel.getWorkflows(token);
-    }
-
-    @Override
     public void showDetail(WorkflowListItem item) {
         if (!workflowViewModel.hasViewDetailsPermissions()) return;
 
@@ -166,14 +156,15 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_WORKFLOW_DETAIL && resultCode == RESULT_OK) {
-            workflowViewModel.resetGetAllWorkflows(false);
+            addWorkflowsObserver();
+            workflowViewModel.reloadWorkflowsList(this);
         }
     }
 
     // swipe down to refresh - SwipeRefreshLayout
     @Override
     public void onRefresh() {
-        workflowViewModel.resetGetAllWorkflows(true);
+        workflowViewModel.reloadWorkflowsList(this, true);
     }
 
     private void setupSearchListener() {
@@ -289,43 +280,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     }
 
     private void subscribe() {
-        final Observer<Boolean> addWorkflowsObserver = (setWorkflows -> addWorkflowsObserver());
-
         // Used when we have some filter operation happening.
         final Observer<PagedList<WorkflowListItem>> updateWithSortedListObserver = (this::updateAdapterList);
-
-        final Observer<int[]> toggleRadioButtonObserver = (toggle -> {
-            if (toggle == null || toggle.length < 1) {
-                return;
-            }
-            boolean check = toggle[INDEX_CHECK] == CHECK;
-            toggleRadioButtonFilter(toggle[INDEX_TYPE], check);
-        });
-
-        final Observer<int[]> toggleSwitchObserver = (toggle -> {
-            if (toggle == null || toggle.length < 1) {
-                return;
-            }
-            boolean check = toggle[INDEX_CHECK] == CHECK;
-            toggleAscendingDescendingSwitch(toggle[INDEX_TYPE], check);
-        });
-
-        final Observer<int[]> toggleSwitchFilterObserver = (toggle -> {
-            if (toggle == null || toggle.length < 1) {
-                return;
-            }
-            boolean check = toggle[INDEX_CHECK] == CHECK;
-            toogleFilterSwitch(toggle[INDEX_TYPE], check);
-        });
-
-        final Observer<Integer> setSelectTypeObserver = (index -> {
-            if (index == null) {
-                workflowFiltersMenuBinding.spnWorkflowtype
-                        .setSelection(WorkflowViewModel.NO_TYPE_SELECTED);
-                return;
-            }
-            workflowFiltersMenuBinding.spnWorkflowtype.setSelection(index);
-        });
 
         final Observer<Boolean> showListObserver = (this::showListContent);
 
@@ -344,22 +300,14 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         addWorkflowsObserver();
         workflowViewModel.getObservableUpdateWithSortedList()
                 .observe(this, updateWithSortedListObserver);
-        workflowViewModel.getObservableToggleRadioButton()
-                .observe(this, toggleRadioButtonObserver);
-        workflowViewModel.getObservableToggleSwitch().observe(this, toggleSwitchObserver);
         workflowViewModel.getObservableShowList().observe(this, showListObserver);
         workflowViewModel.getObservableAddWorkflowObserver().observe(this, aBoolean -> {
             addWorkflowsObserver();
         });
         workflowViewModel.getObservableSetAllCheckboxesList()
                 .observe(this, setAllCeckboxesObserver);
-        workflowViewModel.getObservableToggleFilterSwitch()
-                .observe(this, toggleSwitchFilterObserver);
-        workflowViewModel.getObservableSetSelectType().observe(this, setSelectTypeObserver);
         workflowViewModel.showBottomSheetLoading.observe(this, this::showBottomSheetLoading);
         workflowViewModel.getObservableLoadMore().observe(this, this::showBottomSheetLoading);
-        workflowViewModel.clearFilters.observe(this, this::clearFilters);
-        subscribeToTypeMenu();
         workflowViewModel.rightDrawerFilterMenus
                 .observe(this, this::createFilterListRightDrawer);
         workflowViewModel.rightDrawerOptionMenus
@@ -515,12 +463,12 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 actionMessage.sortType,
                 actionMessage.isChecked
         );
-        workflowViewModel.applyFilters();
+        workflowViewModel.applyFilters(this);
     }
 
     private void handleMessageRadioButtonClickedToWorkflowList(int[] message) {
         workflowViewModel.receiveMessageRadioButtonClicked(message);
-        workflowViewModel.applyFilters();
+        workflowViewModel.applyFilters(this);
     }
 
     private void handleMessageMainToggleSwitch(int[] message) {
@@ -560,133 +508,11 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         workflowViewModel.handleRightDrawerBackAction();
     }
 
-    private void subscribeToTypeMenu() {
-        final Observer<List<WorkflowTypeMenu>> typeListMenuObserver = (list -> {
-            if (list == null) {
-                return;
-            }
-            setupSpinnerWorkflowType(list);
-        });
-        workflowViewModel.getObservableTypeItemMenu().observe(this, typeListMenuObserver);
-    }
-
-    private void setupSpinnerWorkflowType(List<WorkflowTypeMenu> itemMenus) {
-        if (this.getContext() == null) {
-            return;
-        }
-        if (workflowFiltersMenuBinding == null || workflowFiltersMenuBinding.spnWorkflowtype == null) {
-            return;
-        }
-
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-        WorkflowTypeSpinnerAdapter adapter = new WorkflowTypeSpinnerAdapter(inflater,
-                itemMenus);
-
-        workflowFiltersMenuBinding.spnWorkflowtype
-                .setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position,
-                                               long id) {
-                        workflowViewModel.loadWorkflowsByType(position, WorkflowFragment.this);
-                        prepareWorkflowListWithFilters();
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-                        // Not needed but class needs to override it.
-                    }
-                });
-
-        workflowFiltersMenuBinding.spnWorkflowtype.setAdapter(adapter);
-    }
-
-    private void prepareWorkflowListWithFilters() {
-        boolean isCheckedMyPendings = workflowFiltersMenuBinding.swchMyworkflows.isChecked();
-        boolean isCheckedStatus = workflowFiltersMenuBinding.swchStatus.isChecked();
-        int typeIdPositionInArray = workflowFiltersMenuBinding.spnWorkflowtype
-                .getSelectedItemPosition();
-
-        workflowViewModel.handleWorkflowTypeFilters(
-                WorkflowFragment.this,
-                typeIdPositionInArray,
-                isCheckedMyPendings,
-                isCheckedStatus);
-    }
-
-    private void clearFilters(Boolean clear) {
-        if (workflowFiltersMenuBinding == null) {
-            return;
-        }
-        workflowFiltersMenuBinding.swchMyworkflows.setChecked(false);
-        workflowFiltersMenuBinding.swchStatus.setChecked(true);
-        workflowFiltersMenuBinding.spnWorkflowtype
-                .setSelection(WorkflowViewModel.NO_TYPE_SELECTED);
-    }
-
-    private void toggleAscendingDescendingSwitch(int switchType, boolean check) {
-        switch (switchType) {
-            case SWITCH_NUMBER:
-                workflowFiltersMenuBinding.swchWorkflownumber.setChecked(check);
-                setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchWorkflownumber,
-                        check);
-                break;
-            case SWITCH_CREATED_DATE:
-                workflowFiltersMenuBinding.swchCreatedate.setChecked(check);
-                setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchCreatedate,
-                        check);
-                break;
-            case SWITCH_UPDATED_DATE:
-                workflowFiltersMenuBinding.swchUpdatedate.setChecked(check);
-                setSwitchAscendingDescendingText(workflowFiltersMenuBinding.swchUpdatedate,
-                        check);
-                break;
-            default:
-                Log.d(TAG,
-                        "toggleAscendingDescendingSwitch: Trying to perform a toggle and there is no related Switch object");
-                break;
-        }
-    }
-
-    private void toogleFilterSwitch(int switchType, boolean check) {
-        switch (switchType) {
-            case SWITCH_PENDING:
-                workflowFiltersMenuBinding.swchMyworkflows.setChecked(check);
-                break;
-            case SWITCH_STATUS:
-                workflowFiltersMenuBinding.swchStatus.setChecked(check);
-                break;
-            default:
-                Log.d(TAG,
-                        "toogleFilterSwitch: Trying to perform a toggle and there is no related Switch object");
-                break;
-        }
-    }
-
     private void setSwitchAscendingDescendingText(Switch switchType, boolean check) {
         if (check) {
             switchType.setText(getString(R.string.ascending));
         } else {
             switchType.setText(getString(R.string.descending));
-        }
-    }
-
-    private void toggleRadioButtonFilter(int radioType, boolean check) {
-        switch (radioType) {
-            case RADIO_NUMBER:
-                workflowFiltersMenuBinding.chbxWorkflownumber.setChecked(check);
-                break;
-            case RADIO_CREATED_DATE:
-                workflowFiltersMenuBinding.chbxCreatedate.setChecked(check);
-                break;
-            case RADIO_UPDATED_DATE:
-                workflowFiltersMenuBinding.chbxUpdatedate.setChecked(check);
-                break;
-            case RADIO_CLEAR_ALL:
-                workflowFiltersMenuBinding.radioGroupSortBy.clearCheck();
-            default:
-                Log.d(TAG,
-                        "toggleRadioButtonFilter: Trying to perform toggle on unknown radio button");
-                break;
         }
     }
 

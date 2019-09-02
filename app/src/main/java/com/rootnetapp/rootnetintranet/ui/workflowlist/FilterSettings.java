@@ -144,7 +144,8 @@ public class FilterSettings {
         return systemStatusFilterOptionList.size();
     }
 
-    public void setSystemStatusFilterOptionList(List<WorkflowTypeMenu> systemStatusFilterOptionList) {
+    public void setSystemStatusFilterOptionList(
+            List<WorkflowTypeMenu> systemStatusFilterOptionList) {
         this.systemStatusFilterOptionList = systemStatusFilterOptionList;
     }
 
@@ -483,7 +484,8 @@ public class FilterSettings {
         if (systemStatusFilterOptionList.size() < 1) {
             return;
         }
-        WorkflowTypeMenu baseFilter = systemStatusFilterOptionList.get(systemStatusFilterIndexSelected);
+        WorkflowTypeMenu baseFilter = systemStatusFilterOptionList
+                .get(systemStatusFilterIndexSelected);
         baseFilter.setSelected(true);
     }
 
@@ -522,7 +524,8 @@ public class FilterSettings {
         if (systemStatusFilterOptionList.size() < 1) {
             return SYSTEM_STATUS_FILTER_ACTIVE_ID;
         }
-        WorkflowTypeMenu baseFilter = systemStatusFilterOptionList.get(systemStatusFilterIndexSelected);
+        WorkflowTypeMenu baseFilter = systemStatusFilterOptionList
+                .get(systemStatusFilterIndexSelected);
         return baseFilter.getId();
     }
 
@@ -542,6 +545,8 @@ public class FilterSettings {
             workflowTypeFilterIndexSelected = 0;
             return filterSelected;
         }
+
+        if (workflowTypeOptionsList.isEmpty()) return null;
 
         // Clear previously selected base filter.
         filterSelected = workflowTypeOptionsList.get(workflowTypeFilterIndexSelected);
@@ -585,8 +590,8 @@ public class FilterSettings {
     }
 
     /**
-     * FilterSettings updates statusFilterIndexSelected, and clears any other items selected. Updates
-     * statusFilterOptionsList and marks as selected on the position given.
+     * FilterSettings updates statusFilterIndexSelected, and clears any other items selected.
+     * Updates statusFilterOptionsList and marks as selected on the position given.
      *
      * @param position Index position to mark as selected in statysFilterOptionsList.
      *
@@ -614,8 +619,8 @@ public class FilterSettings {
     }
 
     /**
-     * FilterSettings updates systemStatusFilterIndexSelected, and clears any other items selected. Updates
-     * systemStatusFilterOptionsList and marks as selected on the position given.
+     * FilterSettings updates systemStatusFilterIndexSelected, and clears any other items selected.
+     * Updates systemStatusFilterOptionsList and marks as selected on the position given.
      *
      * @param position Index position to mark as selected in systemStatusFilterOptionsList.
      *
@@ -623,7 +628,7 @@ public class FilterSettings {
      */
     protected WorkflowTypeMenu handleSystemStatusFilterPositionSelected(int position) {
         WorkflowTypeMenu filterSelected;
-        if (position ==  systemStatusFilterIndexSelected) {
+        if (position == systemStatusFilterIndexSelected) {
             filterSelected = systemStatusFilterOptionList.get(position);
             filterSelected.setSelected(false);
             systemStatusFilterIndexSelected = 0;

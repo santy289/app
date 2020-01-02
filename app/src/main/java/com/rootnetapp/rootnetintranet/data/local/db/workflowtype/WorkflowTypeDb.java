@@ -1,5 +1,11 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflowtype;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.Index;
+import androidx.room.PrimaryKey;
+
 import com.rootnetapp.rootnetintranet.models.responses.workflows.presets.Preset;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
@@ -7,12 +13,6 @@ import com.squareup.moshi.Json;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.Ignore;
-import androidx.room.Index;
-import androidx.room.PrimaryKey;
 
 @Entity(indices = {@Index("id")})
 public class WorkflowTypeDb {
@@ -217,7 +217,7 @@ public class WorkflowTypeDb {
         return list;
     }
 
-    public List<Integer> getRoleApproverProfileIds(int roleId){
+    public List<Integer> getRoleApproverProfileIds(int roleId) {
         List<Integer> profileIds = new ArrayList<>();
 
         for (DefaultRoleApprover roleApprover : getDefaultRoleApprovers()) {
@@ -225,5 +225,20 @@ public class WorkflowTypeDb {
         }
 
         return profileIds;
+    }
+
+    public List<Status> getAllStatusForApprover(int approverId) {
+        List<Status> statusList = new ArrayList<>();
+
+        for (Status s : getStatus()) {
+            for (Approver a : s.getApproversList()) {
+                if (a.entityId == approverId) {
+                    statusList.add(s);
+                    break;
+                }
+            }
+        }
+
+        return statusList;
     }
 }

@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.status;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,19 +10,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
-
-import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
-import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailStatusBinding;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
-import com.rootnetapp.rootnetintranet.ui.RootnetApp;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters.ApproversAdapter;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
@@ -33,6 +21,20 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
+import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailStatusBinding;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
+import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.massapproval.MassApprovalActivity;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters.ApproversAdapter;
+
+import java.util.List;
+
+import javax.inject.Inject;
 
 public class StatusFragment extends Fragment {
 
@@ -120,6 +122,7 @@ public class StatusFragment extends Fragment {
     private void setOnClickListeners() {
         mBinding.includeNextStep.btnApprove.setOnClickListener(v -> approveAction());
         mBinding.includeNextStep.btnReject.setOnClickListener(v -> rejectAction());
+        mBinding.includeNextStep.btnMassApproval.setOnClickListener(v -> goToMassApproval());
     }
 
     /**
@@ -344,5 +347,11 @@ public class StatusFragment extends Fragment {
                 getString(messageRes),
                 Toast.LENGTH_SHORT)
                 .show();
+    }
+
+    private void goToMassApproval() {
+        Intent intent = new Intent(getActivity(), MassApprovalActivity.class);
+        intent.putExtra(MassApprovalActivity.EXTRA_WORKFLOW_LIST_ITEM, mWorkflowListItem);
+        startActivity(intent);
     }
 }

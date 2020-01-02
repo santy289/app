@@ -454,4 +454,9 @@
     <string name="geolocation_activity_could_not_retrieve_location">Ubicación no encontrada</string>
     <string name="geolocation_activity_unnamed">Sin nombre</string>
     <string name="geolocation_activity_no_connection">Sin conexión a internet.</string>
+
+    <!--MassApprovalActivity-->
+    <string name="mass_approval_activity_title">Aprobación Masiva</string>
+    <string name="mass_approval_activity_reject">Reject</string>
+    <string name="mass_approval_activity_send">Send</string>
 </resources>

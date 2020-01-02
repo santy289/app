@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">RootnetIntranet</string>
+    <string name="app_name">Rootnet Intranet</string>
     <string name="cloud_based">Cloud-Based</string>
     <string name="subdomain">Subdomain</string>
     <string name="url_half">.rootnetapp.com</string>

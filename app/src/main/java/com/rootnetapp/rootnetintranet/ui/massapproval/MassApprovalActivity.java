@@ -113,6 +113,8 @@ public class MassApprovalActivity extends AppCompatActivity {
                 .observe(this, this::enableSubmitButton);
         massApprovalViewModel.getObservableHandleResult()
                 .observe(this, this::handleResult);
+        massApprovalViewModel.getObservableNoStatuses()
+                .observe(this, this::handleNoStatuses);
 
         massApprovalViewModel.showLoading.observe(this, this::showLoading);
     }
@@ -186,6 +188,23 @@ public class MassApprovalActivity extends AppCompatActivity {
     @UiThread
     private void enableSubmitButton(boolean enable) {
         mBinding.btnSubmit.setEnabled(enable);
+    }
+
+    @UiThread
+    private void handleNoStatuses(boolean ignored) {
+        showNoStatusesView(true);
+        showSubmitButton(false);
+        showRecyclerView(false);
+    }
+
+    @UiThread
+    private void showNoStatusesView(boolean show){
+        mBinding.tvNoMoreStatus.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    @UiThread
+    private void showRecyclerView(boolean show){
+        mBinding.rvStatuses.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     @Override

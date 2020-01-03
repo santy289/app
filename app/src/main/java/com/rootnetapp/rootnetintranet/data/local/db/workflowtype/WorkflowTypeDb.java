@@ -208,9 +208,9 @@ public class WorkflowTypeDb {
     public List<Approver> getDistinctApprovers() {
         List<Approver> list = new ArrayList<>();
 
-        for (Status status : getStatus()) {
-            for (Approver approver : status.getApproversList()) {
-                if (!list.contains(approver)) list.add(approver);
+        for (Status s : getStatus()) {
+            for (Approver a : s.getApproversList()) {
+                if (!list.contains(a)) list.add(a);
             }
         }
 
@@ -240,5 +240,19 @@ public class WorkflowTypeDb {
         }
 
         return statusList;
+    }
+
+    public Approver getApproverForStatus(int statusId, int approverId) {
+        for (Status s : getStatus()) {
+            if (s.getId() == statusId) {
+                for (Approver a : s.getApproversList()) {
+                    if (a.entityId == approverId) {
+                        return a;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 }

@@ -9,6 +9,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
@@ -35,6 +36,7 @@ public class MassApprovalViewModel extends ViewModel {
     private MutableLiveData<Boolean> mShowSubmitButtonLiveData;
     private MutableLiveData<Boolean> mEnableSubmitButtonLiveData;
     private MutableLiveData<Boolean> mHandleResultLiveData;
+    private MutableLiveData<Boolean> mNoStatusesLiveData;
     protected MutableLiveData<Boolean> showLoading;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
@@ -124,28 +126,38 @@ public class MassApprovalViewModel extends ViewModel {
         if (currentWorkflowType == null) {
             return;
         }
-        updateUIWithWorkflowType(currentWorkflowType);
+        updateUIWithWorkflowType();
     }
 
-    private void updateUIWithWorkflowType(WorkflowTypeDb currentWorkflowType) {
+    private void updateUIWithWorkflowType() {
+        List<StatusApproval> pendingStatusesForUser = getPendingStatusesForUser();
+
+        if (pendingStatusesForUser.isEmpty()) {
+            mNoStatusesLiveData.setValue(true);
+        } else {
+            mPendingStatusListLiveData.setValue(pendingStatusesForUser);
+            mShowSubmitButtonLiveData.setValue(true);
+        }
+    }
+
+    private List<StatusApproval> getPendingStatusesForUser() {
         List<StatusApproval> pendingStatusesForUser = new ArrayList<>();
 
-        List<Status> allStatusesListForUser = currentWorkflowType
-                .getAllStatusForApprover(mUserId);
+        List<Status> allStatusesListForUser = currentWorkflowType.getAllStatusForApprover(mUserId);
 
         for (Status status : allStatusesListForUser) {
             Boolean isApproved = ApproverHistory.getApprovalStateForStatusAndApprover(
                     mWorkflow.getWorkflowApprovalHistory(), status.getId(), mUserId);
 
-            if (isApproved == null) pendingStatusesForUser.add(new StatusApproval(status));
+            Approver approver = currentWorkflowType.getApproverForStatus(status.getId(), mUserId);
+            boolean canChangeMind = approver != null && approver.canChangeMind;
+
+            if (isApproved == null || canChangeMind) {
+                pendingStatusesForUser.add(new StatusApproval(status));
+            }
         }
 
-        if (pendingStatusesForUser.isEmpty()) {
-            //todo handle error
-        } else {
-            mPendingStatusListLiveData.setValue(pendingStatusesForUser);
-            mShowSubmitButtonLiveData.setValue(true);
-        }
+        return pendingStatusesForUser;
     }
 
     protected void processMassApproval(List<StatusApproval> statusApprovalList) {
@@ -263,5 +275,12 @@ public class MassApprovalViewModel extends ViewModel {
             mHandleResultLiveData = new MutableLiveData<>();
         }
         return mHandleResultLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableNoStatuses() {
+        if (mNoStatusesLiveData == null) {
+            mNoStatusesLiveData = new MutableLiveData<>();
+        }
+        return mNoStatusesLiveData;
     }
 }

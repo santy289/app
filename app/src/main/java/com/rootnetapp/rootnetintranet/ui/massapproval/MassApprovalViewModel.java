@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
@@ -44,7 +45,7 @@ public class MassApprovalViewModel extends ViewModel {
     private String mToken;
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the mWorkflow.
     private WorkflowDb mWorkflow; // Not in DB and more complete response from network.
-    private WorkflowTypeDb currentWorkflowType;
+    private WorkflowTypeDb mCurrentWorkflowType;
     private int mUserId;
 
     public MassApprovalViewModel(MassApprovalRepository massApprovalRepository) {
@@ -82,7 +83,7 @@ public class MassApprovalViewModel extends ViewModel {
     }
 
     protected WorkflowTypeDb getCurrentWorkflowType() {
-        return currentWorkflowType;
+        return mCurrentWorkflowType;
     }
 
     private void getWorkflow(String auth, int workflowId) {
@@ -122,8 +123,8 @@ public class MassApprovalViewModel extends ViewModel {
      */
     private void onTypeSuccess(WorkflowTypeResponse response) {
         showLoading.setValue(false);
-        currentWorkflowType = response.getWorkflowType();
-        if (currentWorkflowType == null) {
+        mCurrentWorkflowType = response.getWorkflowType();
+        if (mCurrentWorkflowType == null) {
             return;
         }
         updateUIWithWorkflowType();
@@ -143,13 +144,13 @@ public class MassApprovalViewModel extends ViewModel {
     private List<StatusApproval> getPendingStatusesForUser() {
         List<StatusApproval> pendingStatusesForUser = new ArrayList<>();
 
-        List<Status> allStatusesListForUser = currentWorkflowType.getAllStatusForApprover(mUserId);
+        List<Status> allStatusesListForUser = mCurrentWorkflowType.getAllStatusForApprover(mUserId);
 
         for (Status status : allStatusesListForUser) {
             Boolean isApproved = ApproverHistory.getApprovalStateForStatusAndApprover(
                     mWorkflow.getWorkflowApprovalHistory(), status.getId(), mUserId);
 
-            Approver approver = currentWorkflowType.getApproverForStatus(status.getId(), mUserId);
+            Approver approver = mCurrentWorkflowType.getApproverForStatus(status.getId(), mUserId);
             boolean canChangeMind = approver != null && approver.canChangeMind;
 
             if (isApproved == null || canChangeMind) {
@@ -170,7 +171,7 @@ public class MassApprovalViewModel extends ViewModel {
         }
 
         if (listToPost.isEmpty()) {
-            //todo handle error
+            mShowToastMessage.setValue(R.string.mass_approval_activity_no_selection);
         } else {
             postSendToServer(listToPost);
         }

@@ -464,4 +464,6 @@
     <string name="mass_approval_activity_reject">Reject</string>
     <string name="mass_approval_activity_send">Send</string>
     <string name="mass_approval_activity_success">Workflow updated</string>
+    <string name="mass_approval_activity_fail">An error has occurred while processing a mass approval operation</string>
+    <string name="mass_approval_activity_no_selection">Please select at least one status to approve or reject</string>
 </resources>

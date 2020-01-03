@@ -143,11 +143,11 @@ public class MassApprovalActivity extends AppCompatActivity {
 
     private void handleResult(boolean success) {
         if (!success) {
-            //todo error
+            showToastMessage(R.string.mass_approval_activity_fail);
             return;
         }
 
-        showToastMessage(R.string.mass_approval_activity_success);
+        showToastMessage(R.string.mass_approval_activity_fail);
 
         setResult(RESULT_OK);
         finish();
@@ -198,12 +198,12 @@ public class MassApprovalActivity extends AppCompatActivity {
     }
 
     @UiThread
-    private void showNoStatusesView(boolean show){
+    private void showNoStatusesView(boolean show) {
         mBinding.tvNoMoreStatus.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     @UiThread
-    private void showRecyclerView(boolean show){
+    private void showRecyclerView(boolean show) {
         mBinding.rvStatuses.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 

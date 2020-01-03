@@ -460,4 +460,6 @@
     <string name="mass_approval_activity_reject">Reject</string>
     <string name="mass_approval_activity_send">Send</string>
     <string name="mass_approval_activity_success">Workflow actualizado</string>
+    <string name="mass_approval_activity_fail">Ha ocurrido un error al procesar la operación de aprobación masiva</string>
+    <string name="mass_approval_activity_no_selection">Por favor seleccione al menos un estado para actualizar</string>
 </resources>

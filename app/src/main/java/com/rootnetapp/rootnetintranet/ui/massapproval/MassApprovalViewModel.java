@@ -158,7 +158,7 @@ public class MassApprovalViewModel extends ViewModel {
             WorkflowTypeDb currentWorkflowType, WorkflowDb workflow, int userId) {
         List<StatusApproval> pendingStatusesForUser = new ArrayList<>();
 
-        List<Status> allStatusesListForUser = currentWorkflowType.getAllStatusForApprover(userId);
+        List<Status> allStatusesListForUser = currentWorkflowType.getAllStatusForApprover(workflow, userId);
 
         for (Status status : allStatusesListForUser) {
             Boolean isUserApproved = ApproverHistory.getApprovalStateForStatusAndApprover(

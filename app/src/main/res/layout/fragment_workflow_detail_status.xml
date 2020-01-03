@@ -58,6 +58,16 @@
                 app:layout_constraintTop_toTopOf="@id/tv_title_workflow_status"
                 tools:visibility="visible" />
 
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:indeterminate="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_title_workflow_status" />
+
             <include
                 android:id="@+id/include_status_summary"
                 layout="@layout/fragment_workflow_detail_status_summary"
@@ -84,6 +94,7 @@
                 app:layout_constraintTop_toBottomOf="@id/include_status_summary" />
 
             <View
+                android:id="@+id/view_title_next_step"
                 android:layout_width="0dp"
                 android:layout_height="2dp"
                 android:layout_marginStart="16dp"

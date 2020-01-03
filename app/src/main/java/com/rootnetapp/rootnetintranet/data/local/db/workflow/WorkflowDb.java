@@ -1,5 +1,14 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflow;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Embedded;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Ignore;
+import androidx.room.Index;
+import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.converters.StringDateConverter;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.models.createworkflow.SpecificApprovers;
@@ -11,15 +20,6 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHis
 import com.squareup.moshi.Json;
 
 import java.util.List;
-
-import androidx.room.ColumnInfo;
-import androidx.room.Embedded;
-import androidx.room.Entity;
-import androidx.room.ForeignKey;
-import androidx.room.Ignore;
-import androidx.room.Index;
-import androidx.room.PrimaryKey;
-import androidx.room.TypeConverters;
 
 @Entity(foreignKeys = @ForeignKey(entity = WorkflowTypeDb.class,
                                             parentColumns = "id",
@@ -398,5 +398,15 @@ public class WorkflowDb {
 
     public void setPeopleRelated(List<PersonRelated> peopleRelated) {
         this.peopleRelated = peopleRelated;
+    }
+
+    public boolean isStatusPendingForApproval(int statusId){
+        for (Integer id : getPendingApproval()) {
+            if (statusId == id){
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -23,7 +23,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
-import com.rootnetapp.rootnetintranet.ui.massapproval.models.StatusApproval;
+import com.rootnetapp.rootnetintranet.ui.massapproval.MassApprovalViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +51,7 @@ public class StatusViewModel extends ViewModel {
     private MutableLiveData<Boolean> mTieStatusLiveData;
 
     protected MutableLiveData<Boolean> showLoading;
+    protected MutableLiveData<Boolean> showInitialLoading;
     protected MutableLiveData<List<Approver>> updateCurrentApproversList;
     protected MutableLiveData<List<String>> updateApproveSpinner;
     protected MutableLiveData<Boolean> hideApproveSpinnerOnEmptyData;
@@ -74,6 +75,7 @@ public class StatusViewModel extends ViewModel {
     protected StatusViewModel(StatusRepository statusRepository) {
         this.mRepository = statusRepository;
         this.showLoading = new MutableLiveData<>();
+        this.showInitialLoading = new MutableLiveData<>();
         this.updateCurrentApproversList = new MutableLiveData<>();
         this.updateApproveSpinner = new MutableLiveData<>();
         this.hideApproveSpinnerOnEmptyData = new MutableLiveData<>();
@@ -91,12 +93,14 @@ public class StatusViewModel extends ViewModel {
         mWorkflowListItem = workflow;
         mUserId = loggedUserId == null ? 0 : Integer.parseInt(loggedUserId);
 
+        showInitialLoading.setValue(true);
         getWorkflow(mToken, mWorkflowListItem.getWorkflowId());
     }
 
     protected void updateInfo() {
         if (mWorkflowListItem == null) return;
 
+        showInitialLoading.setValue(true);
         getWorkflow(mToken, mWorkflowListItem.getWorkflowId());
     }
 
@@ -343,6 +347,8 @@ public class StatusViewModel extends ViewModel {
      * @param response Incoming response from server.
      */
     private void onTypeSuccess(WorkflowTypeResponse response) {
+        showInitialLoading.setValue(false);
+
         currentWorkflowType = response.getWorkflowType();
         if (currentWorkflowType == null) {
             return;
@@ -399,7 +405,7 @@ public class StatusViewModel extends ViewModel {
         updateApproveSpinnerUi(mWorkflow, nextStatusIds);
 
         // Check Mass Approval
-        hideMassApprovalLiveData.setValue(getPendingStatusesForUser().isEmpty());
+        hideMassApprovalLiveData.setValue(MassApprovalViewModel.getPendingStatusesForUser(currentWorkflowType, mWorkflow, mUserId).isEmpty());
     }
 
     /**
@@ -534,13 +540,14 @@ public class StatusViewModel extends ViewModel {
      * @param nextStatusIds List of ids specified by a Workflow in order to look in a WorkflowType.
      */
     private void updateApproveSpinnerUi(WorkflowDb workflow, List<Integer> nextStatusIds) {
-        if (!workflow.isLoggedIsApprover()) {
-            hideApproveSpinnerOnNotApprover.setValue(true);
+        List<String> nextStatusList = new ArrayList<>();
+        if (nextStatusIds.isEmpty()) {
+            hideApproveSpinnerOnEmptyData.setValue(true);
             return;
         }
-        List<String> nextStatusList = new ArrayList<>();
-        if (nextStatusIds.size() < 1) {
-            hideApproveSpinnerOnEmptyData.setValue(true);
+
+        if (!workflow.isLoggedIsApprover()) {
+            hideApproveSpinnerOnNotApprover.setValue(true);
             return;
         }
 
@@ -586,32 +593,6 @@ public class StatusViewModel extends ViewModel {
         return isOpen ? R.color.green : R.color.text_red;
     }
 
-    /**
-     * Retrieves a list of the status where the logged user is an approver of and the user can
-     * modify the approval state of the status.
-     *
-     * @return list of available status to update.
-     */
-    private List<StatusApproval> getPendingStatusesForUser() {
-        List<StatusApproval> pendingStatusesForUser = new ArrayList<>();
-
-        List<Status> allStatusesListForUser = currentWorkflowType.getAllStatusForApprover(mUserId);
-
-        for (Status status : allStatusesListForUser) {
-            Boolean isApproved = ApproverHistory.getApprovalStateForStatusAndApprover(
-                    mWorkflow.getWorkflowApprovalHistory(), status.getId(), mUserId);
-
-            Approver approver = currentWorkflowType.getApproverForStatus(status.getId(), mUserId);
-            boolean canChangeMind = approver != null && approver.canChangeMind;
-
-            if (isApproved == null || canChangeMind) {
-                pendingStatusesForUser.add(new StatusApproval(status));
-            }
-        }
-
-        return pendingStatusesForUser;
-    }
-
     private void onFailure(Throwable throwable) {
         if (throwable instanceof HttpException) {
             int httpCode = ((HttpException) throwable).code();
@@ -621,6 +602,7 @@ public class StatusViewModel extends ViewModel {
             }
         }
 
+        showInitialLoading.setValue(false);
         showLoading.setValue(false);
         mErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
     }

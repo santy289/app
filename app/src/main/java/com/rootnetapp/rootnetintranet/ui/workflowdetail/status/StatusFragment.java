@@ -95,7 +95,7 @@ public class StatusFragment extends Fragment {
         final Observer<Integer> errorObserver = ((Integer data) -> {
             showLoading(false);
             if (null != data) {
-                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
+                showToastMessage(data);
             }
         });
 
@@ -107,6 +107,8 @@ public class StatusFragment extends Fragment {
         statusViewModel.getObservableEnableApproveRejectButtons()
                 .observe(getViewLifecycleOwner(), this::enableApproveRejectButtons);
 
+        statusViewModel.showInitialLoading
+                .observe(getViewLifecycleOwner(), this::showInitialLoading);
         statusViewModel.showLoading.observe(getViewLifecycleOwner(), this::showLoading);
         statusViewModel.handleShowLoadingByRepo.observe(getViewLifecycleOwner(), this::showLoading);
         statusViewModel.updateStatusUi.observe(getViewLifecycleOwner(), this::updateStatusDetails);
@@ -325,7 +327,7 @@ public class StatusFragment extends Fragment {
     }
 
     @UiThread
-    private void hideMassApprovalButton(boolean hide){
+    private void hideMassApprovalButton(boolean hide) {
         mBinding.includeNextStep.btnMassApproval.setVisibility(hide ? View.GONE : View.VISIBLE);
     }
 
@@ -353,12 +355,30 @@ public class StatusFragment extends Fragment {
                 ContextCompat.getColor(getContext(), statusUiData.getSelectedColor()));
     }
 
+    @UiThread
     private void showToastMessage(@StringRes int messageRes) {
         Toast.makeText(
                 getContext(),
                 getString(messageRes),
                 Toast.LENGTH_SHORT)
                 .show();
+    }
+
+    @UiThread
+    private void showInitialLoading(boolean show) {
+        if (show) {
+            mBinding.progressBar.setVisibility(View.VISIBLE);
+            mBinding.includeStatusSummary.lytStatusSummary.setVisibility(View.GONE);
+            mBinding.includeNextStep.lytStatusNextStep.setVisibility(View.GONE);
+            mBinding.tvTitleNextStep.setVisibility(View.GONE);
+            mBinding.viewTitleNextStep.setVisibility(View.GONE);
+        } else {
+            mBinding.progressBar.setVisibility(View.GONE);
+            mBinding.includeStatusSummary.lytStatusSummary.setVisibility(View.VISIBLE);
+            mBinding.includeNextStep.lytStatusNextStep.setVisibility(View.VISIBLE);
+            mBinding.tvTitleNextStep.setVisibility(View.VISIBLE);
+            mBinding.viewTitleNextStep.setVisibility(View.VISIBLE);
+        }
     }
 
     private void goToMassApproval() {

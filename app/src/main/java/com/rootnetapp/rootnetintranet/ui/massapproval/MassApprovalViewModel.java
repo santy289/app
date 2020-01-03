@@ -137,7 +137,8 @@ public class MassApprovalViewModel extends ViewModel {
      * Processes the workflow type information and send the relevant data to update the UI.
      */
     private void updateUIWithWorkflowType() {
-        List<StatusApproval> pendingStatusesForUser = getPendingStatusesForUser();
+        List<StatusApproval> pendingStatusesForUser = getPendingStatusesForUser(
+                mCurrentWorkflowType, mWorkflow, mUserId);
 
         if (pendingStatusesForUser.isEmpty()) {
             mNoStatusesLiveData.setValue(true);
@@ -153,19 +154,21 @@ public class MassApprovalViewModel extends ViewModel {
      *
      * @return list of available status to update.
      */
-    private List<StatusApproval> getPendingStatusesForUser() {
+    public static List<StatusApproval> getPendingStatusesForUser(
+            WorkflowTypeDb currentWorkflowType, WorkflowDb workflow, int userId) {
         List<StatusApproval> pendingStatusesForUser = new ArrayList<>();
 
-        List<Status> allStatusesListForUser = mCurrentWorkflowType.getAllStatusForApprover(mUserId);
+        List<Status> allStatusesListForUser = currentWorkflowType.getAllStatusForApprover(userId);
 
         for (Status status : allStatusesListForUser) {
-            Boolean isApproved = ApproverHistory.getApprovalStateForStatusAndApprover(
-                    mWorkflow.getWorkflowApprovalHistory(), status.getId(), mUserId);
+            Boolean isUserApproved = ApproverHistory.getApprovalStateForStatusAndApprover(
+                    workflow.getWorkflowApprovalHistory(), status.getId(), userId);
 
-            Approver approver = mCurrentWorkflowType.getApproverForStatus(status.getId(), mUserId);
+            Approver approver = currentWorkflowType.getApproverForStatus(status.getId(), userId);
             boolean canChangeMind = approver != null && approver.canChangeMind;
+            boolean isStatusPending = workflow.isStatusPendingForApproval(status.getId());
 
-            if (isApproved == null || canChangeMind) {
+            if (isStatusPending && (isUserApproved == null || canChangeMind)) {
                 pendingStatusesForUser.add(new StatusApproval(status));
             }
         }

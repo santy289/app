@@ -37,7 +37,7 @@ public class StatusRepository {
         this.profileDao = database.profileDao();
     }
 
-    protected void clearDisposables() {
+    public void clearDisposables() {
         disposables.clear();
     }
 

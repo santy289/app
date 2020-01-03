@@ -53,7 +53,6 @@ public class MassApprovalActivity extends AppCompatActivity {
 
         SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
-        String permissionsString = prefs.getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
         String loggedUserId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
 
         setOnClickListeners();
@@ -64,21 +63,25 @@ public class MassApprovalActivity extends AppCompatActivity {
         WorkflowListItem mWorkflowListItem = getIntent()
                 .getParcelableExtra(EXTRA_WORKFLOW_LIST_ITEM);
 
-        massApprovalViewModel
-                .initWithDetails(token, mWorkflowListItem, loggedUserId, permissionsString);
+        massApprovalViewModel.initWithDetails(token, mWorkflowListItem, loggedUserId);
     }
 
     /**
      * Method will initialize some UI features using an WorkflowListItem object coming from the user
      * selection in workflow list.
      *
-     * @param workflowListItem
+     * @param workflowListItem workflow simple object to fetch the complete info.
      */
     private void initUiWith(WorkflowListItem workflowListItem) {
         setActionBar(workflowListItem);
         massApprovalViewModel.getObservableInitWorkflowUi().removeObservers(this);
     }
 
+    /**
+     * Set the action bar with its title and subtitle, detailing the workflow title and type.
+     *
+     * @param workflowListItem workflow info.
+     */
     private void setActionBar(WorkflowListItem workflowListItem) {
         setSupportActionBar(mBinding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -131,26 +134,22 @@ public class MassApprovalActivity extends AppCompatActivity {
         mBinding.rvStatuses.setNestedScrollingEnabled(false);
     }
 
+    /**
+     * Populates the RecyclerView with the status for the user to select.
+     *
+     * @param statuses list of available status to update.
+     */
     private void updatePendingStatusList(List<StatusApproval> statuses) {
         mAdapter = new MassApprovalAdapter(massApprovalViewModel.getCurrentWorkflowType(),
                 statuses);
         mBinding.rvStatuses.setAdapter(mAdapter);
     }
 
+    /**
+     * Sends the request to the ViewModel to process the user selections.
+     */
     private void processMassApproval() {
         massApprovalViewModel.processMassApproval(mAdapter.getDataset());
-    }
-
-    private void handleResult(boolean success) {
-        if (!success) {
-            showToastMessage(R.string.mass_approval_activity_fail);
-            return;
-        }
-
-        showToastMessage(R.string.mass_approval_activity_fail);
-
-        setResult(RESULT_OK);
-        finish();
     }
 
     @UiThread
@@ -205,6 +204,25 @@ public class MassApprovalActivity extends AppCompatActivity {
     @UiThread
     private void showRecyclerView(boolean show) {
         mBinding.rvStatuses.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    /**
+     * Handles the Mass Approval process result. Finishes this activity if the result was
+     * successful.
+     *
+     * @param success whether the MassApproval process result was successful.
+     */
+    @UiThread
+    private void handleResult(boolean success) {
+        if (!success) {
+            showToastMessage(R.string.mass_approval_activity_fail);
+            return;
+        }
+
+        showToastMessage(R.string.mass_approval_activity_fail);
+
+        setResult(RESULT_OK);
+        finish();
     }
 
     @Override

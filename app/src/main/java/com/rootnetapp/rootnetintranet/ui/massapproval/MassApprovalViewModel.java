@@ -63,29 +63,32 @@ public class MassApprovalViewModel extends ViewModel {
      * Initialize the Workflow detail screen using a WorkflowListItem coming from the user selection
      * on the workflow list.
      *
-     * @param token             auth token
-     * @param workflow          workflow item
-     * @param loggedUserId      user id
-     * @param permissionsString user permissions
+     * @param token        auth token
+     * @param workflow     workflow item
+     * @param loggedUserId user id
      */
-    protected void initWithDetails(String token, WorkflowListItem workflow, String loggedUserId,
-                                   String permissionsString) {
-        this.mToken = token;
-        this.mWorkflowListItem = workflow;
+    protected void initWithDetails(String token, WorkflowListItem workflow, String loggedUserId) {
+        mToken = token;
+        mWorkflowListItem = workflow;
         mInitWorkflowUiLiveData.setValue(workflow);
 
         mUserId = loggedUserId == null ? 0 : Integer.parseInt(loggedUserId);
-//        checkPermissions(permissionsString, userId);
 
         showLoading.setValue(true);
 
-        getWorkflow(this.mToken, this.mWorkflowListItem.getWorkflowId());
+        getWorkflow(mToken, mWorkflowListItem.getWorkflowId());
     }
 
     protected WorkflowTypeDb getCurrentWorkflowType() {
         return mCurrentWorkflowType;
     }
 
+    /**
+     * Calls the repository to obtain the workflow info
+     *
+     * @param auth       token
+     * @param workflowId id of the workflow to obtain
+     */
     private void getWorkflow(String auth, int workflowId) {
         Disposable disposable = mRepository
                 .getWorkflow(auth, workflowId)
@@ -104,7 +107,7 @@ public class MassApprovalViewModel extends ViewModel {
     }
 
     /**
-     * Calls the repository for obtaining a new Workflow Type by a type id.
+     * Calls the repository to obtain the workflow type info.
      *
      * @param auth   Access token to use for endpoint request.
      * @param typeId Id that will be passed on to the endpoint.
@@ -130,6 +133,9 @@ public class MassApprovalViewModel extends ViewModel {
         updateUIWithWorkflowType();
     }
 
+    /**
+     * Processes the workflow type information and send the relevant data to update the UI.
+     */
     private void updateUIWithWorkflowType() {
         List<StatusApproval> pendingStatusesForUser = getPendingStatusesForUser();
 
@@ -141,6 +147,12 @@ public class MassApprovalViewModel extends ViewModel {
         }
     }
 
+    /**
+     * Retrieves a list of the status where the logged user is an approver of and the user can
+     * modify the approval state of the status.
+     *
+     * @return list of available status to update.
+     */
     private List<StatusApproval> getPendingStatusesForUser() {
         List<StatusApproval> pendingStatusesForUser = new ArrayList<>();
 
@@ -161,6 +173,11 @@ public class MassApprovalViewModel extends ViewModel {
         return pendingStatusesForUser;
     }
 
+    /**
+     * Processes the user selection and create the list of updates to send to the server.
+     *
+     * @param statusApprovalList list of user selections.
+     */
     protected void processMassApproval(List<StatusApproval> statusApprovalList) {
         List<StatusApproval> listToPost = new ArrayList<>();
 
@@ -178,6 +195,11 @@ public class MassApprovalViewModel extends ViewModel {
 
     }
 
+    /**
+     * Sends a request to the repository to post the Mass Approval selected by the user
+     *
+     * @param statusApprovalList list of processed user selections.
+     */
     private void postSendToServer(List<StatusApproval> statusApprovalList) {
         //we cannot use a POJO for this request because the payload has dynamic fields.
         Map<String, Object> mapBody = new HashMap<>();
@@ -209,10 +231,20 @@ public class MassApprovalViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
+    /**
+     * Handles the Mass Approval post failure.
+     *
+     * @param throwable exception thrown that caused the failure.
+     */
     private void onMassApprovalFailure(Throwable throwable) {
         onFailure(throwable);
     }
 
+    /**
+     * Handles the Mass Approval post success.
+     *
+     * @param workflowResponse remote API response.
+     */
     private void onMassApprovalSuccess(WorkflowResponse workflowResponse) {
         mHandleResultLiveData.setValue(workflowResponse.getWorkflow() != null);
     }

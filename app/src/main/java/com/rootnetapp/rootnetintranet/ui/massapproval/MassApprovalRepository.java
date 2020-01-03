@@ -9,22 +9,15 @@ import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class MassApprovalRepository extends StatusRepository {
-
-    private final CompositeDisposable disposables = new CompositeDisposable();
 
     private static final String TAG = "MassApprovalRepository";
 
     protected MassApprovalRepository(ApiInterface service,
                                      AppDatabase database) {
         super(service, database);
-    }
-
-    protected void clearDisposables() {
-        disposables.clear();
     }
 
     public Observable<WorkflowResponse> postMassApproval(String token,

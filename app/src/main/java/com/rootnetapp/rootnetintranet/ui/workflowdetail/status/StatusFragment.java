@@ -24,6 +24,7 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailStatusBinding;
@@ -79,12 +80,13 @@ public class StatusFragment extends Fragment {
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
+        String loggedUserId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
 
         setOnClickListeners();
         setOnOpenStatusChangedListener();
         subscribe();
 
-        statusViewModel.initDetails(token, mWorkflowListItem);
+        statusViewModel.initDetails(token, mWorkflowListItem, loggedUserId);
 
         return view;
     }
@@ -122,6 +124,8 @@ public class StatusFragment extends Fragment {
                 .observe(getViewLifecycleOwner(), this::updateStatusDetails);
         statusViewModel.setWorkflowIsOpen
                 .observe(getViewLifecycleOwner(), this::updateWorkflowStatus);
+        statusViewModel.hideMassApprovalLiveData
+                .observe(getViewLifecycleOwner(), this::hideMassApprovalButton);
     }
 
     private void setOnClickListeners() {
@@ -314,12 +318,15 @@ public class StatusFragment extends Fragment {
         if (hide) {
             mBinding.includeNextStep.tvTitleApprovers.setVisibility(View.GONE);
             mBinding.includeNextStep.rvApprovers.setVisibility(View.GONE);
-            mBinding.includeNextStep.btnMassApproval.setVisibility(View.GONE);
         } else {
-            mBinding.includeNextStep.tvTitleApprovers.setVisibility(View.GONE);
-            mBinding.includeNextStep.rvApprovers.setVisibility(View.GONE);
-            mBinding.includeNextStep.btnMassApproval.setVisibility(View.GONE);
+            mBinding.includeNextStep.tvTitleApprovers.setVisibility(View.VISIBLE);
+            mBinding.includeNextStep.rvApprovers.setVisibility(View.VISIBLE);
         }
+    }
+
+    @UiThread
+    private void hideMassApprovalButton(boolean hide){
+        mBinding.includeNextStep.btnMassApproval.setVisibility(hide ? View.GONE : View.VISIBLE);
     }
 
     /**

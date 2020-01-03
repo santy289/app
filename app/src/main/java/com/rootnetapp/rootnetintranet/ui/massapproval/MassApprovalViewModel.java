@@ -246,6 +246,7 @@ public class MassApprovalViewModel extends ViewModel {
      * @param workflowResponse remote API response.
      */
     private void onMassApprovalSuccess(WorkflowResponse workflowResponse) {
+        showLoading.setValue(false);
         mHandleResultLiveData.setValue(workflowResponse.getWorkflow() != null);
     }
 

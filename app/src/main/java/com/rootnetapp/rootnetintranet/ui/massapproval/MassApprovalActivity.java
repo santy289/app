@@ -219,7 +219,7 @@ public class MassApprovalActivity extends AppCompatActivity {
             return;
         }
 
-        showToastMessage(R.string.mass_approval_activity_fail);
+        showToastMessage(R.string.mass_approval_activity_success);
 
         setResult(RESULT_OK);
         finish();

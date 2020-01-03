@@ -8,12 +8,11 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
-import com.rootnetapp.rootnetintranet.models.createworkflow.StatusSpecific;
-import com.rootnetapp.rootnetintranet.models.requests.createworkflow.WorkflowMetas;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
+import com.rootnetapp.rootnetintranet.ui.massapproval.models.StatusApproval;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,8 +31,10 @@ public class MassApprovalViewModel extends ViewModel {
     private MutableLiveData<Integer> mShowToastMessage;
     private MutableLiveData<WorkflowListItem> mInitWorkflowUiLiveData;
     private MutableLiveData<String> mWorkflowTypeVersionLiveData;
-    private MutableLiveData<List<Status>> mPendingStatusListLiveData;
-    private MutableLiveData<Boolean> mShowSendButtonLiveData;
+    private MutableLiveData<List<StatusApproval>> mPendingStatusListLiveData;
+    private MutableLiveData<Boolean> mShowSubmitButtonLiveData;
+    private MutableLiveData<Boolean> mEnableSubmitButtonLiveData;
+    private MutableLiveData<Boolean> mHandleResultLiveData;
     protected MutableLiveData<Boolean> showLoading;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
@@ -72,6 +73,8 @@ public class MassApprovalViewModel extends ViewModel {
 
         mUserId = loggedUserId == null ? 0 : Integer.parseInt(loggedUserId);
 //        checkPermissions(permissionsString, userId);
+
+        showLoading.setValue(true);
 
         getWorkflow(this.mToken, this.mWorkflowListItem.getWorkflowId());
     }
@@ -125,7 +128,7 @@ public class MassApprovalViewModel extends ViewModel {
     }
 
     private void updateUIWithWorkflowType(WorkflowTypeDb currentWorkflowType) {
-        List<Status> pendingStatusesForUser = new ArrayList<>();
+        List<StatusApproval> pendingStatusesForUser = new ArrayList<>();
 
         List<Status> allStatusesListForUser = currentWorkflowType
                 .getAllStatusForApprover(mUserId);
@@ -134,11 +137,71 @@ public class MassApprovalViewModel extends ViewModel {
             Boolean isApproved = ApproverHistory.getApprovalStateForStatusAndApprover(
                     mWorkflow.getWorkflowApprovalHistory(), status.getId(), mUserId);
 
-            if (isApproved == null) pendingStatusesForUser.add(status);
+            if (isApproved == null) pendingStatusesForUser.add(new StatusApproval(status));
         }
 
-        mPendingStatusListLiveData.setValue(pendingStatusesForUser);
-        mShowSendButtonLiveData.setValue(true);
+        if (pendingStatusesForUser.isEmpty()) {
+            //todo handle error
+        } else {
+            mPendingStatusListLiveData.setValue(pendingStatusesForUser);
+            mShowSubmitButtonLiveData.setValue(true);
+        }
+    }
+
+    protected void processMassApproval(List<StatusApproval> statusApprovalList) {
+        List<StatusApproval> listToPost = new ArrayList<>();
+
+        for (StatusApproval sa : statusApprovalList) {
+            if (sa.getSelectedStatus() != null || sa.isRejected()) {
+                listToPost.add(sa);
+            }
+        }
+
+        if (listToPost.isEmpty()) {
+            //todo handle error
+        } else {
+            postSendToServer(listToPost);
+        }
+
+    }
+
+    private void postSendToServer(List<StatusApproval> statusApprovalList) {
+        //we cannot use a POJO for this request because the payload has dynamic fields.
+        Map<String, Object> mapBody = new HashMap<>();
+        mapBody.put("workflow", mWorkflow.getId());
+
+        Map<String, Object> statusApprovalMap = new HashMap<>();
+        for (StatusApproval sa : statusApprovalList) {
+            String key = String.valueOf(sa.getStatus().getId());
+            Object value;
+            if (sa.isRejected()) {
+                value = false;
+            } else {
+                value = sa.getSelectedStatus().getId();
+            }
+
+            statusApprovalMap.put(key, value);
+        }
+
+        mapBody.put("workflow_approvals", statusApprovalMap);
+
+        mEnableSubmitButtonLiveData.setValue(false);
+
+        showLoading.setValue(true);
+
+        Disposable disposable = mRepository
+                .postMassApproval(mToken, mapBody)
+                .subscribe(this::onMassApprovalSuccess, this::onMassApprovalFailure);
+
+        mDisposables.add(disposable);
+    }
+
+    private void onMassApprovalFailure(Throwable throwable) {
+        onFailure(throwable);
+    }
+
+    private void onMassApprovalSuccess(WorkflowResponse workflowResponse) {
+        mHandleResultLiveData.setValue(workflowResponse.getWorkflow() != null);
     }
 
     private void onFailure(Throwable throwable) {
@@ -174,17 +237,31 @@ public class MassApprovalViewModel extends ViewModel {
         return mWorkflowTypeVersionLiveData;
     }
 
-    protected LiveData<List<Status>> getObservablePendingStatusList() {
+    protected LiveData<List<StatusApproval>> getObservablePendingStatusList() {
         if (mPendingStatusListLiveData == null) {
             mPendingStatusListLiveData = new MutableLiveData<>();
         }
         return mPendingStatusListLiveData;
     }
 
-    protected LiveData<Boolean> getObservableShowSendButton() {
-        if (mShowSendButtonLiveData == null) {
-            mShowSendButtonLiveData = new MutableLiveData<>();
+    protected LiveData<Boolean> getObservableShowSubmitButton() {
+        if (mShowSubmitButtonLiveData == null) {
+            mShowSubmitButtonLiveData = new MutableLiveData<>();
         }
-        return mShowSendButtonLiveData;
+        return mShowSubmitButtonLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableEnableSubmitButton() {
+        if (mEnableSubmitButtonLiveData == null) {
+            mEnableSubmitButtonLiveData = new MutableLiveData<>();
+        }
+        return mEnableSubmitButtonLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableHandleResult() {
+        if (mHandleResultLiveData == null) {
+            mHandleResultLiveData = new MutableLiveData<>();
+        }
+        return mHandleResultLiveData;
     }
 }

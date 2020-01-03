@@ -3,6 +3,13 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.status;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
+import androidx.lifecycle.ViewModel;
+
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
@@ -20,12 +27,6 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTyp
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Transformations;
-import androidx.lifecycle.ViewModel;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -85,6 +86,12 @@ public class StatusViewModel extends ViewModel {
     protected void initDetails(String token, WorkflowListItem workflow) {
         this.mToken = token;
         this.mWorkflowListItem = workflow;
+        getWorkflow(mToken, mWorkflowListItem.getWorkflowId());
+    }
+
+    protected void updateInfo() {
+        if (mWorkflowListItem == null) return;
+
         getWorkflow(mToken, mWorkflowListItem.getWorkflowId());
     }
 

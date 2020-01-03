@@ -14,19 +14,23 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.databinding.ItemMassApprovalBinding;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
-import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragmentInterface;
+import com.rootnetapp.rootnetintranet.ui.massapproval.models.StatusApproval;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MassApprovalAdapter extends RecyclerView.Adapter<MassApprovalViewholder> {
 
-    private List<Status> mDataset;
+    private List<StatusApproval> mDataset;
     private WorkflowTypeDb mWorkflowType;
 
-    public MassApprovalAdapter(WorkflowTypeDb workflowTypeDb, List<Status> statuses) {
+    public MassApprovalAdapter(WorkflowTypeDb workflowTypeDb, List<StatusApproval> statuses) {
         this.mWorkflowType = workflowTypeDb;
         this.mDataset = statuses;
+    }
+
+    public List<StatusApproval> getDataset() {
+        return mDataset;
     }
 
     @Override
@@ -40,14 +44,18 @@ public class MassApprovalAdapter extends RecyclerView.Adapter<MassApprovalViewho
 
     @Override
     public void onBindViewHolder(@NonNull MassApprovalViewholder holder, int position) {
-        Status status = getItem(position);
+        StatusApproval statusApproval = getItem(position);
         Context context = holder.getBinding().spSteps.getContext();
+
+        holder.getBinding().tvStatusTitle.setText(statusApproval.getStatus().getName());
 
         List<String> nextStatuses = new ArrayList<>();
 
-        for (int nextStatusId : status.getRelations()) {
+        for (int nextStatusId : statusApproval.getStatus().getRelations()) {
 
-            Status nextStatus = findStatusInListBy(nextStatusId);
+            Status nextStatus = Status
+                    .getStatusByIdFromList(mWorkflowType.getStatus(), nextStatusId);
+
             if (nextStatus == null) {
                 continue;
             }
@@ -58,7 +66,8 @@ public class MassApprovalAdapter extends RecyclerView.Adapter<MassApprovalViewho
             nextStatuses.add(name);
         }
 
-        nextStatuses.add(context.getString(R.string.mass_approval_activity_reject));
+        final String rejectString = context.getString(R.string.mass_approval_activity_reject);
+        nextStatuses.add(rejectString);
 
         String hint = context.getString(R.string.workflow_detail_status_fragment_spinner_title);
         // check whether the hint has already been added
@@ -73,6 +82,7 @@ public class MassApprovalAdapter extends RecyclerView.Adapter<MassApprovalViewho
                 nextStatuses
         );
         holder.getBinding().spSteps.setAdapter(adapter);
+        holder.getBinding().spSteps.setTag(statusApproval);
 
         // listener to keep track of selected item
         holder.getBinding().spSteps
@@ -81,16 +91,21 @@ public class MassApprovalAdapter extends RecyclerView.Adapter<MassApprovalViewho
                     public void onItemSelected(AdapterView<?> parent, View view, int position,
                                                long id) {
 
-                        Integer stepIndex;
+                        String selectedItem = parent.getSelectedItem().toString();
+                        if (selectedItem.equals(rejectString)) {
+                            //last item (reject)
+                            statusApproval.setRejected(true);
+                        } else if (position != 0) {
+                            //account for hint as the first item
+                            int index = position - 1;
 
-                        //account for hint as the first item
-                        if (position == 0) {
-                            stepIndex = null; //null gets ignored by API call
-                        } else {
-                            stepIndex = position - 1;
+                            int statusId = statusApproval.getStatus().getRelations().get(index);
+                            Status nextStatus = Status
+                                    .getStatusByIdFromList(mWorkflowType.getStatus(), statusId);
+
+                            statusApproval.setSelectedStatus(nextStatus);
+                            statusApproval.setRejected(false);
                         }
-
-//                        statusViewModel.setApproveSpinnerItemSelection(stepIndex);
                     }
 
                     @Override
@@ -102,29 +117,12 @@ public class MassApprovalAdapter extends RecyclerView.Adapter<MassApprovalViewho
         holder.getBinding().executePendingBindings();
     }
 
-    private Status getItem(int position) {
+    private StatusApproval getItem(int position) {
         return mDataset.get(position);
     }
 
     @Override
     public int getItemCount() {
         return mDataset.size();
-    }
-
-    private Status findStatusInListBy(int statusId) {
-        List<Status> statusList = mWorkflowType.getStatus();
-        if (statusList == null || statusList.size() < 1) {
-            return null;
-        }
-
-        Status status;
-        for (int i = 0; i < statusId; i++) {
-            status = statusList.get(i);
-            if (status.getId() == statusId) {
-                return status;
-            }
-        }
-
-        return null;
     }
 }

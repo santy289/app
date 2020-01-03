@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.core.content.ContextCompat;
@@ -36,7 +37,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import static android.app.Activity.RESULT_OK;
+
 public class StatusFragment extends Fragment {
+
+    private static final int REQUEST_MASS_APPROVAL = 88;
 
     @Inject
     StatusViewModelFactory statusViewModelFactory;
@@ -352,6 +357,16 @@ public class StatusFragment extends Fragment {
     private void goToMassApproval() {
         Intent intent = new Intent(getActivity(), MassApprovalActivity.class);
         intent.putExtra(MassApprovalActivity.EXTRA_WORKFLOW_LIST_ITEM, mWorkflowListItem);
-        startActivity(intent);
+        startActivityForResult(intent, REQUEST_MASS_APPROVAL);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == REQUEST_MASS_APPROVAL && resultCode == RESULT_OK) {
+            statusViewModel.updateInfo();
+            return;
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

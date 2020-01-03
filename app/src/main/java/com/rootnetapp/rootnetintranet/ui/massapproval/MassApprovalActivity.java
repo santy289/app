@@ -20,9 +20,9 @@ import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMassApprovalBinding;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.massapproval.adapters.MassApprovalAdapter;
+import com.rootnetapp.rootnetintranet.ui.massapproval.models.StatusApproval;
 
 import java.util.List;
 import java.util.Locale;
@@ -56,11 +56,10 @@ public class MassApprovalActivity extends AppCompatActivity {
         String permissionsString = prefs.getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
         String loggedUserId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
 
+        setOnClickListeners();
         setupRecycler();
 
         subscribe();
-
-        showLoading(true);
 
         WorkflowListItem mWorkflowListItem = getIntent()
                 .getParcelableExtra(EXTRA_WORKFLOW_LIST_ITEM);
@@ -108,24 +107,48 @@ public class MassApprovalActivity extends AppCompatActivity {
                 .observe(this, this::updateToolbarSubtitleWithWorkflowVersion);
         massApprovalViewModel.getObservablePendingStatusList()
                 .observe(this, this::updatePendingStatusList);
-        massApprovalViewModel.getObservableShowSendButton()
-                .observe(this, this::showSendButton);
+        massApprovalViewModel.getObservableShowSubmitButton()
+                .observe(this, this::showSubmitButton);
+        massApprovalViewModel.getObservableEnableSubmitButton()
+                .observe(this, this::enableSubmitButton);
+        massApprovalViewModel.getObservableHandleResult()
+                .observe(this, this::handleResult);
 
         massApprovalViewModel.showLoading.observe(this, this::showLoading);
     }
 
+    private void setOnClickListeners() {
+        mBinding.btnSubmit.setOnClickListener(view -> processMassApproval());
+    }
+
     /**
-     * Initializes the status RecyclerView.
+     * Initializes the mass approval RecyclerView.
      */
     private void setupRecycler() {
         mBinding.rvStatuses.setLayoutManager(new LinearLayoutManager(this));
         mBinding.rvStatuses.setNestedScrollingEnabled(false);
     }
 
-    private void updatePendingStatusList(List<Status> statuses) {
+    private void updatePendingStatusList(List<StatusApproval> statuses) {
         mAdapter = new MassApprovalAdapter(massApprovalViewModel.getCurrentWorkflowType(),
                 statuses);
         mBinding.rvStatuses.setAdapter(mAdapter);
+    }
+
+    private void processMassApproval() {
+        massApprovalViewModel.processMassApproval(mAdapter.getDataset());
+    }
+
+    private void handleResult(boolean success) {
+        if (!success) {
+            //todo error
+            return;
+        }
+
+        showToastMessage(R.string.mass_approval_activity_success);
+
+        setResult(RESULT_OK);
+        finish();
     }
 
     @UiThread
@@ -156,8 +179,13 @@ public class MassApprovalActivity extends AppCompatActivity {
     }
 
     @UiThread
-    private void showSendButton(boolean show) {
-        mBinding.btnSend.setVisibility(show ? View.VISIBLE : View.GONE);
+    private void showSubmitButton(boolean show) {
+        mBinding.btnSubmit.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    @UiThread
+    private void enableSubmitButton(boolean enable) {
+        mBinding.btnSubmit.setEnabled(enable);
     }
 
     @Override

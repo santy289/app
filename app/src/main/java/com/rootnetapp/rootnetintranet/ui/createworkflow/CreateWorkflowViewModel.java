@@ -1999,6 +1999,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                 .findItem(meta.getWorkflowTypeFieldId());
 
         if (fileFormItem != null) {
+            fileFormItem.setValue(fileMetaData.name); //to avoid failing the isValid() check
             fileFormItem.setFileName(fileMetaData.name);
             fileFormItem.setFileId(fileMetaData.value);
         }

@@ -10,6 +10,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
+import androidx.annotation.UiThread;
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.request.RequestOptions;
@@ -32,14 +40,6 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters.StepsAda
 import java.util.List;
 
 import javax.inject.Inject;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
-import androidx.annotation.UiThread;
-import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 public class InformationFragment extends Fragment implements InformationFragmentInterface {
 
@@ -152,7 +152,7 @@ public class InformationFragment extends Fragment implements InformationFragment
 
     @UiThread
     private void showEditButton(boolean show) {
-        mBinding.btnEdit.setVisibility(show ? View.VISIBLE : View.GONE);
+        mBinding.btnEdit.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
         mBinding.viewInformation.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 

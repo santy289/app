@@ -1,5 +1,13 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflowtype;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.Index;
+import androidx.room.PrimaryKey;
+
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
+import com.rootnetapp.rootnetintranet.models.createworkflow.StatusSpecific;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.presets.Preset;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
@@ -7,12 +15,6 @@ import com.squareup.moshi.Json;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.Ignore;
-import androidx.room.Index;
-import androidx.room.PrimaryKey;
 
 @Entity(indices = {@Index("id")})
 public class WorkflowTypeDb {
@@ -208,16 +210,16 @@ public class WorkflowTypeDb {
     public List<Approver> getDistinctApprovers() {
         List<Approver> list = new ArrayList<>();
 
-        for (Status status : getStatus()) {
-            for (Approver approver : status.getApproversList()) {
-                if (!list.contains(approver)) list.add(approver);
+        for (Status s : getStatus()) {
+            for (Approver a : s.getApproversList()) {
+                if (!list.contains(a)) list.add(a);
             }
         }
 
         return list;
     }
 
-    public List<Integer> getRoleApproverProfileIds(int roleId){
+    public List<Integer> getRoleApproverProfileIds(int roleId) {
         List<Integer> profileIds = new ArrayList<>();
 
         for (DefaultRoleApprover roleApprover : getDefaultRoleApprovers()) {
@@ -225,5 +227,56 @@ public class WorkflowTypeDb {
         }
 
         return profileIds;
+    }
+
+    public List<Status> getAllStatusForApprover(WorkflowDb workflow, int approverId) {
+        for (int id : workflow.getSpecificApprovers().global) {
+            if (id == approverId) {
+                //approverId is global approver for the workflow
+                return getStatus();
+            }
+        }
+
+        List<Status> statusList = new ArrayList<>();
+
+        for (Status s : getStatus()) {
+            boolean isApproverForStatus = false;
+
+            for (StatusSpecific ss : workflow.getSpecificApprovers().statusSpecific) {
+                if (ss.status == s.getId() && ss.user == approverId) {
+                    //approverId is specific approver of the status
+                    isApproverForStatus = true;
+                    break;
+                }
+            }
+
+            for (Approver a : s.getApproversList()) {
+                if (a.entityId == approverId) {
+                    //approverId is standard approver of the status
+                    isApproverForStatus = true;
+                    break;
+                }
+            }
+
+            if (isApproverForStatus) {
+                statusList.add(s);
+            }
+        }
+
+        return statusList;
+    }
+
+    public Approver getApproverForStatus(int statusId, int approverId) {
+        for (Status s : getStatus()) {
+            if (s.getId() == statusId) {
+                for (Approver a : s.getApproversList()) {
+                    if (a.entityId == approverId) {
+                        return a;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 }

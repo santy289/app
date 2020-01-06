@@ -3,6 +3,13 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.status;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
+import androidx.lifecycle.ViewModel;
+
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
@@ -16,16 +23,11 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Status;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
+import com.rootnetapp.rootnetintranet.ui.massapproval.MassApprovalViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Transformations;
-import androidx.lifecycle.ViewModel;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -49,11 +51,13 @@ public class StatusViewModel extends ViewModel {
     private MutableLiveData<Boolean> mTieStatusLiveData;
 
     protected MutableLiveData<Boolean> showLoading;
+    protected MutableLiveData<Boolean> showInitialLoading;
     protected MutableLiveData<List<Approver>> updateCurrentApproversList;
     protected MutableLiveData<List<String>> updateApproveSpinner;
     protected MutableLiveData<Boolean> hideApproveSpinnerOnEmptyData;
     protected MutableLiveData<Boolean> hideApproveSpinnerOnNotApprover;
     protected MutableLiveData<Boolean> hideApproverListOnEmptyData;
+    protected MutableLiveData<Boolean> hideMassApprovalLiveData;
     protected MutableLiveData<Boolean> mEnableApproveRejectButtonsLiveData;
     protected MutableLiveData<String[]> updateStatusUi;
     protected LiveData<String[]> updateStatusUiFromUserAction;
@@ -65,12 +69,13 @@ public class StatusViewModel extends ViewModel {
     private String mToken;
     private WorkflowListItem mWorkflowListItem; // in DB but has limited data about the workflow.
     private WorkflowDb mWorkflow; // Not in DB and more complete response from network.
-
+    private int mUserId;
     private StatusUiData mStatusUiData;
 
     protected StatusViewModel(StatusRepository statusRepository) {
         this.mRepository = statusRepository;
         this.showLoading = new MutableLiveData<>();
+        this.showInitialLoading = new MutableLiveData<>();
         this.updateCurrentApproversList = new MutableLiveData<>();
         this.updateApproveSpinner = new MutableLiveData<>();
         this.hideApproveSpinnerOnEmptyData = new MutableLiveData<>();
@@ -78,13 +83,24 @@ public class StatusViewModel extends ViewModel {
         this.hideApproverListOnEmptyData = new MutableLiveData<>();
         this.setWorkflowIsOpen = new MutableLiveData<>();
         this.updateStatusUi = new MutableLiveData<>();
+        this.hideMassApprovalLiveData = new MutableLiveData<>();
 
         subscribe();
     }
 
-    protected void initDetails(String token, WorkflowListItem workflow) {
-        this.mToken = token;
-        this.mWorkflowListItem = workflow;
+    protected void initDetails(String token, WorkflowListItem workflow, String loggedUserId) {
+        mToken = token;
+        mWorkflowListItem = workflow;
+        mUserId = loggedUserId == null ? 0 : Integer.parseInt(loggedUserId);
+
+        showInitialLoading.setValue(true);
+        getWorkflow(mToken, mWorkflowListItem.getWorkflowId());
+    }
+
+    protected void updateInfo() {
+        if (mWorkflowListItem == null) return;
+
+        showInitialLoading.setValue(true);
         getWorkflow(mToken, mWorkflowListItem.getWorkflowId());
     }
 
@@ -331,6 +347,8 @@ public class StatusViewModel extends ViewModel {
      * @param response Incoming response from server.
      */
     private void onTypeSuccess(WorkflowTypeResponse response) {
+        showInitialLoading.setValue(false);
+
         currentWorkflowType = response.getWorkflowType();
         if (currentWorkflowType == null) {
             return;
@@ -385,6 +403,9 @@ public class StatusViewModel extends ViewModel {
         // Update approval spinner.
         List<Integer> nextStatusIds = mWorkflow.getCurrentStatusRelations();
         updateApproveSpinnerUi(mWorkflow, nextStatusIds);
+
+        // Check Mass Approval
+        hideMassApprovalLiveData.setValue(MassApprovalViewModel.getPendingStatusesForUser(currentWorkflowType, mWorkflow, mUserId).isEmpty());
     }
 
     /**
@@ -519,13 +540,14 @@ public class StatusViewModel extends ViewModel {
      * @param nextStatusIds List of ids specified by a Workflow in order to look in a WorkflowType.
      */
     private void updateApproveSpinnerUi(WorkflowDb workflow, List<Integer> nextStatusIds) {
-        if (!workflow.isLoggedIsApprover()) {
-            hideApproveSpinnerOnNotApprover.setValue(true);
+        List<String> nextStatusList = new ArrayList<>();
+        if (nextStatusIds.isEmpty()) {
+            hideApproveSpinnerOnEmptyData.setValue(true);
             return;
         }
-        List<String> nextStatusList = new ArrayList<>();
-        if (nextStatusIds.size() < 1) {
-            hideApproveSpinnerOnEmptyData.setValue(true);
+
+        if (!workflow.isLoggedIsApprover()) {
+            hideApproveSpinnerOnNotApprover.setValue(true);
             return;
         }
 
@@ -580,6 +602,7 @@ public class StatusViewModel extends ViewModel {
             }
         }
 
+        showInitialLoading.setValue(false);
         showLoading.setValue(false);
         mErrorLiveData.setValue(Utils.getOnFailureStringRes(throwable));
     }

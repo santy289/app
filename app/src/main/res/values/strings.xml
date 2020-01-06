@@ -458,4 +458,12 @@
     <string name="geolocation_activity_could_not_retrieve_location">Location not found</string>
     <string name="geolocation_activity_unnamed">Unnamed</string>
     <string name="geolocation_activity_no_connection">No internet connection.</string>
+
+    <!--MassApprovalActivity-->
+    <string name="mass_approval_activity_title">Mass Approval</string>
+    <string name="mass_approval_activity_reject">Reject</string>
+    <string name="mass_approval_activity_send">Send</string>
+    <string name="mass_approval_activity_success">Workflow updated</string>
+    <string name="mass_approval_activity_fail">An error has occurred while processing a mass approval operation</string>
+    <string name="mass_approval_activity_no_selection">Please select at least one status to approve or reject</string>
 </resources>

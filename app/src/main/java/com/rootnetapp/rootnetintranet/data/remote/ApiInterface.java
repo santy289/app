@@ -416,6 +416,11 @@ public interface ApiInterface {
                                                                 @Body ApprovalRequest request);
 
     @Headers({"Domain-Name: api"})
+    @POST("intranet/workflow/mass_approval")
+    Observable<WorkflowResponse> postMassApproval(@Header("Authorization") String authorization,
+                                                  @Body Map<String, Object> body);
+
+    @Headers({"Domain-Name: api"})
     @POST("intranet/workflows/records/file")
     Observable<AttachResponse> attachFile(@Header("Authorization") String authorization,
                                           @Body AttachFilesRequest request);

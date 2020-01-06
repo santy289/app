@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.status;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,20 +11,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
-import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
-import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailStatusBinding;
-import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
-import com.rootnetapp.rootnetintranet.ui.RootnetApp;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
-import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters.ApproversAdapter;
-
-import java.util.List;
-
-import javax.inject.Inject;
-
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.core.content.ContextCompat;
@@ -34,7 +23,26 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
+import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailStatusBinding;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.Approver;
+import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.massapproval.MassApprovalActivity;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.adapters.ApproversAdapter;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import static android.app.Activity.RESULT_OK;
+
 public class StatusFragment extends Fragment {
+
+    private static final int REQUEST_MASS_APPROVAL = 88;
 
     @Inject
     StatusViewModelFactory statusViewModelFactory;
@@ -72,12 +80,13 @@ public class StatusFragment extends Fragment {
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("token", "");
+        String loggedUserId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
 
         setOnClickListeners();
         setOnOpenStatusChangedListener();
         subscribe();
 
-        statusViewModel.initDetails(token, mWorkflowListItem);
+        statusViewModel.initDetails(token, mWorkflowListItem, loggedUserId);
 
         return view;
     }
@@ -86,7 +95,7 @@ public class StatusFragment extends Fragment {
         final Observer<Integer> errorObserver = ((Integer data) -> {
             showLoading(false);
             if (null != data) {
-                Toast.makeText(getContext(), getString(data), Toast.LENGTH_LONG).show();
+                showToastMessage(data);
             }
         });
 
@@ -98,6 +107,8 @@ public class StatusFragment extends Fragment {
         statusViewModel.getObservableEnableApproveRejectButtons()
                 .observe(getViewLifecycleOwner(), this::enableApproveRejectButtons);
 
+        statusViewModel.showInitialLoading
+                .observe(getViewLifecycleOwner(), this::showInitialLoading);
         statusViewModel.showLoading.observe(getViewLifecycleOwner(), this::showLoading);
         statusViewModel.handleShowLoadingByRepo.observe(getViewLifecycleOwner(), this::showLoading);
         statusViewModel.updateStatusUi.observe(getViewLifecycleOwner(), this::updateStatusDetails);
@@ -115,11 +126,14 @@ public class StatusFragment extends Fragment {
                 .observe(getViewLifecycleOwner(), this::updateStatusDetails);
         statusViewModel.setWorkflowIsOpen
                 .observe(getViewLifecycleOwner(), this::updateWorkflowStatus);
+        statusViewModel.hideMassApprovalLiveData
+                .observe(getViewLifecycleOwner(), this::hideMassApprovalButton);
     }
 
     private void setOnClickListeners() {
         mBinding.includeNextStep.btnApprove.setOnClickListener(v -> approveAction());
         mBinding.includeNextStep.btnReject.setOnClickListener(v -> rejectAction());
+        mBinding.includeNextStep.btnMassApproval.setOnClickListener(v -> goToMassApproval());
     }
 
     /**
@@ -306,12 +320,15 @@ public class StatusFragment extends Fragment {
         if (hide) {
             mBinding.includeNextStep.tvTitleApprovers.setVisibility(View.GONE);
             mBinding.includeNextStep.rvApprovers.setVisibility(View.GONE);
-            mBinding.includeNextStep.btnMassApproval.setVisibility(View.GONE);
         } else {
-            mBinding.includeNextStep.tvTitleApprovers.setVisibility(View.GONE);
-            mBinding.includeNextStep.rvApprovers.setVisibility(View.GONE);
-            mBinding.includeNextStep.btnMassApproval.setVisibility(View.GONE);
+            mBinding.includeNextStep.tvTitleApprovers.setVisibility(View.VISIBLE);
+            mBinding.includeNextStep.rvApprovers.setVisibility(View.VISIBLE);
         }
+    }
+
+    @UiThread
+    private void hideMassApprovalButton(boolean hide) {
+        mBinding.includeNextStep.btnMassApproval.setVisibility(hide ? View.GONE : View.VISIBLE);
     }
 
     /**
@@ -338,11 +355,45 @@ public class StatusFragment extends Fragment {
                 ContextCompat.getColor(getContext(), statusUiData.getSelectedColor()));
     }
 
+    @UiThread
     private void showToastMessage(@StringRes int messageRes) {
         Toast.makeText(
                 getContext(),
                 getString(messageRes),
                 Toast.LENGTH_SHORT)
                 .show();
+    }
+
+    @UiThread
+    private void showInitialLoading(boolean show) {
+        if (show) {
+            mBinding.progressBar.setVisibility(View.VISIBLE);
+            mBinding.includeStatusSummary.lytStatusSummary.setVisibility(View.GONE);
+            mBinding.includeNextStep.lytStatusNextStep.setVisibility(View.GONE);
+            mBinding.tvTitleNextStep.setVisibility(View.GONE);
+            mBinding.viewTitleNextStep.setVisibility(View.GONE);
+        } else {
+            mBinding.progressBar.setVisibility(View.GONE);
+            mBinding.includeStatusSummary.lytStatusSummary.setVisibility(View.VISIBLE);
+            mBinding.includeNextStep.lytStatusNextStep.setVisibility(View.VISIBLE);
+            mBinding.tvTitleNextStep.setVisibility(View.VISIBLE);
+            mBinding.viewTitleNextStep.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void goToMassApproval() {
+        Intent intent = new Intent(getActivity(), MassApprovalActivity.class);
+        intent.putExtra(MassApprovalActivity.EXTRA_WORKFLOW_LIST_ITEM, mWorkflowListItem);
+        startActivityForResult(intent, REQUEST_MASS_APPROVAL);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == REQUEST_MASS_APPROVAL && resultCode == RESULT_OK) {
+            statusViewModel.updateInfo();
+            return;
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

@@ -2,6 +2,9 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.status;
 
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.ProfileDao;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.workflowdetail.ProfileInvolved;
@@ -11,8 +14,6 @@ import com.rootnetapp.rootnetintranet.models.responses.workflowdetail.WorkflowAp
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeResponse;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -26,8 +27,8 @@ public class StatusRepository {
     private MutableLiveData<WorkflowApproveRejectResponse> responseApproveRejection;
     private MutableLiveData<Throwable> errorLiveData;
 
-    private ApiInterface service;
-    private ProfileDao profileDao;
+    protected ApiInterface service;
+    protected ProfileDao profileDao;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
@@ -36,7 +37,7 @@ public class StatusRepository {
         this.profileDao = database.profileDao();
     }
 
-    protected void clearDisposables() {
+    public void clearDisposables() {
         disposables.clear();
     }
 
@@ -57,7 +58,7 @@ public class StatusRepository {
      * @param auth   Access token to use for endpoint request.
      * @param typeId object ID that will be passed on to the endpoint.
      */
-    protected Observable<WorkflowTypeResponse> getWorkflowType(String auth, int typeId) {
+    public Observable<WorkflowTypeResponse> getWorkflowType(String auth, int typeId) {
         return service.getWorkflowType(auth, typeId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -68,7 +69,7 @@ public class StatusRepository {
      * @param auth       Access token to use for endpoint request.
      * @param workflowId object ID that will be passed on to the endpoint.
      */
-    protected Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {
+    public Observable<WorkflowResponse> getWorkflow(String auth, int workflowId) {
         return service.getWorkflow(auth, workflowId).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }

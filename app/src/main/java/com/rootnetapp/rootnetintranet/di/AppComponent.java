@@ -14,6 +14,8 @@ import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivityModule;
 import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerFragment;
 import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerModule;
+import com.rootnetapp.rootnetintranet.ui.massapproval.MassApprovalActivity;
+import com.rootnetapp.rootnetintranet.ui.massapproval.MassApprovalModule;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileModule;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
@@ -83,7 +85,8 @@ import dagger.Component;
                 WorkflowSearchModule.class,
                 PerformActionModule.class,
                 FlowchartModule.class,
-                GeolocationModule.class
+                GeolocationModule.class,
+                MassApprovalModule.class
         }
 )
 
@@ -138,4 +141,6 @@ public interface AppComponent {
     void inject(PeopleInvolvedFragment peopleInvolvedFragment);
 
     void inject(GeolocationActivity geolocationActivity);
+
+    void inject(MassApprovalActivity massApprovalActivity);
 }

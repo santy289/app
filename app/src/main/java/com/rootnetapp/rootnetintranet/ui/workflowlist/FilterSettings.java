@@ -76,10 +76,6 @@ public class FilterSettings {
         this.systemStatusFilterIndexSelected = 1;
     }
 
-    public void resetFilterSettings() {
-        int test = 0;
-    }
-
     public int getSizeOfRightDrawerOptionsListMap() {
         return rightDrawerOptionsList.size();
     }
@@ -194,6 +190,10 @@ public class FilterSettings {
         if (dynamicFilters.containsKey(key)) dynamicFilters.remove(key);
 
         dynamicFilters.put(key, value);
+    }
+
+    public void clearDynamicFilters() {
+        dynamicFilters = new HashMap<>();
     }
 
     public ArrayMap<Integer, RightDrawerOptionList> getRightDrawerOptionsList() {
@@ -458,6 +458,11 @@ public class FilterSettings {
             return;
         }
         WorkflowTypeMenu filter = workflowTypeOptionsList.get(workflowTypeFilterIndexSelected);
+
+        for (WorkflowTypeMenu menu : workflowTypeOptionsList) {
+            menu.setSelected(false);
+        }
+
         filter.setSelected(true);
     }
 
@@ -467,6 +472,11 @@ public class FilterSettings {
             return;
         }
         WorkflowTypeMenu baseFilter = baseFilterOptionsList.get(baseFilterIndexSelected);
+
+        for (WorkflowTypeMenu menu : baseFilterOptionsList) {
+            menu.setSelected(false);
+        }
+
         baseFilter.setSelected(true);
     }
 
@@ -476,6 +486,11 @@ public class FilterSettings {
             return;
         }
         WorkflowTypeMenu baseFilter = statusFilterOptionList.get(statusFilterIndexSelected);
+
+        for (WorkflowTypeMenu menu : statusFilterOptionList) {
+            menu.setSelected(false);
+        }
+
         baseFilter.setSelected(true);
     }
 
@@ -486,6 +501,11 @@ public class FilterSettings {
         }
         WorkflowTypeMenu baseFilter = systemStatusFilterOptionList
                 .get(systemStatusFilterIndexSelected);
+
+        for (WorkflowTypeMenu menu : systemStatusFilterOptionList) {
+            menu.setSelected(false);
+        }
+
         baseFilter.setSelected(true);
     }
 

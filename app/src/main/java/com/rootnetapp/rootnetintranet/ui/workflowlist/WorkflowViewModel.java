@@ -141,6 +141,7 @@ public class WorkflowViewModel extends ViewModel {
     private boolean isStatusFilterApplied;
     private boolean isSystemStatusFilterApplied;
     private boolean isWorkflowTypeFilterApplied;
+    private boolean isScrollToTop;
 
     public WorkflowViewModel(WorkflowRepository workflowRepository) {
         this.workflowRepository = workflowRepository;
@@ -1065,6 +1066,7 @@ public class WorkflowViewModel extends ViewModel {
                             id,
                             filterSettings.getSearchText());
                 }
+                isScrollToTop = true;
                 reloadWorkflowsList(lifecycleOwner);
                 break;
             }
@@ -1090,6 +1092,7 @@ public class WorkflowViewModel extends ViewModel {
                             id,
                             filterSettings.getSearchText());
                 }
+                isScrollToTop = true;
                 reloadWorkflowsList(lifecycleOwner);
                 break;
             }
@@ -1115,6 +1118,7 @@ public class WorkflowViewModel extends ViewModel {
                             id,
                             filterSettings.getSearchText());
                 }
+                isScrollToTop = true;
                 reloadWorkflowsList(lifecycleOwner);
                 break;
             }
@@ -1140,6 +1144,7 @@ public class WorkflowViewModel extends ViewModel {
                             id,
                             filterSettings.getSearchText());
                 }
+                isScrollToTop = true;
                 reloadWorkflowsList(lifecycleOwner);
                 break;
             }
@@ -1342,10 +1347,14 @@ public class WorkflowViewModel extends ViewModel {
         showLoading.setValue(false);
         updateWithSortedList.setValue(listWorkflows);
         if (isSwipe != null && isSwipe) {
-            //only scroll to top if it was a swipe refresh
-            handleScrollRecyclerToTop.setValue(true);
             isSwipe = null; //clear value
         }
+
+        if (isScrollToTop) {
+            isScrollToTop = false;
+            handleScrollRecyclerToTop.setValue(true);
+        }
+
         showList.setValue(true);
     }
 

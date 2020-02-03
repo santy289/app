@@ -216,7 +216,16 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
         //scroll to top after a tiny delay
         new Handler().postDelayed(
-                () -> fragmentWorkflowBinding.recWorkflows.scrollToPosition(0),
+                () -> {
+                    LinearLayoutManager linearLayoutManager = (LinearLayoutManager) fragmentWorkflowBinding.recWorkflows
+                            .getLayoutManager();
+
+                    if (linearLayoutManager == null) {
+                        return;
+                    }
+
+                    linearLayoutManager.smoothScrollToPosition(fragmentWorkflowBinding.recWorkflows, null, 0);
+                },
                 500);
     }
 

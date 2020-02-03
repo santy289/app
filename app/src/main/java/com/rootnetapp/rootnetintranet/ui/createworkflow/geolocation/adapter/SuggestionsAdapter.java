@@ -7,15 +7,15 @@ import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.rootnetapp.rootnetintranet.databinding.ItemAutocompletePlacesBinding;
 import com.rootnetapp.rootnetintranet.models.responses.googlemaps.autocomplete.MainTextMatchedSubstring;
 import com.rootnetapp.rootnetintranet.models.responses.googlemaps.autocomplete.Prediction;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.geolocation.GeolocationActivityInterface;
 
 import java.util.List;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Created by root on 04/04/18.
@@ -68,7 +68,10 @@ public class SuggestionsAdapter extends RecyclerView.Adapter<SuggestionsViewHold
     }
 
     private void addBoldSpan(SpannableString spannableString, int length, int offset) {
-        spannableString.setSpan(new StyleSpan(Typeface.BOLD), offset, length, 0);
+        try {
+            spannableString.setSpan(new StyleSpan(Typeface.BOLD), offset, length, 0);
+        } catch (IndexOutOfBoundsException e) {
+        }
     }
 
     public Prediction getItem(int position) {

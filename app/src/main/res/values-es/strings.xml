@@ -50,7 +50,7 @@
 
     <string name="action_settings">Configuración</string>
     <string name="profile">Perfil</string>
-    <string name="exit">Salida</string>
+    <string name="exit">Cerrar Sesión</string>
     <string name="repassword">Repetir la clave</string>
     <string name="valid_token">Tu token es válido.</string>
     <string name="empty_token">Por favor ingresar un token válido</string>

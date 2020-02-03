@@ -275,10 +275,11 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     protected void initWorkflowList(SharedPreferences sharedPreferences,
-                                    LifecycleOwner lifecycleOwner) {
+                                    LifecycleOwner lifecycleOwner, boolean showLoading) {
         if (!TextUtils.isEmpty(token)) {
-//            showLoading.setValue(true);
-            int baseFilterId = filterSettings.getBaseFilterSelectedId();
+            if (showLoading) {
+                this.showLoading.setValue(true);
+            }
             loadWorkflowsByFilters(filterSettings, lifecycleOwner);
             return;
         }

@@ -133,7 +133,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         setupSearchListener();
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        workflowViewModel.initWorkflowList(prefs, this);
+        workflowViewModel.initWorkflowList(prefs, this, !firstLoad);
         if (firstLoad) {
             subscribe();
         }
@@ -640,7 +640,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
 
-        workflowViewModel.initWorkflowList(prefs, this);
+        workflowViewModel.initWorkflowList(prefs, this, true);
     }
 
     @UiThread

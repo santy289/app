@@ -1419,6 +1419,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         //handle chip close icon
         holder.getBinding().chipValue.setOnCloseIconClickListener(v -> {
+            mFragmentInterface.hideSoftInputKeyboard();
+
             item.clearValues();
             notifyItemChanged(getItemPosition(item));
         });

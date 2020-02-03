@@ -15,4 +15,6 @@ public interface CreateWorkflowFragmentInterface {
     boolean onBackPressed();
 
     void showToastMessage(int stringRes);
+
+    void hideSoftInputKeyboard();
 }

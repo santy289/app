@@ -11,6 +11,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.github.marlonlom.utilities.timeago.TimeAgo;
 import com.github.marlonlom.utilities.timeago.TimeAgoMessages;
 import com.rootnetapp.rootnetintranet.R;
@@ -33,14 +41,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import androidx.annotation.DrawableRes;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
 
@@ -133,7 +133,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineViewholder> {
         String title = "";
         if (people != null) {
             for (User user : people) {
-                if (user.getId() == item.getAuthor()) {
+                if (item.getAuthor() != null && user.getId() == item.getAuthor()) {
                     author = user;
                     if (user.getPicture() != null) {
                         String path = Utils.imgDomain + user.getPicture().trim();

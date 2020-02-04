@@ -21,6 +21,18 @@ import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.annotation.UiThread;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -53,18 +65,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
-import androidx.annotation.UiThread;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
-import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFragmentInterface {
 
@@ -472,6 +472,8 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
      * @param autocompleteFormItem form item.
      */
     public void showAutocompleteDialog(AutocompleteFormItem autocompleteFormItem) {
+        hideSoftInputKeyboard();
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext(),
                 R.style.AlertDialogTheme);
 
@@ -518,13 +520,13 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         AutocompleteSuggestionsAdapter.OnSuggestionSelectedListener onSuggestionSelectedListener = option -> {
             if (option == null) return;
 
-            hideSoftInputKeyboard();
-
             autocompleteFormItem.setValue(option);
 
             updateFormItemUi(autocompleteFormItem);
 
             mAutocompleteDialog.dismiss();
+
+            hideSoftInputKeyboard();
         };
 
         mAutocompleteSuggestionsAdapter = new AutocompleteSuggestionsAdapter(
@@ -817,13 +819,14 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         viewModel.generateFieldsByType(workflowTypeId);
     }
 
-    private void hideSoftInputKeyboard() {
+    public void hideSoftInputKeyboard() {
         // Check if no view has focus:
         View view = getActivity().getCurrentFocus();
         if (view != null) {
             InputMethodManager imm = (InputMethodManager) getActivity()
                     .getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            view.clearFocus();
         }
     }
 

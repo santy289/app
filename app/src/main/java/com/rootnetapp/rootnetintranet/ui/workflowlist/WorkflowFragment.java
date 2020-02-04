@@ -133,7 +133,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         setupSearchListener();
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        workflowViewModel.initWorkflowList(prefs, this);
+        workflowViewModel.initWorkflowList(prefs, this, !firstLoad);
         if (firstLoad) {
             subscribe();
         }
@@ -216,7 +216,16 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
         //scroll to top after a tiny delay
         new Handler().postDelayed(
-                () -> fragmentWorkflowBinding.recWorkflows.scrollToPosition(0),
+                () -> {
+                    LinearLayoutManager linearLayoutManager = (LinearLayoutManager) fragmentWorkflowBinding.recWorkflows
+                            .getLayoutManager();
+
+                    if (linearLayoutManager == null) {
+                        return;
+                    }
+
+                    linearLayoutManager.smoothScrollToPosition(fragmentWorkflowBinding.recWorkflows, null, 0);
+                },
                 500);
     }
 
@@ -631,7 +640,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         SharedPreferences prefs = getContext()
                 .getSharedPreferences("Sessions", Context.MODE_PRIVATE);
 
-        workflowViewModel.initWorkflowList(prefs, this);
+        workflowViewModel.initWorkflowList(prefs, this, true);
     }
 
     @UiThread

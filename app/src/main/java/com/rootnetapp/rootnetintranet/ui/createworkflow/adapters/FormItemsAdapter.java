@@ -9,6 +9,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatEditText;
+import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.GlideUrl;
@@ -56,12 +63,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatEditText;
-import androidx.fragment.app.FragmentManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -783,6 +784,7 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 android.R.layout.simple_spinner_dropdown_item,
                 options);
         holder.getBinding().spInput.setAdapter(spinnerAdapter);
+        holder.getBinding().spInput.setTag(selectionsAdapter);
 
         //only creates the listener once.
         if (holder.getBinding().spInput.getOnItemSelectedListener() == null) {
@@ -798,10 +800,14 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                                 return;
                             }
 
+                            Spinner spinner = (Spinner) parent;
+                            ArrayAdapter<Option> spinnerAdapter = (ArrayAdapter<Option>) spinner.getAdapter();
+
                             // the user has selected a valid option
                             if (spinnerAdapter.getCount() > position) {
+                                MultipleChoiceSelectionsAdapter adapter = (MultipleChoiceSelectionsAdapter) spinner.getTag();
                                 Option selectedOption = spinnerAdapter.getItem(position);
-                                selectionsAdapter.addItem(selectedOption);
+                                adapter.addItem(selectedOption);
                             }
 
                             //clear spinner selection
@@ -1413,6 +1419,8 @@ public class FormItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         //handle chip close icon
         holder.getBinding().chipValue.setOnCloseIconClickListener(v -> {
+            mFragmentInterface.hideSoftInputKeyboard();
+
             item.clearValues();
             notifyItemChanged(getItemPosition(item));
         });

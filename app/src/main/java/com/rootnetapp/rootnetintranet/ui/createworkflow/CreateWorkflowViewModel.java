@@ -515,7 +515,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     }
 
     protected void generateFieldsByType(int id) {
-        if (id == 0) {
+        if (id == 0 || mWorkflowTypeDbList == null || mWorkflowTypeDbList.isEmpty()) {
             showLoading.setValue(false);
             return;
         }

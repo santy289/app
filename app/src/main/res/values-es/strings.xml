@@ -272,6 +272,7 @@
     <string name="workflow_list_no_selections">No se han seleccionado workflows.</string>
     <string name="workflow_list_delete_dialog_title">Eliminar Workflows</string>
     <string name="workflow_list_delete_dialog_msg">¿Está seguro que desea eliminar los workflows %s?</string>
+    <string name="restore_default_filters">Limpiar Filtros</string>
 
     <!--WorkflowDetailActivity-->
     <string name="workflow_detail_activity_title">Detalles de Workflow</string>

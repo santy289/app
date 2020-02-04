@@ -65,6 +65,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     public static final int SWITCH_NUMBER = 500;
     public static final int SWITCH_CREATED_DATE = 501;
     public static final int SWITCH_UPDATED_DATE = 502;
+    public static final int SWITCH_CLEAR_ALL = 503;
     public static final int RADIO_NUMBER = 600;
     public static final int RADIO_CREATED_DATE = 601;
     public static final int RADIO_UPDATED_DATE = 602;
@@ -146,7 +147,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     public void showDetail(WorkflowListItem item) {
         if (!workflowViewModel.hasViewDetailsPermissions()) return;
 
-        workflowViewModel.resetFilterSettings();
         Intent intent = new Intent(getActivity(), WorkflowDetailActivity.class);
         intent.putExtra(WorkflowDetailActivity.EXTRA_WORKFLOW_LIST_ITEM, item);
         startActivityForResult(intent, REQUEST_WORKFLOW_DETAIL);
@@ -383,6 +383,8 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
                 .observe(this, this::handleMessageStatusFiltersClicked);
         mainViewModel.messageSystemStatusFiltersClickedToWorkflowList
                 .observe(this, this::handleMessageSystemStatusFiltersClicked);
+        mainViewModel.messageClearFiltersClickedToWorkflowList
+                .observe(this, this::handleMessageClearFiltersClicked);
         mainViewModel.messageWorkflowTypeFilterPositionSelectedToWorkflowList
                 .observe(this, this::handleMessageWorkflowTypeFilterPositionSelected);
         mainViewModel.messageBaseFilterPositionSelectedToWorkflowList
@@ -459,6 +461,10 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     private void handleMessageSystemStatusFiltersClicked(Boolean clicked) {
         workflowViewModel.handleSystemStatusFieldClick();
+    }
+
+    private void handleMessageClearFiltersClicked(Boolean clicked) {
+        workflowViewModel.handleClearFiltersClick(this);
     }
 
     private void handleMessageMainUpdateSortSelection(int sortType) {

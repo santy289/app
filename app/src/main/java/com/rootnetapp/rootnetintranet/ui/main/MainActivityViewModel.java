@@ -104,6 +104,7 @@ public class MainActivityViewModel extends ViewModel {
     public MutableLiveData<Boolean> messageWorkflowTypeFilterClickedToWorkflowList;
     public MutableLiveData<Boolean> messageStatusFiltersClickedToWorkflowList;
     public MutableLiveData<Boolean> messageSystemStatusFiltersClickedToWorkflowList;
+    public MutableLiveData<Boolean> messageClearFiltersClickedToWorkflowList;
     public MutableLiveData<Integer> messageWorkflowTypeFilterPositionSelectedToWorkflowList;
     public MutableLiveData<Integer> messageBaseFilterPositionSelectedToWorkflowList;
     public MutableLiveData<Integer> messageStatusFilterPositionSelectedToWorkflowList;
@@ -141,6 +142,7 @@ public class MainActivityViewModel extends ViewModel {
         this.messageWorkflowTypeFilterClickedToWorkflowList = new MutableLiveData<>();
         this.messageStatusFiltersClickedToWorkflowList = new MutableLiveData<>();
         this.messageSystemStatusFiltersClickedToWorkflowList = new MutableLiveData<>();
+        this.messageClearFiltersClickedToWorkflowList = new MutableLiveData<>();
         this.receiveMessageCreateWorkflowTypeFiltersAdapter = new MutableLiveData<>();
         this.receiveMessageCreateBaseFiltersAdapter = new MutableLiveData<>();
         this.receiveMessageCreateStatusFiltersAdapter = new MutableLiveData<>();
@@ -268,6 +270,10 @@ public class MainActivityViewModel extends ViewModel {
 
     protected void sendSystemStatusFiltersClicked() {
         messageSystemStatusFiltersClickedToWorkflowList.setValue(true);
+    }
+
+    protected void sendClearFiltersClicked() {
+        messageClearFiltersClickedToWorkflowList.setValue(true);
     }
 
     protected void sendWorkflowTypeFilterPositionClicked(int position) {

@@ -499,10 +499,6 @@ public class WorkflowViewModel extends ViewModel {
         disposables.add(disposable);
     }
 
-    protected void resetFilterSettings() {
-        filterSettings.resetFilterSettings();
-    }
-
     /**
      * Groups workflow types in their respective categories and saves results in FilterSettings.
      */
@@ -760,6 +756,17 @@ public class WorkflowViewModel extends ViewModel {
         messageMainSystemStatusFilters.setValue(optionsList);
     }
 
+    protected void handleClearFiltersClick(LifecycleOwner lifecycleOwner) {
+        resetWorkflowTypeFilter();
+        resetBaseFilter();
+        resetStatusFilter();
+        resetSystemStatusFilter();
+        filterSettings.clearDynamicFilters();
+
+        showLoading.setValue(true);
+        loadWorkflowsByFilters(filterSettings, lifecycleOwner);
+    }
+
     /**
      * Handles a position tapped on the List of WorkflowTypeFilters. This function will update
      * FilterSettings with the latest position selected and make a network call to update the
@@ -775,15 +782,21 @@ public class WorkflowViewModel extends ViewModel {
         filterSelected = filterSettings.handleWorkflowTypeFilterPositionSelected(position);
         if (!filterSelected.isSelected()) {
             // Unselected, no items selected. Filter by All.
-            filterSettings.resetWorkflowTypeFilterSelectionToAll();
             filterSelected = filterSettings.getWorkflowTypeOptionsList().get(0);
-            filterSettings.setWorkflowTypeId(filterSelected.getWorkflowTypeId());
+            resetWorkflowTypeFilter();
         }
         messageMainWorkflowTypeFilterSelectionToFilterList.setValue(filterSelected.getLabel());
         messageMainWorkflowTypeIdFilterSelectionToFilterList
                 .setValue(filterSelected.getWorkflowTypeId());
         invalidateDrawerOptionsList.setValue(true);
         handleFilterByWorkflowType(filterSelected, lifecycleOwner);
+    }
+
+    private void resetWorkflowTypeFilter() {
+        WorkflowTypeMenu filterSelected = filterSettings.getWorkflowTypeOptionsList().get(0);
+        filterSettings.resetWorkflowTypeFilterSelectionToAll();
+        filterSettings.setWorkflowTypeId(filterSelected.getWorkflowTypeId());
+        messageMainWorkflowTypeFilterSelectionToFilterList.setValue(filterSelected.getLabel());
     }
 
     /**
@@ -798,17 +811,19 @@ public class WorkflowViewModel extends ViewModel {
         showLoading.setValue(true);
         WorkflowTypeMenu filterSelected;
         filterSelected = filterSettings.handleBaseFilterPositionSelected(position);
-        int baseFilterId = filterSelected.getId();
         if (!filterSelected.isSelected()) {
             // Unselected, no items selected. Filter by All.
-            filterSettings.resetBaseFilterSelectionToAll();
-            baseFilterId = BASE_FILTER_ALL_ID;
-            messageMainBaseFilterSelectionToFilterList.setValue(R.string.all);
+            resetBaseFilter();
         } else {
             messageMainBaseFilterSelectionToFilterList.setValue(filterSelected.getResLabel());
         }
         invalidateDrawerOptionsList.setValue(true);
         loadWorkflowsByFilters(filterSettings, lifecycleOwner);
+    }
+
+    private void resetBaseFilter() {
+        filterSettings.resetBaseFilterSelectionToAll();
+        messageMainBaseFilterSelectionToFilterList.setValue(R.string.all);
     }
 
     /**
@@ -823,17 +838,19 @@ public class WorkflowViewModel extends ViewModel {
         showLoading.setValue(true);
         WorkflowTypeMenu filterSelected;
         filterSelected = filterSettings.handleStatusFilterPositionSelected(position);
-        int filterId = filterSelected.getId();
         if (!filterSelected.isSelected()) {
             // Unselected, no items selected. Filter by Open.
-            filterSettings.resetStatusFilterSelectionToOpen();
-            filterId = STATUS_FILTER_OPEN_ID;
-            messageMainStatusFilterSelectionToFilterList.setValue(R.string.open);
+            resetStatusFilter();
         } else {
             messageMainStatusFilterSelectionToFilterList.setValue(filterSelected.getResLabel());
         }
         invalidateDrawerOptionsList.setValue(true);
         loadWorkflowsByFilters(filterSettings, lifecycleOwner);
+    }
+
+    private void resetStatusFilter() {
+        filterSettings.resetStatusFilterSelectionToOpen();
+        messageMainStatusFilterSelectionToFilterList.setValue(R.string.open);
     }
 
     /**
@@ -849,18 +866,20 @@ public class WorkflowViewModel extends ViewModel {
         showLoading.setValue(true);
         WorkflowTypeMenu filterSelected;
         filterSelected = filterSettings.handleSystemStatusFilterPositionSelected(position);
-        int filterId = filterSelected.getId();
         if (!filterSelected.isSelected()) {
             // Unselected, no items selected. Filter by Active.
-            filterSettings.resetSystemStatusFilterSelectionToActive();
-            filterId = STATUS_FILTER_OPEN_ID;
-            messageMainSystemStatusFilterSelectionToFilterList.setValue(R.string.active);
+            resetSystemStatusFilter();
         } else {
             messageMainSystemStatusFilterSelectionToFilterList
                     .setValue(filterSelected.getResLabel());
         }
         invalidateDrawerOptionsList.setValue(true);
         loadWorkflowsByFilters(filterSettings, lifecycleOwner);
+    }
+
+    private void resetSystemStatusFilter() {
+        filterSettings.resetSystemStatusFilterSelectionToActive();
+        messageMainSystemStatusFilterSelectionToFilterList.setValue(R.string.active);
     }
 
     /**

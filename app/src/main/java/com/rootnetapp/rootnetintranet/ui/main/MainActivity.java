@@ -86,6 +86,7 @@ import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.RA
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.RADIO_CREATED_DATE;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.RADIO_NUMBER;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.RADIO_UPDATED_DATE;
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_CLEAR_ALL;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_CREATED_DATE;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_NUMBER;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.SWITCH_UPDATED_DATE;
@@ -447,6 +448,7 @@ public class MainActivity extends AppCompatActivity
             }
             mainBinding.rightDrawer.rightDrawerFilters.setVisibility(View.GONE);
             viewModel.sendRightDrawerBackButtonClick();
+            hideSoftInputKeyboard();
         });
 
         mainBinding.rightDrawer.rightDrawerSort.setOnClickListener(view -> {
@@ -483,6 +485,11 @@ public class MainActivity extends AppCompatActivity
             viewModel.sendSystemStatusFiltersClicked();
         });
 
+        // Using the system status field filter.
+        mainBinding.rightDrawer.rightDrawerRestoreDefaults.setOnClickListener(view -> {
+            restoreFilterDefaults();
+        });
+
         mainBinding.toolbarImage.setOnClickListener(
                 v -> showFragment(ProfileFragment.newInstance(), false));
 
@@ -491,6 +498,19 @@ public class MainActivity extends AppCompatActivity
         showDynamicFiltersFragment(mDynamicFiltersFragment, false);
         showStandardFiltersFragment(
                 CreateWorkflowFragment.newInstance(FormType.STANDARD_FILTERS, this), false);
+    }
+
+    private void restoreFilterDefaults() {
+        mDynamicFiltersFragment = CreateWorkflowFragment
+                .newInstance(FormType.DYNAMIC_FILTERS, this);
+        showDynamicFiltersFragment(mDynamicFiltersFragment, false);
+        showStandardFiltersFragment(
+                CreateWorkflowFragment.newInstance(FormType.STANDARD_FILTERS, this), false);
+
+        updateSortFieldSelection(R.string.no_selection);
+        toggleRadioButtonFilter(RADIO_CLEAR_ALL, false);
+        toggleAscendingDescendingSwitch(SWITCH_CLEAR_ALL, false);
+        viewModel.sendClearFiltersClicked();
     }
 
     private void openRightDrawer(boolean open) {
@@ -560,6 +580,7 @@ public class MainActivity extends AppCompatActivity
             hideSystemStatusFilters(true);
             hideStandardFilters(true);
             hideDynamicFilters(true);
+            hideClearFilters(true);
         } else {
             mainBinding.rightDrawer.rightDrawerSort.setVisibility(View.VISIBLE);
             mainBinding.rightDrawer.drawerBackButton.setVisibility(View.GONE);
@@ -570,6 +591,7 @@ public class MainActivity extends AppCompatActivity
             hideSystemStatusFilters(false);
             hideStandardFilters(false);
             hideDynamicFilters(false);
+            hideClearFilters(false);
         }
     }
 
@@ -656,6 +678,11 @@ public class MainActivity extends AppCompatActivity
                 mainBinding.rightDrawer.sortOptions.swchUpdatedate.setChecked(check);
                 setSwitchAscendingDescendingText(mainBinding.rightDrawer.sortOptions.swchUpdatedate,
                         check);
+                break;
+            case SWITCH_CLEAR_ALL:
+                toggleAscendingDescendingSwitch(SWITCH_NUMBER, check);
+                toggleAscendingDescendingSwitch(SWITCH_CREATED_DATE, check);
+                toggleAscendingDescendingSwitch(SWITCH_UPDATED_DATE, check);
                 break;
             default:
                 Log.d(TAG,
@@ -802,6 +829,7 @@ public class MainActivity extends AppCompatActivity
         hideSystemStatusFilters(false);
         hideStandardFilters(false);
         hideDynamicFilters(false);
+        hideClearFilters(false);
         LayoutInflater inflater = LayoutInflater.from(this);
         rightDrawerFiltersAdapter = new RightDrawerFiltersAdapter(inflater, menus);
 
@@ -926,6 +954,7 @@ public class MainActivity extends AppCompatActivity
         hideSystemStatusFilters(true);
         hideStandardFilters(true);
         hideDynamicFilters(true);
+        hideClearFilters(true);
         mainBinding.rightDrawer.drawerBackButton.setVisibility(View.VISIBLE);
         mainBinding.rightDrawer.rightDrawerTitle.setText(title);
     }
@@ -1019,8 +1048,18 @@ public class MainActivity extends AppCompatActivity
     private void hideDynamicFilters(boolean hide) {
         if (hide) {
             mainBinding.rightDrawer.rightDrawerDynamicFilters.setVisibility(View.GONE);
+            mainBinding.rightDrawer.separatorDynamic.setVisibility(View.GONE);
         } else {
             mainBinding.rightDrawer.rightDrawerDynamicFilters.setVisibility(View.VISIBLE);
+            mainBinding.rightDrawer.separatorDynamic.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void hideClearFilters(boolean hide) {
+        if (hide) {
+            mainBinding.rightDrawer.rightDrawerRestoreDefaults.setVisibility(View.GONE);
+        } else {
+            mainBinding.rightDrawer.rightDrawerRestoreDefaults.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1129,11 +1168,11 @@ public class MainActivity extends AppCompatActivity
     private void hideSoftInputKeyboard() {
         // Check if no view has focus:
         View view = getCurrentFocus();
-        if (view != null) {
-            InputMethodManager imm = (InputMethodManager) getSystemService(
-                    Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        }
+        if (view == null) view = mainBinding.container;
+
+        InputMethodManager imm = (InputMethodManager) getSystemService(
+                Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     @UiThread

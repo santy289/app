@@ -140,6 +140,10 @@ public class MainActivity extends AppCompatActivity
         setupBottomNavigation();
     }
 
+    private void setToolbarTitle(CharSequence title) {
+        mainBinding.toolbarTitle.setText(title);
+    }
+
     /**
      * Used to send some intent with token, protocol, port values to a service.
      */
@@ -309,18 +313,17 @@ public class MainActivity extends AppCompatActivity
         switch (content[0]) {
             case MainActivityViewModel.IMG_LOGO:
                 builder.into(mainBinding.leftDrawer.imgLogo);
-                return;
-            case MainActivityViewModel.IMG_BAR_LOGO:
-                builder.into(mainBinding.toolbarLogo);
-                return;
+                break;
             case MainActivityViewModel.IMG_TOOLBAR:
                 builder.into(mainBinding.toolbarImage);
+                break;
         }
     }
 
     private void setupBottomNavigation() {
         //fixme temporary setup of Workflows as the initial tab
         mainBinding.bottomNavigation.setSelectedItemId(R.id.menu_workflow_list);
+        setToolbarTitle(getString(R.string.bottom_nav_workflow_list));
 
         mainBinding.bottomNavigation.setOnNavigationItemSelectedListener(
                 item -> {
@@ -331,6 +334,7 @@ public class MainActivity extends AppCompatActivity
 
     private void handleBottomNavigationSelection(@NonNull MenuItem item) {
         item.setChecked(true);
+        setToolbarTitle(item.getTitle());
 
         switch (item.getItemId()) {
             case R.id.menu_timeline:
@@ -707,7 +711,6 @@ public class MainActivity extends AppCompatActivity
 
     private void setActionBar() {
         setSupportActionBar(mainBinding.toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mainBinding.drawerLayout, mainBinding.toolbar
                 , R.string.navigation_drawer_open, R.string.navigation_drawer_close);

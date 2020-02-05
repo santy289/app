@@ -189,9 +189,6 @@ public class MainActivityViewModel extends ViewModel {
             content[0] = MainActivityViewModel.IMG_LOGO;
             content[1] = Utils.URL + domain.getClient().getLogoUrl();
             setImgInView.setValue(content);
-            content[0] = MainActivityViewModel.IMG_BAR_LOGO;
-            content[1] = Utils.URL + domain.getClient().getLogoUrl();
-            setImgInView.setValue(content);
             RetrofitUrlManager.getInstance().putDomain("api", Utils.domain);
         } catch (IOException e) {
             Log.d(TAG, "initMainViewModel: error: " + e.getMessage());

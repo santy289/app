@@ -3,6 +3,10 @@ package com.rootnetapp.rootnetintranet.ui.login;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+
 import com.auth0.android.jwt.JWT;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
@@ -15,12 +19,10 @@ import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
+import retrofit2.HttpException;
 
 public class LoginViewModel extends ViewModel {
 
@@ -111,7 +113,15 @@ public class LoginViewModel extends ViewModel {
 
     private void onLoginFailure(Throwable throwable) {
         Log.d(TAG, "onLoginFailure: error - " + throwable.getMessage());
-        mErrorLiveData.setValue(R.string.failure_connect);
+
+        int stringRes = R.string.failure_connect;
+
+        if (throwable instanceof HttpException) {
+            int httpCode = ((HttpException) throwable).code();
+            if (httpCode == 401) stringRes = R.string.bad_credentials;
+        }
+
+        mErrorLiveData.setValue(stringRes);
     }
 
     public LiveData<LoginResponse> getObservableLogin() {

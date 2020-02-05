@@ -643,6 +643,11 @@ public class WorkflowViewModel extends ViewModel {
             options.put("workflow_type_id", workflowTypeSelected);
         }
 
+        String searchText = filterSettings.getSearchText();
+        if (searchText != null && !searchText.isEmpty()) {
+            options.put("query", searchText);
+        }
+
         switch (filterSettings.getBaseFilterSelectedId()) {
             case BASE_FILTER_ALL_ID:
                 // Nothing to do add to options.
@@ -981,8 +986,9 @@ public class WorkflowViewModel extends ViewModel {
      */
     protected void filterBySearchText(String searchText, LifecycleOwner lifecycleOwner) {
         filterSettings.setSearchText(searchText);
-        liveWorkflows.removeObservers(lifecycleOwner);
-        applyFilters(lifecycleOwner, filterSettings);
+
+        showLoading.setValue(true);
+        loadWorkflowsByFilters(filterSettings, lifecycleOwner);
     }
 
     private void subscribe(LifecycleOwner lifecycleOwner) {
@@ -1077,14 +1083,14 @@ public class WorkflowViewModel extends ViewModel {
                             filterSettings.isCheckedStatus(),
                             token,
                             id,
-                            filterSettings.getSearchText());
+                            ""); //search text is already used by the web service
                 } else {
                     workflowRepository.rawQueryWorkflowListByFilters(
                             filterSettings.isCheckedStatus(),
                             filterSettings.getWorkflowTypeId(),
                             token,
                             id,
-                            filterSettings.getSearchText());
+                            "");
                 }
                 isScrollToTop = true;
                 reloadWorkflowsList(lifecycleOwner);
@@ -1100,7 +1106,7 @@ public class WorkflowViewModel extends ViewModel {
                             isDescending,
                             token,
                             id,
-                            filterSettings.getSearchText());
+                            "");
                 } else {
                     boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
                     workflowRepository.rawQueryWorkflowListByFilters(
@@ -1110,7 +1116,7 @@ public class WorkflowViewModel extends ViewModel {
                             isDescending,
                             token,
                             id,
-                            filterSettings.getSearchText());
+                            "");
                 }
                 isScrollToTop = true;
                 reloadWorkflowsList(lifecycleOwner);
@@ -1126,7 +1132,7 @@ public class WorkflowViewModel extends ViewModel {
                             isDescending,
                             token,
                             id,
-                            filterSettings.getSearchText());
+                            "");
                 } else {
                     boolean isDescending = !sort.getCreatedSortOrder().equals(Sort.sortOrder.ASC);
                     workflowRepository.rawQueryWorkflowListByFilters(
@@ -1136,7 +1142,7 @@ public class WorkflowViewModel extends ViewModel {
                             isDescending,
                             token,
                             id,
-                            filterSettings.getSearchText());
+                            "");
                 }
                 isScrollToTop = true;
                 reloadWorkflowsList(lifecycleOwner);
@@ -1152,7 +1158,7 @@ public class WorkflowViewModel extends ViewModel {
                             isDescending,
                             token,
                             id,
-                            filterSettings.getSearchText());
+                            "");
                 } else {
                     boolean isDescending = !sort.getUpdatedSortOrder().equals(Sort.sortOrder.ASC);
                     workflowRepository.rawQueryWorkflowListByFilters(
@@ -1162,7 +1168,7 @@ public class WorkflowViewModel extends ViewModel {
                             isDescending,
                             token,
                             id,
-                            filterSettings.getSearchText());
+                            "");
                 }
                 isScrollToTop = true;
                 reloadWorkflowsList(lifecycleOwner);

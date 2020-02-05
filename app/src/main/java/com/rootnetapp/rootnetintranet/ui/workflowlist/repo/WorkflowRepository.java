@@ -415,7 +415,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         Disposable disposable = service
                 .getWorkflowsByBaseFilters(
                         token,
-                        50,
+                        100,
                         1,
                         false,
                         options)

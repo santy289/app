@@ -1185,12 +1185,17 @@ public class WorkflowViewModel extends ViewModel {
 
     public void reloadWorkflowsList(LifecycleOwner lifecycleOwner, boolean isSwipe) {
         this.isSwipe = isSwipe;
-        if (!isSwipe) showLoading.setValue(true);
 
-        liveWorkflows.removeObservers(
-                lifecycleOwner); // TODO try putting this back and maybe it works and delete from handleWorkflowTypeFilters first line.
-        liveWorkflows = workflowRepository.getAllWorkflows();
-        addWorkflowObserver.postValue(true);
+        if (isSwipe) {
+            loadWorkflowsByFilters(filterSettings, lifecycleOwner);
+        } else {
+            showLoading.setValue(true);
+
+            liveWorkflows.removeObservers(
+                    lifecycleOwner); // TODO try putting this back and maybe it works and delete from handleWorkflowTypeFilters first line.
+            liveWorkflows = workflowRepository.getAllWorkflows();
+            addWorkflowObserver.postValue(true);
+        }
     }
 
     protected void handleCheckboxAllOnClick(boolean isChecked) {
@@ -1376,12 +1381,8 @@ public class WorkflowViewModel extends ViewModel {
             isSwipe = null; //clear value
         }
 
-        if (isScrollToTop) {
-            isScrollToTop = false;
-            handleScrollRecyclerToTop.setValue(true);
-        }
-
         showList.setValue(true);
+        handleScrollRecyclerToTop.setValue(true);
     }
 
     private void clearOtherSwitchesBut(Sort.sortType ofType) {

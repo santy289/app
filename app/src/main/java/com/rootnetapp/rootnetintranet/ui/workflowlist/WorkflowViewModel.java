@@ -762,6 +762,7 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     protected void handleClearFiltersClick(LifecycleOwner lifecycleOwner) {
+        resetSortByFilter();
         resetWorkflowTypeFilter();
         resetBaseFilter();
         resetStatusFilter();
@@ -770,6 +771,10 @@ public class WorkflowViewModel extends ViewModel {
 
         showLoading.setValue(true);
         loadWorkflowsByFilters(filterSettings, lifecycleOwner);
+    }
+
+    private void resetSortByFilter() {
+        sort = new Sort();
     }
 
     /**

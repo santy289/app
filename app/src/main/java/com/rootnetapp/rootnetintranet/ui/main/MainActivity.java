@@ -46,6 +46,7 @@ import androidx.lifecycle.ViewModelProviders;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.BuildConfig;
 import com.rootnetapp.rootnetintranet.R;
@@ -53,6 +54,7 @@ import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
+import com.rootnetapp.rootnetintranet.fcm.FirebaseTopics;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
@@ -138,6 +140,17 @@ public class MainActivity extends AppCompatActivity
 //        showFragment(TimelineFragment.newInstance(this), false);
         setFilterBoxListeners();
         setupBottomNavigation();
+        subscribeToFcmTopics();
+    }
+
+    private void subscribeToFcmTopics() {
+        subscribeToFcmTopic(FirebaseTopics.WORKFLOWS);
+    }
+
+    private void subscribeToFcmTopic(String topic) {
+        FirebaseMessaging.getInstance().subscribeToTopic(topic)
+                .addOnCompleteListener(task -> Log.d(TAG,
+                        "FCM subscribe to topic: " + topic + " - " + task.isSuccessful()));
     }
 
     private void setToolbarTitle(CharSequence title) {

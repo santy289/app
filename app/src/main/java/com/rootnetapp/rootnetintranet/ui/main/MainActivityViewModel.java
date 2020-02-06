@@ -29,7 +29,6 @@ import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
-import com.rootnetapp.rootnetintranet.services.websocket.RestartWebsocketReceiver;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.DynamicFilter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.squareup.moshi.JsonAdapter;
@@ -69,8 +68,6 @@ public class MainActivityViewModel extends ViewModel {
     private MutableLiveData<Boolean> attemptTokenRefresh;
     private MutableLiveData<String> saveToPreference;
     private MutableLiveData<Boolean> goToDomain;
-    private MutableLiveData<Boolean> startService;
-    private MutableLiveData<Boolean> stopService;
     private MutableLiveData<QuickActionsVisibility> quickActionsVisibilityLiveData;
     protected MutableLiveData<Integer> setSearchMenuLayout;
     protected MutableLiveData<Integer> setUploadMenuLayout;
@@ -158,8 +155,6 @@ public class MainActivityViewModel extends ViewModel {
         this.receiveMessageStatusFilterSelected = new MutableLiveData<>();
         this.receiveMessageSystemStatusFilterSelected = new MutableLiveData<>();
         this.openRightDrawer = new MutableLiveData<>();
-        this.startService = new MutableLiveData<>();
-        this.stopService = new MutableLiveData<>();
     }
 
     @Override
@@ -168,10 +163,6 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     protected void initMainViewModel(SharedPreferences sharedPreferences) {
-        if (!RestartWebsocketReceiver.getRunningIndicator()) {
-            startService.setValue(true);
-        }
-
         String json = sharedPreferences.getString(PreferenceKeys.PREF_DOMAIN, "");
         if (json.isEmpty()) {
             Log.d("test", "onCreate: ALGO PASO");//todo mejorar esta validacion
@@ -586,20 +577,6 @@ public class MainActivityViewModel extends ViewModel {
             goToDomain = new MutableLiveData<>();
         }
         return goToDomain;
-    }
-
-    LiveData<Boolean> getObservableStartService() {
-        if (startService == null) {
-            startService = new MutableLiveData<>();
-        }
-        return startService;
-    }
-
-    LiveData<Boolean> getObservableStopService() {
-        if (stopService == null) {
-            stopService = new MutableLiveData<>();
-        }
-        return stopService;
     }
 
     LiveData<QuickActionsVisibility> getObservableQuickActionsVisibility() {

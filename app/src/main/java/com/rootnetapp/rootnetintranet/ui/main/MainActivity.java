@@ -1,6 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -50,7 +49,6 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.BuildConfig;
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
 import com.rootnetapp.rootnetintranet.fcm.FirebaseTopics;
@@ -58,9 +56,6 @@ import com.rootnetapp.rootnetintranet.fcm.NotificationDataKeys;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
-import com.rootnetapp.rootnetintranet.services.websocket.RestartWebsocketReceiver;
-import com.rootnetapp.rootnetintranet.services.websocket.WebSocketService;
-import com.rootnetapp.rootnetintranet.services.websocket.WebsocketSecureHandler;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragmentInterface;
@@ -122,8 +117,6 @@ public class MainActivity extends AppCompatActivity
                 .of(this, profileViewModelFactory)
                 .get(MainActivityViewModel.class);
 
-//        dozeModeWhitelist(); //todo verify service
-
         fragmentManager = getSupportFragmentManager();
         setActionBar();
         subscribe();
@@ -159,60 +152,6 @@ public class MainActivity extends AppCompatActivity
 
     private void setToolbarTitle(CharSequence title) {
         mainBinding.toolbarTitle.setText(title);
-    }
-
-    /**
-     * Used to send some intent with token, protocol, port values to a service.
-     */
-    private void sendBroadcastWebsocket() {
-        SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String token = sharedPref.getString(PreferenceKeys.PREF_TOKEN, "");
-        String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
-        String port = sharedPref.getString(PreferenceKeys.PREF_PORT, "");
-        Intent broadcastIntent = createIntent(RestartWebsocketReceiver.class, token, port, protocol,
-                Utils.domain);
-        broadcastIntent.setAction("restartservice");
-        sendBroadcast(broadcastIntent);
-    }
-
-    /**
-     * Used to create an intent based on the class name passed on. This will be used to call a
-     * service.
-     *
-     * @param className
-     * @param token
-     * @param port
-     * @param protocol
-     * @param domain
-     *
-     * @return
-     */
-    private Intent createIntent(Class<?> className, String token, String port, String protocol,
-                                String domain) {
-        Intent intent = new Intent(getBaseContext(), className);
-        intent.putExtra(WebsocketSecureHandler.KEY_TOKEN, token);
-        intent.putExtra(WebsocketSecureHandler.KEY_PORT, port);
-        intent.putExtra(WebsocketSecureHandler.KEY_PROTOCOL, protocol);
-        intent.putExtra(WebsocketSecureHandler.KEY_DOMAIN, domain);
-        return intent;
-    }
-
-    private void stopWebsocketService() {
-        Intent intent = new Intent(getBaseContext(), WebSocketService.class);
-
-        stopService(intent);
-    }
-
-    private boolean isMyServiceRunning() {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningServiceInfo> list = manager
-                .getRunningServices(Integer.MAX_VALUE);
-        for (ActivityManager.RunningServiceInfo service : list) {
-            if (WebSocketService.class.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
@@ -1170,11 +1109,6 @@ public class MainActivity extends AppCompatActivity
         viewModel.receiveMessageSystemStatusFilterSelected
                 .observe(this, this::handleUpdateSystemStatusFilterSelectionUpdateWith);
         viewModel.openRightDrawer.observe(this, this::openRightDrawer);
-
-        //todo verify service
-//        viewModel.getObservableStartService().observe(this, result -> sendBroadcastWebsocket());
-
-//        viewModel.getObservableStopService().observe(this, result -> stopWebsocketService());
 
         viewModel.getObservableQuickActionsVisibility().observe(this, this::setupSpeedDialFab);
     }

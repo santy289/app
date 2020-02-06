@@ -1,1 +1,1 @@
-include ':app', ':autobahn'
+include ':app'

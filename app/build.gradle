@@ -110,7 +110,6 @@ dependencies {
     testImplementation "junit:junit:$rootProject.jUnit"
     implementation 'com.auth0.android:jwtdecode:1.1.1'
     implementation "de.hdodenhof:circleimageview:$rootProject.circleImageViewVersion"
-    implementation project(':autobahn')
 }
 
 configurations {

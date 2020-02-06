@@ -36,12 +36,15 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
-                        <ImageView
-                            android:id="@+id/toolbar_logo"
+                        <TextView
+                            android:id="@+id/toolbar_title"
                             android:layout_width="wrap_content"
-                            android:layout_height="32dp"
+                            android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
-                            android:maxWidth="120dp" />
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorAccent"
+                            android:maxWidth="140dp" />
 
                         <de.hdodenhof.circleimageview.CircleImageView
                             android:id="@+id/toolbar_image"

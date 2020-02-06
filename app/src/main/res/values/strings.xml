@@ -347,7 +347,7 @@
     <string name="workflow_detail_comments_fragment_no_view_permissions">You do not have permissions to view the comments</string>
     <!--FilesFragment-->
     <string name="workflow_detail_files_fragment_title">@string/workflow_detail_files_fragment_documents</string>
-    <string name="workflow_detail_files_fragment_documents">Documents</string>
+    <string name="workflow_detail_files_fragment_documents">Documents Attachments</string>
     <string name="workflow_detail_files_fragment_no_files">No documents have been uploaded.</string>
     <string name="workflow_detail_files_fragment_file_name">File Name</string>
     <string name="workflow_detail_files_fragment_no_file_manager">Please install a File Manager.</string>

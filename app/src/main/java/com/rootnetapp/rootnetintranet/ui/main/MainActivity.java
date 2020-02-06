@@ -141,7 +141,6 @@ public class MainActivity extends AppCompatActivity
 
     private void checkForPushNotificationIntent() {
         String workflowId = getIntent().getStringExtra(NotificationDataKeys.KEY_WORKFLOW_ID);
-        workflowId = "715";
         // If id is defined, then this activity was launched from a push notification
         if (!TextUtils.isEmpty(workflowId)) {
             goToWorkflowDetail(workflowId);

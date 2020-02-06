@@ -58,7 +58,7 @@ public class RootnetFirebaseMessagingService extends FirebaseMessagingService {
             int notificationId = 0;
 
             if (title != null && message != null) {
-                prepareNotification(title, message, "715", notificationId);
+                prepareNotification(title, message, null, notificationId);
             }
         }
     }

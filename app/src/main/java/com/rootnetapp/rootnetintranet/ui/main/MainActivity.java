@@ -52,9 +52,9 @@ import com.rootnetapp.rootnetintranet.BuildConfig;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
 import com.rootnetapp.rootnetintranet.fcm.FirebaseTopics;
+import com.rootnetapp.rootnetintranet.fcm.NotificationDataKeys;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
@@ -72,6 +72,7 @@ import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
 import com.rootnetapp.rootnetintranet.ui.sync.SyncActivity;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
@@ -129,18 +130,22 @@ public class MainActivity extends AppCompatActivity
         initActionListeners();
         viewModel.initMainViewModel(sharedPref);
 
-        String workflowId = getIntent().getStringExtra("goToWorkflow");
-        // If id is defined, then this activity was launched with a fragment selection
-        if (workflowId != null) {
-            viewModel.getWorkflow(Integer.parseInt(workflowId));
-        }
-
         //fixme temporary setup of Workflows as the initial tab
         showFragment(WorkflowFragment.newInstance(this), false);
 //        showFragment(TimelineFragment.newInstance(this), false);
         setFilterBoxListeners();
         setupBottomNavigation();
         subscribeToFcmTopics();
+        checkForPushNotificationIntent();
+    }
+
+    private void checkForPushNotificationIntent() {
+        String workflowId = getIntent().getStringExtra(NotificationDataKeys.KEY_WORKFLOW_ID);
+        workflowId = "715";
+        // If id is defined, then this activity was launched from a push notification
+        if (!TextUtils.isEmpty(workflowId)) {
+            goToWorkflowDetail(workflowId);
+        }
     }
 
     private void subscribeToFcmTopics() {
@@ -833,11 +838,11 @@ public class MainActivity extends AppCompatActivity
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-    protected void goToWorkflowDetail(Workflow workflow) {
-//        showFragment(
-//                WorkflowDetailFragment.newInstance(workflow, this),
-//                true
-//        );
+    protected void goToWorkflowDetail(String workflowId) {
+        Intent intent = new Intent(this, WorkflowDetailActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra(WorkflowDetailActivity.INTENT_EXTRA_ID, workflowId);
+        startActivity(intent);
     }
 
     // Populates Filters List
@@ -1137,12 +1142,10 @@ public class MainActivity extends AppCompatActivity
         final Observer<String[]> setImgInViewObserver = (this::setImageIn);
         final Observer<Boolean> collapseMenuObserver = (this::collapseActionView);
         final Observer<Boolean> hideKeyboardObserver = (this::hideKeyboard);
-        final Observer<Workflow> goToWorkflowDetailObserver = (this::goToWorkflowDetail);
         viewModel.getObservableError().observe(this, errorObserver);
         viewModel.getObservableSetImgInView().observe(this, setImgInViewObserver);
         viewModel.getObservableCollapseMenu().observe(this, collapseMenuObserver);
         viewModel.getObservableHideKeyboard().observe(this, hideKeyboardObserver);
-        viewModel.getObservableGoToWorkflowDetail().observe(this, goToWorkflowDetailObserver);
         viewModel.setRightDrawerFilterList.observe(this, (this::setRightDrawerFilters));
         viewModel.setRightDrawerOptionList.observe(this, (this::setRightDrawerOptions));
         viewModel.invalidateOptionsList.observe(this, invalidate -> invalidateOptionList());

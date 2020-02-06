@@ -26,11 +26,6 @@ public class RootnetFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "FirebaseService";
 
-    private static final String KEY_TITLE = "title";
-    private static final String KEY_MESSAGE = "message";
-    private static final String KEY_WORKFLOW_ID = "id";
-    private static final String KEY_AUTHOR = "author";
-
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
@@ -38,13 +33,14 @@ public class RootnetFirebaseMessagingService extends FirebaseMessagingService {
 
         // Check if message contains a data payload.
         Map<String, String> data = remoteMessage.getData();
+
         if (data.size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
 
-            String title = data.get(KEY_TITLE);
-            String message = data.get(KEY_MESSAGE);
-            String workflowId = data.get(KEY_WORKFLOW_ID);
-            String author = data.get(KEY_AUTHOR);
+            String title = data.get(NotificationDataKeys.KEY_TITLE);
+            String message = data.get(NotificationDataKeys.KEY_MESSAGE);
+            String workflowId = data.get(NotificationDataKeys.KEY_WORKFLOW_ID);
+            String author = data.get(NotificationDataKeys.KEY_AUTHOR);
             int notificationId = 0;
 
             if (title != null && message != null && workflowId != null) {
@@ -62,7 +58,7 @@ public class RootnetFirebaseMessagingService extends FirebaseMessagingService {
             int notificationId = 0;
 
             if (title != null && message != null) {
-                prepareNotification(title, message, null, notificationId);
+                prepareNotification(title, message, "715", notificationId);
             }
         }
     }
@@ -72,7 +68,7 @@ public class RootnetFirebaseMessagingService extends FirebaseMessagingService {
      * had been compromised. Note that this is called when the InstanceID token is initially
      * generated so this is where you would retrieve the token.
      * <p>
-     * We don't use this method to refresh the token to the server, because we fetch the current
+     * We don't use this method to send the token to the server, because we fetch the current
      * instance id token when logging in, and this is done every time the app is opened.
      */
     @Override

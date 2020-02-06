@@ -10,6 +10,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.auth0.android.jwt.JWT;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
@@ -367,25 +368,34 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     protected void attemptLogin(String user, String password) {
-        Disposable disposable = repository.login(user, password)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(loginResponse -> {
-                    if (loginResponse == null) {
-                        goToDomain.setValue(true);
-                        return;
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(task -> {
+                    String firebaseToken = "";
+                    if (task.isSuccessful()) {
+                        // Get new Instance ID token
+                        firebaseToken = task.getResult().getToken();
                     }
-                    String token = loginResponse.getToken();
-                    saveToPreference.setValue(token);
-                    String authToken = "Bearer " + token;
 
-                }, throwable -> {
-                    Log.d(TAG,
-                            "attemptToLogin: Smomething failed with network request: " + throwable
-                                    .getMessage());
-                    goToDomain.setValue(true);
+                    Disposable disposable = repository.login(user, password, firebaseToken)
+                            .subscribeOn(Schedulers.newThread())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(loginResponse -> {
+                                if (loginResponse == null) {
+                                    goToDomain.setValue(true);
+                                    return;
+                                }
+                                String token = loginResponse.getToken();
+                                saveToPreference.setValue(token);
+                                String authToken = "Bearer " + token;
+
+                            }, throwable -> {
+                                Log.d(TAG,
+                                        "attemptToLogin: Smomething failed with network request: " + throwable
+                                                .getMessage());
+                                goToDomain.setValue(true);
+                            });
+                    disposables.add(disposable);
                 });
-        disposables.add(disposable);
     }
 
     protected void onCreateOptionsMenu() {

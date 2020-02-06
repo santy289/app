@@ -4,26 +4,30 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.widget.ProgressBar;
-
-import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
-import com.rootnetapp.rootnetintranet.ui.RootnetApp;
-import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
-import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
-
-import javax.inject.Inject;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
 
+import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
+import com.rootnetapp.rootnetintranet.fcm.NotificationDataKeys;
+import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
+import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
+
+import javax.inject.Inject;
+
 public class SyncActivity extends AppCompatActivity {
 
     @Inject
     SyncHelper syncHelper;
     private ProgressBar bar;
+
+    private String pushNotificationWorkflowId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +40,9 @@ public class SyncActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayShowTitleEnabled(false);
         }
+
+        checkForPushNotificationIntent();
+
         SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
 
@@ -47,6 +54,11 @@ public class SyncActivity extends AppCompatActivity {
         bar.setMax(SyncHelper.MAX_ENDPOINT_CALLS);
         subscribe();
         syncHelper.syncData(token);
+    }
+
+    private void checkForPushNotificationIntent() {
+        pushNotificationWorkflowId = getIntent()
+                .getStringExtra(NotificationDataKeys.KEY_WORKFLOW_ID);
     }
 
     private void attemptToLogin() {
@@ -76,8 +88,7 @@ public class SyncActivity extends AppCompatActivity {
         final Observer<Boolean> syncObserver = ((Boolean data) -> {
             syncHelper.clearDisposables();
             syncHelper.getObservableSync().removeObservers(this);
-            startActivity(new Intent(this, MainActivity.class));
-            finishAffinity();
+            goToMain();
         });
 
         final Observer<Integer> progressObserver = ((Integer data) -> {
@@ -88,6 +99,17 @@ public class SyncActivity extends AppCompatActivity {
 
         syncHelper.getObservableSync().observe(this, syncObserver);
         syncHelper.getObservableProgress().observe(this, progressObserver);
+    }
+
+    private void goToMain() {
+        Intent intent = new Intent(this, MainActivity.class);
+
+        if (!TextUtils.isEmpty(pushNotificationWorkflowId)) {
+            intent.putExtra(NotificationDataKeys.KEY_WORKFLOW_ID, pushNotificationWorkflowId);
+        }
+
+        startActivity(intent);
+        finishAffinity();
     }
 
     private void subscribeForLogin() {

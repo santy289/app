@@ -81,7 +81,6 @@ public class WorkflowViewModel extends ViewModel {
     private MutableLiveData<Boolean> handleScrollRecyclerToTop;
     private MutableLiveData<Boolean> showBulkActionMenuLiveData;
     private MutableLiveData<Integer> filtersCounterLiveData;
-    public MutableLiveData<Boolean> showBottomSheetLoading;
     protected MutableLiveData<Boolean> clearFilters;
     private LiveData<PagedList<WorkflowListItem>> liveWorkflows;
 
@@ -148,7 +147,6 @@ public class WorkflowViewModel extends ViewModel {
         sort = new Sort();
         getWorkflowTypesFromDb();
         filterSettings = new FilterSettings();
-        showBottomSheetLoading = new MutableLiveData<>();
         clearFilters = new MutableLiveData<>();
         workflowTypeMenuItems = new MutableLiveData<>();
         rightDrawerFilterMenus = new MutableLiveData<>();
@@ -643,6 +641,11 @@ public class WorkflowViewModel extends ViewModel {
             options.put("workflow_type_id", workflowTypeSelected);
         }
 
+        String searchText = filterSettings.getSearchText();
+        if (searchText != null && !searchText.isEmpty()) {
+            options.put("query", searchText);
+        }
+
         switch (filterSettings.getBaseFilterSelectedId()) {
             case BASE_FILTER_ALL_ID:
                 // Nothing to do add to options.
@@ -757,6 +760,7 @@ public class WorkflowViewModel extends ViewModel {
     }
 
     protected void handleClearFiltersClick(LifecycleOwner lifecycleOwner) {
+        resetSortByFilter();
         resetWorkflowTypeFilter();
         resetBaseFilter();
         resetStatusFilter();
@@ -765,6 +769,10 @@ public class WorkflowViewModel extends ViewModel {
 
         showLoading.setValue(true);
         loadWorkflowsByFilters(filterSettings, lifecycleOwner);
+    }
+
+    private void resetSortByFilter() {
+        sort = new Sort();
     }
 
     /**
@@ -981,8 +989,9 @@ public class WorkflowViewModel extends ViewModel {
      */
     protected void filterBySearchText(String searchText, LifecycleOwner lifecycleOwner) {
         filterSettings.setSearchText(searchText);
-        liveWorkflows.removeObservers(lifecycleOwner);
-        applyFilters(lifecycleOwner, filterSettings);
+
+        showLoading.setValue(true);
+        loadWorkflowsByFilters(filterSettings, lifecycleOwner);
     }
 
     private void subscribe(LifecycleOwner lifecycleOwner) {
@@ -1072,72 +1081,42 @@ public class WorkflowViewModel extends ViewModel {
         switch (sort.getSortingType()) {
             case NONE: {
                 isSortFilterApplied = false;
-                if (filterSettings.getWorkflowTypeId() == NO_TYPE_SELECTED) {
-                    workflowRepository.rawQueryWorkflowListByFilters(
-                            filterSettings.isCheckedStatus(),
-                            token,
-                            id,
-                            filterSettings.getSearchText());
-                } else {
-                    workflowRepository.rawQueryWorkflowListByFilters(
-                            filterSettings.isCheckedStatus(),
-                            filterSettings.getWorkflowTypeId(),
-                            token,
-                            id,
-                            filterSettings.getSearchText());
-                }
+                workflowRepository.rawQueryWorkflowListByFilters(
+                        filterSettings.isCheckedStatus(),
+                        token,
+                        id,
+                        ""); //search text is already used by the web service
                 isScrollToTop = true;
                 reloadWorkflowsList(lifecycleOwner);
                 break;
             }
             case BYNUMBER: {
                 isSortFilterApplied = true;
-                if (filterSettings.getWorkflowTypeId() == NO_TYPE_SELECTED) {
-                    boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
-                    workflowRepository.rawQueryWorkflowListByFilters(
-                            filterSettings.isCheckedStatus(),
-                            WorkflowRepository.WORKFLOWID,
-                            isDescending,
-                            token,
-                            id,
-                            filterSettings.getSearchText());
-                } else {
-                    boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
-                    workflowRepository.rawQueryWorkflowListByFilters(
-                            filterSettings.isCheckedStatus(),
-                            filterSettings.getWorkflowTypeId(),
-                            WorkflowRepository.WORKFLOWID,
-                            isDescending,
-                            token,
-                            id,
-                            filterSettings.getSearchText());
-                }
-                isScrollToTop = true;
+
+                boolean isDescending = !sort.getNumberSortOrder().equals(Sort.sortOrder.ASC);
+                workflowRepository.rawQueryWorkflowListByFilters(
+                        filterSettings.isCheckedStatus(),
+                        WorkflowRepository.WORKFLOWID,
+                        isDescending,
+                        token,
+                        id,
+                        "");
+
                 reloadWorkflowsList(lifecycleOwner);
                 break;
             }
             case BYCREATE: {
                 isSortFilterApplied = true;
-                if (filterSettings.getWorkflowTypeId() == NO_TYPE_SELECTED) {
-                    boolean isDescending = !sort.getCreatedSortOrder().equals(Sort.sortOrder.ASC);
-                    workflowRepository.rawQueryWorkflowListByFilters(
-                            filterSettings.isCheckedStatus(),
-                            WorkflowRepository.WORKFLOW_CREATED,
-                            isDescending,
-                            token,
-                            id,
-                            filterSettings.getSearchText());
-                } else {
-                    boolean isDescending = !sort.getCreatedSortOrder().equals(Sort.sortOrder.ASC);
-                    workflowRepository.rawQueryWorkflowListByFilters(
-                            filterSettings.isCheckedStatus(),
-                            filterSettings.getWorkflowTypeId(),
-                            WorkflowRepository.WORKFLOW_CREATED,
-                            isDescending,
-                            token,
-                            id,
-                            filterSettings.getSearchText());
-                }
+
+                boolean isDescending = !sort.getCreatedSortOrder().equals(Sort.sortOrder.ASC);
+                workflowRepository.rawQueryWorkflowListByFilters(
+                        filterSettings.isCheckedStatus(),
+                        WorkflowRepository.WORKFLOW_CREATED,
+                        isDescending,
+                        token,
+                        id,
+                        "");
+
                 isScrollToTop = true;
                 reloadWorkflowsList(lifecycleOwner);
                 break;
@@ -1152,7 +1131,7 @@ public class WorkflowViewModel extends ViewModel {
                             isDescending,
                             token,
                             id,
-                            filterSettings.getSearchText());
+                            "");
                 } else {
                     boolean isDescending = !sort.getUpdatedSortOrder().equals(Sort.sortOrder.ASC);
                     workflowRepository.rawQueryWorkflowListByFilters(
@@ -1162,7 +1141,7 @@ public class WorkflowViewModel extends ViewModel {
                             isDescending,
                             token,
                             id,
-                            filterSettings.getSearchText());
+                            "");
                 }
                 isScrollToTop = true;
                 reloadWorkflowsList(lifecycleOwner);
@@ -1179,12 +1158,17 @@ public class WorkflowViewModel extends ViewModel {
 
     public void reloadWorkflowsList(LifecycleOwner lifecycleOwner, boolean isSwipe) {
         this.isSwipe = isSwipe;
-        if (!isSwipe) showLoading.setValue(true);
 
-        liveWorkflows.removeObservers(
-                lifecycleOwner); // TODO try putting this back and maybe it works and delete from handleWorkflowTypeFilters first line.
-        liveWorkflows = workflowRepository.getAllWorkflows();
-        addWorkflowObserver.postValue(true);
+        if (isSwipe) {
+            loadWorkflowsByFilters(filterSettings, lifecycleOwner);
+        } else {
+            showLoading.setValue(true);
+
+            liveWorkflows.removeObservers(
+                    lifecycleOwner); // TODO try putting this back and maybe it works and delete from handleWorkflowTypeFilters first line.
+            liveWorkflows = workflowRepository.getAllWorkflows();
+            addWorkflowObserver.postValue(true);
+        }
     }
 
     protected void handleCheckboxAllOnClick(boolean isChecked) {
@@ -1370,12 +1354,8 @@ public class WorkflowViewModel extends ViewModel {
             isSwipe = null; //clear value
         }
 
-        if (isScrollToTop) {
-            isScrollToTop = false;
-            handleScrollRecyclerToTop.setValue(true);
-        }
-
         showList.setValue(true);
+        handleScrollRecyclerToTop.setValue(true);
     }
 
     private void clearOtherSwitchesBut(Sort.sortType ofType) {

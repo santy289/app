@@ -315,7 +315,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         });
         workflowViewModel.getObservableSetAllCheckboxesList()
                 .observe(this, setAllCeckboxesObserver);
-        workflowViewModel.showBottomSheetLoading.observe(this, this::showBottomSheetLoading);
         workflowViewModel.getObservableLoadMore().observe(this, this::showBottomSheetLoading);
         workflowViewModel.rightDrawerFilterMenus
                 .observe(this, this::createFilterListRightDrawer);

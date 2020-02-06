@@ -13,6 +13,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
+import androidx.annotation.UiThread;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -28,16 +38,6 @@ import java.io.File;
 import java.util.List;
 
 import javax.inject.Inject;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
-import androidx.annotation.UiThread;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
-import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 import static com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesViewModel.REQUEST_EXTERNAL_STORAGE_PERMISSIONS;
 import static com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesViewModel.REQUEST_FILE_TO_ATTACH;
@@ -237,8 +237,8 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
 
     @UiThread
     private void setTemplateTitleWith(String name) {
-        String title = getString(R.string.template) + " " + name;
-        mBinding.tvTitleFiles.setText(title);
+//        String title = getString(R.string.template) + " " + name;
+//        mBinding.tvTitleFiles.setText(title);
     }
 
     /**

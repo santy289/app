@@ -34,19 +34,12 @@ public class RootnetFirebaseMessagingService extends FirebaseMessagingService {
         // Check if message contains a data payload.
         Map<String, String> data = remoteMessage.getData();
 
+        String workflowId = null;
+
         if (data.size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
 
-            String title = data.get(NotificationDataKeys.KEY_TITLE);
-            String message = data.get(NotificationDataKeys.KEY_MESSAGE);
-            String workflowId = data.get(NotificationDataKeys.KEY_WORKFLOW_ID);
-            String author = data.get(NotificationDataKeys.KEY_AUTHOR);
-            int notificationId = 0;
-
-            if (title != null && message != null && workflowId != null) {
-                prepareNotification(title, message, workflowId, notificationId);
-                return;
-            }
+            workflowId = data.get(NotificationDataKeys.KEY_WORKFLOW_ID);
         }
 
         // Check if message contains a notification payload.
@@ -58,7 +51,7 @@ public class RootnetFirebaseMessagingService extends FirebaseMessagingService {
             int notificationId = 0;
 
             if (title != null && message != null) {
-                prepareNotification(title, message, null, notificationId);
+                prepareNotification(title, message, workflowId, notificationId);
             }
         }
     }

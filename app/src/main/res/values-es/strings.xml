@@ -51,6 +51,7 @@
 
     <string name="action_settings">Configuración</string>
     <string name="profile">Perfil</string>
+    <string name="login_qr">Inicio de sesión con QR</string>
     <string name="exit">Cerrar Sesión</string>
     <string name="repassword">Repetir la clave</string>
     <string name="valid_token">Tu token es válido.</string>
@@ -464,4 +465,8 @@
     <string name="mass_approval_activity_success">Workflow actualizado</string>
     <string name="mass_approval_activity_fail">Ha ocurrido un error al procesar la operación de aprobación masiva</string>
     <string name="mass_approval_activity_no_selection">Por favor seleccione al menos un estado para actualizar</string>
+
+    <!--QrLoginActivity-->
+    <string name="qr_login_activity_title">Código QR Generado</string>
+    <string name="qr_login_activity_description">Utilice este código QR para iniciar sesión en otras aplicaciones de Rootnet que soporten la funcionalidad \"Iniciar sesión con QR\".</string>
 </resources>

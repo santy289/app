@@ -109,6 +109,10 @@ public interface ApiInterface {
     Observable<ResetPasswordResponse> resetPassword(@Body ResetPasswordRequest resetPasswordRequest);
 
     @Headers({"Domain-Name: api"})
+    @POST("user/temporary_token")
+    Observable<LoginResponse> requestTemporaryToken(@Header("Authorization") String authorization);
+
+    @Headers({"Domain-Name: api"})
     @GET("profiles?enabled=all")
     Observable<UserResponse> getUsers(@Header("Authorization") String authorization);
 

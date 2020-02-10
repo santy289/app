@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.main;
 
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.IdRes;
@@ -25,6 +26,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.TextInputFormItem;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
+import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
@@ -34,6 +36,10 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
+import net.glxn.qrgen.android.QRCode;
+import net.glxn.qrgen.core.exception.QRGenerationException;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
@@ -71,6 +77,8 @@ public class MainActivityViewModel extends ViewModel {
     private MutableLiveData<Boolean> startService;
     private MutableLiveData<Boolean> stopService;
     private MutableLiveData<QuickActionsVisibility> quickActionsVisibilityLiveData;
+    private MutableLiveData<Boolean> showLoadingLiveData;
+    private MutableLiveData<File> showQRCodeLiveData;
     protected MutableLiveData<Integer> setSearchMenuLayout;
     protected MutableLiveData<Integer> setUploadMenuLayout;
     protected MutableLiveData<List<WorkflowTypeMenu>> setRightDrawerFilterList;
@@ -115,6 +123,7 @@ public class MainActivityViewModel extends ViewModel {
     List<WorkflowTypeMenu> optionsList;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
+    private String mToken;
 
     protected final static String IMG_LOGO = "imgLogo";
     protected final static String IMG_BAR_LOGO = "imgBarLogo";
@@ -198,6 +207,8 @@ public class MainActivityViewModel extends ViewModel {
         JWT jwt = new JWT(token);
         int id = Integer.parseInt(jwt.getClaim(PreferenceKeys.PREF_PROFILE_ID).asString());
         getUser(id);
+
+        mToken = "Bearer " + token;
 
         String permissionsString = sharedPreferences
                 .getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
@@ -508,6 +519,32 @@ public class MainActivityViewModel extends ViewModel {
     }
     //endregion
 
+    public void requestTemporaryToken() {
+        showLoadingLiveData.setValue(true);
+        Disposable disposable = repository
+                .requestTemporaryToken(mToken)
+                .subscribe(this::onTemporaryTokenSuccess, this::onFailure);
+        disposables.add(disposable);
+    }
+
+    private void onTemporaryTokenSuccess(LoginResponse response) {
+        showLoadingLiveData.setValue(false);
+
+        String token = response.getToken();
+
+        if (TextUtils.isEmpty(token)) {
+            mErrorLiveData.setValue(R.string.failure_connect);
+        }
+
+        try {
+            String trimmedToken = token.substring(0, 100); //todo remove this once the backend impl is changed
+            File file = QRCode.from(trimmedToken).withSize(300, 300).file();
+            showQRCodeLiveData.setValue(file);
+        } catch(QRGenerationException e) {
+            mErrorLiveData.setValue(R.string.failure_connect);
+        }
+    }
+
     public LiveData<Cursor> getObservableWorkflows() {
         if (mWorkflowsLiveData == null) {
             mWorkflowsLiveData = new MutableLiveData<>();
@@ -597,5 +634,19 @@ public class MainActivityViewModel extends ViewModel {
             quickActionsVisibilityLiveData = new MutableLiveData<>();
         }
         return quickActionsVisibilityLiveData;
+    }
+
+    LiveData<File> getObservableShowQRCode() {
+        if (showQRCodeLiveData == null) {
+            showQRCodeLiveData = new MutableLiveData<>();
+        }
+        return showQRCodeLiveData;
+    }
+
+    LiveData<Boolean> getObservableShowLoading() {
+        if (showLoadingLiveData == null) {
+            showLoadingLiveData = new MutableLiveData<>();
+        }
+        return showLoadingLiveData;
     }
 }

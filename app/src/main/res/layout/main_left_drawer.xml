@@ -10,9 +10,9 @@
             android:id="@+id/scrollView2"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/ll_bottom_items"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/tv_version_name"
             app:layout_constraintTop_toTopOf="parent">
 
             <LinearLayout
@@ -42,6 +42,17 @@
 
                 </FrameLayout>
 
+                <TextView
+                    android:id="@+id/tv_version_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:paddingBottom="16dp"
+                    android:textSize="12sp"
+                    android:textColor="@color/dark_gray"
+                    tools:text="1.0.0" />
 
                 <!--   <RelativeLayout
                        android:layout_width="match_parent"
@@ -187,16 +198,37 @@
             </LinearLayout>
         </ScrollView>
 
-        <TextView
-            android:id="@+id/tv_version_name"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:id="@+id/ll_bottom_items"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:text="1.0.0"
-            android:padding="16dp"
+            android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/scrollView2"
-            android:textColor="@color/black" />
+            app:layout_constraintTop_toBottomOf="@id/scrollView2">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/selected_filter" />
+
+            <RelativeLayout
+                android:id="@+id/nav_login_qr"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:paddingStart="15dp"
+                android:paddingTop="18dp"
+                android:paddingEnd="15dp"
+                android:paddingBottom="18dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/login_qr"
+                    android:textColor="@color/black" />
+            </RelativeLayout>
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -102,6 +102,9 @@ dependencies {
 
     implementation "com.github.marlonlom:timeago:$rootProject.timeagoVersion"
 
+    //QR code generator
+    implementation "com.github.kenglxn.QRGen:android:$rootProject.qrGenVersion"
+
     //Test
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'

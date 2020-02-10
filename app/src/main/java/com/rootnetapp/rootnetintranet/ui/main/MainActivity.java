@@ -66,6 +66,7 @@ import com.rootnetapp.rootnetintranet.ui.createworkflow.FormType;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.manager.WorkflowManagerFragment;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
+import com.rootnetapp.rootnetintranet.ui.qrtoken.QRTokenActivity;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
 import com.rootnetapp.rootnetintranet.ui.sync.SyncActivity;
@@ -75,6 +76,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOptionsAdapter;
 
+import java.io.File;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -440,6 +442,7 @@ public class MainActivity extends AppCompatActivity
         mainBinding.leftDrawer.navWorkflows.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navSync.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navProfile.setOnClickListener(this::drawerClicks);
+        mainBinding.leftDrawer.navLoginQr.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navExit.setOnClickListener(this::drawerClicks);
         mainBinding.rightDrawer.drawerBackButton.setOnClickListener(view -> {
             if (sortingActive) {
@@ -750,6 +753,9 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_profile:
                 showFragment(ProfileFragment.newInstance(), false);
                 mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
+                break;
+            case R.id.nav_login_qr:
+                viewModel.requestTemporaryToken();
                 break;
             case R.id.nav_exit:
                 showLogoutDialog();
@@ -1162,6 +1168,8 @@ public class MainActivity extends AppCompatActivity
 //        viewModel.getObservableStopService().observe(this, result -> stopWebsocketService());
 
         viewModel.getObservableQuickActionsVisibility().observe(this, this::setupSpeedDialFab);
+        viewModel.getObservableShowQRCode().observe(this, this::showGeneratedQRCode);
+        viewModel.getObservableShowLoading().observe(this, this::showLoading);
     }
 
     private void subscribeForLogin() {
@@ -1192,5 +1200,21 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onValuesSelected(List<BaseFormItem> baseFormItems) {
         viewModel.onValuesSelected(baseFormItems);
+    }
+
+    @UiThread
+    private void showGeneratedQRCode(File qrCode) {
+        Intent intent = new Intent(this, QRTokenActivity.class);
+        intent.putExtra(QRTokenActivity.EXTRA_QR_CODE, qrCode);
+        startActivity(intent);
+    }
+
+    @UiThread
+    private void showLoading(boolean show) {
+        if (show) {
+            Utils.showLoading(this);
+        } else {
+            Utils.hideLoading();
+        }
     }
 }

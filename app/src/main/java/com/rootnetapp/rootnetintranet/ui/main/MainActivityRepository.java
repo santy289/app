@@ -2,7 +2,6 @@ package com.rootnetapp.rootnetintranet.ui.main;
 
 import android.database.Cursor;
 
-import com.google.android.gms.common.api.Api;
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
@@ -37,8 +36,13 @@ public class MainActivityRepository {
         return Observable.fromCallable(()-> database.workflowDao().getWorkflow(id))
                 .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
     }
+
     public Observable<LoginResponse> login(String user, String password) {
-        return apiInterface.login(user, password).subscribeOn(Schedulers.newThread())
+        return apiInterface.login(user, password).subscribeOn(Schedulers.newThread());
+    }
+
+    public Observable<LoginResponse> requestTemporaryToken(String token) {
+        return apiInterface.requestTemporaryToken(token).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 }

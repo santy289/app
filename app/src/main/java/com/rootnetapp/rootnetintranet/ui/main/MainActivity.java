@@ -76,7 +76,6 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOptionsAdapter;
 
-import java.io.File;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -755,7 +754,7 @@ public class MainActivity extends AppCompatActivity
                 mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
                 break;
             case R.id.nav_login_qr:
-                viewModel.requestTemporaryToken();
+                startActivity(new Intent(this, QRTokenActivity.class));
                 break;
             case R.id.nav_exit:
                 showLogoutDialog();
@@ -1168,7 +1167,6 @@ public class MainActivity extends AppCompatActivity
 //        viewModel.getObservableStopService().observe(this, result -> stopWebsocketService());
 
         viewModel.getObservableQuickActionsVisibility().observe(this, this::setupSpeedDialFab);
-        viewModel.getObservableShowQRCode().observe(this, this::showGeneratedQRCode);
         viewModel.getObservableShowLoading().observe(this, this::showLoading);
     }
 
@@ -1200,13 +1198,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onValuesSelected(List<BaseFormItem> baseFormItems) {
         viewModel.onValuesSelected(baseFormItems);
-    }
-
-    @UiThread
-    private void showGeneratedQRCode(File qrCode) {
-        Intent intent = new Intent(this, QRTokenActivity.class);
-        intent.putExtra(QRTokenActivity.EXTRA_QR_CODE, qrCode);
-        startActivity(intent);
     }
 
     @UiThread

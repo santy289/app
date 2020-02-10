@@ -40,9 +40,4 @@ public class MainActivityRepository {
     public Observable<LoginResponse> login(String user, String password) {
         return apiInterface.login(user, password).subscribeOn(Schedulers.newThread());
     }
-
-    public Observable<LoginResponse> requestTemporaryToken(String token) {
-        return apiInterface.requestTemporaryToken(token).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
 }

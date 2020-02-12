@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
+import com.rootnetapp.rootnetintranet.models.responses.login.TemporaryTokenResponse;
 
 import net.glxn.qrgen.android.QRCode;
 import net.glxn.qrgen.core.exception.QRGenerationException;
@@ -55,7 +55,7 @@ public class QRTokenViewModel extends ViewModel {
         mDisposables.add(disposable);
     }
 
-    private void onTemporaryTokenSuccess(LoginResponse response) {
+    private void onTemporaryTokenSuccess(TemporaryTokenResponse response) {
         mShowLoadingLiveData.setValue(false);
 
         String token = response.getToken();
@@ -65,8 +65,7 @@ public class QRTokenViewModel extends ViewModel {
         }
 
         try {
-            String trimmedToken = token.substring(0, 100); //todo remove this once the backend impl is changed
-            File file = QRCode.from(trimmedToken).withSize(300, 300).file();
+            File file = QRCode.from(token).withSize(300, 300).file();
             mShowQRCodeLiveData.setValue(file);
         } catch(QRGenerationException e) {
             mShowToastMessage.setValue(R.string.failure_connect);

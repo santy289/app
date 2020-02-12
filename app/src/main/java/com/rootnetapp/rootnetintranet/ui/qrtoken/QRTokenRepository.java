@@ -1,7 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.qrtoken;
 
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
-import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
+import com.rootnetapp.rootnetintranet.models.responses.login.TemporaryTokenResponse;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -17,7 +17,7 @@ public class QRTokenRepository {
         this.apiInterface = service;
     }
 
-    public Observable<LoginResponse> requestTemporaryToken(String token) {
+    public Observable<TemporaryTokenResponse> requestTemporaryToken(String token) {
         return apiInterface.requestTemporaryToken(token).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }

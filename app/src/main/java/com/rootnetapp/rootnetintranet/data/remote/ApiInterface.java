@@ -29,6 +29,7 @@ import com.rootnetapp.rootnetintranet.models.responses.googlemaps.PlaceDetailsRe
 import com.rootnetapp.rootnetintranet.models.responses.googlemaps.autocomplete.AutocompleteResponse;
 import com.rootnetapp.rootnetintranet.models.responses.googlemaps.nearbysearch.NearbySearchResponse;
 import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
+import com.rootnetapp.rootnetintranet.models.responses.login.TemporaryTokenResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.project.ProjectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordResponse;
@@ -111,7 +112,7 @@ public interface ApiInterface {
 
     @Headers({"Domain-Name: api"})
     @POST("user/temporary_token")
-    Observable<LoginResponse> requestTemporaryToken(@Header("Authorization") String authorization);
+    Observable<TemporaryTokenResponse> requestTemporaryToken(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
     @GET("profiles?enabled=all")

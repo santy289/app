@@ -69,6 +69,7 @@ public class MainActivityViewModel extends ViewModel {
     private MutableLiveData<String> saveToPreference;
     private MutableLiveData<Boolean> goToDomain;
     private MutableLiveData<QuickActionsVisibility> quickActionsVisibilityLiveData;
+    private MutableLiveData<Boolean> showLoadingLiveData;
     protected MutableLiveData<Integer> setSearchMenuLayout;
     protected MutableLiveData<Integer> setUploadMenuLayout;
     protected MutableLiveData<List<WorkflowTypeMenu>> setRightDrawerFilterList;
@@ -113,6 +114,7 @@ public class MainActivityViewModel extends ViewModel {
     List<WorkflowTypeMenu> optionsList;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
+    private String mToken;
 
     protected final static String IMG_LOGO = "imgLogo";
     protected final static String IMG_BAR_LOGO = "imgBarLogo";
@@ -190,6 +192,8 @@ public class MainActivityViewModel extends ViewModel {
         JWT jwt = new JWT(token);
         int id = Integer.parseInt(jwt.getClaim(PreferenceKeys.PREF_PROFILE_ID).asString());
         getUser(id);
+
+        mToken = "Bearer " + token;
 
         String permissionsString = sharedPreferences
                 .getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
@@ -584,5 +588,12 @@ public class MainActivityViewModel extends ViewModel {
             quickActionsVisibilityLiveData = new MutableLiveData<>();
         }
         return quickActionsVisibilityLiveData;
+    }
+
+    LiveData<Boolean> getObservableShowLoading() {
+        if (showLoadingLiveData == null) {
+            showLoadingLiveData = new MutableLiveData<>();
+        }
+        return showLoadingLiveData;
     }
 }

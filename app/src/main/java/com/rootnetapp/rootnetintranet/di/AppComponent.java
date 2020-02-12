@@ -18,6 +18,8 @@ import com.rootnetapp.rootnetintranet.ui.massapproval.MassApprovalActivity;
 import com.rootnetapp.rootnetintranet.ui.massapproval.MassApprovalModule;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
 import com.rootnetapp.rootnetintranet.ui.profile.ProfileModule;
+import com.rootnetapp.rootnetintranet.ui.qrtoken.QRTokenActivity;
+import com.rootnetapp.rootnetintranet.ui.qrtoken.QRTokenModule;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsModule;
 import com.rootnetapp.rootnetintranet.ui.quickactions.performaction.PerformActionFragment;
@@ -86,7 +88,8 @@ import dagger.Component;
                 PerformActionModule.class,
                 FlowchartModule.class,
                 GeolocationModule.class,
-                MassApprovalModule.class
+                MassApprovalModule.class,
+                QRTokenModule.class
         }
 )
 
@@ -143,4 +146,6 @@ public interface AppComponent {
     void inject(GeolocationActivity geolocationActivity);
 
     void inject(MassApprovalActivity massApprovalActivity);
+
+    void inject(QRTokenActivity qrTokenActivity);
 }

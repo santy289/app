@@ -10,6 +10,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.auth0.android.jwt.JWT;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
@@ -28,7 +29,6 @@ import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
-import com.rootnetapp.rootnetintranet.services.websocket.RestartWebsocketReceiver;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.DynamicFilter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.squareup.moshi.JsonAdapter;
@@ -68,8 +68,6 @@ public class MainActivityViewModel extends ViewModel {
     private MutableLiveData<Boolean> attemptTokenRefresh;
     private MutableLiveData<String> saveToPreference;
     private MutableLiveData<Boolean> goToDomain;
-    private MutableLiveData<Boolean> startService;
-    private MutableLiveData<Boolean> stopService;
     private MutableLiveData<QuickActionsVisibility> quickActionsVisibilityLiveData;
     private MutableLiveData<Boolean> showLoadingLiveData;
     protected MutableLiveData<Integer> setSearchMenuLayout;
@@ -159,8 +157,6 @@ public class MainActivityViewModel extends ViewModel {
         this.receiveMessageStatusFilterSelected = new MutableLiveData<>();
         this.receiveMessageSystemStatusFilterSelected = new MutableLiveData<>();
         this.openRightDrawer = new MutableLiveData<>();
-        this.startService = new MutableLiveData<>();
-        this.stopService = new MutableLiveData<>();
     }
 
     @Override
@@ -169,10 +165,6 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     protected void initMainViewModel(SharedPreferences sharedPreferences) {
-        if (!RestartWebsocketReceiver.getRunningIndicator()) {
-            startService.setValue(true);
-        }
-
         String json = sharedPreferences.getString(PreferenceKeys.PREF_DOMAIN, "");
         if (json.isEmpty()) {
             Log.d("test", "onCreate: ALGO PASO");//todo mejorar esta validacion
@@ -371,25 +363,34 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     protected void attemptLogin(String user, String password) {
-        Disposable disposable = repository.login(user, password)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(loginResponse -> {
-                    if (loginResponse == null) {
-                        goToDomain.setValue(true);
-                        return;
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(task -> {
+                    String firebaseToken = "";
+                    if (task.isSuccessful()) {
+                        // Get new Instance ID token
+                        firebaseToken = task.getResult().getToken();
                     }
-                    String token = loginResponse.getToken();
-                    saveToPreference.setValue(token);
-                    String authToken = "Bearer " + token;
 
-                }, throwable -> {
-                    Log.d(TAG,
-                            "attemptToLogin: Smomething failed with network request: " + throwable
-                                    .getMessage());
-                    goToDomain.setValue(true);
+                    Disposable disposable = repository.login(user, password, firebaseToken)
+                            .subscribeOn(Schedulers.newThread())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(loginResponse -> {
+                                if (loginResponse == null) {
+                                    goToDomain.setValue(true);
+                                    return;
+                                }
+                                String token = loginResponse.getToken();
+                                saveToPreference.setValue(token);
+                                String authToken = "Bearer " + token;
+
+                            }, throwable -> {
+                                Log.d(TAG,
+                                        "attemptToLogin: Smomething failed with network request: " + throwable
+                                                .getMessage());
+                                goToDomain.setValue(true);
+                            });
+                    disposables.add(disposable);
                 });
-        disposables.add(disposable);
     }
 
     protected void onCreateOptionsMenu() {

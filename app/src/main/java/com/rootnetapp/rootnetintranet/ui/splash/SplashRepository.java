@@ -15,8 +15,8 @@ public class SplashRepository {
         this.services = apiInterface;
     }
 
-    public Observable<LoginResponse> login(String user, String password) {
-        return services.login(user, password).subscribeOn(Schedulers.newThread())
+    public Observable<LoginResponse> login(String user, String password, String firebaseToken) {
+        return services.login(user, password, firebaseToken).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 }

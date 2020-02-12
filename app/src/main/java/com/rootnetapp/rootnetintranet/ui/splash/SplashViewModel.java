@@ -4,6 +4,11 @@ import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.squareup.moshi.JsonAdapter;
@@ -11,9 +16,6 @@ import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
@@ -77,22 +79,32 @@ public class SplashViewModel extends ViewModel {
             goToDomain.setValue(true);
             return;
         }
-        Disposable disposable = splashRepository.login(user, password).subscribe(loginResponse -> {
-            if (loginResponse == null) {
-                goToDomain.setValue(true);
-                return;
-            }
-            String token = loginResponse.getToken();
-            String[] content = new String[2];
-            content[0] = "token";
-            content[1] = token;
-            saveToPreference.setValue(content);
-            goToSync.setValue(true);
-        }, throwable -> {
-            Log.d(TAG, "attemptToLogin: Smomething failed with network request: " + throwable.getMessage());
-            goToDomain.setValue(true);
-        });
-        disposables.add(disposable);
+
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(task -> {
+                    String firebaseToken = "";
+                    if (task.isSuccessful()) {
+                        // Get new Instance ID token
+                        firebaseToken = task.getResult().getToken();
+                    }
+
+                    Disposable disposable = splashRepository.login(user, password, firebaseToken).subscribe(loginResponse -> {
+                        if (loginResponse == null) {
+                            goToDomain.setValue(true);
+                            return;
+                        }
+                        String token = loginResponse.getToken();
+                        String[] content = new String[2];
+                        content[0] = "token";
+                        content[1] = token;
+                        saveToPreference.setValue(content);
+                        goToSync.setValue(true);
+                    }, throwable -> {
+                        Log.d(TAG, "attemptToLogin: Something failed with network request: " + throwable.getMessage());
+                        goToDomain.setValue(true);
+                    });
+                    disposables.add(disposable);
+                });
     }
 
     public LiveData<Boolean> getObservableGoToDomain() {

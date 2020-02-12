@@ -36,8 +36,9 @@ public class MainActivityRepository {
         return Observable.fromCallable(()-> database.workflowDao().getWorkflow(id))
                 .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
     }
-
-    public Observable<LoginResponse> login(String user, String password) {
-        return apiInterface.login(user, password).subscribeOn(Schedulers.newThread());
+    
+    public Observable<LoginResponse> login(String user, String password, String firebaseToken) {
+        return apiInterface.login(user, password, firebaseToken).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 }

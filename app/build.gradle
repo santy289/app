@@ -70,6 +70,8 @@ dependencies {
     implementation "com.google.dagger:dagger:$rootProject.daggerLibraryVersion"
     implementation "com.google.android.gms:play-services-maps:$rootProject.googleMapsVersion"
     implementation "com.google.android.libraries.places:places:$rootProject.placesVersion"
+
+    //firebase
     implementation "com.google.firebase:firebase-core:$rootProject.firebaseVersion"
     implementation "com.google.firebase:firebase-messaging:$rootProject.firebaseMessagingVersion"
     implementation "com.google.firebase:firebase-crash:$rootProject.firebaseCrashVersion"
@@ -111,7 +113,6 @@ dependencies {
     testImplementation "junit:junit:$rootProject.jUnit"
     implementation 'com.auth0.android:jwtdecode:1.1.1'
     implementation "de.hdodenhof:circleimageview:$rootProject.circleImageViewVersion"
-    implementation project(':autobahn')
 }
 
 configurations {

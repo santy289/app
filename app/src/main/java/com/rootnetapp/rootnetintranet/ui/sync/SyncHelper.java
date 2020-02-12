@@ -6,6 +6,7 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.rootnetapp.rootnetintranet.BuildConfig;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
@@ -350,25 +351,34 @@ public class SyncHelper {
     }
 
     protected void attemptLogin(String username, String password) {
-        Disposable disposable = apiInterface.login(username, password)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(loginResponse -> {
-                    if (loginResponse == null) {
-                        goToDomain.setValue(true);
-                        return;
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(task -> {
+                    String firebaseToken = "";
+                    if (task.isSuccessful()) {
+                        // Get new Instance ID token
+                        firebaseToken = task.getResult().getToken();
                     }
-                    String token = loginResponse.getToken();
-                    saveToPreference.setValue(token);
-                    String authToken = "Bearer " + token;
-                    syncData(authToken);
-                }, throwable -> {
-                    Log.d(TAG,
-                            "attemptToLogin: Smomething failed with network request: " + throwable
-                                    .getMessage());
-                    goToDomain.setValue(true);
+
+                    Disposable disposable = apiInterface.login(username, password, firebaseToken)
+                            .subscribeOn(Schedulers.newThread())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(loginResponse -> {
+                                if (loginResponse == null) {
+                                    goToDomain.setValue(true);
+                                    return;
+                                }
+                                String token = loginResponse.getToken();
+                                saveToPreference.setValue(token);
+                                String authToken = "Bearer " + token;
+                                syncData(authToken);
+                            }, throwable -> {
+                                Log.d(TAG,
+                                        "attemptToLogin: Smomething failed with network request: " + throwable
+                                                .getMessage());
+                                goToDomain.setValue(true);
+                            });
+                    disposables.add(disposable);
                 });
-        disposables.add(disposable);
     }
 
     private void onUsersSuccess(ProfileResponse profileResponse) {
@@ -491,6 +501,5 @@ public class SyncHelper {
         }
         return saveToPreference;
     }
-
 
 }

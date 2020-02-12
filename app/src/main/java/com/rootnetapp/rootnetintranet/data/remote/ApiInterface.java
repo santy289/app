@@ -91,7 +91,8 @@ public interface ApiInterface {
     @POST("login_check")
     @FormUrlEncoded
     Observable<LoginResponse> login(@Field("username") String user,
-                                    @Field("password") String password);
+                                    @Field("password") String password,
+                                    @Field("firebase_id") String firebaseToken);
 
     @Headers({"Domain-Name: api"})
     @POST("check/send/email")

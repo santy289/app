@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.auth0.android.jwt.JWT;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -71,8 +72,23 @@ public class LoginViewModel extends ViewModel {
     public void login(String user, String password) {
         this.userName = user;
         this.password = password;
-        Disposable disposable = loginRepository.login(user, password).subscribe(this::onLoginSuccess, this::onLoginFailure);
-        disposables.add(disposable);
+
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(task -> {
+                    String token = "";
+                    if (task.isSuccessful()) {
+                        // Get new Instance ID token
+                        token = task.getResult().getToken();
+                    }
+
+                    Disposable disposable = loginRepository
+                            .login(userName, LoginViewModel.this.password, token)
+                            .subscribe(
+                                    LoginViewModel.this::onLoginSuccess,
+                                    LoginViewModel.this::onLoginFailure
+                            );
+                    disposables.add(disposable);
+                });
     }
 
     private void onLoginSuccess(LoginResponse loginResponse) {
@@ -130,6 +146,7 @@ public class LoginViewModel extends ViewModel {
         }
         return mLoginLiveData;
     }
+
     public LiveData<Integer> getObservableError() {
         if (mErrorLiveData == null) {
             mErrorLiveData = new MutableLiveData<>();

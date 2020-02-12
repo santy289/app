@@ -1,6 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.main;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -46,19 +45,17 @@ import androidx.lifecycle.ViewModelProviders;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.BuildConfig;
 import com.rootnetapp.rootnetintranet.R;
-import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
-import com.rootnetapp.rootnetintranet.data.local.db.workflow.Workflow;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
+import com.rootnetapp.rootnetintranet.fcm.FirebaseTopics;
+import com.rootnetapp.rootnetintranet.fcm.NotificationDataKeys;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
-import com.rootnetapp.rootnetintranet.services.websocket.RestartWebsocketReceiver;
-import com.rootnetapp.rootnetintranet.services.websocket.WebSocketService;
-import com.rootnetapp.rootnetintranet.services.websocket.WebsocketSecureHandler;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragmentInterface;
@@ -70,6 +67,7 @@ import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
 import com.rootnetapp.rootnetintranet.ui.sync.SyncActivity;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerFiltersAdapter;
@@ -119,83 +117,41 @@ public class MainActivity extends AppCompatActivity
                 .of(this, profileViewModelFactory)
                 .get(MainActivityViewModel.class);
 
-//        dozeModeWhitelist(); //todo verify service
-
         fragmentManager = getSupportFragmentManager();
         setActionBar();
         subscribe();
         initActionListeners();
         viewModel.initMainViewModel(sharedPref);
 
-        String workflowId = getIntent().getStringExtra("goToWorkflow");
-        // If id is defined, then this activity was launched with a fragment selection
-        if (workflowId != null) {
-            viewModel.getWorkflow(Integer.parseInt(workflowId));
-        }
-
         //fixme temporary setup of Workflows as the initial tab
         showFragment(WorkflowFragment.newInstance(this), false);
 //        showFragment(TimelineFragment.newInstance(this), false);
         setFilterBoxListeners();
         setupBottomNavigation();
+        subscribeToFcmTopics();
+        checkForPushNotificationIntent();
+    }
+
+    private void checkForPushNotificationIntent() {
+        String workflowId = getIntent().getStringExtra(NotificationDataKeys.KEY_WORKFLOW_ID);
+        // If id is defined, then this activity was launched from a push notification
+        if (!TextUtils.isEmpty(workflowId)) {
+            goToWorkflowDetail(workflowId);
+        }
+    }
+
+    private void subscribeToFcmTopics() {
+        subscribeToFcmTopic(FirebaseTopics.WORKFLOWS);
+    }
+
+    private void subscribeToFcmTopic(String topic) {
+        FirebaseMessaging.getInstance().subscribeToTopic(topic)
+                .addOnCompleteListener(task -> Log.d(TAG,
+                        "FCM subscribe to topic: " + topic + " - " + task.isSuccessful()));
     }
 
     private void setToolbarTitle(CharSequence title) {
         mainBinding.toolbarTitle.setText(title);
-    }
-
-    /**
-     * Used to send some intent with token, protocol, port values to a service.
-     */
-    private void sendBroadcastWebsocket() {
-        SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        String token = sharedPref.getString(PreferenceKeys.PREF_TOKEN, "");
-        String protocol = sharedPref.getString(PreferenceKeys.PREF_PROTOCOL, "");
-        String port = sharedPref.getString(PreferenceKeys.PREF_PORT, "");
-        Intent broadcastIntent = createIntent(RestartWebsocketReceiver.class, token, port, protocol,
-                Utils.domain);
-        broadcastIntent.setAction("restartservice");
-        sendBroadcast(broadcastIntent);
-    }
-
-    /**
-     * Used to create an intent based on the class name passed on. This will be used to call a
-     * service.
-     *
-     * @param className
-     * @param token
-     * @param port
-     * @param protocol
-     * @param domain
-     *
-     * @return
-     */
-    private Intent createIntent(Class<?> className, String token, String port, String protocol,
-                                String domain) {
-        Intent intent = new Intent(getBaseContext(), className);
-        intent.putExtra(WebsocketSecureHandler.KEY_TOKEN, token);
-        intent.putExtra(WebsocketSecureHandler.KEY_PORT, port);
-        intent.putExtra(WebsocketSecureHandler.KEY_PROTOCOL, protocol);
-        intent.putExtra(WebsocketSecureHandler.KEY_DOMAIN, domain);
-        return intent;
-    }
-
-    private void stopWebsocketService() {
-        Intent intent = new Intent(getBaseContext(), WebSocketService.class);
-
-        stopService(intent);
-    }
-
-    private boolean isMyServiceRunning() {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningServiceInfo> list = manager
-                .getRunningServices(Integer.MAX_VALUE);
-        for (ActivityManager.RunningServiceInfo service : list) {
-            if (WebSocketService.class.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
@@ -820,11 +776,11 @@ public class MainActivity extends AppCompatActivity
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-    protected void goToWorkflowDetail(Workflow workflow) {
-//        showFragment(
-//                WorkflowDetailFragment.newInstance(workflow, this),
-//                true
-//        );
+    protected void goToWorkflowDetail(String workflowId) {
+        Intent intent = new Intent(this, WorkflowDetailActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra(WorkflowDetailActivity.INTENT_EXTRA_ID, workflowId);
+        startActivity(intent);
     }
 
     // Populates Filters List
@@ -1124,12 +1080,10 @@ public class MainActivity extends AppCompatActivity
         final Observer<String[]> setImgInViewObserver = (this::setImageIn);
         final Observer<Boolean> collapseMenuObserver = (this::collapseActionView);
         final Observer<Boolean> hideKeyboardObserver = (this::hideKeyboard);
-        final Observer<Workflow> goToWorkflowDetailObserver = (this::goToWorkflowDetail);
         viewModel.getObservableError().observe(this, errorObserver);
         viewModel.getObservableSetImgInView().observe(this, setImgInViewObserver);
         viewModel.getObservableCollapseMenu().observe(this, collapseMenuObserver);
         viewModel.getObservableHideKeyboard().observe(this, hideKeyboardObserver);
-        viewModel.getObservableGoToWorkflowDetail().observe(this, goToWorkflowDetailObserver);
         viewModel.setRightDrawerFilterList.observe(this, (this::setRightDrawerFilters));
         viewModel.setRightDrawerOptionList.observe(this, (this::setRightDrawerOptions));
         viewModel.invalidateOptionsList.observe(this, invalidate -> invalidateOptionList());
@@ -1155,11 +1109,6 @@ public class MainActivity extends AppCompatActivity
         viewModel.receiveMessageSystemStatusFilterSelected
                 .observe(this, this::handleUpdateSystemStatusFilterSelectionUpdateWith);
         viewModel.openRightDrawer.observe(this, this::openRightDrawer);
-
-        //todo verify service
-//        viewModel.getObservableStartService().observe(this, result -> sendBroadcastWebsocket());
-
-//        viewModel.getObservableStopService().observe(this, result -> stopWebsocketService());
 
         viewModel.getObservableQuickActionsVisibility().observe(this, this::setupSpeedDialFab);
     }

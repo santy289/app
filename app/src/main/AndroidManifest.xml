@@ -113,6 +113,12 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize|stateHidden" />
+        <activity
+            android:name=".ui.qrtoken.QRTokenActivity"
+            android:label="@string/qr_login_activity_title"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustResize|stateHidden" />
 
         <!--region Firebase-->
         <service android:name=".fcm.RootnetFirebaseMessagingService">

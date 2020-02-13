@@ -50,7 +50,8 @@
 
     <string name="action_settings">Settings</string>
     <string name="profile">Profile</string>
-    <string name="exit">Logout</string>
+    <string name="login_qr">Login with QR</string>
+    <string name="exit">Log out</string>
     <string name="repassword">Repeat your password</string>
     <string name="valid_token">Your token is valid.</string>
     <string name="empty_token">Please enter a valid token</string>
@@ -468,4 +469,8 @@
     <string name="mass_approval_activity_success">Workflow updated</string>
     <string name="mass_approval_activity_fail">An error has occurred while processing a mass approval operation</string>
     <string name="mass_approval_activity_no_selection">Please select at least one status to approve or reject</string>
+
+    <!--QrLoginActivity-->
+    <string name="qr_login_activity_title">Generated QR Code</string>
+    <string name="qr_login_activity_description">Use this QR code to log in to the other Rootnet Applications that have the \"Log in with QR\" feature.</string>
 </resources>

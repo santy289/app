@@ -27,7 +27,7 @@ public class SyncActivity extends AppCompatActivity {
     SyncHelper syncHelper;
     private ProgressBar bar;
 
-    private String pushNotificationWorkflowId;
+    private String notificationWorkflowId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +41,7 @@ public class SyncActivity extends AppCompatActivity {
             actionBar.setDisplayShowTitleEnabled(false);
         }
 
-        checkForPushNotificationIntent();
+        checkForExternalIntent();
 
         SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
@@ -56,9 +56,8 @@ public class SyncActivity extends AppCompatActivity {
         syncHelper.syncData(token);
     }
 
-    private void checkForPushNotificationIntent() {
-        pushNotificationWorkflowId = getIntent()
-                .getStringExtra(NotificationDataKeys.KEY_WORKFLOW_ID);
+    private void checkForExternalIntent() {
+        notificationWorkflowId = getIntent().getStringExtra(NotificationDataKeys.KEY_WORKFLOW_ID);
     }
 
     private void attemptToLogin() {
@@ -104,8 +103,8 @@ public class SyncActivity extends AppCompatActivity {
     private void goToMain() {
         Intent intent = new Intent(this, MainActivity.class);
 
-        if (!TextUtils.isEmpty(pushNotificationWorkflowId)) {
-            intent.putExtra(NotificationDataKeys.KEY_WORKFLOW_ID, pushNotificationWorkflowId);
+        if (!TextUtils.isEmpty(notificationWorkflowId)) {
+            intent.putExtra(NotificationDataKeys.KEY_WORKFLOW_ID, notificationWorkflowId);
         }
 
         startActivity(intent);

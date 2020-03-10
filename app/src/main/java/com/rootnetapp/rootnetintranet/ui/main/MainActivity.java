@@ -130,10 +130,10 @@ public class MainActivity extends AppCompatActivity
         setFilterBoxListeners();
         setupBottomNavigation();
         subscribeToFcmTopics();
-        checkForPushNotificationIntent();
+        checkForExternalIntent();
     }
 
-    private void checkForPushNotificationIntent() {
+    private void checkForExternalIntent() {
         String workflowId = getIntent().getStringExtra(NotificationDataKeys.KEY_WORKFLOW_ID);
         // If id is defined, then this activity was launched from a push notification
         if (!TextUtils.isEmpty(workflowId)) {

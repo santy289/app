@@ -28,6 +28,7 @@
     <string name="accept">Aceptar</string>
     <string name="cancel">Cancelar</string>
     <string name="bad_credentials">Credenciales inválidas</string>
+    <string name="deep_link_workflow_detail">Perfil de Workflow</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

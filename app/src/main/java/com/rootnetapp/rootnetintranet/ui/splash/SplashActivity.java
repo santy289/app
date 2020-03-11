@@ -3,6 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.splash;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 
@@ -15,6 +16,8 @@ import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.domain.DomainActivity;
 import com.rootnetapp.rootnetintranet.ui.sync.SyncActivity;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 public class SplashActivity extends AppCompatActivity {
@@ -23,7 +26,7 @@ public class SplashActivity extends AppCompatActivity {
     SplashViewModelFactory splashViewModelFactory;
     SplashViewModel splashViewModel;
 
-    private String pushNotificationWorkflowId;
+    private String notificationWorkflowId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +37,7 @@ public class SplashActivity extends AppCompatActivity {
                 .get(SplashViewModel.class);
 
         checkForPushNotificationIntent();
+        checkForDeepLinkIntent();
 
         subscribe();
         SharedPreferences sharedPreferences = getSharedPreferences("Sessions",
@@ -42,8 +46,23 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void checkForPushNotificationIntent() {
-        pushNotificationWorkflowId = getIntent()
-                .getStringExtra(NotificationDataKeys.KEY_WORKFLOW_ID);
+        notificationWorkflowId = getIntent().getStringExtra(NotificationDataKeys.KEY_WORKFLOW_ID);
+    }
+
+    private void checkForDeepLinkIntent() {
+        Uri uri = getIntent().getData();
+
+        if (uri != null) {
+            List<String> pathSegments = uri.getPathSegments();
+
+            //check if any of the path segments is a number, that would represent the workflow ID
+            for (String path : pathSegments) {
+                if (TextUtils.isDigitsOnly(path)) {
+                    notificationWorkflowId = path;
+                    break;
+                }
+            }
+        }
     }
 
     private void subscribe() {
@@ -63,8 +82,8 @@ public class SplashActivity extends AppCompatActivity {
     private void goToSync(Boolean open) {
         Intent intent = new Intent(this, SyncActivity.class);
 
-        if (!TextUtils.isEmpty(pushNotificationWorkflowId)) {
-            intent.putExtra(NotificationDataKeys.KEY_WORKFLOW_ID, pushNotificationWorkflowId);
+        if (!TextUtils.isEmpty(notificationWorkflowId)) {
+            intent.putExtra(NotificationDataKeys.KEY_WORKFLOW_ID, notificationWorkflowId);
         }
 
         startActivity(intent);

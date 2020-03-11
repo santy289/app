@@ -46,15 +46,17 @@
             android:value="@string/google_maps_key" />
 
         <!--Crashlytics release build only-->
-        <meta-data android:name="firebase_crashlytics_collection_enabled" android:value="${enableCrashReporting}" />
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="${enableCrashReporting}" />
 
         <activity
             android:name=".ui.createworkflow.geolocation.GeolocationActivity"
             android:label="@string/title_activity_geolocation"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".ui.main.MainActivity"
             android:label="@string/title_activity_main"
@@ -87,6 +89,20 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <intent-filter android:label="@string/deep_link_workflow_detail">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- Accepts URLs that begins with https://{subdomain}.rootnetapp.com/Intranet/workflow/ -->
+                <!-- note that the leading "/" is required for pathPrefix-->
+                <data
+                    android:host="*.rootnetapp.com"
+                    android:pathPrefix="/Intranet/workflow/"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
         <activity

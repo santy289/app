@@ -23,25 +23,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.DrawableRes;
-import androidx.annotation.IdRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
-import androidx.annotation.UiThread;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.PopupMenu;
-import androidx.core.content.ContextCompat;
-import androidx.core.view.GravityCompat;
-import androidx.databinding.DataBindingUtil;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -66,6 +47,7 @@ import com.rootnetapp.rootnetintranet.ui.profile.ProfileFragment;
 import com.rootnetapp.rootnetintranet.ui.qrtoken.QRTokenActivity;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickActionsActivity;
+import com.rootnetapp.rootnetintranet.ui.resourcing.planner.ResourcingPlannerActivity;
 import com.rootnetapp.rootnetintranet.ui.sync.SyncActivity;
 import com.rootnetapp.rootnetintranet.ui.timeline.TimelineFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.WorkflowDetailActivity;
@@ -77,6 +59,25 @@ import com.rootnetapp.rootnetintranet.ui.workflowlist.adapters.RightDrawerOption
 import java.util.List;
 
 import javax.inject.Inject;
+
+import androidx.annotation.DrawableRes;
+import androidx.annotation.IdRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
+import androidx.annotation.UiThread;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.databinding.DataBindingUtil;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.CHECK;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.INDEX_CHECK;
@@ -395,6 +396,7 @@ public class MainActivity extends AppCompatActivity
 
     private void initActionListeners() {
         mainBinding.leftDrawer.navWorkflows.setOnClickListener(this::drawerClicks);
+        mainBinding.leftDrawer.navResourcing.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navSync.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navProfile.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navLoginQr.setOnClickListener(this::drawerClicks);
@@ -700,6 +702,9 @@ public class MainActivity extends AppCompatActivity
                 mainBinding.bottomNavigation.setSelectedItemId(R.id.menu_workflow_list);
                 showFragment(WorkflowFragment.newInstance(this), false);
                 mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
+                break;
+            case R.id.nav_resourcing:
+                startActivity(new Intent(this, ResourcingPlannerActivity.class));
                 break;
             case R.id.nav_sync:
                 startActivity(new Intent(this, SyncActivity.class));

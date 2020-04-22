@@ -269,7 +269,7 @@ public class Utils {
 
     public static String getWeekStart() {
         Calendar calendar = Calendar.getInstance();
-        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
             calendar.add(Calendar.DAY_OF_YEAR, -1);
         }
         Date c = calendar.getTime();
@@ -279,7 +279,7 @@ public class Utils {
 
     public static String getWeekEnd() {
         Calendar calendar = Calendar.getInstance();
-        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) {
+        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
             calendar.add(Calendar.DAY_OF_YEAR, 1);
         }
         Date c = calendar.getTime();

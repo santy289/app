@@ -77,6 +77,7 @@
     <string name="business_oportunities">Business Oportunities</string>
     <string name="synchronize">Sync up</string>
     <string name="synchronization">Synchronization</string>
+    <string name="resourcing_planner">Resourcing Planner</string>
     <string name="workflow_list">WORKFLOWS LIST</string>
     <string name="btn_add">+ Add</string>
     <string name="description">Description</string>
@@ -474,4 +475,7 @@
     <!--QrLoginActivity-->
     <string name="qr_login_activity_title">Generated QR Code</string>
     <string name="qr_login_activity_description">Use this QR code to log in to the other Rootnet Applications that have the \"Log in with QR\" feature.</string>
+
+    <!--ResourcingPlannerActivity-->
+    <string name="resourcing_planner_activity_title">Resourcing Planner</string>
 </resources>

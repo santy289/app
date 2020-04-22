@@ -78,6 +78,7 @@
     <string name="business_oportunities">Oportunidades de Negocios</string>
     <string name="synchronize">Sincronizar</string>
     <string name="synchronization">Sincronización</string>
+    <string name="resourcing_planner">Planeador de Recursos</string>
     <string name="workflow_list">LISTA DE WORKFLOWS</string>
     <string name="btn_add">+ Añadir</string>
     <string name="description">Descripción</string>
@@ -470,4 +471,7 @@
     <!--QrLoginActivity-->
     <string name="qr_login_activity_title">Código QR Generado</string>
     <string name="qr_login_activity_description">Utilice este código QR para iniciar sesión en otras aplicaciones de Rootnet que soporten la funcionalidad \"Iniciar sesión con QR\".</string>
+
+    <!--ResourcingPlannerActivity-->
+    <string name="resourcing_planner_activity_title">Resourcing Planner</string>
 </resources>

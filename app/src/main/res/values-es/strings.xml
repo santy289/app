@@ -474,4 +474,15 @@
 
     <!--ResourcingPlannerActivity-->
     <string name="resourcing_planner_activity_title">Resourcing Planner</string>
+    <string name="resourcing_planner_monday_short">Lun</string>
+    <string name="resourcing_planner_tuesday_short">Mar</string>
+    <string name="resourcing_planner_wednesday_short">Mié</string>
+    <string name="resourcing_planner_thursday_short">Jue</string>
+    <string name="resourcing_planner_friday_short">Vie</string>
+    <string name="resourcing_planner_saturday_short">Sáb</string>
+    <string name="resourcing_planner_sunday_short">Dom</string>
+    <plurals name="resourcing_planner_total_hours">
+        <item formatted="true" quantity="one">Total: 1 hora</item>
+        <item formatted="true" quantity="other">Total: %d horas</item>
+    </plurals>
 </resources>

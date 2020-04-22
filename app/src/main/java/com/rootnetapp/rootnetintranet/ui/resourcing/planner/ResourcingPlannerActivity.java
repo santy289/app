@@ -12,6 +12,7 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ActivityResourcingPlannerBinding;
 import com.rootnetapp.rootnetintranet.models.responses.resourcing.Booking;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.resourcing.planner.adapters.ResourcingPlannerAdapter;
 import com.rootnetapp.rootnetintranet.ui.resourcing.planner.models.PersonBooking;
 
 import java.util.List;
@@ -24,6 +25,7 @@ import androidx.annotation.UiThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 public class ResourcingPlannerActivity extends AppCompatActivity {
 
@@ -68,7 +70,9 @@ public class ResourcingPlannerActivity extends AppCompatActivity {
 
     @UiThread
     private void populateBookings(Map<PersonBooking, List<Booking>> personBookingListMap) {
-        //todo: fill adapter
+        mBinding.rvResourcing.setLayoutManager(new LinearLayoutManager(this));
+        mBinding.rvResourcing.setAdapter(new ResourcingPlannerAdapter(personBookingListMap,
+                mViewModel.getCurrentStartDate()));
     }
 
     @UiThread

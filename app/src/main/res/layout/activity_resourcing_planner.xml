@@ -6,6 +6,29 @@
         android:layout_height="match_parent"
         tools:context=".ui.resourcing.planner.ResourcingPlannerActivity">
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="?attr/actionBarSize"
+            android:background="@color/white">
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:fillViewport="true"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_resourcing"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+            </HorizontalScrollView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -24,45 +47,6 @@
                 app:popupTheme="@style/AppTheme.PopupOverlay" />
 
         </com.google.android.material.appbar.AppBarLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/lyt_not_found"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="?attr/actionBarSize"
-            android:background="@color/white"
-            android:visibility="gone"
-            tools:visibility="visible">
-
-            <ImageView
-                android:id="@+id/iv_not_found"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:layout_marginBottom="10dp"
-                android:src="@drawable/ic_error_black_24dp"
-                android:tint="@color/text_red"
-                app:layout_constraintBottom_toTopOf="@+id/tv_not_found"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_chainStyle="packed" />
-
-            <TextView
-                android:id="@+id/tv_not_found"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="@string/workflow_detail_activity_workflow_not_found"
-                android:textColor="@color/colorAccent"
-                android:textSize="18sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/iv_not_found"
-                app:layout_constraintVertical_chainStyle="packed"
-                app:layout_constraintWidth_default="wrap" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>
 

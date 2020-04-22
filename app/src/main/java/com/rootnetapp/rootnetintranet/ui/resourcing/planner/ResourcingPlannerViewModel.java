@@ -7,7 +7,9 @@ import com.rootnetapp.rootnetintranet.models.responses.resourcing.BookingsRespon
 import com.rootnetapp.rootnetintranet.ui.resourcing.planner.models.PersonBooking;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +32,7 @@ public class ResourcingPlannerViewModel extends ViewModel {
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
     private String mToken;
+    private Date mCurrentStartDate;
 
     public ResourcingPlannerViewModel(ResourcingPlannerRepository resourcingPlannerRepository) {
         this.mRepository = resourcingPlannerRepository;
@@ -43,17 +46,26 @@ public class ResourcingPlannerViewModel extends ViewModel {
     public void init(String token) {
         mToken = token;
 
-        String startDate = Utils.getWeekStart();
-        String endDate = Utils.getWeekEnd();
+        Calendar now = Calendar.getInstance();
+        Date startDate = Utils.getWeekStartDate(now);
+        Date endDate = Utils.getWeekEndDate(now);
 
         getBookings(startDate, endDate);
     }
 
-    private void getBookings(String startDate, String endDate) {
-        mShowLoadingLiveData.setValue(true);
+    public Date getCurrentStartDate() {
+        return mCurrentStartDate;
+    }
 
+    private void getBookings(Date startDate, Date endDate) {
+        mCurrentStartDate = startDate;
+
+        String startDateString = Utils.getFormattedDate(startDate, Utils.SERVER_DATE_FORMAT_SHORT);
+        String endDateString = Utils.getFormattedDate(endDate, Utils.SERVER_DATE_FORMAT_SHORT);
+
+        mShowLoadingLiveData.setValue(true);
         Disposable disposable = mRepository
-                .getBookings(mToken, startDate, endDate)
+                .getBookings(mToken, startDateString, endDateString)
                 .subscribe(this::onBookingsSuccess, this::onFailure);
         mDisposables.add(disposable);
     }

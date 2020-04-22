@@ -57,6 +57,7 @@ public class Utils {
     private static final String WEB_PROTOCOL = "https://";
 
     public static final String SERVER_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
+    public static final String SERVER_DATE_FORMAT_SHORT = "yyyy-MM-dd";
     public static final String SERVER_DATE_FORMAT_NO_TIMEZONE = "yyyy-MM-dd'T'HH:mm:ss";
     public static final String STANDARD_DATE_DISPLAY_FORMAT = "MMMM dd, yyyy";
     public static final String SHORT_DATE_DISPLAY_FORMAT = "dd/MM/yy";
@@ -267,24 +268,18 @@ public class Utils {
         return df.format(c);
     }
 
-    public static String getWeekStart() {
-        Calendar calendar = Calendar.getInstance();
+    public static Date getWeekStartDate(Calendar calendar) {
         while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
             calendar.add(Calendar.DAY_OF_YEAR, -1);
         }
-        Date c = calendar.getTime();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        return df.format(c);
+        return calendar.getTime();
     }
 
-    public static String getWeekEnd() {
-        Calendar calendar = Calendar.getInstance();
+    public static Date getWeekEndDate(Calendar calendar) {
         while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
             calendar.add(Calendar.DAY_OF_YEAR, 1);
         }
-        Date c = calendar.getTime();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        return df.format(c);
+        return calendar.getTime();
     }
 
     public static String replaceLast(String string, String substring, String replacement) {

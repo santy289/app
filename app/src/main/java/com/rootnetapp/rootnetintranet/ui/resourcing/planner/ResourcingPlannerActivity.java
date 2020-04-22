@@ -73,6 +73,7 @@ public class ResourcingPlannerActivity extends AppCompatActivity {
         mBinding.rvResourcing.setLayoutManager(new LinearLayoutManager(this));
         mBinding.rvResourcing.setAdapter(new ResourcingPlannerAdapter(personBookingListMap,
                 mViewModel.getCurrentStartDate()));
+        mBinding.rvResourcing.setNestedScrollingEnabled(false);
     }
 
     @UiThread

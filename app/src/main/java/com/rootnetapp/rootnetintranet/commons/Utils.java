@@ -272,6 +272,10 @@ public class Utils {
         while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
             calendar.add(Calendar.DAY_OF_YEAR, -1);
         }
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTime();
     }
 
@@ -279,6 +283,10 @@ public class Utils {
         while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
             calendar.add(Calendar.DAY_OF_YEAR, 1);
         }
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTime();
     }
 
@@ -564,5 +572,9 @@ public class Utils {
 
     public static String getWebProtocol(String domain) {
         return WEB_PROTOCOL;
+    }
+
+    public static int secondsToHours(long seconds) {
+        return (int) (seconds / (60 * 60));
     }
 }

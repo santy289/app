@@ -53,7 +53,7 @@ public class ResourcingPlannerViewModel extends ViewModel {
         getBookings(startDate, endDate);
     }
 
-    public Date getCurrentStartDate() {
+    protected Date getCurrentStartDate() {
         return mCurrentStartDate;
     }
 
@@ -93,7 +93,8 @@ public class ResourcingPlannerViewModel extends ViewModel {
                 continue;
             }
 
-            personBookingMap.put(personBooking, new ArrayList<>(Collections.singletonList(booking)));
+            personBookingMap
+                    .put(personBooking, new ArrayList<>(Collections.singletonList(booking)));
         }
 
         mBookingMapLiveData.setValue(personBookingMap);

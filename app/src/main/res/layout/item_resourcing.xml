@@ -10,10 +10,18 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/lyt_days"
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="@+id/lyt_person"
+            android:layout_height="wrap_content"
             app:layout_constraintStart_toEndOf="@id/lyt_person"
             app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_bookings"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <View
                 android:id="@+id/lyt_monday"
@@ -77,18 +85,12 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@id/lyt_saturday"
                 app:layout_constraintTop_toTopOf="parent" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_bookings"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/lyt_person"
             android:layout_width="@dimen/resourcing_person_width"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:background="@drawable/border_bg_resourcing_header"
             android:padding="8dp"
             app:layout_constraintBottom_toBottomOf="@+id/lyt_days"
@@ -99,11 +101,11 @@
                 android:id="@+id/tv_person_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@color/colorAccent"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                android:textColor="@color/colorAccent"
                 tools:text="Jon Doe" />
 
             <TextView

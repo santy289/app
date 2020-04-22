@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class ResourcingPlannerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -105,9 +106,16 @@ public class ResourcingPlannerAdapter extends RecyclerView.Adapter<RecyclerView.
                 List<Booking> bookingList = getBookingList(index);
                 long totalEstimatedTime = bookingList.stream().mapToLong(Booking::getEstimatedTime)
                         .sum();
-                int numberOfHours = (int) ((totalEstimatedTime % 86400) / 3600);
+                int numberOfHours = Utils.secondsToHours(totalEstimatedTime);
                 contentViewHolder.getBinding().tvTotalTime.setText(
-                        context.getResources().getQuantityString(R.plurals.resourcing_planner_total_hours, numberOfHours, numberOfHours));
+                        context.getResources()
+                                .getQuantityString(R.plurals.resourcing_planner_total_hours,
+                                        numberOfHours, numberOfHours));
+
+                contentViewHolder.getBinding().rvBookings
+                        .setLayoutManager(new LinearLayoutManager(context));
+                contentViewHolder.getBinding().rvBookings
+                        .setAdapter(new BookingAdapter(bookingList, mondayDate));
 
                 contentViewHolder.getBinding().executePendingBindings();
                 break;

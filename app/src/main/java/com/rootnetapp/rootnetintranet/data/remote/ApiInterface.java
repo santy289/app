@@ -548,7 +548,7 @@ public interface ApiInterface {
     @Headers({"Domain-Name: api"})
     @GET("intranet/bookings")
     Observable<BookingsResponse> getBookings(@Header("Authorization") String authorization,
-                                                          @Query("start_date") String startDate,
+                                                          @Query("initial_date") String startDate,
                                                           @Query("end_date") String endDate);
 
     //region Google Maps API

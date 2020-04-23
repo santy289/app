@@ -16,9 +16,9 @@ import java.util.concurrent.TimeUnit;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class BookingAdapter extends RecyclerView.Adapter<BookingViewHolder> {
+import static com.rootnetapp.rootnetintranet.ui.resourcing.planner.ResourcingPlannerViewModel.WEEK_DAYS_AMOUNT;
 
-    private static final int WEEK_DAYS_AMOUNT = 7;
+public class BookingAdapter extends RecyclerView.Adapter<BookingViewHolder> {
 
     private List<Booking> bookingList;
     private Date weekStartDate;

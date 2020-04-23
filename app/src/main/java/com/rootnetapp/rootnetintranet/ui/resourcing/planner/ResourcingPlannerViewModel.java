@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import androidx.lifecycle.LiveData;
@@ -27,12 +28,16 @@ import io.reactivex.disposables.Disposable;
 
 public class ResourcingPlannerViewModel extends ViewModel {
 
+    public static final int WEEK_DAYS_AMOUNT = 7;
+
     private static final String TAG = "ResourcingPlannerVM";
 
     private ResourcingPlannerRepository mRepository;
     private MutableLiveData<Boolean> mShowLoadingLiveData;
     private MutableLiveData<Integer> mShowToastMessage;
     private MutableLiveData<Map<PersonBooking, List<Booking>>> mBookingMapLiveData;
+    private MutableLiveData<String> mCurrentDateFilterLiveData;
+    private MutableLiveData<Boolean> mClearBookingsLiveData;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
@@ -53,14 +58,38 @@ public class ResourcingPlannerViewModel extends ViewModel {
         mToken = token;
 
         Calendar now = Calendar.getInstance();
-        Date startDate = Utils.getWeekStartDate(now);
-        Date endDate = Utils.getWeekEndDate(now);
+        getBookingsForWeek(now);
+    }
+
+    protected void fetchNextWeek() {
+        fetchWeek(WEEK_DAYS_AMOUNT);
+    }
+
+    protected void fetchPreviousWeek() {
+        fetchWeek(-WEEK_DAYS_AMOUNT);
+    }
+
+    private void fetchWeek(int daysDiff) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(mCurrentStartDate);
+        calendar.add(Calendar.DAY_OF_YEAR, daysDiff);
+
+        getBookingsForWeek(calendar);
+
+        mClearBookingsLiveData.setValue(true);
+    }
+
+    private void getBookingsForWeek(Calendar calendar) {
+        Date startDate = Utils.getWeekStartDate(calendar);
+        Date endDate = Utils.getWeekEndDate(calendar);
 
         getBookings(startDate, endDate);
     }
 
     private void getBookings(Date startDate, Date endDate) {
         mCurrentStartDate = startDate;
+
+        mCurrentDateFilterLiveData.setValue(getDateFilterText(startDate, endDate));
 
         String startDateString = Utils.getFormattedDate(startDate, Utils.SERVER_DATE_FORMAT_SHORT);
         String endDateString = Utils.getFormattedDate(endDate, Utils.SERVER_DATE_FORMAT_SHORT);
@@ -173,6 +202,28 @@ public class ResourcingPlannerViewModel extends ViewModel {
         mBookingMapLiveData.setValue(mPersonBookingListMap);
     }
 
+    private String getDateFilterText(Date startDate, Date endDate) {
+        String startDateString = Utils.getFormattedDate(startDate, Utils.SHORT_DATE_NO_YEAR_FORMAT);
+        String endDateString = Utils.getFormattedDate(endDate, Utils.SHORT_DATE_NO_YEAR_FORMAT);
+
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.setTime(startDate);
+
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.setTime(endDate);
+
+        int startYear = startCalendar.get(Calendar.YEAR);
+        int endYear = endCalendar.get(Calendar.YEAR);
+
+        if (startYear == endYear) {
+            return String.format(Locale.getDefault(), "%s - %s %d", startDateString, endDateString,
+                    endYear);
+        } else {
+            return String.format(Locale.getDefault(), "%s %d - %s %d", startDateString, startYear,
+                    endDateString, endYear);
+        }
+    }
+
     private void onFailure(Throwable throwable) {
         mShowLoadingLiveData.setValue(false);
         mShowToastMessage.setValue(Utils.getOnFailureStringRes(throwable));
@@ -197,5 +248,19 @@ public class ResourcingPlannerViewModel extends ViewModel {
             mBookingMapLiveData = new MutableLiveData<>();
         }
         return mBookingMapLiveData;
+    }
+
+    protected LiveData<String> getObservableCurrentDateFilter() {
+        if (mCurrentDateFilterLiveData == null) {
+            mCurrentDateFilterLiveData = new MutableLiveData<>();
+        }
+        return mCurrentDateFilterLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableClearBookings() {
+        if (mClearBookingsLiveData == null) {
+            mClearBookingsLiveData = new MutableLiveData<>();
+        }
+        return mClearBookingsLiveData;
     }
 }

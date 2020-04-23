@@ -61,6 +61,7 @@ public class Utils {
     public static final String SERVER_DATE_FORMAT_NO_TIMEZONE = "yyyy-MM-dd'T'HH:mm:ss";
     public static final String STANDARD_DATE_DISPLAY_FORMAT = "MMMM dd, yyyy";
     public static final String SHORT_DATE_DISPLAY_FORMAT = "dd/MM/yy";
+    public static final String SHORT_DATE_NO_YEAR_FORMAT= "dd MMM";
 
     public static final String[] ALLOWED_MIME_TYPES = {
             "text/*",

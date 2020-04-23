@@ -13,19 +13,92 @@
             android:background="@color/white">
 
             <HorizontalScrollView
+                android:id="@+id/hsv"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:fillViewport="true"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lyt_date_filter">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_resourcing"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </HorizontalScrollView>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/lyt_date_filter"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rv_resourcing"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-            </HorizontalScrollView>
+                <FrameLayout
+                    android:id="@+id/fl_btn_previous"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toStartOf="@+id/tv_date_filter"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <Button
+                        android:id="@+id/btn_previous"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="35dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        app:backgroundTint="@color/white"
+                        app:icon="@drawable/ic_chevron_left_black_24dp"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconSize="24dp"
+                        app:iconTint="@color/colorAccent"
+                        app:rippleColor="@color/dark_gray" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tv_date_filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/spinner_bg"
+                    android:gravity="center"
+                    android:paddingStart="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="8dp"
+                    android:textColor="@color/colorAccent"
+                    app:layout_constraintBottom_toBottomOf="@id/fl_btn_previous"
+                    app:layout_constraintEnd_toStartOf="@id/fl_btn_next"
+                    app:layout_constraintStart_toEndOf="@id/fl_btn_previous"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="12 - 19 apr" />
+
+                <FrameLayout
+                    android:id="@+id/fl_btn_next"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/tv_date_filter"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <Button
+                        android:id="@+id/btn_next"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="35dp"
+                        android:layout_height="wrap_content"
+                        app:backgroundTint="@color/white"
+                        app:icon="@drawable/ic_chevron_right_black_24dp"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconSize="24dp"
+                        app:iconTint="@color/colorAccent"
+                        app:rippleColor="@color/dark_gray" />
+                </FrameLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

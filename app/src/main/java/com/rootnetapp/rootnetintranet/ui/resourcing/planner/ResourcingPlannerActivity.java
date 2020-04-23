@@ -15,6 +15,7 @@ import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.resourcing.planner.adapters.ResourcingPlannerAdapter;
 import com.rootnetapp.rootnetintranet.ui.resourcing.planner.models.PersonBooking;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +52,7 @@ public class ResourcingPlannerActivity extends AppCompatActivity {
         String loggedUserId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
 
         setActionBar();
+        setOnClickListeners();
         subscribe();
 
         mViewModel.init(token);
@@ -62,10 +64,17 @@ public class ResourcingPlannerActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(getTitle());
     }
 
+    private void setOnClickListeners() {
+        mBinding.btnPrevious.setOnClickListener(v -> mViewModel.fetchPreviousWeek());
+        mBinding.btnNext.setOnClickListener(v -> mViewModel.fetchNextWeek());
+    }
+
     private void subscribe() {
         mViewModel.getObservableShowLoading().observe(this, this::showLoading);
         mViewModel.getObservableShowToastMessage().observe(this, this::showToastMessage);
         mViewModel.getObservableBookingMap().observe(this, this::populateBookings);
+        mViewModel.getObservableCurrentDateFilter().observe(this, this::setDateFilterText);
+        mViewModel.getObservableClearBookings().observe(this, this::clearBookings);
     }
 
     @UiThread
@@ -74,6 +83,23 @@ public class ResourcingPlannerActivity extends AppCompatActivity {
         mBinding.rvResourcing.setAdapter(new ResourcingPlannerAdapter(personBookingListMap,
                 mViewModel.getCurrentStartDate()));
         mBinding.rvResourcing.setNestedScrollingEnabled(false);
+        mBinding.hsv.smoothScrollTo(0, 0);
+//        mBinding.hsv.scrollTo(0, 0);
+    }
+
+    @UiThread
+    private void clearBookings(Boolean clear) {
+        if (!clear) {
+            return;
+        }
+
+        mBinding.rvResourcing.setAdapter(
+                new ResourcingPlannerAdapter(new HashMap<>(), mViewModel.getCurrentStartDate()));
+    }
+
+    @UiThread
+    private void setDateFilterText(String dateFilterText) {
+        mBinding.tvDateFilter.setText(dateFilterText);
     }
 
     @UiThread

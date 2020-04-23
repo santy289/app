@@ -5,6 +5,8 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ItemResourcingBinding;
@@ -102,6 +104,21 @@ public class ResourcingPlannerAdapter extends RecyclerView.Adapter<RecyclerView.
 
                 PersonBooking personBooking = getPersonBooking(index);
                 contentViewHolder.getBinding().tvPersonName.setText(personBooking.getPersonName());
+
+                String rolePrimary = personBooking.getRolePrimary() == null ? "" : personBooking
+                        .getRolePrimary();
+                contentViewHolder.getBinding().tvPersonRole.setText(rolePrimary);
+
+                if (personBooking.getPersonAvatar().length > 0) {
+                    Glide.with(context)
+                            .load(personBooking.getPersonAvatar())
+                            .apply(
+                                    new RequestOptions()
+                                            .placeholder(R.drawable.default_profile_avatar)
+                                            .error(R.drawable.default_profile_avatar)
+                            )
+                            .into(contentViewHolder.getBinding().civPersonPicture);
+                }
 
                 List<Booking> bookingList = getBookingList(index);
                 long totalEstimatedTime = bookingList.stream().mapToLong(Booking::getEstimatedTime)

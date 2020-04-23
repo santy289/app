@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.resourcing.planner;
 
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
+import com.rootnetapp.rootnetintranet.models.responses.people.PeopleDirectoryResponse;
 import com.rootnetapp.rootnetintranet.models.responses.project.ProjectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.resourcing.BookingsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.role.RoleResponse;
@@ -31,6 +32,11 @@ public class ResourcingPlannerRepository {
 
     public Observable<RoleResponse> getRoles(String auth) {
         return service.getRoles(auth).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<PeopleDirectoryResponse> getPeopleDirectory(String auth) {
+        return service.getPeopleDirectory(auth).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 }

@@ -34,6 +34,8 @@ public class Booking {
     private Integer personId;
     @Json(name = "person_name")
     private String personName;
+    @Json(name = "person_avatar")
+    private String personAvatar;
     @Json(name = "status")
     private Boolean status;
     @Json(name = "version")
@@ -193,5 +195,13 @@ public class Booking {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getPersonAvatar() {
+        return personAvatar;
+    }
+
+    public void setPersonAvatar(String personAvatar) {
+        this.personAvatar = personAvatar;
     }
 }

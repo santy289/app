@@ -1,6 +1,8 @@
 package com.rootnetapp.rootnetintranet.ui.resourcing.planner;
 
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.models.responses.people.PeopleDirectoryResponse;
+import com.rootnetapp.rootnetintranet.models.responses.people.PersonDirectory;
 import com.rootnetapp.rootnetintranet.models.responses.project.Project;
 import com.rootnetapp.rootnetintranet.models.responses.project.ProjectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.resourcing.Booking;
@@ -104,7 +106,6 @@ public class ResourcingPlannerViewModel extends ViewModel {
     private void onBookingsSuccess(BookingsResponse bookingsResponse) {
         if (bookingsResponse.getResponse().isEmpty()) {
             mShowLoadingLiveData.setValue(false);
-            //todo error
             return;
         }
 
@@ -113,9 +114,15 @@ public class ResourcingPlannerViewModel extends ViewModel {
         for (BookingWrapper bookingWrapper : bookingsResponse.getResponse()) {
             Booking booking = bookingWrapper.getBooking();
 
+            if (booking == null) {
+                continue;
+            }
+
             PersonBooking personBooking = new PersonBooking(
                     booking.getPersonId(),
                     booking.getPersonName());
+
+            personBooking.setPersonAvatar(Utils.decodeImageUri(booking.getPersonAvatar()));
 
             if (personBookingMap.containsKey(personBooking)) {
                 //if the key exists, the list is initialized
@@ -176,10 +183,8 @@ public class ResourcingPlannerViewModel extends ViewModel {
     }
 
     private void onProjectsCompleted(ProjectResponse projectResponse) {
-        mShowLoadingLiveData.setValue(false);
-
         if (projectResponse.getProjects().isEmpty()) {
-            mBookingMapLiveData.setValue(mPersonBookingListMap);
+            getPeopleDirectory();
             return;
         }
 
@@ -195,10 +200,41 @@ public class ResourcingPlannerViewModel extends ViewModel {
             });
         });
 
-        mBookingMapLiveData.setValue(mPersonBookingListMap);
+        getPeopleDirectory();
     }
 
     private void onProjectsFailure(Throwable throwable) {
+        getPeopleDirectory();
+    }
+
+    private void getPeopleDirectory() {
+        Disposable disposable = mRepository
+                .getPeopleDirectory(mToken)
+                .subscribe(this::onPeopleDirectoryCompleted, this::onPeopleDirectoryFailure);
+        mDisposables.add(disposable);
+    }
+
+    private void onPeopleDirectoryCompleted(PeopleDirectoryResponse peopleDirectoryResponse) {
+        mShowLoadingLiveData.setValue(false);
+
+        if (peopleDirectoryResponse.getList().isEmpty()) {
+            mBookingMapLiveData.setValue(mPersonBookingListMap);
+            return;
+        }
+
+        List<PersonDirectory> personDirectoryList = peopleDirectoryResponse.getList();
+
+        mPersonBookingListMap.keySet().forEach(personBooking -> {
+            personDirectoryList.stream()
+                    .filter(personDirectory -> personBooking.getPersonId() == personDirectory
+                            .getId()).findFirst().ifPresent(personDirectory -> personBooking
+                    .setRolePrimary(personDirectory.getRolePrimary()));
+        });
+
+        mBookingMapLiveData.setValue(mPersonBookingListMap);
+    }
+
+    private void onPeopleDirectoryFailure(Throwable throwable) {
         mBookingMapLiveData.setValue(mPersonBookingListMap);
     }
 

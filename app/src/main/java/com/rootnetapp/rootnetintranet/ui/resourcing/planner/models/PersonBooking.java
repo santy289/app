@@ -1,16 +1,13 @@
 package com.rootnetapp.rootnetintranet.ui.resourcing.planner.models;
 
-import com.rootnetapp.rootnetintranet.models.responses.resourcing.Booking;
-
-import java.util.List;
-
 /**
  * Created by ldemorais on 4/21/20. ldemorais@hypernovalabs.com
  */
 public class PersonBooking {
     private Integer personId;
     private String personName;
-    private String personAvatar;
+    private String rolePrimary;
+    private byte[] personAvatar;
 
     public PersonBooking(int personId, String personName) {
         this.personId = personId;
@@ -33,12 +30,20 @@ public class PersonBooking {
         this.personName = personName;
     }
 
-    public String getPersonAvatar() {
+    public byte[] getPersonAvatar() {
         return personAvatar;
     }
 
-    public void setPersonAvatar(String personAvatar) {
+    public void setPersonAvatar(byte[] personAvatar) {
         this.personAvatar = personAvatar;
+    }
+
+    public String getRolePrimary() {
+        return rolePrimary;
+    }
+
+    public void setRolePrimary(String rolePrimary) {
+        this.rolePrimary = rolePrimary;
     }
 
     @Override

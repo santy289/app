@@ -27,7 +27,7 @@ public class Booking {
     @Json(name = "registered_time")
     private Long registeredTime;
     @Json(name = "booking_type")
-    private String bookingType;
+    private @BookingType String bookingType;
     @Json(name = "registered_confirmed")
     private Boolean registeredConfirmed;
     @Json(name = "person_id")
@@ -40,6 +40,8 @@ public class Booking {
     private Integer version;
     @Json(name = "version_created_at")
     private String versionCreatedAt;
+
+    private transient String title;
 
     public int getId() {
         return id;
@@ -183,5 +185,13 @@ public class Booking {
 
     public void setVersionCreatedAt(String versionCreatedAt) {
         this.versionCreatedAt = versionCreatedAt;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

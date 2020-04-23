@@ -1,9 +1,14 @@
 package com.rootnetapp.rootnetintranet.ui.resourcing.planner;
 
 import com.rootnetapp.rootnetintranet.commons.Utils;
+import com.rootnetapp.rootnetintranet.models.responses.project.Project;
+import com.rootnetapp.rootnetintranet.models.responses.project.ProjectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.resourcing.Booking;
+import com.rootnetapp.rootnetintranet.models.responses.resourcing.BookingType;
 import com.rootnetapp.rootnetintranet.models.responses.resourcing.BookingWrapper;
 import com.rootnetapp.rootnetintranet.models.responses.resourcing.BookingsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.role.Role;
+import com.rootnetapp.rootnetintranet.models.responses.role.RoleResponse;
 import com.rootnetapp.rootnetintranet.ui.resourcing.planner.models.PersonBooking;
 
 import java.util.ArrayList;
@@ -33,6 +38,7 @@ public class ResourcingPlannerViewModel extends ViewModel {
 
     private String mToken;
     private Date mCurrentStartDate;
+    private HashMap<PersonBooking, List<Booking>> mPersonBookingListMap;
 
     public ResourcingPlannerViewModel(ResourcingPlannerRepository resourcingPlannerRepository) {
         this.mRepository = resourcingPlannerRepository;
@@ -53,10 +59,6 @@ public class ResourcingPlannerViewModel extends ViewModel {
         getBookings(startDate, endDate);
     }
 
-    protected Date getCurrentStartDate() {
-        return mCurrentStartDate;
-    }
-
     private void getBookings(Date startDate, Date endDate) {
         mCurrentStartDate = startDate;
 
@@ -71,9 +73,8 @@ public class ResourcingPlannerViewModel extends ViewModel {
     }
 
     private void onBookingsSuccess(BookingsResponse bookingsResponse) {
-        mShowLoadingLiveData.setValue(false);
-
         if (bookingsResponse.getResponse().isEmpty()) {
+            mShowLoadingLiveData.setValue(false);
             //todo error
             return;
         }
@@ -97,7 +98,79 @@ public class ResourcingPlannerViewModel extends ViewModel {
                     .put(personBooking, new ArrayList<>(Collections.singletonList(booking)));
         }
 
-        mBookingMapLiveData.setValue(personBookingMap);
+        mPersonBookingListMap = personBookingMap;
+
+        getRoles();
+    }
+
+    protected Date getCurrentStartDate() {
+        return mCurrentStartDate;
+    }
+
+    private void getRoles() {
+        Disposable disposable = mRepository
+                .getRoles(mToken)
+                .subscribe(this::onRolesCompleted, this::onRolesFailure);
+        mDisposables.add(disposable);
+    }
+
+    private void onRolesCompleted(RoleResponse roleResponse) {
+        if (roleResponse.getList().isEmpty()) {
+            getProjects();
+            return;
+        }
+
+        List<Role> roleList = roleResponse.getList();
+
+        mPersonBookingListMap.values().forEach(bookingList -> {
+            bookingList.forEach(booking -> {
+                if (booking.getBookingType().equals(BookingType.ROLE)) {
+                    roleList.stream()
+                            .filter(role -> role.getId() == booking.getRecord())
+                            .findFirst().ifPresent(role -> booking.setTitle(role.getName()));
+                }
+            });
+        });
+
+        getProjects();
+    }
+
+    private void onRolesFailure(Throwable throwable) {
+        getProjects();
+    }
+
+    private void getProjects() {
+        Disposable disposable = mRepository
+                .getProjects(mToken)
+                .subscribe(this::onProjectsCompleted, this::onProjectsFailure);
+        mDisposables.add(disposable);
+    }
+
+    private void onProjectsCompleted(ProjectResponse projectResponse) {
+        mShowLoadingLiveData.setValue(false);
+
+        if (projectResponse.getProjects().isEmpty()) {
+            mBookingMapLiveData.setValue(mPersonBookingListMap);
+            return;
+        }
+
+        List<Project> projectList = projectResponse.getProjects();
+
+        mPersonBookingListMap.values().forEach(bookingList -> {
+            bookingList.forEach(booking -> {
+                if (booking.getBookingType().equals(BookingType.PROJECT)) {
+                    projectList.stream()
+                            .filter(project -> project.getId().equals(booking.getRecord()))
+                            .findFirst().ifPresent(project -> booking.setTitle(project.getTitle()));
+                }
+            });
+        });
+
+        mBookingMapLiveData.setValue(mPersonBookingListMap);
+    }
+
+    private void onProjectsFailure(Throwable throwable) {
+        mBookingMapLiveData.setValue(mPersonBookingListMap);
     }
 
     private void onFailure(Throwable throwable) {

@@ -489,5 +489,5 @@
         <item formatted="true" quantity="one">Total: 1 hour</item>
         <item formatted="true" quantity="other">Total: %d hours</item>
     </plurals>
-    <string name="resourcing_planner_booking_title" translatable="false">%1$s - %2$s (%3$dh)</string>
+    <string name="resourcing_planner_booking_title" translatable="false">%1$s %2$s (%3$dh)</string>
 </resources>

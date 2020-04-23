@@ -44,9 +44,10 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingViewHolder> {
         Context context = holder.getBinding().getRoot().getContext();
 
         int bookingHours = Utils.secondsToHours(booking.getEstimatedTime());
+        String title = booking.getTitle() == null ? "" : " - " + booking.getTitle();
         holder.getBinding().tvTitle.setText(
                 context.getString(R.string.resourcing_planner_booking_title,
-                        booking.getBookingType(), " ", bookingHours));
+                        booking.getBookingType(), title, bookingHours));
 
         holder.getBinding().tvDescription.setText(booking.getDescription());
 

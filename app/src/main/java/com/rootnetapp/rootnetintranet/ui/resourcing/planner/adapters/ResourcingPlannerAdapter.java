@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -109,13 +110,15 @@ public class ResourcingPlannerAdapter extends RecyclerView.Adapter<RecyclerView.
                         .getRolePrimary();
                 contentViewHolder.getBinding().tvPersonRole.setText(rolePrimary);
 
-                if (personBooking.getPersonAvatar().length > 0) {
+                if (personBooking.getPersonAvatar() != null && personBooking
+                        .getPersonAvatar().length > 0) {
                     Glide.with(context)
                             .load(personBooking.getPersonAvatar())
                             .apply(
                                     new RequestOptions()
                                             .placeholder(R.drawable.default_profile_avatar)
                                             .error(R.drawable.default_profile_avatar)
+                                            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                             )
                             .into(contentViewHolder.getBinding().civPersonPicture);
                 }

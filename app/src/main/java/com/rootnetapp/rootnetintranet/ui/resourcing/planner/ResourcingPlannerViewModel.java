@@ -1,5 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.resourcing.planner;
 
+import android.text.TextUtils;
+
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.models.responses.people.PeopleDirectoryResponse;
 import com.rootnetapp.rootnetintranet.models.responses.people.PersonDirectory;
@@ -40,15 +42,18 @@ public class ResourcingPlannerViewModel extends ViewModel {
     private MutableLiveData<Map<PersonBooking, List<Booking>>> mBookingMapLiveData;
     private MutableLiveData<String> mCurrentDateFilterLiveData;
     private MutableLiveData<Boolean> mClearBookingsLiveData;
+    private MutableLiveData<Boolean> mShowSearchPeopleFilterLiveData;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
 
     private String mToken;
     private Date mCurrentStartDate;
     private HashMap<PersonBooking, List<Booking>> mPersonBookingListMap;
+    private String mCurrentQuery;
 
     public ResourcingPlannerViewModel(ResourcingPlannerRepository resourcingPlannerRepository) {
         this.mRepository = resourcingPlannerRepository;
+        mCurrentQuery = "";
     }
 
     @Override
@@ -61,6 +66,25 @@ public class ResourcingPlannerViewModel extends ViewModel {
 
         Calendar now = Calendar.getInstance();
         getBookingsForWeek(now);
+    }
+
+    protected void filterPeople(String query) {
+        mCurrentQuery = query;
+
+        if (query.isEmpty()) {
+            mBookingMapLiveData.setValue(mPersonBookingListMap);
+            return;
+        }
+
+        HashMap<PersonBooking, List<Booking>> filteredMap = new HashMap<>();
+
+        mPersonBookingListMap.keySet().forEach(personBooking -> {
+            if (personBooking.getPersonName().toLowerCase().contains(query.toLowerCase().trim())) {
+                filteredMap.put(personBooking, mPersonBookingListMap.get(personBooking));
+            }
+        });
+
+        mBookingMapLiveData.setValue(filteredMap);
     }
 
     protected void fetchNextWeek() {
@@ -122,7 +146,9 @@ public class ResourcingPlannerViewModel extends ViewModel {
                     booking.getPersonId(),
                     booking.getPersonName());
 
-            personBooking.setPersonAvatar(Utils.decodeImageUri(booking.getPersonAvatar()));
+            if (!TextUtils.isEmpty(booking.getPersonAvatar())) {
+                personBooking.setPersonAvatar(Utils.decodeImageUri(booking.getPersonAvatar()));
+            }
 
             if (personBookingMap.containsKey(personBooking)) {
                 //if the key exists, the list is initialized
@@ -135,6 +161,8 @@ public class ResourcingPlannerViewModel extends ViewModel {
         }
 
         mPersonBookingListMap = personBookingMap;
+
+        mShowSearchPeopleFilterLiveData.setValue(mPersonBookingListMap.size() > 1);
 
         getRoles();
     }
@@ -218,7 +246,7 @@ public class ResourcingPlannerViewModel extends ViewModel {
         mShowLoadingLiveData.setValue(false);
 
         if (peopleDirectoryResponse.getList().isEmpty()) {
-            mBookingMapLiveData.setValue(mPersonBookingListMap);
+            sendResourcingListToUi();
             return;
         }
 
@@ -231,11 +259,15 @@ public class ResourcingPlannerViewModel extends ViewModel {
                     .setRolePrimary(personDirectory.getRolePrimary()));
         });
 
-        mBookingMapLiveData.setValue(mPersonBookingListMap);
+        sendResourcingListToUi();
     }
 
     private void onPeopleDirectoryFailure(Throwable throwable) {
-        mBookingMapLiveData.setValue(mPersonBookingListMap);
+        sendResourcingListToUi();
+    }
+
+    private void sendResourcingListToUi() {
+        filterPeople(mCurrentQuery);
     }
 
     private String getDateFilterText(Date startDate, Date endDate) {
@@ -298,5 +330,12 @@ public class ResourcingPlannerViewModel extends ViewModel {
             mClearBookingsLiveData = new MutableLiveData<>();
         }
         return mClearBookingsLiveData;
+    }
+
+    protected LiveData<Boolean> getObservableShowSearchPeopleFilter() {
+        if (mShowSearchPeopleFilterLiveData == null) {
+            mShowSearchPeopleFilterLiveData = new MutableLiveData<>();
+        }
+        return mShowSearchPeopleFilterLiveData;
     }
 }

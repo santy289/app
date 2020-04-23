@@ -485,4 +485,5 @@
         <item formatted="true" quantity="one">Total: 1 hora</item>
         <item formatted="true" quantity="other">Total: %d horas</item>
     </plurals>
+    <string name="resourcing_planner_search_people_hint" translatable="false">Buscar personas</string>
 </resources>

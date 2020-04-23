@@ -3,7 +3,10 @@ package com.rootnetapp.rootnetintranet.ui.resourcing.planner;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -53,6 +56,7 @@ public class ResourcingPlannerActivity extends AppCompatActivity {
 
         setActionBar();
         setOnClickListeners();
+        setSearchBarListener();
         subscribe();
 
         mViewModel.init(token);
@@ -69,12 +73,32 @@ public class ResourcingPlannerActivity extends AppCompatActivity {
         mBinding.btnNext.setOnClickListener(v -> mViewModel.fetchNextWeek());
     }
 
+    private void setSearchBarListener() {
+        mBinding.inputSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mViewModel.filterPeople(s.toString());
+            }
+        });
+    }
+
     private void subscribe() {
         mViewModel.getObservableShowLoading().observe(this, this::showLoading);
         mViewModel.getObservableShowToastMessage().observe(this, this::showToastMessage);
         mViewModel.getObservableBookingMap().observe(this, this::populateBookings);
         mViewModel.getObservableCurrentDateFilter().observe(this, this::setDateFilterText);
         mViewModel.getObservableClearBookings().observe(this, this::clearBookings);
+        mViewModel.getObservableShowSearchPeopleFilter().observe(this, this::showSearchPeopleFilter);
     }
 
     @UiThread
@@ -100,6 +124,11 @@ public class ResourcingPlannerActivity extends AppCompatActivity {
     @UiThread
     private void setDateFilterText(String dateFilterText) {
         mBinding.tvDateFilter.setText(dateFilterText);
+    }
+
+    @UiThread
+    private void showSearchPeopleFilter(Boolean show) {
+        mBinding.inputSearch.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     @UiThread

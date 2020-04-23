@@ -491,4 +491,17 @@
     </plurals>
     <string name="resourcing_planner_booking_title" translatable="false">%1$s %2$s (%3$dh)</string>
     <string name="resourcing_planner_search_people_hint" translatable="false">Search people</string>
+
+    <!--BookingDetailActivity-->
+    <string name="booking_detail_activity_title">Booking</string>
+    <string name="booking_detail_information">Information</string>
+    <string name="booking_detail_author">Author</string>
+    <string name="booking_detail_user">User</string>
+    <string name="booking_detail_booking_type">Type</string>
+    <string name="booking_detail_record">Record</string>
+    <string name="booking_detail_description">Description</string>
+    <string name="booking_detail_day_from">From</string>
+    <string name="booking_detail_day_to">To</string>
+    <string name="booking_detail_estimated_time">Estimated Time</string>
+    <string name="booking_detail_registered_time">Registered Time</string>
 </resources>

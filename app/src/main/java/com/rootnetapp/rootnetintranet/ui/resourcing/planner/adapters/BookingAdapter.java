@@ -8,6 +8,7 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ItemBookingBinding;
 import com.rootnetapp.rootnetintranet.models.responses.resourcing.Booking;
+import com.rootnetapp.rootnetintranet.ui.resourcing.planner.ResourcingPlannerActivityInterface;
 
 import java.util.Date;
 import java.util.List;
@@ -22,10 +23,13 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingViewHolder> {
 
     private List<Booking> bookingList;
     private Date weekStartDate;
+    private ResourcingPlannerActivityInterface activityInterface;
 
-    public BookingAdapter(List<Booking> bookingList, Date weekStartDate) {
+    public BookingAdapter(List<Booking> bookingList, Date weekStartDate,
+                          ResourcingPlannerActivityInterface activityInterface) {
         this.bookingList = bookingList;
         this.weekStartDate = weekStartDate;
+        this.activityInterface = activityInterface;
     }
 
     @NonNull
@@ -42,6 +46,9 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingViewHolder> {
         Booking booking = getItem(position);
 
         Context context = holder.getBinding().getRoot().getContext();
+
+        holder.getBinding().getRoot()
+                .setOnClickListener(v -> activityInterface.showBookingDetail(booking));
 
         int bookingHours = Utils.secondsToHours(booking.getEstimatedTime());
         String title = booking.getTitle() == null ? "" : " - " + booking.getTitle();

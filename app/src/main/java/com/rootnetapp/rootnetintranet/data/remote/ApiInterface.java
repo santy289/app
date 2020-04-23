@@ -34,6 +34,7 @@ import com.rootnetapp.rootnetintranet.models.responses.people.PeopleDirectoryRes
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.project.ProjectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordResponse;
+import com.rootnetapp.rootnetintranet.models.responses.resourcing.BookingResponse;
 import com.rootnetapp.rootnetintranet.models.responses.resourcing.BookingsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.role.RoleResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
@@ -551,6 +552,11 @@ public interface ApiInterface {
     Observable<BookingsResponse> getBookings(@Header("Authorization") String authorization,
                                                           @Query("initial_date") String startDate,
                                                           @Query("end_date") String endDate);
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/booking/{id}")
+    Observable<BookingResponse> getBooking(@Header("Authorization") String authorization,
+                                           @Path("id") int bookingId);
 
     @Headers({"Domain-Name: api"})
     @GET("/intranet/people/directory?all=true")

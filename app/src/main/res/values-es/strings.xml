@@ -486,4 +486,17 @@
         <item formatted="true" quantity="other">Total: %d horas</item>
     </plurals>
     <string name="resourcing_planner_search_people_hint" translatable="false">Buscar personas</string>
+
+    <!--BookingDetailActivity-->
+    <string name="booking_detail_activity_title">Booking</string>
+    <string name="booking_detail_information">Información</string>
+    <string name="booking_detail_author">Autor</string>
+    <string name="booking_detail_user">Usuario</string>
+    <string name="booking_detail_booking_type">Tipo</string>
+    <string name="booking_detail_record">Registro</string>
+    <string name="booking_detail_description">Descripción</string>
+    <string name="booking_detail_day_from">Desde</string>
+    <string name="booking_detail_day_to">Hasta</string>
+    <string name="booking_detail_estimated_time">Tiempo Estimado</string>
+    <string name="booking_detail_registered_time">Tiempo Registrado</string>
 </resources>

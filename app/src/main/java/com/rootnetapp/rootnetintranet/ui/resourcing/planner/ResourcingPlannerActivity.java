@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.resourcing.planner;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
@@ -15,6 +16,7 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ActivityResourcingPlannerBinding;
 import com.rootnetapp.rootnetintranet.models.responses.resourcing.Booking;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.resourcing.booking.BookingDetailActivity;
 import com.rootnetapp.rootnetintranet.ui.resourcing.planner.adapters.ResourcingPlannerAdapter;
 import com.rootnetapp.rootnetintranet.ui.resourcing.planner.models.PersonBooking;
 
@@ -31,7 +33,8 @@ import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-public class ResourcingPlannerActivity extends AppCompatActivity {
+public class ResourcingPlannerActivity extends AppCompatActivity implements
+        ResourcingPlannerActivityInterface {
 
     private static final String TAG = "ResourcingPlannerActivity";
 
@@ -98,14 +101,15 @@ public class ResourcingPlannerActivity extends AppCompatActivity {
         mViewModel.getObservableBookingMap().observe(this, this::populateBookings);
         mViewModel.getObservableCurrentDateFilter().observe(this, this::setDateFilterText);
         mViewModel.getObservableClearBookings().observe(this, this::clearBookings);
-        mViewModel.getObservableShowSearchPeopleFilter().observe(this, this::showSearchPeopleFilter);
+        mViewModel.getObservableShowSearchPeopleFilter()
+                .observe(this, this::showSearchPeopleFilter);
     }
 
     @UiThread
     private void populateBookings(Map<PersonBooking, List<Booking>> personBookingListMap) {
         mBinding.rvResourcing.setLayoutManager(new LinearLayoutManager(this));
         mBinding.rvResourcing.setAdapter(new ResourcingPlannerAdapter(personBookingListMap,
-                mViewModel.getCurrentStartDate()));
+                mViewModel.getCurrentStartDate(), this));
         mBinding.rvResourcing.setNestedScrollingEnabled(false);
         mBinding.hsv.smoothScrollTo(0, 0);
 //        mBinding.hsv.scrollTo(0, 0);
@@ -118,7 +122,8 @@ public class ResourcingPlannerActivity extends AppCompatActivity {
         }
 
         mBinding.rvResourcing.setAdapter(
-                new ResourcingPlannerAdapter(new HashMap<>(), mViewModel.getCurrentStartDate()));
+                new ResourcingPlannerAdapter(new HashMap<>(), mViewModel.getCurrentStartDate(),
+                        this));
     }
 
     @UiThread
@@ -159,4 +164,12 @@ public class ResourcingPlannerActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    public void showBookingDetail(Booking booking) {
+        Intent intent = new Intent(this, BookingDetailActivity.class);
+        intent.putExtra(BookingDetailActivity.EXTRA_BOOKING_ID, booking.getId());
+        intent.putExtra(BookingDetailActivity.EXTRA_BOOKING_RECORD, booking.getTitle());
+        startActivity(intent);
+    }
+
 }

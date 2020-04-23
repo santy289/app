@@ -13,6 +13,7 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ItemResourcingBinding;
 import com.rootnetapp.rootnetintranet.databinding.ItemResourcingHeaderBinding;
 import com.rootnetapp.rootnetintranet.models.responses.resourcing.Booking;
+import com.rootnetapp.rootnetintranet.ui.resourcing.planner.ResourcingPlannerActivityInterface;
 import com.rootnetapp.rootnetintranet.ui.resourcing.planner.models.PersonBooking;
 
 import java.util.ArrayList;
@@ -32,11 +33,13 @@ public class ResourcingPlannerAdapter extends RecyclerView.Adapter<RecyclerView.
     private Map<PersonBooking, List<Booking>> personBookingListMap;
     private List<PersonBooking> personBookingList;
     private Date mondayDate;
+    private ResourcingPlannerActivityInterface activityInterface;
 
     public ResourcingPlannerAdapter(Map<PersonBooking, List<Booking>> personBookingListMap,
-                                    Date mondayDate) {
+                                    Date mondayDate, ResourcingPlannerActivityInterface activityInterface) {
         this.personBookingListMap = personBookingListMap;
         this.mondayDate = mondayDate;
+        this.activityInterface = activityInterface;
 
         personBookingList = new ArrayList<>(personBookingListMap.keySet());
     }
@@ -135,7 +138,7 @@ public class ResourcingPlannerAdapter extends RecyclerView.Adapter<RecyclerView.
                 contentViewHolder.getBinding().rvBookings
                         .setLayoutManager(new LinearLayoutManager(context));
                 contentViewHolder.getBinding().rvBookings
-                        .setAdapter(new BookingAdapter(bookingList, mondayDate));
+                        .setAdapter(new BookingAdapter(bookingList, mondayDate, activityInterface));
 
                 contentViewHolder.getBinding().executePendingBindings();
                 break;

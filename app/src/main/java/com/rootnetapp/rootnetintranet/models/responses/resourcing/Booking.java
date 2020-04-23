@@ -42,8 +42,15 @@ public class Booking {
     private Integer version;
     @Json(name = "version_created_at")
     private String versionCreatedAt;
+    @Json(name = "comment_count")
+    private int commentCount;
+    @Json(name = "author")
+    private Author author;
 
     private transient String title;
+    private transient int estimatedTimeHours;
+    private transient int registeredTimeHours;
+    private transient byte[] personAvatarBytes;
 
     public int getId() {
         return id;
@@ -203,5 +210,37 @@ public class Booking {
 
     public void setPersonAvatar(String personAvatar) {
         this.personAvatar = personAvatar;
+    }
+
+    public Author getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(Author author) {
+        this.author = author;
+    }
+
+    public int getEstimatedTimeHours() {
+        return estimatedTimeHours;
+    }
+
+    public void setEstimatedTimeHours(int estimatedTimeHours) {
+        this.estimatedTimeHours = estimatedTimeHours;
+    }
+
+    public int getRegisteredTimeHours() {
+        return registeredTimeHours;
+    }
+
+    public void setRegisteredTimeHours(int registeredTimeHours) {
+        this.registeredTimeHours = registeredTimeHours;
+    }
+
+    public byte[] getPersonAvatarBytes() {
+        return personAvatarBytes;
+    }
+
+    public void setPersonAvatarBytes(byte[] personAvatarBytes) {
+        this.personAvatarBytes = personAvatarBytes;
     }
 }

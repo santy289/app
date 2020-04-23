@@ -30,6 +30,8 @@ import com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment.ResetPasswordFr
 import com.rootnetapp.rootnetintranet.ui.resetPass.resetfragment.ResetPasswordModule;
 import com.rootnetapp.rootnetintranet.ui.resetPass.tokenfragment.RequestTokenFragment;
 import com.rootnetapp.rootnetintranet.ui.resetPass.tokenfragment.RequestTokenModule;
+import com.rootnetapp.rootnetintranet.ui.resourcing.booking.BookingDetailActivity;
+import com.rootnetapp.rootnetintranet.ui.resourcing.booking.BookingDetailModule;
 import com.rootnetapp.rootnetintranet.ui.resourcing.planner.ResourcingPlannerActivity;
 import com.rootnetapp.rootnetintranet.ui.resourcing.planner.ResourcingPlannerModule;
 import com.rootnetapp.rootnetintranet.ui.splash.SplashActivity;
@@ -92,7 +94,8 @@ import dagger.Component;
                 GeolocationModule.class,
                 MassApprovalModule.class,
                 QRTokenModule.class,
-                ResourcingPlannerModule.class
+                ResourcingPlannerModule.class,
+                BookingDetailModule.class
         }
 )
 
@@ -153,4 +156,6 @@ public interface AppComponent {
     void inject(QRTokenActivity qrTokenActivity);
 
     void inject(ResourcingPlannerActivity resourcingPlannerActivity);
+
+    void inject(BookingDetailActivity bookingDetailActivity);
 }

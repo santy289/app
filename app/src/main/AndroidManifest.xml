@@ -135,6 +135,19 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize|stateHidden" />
+        <activity
+            android:name=".ui.resourcing.planner.ResourcingPlannerActivity"
+            android:label="@string/resourcing_planner_activity_title"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustResize|stateHidden" />
+        <activity
+            android:name=".ui.resourcing.booking.BookingDetailActivity"
+            android:label="@string/booking_detail_activity_title"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustResize|stateHidden" />
+
 
         <!--region Firebase-->
         <service android:name=".fcm.RootnetFirebaseMessagingService">

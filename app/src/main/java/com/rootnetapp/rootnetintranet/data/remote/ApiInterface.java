@@ -30,9 +30,12 @@ import com.rootnetapp.rootnetintranet.models.responses.googlemaps.autocomplete.A
 import com.rootnetapp.rootnetintranet.models.responses.googlemaps.nearbysearch.NearbySearchResponse;
 import com.rootnetapp.rootnetintranet.models.responses.login.LoginResponse;
 import com.rootnetapp.rootnetintranet.models.responses.login.TemporaryTokenResponse;
+import com.rootnetapp.rootnetintranet.models.responses.people.PeopleDirectoryResponse;
 import com.rootnetapp.rootnetintranet.models.responses.products.ProductsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.project.ProjectResponse;
 import com.rootnetapp.rootnetintranet.models.responses.resetPass.ResetPasswordResponse;
+import com.rootnetapp.rootnetintranet.models.responses.resourcing.BookingResponse;
+import com.rootnetapp.rootnetintranet.models.responses.resourcing.BookingsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.role.RoleResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesResponse;
@@ -543,6 +546,21 @@ public interface ApiInterface {
     Observable<SubContactsResponse> postSearchSubContacts(@Header("Authorization") String authorization,
                                                           @Field("query") String query,
                                                           @Query("limit") int limit);
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/bookings")
+    Observable<BookingsResponse> getBookings(@Header("Authorization") String authorization,
+                                                          @Query("initial_date") String startDate,
+                                                          @Query("end_date") String endDate);
+
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/booking/{id}")
+    Observable<BookingResponse> getBooking(@Header("Authorization") String authorization,
+                                           @Path("id") int bookingId);
+
+    @Headers({"Domain-Name: api"})
+    @GET("/intranet/people/directory?all=true")
+    Observable<PeopleDirectoryResponse> getPeopleDirectory(@Header("Authorization") String authorization);
 
     //region Google Maps API
     @GET("https://maps.googleapis.com/maps/api/place/nearbysearch/json?rankby=distance")

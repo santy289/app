@@ -57,9 +57,11 @@ public class Utils {
     private static final String WEB_PROTOCOL = "https://";
 
     public static final String SERVER_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
+    public static final String SERVER_DATE_FORMAT_SHORT = "yyyy-MM-dd";
     public static final String SERVER_DATE_FORMAT_NO_TIMEZONE = "yyyy-MM-dd'T'HH:mm:ss";
     public static final String STANDARD_DATE_DISPLAY_FORMAT = "MMMM dd, yyyy";
     public static final String SHORT_DATE_DISPLAY_FORMAT = "dd/MM/yy";
+    public static final String SHORT_DATE_NO_YEAR_FORMAT = "dd MMM";
 
     public static final String[] ALLOWED_MIME_TYPES = {
             "text/*",
@@ -267,24 +269,26 @@ public class Utils {
         return df.format(c);
     }
 
-    public static String getWeekStart() {
-        Calendar calendar = Calendar.getInstance();
-        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+    public static Date getWeekStartDate(Calendar calendar) {
+        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
             calendar.add(Calendar.DAY_OF_YEAR, -1);
         }
-        Date c = calendar.getTime();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        return df.format(c);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
     }
 
-    public static String getWeekEnd() {
-        Calendar calendar = Calendar.getInstance();
-        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) {
+    public static Date getWeekEndDate(Calendar calendar) {
+        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
             calendar.add(Calendar.DAY_OF_YEAR, 1);
         }
-        Date c = calendar.getTime();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        return df.format(c);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
     }
 
     public static String replaceLast(String string, String substring, String replacement) {
@@ -569,5 +573,14 @@ public class Utils {
 
     public static String getWebProtocol(String domain) {
         return WEB_PROTOCOL;
+    }
+
+    public static int secondsToHours(long seconds) {
+        return (int) (seconds / (60 * 60));
+    }
+
+    public static byte[] decodeImageUri(String imageUri) {
+        String base64EncodedString = imageUri.substring(imageUri.indexOf(",") + 1);
+        return Base64.decode(base64EncodedString, Base64.DEFAULT);
     }
 }

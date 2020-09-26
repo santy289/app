@@ -357,7 +357,8 @@
     <string name="workflow_detail_files_fragment_preset_unavailable">Este template no está disponible.</string>
     <string name="workflow_detail_files_fragment_permissions_not_granted">No es posible descargar el archivo debido a que los permisos no fueron otorgados.</string>
     <string name="workflow_detail_files_fragment_no_view_permissions">No tienes suficientes permisos para ver los archivos</string>
-
+    <!--SignatureFragment-->
+    <string name="workflow_detail_signature_fragment_title">Firma Digital</string>
     <!--MainActivity-->
     <string name="bottom_nav_timeline">Timeline</string>
     <string name="bottom_nav_workflow_list">Workflows</string>

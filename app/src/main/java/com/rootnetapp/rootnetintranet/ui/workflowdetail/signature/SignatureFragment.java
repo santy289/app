@@ -1,7 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.signature;
 
 import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.os.Bundle;
@@ -9,18 +8,20 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.databinding.SignatureFragmentBinding;
+import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureSignersState;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureTemplateState;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.signature.adapters.SignersListAdapter;
 
 import javax.inject.Inject;
 
@@ -30,8 +31,6 @@ public class SignatureFragment extends Fragment {
     SignatureViewModelFactory signatureViewModelFactory;
     private SignatureViewModel signatureViewModel;
     private SignatureFragmentBinding signatureFragmentBinding;
-    private AutoCompleteTextView exposedDropdownTemplates;
-    private Button actionTemplateButton;
 
     public static SignatureFragment newInstance() {
         return new SignatureFragment();
@@ -51,8 +50,6 @@ public class SignatureFragment extends Fragment {
                 false);
 
         View view = (View) signatureFragmentBinding.getRoot();
-        exposedDropdownTemplates = view.findViewById(R.id.exposed_dropdown_templates);
-        actionTemplateButton = view.findViewById(R.id.signature_action_template_button);
 
         initUi();
         return view;
@@ -70,6 +67,26 @@ public class SignatureFragment extends Fragment {
 
     private void setupObservables() {
         signatureViewModel.getSignatureTemplateState().observe(getViewLifecycleOwner(), this::updateTemplateUi);
+        signatureViewModel.getSignatureSignerState().observe(getViewLifecycleOwner(), this::updateSignersUi);
+    }
+
+    private void updateSignersUi(SignatureSignersState signatureSignersState) {
+        RecyclerView.LayoutManager manager = signatureFragmentBinding.signatureSignersList.getLayoutManager();
+        if (manager == null) {
+            signatureFragmentBinding.signatureSignersList.setLayoutManager(new LinearLayoutManager(getContext()));
+        }
+
+        if (signatureSignersState.isShowMessage()) {
+            signatureFragmentBinding.signatureSignersList.setVisibility(View.GONE);
+            signatureFragmentBinding.signatureSignersMessage.setText(signatureSignersState.getMessage());
+            signatureFragmentBinding.signatureSignersMessage.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        signatureFragmentBinding.signatureSignersList.setVisibility(View.VISIBLE);
+        signatureFragmentBinding.signatureSignersMessage.setText("");
+        signatureFragmentBinding.signatureSignersMessage.setVisibility(View.GONE);
+        signatureFragmentBinding.signatureSignersList.setAdapter(new SignersListAdapter(signatureSignersState.getSignerItems()));
     }
 
     private void updateTemplateUi(SignatureTemplateState state) {
@@ -79,10 +96,10 @@ public class SignatureFragment extends Fragment {
                         getContext(),
                         R.layout.signature_exposed_menu_item,
                         templates);
-        exposedDropdownTemplates.setAdapter(adapter);
-        exposedDropdownTemplates.setEnabled(state.isTemplateMenuEnable());
-        actionTemplateButton.setText(state.getTemplateActionTitleResId());
-        actionTemplateButton.setEnabled(state.isTemplateActionEnable());
+        signatureFragmentBinding.exposedDropdownTemplates.setAdapter(adapter);
+        signatureFragmentBinding.exposedDropdownTemplates.setEnabled(state.isTemplateMenuEnable());
+        signatureFragmentBinding.signatureActionTemplateButton.setText(state.getTemplateActionTitleResId());
+        signatureFragmentBinding.signatureActionTemplateButton.setEnabled(state.isTemplateActionEnable());
     }
 
 }

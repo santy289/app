@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureSignersState;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureTemplateState;
 
 import java.util.ArrayList;
@@ -12,6 +13,8 @@ import java.util.ArrayList;
 public class SignatureViewModel extends ViewModel {
 
     private MutableLiveData<SignatureTemplateState> signatureTemplateState = new MutableLiveData<>();
+    private MutableLiveData<SignatureSignersState> signatureSignersState = new MutableLiveData<>();
+
     private SignatureRepository signatureRepository;
 
     public SignatureViewModel(SignatureRepository signatureRepository) {
@@ -20,6 +23,9 @@ public class SignatureViewModel extends ViewModel {
 
     LiveData<SignatureTemplateState> getSignatureTemplateState() {
         return signatureTemplateState;
+    }
+    LiveData<SignatureSignersState> getSignatureSignerState() {
+        return signatureSignersState;
     }
 
     public void onStart() {
@@ -34,12 +40,17 @@ public class SignatureViewModel extends ViewModel {
                 true,
                 R.string.signature_initialize,
                 templateItems);
-
         signatureTemplateState.setValue(state);
+
+        noSignersFound();
     }
 
-    public void refreshContent(SignatureTemplateState templateState) {
+    private void refreshContent(SignatureTemplateState templateState) {
         signatureTemplateState.setValue(templateState);
     }
 
+    private void noSignersFound() {
+        SignatureSignersState signersState = new SignatureSignersState(true, null, R.string.signature_signers_message_no_signers);
+        signatureSignersState.setValue(signersState);
+    }
 }

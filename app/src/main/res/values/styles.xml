@@ -95,4 +95,11 @@
         <item name="spinBars">true</item>
         <item name="color">@color/colorAccent</item>
     </style>
+
+    <style name="DetailTitleTextView" parent="android:Widget.TextView">
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/workflow_details_section_title</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>

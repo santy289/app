@@ -4,6 +4,9 @@ import androidx.annotation.StringRes;
 
 import java.util.ArrayList;
 
+/**
+ * This is the state of the template selection region in the Digital Signature tab in Workflow Details.
+ */
 public class SignatureTemplateState {
     private boolean isTemplateMenuEnable;
     private boolean isTemplateActionEnable;

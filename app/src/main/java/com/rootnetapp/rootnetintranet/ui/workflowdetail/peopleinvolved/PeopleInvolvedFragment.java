@@ -78,7 +78,7 @@ public class PeopleInvolvedFragment extends Fragment {
 
     private void subscribe() {
         peopleInvolvedViewModel.getObservableShowToastMessage()
-                .observe(this, this::showToastMessage);
+                .observe(getViewLifecycleOwner(), this::showToastMessage);
 
         peopleInvolvedViewModel.showLoading.observe(getViewLifecycleOwner(), this::showLoading);
         peopleInvolvedViewModel.updateProfilesInvolved.observe(getViewLifecycleOwner(), this::updateProfilesInvolved);

@@ -62,6 +62,7 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     private WorkflowDetailViewPagerAdapter mViewPagerAdapter;
     private Menu mMenu;
     private OnOpenStatusChangedListener mOnOpenStatusChangedListener;
+    private boolean isSignatureEnabled = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,10 +73,11 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 .of(this, workflowViewModelFactory)
                 .get(WorkflowDetailViewModel.class);
 
-        SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences(PreferenceKeys.PREF_SESSION, Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
         String permissionsString = prefs.getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
         String loggedUserId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
+        isSignatureEnabled = prefs.getBoolean(PreferenceKeys.PREF_SIGNATURE, false);
 
         subscribe();
 
@@ -157,8 +159,10 @@ public class WorkflowDetailActivity extends AppCompatActivity {
      * Initializes and set the {@link WorkflowDetailViewPagerAdapter} for the {@link ViewPager}.
      */
     private void setupViewPager(WorkflowListItem workflowListItem) {
-        mViewPagerAdapter = new WorkflowDetailViewPagerAdapter(this, workflowListItem,
-                getSupportFragmentManager());
+        mViewPagerAdapter = new WorkflowDetailViewPagerAdapter(this,
+                workflowListItem,
+                getSupportFragmentManager(),
+                isSignatureEnabled);
         mBinding.viewPager.setAdapter(mViewPagerAdapter);
     }
 

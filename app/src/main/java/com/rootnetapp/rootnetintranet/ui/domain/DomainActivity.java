@@ -9,19 +9,30 @@ import androidx.databinding.DataBindingUtil;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ActivityDomainBinding;
+import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
+import com.rootnetapp.rootnetintranet.models.responses.domain.Module_;
+import com.rootnetapp.rootnetintranet.models.responses.domain.Product;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.login.LoginActivity;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
+
+import java.io.IOException;
+import java.util.List;
 
 import javax.inject.Inject;
 
 public class DomainActivity extends AppCompatActivity {
 
+    private static final String TAG = "DomainActivityLog";
     @Inject
     DomainViewModelFactory domainViewModelFactory;
     DomainViewModel domainViewModel;
@@ -82,8 +93,40 @@ public class DomainActivity extends AppCompatActivity {
     }
 
     private void saveInPreferences(String jsonString) {
-        SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
-        sharedPref.edit().putString("domain", jsonString).apply();
+        SharedPreferences sharedPref = getSharedPreferences(PreferenceKeys.PREF_SESSION, Context.MODE_PRIVATE);
+        boolean isSignatureEnabled = isSignatureProductEnabled(jsonString);
+        sharedPref.edit()
+                .putString(PreferenceKeys.PREF_DOMAIN, jsonString)
+                .putBoolean(PreferenceKeys.PREF_SIGNATURE, isSignatureEnabled)
+                .apply();
+    }
+
+    private boolean isSignatureProductEnabled(String json) {
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<ClientResponse> jsonAdapter = moshi.adapter(ClientResponse.class);
+        ClientResponse domain;
+        try {
+            domain = jsonAdapter.fromJson(json);
+            if (domain == null || domain.getClient() == null || domain.getClient().getProducts() == null) {
+                return false;
+            }
+            List<Product> products = domain.getClient().getProducts();
+            for (Product product : products) {
+                if (product.getMachineName() == null || !product.getMachineName().equals("intranet")) {
+                    continue;
+                }
+                List<Module_> modules = product.getModules();
+                for (Module_ module : modules) {
+                    if (module.getMachineName() != null && module.getMachineName().equals("workflows_signature_validateid")) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        } catch (IOException e) {
+            Log.d(TAG, "setSignatureProductEnabled: " + e.getMessage());
+            return false;
+        }
     }
 
     private void openLogin(boolean open) {

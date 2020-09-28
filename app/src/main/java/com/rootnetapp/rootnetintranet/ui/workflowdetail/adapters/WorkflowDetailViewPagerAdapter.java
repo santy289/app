@@ -40,11 +40,15 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
     private final WorkflowListItem mWorkflowItem;
     private int mCommentsCounter;
     private int mFilesCounter;
+    private boolean isSignatureEnabled;
 
-    public WorkflowDetailViewPagerAdapter(Context context, WorkflowListItem item,
-                                          FragmentManager fm) {
+    public WorkflowDetailViewPagerAdapter(Context context,
+                                          WorkflowListItem item,
+                                          FragmentManager fm,
+                                          boolean isSignatureEnabled) {
         super(fm);
         Resources resources = context.getResources();
+        this.isSignatureEnabled = isSignatureEnabled;
         titles = new String[] {
                 resources.getString(R.string.workflow_detail_status_fragment_title),
                 resources.getString(R.string.workflow_detail_flowchart_fragment_title),
@@ -98,7 +102,10 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
      */
     @Override
     public int getCount() {
-        return 8;
+        if (!isSignatureEnabled) {
+            return titles.length - 1;
+        }
+        return titles.length;
     }
 
     /**

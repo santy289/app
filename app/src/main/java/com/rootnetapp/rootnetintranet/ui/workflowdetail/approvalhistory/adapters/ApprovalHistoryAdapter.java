@@ -79,8 +79,12 @@ public class ApprovalHistoryAdapter extends RecyclerView.Adapter<ApprovalViewhol
         String dateFormatted = Utils.serverFormatToFormat(approverHistory.createdAt, format);
         viewholder.binding.tvApprovalHistoryDate.setText(dateFormatted);
 
+        if (approverHistory.status != null) {
+            viewholder.binding.tvStatus.setText(approverHistory.status.getName());
+        } else {
+            viewholder.binding.tvStatus.setText("N/A");
+        }
 
-        viewholder.binding.tvStatus.setText(approverHistory.status.getName());
 
         viewholder.binding.executePendingBindings();
     }

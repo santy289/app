@@ -362,6 +362,10 @@
     <string name="workflow_detail_files_fragment_no_view_permissions">You do not have permissions to view the files</string>
     <!-- SignatureFragment-->
     <string name="workflow_detail_signature_fragment_title">Digital Signature</string>
+    <string name="select_a_template">Select a template</string>
+    <string name="signature_initialize">Start document for signatures</string>
+    <string name="signature_overwrite">Overwrite current document</string>
+    <string name="signature_biometric">Start biometric signatures</string>
     <!--MainActivity-->
     <string name="bottom_nav_timeline">Timeline</string>
     <string name="bottom_nav_workflow_list">Workflows</string>

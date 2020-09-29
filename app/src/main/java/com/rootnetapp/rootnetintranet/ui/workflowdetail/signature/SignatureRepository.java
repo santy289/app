@@ -8,8 +8,13 @@ import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSignatureD
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSigner;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentListResponse;
+import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentResponse;
+import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentSigner;
+import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureTemplate;
+import com.rootnetapp.rootnetintranet.models.responses.signature.Signer;
 import com.rootnetapp.rootnetintranet.models.responses.signature.TemplatesResponse;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -64,14 +69,115 @@ public class SignatureRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    protected Observable<Boolean> saveSigners(List<TemplateSigner> signers) {
+    /**
+     * This function checks for the documentSigners (signers coming from the network, which already
+     * signed or rejected the document) and updates our existing templateSigners already in the database.
+     * @param documentListResponse
+     * @param workflowTypeId
+     * @param workflowId
+     * @return
+     */
+    protected Observable<Boolean> saveSignatureDocuments(
+            DocumentListResponse documentListResponse,
+            int workflowTypeId,
+            int workflowId) {
         return Observable.fromCallable(() -> {
-            if (signers == null || signers.size() == 0) {
+            List<DocumentResponse> documentResponses = documentListResponse.getResponse();
+            for (DocumentResponse documentResponse : documentResponses) {
+                List<DocumentSigner> documentSigners = documentResponse.getSigners();
+                if (documentSigners == null || documentSigners.size() < 1) {
+                    continue;
+                }
+
+                List<TemplateSigner> templateSigners = templateSignatureDao.getListAllSignersByIds(
+                        workflowTypeId,
+                        workflowId,
+                        documentResponse.getTemplateId()
+                );
+
+                if (templateSigners == null || templateSigners.size() < 1) {
+                    continue;
+                }
+
+                for (DocumentSigner documentSigner : documentSigners) {
+                    for (TemplateSigner templateSigner : templateSigners) {
+                        if (templateSigner.getUserId() != documentSigner.getProfileId()) {
+                            continue;
+                        }
+                        if (!documentSigner.isReady()) {
+                            continue;
+                        }
+                        templateSignatureDao.updateTemplateSigner(
+                                templateSigner.getUserId(),
+                                workflowId,
+                                workflowTypeId,
+                                documentResponse.getTemplateId(),
+                                documentSigner.isReady(),
+                                documentSigner.getDisplayTime()
+                        );
+                    }
+                }
+            }
+            return true;
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<Boolean> processAndTemplateResponse(TemplatesResponse templatesResponse, int workflowId, int workflowTypeId) {
+        return Observable.fromCallable(() -> {
+            List<TemplateSignature> templateSignatures = new ArrayList<>();
+            TemplateSignature templateSignature;
+            for (SignatureTemplate signatureTemplate : templatesResponse.getResponse()) {
+                templateSignature = new TemplateSignature(
+                        signatureTemplate.getTemplateId(),
+                        workflowTypeId,
+                        workflowId,
+                        signatureTemplate.getName(),
+                        signatureTemplate.getDocumentStatus(),
+                        signatureTemplate.getTemplateStatus()
+                );
+                templateSignatures.add(templateSignature);
+
+                List<Signer> signers = signatureTemplate.getUsers();
+                if (signers == null || signers.size() < 1) {
+                    continue;
+                }
+
+                List<TemplateSigner> templateSignerList = new ArrayList<>();
+                TemplateSigner templateSigner;
+                for (Signer signer : signers) {
+                    templateSigner = new TemplateSigner(
+                            signer.getId(),
+                            workflowId,
+                            workflowTypeId,
+                            signatureTemplate.getTemplateId(),
+                            signer.isEnabled(),
+                            signer.isFieldUser(),
+                            signer.getDetails().getFirstName(),
+                            signer.getDetails().getLastName(),
+                            signer.getDetails().isExternalUser(),
+                            signer.getDetails().getEmail(),
+                            signer.getDetails().getRole(),
+                            signer.getDetails().getFullName(),
+                            false,
+                            ""
+                    );
+                    templateSignerList.add(templateSigner);
+                }
+
+
+                if (templateSignerList.size() == 0) {
+                    return false;
+                }
+                templateSignatureDao.deleteAllSignersById(workflowTypeId, workflowId);
+                templateSignatureDao.insertAllSigners(templateSignerList);
+            }
+
+            if (templateSignatures.size() == 0) {
                 return false;
             }
-            TemplateSigner signer = signers.get(0);
-            templateSignatureDao.deleteAllSignersById(signer.getWorkflowTypeId(), signer.getWorkflowId());
-            templateSignatureDao.insertAllSigners(signers);
+
+            templateSignatureDao.deleteAllById(workflowTypeId, workflowId);
+            templateSignatureDao.insertAll(templateSignatures);
             return true;
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }

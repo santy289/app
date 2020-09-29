@@ -3,6 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.signature.adapters;
 import android.content.Context;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -61,9 +62,23 @@ public class SignersListAdapter extends RecyclerView.Adapter<SignersViewHolder> 
         }
 
         viewHolder.binding.signerName.setText(item.getName());
-        viewHolder.binding.signerRole.setText(item.getRole());
-        viewHolder.binding.signerUserType.setText(item.getUserType());
-        viewHolder.binding.singerSignatureDate.setText(item.getDate());
+
+        if (TextUtils.isEmpty(item.getRole())) {
+            viewHolder.binding.signerRole.setVisibility(View.GONE);
+        } else {
+            viewHolder.binding.signerRole.setVisibility(View.VISIBLE);
+            viewHolder.binding.signerRole.setText(item.getRole());
+        }
+
+        if (TextUtils.isEmpty(item.getUserType())) {
+            viewHolder.binding.signerUserType.setVisibility(View.GONE);
+        } else {
+            viewHolder.binding.signerUserType.setVisibility(View.VISIBLE);
+            viewHolder.binding.signerUserType.setText(item.getUserType());
+        }
+
+        String date = String.format(context.getString(R.string.signature_time_title), item.getDate());
+        viewHolder.binding.singerSignatureDate.setText(date);
 
         if (item.isSigned()) {
             viewHolder.binding.signerStatus.setImageResource(icon_signature_positive);

@@ -42,4 +42,7 @@ public interface TemplateSignatureDao {
 
     @Query("SELECT * FROM template_signer WHERE workflowTypeId = :workflowTypeId AND workflowId = :workflowId AND templateId = :templateId")
     List<TemplateSigner> getListAllSignersByIds(int workflowTypeId, int workflowId, int templateId);
+
+    @Query("UPDATE template_signer SET isReady = :isReady, operationTime = :operationTime WHERE userId = :userId AND workflowId = :workflowId AND workflowTypeId = :workflowTypeId AND templateId = :templateId")
+    void updateTemplateSigner(int userId, int workflowId, int workflowTypeId, int templateId, boolean isReady, String operationTime);
 }

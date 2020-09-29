@@ -9,8 +9,6 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSignature;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSigner;
 import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentListResponse;
-import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureTemplate;
-import com.rootnetapp.rootnetintranet.models.responses.signature.Signer;
 import com.rootnetapp.rootnetintranet.models.responses.signature.TemplatesResponse;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureSignersState;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureTemplateMenuItem;
@@ -58,6 +56,13 @@ public class SignatureViewModel extends ViewModel {
         return showLoading;
     }
 
+    /**
+     * Starting point to update the UI for the first time.
+     *
+     * @param token
+     * @param workflowTypeId
+     * @param workflowId
+     */
     public void onStart(String token, int workflowTypeId, int workflowId) {
         this.workflowTypeId = workflowTypeId;
         this.workflowId = workflowId;
@@ -66,6 +71,14 @@ public class SignatureViewModel extends ViewModel {
         noSignersFound();
     }
 
+    /**
+     * Given the token, workflowTypeId, workflowId it will fetch from the network the templates,
+     * and documents signed if any.
+     *
+     * @param token
+     * @param workflowTypeId
+     * @param workflowId
+     */
     private void refreshContentFromNetwork(String token, int workflowTypeId, int workflowId) {
         showLoading.setValue(true);
         Disposable disposable = signatureRepository.getTemplatesBy(token, workflowTypeId, workflowId)
@@ -77,54 +90,33 @@ public class SignatureViewModel extends ViewModel {
     }
 
     private void refreshDocumentOnSuccess(DocumentListResponse documentListResponse) {
-        // do something
-    }
-
-    private void refreshOnSuccess(TemplatesResponse templatesResponse) {
-        List<TemplateSignature> templateSignatures = new ArrayList<>();
-        TemplateSignature templateSignature;
-        for (SignatureTemplate signatureTemplate : templatesResponse.getResponse()) {
-            templateSignature = new TemplateSignature(
-                    signatureTemplate.getTemplateId(),
-                    this.workflowTypeId,
-                    this.workflowId,
-                    signatureTemplate.getName(),
-                    signatureTemplate.getDocumentStatus(),
-                    signatureTemplate.getTemplateStatus()
-            );
-            templateSignatures.add(templateSignature);
-
-            List<Signer> signers = signatureTemplate.getUsers();
-            if (signers == null || signers.size() < 1) {
-                continue;
-            }
-
-            List<TemplateSigner> templateSignerList = new ArrayList<>();
-            TemplateSigner templateSigner;
-            for (Signer signer : signers) {
-                templateSigner = new TemplateSigner(
-                        signer.getId(),
-                        this.workflowId,
-                        this.workflowTypeId,
-                        signatureTemplate.getTemplateId(),
-                        signer.isEnabled(),
-                        signer.isFieldUser(),
-                        signer.getDetails().getFirstName(),
-                        signer.getDetails().getLastName(),
-                        signer.getDetails().isExternalUser(),
-                        signer.getDetails().getEmail(),
-                        signer.getDetails().getRole(),
-                        signer.getDetails().getFullName()
-                );
-                templateSignerList.add(templateSigner);
-            }
-            Disposable disposable = signatureRepository.saveSigners(templateSignerList).subscribe();
-            disposables.add(disposable);
+        if (documentListResponse.getResponse() == null || documentListResponse.getResponse().size() < 1) {
+            return;
         }
-        Disposable disposable = signatureRepository.saveTemplates(templateSignatures).subscribe();
+
+        Disposable disposable = signatureRepository
+                .saveSignatureDocuments(documentListResponse, workflowTypeId, workflowId)
+                .subscribe();
         disposables.add(disposable);
     }
 
+    private void refreshOnSuccess(TemplatesResponse templatesResponse) {
+        if (templatesResponse.getResponse() == null || templatesResponse.getResponse().size() < 1) {
+            return;
+        }
+
+        Disposable disposable = signatureRepository
+                .processAndTemplateResponse(templatesResponse, workflowId, workflowTypeId).
+                subscribe();
+        disposables.add(disposable);
+    }
+
+    /**
+     * Handles if during the networking request something fails. This is used for any network
+     * failures.
+     *
+     * @param throwable
+     */
     private void onFailureNetwork(Throwable throwable) {
         showLoading.setValue(false);
         int test = 1;
@@ -176,10 +168,10 @@ public class SignatureViewModel extends ViewModel {
         for (TemplateSigner templateSigner : templateSignerList) {
             signerItem = new SignerItem(null,
                     templateSigner.getFullName(),
-                    false,
+                    templateSigner.isReady(),
                     templateSigner.isExternalUser() ? "External" : "System",
                     templateSigner.getRole(),
-                    "Signature date:");
+                    templateSigner.getOperationTime());
             listSigners.add(signerItem);
         }
 
@@ -190,6 +182,11 @@ public class SignatureViewModel extends ViewModel {
         signatureSignersState.setValue(state);
     }
 
+    /**
+     * This function manages the click event when the user chooses a menu item from the list of templates.
+     *
+     * @param indexSelected
+     */
     public void onItemSelected(int indexSelected) {
         SignatureTemplateMenuItem item = cachedMenuItems.get(indexSelected);
         TemplateSignature template = cachedTemplates.get(indexSelected);
@@ -212,6 +209,14 @@ public class SignatureViewModel extends ViewModel {
         signatureTemplateState.setValue(templateState);
     }
 
+    /**
+     * This function handles all the logic behind of how to update the templates select box, and
+     * action button.
+     *
+     * @param templateSignature
+     * @param templateNames
+     * @return
+     */
     private SignatureTemplateState handleTemplateStateUsing(TemplateSignature templateSignature, ArrayList<String> templateNames) {
         if (templateSignature.getDocumentStatus().equals("not_ready") &&
                 !templateSignature.getTemplateStatus().equals("ready")) {
@@ -251,6 +256,9 @@ public class SignatureViewModel extends ViewModel {
         disposables.clear();
     }
 
+    /**
+     * This function will disable the menu box, and also the action button for the templates.
+     */
     private void noTemplatesFound() {
         ArrayList<String> templateNames = new ArrayList<>();
         SignatureTemplateState templateState = new SignatureTemplateState(
@@ -261,6 +269,10 @@ public class SignatureViewModel extends ViewModel {
         signatureTemplateState.setValue(templateState);
     }
 
+    /**
+     * This function is used when we want to set a signers not found message instead of the signers
+     * list.
+     */
     private void noSignersFound() {
         SignatureSignersState signersState = new SignatureSignersState(true, null, R.string.signature_signers_message_no_signers);
         signatureSignersState.setValue(signersState);

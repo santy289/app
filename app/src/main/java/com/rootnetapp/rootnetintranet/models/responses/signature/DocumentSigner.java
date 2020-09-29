@@ -1,6 +1,13 @@
 package com.rootnetapp.rootnetintranet.models.responses.signature;
 
+import android.text.TextUtils;
+
 import com.squareup.moshi.Json;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class DocumentSigner {
     private String email;
@@ -15,8 +22,47 @@ public class DocumentSigner {
 
     private boolean ready;
 
+    private int profileId;
+
     @Json(name = "signer_status")
     private String signerStatus;
+
+    @Json(name = "operation_time")
+    private String operationTime;
+
+    public String getOperationTime() {
+        return operationTime;
+    }
+
+    public String getDisplayTime() {
+        if (TextUtils.isEmpty(operationTime)) {
+            return "";
+        }
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+        SimpleDateFormat formatterOut = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
+        try {
+            Date date = format.parse(operationTime);
+            if (date == null) {
+                return "";
+            }
+            return formatterOut.format(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    public void setOperationTime(String operationTime) {
+        this.operationTime = operationTime;
+    }
+
+    public int getProfileId() {
+        return profileId;
+    }
+
+    public void setProfileId(int profileId) {
+        this.profileId = profileId;
+    }
 
     public String getEmail() {
         return email;

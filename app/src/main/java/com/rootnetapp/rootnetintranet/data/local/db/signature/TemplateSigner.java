@@ -16,8 +16,10 @@ public class TemplateSigner {
     private String email;
     private String role;
     private String fullName;
+    private boolean isReady;
+    private String operationTime;
 
-    public TemplateSigner(int userId, int workflowId, int workflowTypeId, int templateId, boolean enabled, boolean isFieldUser, String firstName, String lastName, boolean isExternalUser, String email, String role, String fullName) {
+    public TemplateSigner(int userId, int workflowId, int workflowTypeId, int templateId, boolean enabled, boolean isFieldUser, String firstName, String lastName, boolean isExternalUser, String email, String role, String fullName, boolean isReady, String operationTime) {
         this.userId = userId;
         this.workflowId = workflowId;
         this.workflowTypeId = workflowTypeId;
@@ -30,6 +32,16 @@ public class TemplateSigner {
         this.email = email;
         this.role = role;
         this.fullName = fullName;
+        this.isReady = isReady;
+        this.operationTime = operationTime;
+    }
+
+    public String getOperationTime() {
+        return operationTime;
+    }
+
+    public boolean isReady() {
+        return isReady;
     }
 
     public int getUserId() {

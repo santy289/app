@@ -363,6 +363,7 @@
     <string name="signature_initialize">Iniciar documento para firmas</string>
     <string name="signature_overwrite">Sobrescribir documento actual</string>
     <string name="signature_biometric">Iniciar firma biométrica</string>
+    <string name="signature_time_title">Fecha de firma: %1$s</string>
     <string name="signers">Firmantes</string>
     <string name="icon_signature_positive_or_negative">Icono de firma positivo o negativo</string>
     <string name="signature_signers_message_no_signers">No hay firmantes para este template</string>

@@ -366,6 +366,7 @@
     <string name="signature_initialize">Start document for signatures</string>
     <string name="signature_overwrite">Overwrite current document</string>
     <string name="signature_biometric">Start biometric signatures</string>
+    <string name="signature_time_title">Signature date: %1$s</string>
     <string name="signers">Signers</string>
     <string name="icon_signature_positive_or_negative">Icon signature positive or negative</string>
     <string name="signature_signers_message_no_signers">No signers found for this template</string>

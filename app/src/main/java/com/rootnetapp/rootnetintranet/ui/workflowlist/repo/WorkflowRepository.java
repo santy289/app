@@ -94,7 +94,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     }
 
     public Observable<ListsResponse> getList(String auth, int id) {
-        return service.getListItems(auth, id).subscribeOn(Schedulers.newThread())
+        return service.getListItems(auth, id).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
@@ -367,7 +367,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
             workflowDbDao.insertWorkflows(worflows);
             callback.updateIsLoading(false);
             return true;
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> {
                     showLoadingMore(false);
@@ -387,7 +387,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         Disposable disposable = Completable.fromCallable(() -> {
             workflowDbDao.insertWorkflow(workflow);
             return true;
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe();
         disposables.add(disposable);
@@ -398,7 +398,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
             workflowDbDao.deleteAllWorkflows();
             workflowDbDao.insertWorkflows(workflowsResponse.getList());
             return true;
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(success -> {
                     Log.d(TAG, "workflowDbSuccessFilter: ");
@@ -419,7 +419,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                         1,
                         false,
                         options)
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::workflowDbSuccessFilter, throwable -> {
                     Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
@@ -436,7 +436,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                                                                           List<Integer> workflowIds,
                                                                           boolean open) {
         return service.postWorkflowActivationOpenClose(token, workflowIds, open)
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
@@ -444,7 +444,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                                                                           List<Integer> workflowIds,
                                                                           boolean enable) {
         return service.postWorkflowActivationEnableDisable(token, workflowIds, enable)
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
@@ -452,12 +452,12 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                                                                   int workflowId,
                                                                   PostDeleteWorkflows postDeleteWorkflows){
         return service.deleteWorkflows(token, workflowId, postDeleteWorkflows)
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Observable<ListsResponse> getCategoryList(String auth, int id) {
-        return service.getListItems(auth, id).subscribeOn(Schedulers.newThread())
+        return service.getListItems(auth, id).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
@@ -465,7 +465,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         Disposable disposable = Observable.fromCallable(() -> {
             workflowDbDao.deleteWorkflows(workflowDbs);
             return true;
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(success -> {
                     Log.d(TAG, "deleteWorkflowsLocal: ");
@@ -482,7 +482,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         Disposable disposable = Observable.fromCallable(() -> {
             workflowDbDao.deleteWorkflowsByIds(workflowIds);
             return true;
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(success -> {
                     Log.d(TAG, "deleteWorkflowsLocalByIds: ");

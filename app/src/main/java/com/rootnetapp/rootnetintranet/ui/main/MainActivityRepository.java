@@ -24,21 +24,21 @@ public class MainActivityRepository {
 
     public Observable<User> getUser(int id) {
         return Observable.fromCallable(()-> database.userDao().getUserById(id))
-                .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
 
     public Observable<Cursor> getWorkflowsLike(String text) {
         return Observable.fromCallable(()-> database.workflowDao().getWorkflowsLike(text))
-                .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
 
     public Observable<Workflow> getWorkflow(int id) {
         return Observable.fromCallable(()-> database.workflowDao().getWorkflow(id))
-                .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
     
     public Observable<LoginResponse> login(String user, String password, String firebaseToken) {
-        return apiInterface.login(user, password, firebaseToken).subscribeOn(Schedulers.newThread())
+        return apiInterface.login(user, password, firebaseToken).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 }

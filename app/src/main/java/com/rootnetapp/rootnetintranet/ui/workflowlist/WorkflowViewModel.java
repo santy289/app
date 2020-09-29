@@ -241,7 +241,7 @@ public class WorkflowViewModel extends ViewModel {
         Disposable disposable = Observable.fromCallable(() -> {
             workflowTypeForMenu = this.workflowRepository.getWorkflowTypesForMenu();
             return true;
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> {
                 }, throwable -> {

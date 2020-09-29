@@ -3,6 +3,8 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.signature;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -17,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.databinding.SignatureFragmentBinding;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureSignersState;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureTemplateState;
@@ -51,8 +54,18 @@ public class SignatureFragment extends Fragment {
 
         View view = (View) signatureFragmentBinding.getRoot();
 
-        initUi();
+        SharedPreferences prefs = getActivity()
+                .getSharedPreferences(PreferenceKeys.PREF_SESSION, Context.MODE_PRIVATE);
+        String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
+
+        initUi(token);
         return view;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        signatureViewModel.onDestroy();
     }
 
     @Override
@@ -60,9 +73,9 @@ public class SignatureFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
     }
 
-    private void initUi() {
+    private void initUi(String token) {
         setupObservables();
-        signatureViewModel.onStart();
+        signatureViewModel.onStart(token, 38, 125);
     }
 
     private void setupObservables() {

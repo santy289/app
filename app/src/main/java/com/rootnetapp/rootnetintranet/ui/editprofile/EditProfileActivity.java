@@ -46,8 +46,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 .of(this, editProfileViewModelFactory)
                 .get(EditProfileViewModel.class);
 
-        //TODO preferences inyectadas con Dagger
-        SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences(PreferenceKeys.PREF_SESSION, Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
 
         subscribe();

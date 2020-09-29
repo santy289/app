@@ -543,7 +543,7 @@ public class CreateWorkflowViewModel extends ViewModel {
             }
             formSettings.setFields(fields);
             return formSettings;
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(ignored -> createPeopleInvolvedItem(),
                         throwable -> showLoading.setValue(false));
@@ -998,7 +998,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                     .setTag(TAG_PEOPLE_INVOLVED)
                     .setFieldId(TAG_PEOPLE_INVOLVED)
                     .build();
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(intentFormItem -> {
                     mAddPeopleInvolvedItemLiveData.setValue(intentFormItem);

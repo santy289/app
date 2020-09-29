@@ -153,6 +153,13 @@ public interface ApiInterface {
                                           @Field("repeated_password") String repeatedPassword);
 
     @Headers({"Domain-Name: api"})
+    @GET("signing_vendor/workflow_type/{id}/templates")
+    Observable<com.rootnetapp.rootnetintranet.models.responses.signature.TemplatesResponse> getSignatureTemplatesBy(@Header("Authorization") String authorization,
+                                                                                                                     @Path("id") int workflowTypeId,
+                                                                                                                    @Query("workflowId") int workflowId);
+
+
+    @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?status=true")
     @Deprecated
     Observable<WorkflowsResponse> getWorkflows(@Header("Authorization") String authorization,

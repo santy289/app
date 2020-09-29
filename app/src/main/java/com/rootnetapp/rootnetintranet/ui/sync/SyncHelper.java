@@ -111,7 +111,7 @@ public class SyncHelper {
 
         Disposable disposable = apiInterface
                 .getCountriesDb(token)
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::saveCountriesToDatabase, throwable -> {
                     Log.d(TAG, "getCountryData: " + throwable.getMessage());
@@ -137,7 +137,7 @@ public class SyncHelper {
                 .doOnNext(response -> saveSettingsToPreference(response,
                         PreferenceKeys.PREF_PROTOCOL))
 //                .retryWhen(observable -> Observable.timer(3, TimeUnit.SECONDS))
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> success(true), throwable -> {
                     Log.d(TAG, "getWsSettings: " + throwable.getMessage());
@@ -161,7 +161,7 @@ public class SyncHelper {
                 .getGoogleMapsApiKey(token)
                 .doOnNext(response -> saveSettingsToPreference(response,
                         PreferenceKeys.PREF_GOOGLE_MAPS_API_KEY))
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> success(true), throwable -> {
                     Log.d(TAG, "getGoogleMapsSettings: " + throwable.getMessage());
@@ -203,7 +203,7 @@ public class SyncHelper {
             countryDBDao.deleteAllCountries();
             countryDBDao.insertCountryList(list);
             return true;
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::success, this::handleNetworkError);
         disposables.add(disposable);
@@ -217,7 +217,7 @@ public class SyncHelper {
                         true,
                         page,
                         false)
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::getWorkflowDbSuccess, throwable -> {
                     Log.d(TAG, "getWorkflowsDb: error: " + throwable.getMessage());
@@ -229,7 +229,7 @@ public class SyncHelper {
     private void getWorkflowTypesDb(String token) {
         Disposable disposable = apiInterface
                 .getWorkflowTypesDb(token)
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onWorkflowTypesDbSuccess, throwable -> {
                     Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
@@ -257,7 +257,7 @@ public class SyncHelper {
 
             getWorkflowsDb(auth, 1);
             return true;
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         success -> onDatabaseSavedWorkflowTypeDb(),
@@ -269,7 +269,7 @@ public class SyncHelper {
     private void onDatabaseSavedWorkflowTypeDb() {
         Disposable disposable = apiInterface
                 .getCategoryListId(auth)
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(categoryListResponse -> {
                     int id = categoryListResponse.getCategoryList();
@@ -291,7 +291,7 @@ public class SyncHelper {
             workflowDbDao.deleteAllWorkflows();
             workflowDbDao.insertWorkflows(workflowDbs);
             return true;
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         success -> getCountryData(auth),
@@ -308,7 +308,7 @@ public class SyncHelper {
     private void getAllWorkflows(String token, int page) {
         Disposable disposable = apiInterface
                 .getWorkflows(token, 50, true, page, true)
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onWorkflowsSuccess, throwable -> {
                     Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
@@ -318,7 +318,7 @@ public class SyncHelper {
     }
 
     private void getUser(String token) {
-        Disposable disposable = apiInterface.getProfiles(token).subscribeOn(Schedulers.newThread()).
+        Disposable disposable = apiInterface.getProfiles(token).subscribeOn(Schedulers.io()).
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe(this::onUsersSuccess, throwable -> {
                     Log.d(TAG, "getData: error " + throwable.getMessage());
@@ -360,7 +360,7 @@ public class SyncHelper {
                     }
 
                     Disposable disposable = apiInterface.login(username, password, firebaseToken)
-                            .subscribeOn(Schedulers.newThread())
+                            .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(loginResponse -> {
                                 if (loginResponse == null) {
@@ -390,7 +390,7 @@ public class SyncHelper {
             database.profileDao().deleteAllProfiles();
             database.profileDao().insertProfiles(profiles);
             return true;
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::success,
                         this::handleNetworkError);
@@ -404,7 +404,7 @@ public class SyncHelper {
             database.workflowDao().clearWorkflows();
             database.workflowDao().insertAll(workflows);
             return true;
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::success,
                         this::handleNetworkError);
@@ -413,7 +413,7 @@ public class SyncHelper {
 
     private void getLoggedProfile(String token) {
         Disposable disposable = apiInterface.getLoggedProfile(token)
-                .subscribeOn(Schedulers.newThread()).
+                .subscribeOn(Schedulers.io()).
                         observeOn(AndroidSchedulers.mainThread()).
                         subscribe(this::onLoggedProfileSuccess, throwable -> {
                             Log.d(TAG, "getData: error " + throwable.getMessage());
@@ -453,7 +453,7 @@ public class SyncHelper {
             list.add(user);
             database.userDao().insertAll(list);
             return true;
-        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::success,
                         this::handleNetworkError);
         disposables.add(disposable);

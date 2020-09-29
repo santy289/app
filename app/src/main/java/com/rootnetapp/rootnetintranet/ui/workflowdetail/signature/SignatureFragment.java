@@ -86,22 +86,16 @@ public class SignatureFragment extends Fragment {
     }
 
     private void setupObservablesAndListeners() {
-        signatureFragmentBinding.exposedDropdownTemplates.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // refresh ui
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // disable buttons
-            }
-        });
         signatureViewModel.getSignatureTemplateState().observe(getViewLifecycleOwner(), this::updateTemplateUi);
         signatureViewModel.getSignatureSignerState().observe(getViewLifecycleOwner(), this::updateSignersUi);
     }
 
+    /**
+     * This function updates the list of signers for each template. This is list comes from the dataase
+     * and the selection made using the select box of the UI.
+     *
+     * @param signatureSignersState
+     */
     private void updateSignersUi(SignatureSignersState signatureSignersState) {
         RecyclerView.LayoutManager manager = signatureFragmentBinding.signatureSignersList.getLayoutManager();
         if (manager == null) {
@@ -136,6 +130,12 @@ public class SignatureFragment extends Fragment {
                             R.layout.signature_exposed_menu_item,
                             templates);
             signatureFragmentBinding.exposedDropdownTemplates.setAdapter(adapter);
+            signatureFragmentBinding.exposedDropdownTemplates.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    signatureViewModel.onItemSelected(position);
+                }
+            });
         }
         signatureFragmentBinding.exposedDropdownTemplates.setEnabled(state.isTemplateMenuEnable());
         signatureFragmentBinding.signatureActionTemplateButton.setText(state.getTemplateActionTitleResId());

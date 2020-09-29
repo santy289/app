@@ -39,4 +39,7 @@ public interface TemplateSignatureDao {
 
     @Query("SELECT * FROM template_signer WHERE workflowTypeId = :workflowTypeId AND workflowId = :workflowId AND templateId = :templateId")
     LiveData<List<TemplateSigner>> getAllSignersByIds(int workflowTypeId, int workflowId, int templateId);
+
+    @Query("SELECT * FROM template_signer WHERE workflowTypeId = :workflowTypeId AND workflowId = :workflowId AND templateId = :templateId")
+    List<TemplateSigner> getListAllSignersByIds(int workflowTypeId, int workflowId, int templateId);
 }

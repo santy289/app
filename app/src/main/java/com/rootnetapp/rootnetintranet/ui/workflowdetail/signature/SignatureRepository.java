@@ -51,6 +51,12 @@ public class SignatureRepository {
         return templateSignatureDao.getAllSignersByIds(workflowTypeId, workflowId, templateId);
     }
 
+    protected Observable<List<TemplateSigner>> getAllSigners(int workflowTypeId, int workflowId, int templateId) {
+        return Observable.fromCallable(() -> templateSignatureDao.getListAllSignersByIds(workflowTypeId, workflowId, templateId))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     protected Observable<Boolean> saveSigners(List<TemplateSigner> signers) {
         return Observable.fromCallable(() -> {
             if (signers == null || signers.size() == 0) {

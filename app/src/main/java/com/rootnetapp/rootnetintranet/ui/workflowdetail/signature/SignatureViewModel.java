@@ -7,7 +7,9 @@ import androidx.lifecycle.ViewModel;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSignature;
+import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSigner;
 import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureTemplate;
+import com.rootnetapp.rootnetintranet.models.responses.signature.Signer;
 import com.rootnetapp.rootnetintranet.models.responses.signature.TemplatesResponse;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureSignersState;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureTemplateMenuItem;
@@ -87,6 +89,33 @@ public class SignatureViewModel extends ViewModel {
                     signatureTemplate.getTemplateStatus()
             );
             templateSignatures.add(templateSignature);
+
+            List<Signer> signers = signatureTemplate.getUsers();
+            if (signers == null || signers.size() < 1) {
+                continue;
+            }
+
+            List<TemplateSigner> templateSignerList = new ArrayList<>();
+            TemplateSigner templateSigner;
+            for (Signer signer : signers) {
+                templateSigner = new TemplateSigner(
+                        signer.getId(),
+                        this.workflowId,
+                        this.workflowTypeId,
+                        signatureTemplate.getTemplateId(),
+                        signer.isEnabled(),
+                        signer.isFieldUser(),
+                        signer.getDetails().getFirstName(),
+                        signer.getDetails().getLastName(),
+                        signer.getDetails().isExternalUser(),
+                        signer.getDetails().getEmail(),
+                        signer.getDetails().getRole(),
+                        signer.getDetails().getFullName()
+                );
+                templateSignerList.add(templateSigner);
+            }
+            Disposable disposable = signatureRepository.saveSigners(templateSignerList).subscribe();
+            disposables.add(disposable);
         }
 
         Disposable disposable = signatureRepository.saveTemplates(templateSignatures).subscribe();
@@ -96,7 +125,6 @@ public class SignatureViewModel extends ViewModel {
     private void onFailure(Throwable throwable) {
         int test = 1;
     }
-
 
     private void setupTemplatesContent(int workflowTypeId, int workflowId) {
         signatureTemplateState.addSource(

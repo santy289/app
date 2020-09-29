@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData;
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSignature;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSignatureDao;
+import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSigner;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
 import com.rootnetapp.rootnetintranet.models.responses.signature.TemplatesResponse;
 
@@ -46,4 +47,19 @@ public class SignatureRepository {
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
 
+    protected LiveData<List<TemplateSigner>> getAllSignersBy(int workflowTypeId, int workflowId, int templateId) {
+        return templateSignatureDao.getAllSignersByIds(workflowTypeId, workflowId, templateId);
+    }
+
+    protected Observable<Boolean> saveSigners(List<TemplateSigner> signers) {
+        return Observable.fromCallable(() -> {
+            if (signers == null || signers.size() == 0) {
+                return false;
+            }
+            TemplateSigner signer = signers.get(0);
+            templateSignatureDao.deleteAllSignersById(signer.getWorkflowTypeId(), signer.getWorkflowId());
+            templateSignatureDao.insertAllSigners(signers);
+            return true;
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    }
 }

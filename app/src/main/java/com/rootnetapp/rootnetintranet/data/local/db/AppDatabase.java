@@ -9,6 +9,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.profile.Profile;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.ProfileDao;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSignature;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSignatureDao;
+import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSigner;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.Field;
@@ -27,7 +28,8 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDao;
         Field.class,
         Profile.class,
         CountryDB.class,
-        TemplateSignature.class
+        TemplateSignature.class,
+        TemplateSigner.class
 }, version = 7, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     public abstract UserDao userDao();

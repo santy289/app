@@ -24,4 +24,19 @@ public interface TemplateSignatureDao {
 
     @Query("SELECT * FROM template_signature WHERE workflow_type_id = :workflowTypeId AND workflow_id = :workflowId")
     LiveData<List<TemplateSignature>> getAllTemplatesByWorkflowTypeId(int workflowTypeId, int workflowId);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertSigner(TemplateSigner signer);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertAllSigners(List<TemplateSigner> signers);
+
+    @Query("DELETE FROM template_signer")
+    void deleteAllSigners();
+
+    @Query("DELETE FROM template_signer WHERE workflowTypeId = :workflowTypeId AND workflowId = :workflowId")
+    void deleteAllSignersById(int workflowTypeId, int workflowId);
+
+    @Query("SELECT * FROM template_signer WHERE workflowTypeId = :workflowTypeId AND workflowId = :workflowId AND templateId = :templateId")
+    LiveData<List<TemplateSigner>> getAllSignersByIds(int workflowTypeId, int workflowId, int templateId);
 }

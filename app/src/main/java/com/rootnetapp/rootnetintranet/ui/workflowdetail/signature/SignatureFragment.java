@@ -20,6 +20,7 @@ import android.widget.ArrayAdapter;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
+import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.SignatureFragmentBinding;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureSignersState;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureTemplateState;
@@ -34,8 +35,11 @@ public class SignatureFragment extends Fragment {
     SignatureViewModelFactory signatureViewModelFactory;
     private SignatureViewModel signatureViewModel;
     private SignatureFragmentBinding signatureFragmentBinding;
+    private WorkflowListItem workflowListItem;
 
-    public static SignatureFragment newInstance() {
+    public static SignatureFragment newInstance(WorkflowListItem workflowListItem) {
+        SignatureFragment fragment = new SignatureFragment();
+        fragment.workflowListItem = workflowListItem;
         return new SignatureFragment();
     }
 
@@ -75,7 +79,9 @@ public class SignatureFragment extends Fragment {
 
     private void initUi(String token) {
         setupObservables();
-        signatureViewModel.onStart(token, 38, 125);
+        signatureViewModel.onStart(token,
+                workflowListItem.workflowTypeId,
+                workflowListItem.workflowId);
     }
 
     private void setupObservables() {

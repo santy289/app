@@ -3,7 +3,6 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.signature;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -21,8 +20,8 @@ import io.reactivex.disposables.Disposable;
 
 public class SignatureViewModel extends ViewModel {
 
-    private MediatorLiveData<SignatureTemplateState> signatureTemplateState = new MediatorLiveData<>();
-    private MutableLiveData<SignatureSignersState> signatureSignersState = new MutableLiveData<>();
+    private MediatorLiveData<SignatureTemplateState> signatureTemplateState;
+    private MutableLiveData<SignatureSignersState> signatureSignersState;
 
     private SignatureRepository signatureRepository;
     private final CompositeDisposable disposables;
@@ -31,6 +30,8 @@ public class SignatureViewModel extends ViewModel {
     public SignatureViewModel(SignatureRepository signatureRepository) {
         this.signatureRepository = signatureRepository;
         this.disposables = new CompositeDisposable();
+        this.signatureTemplateState = new MediatorLiveData<>();
+        this.signatureSignersState = new MutableLiveData<>();
     }
 
     LiveData<SignatureTemplateState> getSignatureTemplateState() {
@@ -58,11 +59,11 @@ public class SignatureViewModel extends ViewModel {
     public void onStart(String token, int workflowTypeId, int workflowId) {
         this.workflowTypeId = workflowTypeId;
         setupTemplatesContent(workflowTypeId);
-        refreshTemplateContent(token, workflowTypeId, workflowId);
+        refreshTemplateContentFromNetwork(token, workflowTypeId, workflowId);
         noSignersFound();
     }
 
-    private void refreshTemplateContent(String token, int workflowTypeId, int workflowId) {
+    private void refreshTemplateContentFromNetwork(String token, int workflowTypeId, int workflowId) {
         Disposable disposable = signatureRepository.getTemplatesBy(token, workflowTypeId, workflowId)
                 .subscribe(this::refreshOnSuccess, this::onFailure);
         disposables.add(disposable);

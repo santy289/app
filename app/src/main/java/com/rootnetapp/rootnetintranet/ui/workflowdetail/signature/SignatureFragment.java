@@ -1,5 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.signature;
 
+import androidx.annotation.UiThread;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -21,6 +22,7 @@ import android.widget.ArrayAdapter;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.SignatureFragmentBinding;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureSignersState;
@@ -88,6 +90,16 @@ public class SignatureFragment extends Fragment {
     private void setupObservablesAndListeners() {
         signatureViewModel.getSignatureTemplateState().observe(getViewLifecycleOwner(), this::updateTemplateUi);
         signatureViewModel.getSignatureSignerState().observe(getViewLifecycleOwner(), this::updateSignersUi);
+        signatureViewModel.getShowLoadingObservable().observe(getViewLifecycleOwner(), this::showLoading);
+    }
+
+    @UiThread
+    private void showLoading(Boolean show) {
+        if (show) {
+            Utils.showLoading(getContext());
+        } else {
+            Utils.hideLoading();
+        }
     }
 
     /**

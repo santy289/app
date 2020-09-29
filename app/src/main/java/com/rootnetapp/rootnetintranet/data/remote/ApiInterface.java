@@ -38,6 +38,7 @@ import com.rootnetapp.rootnetintranet.models.responses.resourcing.BookingRespons
 import com.rootnetapp.rootnetintranet.models.responses.resourcing.BookingsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.role.RoleResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentListResponse;
 import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.InteractionResponse;
@@ -158,6 +159,10 @@ public interface ApiInterface {
                                                                                                                      @Path("id") int workflowTypeId,
                                                                                                                     @Query("workflowId") int workflowId);
 
+    @Headers({"Domain-Name: api"})
+    @GET("signing_vendor/document_list/{workflowId}")
+    Observable<DocumentListResponse> getSignatureDocumentList(@Header("Authorization") String authorization,
+                                                              @Path("workflowId") int workflowId);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?status=true")

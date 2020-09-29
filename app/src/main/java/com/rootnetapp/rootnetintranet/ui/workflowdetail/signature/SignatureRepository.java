@@ -7,6 +7,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSignature;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSignatureDao;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSigner;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
+import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentListResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.TemplatesResponse;
 
 import java.util.List;
@@ -34,6 +35,12 @@ public class SignatureRepository {
         return service.getSignatureTemplatesBy(token, workflowTypeId, workflowId)
                 .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
+
+    protected Observable<DocumentListResponse> getSignatureDocuments(String token, int workflowId) {
+        return service.getSignatureDocumentList(token, workflowId)
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    }
+
 
     protected Observable<Boolean> saveTemplates(List<TemplateSignature> templates) {
         return Observable.fromCallable(() -> {

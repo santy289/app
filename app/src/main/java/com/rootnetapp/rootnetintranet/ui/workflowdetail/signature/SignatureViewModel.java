@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSignature;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSigner;
+import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentListResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureTemplate;
 import com.rootnetapp.rootnetintranet.models.responses.signature.Signer;
 import com.rootnetapp.rootnetintranet.models.responses.signature.TemplatesResponse;
@@ -26,6 +27,7 @@ public class SignatureViewModel extends ViewModel {
 
     private MediatorLiveData<SignatureTemplateState> signatureTemplateState;
     private MutableLiveData<SignatureSignersState> signatureSignersState;
+    private MutableLiveData<Boolean> showLoading;
 
     private SignatureRepository signatureRepository;
     private final CompositeDisposable disposables;
@@ -39,6 +41,7 @@ public class SignatureViewModel extends ViewModel {
         this.disposables = new CompositeDisposable();
         this.signatureTemplateState = new MediatorLiveData<>();
         this.signatureSignersState = new MutableLiveData<>();
+        this.showLoading = new MutableLiveData<>();
         this.cachedMenuItems = new ArrayList<>();
         this.cachedTemplates = new ArrayList<>();
     }
@@ -51,18 +54,30 @@ public class SignatureViewModel extends ViewModel {
         return signatureSignersState;
     }
 
+    LiveData<Boolean> getShowLoadingObservable() {
+        return showLoading;
+    }
+
     public void onStart(String token, int workflowTypeId, int workflowId) {
         this.workflowTypeId = workflowTypeId;
         this.workflowId = workflowId;
         setupTemplatesContent(workflowTypeId, workflowId);
-        refreshTemplateContentFromNetwork(token, workflowTypeId, workflowId);
+        refreshContentFromNetwork(token, workflowTypeId, workflowId);
         noSignersFound();
     }
 
-    private void refreshTemplateContentFromNetwork(String token, int workflowTypeId, int workflowId) {
+    private void refreshContentFromNetwork(String token, int workflowTypeId, int workflowId) {
+        showLoading.setValue(true);
         Disposable disposable = signatureRepository.getTemplatesBy(token, workflowTypeId, workflowId)
-                .subscribe(this::refreshOnSuccess, this::onFailure);
+                .doOnNext(this::refreshOnSuccess)
+                .flatMap(response -> signatureRepository.getSignatureDocuments(token, workflowId))
+                .doOnNext(this::refreshDocumentOnSuccess)
+                .subscribe(response -> showLoading.setValue(false), this::onFailureNetwork);
         disposables.add(disposable);
+    }
+
+    private void refreshDocumentOnSuccess(DocumentListResponse documentListResponse) {
+        // do something
     }
 
     private void refreshOnSuccess(TemplatesResponse templatesResponse) {
@@ -106,9 +121,13 @@ public class SignatureViewModel extends ViewModel {
             Disposable disposable = signatureRepository.saveSigners(templateSignerList).subscribe();
             disposables.add(disposable);
         }
-
         Disposable disposable = signatureRepository.saveTemplates(templateSignatures).subscribe();
         disposables.add(disposable);
+    }
+
+    private void onFailureNetwork(Throwable throwable) {
+        showLoading.setValue(false);
+        int test = 1;
     }
 
     private void onFailure(Throwable throwable) {

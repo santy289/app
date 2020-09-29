@@ -10,6 +10,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSignature;
 import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureTemplate;
 import com.rootnetapp.rootnetintranet.models.responses.signature.TemplatesResponse;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureSignersState;
+import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureTemplateMenuItem;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureTemplateState;
 
 import java.util.ArrayList;
@@ -26,12 +27,15 @@ public class SignatureViewModel extends ViewModel {
     private SignatureRepository signatureRepository;
     private final CompositeDisposable disposables;
     private int workflowTypeId;
+    private int workflowId;
+    private List<SignatureTemplateMenuItem> cachedMenuItems;
 
     public SignatureViewModel(SignatureRepository signatureRepository) {
         this.signatureRepository = signatureRepository;
         this.disposables = new CompositeDisposable();
         this.signatureTemplateState = new MediatorLiveData<>();
         this.signatureSignersState = new MutableLiveData<>();
+        this.cachedMenuItems = new ArrayList<>();
     }
 
     LiveData<SignatureTemplateState> getSignatureTemplateState() {
@@ -58,7 +62,8 @@ public class SignatureViewModel extends ViewModel {
 
     public void onStart(String token, int workflowTypeId, int workflowId) {
         this.workflowTypeId = workflowTypeId;
-        setupTemplatesContent(workflowTypeId);
+        this.workflowId = workflowId;
+        setupTemplatesContent(workflowTypeId, workflowId);
         refreshTemplateContentFromNetwork(token, workflowTypeId, workflowId);
         noSignersFound();
     }
@@ -76,6 +81,7 @@ public class SignatureViewModel extends ViewModel {
             templateSignature = new TemplateSignature(
                     signatureTemplate.getTemplateId(),
                     this.workflowTypeId,
+                    this.workflowId,
                     signatureTemplate.getName(),
                     signatureTemplate.getDocumentStatus(),
                     signatureTemplate.getTemplateStatus()
@@ -91,37 +97,80 @@ public class SignatureViewModel extends ViewModel {
         int test = 1;
     }
 
-    private void setupTemplatesContent(int workflowTypeId) {
+
+    private void setupTemplatesContent(int workflowTypeId, int workflowId) {
         signatureTemplateState.addSource(
-                signatureRepository.getAllTemplatesBy(workflowTypeId),
+                signatureRepository.getAllTemplatesBy(workflowTypeId, workflowId),
                 templateSignatures -> {
-                    ArrayList<String> templateNames = new ArrayList<>();
                     if (templateSignatures == null || templateSignatures.size() == 0) {
-                        SignatureTemplateState templateState = new SignatureTemplateState(
-                                false,
-                                false,
-                                R.string.signature_initialize,
-                                templateNames);
-                        signatureTemplateState.setValue(templateState);
+                        noTemplatesFound();
                         return;
                     }
-
+                    ArrayList<SignatureTemplateMenuItem> templateMenuItems = new ArrayList<>();
+                    ArrayList<String> templateNames = new ArrayList<>();
+                    SignatureTemplateMenuItem menuItem;
                     for (TemplateSignature template : templateSignatures) {
-                        templateNames.add(template.getName());
+                        menuItem = new SignatureTemplateMenuItem(template.getTemplateId(),
+                                template.getName(),
+                                template.getTemplateStatus(),
+                                template.getDocumentStatus());
+                        templateMenuItems.add(menuItem);
+                        templateNames.add(menuItem.getName());
                     }
-
-                    SignatureTemplateState templateState = new SignatureTemplateState(
-                            true,
-                            true,
-                            R.string.signature_initialize,
-                            templateNames);
-
+                    cachedMenuItems = templateMenuItems;
+                    TemplateSignature templateSignature = templateSignatures.get(0);
+                    SignatureTemplateState templateState = handleTemplateStateUsing(templateSignature, templateNames);
                     signatureTemplateState.setValue(templateState);
                 });
     }
 
+    private SignatureTemplateState handleTemplateStateUsing(TemplateSignature templateSignature, ArrayList<String> templateNames) {
+        if (templateSignature.getDocumentStatus().equals("not_ready") &&
+                !templateSignature.getTemplateStatus().equals("ready")) {
+            return new SignatureTemplateState(
+                    false,
+                    false,
+                    R.string.signature_initialize,
+                    templateNames);
+        }
+
+        if (templateSignature.getDocumentStatus().equals("not_ready") &&
+                templateSignature.getTemplateStatus().equals("ready")) {
+            return new SignatureTemplateState(
+                    true,
+                    true,
+                    R.string.signature_initialize,
+                    templateNames);
+        }
+
+        if (!templateSignature.getDocumentStatus().equals("not_ready") &&
+                templateSignature.getTemplateStatus().equals("ready")) {
+            return new SignatureTemplateState(
+                    true,
+                    true,
+                    R.string.signature_overwrite,
+                    templateNames);
+        }
+
+        return new SignatureTemplateState(
+                false,
+                false,
+                R.string.signature_initialize,
+                templateNames);
+    }
+
     protected void onDestroy() {
         disposables.clear();
+    }
+
+    private void noTemplatesFound() {
+        ArrayList<String> templateNames = new ArrayList<>();
+        SignatureTemplateState templateState = new SignatureTemplateState(
+                false,
+                false,
+                R.string.signature_initialize,
+                templateNames);
+        signatureTemplateState.setValue(templateState);
     }
 
     private void noSignersFound() {

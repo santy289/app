@@ -19,9 +19,9 @@ public interface TemplateSignatureDao {
     @Query("DELETE FROM template_signature")
     void deleteAll();
 
-    @Query("DELETE FROM template_signature WHERE workflow_type_id = :workflowTypeId")
-    void deleteAllById(int workflowTypeId);
+    @Query("DELETE FROM template_signature WHERE workflow_type_id = :workflowTypeId AND workflow_id = :workflowId")
+    void deleteAllById(int workflowTypeId, int workflowId);
 
-    @Query("SELECT * FROM template_signature WHERE workflow_type_id = :workflowTypeId")
-    LiveData<List<TemplateSignature>> getAllTemplatesByWorkflowTypeId(int workflowTypeId);
+    @Query("SELECT * FROM template_signature WHERE workflow_type_id = :workflowTypeId AND workflow_id = :workflowId")
+    LiveData<List<TemplateSignature>> getAllTemplatesByWorkflowTypeId(int workflowTypeId, int workflowId);
 }

@@ -14,7 +14,10 @@ public class SignatureTemplateState {
     @StringRes
     private int templateActionTitleResId;
 
-    public SignatureTemplateState(boolean isTemplateMenuEnable, boolean isTemplateActionEnable, int templateActionTitleResId, ArrayList<String> templateMenuItems) {
+    public SignatureTemplateState(boolean isTemplateMenuEnable,
+                                  boolean isTemplateActionEnable,
+                                  int templateActionTitleResId,
+                                  ArrayList<String> templateMenuItems) {
         this.isTemplateMenuEnable = isTemplateMenuEnable;
         this.isTemplateActionEnable = isTemplateActionEnable;
         this.templateMenuItems = templateMenuItems;

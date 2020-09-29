@@ -25,8 +25,8 @@ public class SignatureRepository {
         this.templateSignatureDao = database.templateSignatureDao();
     }
 
-    protected LiveData<List<TemplateSignature>> getAllTemplatesBy(int workflowTypeId) {
-        return templateSignatureDao.getAllTemplatesByWorkflowTypeId(workflowTypeId);
+    protected LiveData<List<TemplateSignature>> getAllTemplatesBy(int workflowTypeId, int workflowId) {
+        return templateSignatureDao.getAllTemplatesByWorkflowTypeId(workflowTypeId, workflowId);
     }
 
     protected Observable<TemplatesResponse> getTemplatesBy(String token, int workflowTypeId, int workflowId) {
@@ -40,7 +40,7 @@ public class SignatureRepository {
                 return false;
             }
             TemplateSignature templateSignature = templates.get(0);
-            templateSignatureDao.deleteAllById(templateSignature.getWorkflowTypeId());
+            templateSignatureDao.deleteAllById(templateSignature.getWorkflowTypeId(), templateSignature.getWorkflowId());
             templateSignatureDao.insertAll(templates);
             return true;
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());

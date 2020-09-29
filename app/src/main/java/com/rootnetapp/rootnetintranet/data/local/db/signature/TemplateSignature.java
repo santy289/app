@@ -16,10 +16,13 @@ public class TemplateSignature {
     private String templateStatus;
     @ColumnInfo(name = "workflow_type_id")
     private int workflowTypeId;
+    @ColumnInfo(name = "workflow_id")
+    private int workflowId;
 
-    public TemplateSignature(int templateId, int workflowTypeId, String name, String documentStatus, String templateStatus) {
+    public TemplateSignature(int templateId, int workflowTypeId, int workflowId, String name, String documentStatus, String templateStatus) {
         this.templateId = templateId;
         this.workflowTypeId = workflowTypeId;
+        this.workflowId = workflowId;
         this.name = name;
         this.documentStatus = documentStatus;
         this.templateStatus = templateStatus;
@@ -43,5 +46,9 @@ public class TemplateSignature {
 
     public int getWorkflowTypeId() {
         return workflowTypeId;
+    }
+
+    public int getWorkflowId() {
+        return workflowId;
     }
 }

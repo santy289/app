@@ -89,7 +89,7 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
             case FILES:
                 return FilesFragment.newInstance(mWorkflowItem);
             case SIGNATURE:
-                return SignatureFragment.newInstance();
+                return SignatureFragment.newInstance(mWorkflowItem);
             default:
                 return null;
         }

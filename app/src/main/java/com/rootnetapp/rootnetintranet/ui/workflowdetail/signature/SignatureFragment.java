@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
 import com.rootnetapp.rootnetintranet.R;
@@ -40,7 +41,7 @@ public class SignatureFragment extends Fragment {
     public static SignatureFragment newInstance(WorkflowListItem workflowListItem) {
         SignatureFragment fragment = new SignatureFragment();
         fragment.workflowListItem = workflowListItem;
-        return new SignatureFragment();
+        return fragment;
     }
 
     @Override
@@ -78,13 +79,25 @@ public class SignatureFragment extends Fragment {
     }
 
     private void initUi(String token) {
-        setupObservables();
+        setupObservablesAndListeners();
         signatureViewModel.onStart(token,
                 workflowListItem.workflowTypeId,
                 workflowListItem.workflowId);
     }
 
-    private void setupObservables() {
+    private void setupObservablesAndListeners() {
+        signatureFragmentBinding.exposedDropdownTemplates.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // refresh ui
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // disable buttons
+            }
+        });
         signatureViewModel.getSignatureTemplateState().observe(getViewLifecycleOwner(), this::updateTemplateUi);
         signatureViewModel.getSignatureSignerState().observe(getViewLifecycleOwner(), this::updateSignersUi);
     }
@@ -108,14 +121,22 @@ public class SignatureFragment extends Fragment {
         signatureFragmentBinding.signatureSignersList.setAdapter(new SignersListAdapter(signatureSignersState.getSignerItems()));
     }
 
+    /**
+     * This function updates the UI for templates. It expects a value for the string array, if null
+     * is passed it will not do anything in therms of the menu items in the select box. This is
+     * done just in case we want to update the buttons and not the menu items.
+     * @param state
+     */
     private void updateTemplateUi(SignatureTemplateState state) {
-        String[] templates = state.getTemplateMenuItems().toArray(new String[0]);
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(
-                        getContext(),
-                        R.layout.signature_exposed_menu_item,
-                        templates);
-        signatureFragmentBinding.exposedDropdownTemplates.setAdapter(adapter);
+        if (state.getTemplateMenuItems() != null) {
+            String[] templates = state.getTemplateMenuItems().toArray(new String[0]);
+            ArrayAdapter<String> adapter =
+                    new ArrayAdapter<>(
+                            getContext(),
+                            R.layout.signature_exposed_menu_item,
+                            templates);
+            signatureFragmentBinding.exposedDropdownTemplates.setAdapter(adapter);
+        }
         signatureFragmentBinding.exposedDropdownTemplates.setEnabled(state.isTemplateMenuEnable());
         signatureFragmentBinding.signatureActionTemplateButton.setText(state.getTemplateActionTitleResId());
         signatureFragmentBinding.signatureActionTemplateButton.setEnabled(state.isTemplateActionEnable());

@@ -5,7 +5,9 @@ import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -20,11 +22,13 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.SignatureFragmentBinding;
+import com.rootnetapp.rootnetintranet.models.ui.general.DialogBoxState;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureSignersState;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureTemplateState;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
@@ -32,7 +36,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.signature.adapters.Signe
 
 import javax.inject.Inject;
 
-public class SignatureFragment extends Fragment {
+public class SignatureFragment extends Fragment implements AdapterView.OnItemClickListener{
 
     @Inject
     SignatureViewModelFactory signatureViewModelFactory;
@@ -80,6 +84,10 @@ public class SignatureFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
     }
 
+    /**
+     * Starting point for UI content update
+     * @param token
+     */
     private void initUi(String token) {
         setupObservablesAndListeners();
         signatureViewModel.onStart(token,
@@ -88,9 +96,14 @@ public class SignatureFragment extends Fragment {
     }
 
     private void setupObservablesAndListeners() {
+        signatureFragmentBinding.signatureActionTemplateButton.setOnClickListener(v -> {
+            signatureViewModel.templateActionClicked();
+        });
+
         signatureViewModel.getSignatureTemplateState().observe(getViewLifecycleOwner(), this::updateTemplateUi);
         signatureViewModel.getSignatureSignerState().observe(getViewLifecycleOwner(), this::updateSignersUi);
         signatureViewModel.getShowLoadingObservable().observe(getViewLifecycleOwner(), this::showLoading);
+        signatureViewModel.getDialogBoxStateObservable().observe(getViewLifecycleOwner(), this::showDialogBox);
     }
 
     @UiThread
@@ -100,6 +113,32 @@ public class SignatureFragment extends Fragment {
         } else {
             Utils.hideLoading();
         }
+    }
+
+    private void showDialogBox(DialogBoxState state) {
+        if (getContext() == null) {
+            return;
+        }
+        Resources res = getResources();
+
+        if (state.isShowNegative()) {
+            new MaterialAlertDialogBuilder(getContext())
+                    .setTitle(res.getString(state.getTitle()))
+                    .setMessage(res.getString(state.getMessage()))
+                    .setNegativeButton(state.getNegative(), null)
+                    .setPositiveButton(state.getPositive(), ( dialog, which) -> {
+                        signatureViewModel.dialogPositive(state.getMessage());
+                    })
+                    .show();
+            return;
+        }
+        new MaterialAlertDialogBuilder(getContext())
+                .setTitle(res.getString(state.getTitle()))
+                .setMessage(res.getString(state.getMessage()))
+                .setPositiveButton(state.getPositive(), ( dialog, which) -> {
+                    signatureViewModel.dialogPositive(state.getMessage());
+                })
+                .show();
     }
 
     /**
@@ -134,7 +173,7 @@ public class SignatureFragment extends Fragment {
      * @param state
      */
     private void updateTemplateUi(SignatureTemplateState state) {
-        if (state.getTemplateMenuItems() != null) {
+        if (state.getTemplateMenuItems() != null && getContext() != null) {
             String[] templates = state.getTemplateMenuItems().toArray(new String[0]);
             ArrayAdapter<String> adapter =
                     new ArrayAdapter<>(
@@ -142,16 +181,22 @@ public class SignatureFragment extends Fragment {
                             R.layout.signature_exposed_menu_item,
                             templates);
             signatureFragmentBinding.exposedDropdownTemplates.setAdapter(adapter);
-            signatureFragmentBinding.exposedDropdownTemplates.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    signatureViewModel.onItemSelected(position);
-                }
-            });
+            signatureFragmentBinding.exposedDropdownTemplates.setOnItemClickListener(this);
         }
         signatureFragmentBinding.exposedDropdownTemplates.setEnabled(state.isTemplateMenuEnable());
         signatureFragmentBinding.signatureActionTemplateButton.setText(state.getTemplateActionTitleResId());
         signatureFragmentBinding.signatureActionTemplateButton.setEnabled(state.isTemplateActionEnable());
     }
 
+    /**
+     * This is the implementation for AdapterView onItemClick listener used in templates select menu box.
+     * @param parent
+     * @param view
+     * @param position
+     * @param id
+     */
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        signatureViewModel.onItemSelected(position);
+    }
 }

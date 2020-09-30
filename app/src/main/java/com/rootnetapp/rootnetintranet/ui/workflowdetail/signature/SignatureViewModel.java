@@ -1,5 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.signature;
 
+import androidx.annotation.StringRes;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -10,8 +11,8 @@ import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSignature;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSigner;
 import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentListResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.TemplatesResponse;
+import com.rootnetapp.rootnetintranet.models.ui.general.DialogBoxState;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureSignersState;
-import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureTemplateMenuItem;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureTemplateState;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignerItem;
 
@@ -24,23 +25,26 @@ import io.reactivex.disposables.Disposable;
 public class SignatureViewModel extends ViewModel {
 
     private MediatorLiveData<SignatureTemplateState> signatureTemplateState;
-    private MutableLiveData<SignatureSignersState> signatureSignersState;
+    private MediatorLiveData<SignatureSignersState> signatureSignersState;
+    private MutableLiveData<DialogBoxState> dialogBoxState;
     private MutableLiveData<Boolean> showLoading;
 
     private SignatureRepository signatureRepository;
     private final CompositeDisposable disposables;
     private int workflowTypeId;
     private int workflowId;
-    private List<SignatureTemplateMenuItem> cachedMenuItems;
     private List<TemplateSignature> cachedTemplates;
+    private SignatureTemplateState cachedTemplateState;
+    private int cachedIndexSelected = 0;
+    private String token;
 
     public SignatureViewModel(SignatureRepository signatureRepository) {
         this.signatureRepository = signatureRepository;
         this.disposables = new CompositeDisposable();
         this.signatureTemplateState = new MediatorLiveData<>();
-        this.signatureSignersState = new MutableLiveData<>();
+        this.signatureSignersState = new MediatorLiveData<>();
+        this.dialogBoxState = new MutableLiveData<>();
         this.showLoading = new MutableLiveData<>();
-        this.cachedMenuItems = new ArrayList<>();
         this.cachedTemplates = new ArrayList<>();
     }
 
@@ -56,6 +60,10 @@ public class SignatureViewModel extends ViewModel {
         return showLoading;
     }
 
+    LiveData<DialogBoxState> getDialogBoxStateObservable() {
+        return dialogBoxState;
+    }
+
     /**
      * Starting point to update the UI for the first time.
      *
@@ -64,11 +72,82 @@ public class SignatureViewModel extends ViewModel {
      * @param workflowId
      */
     public void onStart(String token, int workflowTypeId, int workflowId) {
+        this.token = token;
         this.workflowTypeId = workflowTypeId;
         this.workflowId = workflowId;
         setupTemplatesContent(workflowTypeId, workflowId);
         refreshContentFromNetwork(token, workflowTypeId, workflowId);
         noSignersFound();
+    }
+
+    protected void onDestroy() {
+        disposables.clear();
+    }
+
+    public void templateActionClicked() {
+        // do something with the cached template state is overwrite then show dialog
+        int resTitle = cachedTemplateState.getTemplateActionTitleResId();
+        switch (resTitle) {
+            case R.string.signature_overwrite:
+                dialogBoxState.setValue(new DialogBoxState(
+                        R.string.workflow_detail_signature_fragment_title,
+                        R.string.signature_overwrite_warning,
+                        R.string.cancel,
+                        R.string.accept,
+                        true
+                ));
+                break;
+            case R.string.signature_initialize:
+
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void dialogPositive(@StringRes int message) {
+        if (message == R.string.signature_overwrite_warning) {
+            handleDocumentOverwrite();
+        }
+    }
+
+    private void handleDocumentOverwrite() {
+        if (cachedTemplateState == null || cachedTemplates == null || cachedTemplates.size() < 1) {
+            return;
+        }
+
+        showLoading.setValue(true);
+        TemplateSignature templateSignature = cachedTemplates.get(cachedIndexSelected);
+        Disposable disposable = signatureRepository
+                .overwriteDocument(token, workflowId, templateSignature.getTemplateId())
+                .subscribe(response -> {
+                    showLoading.setValue(false);
+                    refreshContentFromNetwork(token, workflowTypeId, workflowId);
+                }, throwable -> {
+                    showLoading.setValue(false);
+                    dialogBoxState.setValue(new DialogBoxState(
+                            R.string.workflow_detail_signature_fragment_title,
+                            R.string.error_action,
+                            0,
+                            R.string.ok,
+                            false
+                    ));
+                });
+        disposables.add(disposable);
+    }
+
+    /**
+     * This function manages the click event when the user chooses a menu item from the list of templates.
+     *
+     * @param indexSelected
+     */
+    public void onItemSelected(int indexSelected) {
+        cachedIndexSelected = indexSelected;
+        TemplateSignature template = cachedTemplates.get(indexSelected);
+        SignatureTemplateState templateState = handleTemplateStateUsing(template, null);
+        cachedTemplateState = templateState;
+        signatureTemplateState.setValue(templateState);
+        setupSignersContent(workflowTypeId, workflowId, template.getTemplateId());
     }
 
     /**
@@ -126,6 +205,32 @@ public class SignatureViewModel extends ViewModel {
         int test = 1;
     }
 
+    private void setupSignersContent(int workflowTypeId, int workflowId, int templateId) {
+        signatureSignersState.addSource(
+                signatureRepository.getAllSignersBy(workflowTypeId, workflowId, templateId),
+                templateSignerList -> {
+                    //processDatabaseResultToUiModel(templateSignerList);
+                    SignerItem signerItem;
+                    List<SignerItem> listSigners = new ArrayList<>();
+                    for (TemplateSigner templateSigner : templateSignerList) {
+                        signerItem = new SignerItem(null,
+                                templateSigner.getFullName(),
+                                templateSigner.isReady(),
+                                templateSigner.isExternalUser() ? "External" : "System",
+                                templateSigner.getRole(),
+                                templateSigner.getOperationTime());
+                        listSigners.add(signerItem);
+                    }
+
+                    SignatureSignersState state = new SignatureSignersState(
+                            false,
+                            listSigners,
+                            R.string.signature_signers_message_no_signers);
+                    signatureSignersState.setValue(state);
+                }
+        );
+    }
+
     private void setupTemplatesContent(int workflowTypeId, int workflowId) {
         signatureTemplateState.addSource(
                 signatureRepository.getAllTemplatesBy(workflowTypeId, workflowId),
@@ -134,79 +239,20 @@ public class SignatureViewModel extends ViewModel {
                         noTemplatesFound();
                         return;
                     }
-                    ArrayList<SignatureTemplateMenuItem> templateMenuItems = new ArrayList<>();
                     ArrayList<String> templateNames = new ArrayList<>();
-                    SignatureTemplateMenuItem menuItem;
                     for (TemplateSignature template : templateSignatures) {
-                        menuItem = new SignatureTemplateMenuItem(template.getTemplateId(),
-                                template.getName(),
-                                template.getTemplateStatus(),
-                                template.getDocumentStatus());
-                        templateMenuItems.add(menuItem);
-                        templateNames.add(menuItem.getName());
+                        templateNames.add(template.getName());
                     }
-                    cachedMenuItems = templateMenuItems;
                     cachedTemplates = templateSignatures;
 
                     // not choosing anything by default
-                    SignatureTemplateState templateState = new SignatureTemplateState(true,
+                    SignatureTemplateState state = new SignatureTemplateState(true,
                             false,
                             R.string.signature_initialize,
                             templateNames);
-                    signatureTemplateState.setValue(templateState);
+                    cachedTemplateState = state;
+                    signatureTemplateState.setValue(state);
                 });
-    }
-
-    private void onSuccessSigners(List<TemplateSigner> templateSignerList) {
-        if (templateSignerList == null || templateSignerList.size() < 1) {
-            noSignersFound();
-            return;
-        }
-
-        SignerItem signerItem;
-        List<SignerItem> listSigners = new ArrayList<>();
-        for (TemplateSigner templateSigner : templateSignerList) {
-            signerItem = new SignerItem(null,
-                    templateSigner.getFullName(),
-                    templateSigner.isReady(),
-                    templateSigner.isExternalUser() ? "External" : "System",
-                    templateSigner.getRole(),
-                    templateSigner.getOperationTime());
-            listSigners.add(signerItem);
-        }
-
-        SignatureSignersState state = new SignatureSignersState(
-                false,
-                listSigners,
-                R.string.signature_signers_message_no_signers);
-        signatureSignersState.setValue(state);
-    }
-
-    /**
-     * This function manages the click event when the user chooses a menu item from the list of templates.
-     *
-     * @param indexSelected
-     */
-    public void onItemSelected(int indexSelected) {
-        SignatureTemplateMenuItem item = cachedMenuItems.get(indexSelected);
-        TemplateSignature template = cachedTemplates.get(indexSelected);
-        SignatureTemplateState templateState = handleTemplateStateUsing(template, null);
-        signatureTemplateState.setValue(templateState);
-        Disposable disposable = signatureRepository
-                .getAllSigners(workflowTypeId, workflowId, item.getTemplateId())
-                .subscribe(this::onSuccessSigners, this::onFailure);
-        disposables.add(disposable);
-    }
-
-    public void onItemNotSelected() {
-        noSignersFound();
-        SignatureTemplateState templateState = new SignatureTemplateState(
-                true,
-                false,
-                R.string.signature_initialize,
-                null
-        );
-        signatureTemplateState.setValue(templateState);
     }
 
     /**
@@ -252,21 +298,18 @@ public class SignatureViewModel extends ViewModel {
                 templateNames);
     }
 
-    protected void onDestroy() {
-        disposables.clear();
-    }
-
     /**
      * This function will disable the menu box, and also the action button for the templates.
      */
     private void noTemplatesFound() {
         ArrayList<String> templateNames = new ArrayList<>();
-        SignatureTemplateState templateState = new SignatureTemplateState(
+        SignatureTemplateState state = new SignatureTemplateState(
                 false,
                 false,
                 R.string.signature_initialize,
                 templateNames);
-        signatureTemplateState.setValue(templateState);
+        cachedTemplateState = state;
+        signatureTemplateState.setValue(state);
     }
 
     /**
@@ -274,7 +317,7 @@ public class SignatureViewModel extends ViewModel {
      * list.
      */
     private void noSignersFound() {
-        SignatureSignersState signersState = new SignatureSignersState(true, null, R.string.signature_signers_message_no_signers);
-        signatureSignersState.setValue(signersState);
+        SignatureSignersState state = new SignatureSignersState(true, null, R.string.signature_signers_message_no_signers);
+        signatureSignersState.setValue(state);
     }
 }

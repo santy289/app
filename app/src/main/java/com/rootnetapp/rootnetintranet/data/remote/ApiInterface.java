@@ -165,6 +165,12 @@ public interface ApiInterface {
                                                               @Path("workflowId") int workflowId);
 
     @Headers({"Domain-Name: api"})
+    @DELETE("signing_vendor/document")
+    Observable<Object> deleteDocument(@Header("Authorization") String authorization,
+                                      @Query("workflowId") int workflowId,
+                                      @Query("templateId") int templateId);
+
+    @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?status=true")
     @Deprecated
     Observable<WorkflowsResponse> getWorkflows(@Header("Authorization") String authorization,

@@ -32,6 +32,11 @@ public class SignatureRepository {
         this.templateSignatureDao = database.templateSignatureDao();
     }
 
+    protected Observable<Object> overwriteDocument(String token, int workflowId, int templateId) {
+        return service.deleteDocument(token, workflowId, templateId)
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    }
+
     protected LiveData<List<TemplateSignature>> getAllTemplatesBy(int workflowTypeId, int workflowId) {
         return templateSignatureDao.getAllTemplatesByWorkflowTypeId(workflowTypeId, workflowId);
     }
@@ -72,6 +77,7 @@ public class SignatureRepository {
     /**
      * This function checks for the documentSigners (signers coming from the network, which already
      * signed or rejected the document) and updates our existing templateSigners already in the database.
+     *
      * @param documentListResponse
      * @param workflowTypeId
      * @param workflowId
@@ -122,6 +128,15 @@ public class SignatureRepository {
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
 
+    /**
+     * This functions handle taking a TemplateResponse from network and parsing it to the database
+     * models for the app.
+     *
+     * @param templatesResponse
+     * @param workflowId
+     * @param workflowTypeId
+     * @return
+     */
     protected Observable<Boolean> processAndTemplateResponse(TemplatesResponse templatesResponse, int workflowId, int workflowTypeId) {
         return Observable.fromCallable(() -> {
             List<TemplateSignature> templateSignatures = new ArrayList<>();

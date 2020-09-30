@@ -370,6 +370,8 @@
     <string name="signers">Signers</string>
     <string name="icon_signature_positive_or_negative">Icon signature positive or negative</string>
     <string name="signature_signers_message_no_signers">No signers found for this template</string>
+    <string name="signature_overwrite_warning">Are you sure you want to delete the document? This action can not be reversed.</string>
+    <string name="error_action">Something went wrong, the action was not completed.</string>
     <!--MainActivity-->
     <string name="bottom_nav_timeline">Timeline</string>
     <string name="bottom_nav_workflow_list">Workflows</string>

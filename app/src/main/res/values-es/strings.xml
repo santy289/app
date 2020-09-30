@@ -367,6 +367,8 @@
     <string name="signers">Firmantes</string>
     <string name="icon_signature_positive_or_negative">Icono de firma positivo o negativo</string>
     <string name="signature_signers_message_no_signers">No hay firmantes para este template</string>
+    <string name="signature_overwrite_warning">Esta seguro que quiere borrar el documento? Esta acción no es reversible.</string>
+    <string name="error_action">Hubo un error, la acción no fue completada.</string>
     <!--MainActivity-->
     <string name="bottom_nav_timeline">Timeline</string>
     <string name="bottom_nav_workflow_list">Workflows</string>

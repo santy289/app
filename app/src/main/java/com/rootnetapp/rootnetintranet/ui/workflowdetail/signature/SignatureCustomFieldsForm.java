@@ -22,6 +22,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.databinding.SignatureCustomFieldsFormBinding;
 import com.rootnetapp.rootnetintranet.models.responses.signature.FieldCustom;
 import com.rootnetapp.rootnetintranet.models.ui.general.DialogBoxState;
+import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureCustomFieldFormState;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.signature.adapters.SignatureCustomFieldsAdapter;
 
@@ -70,13 +71,18 @@ public class SignatureCustomFieldsForm extends AppCompatActivity {
         viewModel.getFieldCustomObservable().observe(this, this::updateCustomFieldsList);
     }
 
-    private void updateCustomFieldsList(List<FieldCustom> customFields) {
+    private void updateCustomFieldsList(SignatureCustomFieldFormState state) {
         RecyclerView.LayoutManager manager = binding.customFieldsList.getLayoutManager();
         if (manager == null) {
             binding.customFieldsList.setLayoutManager(new LinearLayoutManager(this));
         }
 
-        binding.customFieldsList.setAdapter(new SignatureCustomFieldsAdapter(customFields));
+        if (state.getFieldCustomList() != null) {
+            binding.customFieldsList.setAdapter(new SignatureCustomFieldsAdapter(
+                    state.getFieldCustomList()));
+        }
+
+        binding.customFieldsTitle.setText(state.getTitle());
     }
 
     @Override

@@ -177,6 +177,11 @@ public interface ApiInterface {
     Observable<InitiateSigningResponse> initiateSigning(@Header("Authorization") String authorization,
                                                         @Body SignatureInitiateRequest request);
 
+    @Headers({"Domain-Name: api"})
+    @POST("signing_vendor/initiate_signing")
+    Observable<InitiateSigningResponse> initiateSigningWithFields(@Header("Authorization") String authorization,
+                                                        @Body SignatureInitiateRequest request);
+
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?status=true")

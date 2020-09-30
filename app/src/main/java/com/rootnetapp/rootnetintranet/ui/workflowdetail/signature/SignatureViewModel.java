@@ -13,7 +13,6 @@ import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSignature;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSigner;
 import com.rootnetapp.rootnetintranet.models.requests.signature.SignatureInitiateRequest;
 import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentListResponse;
-import com.rootnetapp.rootnetintranet.models.responses.signature.FieldCustom;
 import com.rootnetapp.rootnetintranet.models.responses.signature.Fields;
 import com.rootnetapp.rootnetintranet.models.responses.signature.InitiateSigningResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.TemplatesResponse;

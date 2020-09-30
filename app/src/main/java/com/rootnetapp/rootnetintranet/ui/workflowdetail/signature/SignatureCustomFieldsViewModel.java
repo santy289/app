@@ -11,6 +11,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.models.responses.signature.FieldCustom;
 import com.rootnetapp.rootnetintranet.models.responses.signature.Fields;
 import com.rootnetapp.rootnetintranet.models.ui.general.DialogBoxState;
+import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureCustomFieldFormState;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
@@ -25,7 +26,7 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
 
     private MutableLiveData<DialogBoxState> dialogBoxState;
     private MutableLiveData<Boolean> showLoading;
-    private MutableLiveData<List<FieldCustom>> customFieldsState;
+    private MutableLiveData<SignatureCustomFieldFormState> customFieldsState;
 
     LiveData<Boolean> getShowLoadingObservable() {
         return showLoading;
@@ -35,7 +36,7 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
         return dialogBoxState;
     }
 
-    LiveData<List<FieldCustom>> getFieldCustomObservable() { return customFieldsState; }
+    LiveData<SignatureCustomFieldFormState> getFieldCustomObservable() { return customFieldsState; }
 
     public SignatureCustomFieldsViewModel(SignatureCustomFieldsRepository repository) {
         this.repository = repository;
@@ -62,7 +63,17 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
                 return;
             }
 
-            customFieldsState.setValue(fields.getCustomFields());
+            String title = "";
+            if (fields.getUserRequired() != null && fields.getUserRequired().getFullName() != null) {
+                title = fields.getUserRequired().getFullName();
+            }
+
+            SignatureCustomFieldFormState state = new SignatureCustomFieldFormState(
+                    title,
+                    fields.getCustomFields()
+            );
+
+            customFieldsState.setValue(state);
         } catch (IOException e) {
             Log.d(TAG, "refreshContent: " + e.getMessage());
         }

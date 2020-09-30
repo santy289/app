@@ -29,6 +29,7 @@ import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.SignatureFragmentBinding;
 import com.rootnetapp.rootnetintranet.models.ui.general.DialogBoxState;
+import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureCustomFieldShared;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureSignersState;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureTemplateState;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
@@ -108,7 +109,7 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
         signatureViewModel.getSignatureSignerState().observe(getViewLifecycleOwner(), this::updateSignersUi);
         signatureViewModel.getShowLoadingObservable().observe(getViewLifecycleOwner(), this::showLoading);
         signatureViewModel.getDialogBoxStateObservable().observe(getViewLifecycleOwner(), this::showDialogBox);
-        signatureViewModel.getGoToCustomFieldFormObservable().observe(getViewLifecycleOwner(), go -> goToCustomFieldsForm());
+        signatureViewModel.getGoToCustomFieldFormObservable().observe(getViewLifecycleOwner(), this::goToCustomFieldsForm);
     }
 
     @UiThread
@@ -146,9 +147,11 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
                 .show();
     }
 
-    private void goToCustomFieldsForm() {
+    private void goToCustomFieldsForm(SignatureCustomFieldShared shared) {
+        workflowListItem.customFieldsJsonConfig = shared.jsonFieldConfig;
         Intent intent = new Intent(getActivity(), SignatureCustomFieldsForm.class);
         intent.putExtra(SignatureCustomFieldsForm.EXTRA_WORKFLOW_LIST_ITEM, workflowListItem);
+        intent.putExtra(SignatureCustomFieldsForm.EXTRA_TEMPLATE_SELECTED_ID, shared.templateId);
         startActivityForResult(intent, REQUEST_CUSTOM_FORM);
     }
 

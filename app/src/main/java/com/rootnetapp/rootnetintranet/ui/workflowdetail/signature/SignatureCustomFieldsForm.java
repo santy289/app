@@ -1,5 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.signature;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 
 import androidx.annotation.StringRes;
@@ -14,11 +15,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.SignatureCustomFieldsFormBinding;
 import com.rootnetapp.rootnetintranet.models.responses.signature.FieldCustom;
+import com.rootnetapp.rootnetintranet.models.ui.general.DialogBoxState;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.signature.adapters.SignatureCustomFieldsAdapter;
 
@@ -29,6 +32,8 @@ import javax.inject.Inject;
 public class SignatureCustomFieldsForm extends AppCompatActivity {
 
     public static final String EXTRA_WORKFLOW_LIST_ITEM = "Extra.WorkflowListItem";
+    public static final String EXTRA_TEMPLATE_SELECTED_ID = "Extra.SignatureTemplateId";
+    public static final int TEMPLATE_ID_NOT_FOUND = 99999;
 
     @Inject
     SignatureCustomFieldsViewModelFactory viewModelFactory;
@@ -52,8 +57,17 @@ public class SignatureCustomFieldsForm extends AppCompatActivity {
 
         WorkflowListItem worklowListItem = getIntent()
                 .getParcelableExtra(SignatureCustomFieldsForm.EXTRA_WORKFLOW_LIST_ITEM);
+        int templateId = getIntent()
+                .getIntExtra(EXTRA_TEMPLATE_SELECTED_ID, TEMPLATE_ID_NOT_FOUND);
 
-        viewModel.onStart(worklowListItem);
+        setupObservablesAndListeners();
+        viewModel.onStart(worklowListItem, templateId);
+    }
+
+    private void setupObservablesAndListeners() {
+        viewModel.getShowLoadingObservable().observe(this, this::showLoading);
+        viewModel.getDialogBoxStateObservable().observe(this, this::showDialogBox);
+        viewModel.getFieldCustomObservable().observe(this, this::updateCustomFieldsList);
     }
 
     private void updateCustomFieldsList(List<FieldCustom> customFields) {
@@ -91,6 +105,30 @@ public class SignatureCustomFieldsForm extends AppCompatActivity {
         } else {
             Utils.hideLoading();
         }
+    }
+
+    @UiThread
+    private void showDialogBox(DialogBoxState state) {
+        Resources res = getResources();
+
+        if (state.isShowNegative()) {
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle(res.getString(state.getTitle()))
+                    .setMessage(res.getString(state.getMessage()))
+                    .setNegativeButton(state.getNegative(), null)
+                    .setPositiveButton(state.getPositive(), ( dialog, which) -> {
+                        viewModel.dialogPositive(state.getMessage());
+                    })
+                    .show();
+            return;
+        }
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(res.getString(state.getTitle()))
+                .setMessage(res.getString(state.getMessage()))
+                .setPositiveButton(state.getPositive(), ( dialog, which) -> {
+                    viewModel.dialogPositive(state.getMessage());
+                })
+                .show();
     }
 
     @UiThread

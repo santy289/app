@@ -51,6 +51,8 @@ public class WorkflowListItem implements Parcelable {
     private String formattedCreatedAt;
     @Ignore
     private String formattedUpdatedAt;
+    @Ignore
+    public String customFieldsJsonConfig;
 
     public WorkflowListItem() {}
 
@@ -308,6 +310,7 @@ public class WorkflowListItem implements Parcelable {
         isChecked = in.readByte() != 0x00;
         formattedCreatedAt = in.readString();
         formattedUpdatedAt = in.readString();
+        customFieldsJsonConfig = in.readString();
     }
 
     @Override
@@ -336,6 +339,7 @@ public class WorkflowListItem implements Parcelable {
         dest.writeByte((byte) (isChecked ? 0x01 : 0x00));
         dest.writeString(formattedCreatedAt);
         dest.writeString(formattedUpdatedAt);
+        dest.writeString(customFieldsJsonConfig);
     }
 
     @SuppressWarnings("unused")

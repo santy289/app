@@ -4,6 +4,12 @@ import com.squareup.moshi.Json;
 
 public class SignatureInitiateRequest {
     public String signatureType;
-    public String templateId;
-    public String workflowId;
+    public int templateId;
+    public int workflowId;
+
+    public SignatureInitiateRequest(String signatureType, int templateId, int workflowId) {
+        this.signatureType = signatureType;
+        this.templateId = templateId;
+        this.workflowId = workflowId;
+    }
 }

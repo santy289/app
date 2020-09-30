@@ -1,5 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.signature;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 
@@ -17,16 +19,15 @@ import android.widget.Toast;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.SignatureCustomFieldsFormBinding;
-import com.rootnetapp.rootnetintranet.models.responses.signature.FieldCustom;
 import com.rootnetapp.rootnetintranet.models.ui.general.DialogBoxState;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureCustomFieldFormState;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.signature.adapters.SignatureCustomFieldsAdapter;
 
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -62,13 +63,30 @@ public class SignatureCustomFieldsForm extends AppCompatActivity {
                 .getIntExtra(EXTRA_TEMPLATE_SELECTED_ID, TEMPLATE_ID_NOT_FOUND);
 
         setupObservablesAndListeners();
-        viewModel.onStart(worklowListItem, templateId);
+        viewModel.onStart(worklowListItem, templateId, getToken());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        viewModel.onDestroy();
+    }
+
+    private String getToken() {
+        SharedPreferences prefs = getSharedPreferences(PreferenceKeys.PREF_SESSION, Context.MODE_PRIVATE);
+        return "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
     }
 
     private void setupObservablesAndListeners() {
+
+        binding.customFieldsSave.setOnClickListener(v -> {
+            viewModel.onActionSave();
+        });
+
         viewModel.getShowLoadingObservable().observe(this, this::showLoading);
         viewModel.getDialogBoxStateObservable().observe(this, this::showDialogBox);
         viewModel.getFieldCustomObservable().observe(this, this::updateCustomFieldsList);
+        viewModel.getSuccessGoBackObservable().observe(this, this::handleResult);
     }
 
     private void updateCustomFieldsList(SignatureCustomFieldFormState state) {

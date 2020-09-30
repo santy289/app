@@ -26,8 +26,8 @@ import io.reactivex.schedulers.Schedulers;
 
 public class SignatureRepository {
 
-    private ApiInterface service;
-    private TemplateSignatureDao templateSignatureDao;
+    protected ApiInterface service;
+    protected TemplateSignatureDao templateSignatureDao;
 
 
     protected SignatureRepository(ApiInterface service, AppDatabase database) {

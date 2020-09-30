@@ -179,7 +179,7 @@ public interface ApiInterface {
 
     @Headers({"Domain-Name: api"})
     @POST("signing_vendor/initiate_signing")
-    Observable<InitiateSigningResponse> initiateSigningWithFields(@Header("Authorization") String authorization,
+    Observable<Object> initiateSigningWithFields(@Header("Authorization") String authorization,
                                                         @Body SignatureInitiateRequest request);
 
 

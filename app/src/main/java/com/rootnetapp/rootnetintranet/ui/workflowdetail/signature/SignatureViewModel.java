@@ -94,6 +94,13 @@ public class SignatureViewModel extends ViewModel {
         noSignersFound();
     }
 
+    public void handleBackFromCustomFieldForm(boolean result) {
+        if (!result) {
+            return;
+        }
+        refreshContentFromNetwork(token, workflowTypeId, workflowId);
+    }
+
     protected void onDestroy() {
         disposables.clear();
     }

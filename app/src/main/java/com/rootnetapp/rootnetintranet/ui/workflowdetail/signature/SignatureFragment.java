@@ -69,12 +69,7 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
                 false);
 
         View view = (View) signatureFragmentBinding.getRoot();
-
-        SharedPreferences prefs = getActivity()
-                .getSharedPreferences(PreferenceKeys.PREF_SESSION, Context.MODE_PRIVATE);
-        String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
-
-        initUi(token);
+        initUi(getToken());
         return view;
     }
 
@@ -98,6 +93,15 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
         signatureViewModel.onStart(token,
                 workflowListItem.workflowTypeId,
                 workflowListItem.workflowId);
+    }
+
+    private String getToken() {
+        if (getActivity() == null) {
+            return "";
+        }
+        SharedPreferences prefs = getActivity()
+                .getSharedPreferences(PreferenceKeys.PREF_SESSION, Context.MODE_PRIVATE);
+        return "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
     }
 
     private void setupObservablesAndListeners() {
@@ -158,12 +162,9 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == REQUEST_CUSTOM_FORM && resultCode == RESULT_OK) {
-            // TODO do something try again to initialize form
-            // AGAIN attempt to make a network call
-
+            signatureViewModel.handleBackFromCustomFieldForm(true);
             return;
         }
-
         super.onActivityResult(requestCode, resultCode, data);
     }
 

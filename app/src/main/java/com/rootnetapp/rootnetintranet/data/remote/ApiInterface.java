@@ -8,6 +8,7 @@ import com.rootnetapp.rootnetintranet.models.requests.comment.PostCommentRequest
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
 import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
 import com.rootnetapp.rootnetintranet.models.requests.resetpassword.ResetPasswordRequest;
+import com.rootnetapp.rootnetintranet.models.requests.signature.SignatureInitiateRequest;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
 import com.rootnetapp.rootnetintranet.models.responses.business.BusinessOpportunitiesResponse;
@@ -39,6 +40,7 @@ import com.rootnetapp.rootnetintranet.models.responses.resourcing.BookingsRespon
 import com.rootnetapp.rootnetintranet.models.responses.role.RoleResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentListResponse;
+import com.rootnetapp.rootnetintranet.models.responses.signature.InitiateSigningResponse;
 import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.InteractionResponse;
@@ -169,6 +171,12 @@ public interface ApiInterface {
     Observable<Object> deleteDocument(@Header("Authorization") String authorization,
                                       @Query("workflowId") int workflowId,
                                       @Query("templateId") int templateId);
+
+    @Headers({"Domain-Name: api"})
+    @POST("signing_vendor/initiate_signing")
+    Observable<InitiateSigningResponse> initiateSigning(@Header("Authorization") String authorization,
+                                                        @Body SignatureInitiateRequest request);
+
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?status=true")

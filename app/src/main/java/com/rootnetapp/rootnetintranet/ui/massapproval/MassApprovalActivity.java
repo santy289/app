@@ -51,7 +51,7 @@ public class MassApprovalActivity extends AppCompatActivity {
                 .of(this, workflowViewModelFactory)
                 .get(MassApprovalViewModel.class);
 
-        SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences(PreferenceKeys.PREF_SESSION, Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
         String loggedUserId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
 

@@ -5,7 +5,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.content.Context;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -36,7 +36,11 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.signature.adapters.Signe
 
 import javax.inject.Inject;
 
+import static android.app.Activity.RESULT_OK;
+
 public class SignatureFragment extends Fragment implements AdapterView.OnItemClickListener{
+
+    private static final int REQUEST_CUSTOM_FORM = 654;
 
     @Inject
     SignatureViewModelFactory signatureViewModelFactory;
@@ -104,6 +108,7 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
         signatureViewModel.getSignatureSignerState().observe(getViewLifecycleOwner(), this::updateSignersUi);
         signatureViewModel.getShowLoadingObservable().observe(getViewLifecycleOwner(), this::showLoading);
         signatureViewModel.getDialogBoxStateObservable().observe(getViewLifecycleOwner(), this::showDialogBox);
+        signatureViewModel.getGoToCustomFieldFormObservable().observe(getViewLifecycleOwner(), go -> goToCustomFieldsForm());
     }
 
     @UiThread
@@ -139,6 +144,24 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
                     signatureViewModel.dialogPositive(state.getMessage());
                 })
                 .show();
+    }
+
+    private void goToCustomFieldsForm() {
+        Intent intent = new Intent(getActivity(), SignatureCustomFieldsForm.class);
+        intent.putExtra(SignatureCustomFieldsForm.EXTRA_WORKFLOW_LIST_ITEM, workflowListItem);
+        startActivityForResult(intent, REQUEST_CUSTOM_FORM);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == REQUEST_CUSTOM_FORM && resultCode == RESULT_OK) {
+            // TODO do something try again to initialize form
+            // AGAIN attempt to make a network call
+
+            return;
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     /**

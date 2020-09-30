@@ -53,6 +53,8 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationF
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.InformationModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved.PeopleInvolvedFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved.PeopleInvolvedModule;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.signature.SignatureCustomFieldsForm;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.signature.SignatureCustomFieldsModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.signature.SignatureFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.signature.SignatureModule;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusFragment;
@@ -99,6 +101,7 @@ import dagger.Component;
                 ResourcingPlannerModule.class,
                 BookingDetailModule.class,
                 SignatureModule.class,
+                SignatureCustomFieldsModule.class
         }
 )
 
@@ -163,4 +166,6 @@ public interface AppComponent {
     void inject(BookingDetailActivity bookingDetailActivity);
 
     void inject(SignatureFragment signatureFragment);
+
+    void inject(SignatureCustomFieldsForm signatureCustomFieldsForm);
 }

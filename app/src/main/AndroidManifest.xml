@@ -2,15 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.rootnetapp.rootnetintranet">
-
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
          location permissions for the 'MyLocation' functionality.
     -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
-    <!-- Network related permissions -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- Network related permissions -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" /> <!-- Storage related permissions -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -18,8 +15,8 @@
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" /> <!-- Doze mode whitelist -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" /> <!-- Notifications Service -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!--Geolocation-->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!--Geolocation-->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- Geolocation -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:name=".ui.RootnetApp"
@@ -32,7 +29,6 @@
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:allowBackup">
-
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -43,9 +39,7 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
-
-        <!--Crashlytics release build only-->
+            android:value="@string/google_maps_key" /> <!-- Crashlytics release build only -->
         <meta-data
             android:name="firebase_crashlytics_collection_enabled"
             android:value="${enableCrashReporting}" />
@@ -90,7 +84,6 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
             <intent-filter android:label="@string/deep_link_workflow_detail">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -98,7 +91,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <!-- Accepts URLs that begins with https://{subdomain}.rootnetapp.com/Intranet/workflow/ -->
-                <!-- note that the leading "/" is required for pathPrefix-->
+                <!-- note that the leading "/" is required for pathPrefix -->
                 <data
                     android:host="*.rootnetapp.com"
                     android:pathPrefix="/Intranet/workflow/"
@@ -130,6 +123,12 @@
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
+            android:name=".ui.workflowdetail.signature.SignatureCustomFieldsForm"
+            android:label="@string/title_activity_signature_custom_fields_form"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustResize|stateHidden"/>
+        <activity
             android:name=".ui.qrtoken.QRTokenActivity"
             android:label="@string/qr_login_activity_title"
             android:screenOrientation="portrait"
@@ -146,31 +145,29 @@
             android:label="@string/booking_detail_activity_title"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
-            android:windowSoftInputMode="adjustResize|stateHidden" />
-
-
-        <!--region Firebase-->
+            android:windowSoftInputMode="adjustResize|stateHidden" /> <!-- region Firebase -->
         <service android:name=".fcm.RootnetFirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
-        <!-- todo Set custom default icon. This is used when no icon is set for incoming notification messages.
-            See README(https://goo.gl/l4GJaQ) for more. -->
+        <!--
+ todo Set custom default icon. This is used when no icon is set for incoming notification messages.
+            See README(https://goo.gl/l4GJaQ) for more.
+        -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@mipmap/ic_launcher_round" />
-        <!-- Set color used with incoming notification messages. This is used when no color is set for the incoming
-             notification message. See README(https://goo.gl/6BKBk7) for more. -->
+        <!--
+ Set color used with incoming notification messages. This is used when no color is set for the incoming
+             notification message. See README(https://goo.gl/6BKBk7) for more.
+        -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/colorPrimary" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="@string/default_notification_channel_id" />
-        <!--endregion-->
-
+            android:value="@string/default_notification_channel_id" /> <!-- endregion -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

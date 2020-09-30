@@ -7,9 +7,11 @@ import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSignature;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSignatureDao;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSigner;
 import com.rootnetapp.rootnetintranet.data.remote.ApiInterface;
+import com.rootnetapp.rootnetintranet.models.requests.signature.SignatureInitiateRequest;
 import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentListResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentSigner;
+import com.rootnetapp.rootnetintranet.models.responses.signature.InitiateSigningResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureTemplate;
 import com.rootnetapp.rootnetintranet.models.responses.signature.Signer;
 import com.rootnetapp.rootnetintranet.models.responses.signature.TemplatesResponse;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -34,6 +37,11 @@ public class SignatureRepository {
 
     protected Observable<Object> overwriteDocument(String token, int workflowId, int templateId) {
         return service.deleteDocument(token, workflowId, templateId)
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<InitiateSigningResponse> initiateSigning(String token, SignatureInitiateRequest body) {
+        return service.initiateSigning(token, body)
                 .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
 

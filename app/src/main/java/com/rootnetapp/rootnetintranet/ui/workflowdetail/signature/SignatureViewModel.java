@@ -28,6 +28,7 @@ public class SignatureViewModel extends ViewModel {
     private MediatorLiveData<SignatureSignersState> signatureSignersState;
     private MutableLiveData<DialogBoxState> dialogBoxState;
     private MutableLiveData<Boolean> showLoading;
+    private MutableLiveData<Boolean> goToCustomFieldsForm;
 
     private SignatureRepository signatureRepository;
     private final CompositeDisposable disposables;
@@ -46,6 +47,7 @@ public class SignatureViewModel extends ViewModel {
         this.dialogBoxState = new MutableLiveData<>();
         this.showLoading = new MutableLiveData<>();
         this.cachedTemplates = new ArrayList<>();
+        this.goToCustomFieldsForm = new MutableLiveData<>();
     }
 
     LiveData<SignatureTemplateState> getSignatureTemplateState() {
@@ -62,6 +64,10 @@ public class SignatureViewModel extends ViewModel {
 
     LiveData<DialogBoxState> getDialogBoxStateObservable() {
         return dialogBoxState;
+    }
+
+    LiveData<Boolean> getGoToCustomFieldFormObservable() {
+        return goToCustomFieldsForm;
     }
 
     /**
@@ -98,7 +104,7 @@ public class SignatureViewModel extends ViewModel {
                 ));
                 break;
             case R.string.signature_initialize:
-
+                goToCustomFieldsForm.setValue(true);
                 break;
             default:
                 break;
@@ -109,6 +115,12 @@ public class SignatureViewModel extends ViewModel {
         if (message == R.string.signature_overwrite_warning) {
             handleDocumentOverwrite();
         }
+    }
+
+    private void handleInitiateSigning() {
+        showLoading.setValue(true);
+
+
     }
 
     private void handleDocumentOverwrite() {

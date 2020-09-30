@@ -96,8 +96,12 @@ public class SignatureCustomFieldsForm extends AppCompatActivity {
         }
 
         if (state.getFieldCustomList() != null) {
-            binding.customFieldsList.setAdapter(new SignatureCustomFieldsAdapter(
-                    state.getFieldCustomList()));
+            if (binding.customFieldsList.getAdapter() == null) {
+                binding.customFieldsList.setAdapter(new SignatureCustomFieldsAdapter(
+                        state.getFieldCustomList()));
+            } else {
+                binding.customFieldsList.getAdapter().notifyDataSetChanged();
+            }
         }
 
         binding.customFieldsTitle.setText(state.getTitle());

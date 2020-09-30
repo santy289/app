@@ -14,6 +14,15 @@ public class FieldCustom {
     private String subtitle;
     private String type;
     private String workflowModel;
+    private boolean isValid = true;
+
+    public boolean isValid() {
+        return isValid;
+    }
+
+    public void setValid(boolean valid) {
+        isValid = valid;
+    }
 
     public String getCustomValue() {
         return customValue;

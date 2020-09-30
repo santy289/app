@@ -1,5 +1,6 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.signature;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -8,7 +9,9 @@ import androidx.lifecycle.ViewModel;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
+import com.rootnetapp.rootnetintranet.models.responses.signature.FieldCustom;
 import com.rootnetapp.rootnetintranet.models.responses.signature.Fields;
+import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureTemplateField;
 import com.rootnetapp.rootnetintranet.models.ui.general.DialogBoxState;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureCustomFieldFormState;
 import com.squareup.moshi.JsonAdapter;
@@ -38,6 +41,7 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
 
     private SignatureCustomFieldFormState cachedState;
     private final List<Fields> cachedIncomingFields;
+    private List<SignatureTemplateField> cachedRequiredFields;
     private String token;
     private int templateId;
 
@@ -54,6 +58,7 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
         this.disposables = new CompositeDisposable();
         this.cachedIncomingFields = new ArrayList<>();
         this.successGoBack = new MutableLiveData<>();
+        this.cachedRequiredFields = new ArrayList<>();
     }
 
     public void onStart(WorkflowListItem workflowListItem, int templateId, String token) {
@@ -69,6 +74,13 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
 
     public void onActionSave() {
         showLoading.setValue(true);
+
+        if (!isValidForm()) {
+            showLoading.setValue(false);
+            return;
+        }
+
+
         Disposable disposable = repository
                 .initializeWithCustomFields(
                         token,
@@ -82,6 +94,52 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
                     showErrorActionNotCompleted();
                 });
         disposables.add(disposable);
+    }
+
+    /**
+     * Validates the form where the custom form can't have no fields, and required fields can't be null.
+     * Also it will compare the required fields against the form state fields at this point before
+     * sending a request.
+     *
+     * @return
+     */
+    private boolean isValidForm() {
+        if (cachedState == null
+                || cachedState.getFieldCustomList() == null
+                || cachedState.getFieldCustomList().size() < 1
+                || cachedRequiredFields == null) {
+            return false;
+        }
+
+        if (cachedRequiredFields.size() == 0 ) {
+            // Nothing to validate the form is valid.
+            return true;
+        }
+
+        List<FieldCustom> customFields = cachedState.getFieldCustomList();
+
+        boolean formIsValid = true;
+        for (SignatureTemplateField cachedRequiredField : cachedRequiredFields) {
+            for (FieldCustom customField : customFields) {
+                if (!customField.getName().equals(cachedRequiredField.getName())
+                || !TextUtils.isEmpty(customField.getCustomValue())) {
+                    continue;
+                }
+                customField.setValid(false);
+                formIsValid = false;
+            }
+        }
+
+        if (!formIsValid) {
+            SignatureCustomFieldFormState state = new SignatureCustomFieldFormState(
+                    cachedState.getTitle(),
+                    customFields
+            );
+            customFieldsState.setValue(state);
+            cachedState = state;
+        }
+
+        return formIsValid;
     }
 
     private void signatureInitiateSuccessful(Object object) {
@@ -115,7 +173,12 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
                     title = fields.getUserRequired().getFullName();
                 }
 
+                if (fields.getRequiredFields() != null) {
+                    cachedRequiredFields = fields.getRequiredFields();
+                }
+
                 cachedIncomingFields.add(fields);
+                cachedRequiredFields = fields.getRequiredFields();
                 return new SignatureCustomFieldFormState(
                         title,
                         fields.getCustomFields()

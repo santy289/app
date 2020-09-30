@@ -13,6 +13,7 @@ import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentRespons
 import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentSigner;
 import com.rootnetapp.rootnetintranet.models.responses.signature.InitiateSigningResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureTemplate;
+import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureWorkflowTypesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.Signer;
 import com.rootnetapp.rootnetintranet.models.responses.signature.TemplatesResponse;
 
@@ -51,6 +52,12 @@ public class SignatureRepository {
 
     protected Observable<TemplatesResponse> getTemplatesBy(String token, int workflowTypeId, int workflowId) {
         return service.getSignatureTemplatesBy(token, workflowTypeId, workflowId)
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<SignatureWorkflowTypesResponse> getTemplatesInWorkflowType(String token,
+                                                                                    int workflowTypeId) {
+        return service.getTemplatesInWorkflowType(token, workflowTypeId)
                 .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
 

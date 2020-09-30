@@ -12,9 +12,13 @@ import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSignature;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSigner;
 import com.rootnetapp.rootnetintranet.models.requests.signature.SignatureInitiateRequest;
+import com.rootnetapp.rootnetintranet.models.responses.signature.DigitalSignature;
 import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentListResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.Fields;
 import com.rootnetapp.rootnetintranet.models.responses.signature.InitiateSigningResponse;
+import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureTemplateField;
+import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureWorkflowTypeTemplate;
+import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureWorkflowTypesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.TemplatesResponse;
 import com.rootnetapp.rootnetintranet.models.ui.general.DialogBoxState;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureCustomFieldShared;
@@ -45,6 +49,8 @@ public class SignatureViewModel extends ViewModel {
     private List<TemplateSignature> cachedTemplates;
     private SignatureTemplateState cachedTemplateState;
     private int cachedIndexSelected = 0;
+    private List<DigitalSignature> cachedSignaturesSelected;
+    private List<SignatureTemplateField> cachedRequiredFields;
     private String token;
 
     public SignatureViewModel(SignatureRepository signatureRepository) {
@@ -196,6 +202,9 @@ public class SignatureViewModel extends ViewModel {
         }
 
         Fields list = fields.get(0);
+        if (cachedRequiredFields != null) {
+            list.setRequiredFields(cachedRequiredFields);
+        }
         Moshi moshi = new Moshi.Builder().build();
         JsonAdapter<Fields> jsonAdapter = moshi.adapter(Fields.class);
         String json = jsonAdapter.toJson(list);
@@ -255,10 +264,29 @@ public class SignatureViewModel extends ViewModel {
         showLoading.setValue(true);
         Disposable disposable = signatureRepository.getTemplatesBy(token, workflowTypeId, workflowId)
                 .doOnNext(this::refreshOnSuccess)
+                .flatMap(response -> signatureRepository.getTemplatesInWorkflowType(token,workflowTypeId))
+                .doOnNext(this::workflowTypeTemplateSuccess)
                 .flatMap(response -> signatureRepository.getSignatureDocuments(token, workflowId))
                 .doOnNext(this::refreshDocumentOnSuccess)
                 .subscribe(response -> showLoading.setValue(false), this::onFailureNetwork);
         disposables.add(disposable);
+    }
+
+    private void workflowTypeTemplateSuccess(SignatureWorkflowTypesResponse response) {
+        if (response.getResult() == null || response.getResult().size() < 1) {
+            return;
+        }
+
+        List<SignatureWorkflowTypeTemplate> templates = response.getResult();
+        SignatureWorkflowTypeTemplate template = templates.get(0);
+
+        if(template.getSignaturesSelected() != null) {
+            cachedSignaturesSelected = template.getSignaturesSelected();
+        }
+
+        if(template.getRequiredFields() != null) {
+            cachedRequiredFields = template.getRequiredFields();
+        }
     }
 
     private void refreshDocumentOnSuccess(DocumentListResponse documentListResponse) {

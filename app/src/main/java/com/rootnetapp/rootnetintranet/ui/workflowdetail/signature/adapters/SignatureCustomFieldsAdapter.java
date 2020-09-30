@@ -21,6 +21,11 @@ public class SignatureCustomFieldsAdapter extends RecyclerView.Adapter<Signature
         this.customFields = customFields;
     }
 
+    public void updateFields(List<FieldCustom> fields) {
+        this.customFields = fields;
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public SignatureCustomFieldsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -28,7 +33,7 @@ public class SignatureCustomFieldsAdapter extends RecyclerView.Adapter<Signature
                 LayoutInflater.from(parent.getContext());
         SignatureCustomFieldItemBinding itemBinding =
                 SignatureCustomFieldItemBinding.inflate(layoutInflater, parent, false);
-        return new SignatureCustomFieldsViewHolder(itemBinding);
+        return new SignatureCustomFieldsViewHolder(itemBinding, customFields);
     }
 
     @Override
@@ -42,6 +47,7 @@ public class SignatureCustomFieldsAdapter extends RecyclerView.Adapter<Signature
         holder.binding.customFieldTextLayout.setHint(field.getDisplayName());
         if (holder.binding.customFieldTextLayout.getEditText() != null) {
             holder.binding.customFieldTextLayout.getEditText().setText(field.getCustomValue());
+            holder.binding.customFieldTextLayout.getEditText().setTag(position);
         }
 
         String helperText;
@@ -69,6 +75,13 @@ public class SignatureCustomFieldsAdapter extends RecyclerView.Adapter<Signature
                 break;
         }
         holder.binding.customFieldTextLayout.setHelperText(helperText);
+
+        if (!field.isValid()) {
+            holder.binding.customFieldTextLayout.setError(context.getString(R.string.required_fields));
+        } else {
+            holder.binding.customFieldTextLayout.setError(null);
+        }
+
     }
 
     @Override

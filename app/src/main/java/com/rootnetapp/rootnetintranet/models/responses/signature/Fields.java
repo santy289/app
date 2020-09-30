@@ -5,6 +5,7 @@ import java.util.List;
 public class Fields {
     private List<FieldCustom> customFields;
     private UserRequired userRequired;
+    private List<SignatureTemplateField> requiredFields;
 
 
     public void setCustomFields(List<FieldCustom> customFields, UserRequired userRequired) {
@@ -18,5 +19,13 @@ public class Fields {
 
     public UserRequired getUserRequired() {
         return userRequired;
+    }
+
+    public List<SignatureTemplateField> getRequiredFields() {
+        return requiredFields;
+    }
+
+    public void setRequiredFields(List<SignatureTemplateField> requiredFields) {
+        this.requiredFields = requiredFields;
     }
 }

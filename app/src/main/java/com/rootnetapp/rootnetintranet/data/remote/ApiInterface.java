@@ -41,6 +41,7 @@ import com.rootnetapp.rootnetintranet.models.responses.role.RoleResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentListResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.InitiateSigningResponse;
+import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureWorkflowTypesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.InteractionResponse;
@@ -182,6 +183,10 @@ public interface ApiInterface {
     Observable<Object> initiateSigningWithFields(@Header("Authorization") String authorization,
                                                         @Body SignatureInitiateRequest request);
 
+    @Headers({"Domain-Name: api"})
+    @GET("signing_vendor/workflow_types")
+    Observable<SignatureWorkflowTypesResponse> getTemplatesInWorkflowType(@Header("Authorization") String authorization,
+                                                                          @Query("workflowTypeId") int workflowTypeId);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?status=true")

@@ -369,6 +369,13 @@
     <string name="signature_signers_message_no_signers">No hay firmantes para este template</string>
     <string name="signature_overwrite_warning">Esta seguro que quiere borrar el documento? Esta acción no es reversible.</string>
     <string name="error_action">Hubo un error, la acción no fue completada.</string>
+    <string name="sub_signature_name">Este es el nombre del firmante</string>
+    <string name="sub_signature_phone">Este es el número de telefono donde quieren recibir el código de autorización para la firma.</string>
+    <string name="sub_signature_email">La dirección de email para recibir el link y continuar el proceso de firma.</string>
+    <string name="sub_signature_identifier_type">Especifica el tipo de identificador usado para el firmante.</string>
+    <string name="sub_signature_identifier">El código o número usado para identificar el firmante.</string>
+    <string name="sub_signature_subject">El asunto que aparecerá en el email con el link para firmar.</string>
+
     <!--MainActivity-->
     <string name="bottom_nav_timeline">Timeline</string>
     <string name="bottom_nav_workflow_list">Workflows</string>

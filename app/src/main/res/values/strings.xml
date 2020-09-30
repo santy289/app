@@ -372,6 +372,13 @@
     <string name="signature_signers_message_no_signers">No signers found for this template</string>
     <string name="signature_overwrite_warning">Are you sure you want to delete the document? This action can not be reversed.</string>
     <string name="error_action">Something went wrong, the action was not completed.</string>
+    <string name="sub_signature_name">This is the name of the signer</string>
+    <string name="sub_signature_phone">This is the phone number where you want to receive the authorization code in order to sign.</string>
+    <string name="sub_signature_email">The email where we are sending a link to continue the signing process.</string>
+    <string name="sub_signature_identifier_type">It specifies the type of identifier used for the signer.</string>
+    <string name="sub_signature_identifier">The identifier code or number used for the signer.</string>
+    <string name="sub_signature_subject">The subject that will appear on the email with the signing link.</string>
+
     <!--MainActivity-->
     <string name="bottom_nav_timeline">Timeline</string>
     <string name="bottom_nav_workflow_list">Workflows</string>

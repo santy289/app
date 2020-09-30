@@ -1,11 +1,13 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.signature.adapters;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.databinding.SignatureCustomFieldItemBinding;
 import com.rootnetapp.rootnetintranet.models.responses.signature.FieldCustom;
 
@@ -35,11 +37,38 @@ public class SignatureCustomFieldsAdapter extends RecyclerView.Adapter<Signature
             return;
         }
 
+        Context context = holder.itemView.getContext();
         FieldCustom field = getItem(position);
         holder.binding.customFieldTextLayout.setHint(field.getDisplayName());
         if (holder.binding.customFieldTextLayout.getEditText() != null) {
             holder.binding.customFieldTextLayout.getEditText().setText(field.getCustomValue());
         }
+
+        String helperText;
+        switch (field.getSubtitle()) {
+            case "sub_signature_name":
+                helperText = context.getString(R.string.sub_signature_name);
+                break;
+            case "sub_signature_phone":
+                helperText = context.getString(R.string.sub_signature_phone);
+                break;
+            case "sub_signature_email":
+                helperText = context.getString(R.string.sub_signature_email);
+                break;
+            case "sub_signature_identifier_type":
+                helperText = context.getString(R.string.sub_signature_identifier_type);
+                break;
+            case "sub_signature_identifier":
+                helperText = context.getString(R.string.sub_signature_identifier);
+                break;
+            case "sub_signature_subject":
+                helperText = context.getString(R.string.sub_signature_subject);
+                break;
+            default:
+                helperText = "";
+                break;
+        }
+        holder.binding.customFieldTextLayout.setHelperText(helperText);
     }
 
     @Override

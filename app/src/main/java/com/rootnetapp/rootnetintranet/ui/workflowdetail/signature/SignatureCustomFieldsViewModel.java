@@ -134,7 +134,6 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
                     continue;
                 }
                 if (!TextUtils.isEmpty(customField.getCustomValue())) {
-                    customField.setValid(true);
                     continue;
                 }
                 customField.setValid(false);

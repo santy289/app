@@ -24,11 +24,11 @@ public class SignatureCustomFieldsViewHolder extends RecyclerView.ViewHolder {
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
             public void afterTextChanged(Editable editable) {}
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
                 if(binding.customFieldTextLayout.getEditText().getTag()!=null){
-                    int position = (int)binding.customFieldTextLayout.getEditText().getTag();
-                    FieldCustom fieldCustom = cachedFields.get(position);
+                    FieldCustom fieldCustom = cachedFields.get(getAdapterPosition());
                     fieldCustom.setCustomValue(charSequence.toString());
-                    cachedFields.set(position, fieldCustom);
+                    cachedFields.set(getAdapterPosition(), fieldCustom);
                 }
             }
         });

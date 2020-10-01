@@ -520,5 +520,6 @@
     <string name="booking_detail_day_to">Hasta</string>
     <string name="booking_detail_estimated_time">Tiempo Estimado</string>
     <string name="booking_detail_registered_time">Tiempo Registrado</string>
+    <string name="title_activity_signature_custom_fields_form">Campos requeridos para firma</string>
     <string name="save">Guardar</string>
 </resources>

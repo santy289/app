@@ -30,6 +30,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.leinardi.android.speeddial.SpeedDialActionItem;
 import com.rootnetapp.rootnetintranet.BuildConfig;
 import com.rootnetapp.rootnetintranet.R;
+import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.databinding.ActivityMainBinding;
 import com.rootnetapp.rootnetintranet.fcm.FirebaseTopics;
@@ -107,6 +108,7 @@ public class MainActivity extends AppCompatActivity
 
     private static final String TAG = "MainActivity";
     private CreateWorkflowFragment mDynamicFiltersFragment;
+    private boolean digitalSignatureEnabled = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,7 +116,9 @@ public class MainActivity extends AppCompatActivity
         mainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         ((RootnetApp) getApplication()).getAppComponent().inject(this);
         mainBinding.navView.setCheckedItem(R.id.nav_timeline);
-        SharedPreferences sharedPref = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = getSharedPreferences(PreferenceKeys.PREF_SESSION, Context.MODE_PRIVATE);
+        digitalSignatureEnabled = sharedPref.getBoolean(PreferenceKeys.PREF_SIGNATURE, false);
+
         viewModel = ViewModelProviders
                 .of(this, profileViewModelFactory)
                 .get(MainActivityViewModel.class);
@@ -339,6 +343,12 @@ public class MainActivity extends AppCompatActivity
             count++;
         }
 
+        if (digitalSignatureEnabled) {
+            addActionItem(R.id.fab_digital_signature, R.string.workflow_detail_signature_fragment_title,
+                    R.drawable.ic_file_black);
+            count++;
+        }
+
         if (count > 0) {
             mainBinding.fabSpeedDial.setOnActionSelectedListener(this::handleSpeedDialClick);
             mainBinding.fabSpeedDial.getMainFab().setSupportImageTintList(ColorStateList.valueOf(
@@ -382,6 +392,9 @@ public class MainActivity extends AppCompatActivity
                 quickAction = QuickAction.COMMENT;
                 break;
 
+            case R.id.fab_digital_signature:
+                quickAction = QuickAction.DIGITAL_SIGNATURE;
+                break;
             default:
                 return false;
         }

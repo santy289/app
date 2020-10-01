@@ -492,6 +492,12 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         addActionItem(R.id.fab_upload_file, R.string.quick_actions_upload_file,
                 R.drawable.ic_file_upload_white_24dp);
 
+
+        if (isSignatureEnabled) {
+            addActionItem(R.id.fab_digital_signature, R.string.workflow_detail_signature_fragment_title,
+                    R.drawable.ic_file_black);
+        }
+
         mBinding.fabSpeedDial.setOnActionSelectedListener(this::handleSpeedDialClick);
         mBinding.fabSpeedDial.getMainFab().setSupportImageTintList(ColorStateList.valueOf(
                 Color.WHITE)); //this is the only way to change the icon color
@@ -535,6 +541,9 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 itemPosition = WorkflowDetailViewPagerAdapter.COMMENTS;
                 break;
 
+            case R.id.fab_digital_signature:
+                itemPosition = WorkflowDetailViewPagerAdapter.SIGNATURE;
+                break;
             default:
                 return false;
         }

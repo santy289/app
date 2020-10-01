@@ -5,6 +5,7 @@
     <item type="id" name="fab_approve_workflow" />
     <item type="id" name="fab_change_status" />
     <item type="id" name="fab_comment" />
+    <item type="id" name="fab_digital_signature" />
 
     <!--WorkflowDetailsActivity-->
     <item type="id" name="fab_upload_file" />

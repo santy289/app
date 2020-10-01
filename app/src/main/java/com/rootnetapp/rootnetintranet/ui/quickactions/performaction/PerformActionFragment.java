@@ -10,10 +10,12 @@ import android.view.ViewGroup;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.FragmentPerformActionBinding;
+import com.rootnetapp.rootnetintranet.models.responses.signature.DigitalSignature;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.quickactions.QuickAction;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.signature.SignatureFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusFragment;
 
 import javax.inject.Inject;
@@ -81,6 +83,9 @@ public class PerformActionFragment extends Fragment {
                 break;
             case QuickAction.COMMENT:
                 showFragment(CommentsFragment.newInstance(mWorkflowListItem, false), true);
+                break;
+            case QuickAction.DIGITAL_SIGNATURE:
+                showFragment(SignatureFragment.newInstance(mWorkflowListItem), true);
                 break;
         }
     }

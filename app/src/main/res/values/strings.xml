@@ -525,6 +525,6 @@
     <string name="booking_detail_day_to">To</string>
     <string name="booking_detail_estimated_time">Estimated Time</string>
     <string name="booking_detail_registered_time">Registered Time</string>
-    <string name="title_activity_signature_custom_fields_form">Custom Fields</string>
+    <string name="title_activity_signature_custom_fields_form">Required Fields for Signature</string>
     <string name="save">Save</string>
 </resources>

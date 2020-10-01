@@ -47,7 +47,6 @@ public class SignatureCustomFieldsAdapter extends RecyclerView.Adapter<Signature
         holder.binding.customFieldTextLayout.setHint(field.getDisplayName());
         if (holder.binding.customFieldTextLayout.getEditText() != null) {
             holder.binding.customFieldTextLayout.getEditText().setText(field.getCustomValue());
-            holder.binding.customFieldTextLayout.getEditText().setTag(position);
         }
 
         String helperText;

@@ -386,6 +386,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         }
 
         Map<String, Object> roleApprovers = new HashMap<>();
+        // List<BaseFormItem> test = formSettings.getPeopleInvolvedFormItems(); // supposdely also this one has more roles
         for (BaseFormItem formItem : formSettings.getRoleApproversFormItems()) {
             Option roleApprover = ((SingleChoiceFormItem) formItem).getValue();
             if (roleApprover == null) continue; //not selected
@@ -907,6 +908,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     private void onWorkflowTypesSuccess(WorkflowTypeDbResponse workflowTypeDbResponse) {
         mWorkflowTypeDbList = workflowTypeDbResponse.getList();
         if (mWorkflowTypeDbList == null || mWorkflowTypeDbList.isEmpty()) {
+            showLoading.setValue(false);
             return;
         }
 
@@ -993,7 +995,7 @@ public class CreateWorkflowViewModel extends ViewModel {
             return new IntentFormItem.Builder()
                     .setTitleRes(R.string.people_involved)
                     .setButtonActionTextRes(R.string.people_involved_action)
-                    .setRequired(workflowTypeDbSingle.isDefineRoles())
+                    .setRequired(workflowTypeDbSingle != null && workflowTypeDbSingle.isDefineRoles())
 //                    .setVisible(mWorkflowListItem == null) //hide in edit mode
                     .setTag(TAG_PEOPLE_INVOLVED)
                     .setFieldId(TAG_PEOPLE_INVOLVED)
@@ -1003,8 +1005,10 @@ public class CreateWorkflowViewModel extends ViewModel {
                 .subscribe(intentFormItem -> {
                     mAddPeopleInvolvedItemLiveData.setValue(intentFormItem);
                     showFields(formSettings);
-                }, throwable -> Log
-                        .d(TAG, "createPeopleInvolvedItem: error " + throwable.getMessage()));
+                }, throwable -> {
+                    Log.d(TAG, "createPeopleInvolvedItem: error " + throwable.getMessage());
+                    showLoading.setValue(false);
+                });
         mDisposables.add(disposable);
     }
 

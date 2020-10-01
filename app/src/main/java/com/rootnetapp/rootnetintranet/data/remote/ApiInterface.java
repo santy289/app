@@ -204,16 +204,6 @@ public interface ApiInterface {
                                                     @Query("save") boolean save);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows?status=true")
-    @Deprecated
-    Observable<WorkflowsResponse> getWorkflows(@Header("Authorization") String authorization,
-                                               @Query("limit") int limit,
-                                               @Query("open") boolean open,
-                                               @Query("page") int page,
-                                               @Query("status") boolean status);
-
-
-    @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?status=true&order=%7B%22desc%22:true,%22column%22:%22updated%22%7D")
     Observable<WorkflowResponseDb> getWorkflowsDb(@Header("Authorization") String authorization,
                                                   @Query("limit") int limit,
@@ -320,7 +310,7 @@ public interface ApiInterface {
     Observable<WorkflowTypesResponse> getWorkflowTypes(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows/types?all_versions=true&filter_counter_status=true")
+    @GET("intranet/workflows/types?filter_counter_status=true")
     Observable<WorkflowTypeDbResponse> getWorkflowTypesDb(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})

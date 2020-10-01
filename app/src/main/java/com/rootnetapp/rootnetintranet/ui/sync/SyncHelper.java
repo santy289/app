@@ -67,7 +67,9 @@ public class SyncHelper {
     public final static int INDEX_KEY_STRING = 0;
     public final static int INDEX_KEY_VALUE = 1;
     private final static String TAG = "SyncHelper";
-    protected static final int MAX_ENDPOINT_CALLS = 7;
+
+    // IMPORTANT: Remember to increase or decrease this number when you remove or add an endpoint.
+    protected static final int MAX_ENDPOINT_CALLS = 6;
 
     public SyncHelper(ApiInterface apiInterface, AppDatabase database) {
         this.apiInterface = apiInterface;
@@ -94,7 +96,6 @@ public class SyncHelper {
         getWsSettings(token);
         getGoogleMapsSettings(token);
         getUser(token);
-        getAllWorkflows(token, 1);
         getWorkflowTypesDb(token);
         getLoggedProfile(token);
     }
@@ -232,7 +233,7 @@ public class SyncHelper {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onWorkflowTypesDbSuccess, throwable -> {
-                    Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
+                    Log.e(TAG, "getAllWorkflows: error: " + throwable.getMessage());
                     handleNetworkError(throwable);
                 });
         disposables.add(disposable);
@@ -304,24 +305,11 @@ public class SyncHelper {
         disposables.clear();
     }
 
-    @Deprecated
-    private void getAllWorkflows(String token, int page) {
-        Disposable disposable = apiInterface
-                .getWorkflows(token, 50, true, page, true)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onWorkflowsSuccess, throwable -> {
-                    Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
-                    handleNetworkError(throwable);
-                });
-        disposables.add(disposable);
-    }
-
     private void getUser(String token) {
         Disposable disposable = apiInterface.getProfiles(token).subscribeOn(Schedulers.io()).
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe(this::onUsersSuccess, throwable -> {
-                    Log.d(TAG, "getData: error " + throwable.getMessage());
+                    Log.e(TAG, "getData: error " + throwable.getMessage());
                     handleNetworkError(throwable);
                 });
         disposables.add(disposable);

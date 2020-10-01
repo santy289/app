@@ -71,6 +71,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
+import okhttp3.ResponseBody;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.Field;
@@ -187,6 +188,20 @@ public interface ApiInterface {
     @GET("signing_vendor/workflow_types")
     Observable<SignatureWorkflowTypesResponse> getTemplatesInWorkflowType(@Header("Authorization") String authorization,
                                                                           @Query("workflowTypeId") int workflowTypeId);
+
+
+    @Headers({"Domain-Name: api"})
+    @GET("signing_vendor/documents/{provider_document_id}")
+    Observable<ResponseBody> getPdfFomProvider(@Header("Authorization") String authorization,
+                                               @Path("provider_document_id") String providerDocumentId,
+                                               @Query("save") boolean save);
+
+    @Headers({"Domain-Name: api"})
+    @GET("signing_vendor/documents/{provider_document_id}")
+    Observable<ResponseBody> getPdfFomProviderUsing(@Header("Authorization") String authorization,
+                                                    @Path("provider_document_id") String providerDocumentId,
+                                                    @Query("params") String jsonStringParams,
+                                                    @Query("save") boolean save);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?status=true")

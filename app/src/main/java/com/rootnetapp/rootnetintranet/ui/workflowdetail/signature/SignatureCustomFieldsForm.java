@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 
-import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -15,7 +14,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.rootnetapp.rootnetintranet.R;
@@ -78,7 +76,6 @@ public class SignatureCustomFieldsForm extends AppCompatActivity {
     }
 
     private void setupObservablesAndListeners() {
-
         binding.customFieldsSave.setOnClickListener(v -> {
             viewModel.onActionSave();
         });
@@ -89,6 +86,13 @@ public class SignatureCustomFieldsForm extends AppCompatActivity {
         viewModel.getSuccessGoBackObservable().observe(this, this::handleResult);
     }
 
+    /**
+     * Updates the fields in the form. If the adapter was already created we only need to notify
+     * the change to the adapter. We are caching in the view model the data structure, thus we
+     * can update it from the view model and the adapter will already have the latest version.
+     *
+     * @param state
+     */
     private void updateCustomFieldsList(SignatureCustomFieldFormState state) {
         RecyclerView.LayoutManager manager = binding.customFieldsList.getLayoutManager();
         if (manager == null) {
@@ -156,15 +160,6 @@ public class SignatureCustomFieldsForm extends AppCompatActivity {
                 .setPositiveButton(state.getPositive(), ( dialog, which) -> {
                     viewModel.dialogPositive(state.getMessage());
                 })
-                .show();
-    }
-
-    @UiThread
-    private void showToastMessage(@StringRes int messageRes) {
-        Toast.makeText(
-                this,
-                getString(messageRes),
-                Toast.LENGTH_SHORT)
                 .show();
     }
 }

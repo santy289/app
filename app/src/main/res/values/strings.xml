@@ -379,6 +379,8 @@
     <string name="sub_signature_identifier_type">It specifies the type of identifier used for the signer.</string>
     <string name="sub_signature_identifier">The identifier code or number used for the signer.</string>
     <string name="sub_signature_subject">The subject that will appear on the email with the signing link.</string>
+    <string name="file_downloaded">The file was downloaded successfully</string>
+    <string name="file_not_available">There is no document available at the moment, try again alter.</string>
 
     <!--MainActivity-->
     <string name="bottom_nav_timeline">Timeline</string>

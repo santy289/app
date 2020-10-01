@@ -61,6 +61,13 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
         this.cachedRequiredFields = new ArrayList<>();
     }
 
+    /**
+     * Starting point for the view model.
+     *
+     * @param workflowListItem
+     * @param templateId
+     * @param token
+     */
     public void onStart(WorkflowListItem workflowListItem, int templateId, String token) {
         this.workflowListItem = workflowListItem;
         this.templateId = templateId;
@@ -72,6 +79,9 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
         disposables.clear();
     }
 
+    /**
+     * This functions handles the save button click on the UI.
+     */
     public void onActionSave() {
         showLoading.setValue(true);
 
@@ -79,7 +89,6 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
             showLoading.setValue(false);
             return;
         }
-
 
         Disposable disposable = repository
                 .initializeWithCustomFields(
@@ -121,8 +130,11 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
         boolean formIsValid = true;
         for (SignatureTemplateField cachedRequiredField : cachedRequiredFields) {
             for (FieldCustom customField : customFields) {
-                if (!customField.getName().equals(cachedRequiredField.getName())
-                || !TextUtils.isEmpty(customField.getCustomValue())) {
+                if (!customField.getName().equals(cachedRequiredField.getName())) {
+                    continue;
+                }
+                if (!TextUtils.isEmpty(customField.getCustomValue())) {
+                    customField.setValid(true);
                     continue;
                 }
                 customField.setValid(false);
@@ -142,6 +154,11 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
         return formIsValid;
     }
 
+    /**
+     * Handles a successful document initiation.
+     *
+     * @param object
+     */
     private void signatureInitiateSuccessful(Object object) {
         showLoading.setValue(false);
         dialogBoxState.setValue(new DialogBoxState(
@@ -153,6 +170,12 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
         ));
     }
 
+    /**
+     * This function works in the background to parse the json string form configuration, and
+     * emits a form state update to the UI.
+     *
+     * @param workflowListItem
+     */
     public void refreshContent(WorkflowListItem workflowListItem) {
         showLoading.setValue(true);
         Disposable disposable = Observable.fromCallable(() -> {
@@ -203,12 +226,20 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
         disposables.add(disposable);
     }
 
+    /**
+     * Handles a positive click on the dialog box.
+     *
+     * @param message
+     */
     public void dialogPositive(int message) {
         if (R.string.signature_success_initialize == message) {
             successGoBack.setValue(true);
         }
     }
 
+    /**
+     * Displays a dialog box with an error message.
+     */
     private void showErrorActionNotCompleted() {
         dialogBoxState.setValue(new DialogBoxState(
                 R.string.workflow_detail_signature_fragment_title,

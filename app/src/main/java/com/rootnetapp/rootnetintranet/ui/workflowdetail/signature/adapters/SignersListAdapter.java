@@ -29,6 +29,11 @@ public class SignersListAdapter extends RecyclerView.Adapter<SignersViewHolder> 
         this.dataSet = dataSet;
     }
 
+    public void updateList(List<SignerItem> items) {
+        this.dataSet = items;
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public SignersViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {

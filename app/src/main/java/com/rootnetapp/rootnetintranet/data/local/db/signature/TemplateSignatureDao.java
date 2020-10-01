@@ -19,6 +19,9 @@ public interface TemplateSignatureDao {
     @Query("DELETE FROM template_signature")
     void deleteAll();
 
+    @Query("SELECT * FROM template_signature WHERE id = :templateId AND workflow_type_id = :workflowTypeId AND workflow_id = :workflowId")
+    List<TemplateSignature> findTemplateDocumentById(int templateId, int workflowTypeId, int workflowId);
+
     @Query("DELETE FROM template_signature WHERE workflow_type_id = :workflowTypeId AND workflow_id = :workflowId")
     void deleteAllById(int workflowTypeId, int workflowId);
 
@@ -45,4 +48,7 @@ public interface TemplateSignatureDao {
 
     @Query("UPDATE template_signer SET isReady = :isReady, operationTime = :operationTime WHERE userId = :userId AND workflowId = :workflowId AND workflowTypeId = :workflowTypeId AND templateId = :templateId")
     void updateTemplateSigner(int userId, int workflowId, int workflowTypeId, int templateId, boolean isReady, String operationTime);
+
+    @Query("UPDATE template_signature SET file_name = :fileName, expiration_time = :expirationTime, provider_document_id = :providerDocumentId WHERE workflow_id = :workflowId AND workflow_type_id = :workflowTypeId AND id = :templateId")
+    void updateDocumentDataInTemplates(int workflowId, int workflowTypeId, int templateId, String fileName, String expirationTime, String providerDocumentId);
 }

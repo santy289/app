@@ -1,12 +1,15 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.signature;
 
 import androidx.annotation.UiThread;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
 
@@ -39,9 +42,11 @@ import javax.inject.Inject;
 
 import static android.app.Activity.RESULT_OK;
 
-public class SignatureFragment extends Fragment implements AdapterView.OnItemClickListener{
+public class SignatureFragment extends Fragment implements AdapterView.OnItemClickListener
+        , View.OnClickListener{
 
     private static final int REQUEST_CUSTOM_FORM = 654;
+    private static final int REQUEST_EXTERNAL_STORAGE_PERMISSIONS = 745;
 
     @Inject
     SignatureViewModelFactory signatureViewModelFactory;
@@ -108,12 +113,15 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
         signatureFragmentBinding.signatureActionTemplateButton.setOnClickListener(v -> {
             signatureViewModel.templateActionClicked();
         });
+        signatureFragmentBinding.signaturePdfDownload.setOnClickListener(this);
+        signatureFragmentBinding.signaturePdfSignedRequest.setOnClickListener(this);
 
         signatureViewModel.getSignatureTemplateState().observe(getViewLifecycleOwner(), this::updateTemplateUi);
         signatureViewModel.getSignatureSignerState().observe(getViewLifecycleOwner(), this::updateSignersUi);
         signatureViewModel.getShowLoadingObservable().observe(getViewLifecycleOwner(), this::showLoading);
         signatureViewModel.getDialogBoxStateObservable().observe(getViewLifecycleOwner(), this::showDialogBox);
         signatureViewModel.getGoToCustomFieldFormObservable().observe(getViewLifecycleOwner(), this::goToCustomFieldsForm);
+        signatureViewModel.getMenuNameSelectedObservable().observe(getViewLifecycleOwner(), this::selectMenuTemplateName);
     }
 
     @UiThread
@@ -190,7 +198,15 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
         signatureFragmentBinding.signatureSignersList.setVisibility(View.VISIBLE);
         signatureFragmentBinding.signatureSignersMessage.setText("");
         signatureFragmentBinding.signatureSignersMessage.setVisibility(View.GONE);
-        signatureFragmentBinding.signatureSignersList.setAdapter(new SignersListAdapter(signatureSignersState.getSignerItems()));
+
+        RecyclerView.Adapter adapterRecycler = signatureFragmentBinding.signatureSignersList.getAdapter();
+        if (adapterRecycler == null) {
+            signatureFragmentBinding.signatureSignersList.setAdapter(new SignersListAdapter(signatureSignersState.getSignerItems()));
+        } else {
+            SignersListAdapter adapter = (SignersListAdapter)adapterRecycler;
+            adapter.updateList(signatureSignersState.getSignerItems());
+        }
+
     }
 
     /**
@@ -215,8 +231,14 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
         signatureFragmentBinding.signatureActionTemplateButton.setEnabled(state.isTemplateActionEnable());
     }
 
+    private void selectMenuTemplateName(String selection) {
+        signatureFragmentBinding.exposedDropdownTemplates.setText(selection, false);
+    }
+
     /**
      * This is the implementation for AdapterView onItemClick listener used in templates select menu box.
+     * Check function updateTemplateUi for usage.
+     *
      * @param parent
      * @param view
      * @param position
@@ -226,4 +248,43 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         signatureViewModel.onItemSelected(position);
     }
+
+    /**
+     * This function implements View.OnClickListener for the pdf buttons, check its usage in setupObservablesAndListeners().
+     * @param v
+     */
+    @Override
+    public void onClick(View v) {
+        boolean hasWritePermissions = checkExternalStoragePermissions();
+        if (!hasWritePermissions) {
+            requestWritePermission();
+        }
+
+        switch (v.getId()) {
+            case R.id.signature_pdf_download:
+                signatureViewModel.pdfDownloadClicked(hasWritePermissions);
+                break;
+            case R.id.signature_pdf_signed_request:
+                signatureViewModel.pdfSignedClicked(hasWritePermissions);
+                break;
+        }
+    }
+
+    private boolean checkExternalStoragePermissions() {
+        if (getContext() == null) {
+            return false;
+        }
+        // Here, thisActivity is the current activity
+        return ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestWritePermission() {
+        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.READ_EXTERNAL_STORAGE},
+                REQUEST_EXTERNAL_STORAGE_PERMISSIONS);
+    }
+
 }

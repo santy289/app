@@ -376,6 +376,8 @@
     <string name="sub_signature_identifier_type">Especifica el tipo de identificador usado para el firmante.</string>
     <string name="sub_signature_identifier">El código o número usado para identificar el firmante.</string>
     <string name="sub_signature_subject">El asunto que aparecerá en el email con el link para firmar.</string>
+    <string name="file_downloaded">El archivo fue descargado exitosamente.</string>
+    <string name="file_not_available">No hay un archivo disponible por el momento, intente mas tarde.</string>
 
     <!--MainActivity-->
     <string name="bottom_nav_timeline">Timeline</string>

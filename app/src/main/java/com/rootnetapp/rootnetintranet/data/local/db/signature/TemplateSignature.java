@@ -4,9 +4,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "template_signature")
+@Entity(tableName = "template_signature", primaryKeys = {"id", "workflow_type_id", "workflow_id"})
 public class TemplateSignature {
-    @PrimaryKey
     @ColumnInfo(name = "id")
     private int templateId;
     private String name;
@@ -18,6 +17,12 @@ public class TemplateSignature {
     private int workflowTypeId;
     @ColumnInfo(name = "workflow_id")
     private int workflowId;
+    @ColumnInfo(name = "file_name")
+    private String fileName;
+    @ColumnInfo(name = "expiration_time")
+    private String expirationTime;
+    @ColumnInfo(name="provider_document_id")
+    private String providerDocumentId;
 
     public TemplateSignature(int templateId, int workflowTypeId, int workflowId, String name, String documentStatus, String templateStatus) {
         this.templateId = templateId;
@@ -26,6 +31,30 @@ public class TemplateSignature {
         this.name = name;
         this.documentStatus = documentStatus;
         this.templateStatus = templateStatus;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public void setExpirationTime(String expirationTime) {
+        this.expirationTime = expirationTime;
+    }
+
+    public void setProviderDocumentId(String providerDocumentId) {
+        this.providerDocumentId = providerDocumentId;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public String getExpirationTime() {
+        return expirationTime;
+    }
+
+    public String getProviderDocumentId() {
+        return providerDocumentId;
     }
 
     public int getTemplateId() {

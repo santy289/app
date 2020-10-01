@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModel;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSignature;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSigner;
+import com.rootnetapp.rootnetintranet.models.requests.signature.DownloadPdfRequest;
 import com.rootnetapp.rootnetintranet.models.requests.signature.SignatureInitiateRequest;
 import com.rootnetapp.rootnetintranet.models.responses.signature.DigitalSignature;
 import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentListResponse;
@@ -28,11 +29,14 @@ import com.rootnetapp.rootnetintranet.models.ui.signature.SignerItem;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
+import java.io.BufferedInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import okhttp3.ResponseBody;
 
 public class SignatureViewModel extends ViewModel {
 
@@ -41,13 +45,14 @@ public class SignatureViewModel extends ViewModel {
     private MutableLiveData<DialogBoxState> dialogBoxState;
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<SignatureCustomFieldShared> goToCustomFieldsForm;
+    private MutableLiveData<String> setMenuNameSelected;
 
     private SignatureRepository signatureRepository;
     private final CompositeDisposable disposables;
     private int workflowTypeId;
     private int workflowId;
     private List<TemplateSignature> cachedTemplates;
-    private SignatureTemplateState cachedTemplateState;
+    private SignatureTemplateState cachedTemplateState = null;
     private int cachedIndexSelected = 0;
     private List<DigitalSignature> cachedSignaturesSelected;
     private List<SignatureTemplateField> cachedRequiredFields;
@@ -62,6 +67,7 @@ public class SignatureViewModel extends ViewModel {
         this.showLoading = new MutableLiveData<>();
         this.cachedTemplates = new ArrayList<>();
         this.goToCustomFieldsForm = new MutableLiveData<>();
+        this.setMenuNameSelected = new MutableLiveData<>();
     }
 
     LiveData<SignatureTemplateState> getSignatureTemplateState() {
@@ -80,9 +86,9 @@ public class SignatureViewModel extends ViewModel {
         return dialogBoxState;
     }
 
-    LiveData<SignatureCustomFieldShared> getGoToCustomFieldFormObservable() {
-        return goToCustomFieldsForm;
-    }
+    LiveData<SignatureCustomFieldShared> getGoToCustomFieldFormObservable() { return goToCustomFieldsForm; }
+
+    LiveData<String> getMenuNameSelectedObservable() { return setMenuNameSelected; }
 
     /**
      * Starting point to update the UI for the first time.
@@ -97,9 +103,50 @@ public class SignatureViewModel extends ViewModel {
         this.workflowId = workflowId;
         setupTemplatesContent(workflowTypeId, workflowId);
         refreshContentFromNetwork(token, workflowTypeId, workflowId);
-        noSignersFound();
     }
 
+    /**
+     * Used only for UI testing. This will populate the signers list.
+     */
+    private void test() {
+        List<SignerItem> items = new ArrayList<>();
+        SignerItem item = new SignerItem(
+                null,
+                "test",
+                true,
+                "system",
+                "some role",
+                "16/78/2020"
+        );
+        items.add(item);
+        items.add(item);
+        items.add(item);
+        items.add(item);
+        items.add(item);
+        items.add(item);
+        items.add(item);
+        items.add(item);
+        items.add(item);
+        items.add(item);
+        items.add(item);
+        items.add(item);
+        items.add(item);
+        items.add(item);
+        items.add(item);
+        items.add(item);
+        items.add(item);
+        items.add(item);
+        signatureSignersState.setValue(new SignatureSignersState(
+                false, items, 0));
+    }
+
+    /**
+     * This function receives a result back from the custom fields form activity. If false
+     * no need to update, user either hit back or the activity was canceled. Otherwise
+     * refresh the content with new content from the network.
+     *
+     * @param result
+     */
     public void handleBackFromCustomFieldForm(boolean result) {
         if (!result) {
             return;
@@ -107,10 +154,164 @@ public class SignatureViewModel extends ViewModel {
         refreshContentFromNetwork(token, workflowTypeId, workflowId);
     }
 
+    /**
+     * This function manages the click event when the user chooses a menu item from the list of templates.
+     *
+     * @param indexSelected
+     */
+    public void onItemSelected(int indexSelected) {
+        if (cachedTemplates.size() == 0) {
+            noSignersFound();
+            return;
+        }
+        TemplateSignature previousTemplate;
+        previousTemplate = cachedTemplates.get(cachedIndexSelected);
+        cachedIndexSelected = indexSelected;
+        TemplateSignature template = cachedTemplates.get(indexSelected);
+        SignatureTemplateState templateState = handleTemplateStateUsing(template, null);
+        cachedTemplateState = templateState;
+        signatureTemplateState.setValue(templateState);
+        setupSignersContent(workflowTypeId, workflowId, template.getTemplateId(), previousTemplate);
+    }
+
     protected void onDestroy() {
         disposables.clear();
     }
 
+    /**
+     * Attempts to get a pdf file with the latest version from the digital signature service provider.
+     *
+     * @param writePermissionGranted
+     */
+    public void pdfSignedClicked(boolean writePermissionGranted) {
+        if (!writePermissionGranted) {
+            return;
+        }
+        showLoading.setValue(true);
+        TemplateSignature template = getTemplateCurrentlySelected();
+        if (template == null) {
+            showLoading.setValue(false);
+            showErrorActionNotCompleted();
+            return;
+        }
+
+        if (!TextUtils.isEmpty(template.getProviderDocumentId())) {
+            attemptToDownloadPdf(template.getProviderDocumentId());
+            return;
+        }
+
+        Disposable disposable = signatureRepository
+                .findTemplateSignatureBy(template.getTemplateId(), workflowTypeId, workflowId)
+                .subscribe( templates -> {
+                    if (templates == null || templates.size() != 1) {
+                        showLoading.setValue(false);
+                        showErrorActionNotCompleted();
+                        return;
+                    }
+
+                    if (templates.get(0).getProviderDocumentId() == null) {
+                        showLoading.setValue(false);
+                        showErrorFileNotAvailable();
+                        return;
+                    }
+
+                    attemptToDownloadPdf(templates.get(0).getProviderDocumentId());
+                }, throwable -> {
+                    showLoading.setValue(false);
+                    showErrorActionNotCompleted();
+                });
+
+        disposables.add(disposable);
+    }
+
+    public void pdfDownloadClicked(boolean writePermissionGranted) {
+        if (!writePermissionGranted) {
+            return;
+        }
+
+        showLoading.setValue(true);
+        TemplateSignature template = getTemplateCurrentlySelected();
+        if (template == null) {
+            showLoading.setValue(false);
+            showErrorActionNotCompleted();
+            return;
+        }
+
+        if (TextUtils.isEmpty(template.getProviderDocumentId())) {
+            showLoading.setValue(false);
+            showErrorFileNotAvailable();
+            return;
+        }
+
+        DownloadPdfRequest request = new DownloadPdfRequest(
+                template.getTemplateId(),
+                template.getFileName(),
+                workflowTypeId,
+                workflowId
+        );
+
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<DownloadPdfRequest> jsonAdapter = moshi.adapter(DownloadPdfRequest.class);
+        String json = jsonAdapter.toJson(request);
+        attemptToDownloadSavePdfWith(template.getProviderDocumentId(), json);
+    }
+
+    private void showErrorFileNotAvailable() {
+        dialogBoxState.setValue(new DialogBoxState(
+                R.string.workflow_detail_signature_fragment_title,
+                R.string.file_not_available,
+                R.string.cancel,
+                R.string.accept,
+                false
+        ));
+    }
+
+    private void attemptToDownloadSavePdfWith(String providerDocumentId, String jsonParams) {
+        Disposable disposable = signatureRepository.getPdfFromProviderUsingParams(token, providerDocumentId, jsonParams, true)
+                .doOnNext( responseBody -> {})
+                .flatMap(this::handleFileResponse)
+                .doOnNext(result -> {})
+                .subscribe(this::handleFileDownloadedSuccess,
+                        this::downloadPdfFailed
+                );
+        disposables.add(disposable);
+    }
+
+    private void attemptToDownloadPdf(String providerDocumentId) {
+        Disposable disposable = signatureRepository.getPdfFromProvider(token, providerDocumentId, false)
+                .doOnNext( responseBody -> {})
+                .flatMap(this::handleFileResponse)
+                .doOnNext(result -> {})
+                .subscribe(this::handleFileDownloadedSuccess,
+                        this::downloadPdfFailed
+                );
+        disposables.add(disposable);
+    }
+
+    private void downloadPdfFailed(Throwable throwable) {
+        showLoading.setValue(false);
+        showErrorFileNotAvailable();
+    }
+
+    private void handleFileDownloadedSuccess(Boolean result) {
+        showLoading.setValue(false);
+        dialogBoxState.setValue(new DialogBoxState(
+                R.string.workflow_detail_signature_fragment_title,
+                R.string.file_downloaded,
+                R.string.cancel,
+                R.string.accept,
+                false
+        ));
+    }
+
+    private io.reactivex.Observable<Boolean> handleFileResponse(ResponseBody responseBody) {
+        InputStream bis = new BufferedInputStream(responseBody.byteStream(), 1024 * 8);
+        return  signatureRepository.saveFileInputStream(bis, "signed-document.pdf");
+    }
+
+    /**
+     * This function handles all the interaction with the action button for the list of templates.
+     */
     public void templateActionClicked() {
         // do something with the cached template state is overwrite then show dialog
         int resTitle = cachedTemplateState.getTemplateActionTitleResId();
@@ -133,6 +334,12 @@ public class SignatureViewModel extends ViewModel {
         }
     }
 
+    /**
+     * This handles all the interactions with the dialog box, and only when the user taps on
+     * the positive button.
+     *
+     * @param message
+     */
     public void dialogPositive(@StringRes int message) {
         if (message == R.string.signature_overwrite_warning) {
             handleDocumentOverwrite();
@@ -174,7 +381,7 @@ public class SignatureViewModel extends ViewModel {
 
         Disposable disposable = signatureRepository
                 .initiateSigning(token, initiateRequest)
-                .subscribe(this::initiateHandleResponse, this::onFailureNetwork);
+                .subscribe(this::initiateHandleResponse, this::onFailure);
 
         disposables.add(disposable);
     }
@@ -182,17 +389,18 @@ public class SignatureViewModel extends ViewModel {
     private void initiateHandleResponse(InitiateSigningResponse response) {
         showLoading.setValue(false);
 
-        if (response.getResponse() == null || TextUtils.isEmpty(response.getResponse().getCode())) {
+        if (response.getResponse() == null) {
             showErrorActionNotCompleted();
             return;
         }
 
         String code = response.getResponse().getCode();
-        if (code.equals("PENDING_CUSTOM_FIELDS")) {
+        if (!TextUtils.isEmpty(response.getResponse().getCode()) && code.equals("PENDING_CUSTOM_FIELDS")) {
             handlePendingCustomFields(response.getResponse().getFields());
             return;
         }
 
+        refreshContentFromNetwork(token, workflowTypeId, workflowId);
     }
 
     private void handlePendingCustomFields(List<Fields> fields) {
@@ -236,20 +444,6 @@ public class SignatureViewModel extends ViewModel {
                     showErrorActionNotCompleted();
                 });
         disposables.add(disposable);
-    }
-
-    /**
-     * This function manages the click event when the user chooses a menu item from the list of templates.
-     *
-     * @param indexSelected
-     */
-    public void onItemSelected(int indexSelected) {
-        cachedIndexSelected = indexSelected;
-        TemplateSignature template = cachedTemplates.get(indexSelected);
-        SignatureTemplateState templateState = handleTemplateStateUsing(template, null);
-        cachedTemplateState = templateState;
-        signatureTemplateState.setValue(templateState);
-        setupSignersContent(workflowTypeId, workflowId, template.getTemplateId());
     }
 
     /**
@@ -319,18 +513,27 @@ public class SignatureViewModel extends ViewModel {
      */
     private void onFailureNetwork(Throwable throwable) {
         showLoading.setValue(false);
-        int test = 1;
     }
 
     private void onFailure(Throwable throwable) {
-        int test = 1;
+        showLoading.setValue(false);
+        dialogBoxState.setValue(new DialogBoxState(
+                R.string.workflow_detail_signature_fragment_title,
+                R.string.error_action,
+                R.string.cancel,
+                R.string.accept,
+                false
+        ));
     }
 
-    private void setupSignersContent(int workflowTypeId, int workflowId, int templateId) {
+
+    private void setupSignersContent(int workflowTypeId, int workflowId, int templateId, TemplateSignature previousTemplate) {
+        if (previousTemplate != null) {
+            signatureSignersState.removeSource(signatureRepository.getAllSignersBy(workflowTypeId, workflowId, previousTemplate.getTemplateId()));
+        }
         signatureSignersState.addSource(
                 signatureRepository.getAllSignersBy(workflowTypeId, workflowId, templateId),
                 templateSignerList -> {
-                    //processDatabaseResultToUiModel(templateSignerList);
                     SignerItem signerItem;
                     List<SignerItem> listSigners = new ArrayList<>();
                     for (TemplateSigner templateSigner : templateSignerList) {
@@ -358,21 +561,35 @@ public class SignatureViewModel extends ViewModel {
                 templateSignatures -> {
                     if (templateSignatures == null || templateSignatures.size() == 0) {
                         noTemplatesFound();
+                        noSignersFound();
                         return;
                     }
                     ArrayList<String> templateNames = new ArrayList<>();
                     for (TemplateSignature template : templateSignatures) {
                         templateNames.add(template.getName());
                     }
+
+                    TemplateSignature previousTemplate = null;
+                    if (cachedTemplates.size() > 0) {
+                        previousTemplate = cachedTemplates.get(cachedIndexSelected);
+                    }
+
                     cachedTemplates = templateSignatures;
 
-                    // not choosing anything by default
-                    SignatureTemplateState state = new SignatureTemplateState(true,
-                            false,
-                            R.string.signature_initialize,
-                            templateNames);
-                    cachedTemplateState = state;
-                    signatureTemplateState.setValue(state);
+                    if (cachedTemplateState == null) {
+                        SignatureTemplateState state = handleTemplateStateUsing(templateSignatures.get(0), templateNames);
+                        cachedTemplateState = state;
+                        cachedIndexSelected = 0;
+                        signatureTemplateState.setValue(state);
+                        setMenuNameSelected.setValue(templateNames.get(0));
+                    } else {
+                        SignatureTemplateState state = handleTemplateStateUsing(templateSignatures.get(cachedIndexSelected), templateNames);
+                        cachedTemplateState = state;
+                        signatureTemplateState.setValue(state);
+                        setMenuNameSelected.setValue(templateNames.get(cachedIndexSelected));
+                    }
+                    int templateId = templateSignatures.get(cachedIndexSelected).getTemplateId();
+                    setupSignersContent(workflowTypeId, workflowId, templateId, previousTemplate);
                 });
     }
 
@@ -431,6 +648,7 @@ public class SignatureViewModel extends ViewModel {
                 templateNames);
         cachedTemplateState = state;
         signatureTemplateState.setValue(state);
+        setMenuNameSelected.setValue("");
     }
 
     /**

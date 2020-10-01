@@ -26,6 +26,7 @@ import org.threeten.bp.ZoneId;
 import org.threeten.bp.ZonedDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,6 +34,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -45,6 +47,8 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+
+import okhttp3.ResponseBody;
 import retrofit2.HttpException;
 
 public class Utils {
@@ -384,6 +388,21 @@ public class Utils {
         os.close();
 
         return pdfFile;
+    }
+
+    public static File decodePdfFromByteStream(InputStream inputStream,String fileName) throws IOException {
+        int count;
+        byte[] data = new byte[1024 * 4];
+        InputStream bis = new BufferedInputStream(inputStream, 1024 * 8);
+        File outputFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);
+        OutputStream output = new FileOutputStream(outputFile);
+        while ((count = bis.read(data)) != -1) {
+            output.write(data, 0, count);
+        }
+        output.flush();
+        output.close();
+        bis.close();
+        return outputFile;
     }
 
     /**

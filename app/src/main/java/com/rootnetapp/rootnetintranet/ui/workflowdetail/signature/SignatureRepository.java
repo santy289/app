@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.signature;
 
 import androidx.lifecycle.LiveData;
 
+import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSignature;
 import com.rootnetapp.rootnetintranet.data.local.db.signature.TemplateSignatureDao;
@@ -17,6 +18,8 @@ import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureWorkfl
 import com.rootnetapp.rootnetintranet.models.responses.signature.Signer;
 import com.rootnetapp.rootnetintranet.models.responses.signature.TemplatesResponse;
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +27,7 @@ import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
 
 public class SignatureRepository {
 
@@ -89,6 +93,32 @@ public class SignatureRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    protected Observable<ResponseBody> getPdfFromProvider(String token, String providerDocumentId, boolean save) {
+        return service.getPdfFomProvider(token, providerDocumentId, save)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<ResponseBody> getPdfFromProviderUsingParams(String token, String providerDocumentId, String jsonParams, boolean save) {
+        return service.getPdfFomProviderUsing(token, providerDocumentId, jsonParams, save)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+
+    protected Observable<Boolean> saveFileInputStream(InputStream inputStream,String fileName) {
+        return Observable.fromCallable(() -> {
+            Utils.decodePdfFromByteStream(inputStream, fileName);
+            return true;
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<List<TemplateSignature>> findTemplateSignatureBy(int templateId, int workflowTypeId, int workflowId) {
+        return Observable.fromCallable(() -> templateSignatureDao.findTemplateDocumentById(templateId, workflowTypeId, workflowId))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     /**
      * This function checks for the documentSigners (signers coming from the network, which already
      * signed or rejected the document) and updates our existing templateSigners already in the database.
@@ -114,6 +144,15 @@ public class SignatureRepository {
                         workflowTypeId,
                         workflowId,
                         documentResponse.getTemplateId()
+                );
+
+                templateSignatureDao.updateDocumentDataInTemplates(
+                        workflowId,
+                        workflowTypeId,
+                        documentResponse.getTemplateId(),
+                        documentResponse.getFileName(),
+                        documentResponse.getExpirationTime(),
+                        documentResponse.getProviderDocumentId()
                 );
 
                 if (templateSigners == null || templateSigners.size() < 1) {

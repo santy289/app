@@ -13,6 +13,8 @@ import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentListRes
 import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentSigner;
 import com.rootnetapp.rootnetintranet.models.responses.signature.InitiateSigningResponse;
+import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureFileResponse;
+import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureFileResponseContent;
 import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureTemplate;
 import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureWorkflowTypesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.Signer;
@@ -93,22 +95,23 @@ public class SignatureRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    protected Observable<ResponseBody> getPdfFromProvider(String token, String providerDocumentId, boolean save) {
+    protected Observable<SignatureFileResponse> getPdfFromProvider(String token, String providerDocumentId, boolean save) {
         return service.getPdfFomProvider(token, providerDocumentId, save)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    protected Observable<ResponseBody> getPdfFromProviderUsingParams(String token, String providerDocumentId, String jsonParams, boolean save) {
+    protected Observable<SignatureFileResponse> getPdfFromProviderUsingParams(String token, String providerDocumentId, String jsonParams, boolean save) {
         return service.getPdfFomProviderUsing(token, providerDocumentId, jsonParams, save)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
 
-    protected Observable<Boolean> saveFileInputStream(InputStream inputStream,String fileName) {
+    protected Observable<Boolean> saveFileDownloaded(SignatureFileResponse fileResponse) {
         return Observable.fromCallable(() -> {
-            Utils.decodePdfFromByteStream(inputStream, fileName);
+            SignatureFileResponseContent content = fileResponse.getResponse();
+            Utils.decodePdfFromBase64Binary(content.getContent(), content.getFileName());
             return true;
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }

@@ -17,6 +17,7 @@ import com.rootnetapp.rootnetintranet.models.responses.signature.DigitalSignatur
 import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentListResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.Fields;
 import com.rootnetapp.rootnetintranet.models.responses.signature.InitiateSigningResponse;
+import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureFileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureTemplateField;
 import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureWorkflowTypeTemplate;
 import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureWorkflowTypesResponse;
@@ -29,14 +30,11 @@ import com.rootnetapp.rootnetintranet.models.ui.signature.SignerItem;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import okhttp3.ResponseBody;
 
 public class SignatureViewModel extends ViewModel {
 
@@ -304,9 +302,8 @@ public class SignatureViewModel extends ViewModel {
         ));
     }
 
-    private io.reactivex.Observable<Boolean> handleFileResponse(ResponseBody responseBody) {
-        InputStream bis = new BufferedInputStream(responseBody.byteStream(), 1024 * 8);
-        return  signatureRepository.saveFileInputStream(bis, "signed-document.pdf");
+    private io.reactivex.Observable<Boolean> handleFileResponse(SignatureFileResponse responseBody) {
+        return  signatureRepository.saveFileDownloaded(responseBody);
     }
 
     /**

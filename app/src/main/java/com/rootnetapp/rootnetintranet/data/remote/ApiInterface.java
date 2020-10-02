@@ -41,6 +41,7 @@ import com.rootnetapp.rootnetintranet.models.responses.role.RoleResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentListResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.InitiateSigningResponse;
+import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureFileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureWorkflowTypesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
@@ -192,13 +193,13 @@ public interface ApiInterface {
 
     @Headers({"Domain-Name: api"})
     @GET("signing_vendor/documents/{provider_document_id}")
-    Observable<ResponseBody> getPdfFomProvider(@Header("Authorization") String authorization,
-                                               @Path("provider_document_id") String providerDocumentId,
-                                               @Query("save") boolean save);
+    Observable<SignatureFileResponse> getPdfFomProvider(@Header("Authorization") String authorization,
+                                                        @Path("provider_document_id") String providerDocumentId,
+                                                        @Query("save") boolean save);
 
     @Headers({"Domain-Name: api"})
     @GET("signing_vendor/documents/{provider_document_id}")
-    Observable<ResponseBody> getPdfFomProviderUsing(@Header("Authorization") String authorization,
+    Observable<SignatureFileResponse> getPdfFomProviderUsing(@Header("Authorization") String authorization,
                                                     @Path("provider_document_id") String providerDocumentId,
                                                     @Query("params") String jsonStringParams,
                                                     @Query("save") boolean save);

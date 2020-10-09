@@ -1,5 +1,8 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.signature;
 
+import android.content.ContentResolver;
+import android.net.Uri;
+import android.system.ErrnoException;
 import android.text.TextUtils;
 
 import androidx.annotation.StringRes;
@@ -30,6 +33,7 @@ import com.rootnetapp.rootnetintranet.models.ui.signature.SignerItem;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +45,7 @@ public class SignatureViewModel extends ViewModel {
     private MediatorLiveData<SignatureTemplateState> signatureTemplateState;
     private MediatorLiveData<SignatureSignersState> signatureSignersState;
     private MutableLiveData<DialogBoxState> dialogBoxState;
+    private MutableLiveData<Uri> openPdfUri;
     private MutableLiveData<Boolean> showLoading;
     private MutableLiveData<SignatureCustomFieldShared> goToCustomFieldsForm;
     private MutableLiveData<String> setMenuNameSelected;
@@ -66,6 +71,7 @@ public class SignatureViewModel extends ViewModel {
         this.cachedTemplates = new ArrayList<>();
         this.goToCustomFieldsForm = new MutableLiveData<>();
         this.setMenuNameSelected = new MutableLiveData<>();
+        this.openPdfUri = new MutableLiveData<>();
     }
 
     LiveData<SignatureTemplateState> getSignatureTemplateState() {
@@ -87,6 +93,8 @@ public class SignatureViewModel extends ViewModel {
     LiveData<SignatureCustomFieldShared> getGoToCustomFieldFormObservable() { return goToCustomFieldsForm; }
 
     LiveData<String> getMenuNameSelectedObservable() { return setMenuNameSelected; }
+
+    LiveData<Uri> getOpenPdfUriObservable() { return openPdfUri; }
 
     /**
      * Starting point to update the UI for the first time.
@@ -181,7 +189,7 @@ public class SignatureViewModel extends ViewModel {
      *
      * @param writePermissionGranted
      */
-    public void pdfSignedClicked(boolean writePermissionGranted) {
+    public void pdfSignedClicked(ContentResolver contentResolver, boolean writePermissionGranted) {
         if (!writePermissionGranted) {
             return;
         }
@@ -194,7 +202,7 @@ public class SignatureViewModel extends ViewModel {
         }
 
         if (!TextUtils.isEmpty(template.getProviderDocumentId())) {
-            attemptToDownloadPdf(template.getProviderDocumentId());
+            attemptToDownloadPdf(contentResolver, template.getProviderDocumentId());
             return;
         }
 
@@ -213,7 +221,7 @@ public class SignatureViewModel extends ViewModel {
                         return;
                     }
 
-                    attemptToDownloadPdf(templates.get(0).getProviderDocumentId());
+                    attemptToDownloadPdf(contentResolver, templates.get(0).getProviderDocumentId());
                 }, throwable -> {
                     showLoading.setValue(false);
                     showErrorActionNotCompleted();
@@ -222,7 +230,7 @@ public class SignatureViewModel extends ViewModel {
         disposables.add(disposable);
     }
 
-    public void pdfDownloadClicked(boolean writePermissionGranted) {
+    public void pdfDownloadClicked(ContentResolver contentResolver, boolean writePermissionGranted) {
         if (!writePermissionGranted) {
             return;
         }
@@ -251,7 +259,7 @@ public class SignatureViewModel extends ViewModel {
         Moshi moshi = new Moshi.Builder().build();
         JsonAdapter<DownloadPdfRequest> jsonAdapter = moshi.adapter(DownloadPdfRequest.class);
         String json = jsonAdapter.toJson(request);
-        attemptToDownloadSavePdfWith(template.getProviderDocumentId(), json);
+        attemptToDownloadSavePdfWith(contentResolver, template.getProviderDocumentId(), json);
     }
 
     private void showErrorFileNotAvailable() {
@@ -264,10 +272,10 @@ public class SignatureViewModel extends ViewModel {
         ));
     }
 
-    private void attemptToDownloadSavePdfWith(String providerDocumentId, String jsonParams) {
+    private void attemptToDownloadSavePdfWith(ContentResolver contentResolver, String providerDocumentId, String jsonParams) {
         Disposable disposable = signatureRepository.getPdfFromProviderUsingParams(token, providerDocumentId, jsonParams, true)
                 .doOnNext( responseBody -> {})
-                .flatMap(this::handleFileResponse)
+                .flatMap(response -> handleFileResponse(contentResolver, response))
                 .doOnNext(result -> {})
                 .subscribe(this::handleFileDownloadedSuccess,
                         this::downloadPdfFailed
@@ -275,10 +283,10 @@ public class SignatureViewModel extends ViewModel {
         disposables.add(disposable);
     }
 
-    private void attemptToDownloadPdf(String providerDocumentId) {
+    private void attemptToDownloadPdf(ContentResolver contentResolver, String providerDocumentId) {
         Disposable disposable = signatureRepository.getPdfFromProvider(token, providerDocumentId, false)
                 .doOnNext( responseBody -> {})
-                .flatMap(this::handleFileResponse)
+                .flatMap(response -> handleFileResponse(contentResolver, response))
                 .doOnNext(result -> {})
                 .subscribe(this::handleFileDownloadedSuccess,
                         this::downloadPdfFailed
@@ -288,10 +296,20 @@ public class SignatureViewModel extends ViewModel {
 
     private void downloadPdfFailed(Throwable throwable) {
         showLoading.setValue(false);
+        if (throwable instanceof FileNotFoundException) {
+            dialogBoxState.setValue(new DialogBoxState(
+                    R.string.workflow_detail_signature_fragment_title,
+                    R.string.error_action,
+                    R.string.cancel,
+                    R.string.accept,
+                    false
+            ));
+            return;
+        }
         showErrorFileNotAvailable();
     }
 
-    private void handleFileDownloadedSuccess(Boolean result) {
+    private void handleFileDownloadedSuccess(Uri result) {
         showLoading.setValue(false);
         dialogBoxState.setValue(new DialogBoxState(
                 R.string.workflow_detail_signature_fragment_title,
@@ -300,10 +318,11 @@ public class SignatureViewModel extends ViewModel {
                 R.string.accept,
                 false
         ));
+        openPdfUri.setValue(result);
     }
 
-    private io.reactivex.Observable<Boolean> handleFileResponse(SignatureFileResponse responseBody) {
-        return  signatureRepository.saveFileDownloaded(responseBody);
+    private io.reactivex.Observable<Uri> handleFileResponse(ContentResolver contentResolver, SignatureFileResponse responseBody) {
+        return  signatureRepository.saveFileDownloaded(contentResolver, responseBody);
     }
 
     /**

@@ -2,13 +2,17 @@ package com.rootnetapp.rootnetintranet.commons;
 
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -30,6 +34,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,6 +51,7 @@ import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
 import okhttp3.ResponseBody;
@@ -388,6 +394,48 @@ public class Utils {
         os.close();
 
         return pdfFile;
+    }
+
+    public static Uri saveBase64PdfToDownloads(ContentResolver contentResolver, String base64, String fileName) throws IOException {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MediaStore.Downloads.DISPLAY_NAME, fileName);
+        contentValues.put(MediaStore.Downloads.MIME_TYPE, "application/pdf");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            contentValues.put(MediaStore.Downloads.IS_PENDING, 1);
+        }
+
+        Uri collection;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+        } else {
+            collection = MediaStore.Downloads.getContentUri("external");
+        }
+        Uri item = contentResolver.insert(collection, contentValues);
+       if (item == null) {
+           throw new FileNotFoundException("Unable to reserve an URI for the downloaded base64 pdf content.");
+       }
+       try {
+           ParcelFileDescriptor pfd = contentResolver.openFileDescriptor(item, "w");
+           FileOutputStream fileOutputStream = new FileOutputStream(pfd.getFileDescriptor());
+           byte[] pdfAsBytes = Base64.decode(base64, Base64.DEFAULT);
+           fileOutputStream.write(pdfAsBytes);
+           // Let the document provider know you're done by closing the stream.
+           fileOutputStream.close();
+           pfd.close();
+
+           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+               contentValues.clear();
+               contentValues.put(MediaStore.Downloads.IS_PENDING, 0);
+               contentResolver.update(item, contentValues, null, null);
+           }
+
+           return item;
+       } catch (FileNotFoundException e) {
+           e.printStackTrace();
+       } catch (IOException e) {
+           e.printStackTrace();
+       }
+       return null;
     }
 
     public static File decodePdfFromByteStream(InputStream inputStream,String fileName) throws IOException {

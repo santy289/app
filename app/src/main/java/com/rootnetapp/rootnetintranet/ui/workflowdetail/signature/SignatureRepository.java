@@ -1,5 +1,8 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.signature;
 
+import android.content.ContentResolver;
+import android.net.Uri;
+
 import androidx.lifecycle.LiveData;
 
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -108,11 +111,15 @@ public class SignatureRepository {
     }
 
 
-    protected Observable<Boolean> saveFileDownloaded(SignatureFileResponse fileResponse) {
+    protected Observable<Uri> saveFileDownloaded(ContentResolver contentResolver, SignatureFileResponse fileResponse) {
         return Observable.fromCallable(() -> {
             SignatureFileResponseContent content = fileResponse.getResponse();
-            Utils.decodePdfFromBase64Binary(content.getContent(), content.getFileName());
-            return true;
+            String fileName = content.getFileName();
+            int index = fileName.lastIndexOf(".");
+            if (index >= 0) {
+                fileName = fileName.substring(0, index);
+            }
+            return Utils.saveBase64PdfToDownloads(contentResolver, content.getContent(), fileName);
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
 

@@ -6,11 +6,14 @@ import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -19,11 +22,13 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.provider.DocumentsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.rootnetapp.rootnetintranet.R;
@@ -122,6 +127,7 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
         signatureViewModel.getDialogBoxStateObservable().observe(getViewLifecycleOwner(), this::showDialogBox);
         signatureViewModel.getGoToCustomFieldFormObservable().observe(getViewLifecycleOwner(), this::goToCustomFieldsForm);
         signatureViewModel.getMenuNameSelectedObservable().observe(getViewLifecycleOwner(), this::selectMenuTemplateName);
+        signatureViewModel.getOpenPdfUriObservable().observe(getViewLifecycleOwner(), this::openUriPdf);
     }
 
     @UiThread
@@ -157,6 +163,19 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
                     signatureViewModel.dialogPositive(state.getMessage());
                 })
                 .show();
+    }
+
+    private void openUriPdf(Uri uri) {
+        Intent intent=new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(uri, "application/pdf");
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+           Toast.makeText(getActivity(), "No Application Available to View PDF", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void goToCustomFieldsForm(SignatureCustomFieldShared shared) {
@@ -260,12 +279,18 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
             requestWritePermission();
         }
 
+        Context context = getContext();
+        if (context == null) {
+            return;
+        }
+
+        ContentResolver contentResolver = context.getContentResolver();
         switch (v.getId()) {
             case R.id.signature_pdf_download:
-                signatureViewModel.pdfDownloadClicked(hasWritePermissions);
+                signatureViewModel.pdfDownloadClicked(contentResolver, hasWritePermissions);
                 break;
             case R.id.signature_pdf_signed_request:
-                signatureViewModel.pdfSignedClicked(hasWritePermissions);
+                signatureViewModel.pdfSignedClicked(contentResolver, hasWritePermissions);
                 break;
         }
     }

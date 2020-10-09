@@ -2,7 +2,6 @@ package com.rootnetapp.rootnetintranet.ui.workflowdetail.signature;
 
 import android.content.ContentResolver;
 import android.net.Uri;
-import android.system.ErrnoException;
 import android.text.TextUtils;
 
 import androidx.annotation.StringRes;

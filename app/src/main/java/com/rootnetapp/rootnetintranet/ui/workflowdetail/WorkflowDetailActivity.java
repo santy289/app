@@ -73,6 +73,8 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 .of(this, workflowViewModelFactory)
                 .get(WorkflowDetailViewModel.class);
 
+        workflowDetailViewModel.onStart(getBaseContext().getContentResolver());
+
         SharedPreferences prefs = getSharedPreferences(PreferenceKeys.PREF_SESSION, Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
         String permissionsString = prefs.getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
@@ -227,23 +229,19 @@ public class WorkflowDetailActivity extends AppCompatActivity {
      * the file, will display a {@link Toast} message. Uses a {@link FileProvider} to create the
      * file URI, instead of using the {@link Uri#fromFile(File)} method.
      *
-     * @param pdfFile the file to be opened.
+     * @param fileUri the uri to be opened.
      *
      * @see <a href="https://developer.android.com/reference/android/support/v4/content/FileProvider">FileProvider</a>
      */
     @UiThread
-    private void openPdfFile(File pdfFile) {
-        if (pdfFile == null) return;
+    private void openPdfFile(Uri fileUri) {
+        if (fileUri == null) return;
 
         Intent target = new Intent(Intent.ACTION_VIEW);
-
-        Uri fileUri = FileProvider.getUriForFile(this,
-                this.getApplicationContext().getPackageName() + ".fileprovider", pdfFile);
-
         target.setDataAndType(fileUri, "application/pdf");
-        target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        target.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
+        target.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         Intent intent = Intent.createChooser(target,
                 getString(R.string.workflow_detail_activity_open_file));
         try {

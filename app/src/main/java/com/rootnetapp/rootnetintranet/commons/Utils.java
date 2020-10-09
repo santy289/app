@@ -51,10 +51,8 @@ import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
-import okhttp3.ResponseBody;
 import retrofit2.HttpException;
 
 public class Utils {

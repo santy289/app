@@ -1,6 +1,8 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail;
 
+import android.content.ContentResolver;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -22,7 +24,6 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +72,7 @@ public class WorkflowDetailViewModel extends ViewModel {
 
     protected MutableLiveData<Boolean> showLoading;
 
-    protected LiveData<File> retrieveWorkflowPdfFile;
+    protected LiveData<Uri> retrieveWorkflowPdfFile;
     protected LiveData<Boolean> handleShowLoadingByRepo;
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
@@ -91,7 +92,11 @@ public class WorkflowDetailViewModel extends ViewModel {
         this.showLoading = new MutableLiveData<>();
         this.initUiWithWorkflowListItem = new MutableLiveData<>();
         this.initSoftUiWithWorkflowListItem = new MutableLiveData<>();
-        subscribe();
+
+    }
+
+    public void onStart(ContentResolver contentResolver) {
+        subscribe(contentResolver);
     }
 
     @Override
@@ -220,7 +225,7 @@ public class WorkflowDetailViewModel extends ViewModel {
      * This subscribe function will make map transformations to observe LiveData objects in the
      * repository. Here we will handle all incoming data from the repo.
      */
-    private void subscribe() {
+    private void subscribe(ContentResolver contentResolver) {
         // Transformation for observing the workflow export pdf file
         retrieveWorkflowPdfFile = Transformations.map(
                 mRepository.getExportPdfResponse(),
@@ -239,7 +244,7 @@ public class WorkflowDetailViewModel extends ViewModel {
 
                     String fileName = mWorkflow.getWorkflowTypeKey() + " - " + mWorkflow.getTitle();
                     try {
-                        return Utils.decodePdfFromBase64Binary(base64, fileName);
+                        return Utils.saveBase64PdfToDownloads(contentResolver, base64, fileName);
 
                     } catch (IOException e) {
                         Log.e(TAG, "exportPDF: ", e);

@@ -31,6 +31,7 @@ import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureSignersState;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureTemplateState;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignerItem;
 import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
 
 import java.io.FileNotFoundException;
@@ -532,6 +533,11 @@ public class SignatureViewModel extends ViewModel {
     }
 
     private void onFailure(Throwable throwable) {
+        if (throwable instanceof JsonDataException) {
+            refreshContentFromNetwork(token, workflowTypeId, workflowId);
+            return;
+        }
+
         showLoading.setValue(false);
         dialogBoxState.setValue(new DialogBoxState(
                 R.string.workflow_detail_signature_fragment_title,

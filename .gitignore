@@ -178,3 +178,4 @@ fabric.properties
 
 !/gradle/wrapper/gradle-wrapper.jar
 jarRepositories.xml
+output-metadata.json

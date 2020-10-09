@@ -21,11 +21,6 @@ public class SignatureCustomFieldsAdapter extends RecyclerView.Adapter<Signature
         this.customFields = customFields;
     }
 
-    public void updateFields(List<FieldCustom> fields) {
-        this.customFields = fields;
-        notifyDataSetChanged();
-    }
-
     @NonNull
     @Override
     public SignatureCustomFieldsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

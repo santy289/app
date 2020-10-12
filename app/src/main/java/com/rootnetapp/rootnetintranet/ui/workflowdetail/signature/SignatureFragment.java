@@ -22,7 +22,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.provider.DocumentsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +52,8 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
     private static final int REQUEST_CUSTOM_FORM = 654;
     private static final int REQUEST_EXTERNAL_STORAGE_PERMISSIONS = 745;
 
+    private static final String SAVE_WORKFLOW_TYPE = "SAVE_WORKFLOW_TYPE";
+
     @Inject
     SignatureViewModelFactory signatureViewModelFactory;
     private SignatureViewModel signatureViewModel;
@@ -63,6 +64,14 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
         SignatureFragment fragment = new SignatureFragment();
         fragment.workflowListItem = workflowListItem;
         return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            this.workflowListItem = savedInstanceState.getParcelable(SAVE_WORKFLOW_TYPE);
+        }
     }
 
     @Override
@@ -103,6 +112,12 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
         signatureViewModel.onStart(token,
                 workflowListItem.workflowTypeId,
                 workflowListItem.workflowId);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(SAVE_WORKFLOW_TYPE, workflowListItem);
     }
 
     private String getToken() {

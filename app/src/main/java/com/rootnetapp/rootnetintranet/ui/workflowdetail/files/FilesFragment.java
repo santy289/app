@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.core.content.ContextCompat;
@@ -54,6 +55,9 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
 
     private WorkflowDetailViewModel workflowDetailViewModel;
 
+    private static final String SAVE_WORKFLOW_TYPE = "SAVE_WORKFLOW_TYPE";
+
+
     public FilesFragment() {
         // Required empty public constructor
     }
@@ -62,6 +66,20 @@ public class FilesFragment extends Fragment implements FilesFragmentInterface {
         FilesFragment fragment = new FilesFragment();
         fragment.mWorkflowListItem = item;
         return fragment;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(SAVE_WORKFLOW_TYPE, mWorkflowListItem);
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            this.mWorkflowListItem = savedInstanceState.getParcelable(SAVE_WORKFLOW_TYPE);
+        }
     }
 
     @Override

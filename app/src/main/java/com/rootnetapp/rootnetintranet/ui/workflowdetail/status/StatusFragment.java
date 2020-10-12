@@ -55,6 +55,8 @@ public class StatusFragment extends Fragment {
     protected static final int INDEX_CURRENT_STATUS = 1;
     protected static final int INDEX_NEXT_STATUS = 2;
 
+    private static final String SAVE_WORKFLOW_TYPE = "SAVE_WORKFLOW_TYPE";
+
     public StatusFragment() {
         // Required empty public constructor
     }
@@ -63,6 +65,20 @@ public class StatusFragment extends Fragment {
         StatusFragment fragment = new StatusFragment();
         fragment.mWorkflowListItem = item;
         return fragment;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(SAVE_WORKFLOW_TYPE, mWorkflowListItem);
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            this.mWorkflowListItem = savedInstanceState.getParcelable(SAVE_WORKFLOW_TYPE);
+        }
     }
 
     @Override

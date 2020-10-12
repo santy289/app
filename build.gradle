@@ -72,6 +72,7 @@ ext {
     crashlyticsVersion              = "2.10.1"
     firebaseCrashVersion            = "16.2.1"
     qrGenVersion                    = "2.6.0"
+    sectionedRecyclerView           = "3.2.0"
     PLATFORM = project.properties.get('buildPlatform', 'android')
     PLATFORM_ANDROID = 'android'
     PLATFORM_NETTY = 'netty'

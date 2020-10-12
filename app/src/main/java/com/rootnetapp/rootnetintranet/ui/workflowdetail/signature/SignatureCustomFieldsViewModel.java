@@ -16,8 +16,10 @@ import com.rootnetapp.rootnetintranet.models.ui.general.DialogBoxState;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureCustomFieldFormState;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
+import com.squareup.moshi.Types;
 
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +30,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class SignatureCustomFieldsViewModel extends ViewModel {
-
     private static final String TAG = "CUSTOM_FIELDS_FORM";
     private SignatureCustomFieldsRepository repository;
     private WorkflowListItem workflowListItem;
@@ -36,10 +37,10 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
 
     private MutableLiveData<DialogBoxState> dialogBoxState;
     private MutableLiveData<Boolean> showLoading;
-    private MutableLiveData<SignatureCustomFieldFormState> customFieldsState;
+    private MutableLiveData<List<SignatureCustomFieldFormState>> customFieldsState;
     private MutableLiveData<Boolean> successGoBack;
 
-    private SignatureCustomFieldFormState cachedState;
+    private List<SignatureCustomFieldFormState> cachedState;
     private final List<Fields> cachedIncomingFields;
     private List<SignatureTemplateField> cachedRequiredFields;
     private String token;
@@ -47,7 +48,7 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
 
     LiveData<Boolean> getShowLoadingObservable() { return showLoading; }
     LiveData<DialogBoxState> getDialogBoxStateObservable() { return dialogBoxState; }
-    LiveData<SignatureCustomFieldFormState> getFieldCustomObservable() { return customFieldsState; }
+    LiveData<List<SignatureCustomFieldFormState>> getFieldCustomObservable() { return customFieldsState; }
     LiveData<Boolean> getSuccessGoBackObservable() { return successGoBack; }
 
     public SignatureCustomFieldsViewModel(SignatureCustomFieldsRepository repository) {
@@ -114,42 +115,45 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
      */
     private boolean isValidForm() {
         if (cachedState == null
-                || cachedState.getFieldCustomList() == null
-                || cachedState.getFieldCustomList().size() < 1
-                || cachedRequiredFields == null) {
+                || cachedState.size() < 1) {
             return false;
         }
 
-        if (cachedRequiredFields.size() == 0 ) {
-            // Nothing to validate the form is valid.
+        if (cachedRequiredFields == null || cachedRequiredFields.size() < 1) {
+            // Nothing to validate we can accept the form
             return true;
         }
 
-        List<FieldCustom> customFields = cachedState.getFieldCustomList();
-
         boolean formIsValid = true;
-        for (SignatureTemplateField cachedRequiredField : cachedRequiredFields) {
-            for (FieldCustom customField : customFields) {
-                if (!customField.getName().equals(cachedRequiredField.getName())) {
-                    continue;
+
+        List<SignatureCustomFieldFormState> newValues = new ArrayList<>();
+        SignatureCustomFieldFormState state;
+        for (int i = 0; i < cachedState.size(); i++) {
+            state = cachedState.get(i);
+            List<FieldCustom> customFields = state.getFieldCustomList();
+            for (SignatureTemplateField cachedRequiredField : cachedRequiredFields) {
+                for (FieldCustom customField : customFields) {
+                    if (!customField.getName().equals(cachedRequiredField.getName())) {
+                        continue;
+                    }
+                    if (!TextUtils.isEmpty(customField.getCustomValue())) {
+                        continue;
+                    }
+                    customField.setValid(false);
+                    formIsValid = false;
                 }
-                if (!TextUtils.isEmpty(customField.getCustomValue())) {
-                    continue;
-                }
-                customField.setValid(false);
-                formIsValid = false;
             }
+
         }
 
         if (!formIsValid) {
-            SignatureCustomFieldFormState state = new SignatureCustomFieldFormState(
-                    cachedState.getTitle(),
-                    customFields
+            SignatureCustomFieldFormState newState = new SignatureCustomFieldFormState(
+                    "",
+                    null
             );
-            customFieldsState.setValue(state);
-            cachedState = state;
+            newValues.add(newState);
+            customFieldsState.setValue(newValues);
         }
-
         return formIsValid;
     }
 
@@ -180,31 +184,39 @@ public class SignatureCustomFieldsViewModel extends ViewModel {
         Disposable disposable = Observable.fromCallable(() -> {
             String jsonFieldConfig = workflowListItem.customFieldsJsonConfig;
             Moshi moshi = new Moshi.Builder().build();
-            JsonAdapter<Fields> jsonAdapter = moshi.adapter(Fields.class);
+            ParameterizedType listData = Types.newParameterizedType(List.class, Fields.class);
+            JsonAdapter<List<Fields>> jsonAdapter = moshi.adapter(listData);
+
             try {
-                Fields fields = jsonAdapter.fromJson(jsonFieldConfig);
+
+                List<Fields> fields = jsonAdapter.fromJson(jsonFieldConfig);
                 if (fields == null
-                        || fields.getCustomFields() == null
-                        || fields.getCustomFields().size() < 1) {
+                        || fields.size() < 1) {
                     showErrorActionNotCompleted();
                     return null;
                 }
 
-                String title = "";
-                if (fields.getUserRequired() != null && fields.getUserRequired().getFullName() != null) {
-                    title = fields.getUserRequired().getFullName();
+                List<SignatureCustomFieldFormState> recyclerViewItems = new ArrayList<>();
+                for (Fields fieldGroup : fields) {
+
+                    String title = "";
+                    if (fieldGroup.getUserRequired() != null && fieldGroup.getUserRequired().getFullName() != null) {
+                        title = fieldGroup.getUserRequired().getFullName();
+                    }
+
+                    if (fieldGroup.getRequiredFields() != null) {
+                        cachedRequiredFields = fieldGroup.getRequiredFields();
+                    }
+
+                    cachedIncomingFields.add(fieldGroup);
+
+                    recyclerViewItems.add(new SignatureCustomFieldFormState(
+                            title,
+                            fieldGroup.getCustomFields()
+                    ));
                 }
 
-                if (fields.getRequiredFields() != null) {
-                    cachedRequiredFields = fields.getRequiredFields();
-                }
-
-                cachedIncomingFields.add(fields);
-                cachedRequiredFields = fields.getRequiredFields();
-                return new SignatureCustomFieldFormState(
-                        title,
-                        fields.getCustomFields()
-                );
+                return recyclerViewItems;
             } catch (IOException e) {
                 Log.d(TAG, "refreshContent: " + e.getMessage());
                 return null;

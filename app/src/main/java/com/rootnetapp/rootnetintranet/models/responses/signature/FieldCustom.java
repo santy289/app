@@ -15,6 +15,24 @@ public class FieldCustom {
     private String type;
     private String workflowModel;
     private boolean isValid = true;
+    private String customUserNameItemUiList;
+    private String customTypeItemUiList;
+
+    public String getCustomUserNameItemUiList() {
+        return customUserNameItemUiList;
+    }
+
+    public void setCustomUserNameItemUiList(String customUserNameItemUiList) {
+        this.customUserNameItemUiList = customUserNameItemUiList;
+    }
+
+    public String getCustomTypeItemUiList() {
+        return customTypeItemUiList;
+    }
+
+    public void setCustomTypeItemUiList(String customTypeItemUiList) {
+        this.customTypeItemUiList = customTypeItemUiList;
+    }
 
     public boolean isValid() {
         return isValid;

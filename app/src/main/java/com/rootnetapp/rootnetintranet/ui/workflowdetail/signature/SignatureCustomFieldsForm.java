@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.UiThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -21,16 +22,23 @@ import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.databinding.SignatureCustomFieldsFormBinding;
+import com.rootnetapp.rootnetintranet.models.responses.signature.FieldCustom;
 import com.rootnetapp.rootnetintranet.models.ui.general.DialogBoxState;
 import com.rootnetapp.rootnetintranet.models.ui.signature.SignatureCustomFieldFormState;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.signature.adapters.CustomFieldUserSection;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.signature.adapters.SignatureCustomFieldsAdapter;
 
 
+import java.util.List;
+
 import javax.inject.Inject;
 
-public class SignatureCustomFieldsForm extends AppCompatActivity {
+import io.github.luizgrp.sectionedrecyclerviewadapter.SectionedRecyclerViewAdapter;
+import io.github.luizgrp.sectionedrecyclerviewadapter.compat.SectionedRecyclerViewAdapterV2Compat;
 
+
+public class SignatureCustomFieldsForm extends AppCompatActivity implements ViewTextUpdate {
     public static final String EXTRA_WORKFLOW_LIST_ITEM = "Extra.WorkflowListItem";
     public static final String EXTRA_TEMPLATE_SELECTED_ID = "Extra.SignatureTemplateId";
     public static final int TEMPLATE_ID_NOT_FOUND = 99999;
@@ -86,29 +94,47 @@ public class SignatureCustomFieldsForm extends AppCompatActivity {
         viewModel.getSuccessGoBackObservable().observe(this, this::handleResult);
     }
 
+    SectionedRecyclerViewAdapter sectionAdapter;
+
     /**
      * Updates the fields in the form. If the adapter was already created we only need to notify
      * the change to the adapter. We are caching in the view model the data structure, thus we
      * can update it from the view model and the adapter will already have the latest version.
      *
-     * @param state
+     * @param states
      */
-    private void updateCustomFieldsList(SignatureCustomFieldFormState state) {
+    private void updateCustomFieldsList(List<SignatureCustomFieldFormState> states) {
         RecyclerView.LayoutManager manager = binding.customFieldsList.getLayoutManager();
         if (manager == null) {
             binding.customFieldsList.setLayoutManager(new LinearLayoutManager(this));
         }
 
-        if (state.getFieldCustomList() != null) {
-            if (binding.customFieldsList.getAdapter() == null) {
-                binding.customFieldsList.setAdapter(new SignatureCustomFieldsAdapter(
-                        state.getFieldCustomList()));
-            } else {
-                binding.customFieldsList.getAdapter().notifyDataSetChanged();
-            }
+        if (states == null) {
+            // TODO consider an error message?
+            return;
         }
 
-        binding.customFieldsTitle.setText(state.getTitle());
+        if (binding.customFieldsList.getAdapter() == null) {
+            sectionAdapter = new SectionedRecyclerViewAdapter();
+            for (SignatureCustomFieldFormState state : states) {
+                CustomFieldUserSection section = new CustomFieldUserSection(state, this);
+                sectionAdapter.addSection(section);
+            }
+            binding.customFieldsList.setAdapter(sectionAdapter);
+        } else {
+            binding.customFieldsList.getAdapter().notifyDataSetChanged();
+        }
+
+    }
+
+    @Override
+    public void onItemUpdate(@NonNull CustomFieldUserSection section, int itemAdapterPosition, String newValue) {
+        if (sectionAdapter == null) {
+            return;
+        }
+        int position = sectionAdapter.getPositionInSection(itemAdapterPosition);
+        FieldCustom fieldCustom = section.getItem(position);
+        fieldCustom.setCustomValue(newValue);
     }
 
     @Override
@@ -162,4 +188,6 @@ public class SignatureCustomFieldsForm extends AppCompatActivity {
                 })
                 .show();
     }
+
+
 }

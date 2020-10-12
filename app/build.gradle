@@ -88,6 +88,9 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-moshi:$rootProject.retrofit"
     implementation "me.jessyan:retrofit-url-manager:$rootProject.retrofitUrlInterceptorVersion"
 
+    implementation "io.github.luizgrp.sectionedrecyclerviewadapter:sectionedrecyclerviewadapter:$rootProject.sectionedRecyclerView"
+
+
     implementation "me.riddhimanadib.form-master:form-master:1.1.0"
     implementation "com.leinardi.android:speed-dial:2.0.0"
 

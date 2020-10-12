@@ -22,6 +22,7 @@ import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
@@ -37,6 +38,7 @@ public class FlowchartFragment extends Fragment {
     private FragmentWorkflowDetailDiagramBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
     private int loadCounter, localStorageCount, localStorageCompleted;
+    private static final String SAVE_WORKFLOW_TYPE = "SAVE_WORKFLOW_TYPE";
 
     public FlowchartFragment() {
         // Required empty public constructor
@@ -49,8 +51,17 @@ public class FlowchartFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(SAVE_WORKFLOW_TYPE, mWorkflowListItem);
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            this.mWorkflowListItem = savedInstanceState.getParcelable(SAVE_WORKFLOW_TYPE);
+        }
     }
 
     @Override
@@ -76,7 +87,7 @@ public class FlowchartFragment extends Fragment {
     }
 
     private void subscribe() {
-        flowchartViewModel.getObservableWebViewData().observe(this, this::setupWebView);
+        flowchartViewModel.getObservableWebViewData().observe(getViewLifecycleOwner(), this::setupWebView);
     }
 
     /**

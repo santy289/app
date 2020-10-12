@@ -36,6 +36,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.core.content.ContextCompat;
@@ -61,6 +62,7 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
 
     private WorkflowDetailViewModel workflowDetailViewModel;
     private boolean isFromDetails;
+    private static final String SAVE_WORKFLOW_TYPE = "SAVE_WORKFLOW_TYPE";
 
     public CommentsFragment() {
         // Required empty public constructor
@@ -79,6 +81,20 @@ public class CommentsFragment extends Fragment implements CommentsFragmentInterf
         fragment.mWorkflowListItem = item;
         fragment.isFromDetails = isFromDetails;
         return fragment;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(SAVE_WORKFLOW_TYPE, mWorkflowListItem);
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            this.mWorkflowListItem = savedInstanceState.getParcelable(SAVE_WORKFLOW_TYPE);
+        }
     }
 
     @Override

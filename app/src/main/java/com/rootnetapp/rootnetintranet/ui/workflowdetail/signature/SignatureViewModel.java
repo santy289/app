@@ -32,8 +32,10 @@ import com.rootnetapp.rootnetintranet.models.ui.signature.SignerItem;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
+import com.squareup.moshi.Types;
 
 import java.io.FileNotFoundException;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -429,9 +431,11 @@ public class SignatureViewModel extends ViewModel {
         if (cachedRequiredFields != null) {
             list.setRequiredFields(cachedRequiredFields);
         }
+
         Moshi moshi = new Moshi.Builder().build();
-        JsonAdapter<Fields> jsonAdapter = moshi.adapter(Fields.class);
-        String json = jsonAdapter.toJson(list);
+        ParameterizedType listData = Types.newParameterizedType(List.class, Fields.class);
+        JsonAdapter<List<Fields>> jsonAdapter = moshi.adapter(listData);
+        String json = jsonAdapter.toJson(fields);
 
         TemplateSignature template = getTemplateCurrentlySelected();
         SignatureCustomFieldShared customFieldShared = new SignatureCustomFieldShared(

@@ -32,19 +32,6 @@
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <TextView
-                android:id="@+id/custom_fields_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="10dp"
-                android:textSize="20sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="Admin User" />
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/custom_fields_list"
                 android:layout_width="0dp"
@@ -56,7 +43,7 @@
                 app:layout_constraintBottom_toTopOf="@+id/custom_fields_save"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/custom_fields_title" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <Button
                 android:id="@+id/custom_fields_save"

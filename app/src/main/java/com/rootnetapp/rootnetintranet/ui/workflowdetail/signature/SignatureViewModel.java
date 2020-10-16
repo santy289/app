@@ -156,6 +156,7 @@ public class SignatureViewModel extends ViewModel {
      * @param result
      */
     public void handleBackFromCustomFieldForm(boolean result) {
+        goToCustomFieldsForm.setValue(null);
         if (!result) {
             return;
         }
@@ -321,6 +322,14 @@ public class SignatureViewModel extends ViewModel {
                 false
         ));
         openPdfUri.setValue(result);
+    }
+
+    public void clearDialogBoxState() {
+        dialogBoxState.setValue(null);
+    }
+
+    public void clearOpenPdfRequest() {
+        openPdfUri.setValue(null);
     }
 
     private io.reactivex.Observable<Uri> handleFileResponse(ContentResolver contentResolver, SignatureFileResponse responseBody) {

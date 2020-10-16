@@ -118,6 +118,7 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(SAVE_WORKFLOW_TYPE, workflowListItem);
+
     }
 
     private String getToken() {
@@ -155,7 +156,7 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
     }
 
     private void showDialogBox(DialogBoxState state) {
-        if (getContext() == null) {
+        if (getContext() == null || state == null) {
             return;
         }
         Resources res = getResources();
@@ -181,12 +182,18 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
     }
 
     private void openUriPdf(Uri uri) {
+        if (uri == null) {
+            return;
+        }
+
         Intent intent=new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(uri, "application/pdf");
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         try {
+            signatureViewModel.clearOpenPdfRequest();
+            signatureViewModel.clearDialogBoxState();
             startActivity(intent);
         } catch (ActivityNotFoundException e) {
            Toast.makeText(getActivity(), "No Application Available to View PDF", Toast.LENGTH_SHORT).show();
@@ -194,6 +201,9 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
     }
 
     private void goToCustomFieldsForm(SignatureCustomFieldShared shared) {
+        if (shared == null) {
+            return;
+        }
         workflowListItem.customFieldsJsonConfig = shared.jsonFieldConfig;
         Intent intent = new Intent(getActivity(), SignatureCustomFieldsForm.class);
         intent.putExtra(SignatureCustomFieldsForm.EXTRA_WORKFLOW_LIST_ITEM, workflowListItem);
@@ -203,8 +213,8 @@ public class SignatureFragment extends Fragment implements AdapterView.OnItemCli
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == REQUEST_CUSTOM_FORM && resultCode == RESULT_OK) {
-            signatureViewModel.handleBackFromCustomFieldForm(true);
+        if (requestCode == REQUEST_CUSTOM_FORM) {
+            signatureViewModel.handleBackFromCustomFieldForm(resultCode == RESULT_OK);
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);

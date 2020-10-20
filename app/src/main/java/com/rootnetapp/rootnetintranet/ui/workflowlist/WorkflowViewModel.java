@@ -1085,7 +1085,7 @@ public class WorkflowViewModel extends ViewModel {
                         filterSettings.isCheckedStatus(),
                         token,
                         id,
-                        ""); //search text is already used by the web service
+                        filterSettings.getSearchText()); //search text is already used by the web service
                 isScrollToTop = true;
                 reloadWorkflowsList(lifecycleOwner);
                 break;

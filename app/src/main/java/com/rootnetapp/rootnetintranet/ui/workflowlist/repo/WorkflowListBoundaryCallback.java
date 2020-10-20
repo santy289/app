@@ -75,8 +75,9 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
             ApiInterface service,
             String token,
             int currentPage,
-            IncomingWorkflowsCallback workflowsCallback) {
-        this(service, token, currentPage, workflowsCallback, "", NO_WORKFLOW_TYPE, "");
+            IncomingWorkflowsCallback workflowsCallback,
+            String searchText) {
+        this(service, token, currentPage, workflowsCallback, "", NO_WORKFLOW_TYPE, searchText);
     }
 
     @Override
@@ -140,7 +141,7 @@ public class WorkflowListBoundaryCallback extends PagedList.BoundaryCallback<Wor
             return;
         }
 
-        int userId = Integer.valueOf(id);
+        int userId = Integer.parseInt(id);
         disposable = service
                 .getMyPendingWorkflowsDb(
                         token,

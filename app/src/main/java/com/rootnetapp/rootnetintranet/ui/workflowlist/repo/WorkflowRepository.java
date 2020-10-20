@@ -124,7 +124,8 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 service,
                 token,
                 currentPage,
-                this
+                this,
+                ""
         );
 
         allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)
@@ -328,7 +329,8 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                     service,
                     token,
                     currentPage,
-                    this
+                    this,
+                    TextUtils.isEmpty(searchText) ? "" : searchText
             );
 
             allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)

@@ -988,7 +988,8 @@ public class WorkflowViewModel extends ViewModel {
      * @param lifecycleOwner
      */
     protected void filterBySearchText(String searchText, LifecycleOwner lifecycleOwner) {
-        filterSettings.setSearchText(searchText);
+        String normalizedText = WorkflowDb.getNormalizedString(searchText);
+        filterSettings.setSearchText(normalizedText);
 
         showLoading.setValue(true);
         loadWorkflowsByFilters(filterSettings, lifecycleOwner);

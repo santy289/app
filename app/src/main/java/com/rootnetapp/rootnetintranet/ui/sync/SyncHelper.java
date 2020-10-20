@@ -287,6 +287,9 @@ public class SyncHelper {
     private void getWorkflowDbSuccess(WorkflowResponseDb workflowsResponse) {
         workflowDbs.addAll(workflowsResponse.getList());
         Disposable disposable = Observable.fromCallable(() -> {
+            for (WorkflowDb workflowDb : workflowDbs) {
+                workflowDb.normalizeColumns();
+            }
             WorkflowDbDao workflowDbDao = database.workflowDbDao();
             // TODO put in a transaction DAO function
             workflowDbDao.deleteAllWorkflows();

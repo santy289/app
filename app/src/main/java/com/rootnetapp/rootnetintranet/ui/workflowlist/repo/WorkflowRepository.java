@@ -157,7 +157,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         } else {
             queryString = baseWorkflowListQuery +
                     "WHERE workflowdb.status = ? " +
-                    "AND (workflowdb.title LIKE '%' || ? || '%' OR WorkflowTypeDb.name LIKE '%' || ? || '%' OR workflowdb.description LIKE '%' || ? || '%' OR workflowdb.workflow_type_key LIKE '%' || ? || '%' OR workflowdb.full_name LIKE '%' || ? || '%') " +
+                    "AND (workflowdb.title_normalized LIKE '%' || ? || '%' OR WorkflowTypeDb.name LIKE '%' || ? || '%' OR workflowdb.description_normalized LIKE '%' || ? || '%' OR workflowdb.workflow_type_key LIKE '%' || ? || '%' OR workflowdb.full_name LIKE '%' || ? || '%') " +
                     "ORDER BY workflowdb.created_at DESC";
             objects = new Object[]{status, searchText, searchText, searchText, searchText,
                                    searchText};
@@ -189,7 +189,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
             queryString = baseWorkflowListQuery +
                     "WHERE (workflowtypedb.original_id = ? OR workflowtypedb.id = ?)" +
                     "AND workflowdb.status = ? " +
-                    "AND (workflowdb.title LIKE '%' || ? || '%' OR WorkflowTypeDb.name LIKE '%' || ? || '%' OR workflowdb.description LIKE '%' || ? || '%' OR workflowdb.workflow_type_key LIKE '%' || ? || '%' OR workflowdb.full_name LIKE '%' || ? || '%') " +
+                    "AND (workflowdb.title_normalized LIKE '%' || ? || '%' OR WorkflowTypeDb.name LIKE '%' || ? || '%' OR workflowdb.description LIKE '%' || ? || '%' OR workflowdb.workflow_type_key LIKE '%' || ? || '%' OR workflowdb.full_name LIKE '%' || ? || '%') " +
                     "ORDER BY workflowdb.created_at DESC";
             objects = new Object[]{originalTypeId, originalTypeId, status, searchText, searchText,
                                    searchText, searchText, searchText};
@@ -225,7 +225,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
             queryString = baseWorkflowListQuery +
                     "WHERE (workflowtypedb.original_id = ? OR workflowtypedb.id = ?)" +
                     "AND workflowdb.status = ? " +
-                    "AND (workflowdb.title LIKE '%' || ? || '%' OR WorkflowTypeDb.name LIKE '%' || ? || '%' OR workflowdb.description LIKE '%' || ? || '%' OR workflowdb.workflow_type_key LIKE '%' || ? || '%' OR workflowdb.full_name LIKE '%' || ? || '%')";
+                    "AND (workflowdb.title_normalized LIKE '%' || ? || '%' OR WorkflowTypeDb.name LIKE '%' || ? || '%' OR workflowdb.description LIKE '%' || ? || '%' OR workflowdb.workflow_type_key LIKE '%' || ? || '%' OR workflowdb.full_name LIKE '%' || ? || '%')";
             objects = new Object[]{originalTypeId, originalTypeId, status, searchText, searchText,
                                    searchText, searchText, searchText};
         }
@@ -261,7 +261,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         } else {
             queryString = baseWorkflowListQuery +
                     "WHERE workflowdb.status = ? " +
-                    "AND (workflowdb.title LIKE '%' || ? || '%' OR WorkflowTypeDb.name LIKE '%' || ? || '%' OR workflowdb.description LIKE '%' || ? || '%' OR workflowdb.workflow_type_key LIKE '%' || ? || '%' OR workflowdb.full_name LIKE '%' || ? || '%')";
+                    "AND (workflowdb.title_normalized LIKE '%' || ? || '%' OR WorkflowTypeDb.name LIKE '%' || ? || '%' OR workflowdb.description LIKE '%' || ? || '%' OR workflowdb.workflow_type_key LIKE '%' || ? || '%' OR workflowdb.full_name LIKE '%' || ? || '%')";
             objects = new Object[]{status, searchText, searchText, searchText, searchText,
                                    searchText};
         }
@@ -362,11 +362,14 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
     /**
      * Inserts workflows without deleting any workflows previously created.
      *
-     * @param worflows
+     * @param workflows
      */
-    public void insertWorkflows(List<WorkflowDb> worflows) {
+    public void insertWorkflows(List<WorkflowDb> workflows) {
         Disposable disposable = Observable.fromCallable(() -> {
-            workflowDbDao.insertWorkflows(worflows);
+            for (WorkflowDb workflowDb : workflows) {
+                workflowDb.normalizeColumns();
+            }
+            workflowDbDao.insertWorkflows(workflows);
             callback.updateIsLoading(false);
             return true;
         }).subscribeOn(Schedulers.io())
@@ -387,6 +390,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
 
     public void insertWorkflow(WorkflowDb workflow) {
         Disposable disposable = Completable.fromCallable(() -> {
+            workflow.normalizeColumns();
             workflowDbDao.insertWorkflow(workflow);
             return true;
         }).subscribeOn(Schedulers.io())
@@ -397,8 +401,12 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
 
     private void workflowDbSuccessFilter(WorkflowResponseDb workflowsResponse) {
         Disposable disposable = Observable.fromCallable(() -> {
+            List<WorkflowDb> workflows = workflowsResponse.getList();
+            for (WorkflowDb workflowDb : workflows) {
+                workflowDb.normalizeColumns();
+            }
             workflowDbDao.deleteAllWorkflows();
-            workflowDbDao.insertWorkflows(workflowsResponse.getList());
+            workflowDbDao.insertWorkflows(workflows);
             return true;
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

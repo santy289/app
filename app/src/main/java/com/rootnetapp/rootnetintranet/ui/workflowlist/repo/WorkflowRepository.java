@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.workflowlist.repo;
 
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -126,7 +127,8 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 token,
                 currentPage,
                 this,
-                ""
+                "",
+                new ArrayMap<>()
         );
 
         allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)
@@ -147,7 +149,8 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
      * @param searchText
      */
     public void rawQueryWorkflowListByFilters(boolean status, String token, String id,
-                                              String searchText, int workflowTypeId) {
+                                              String searchText, int workflowTypeId,
+                                              Map<String, Object> queryOptions) {
         Object[] objects;
         String queryString;
         if (TextUtils.isEmpty(searchText)) {
@@ -165,9 +168,9 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         }
 
         if (workflowTypeId == NO_TYPE_SELECTED) {
-            startRawQuery(queryString, token, objects, id, searchText);
+            startRawQuery(queryString, token, objects, id, searchText, queryOptions);
         } else {
-            startRawQuery(queryString, token, objects, id, workflowTypeId, searchText);
+            startRawQuery(queryString, token, objects, id, workflowTypeId, searchText, queryOptions);
         }
     }
 
@@ -182,7 +185,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
      * @param searchText
      */
     public void rawQueryWorkflowListByFilters(boolean status, int originalTypeId, String token,
-                                              String id, String searchText) {
+                                              String id, String searchText, Map<String, Object> queryOptions) {
         Object[] objects;
         String queryString;
         if (TextUtils.isEmpty(searchText)) {
@@ -201,7 +204,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                                    searchText, searchText, searchText};
         }
         // TODO pass the workflowTypeId as well we need it later. and modify the other functions too.
-        startRawQuery(queryString, token, objects, id, originalTypeId, searchText);
+        startRawQuery(queryString, token, objects, id, originalTypeId, searchText, queryOptions);
     }
 
     /**
@@ -218,7 +221,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
      */
     public void rawQueryWorkflowListByFilters(boolean status, int originalTypeId, String column,
                                               boolean isDescending, String token, String id,
-                                              String searchText) {
+                                              String searchText,  Map<String, Object> queryOptions) {
         String queryString;
         Object[] objects;
 
@@ -231,7 +234,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
             queryString = baseWorkflowListQuery +
                     "WHERE (workflowtypedb.original_id = ? OR workflowtypedb.id = ?)" +
                     "AND workflowdb.status = ? " +
-                    "AND (workflowdb.title_normalized LIKE '%' || ? || '%' OR WorkflowTypeDb.name LIKE '%' || ? || '%' OR workflowdb.description LIKE '%' || ? || '%' OR workflowdb.workflow_type_key LIKE '%' || ? || '%' OR workflowdb.full_name LIKE '%' || ? || '%')";
+                    "AND (workflowdb.title_normalized LIKE '%' || ? || '%' OR WorkflowTypeDb.name LIKE '%' || ? || '%' OR workflowdb.description_normalized LIKE '%' || ? || '%' OR workflowdb.workflow_type_key LIKE '%' || ? || '%' OR workflowdb.full_name LIKE '%' || ? || '%')";
             objects = new Object[]{originalTypeId, originalTypeId, status, searchText, searchText,
                                    searchText, searchText, searchText};
         }
@@ -241,7 +244,11 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
             queryString += "ORDER BY " + column + " ASC";
         }
 
-        startRawQuery(queryString, token, objects, id, searchText);
+        if (originalTypeId == NO_TYPE_SELECTED) {
+            startRawQuery(queryString, token, objects, id, searchText, queryOptions);
+        } else {
+            startRawQuery(queryString, token, objects, id, originalTypeId, searchText, queryOptions);
+        }
     }
 
     /**
@@ -256,7 +263,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
      * @param searchText
      */
     public void rawQueryWorkflowListByFilters(boolean status, String column, boolean isDescending,
-                                              String token, String id, String searchText) {
+                                              String token, String id, String searchText,  Map<String, Object> queryOptions) {
         String queryString;
         Object[] objects;
 
@@ -267,7 +274,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         } else {
             queryString = baseWorkflowListQuery +
                     "WHERE workflowdb.status = ? " +
-                    "AND (workflowdb.title_normalized LIKE '%' || ? || '%' OR WorkflowTypeDb.name LIKE '%' || ? || '%' OR workflowdb.description LIKE '%' || ? || '%' OR workflowdb.workflow_type_key LIKE '%' || ? || '%' OR workflowdb.full_name LIKE '%' || ? || '%')";
+                    "AND (workflowdb.title_normalized LIKE '%' || ? || '%' OR WorkflowTypeDb.name LIKE '%' || ? || '%' OR workflowdb.description_normalized LIKE '%' || ? || '%' OR workflowdb.workflow_type_key LIKE '%' || ? || '%' OR workflowdb.full_name LIKE '%' || ? || '%')";
             objects = new Object[]{status, searchText, searchText, searchText, searchText,
                                    searchText};
         }
@@ -276,19 +283,19 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
         } else {
             queryString += "ORDER BY " + column + " ASC ";
         }
-        startRawQuery(queryString, token, objects, id, searchText);
+        startRawQuery(queryString, token, objects, id, searchText, queryOptions);
     }
 
     private void startRawQuery(String queryString, String token, Object[] objects, String id,
-                               String searchText) {
+                               String searchText, Map<String, Object> queryOptions) {
         SimpleSQLiteQuery sqlQuery = new SimpleSQLiteQuery(queryString, objects);
-        getWorkflowsByFilters(token, sqlQuery, id, NO_WORKFLOW_TYPE, searchText);
+        getWorkflowsByFilters(token, sqlQuery, id, NO_WORKFLOW_TYPE, searchText, queryOptions);
     }
 
     private void startRawQuery(String queryString, String token, Object[] objects, String id,
-                               int workflowTypeId, String searchText) {
+                               int workflowTypeId, String searchText, Map<String, Object> queryOptions) {
         SimpleSQLiteQuery sqlQuery = new SimpleSQLiteQuery(queryString, objects);
-        getWorkflowsByFilters(token, sqlQuery, id, workflowTypeId, searchText);
+        getWorkflowsByFilters(token, sqlQuery, id, workflowTypeId, searchText, queryOptions);
     }
 
     /**
@@ -303,8 +310,12 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
      * @param id
      * @param workflowTypeId
      */
-    private void getWorkflowsByFilters(String token, SupportSQLiteQuery query, String id,
-                                       int workflowTypeId, String searchText) {
+    private void getWorkflowsByFilters(String token,
+                                       SupportSQLiteQuery query,
+                                       String id,
+                                       int workflowTypeId,
+                                       String searchText,
+                                       Map<String, Object> queryOptions) {
         DataSource.Factory<Integer, WorkflowListItem> factory = workflowDbDao
                 .getWorkflowsWithFilter(query);
 
@@ -320,7 +331,8 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                     this,
                     "",
                     workflowTypeId,
-                    searchText
+                    searchText, //TODO remove searchTExt, and workflowTypeID
+                    queryOptions
             );
 
             allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)
@@ -336,7 +348,8 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                     token,
                     currentPage,
                     this,
-                    TextUtils.isEmpty(searchText) ? "" : searchText
+                    TextUtils.isEmpty(searchText) ? "" : searchText,
+                    queryOptions
             );
 
             allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)
@@ -352,7 +365,8 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 this,
                 id,
                 NO_WORKFLOW_TYPE,
-                searchText
+                searchText,
+                queryOptions
         );
 
         allWorkflows = new LivePagedListBuilder<>(factory, pagedListConfig)

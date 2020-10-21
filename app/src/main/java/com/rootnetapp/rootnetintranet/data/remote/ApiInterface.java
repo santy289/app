@@ -220,6 +220,14 @@ public interface ApiInterface {
                                                   @Query("page") int page,
                                                   @Query("workflow_type") boolean showTypeDetails,
                                                   @Query("query") String searchText);
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?")
+    Observable<WorkflowResponseDb> getWorkflowsDbWithQueryOptions(@Header("Authorization") String authorization,
+                                                                  @Query("limit") int limit,
+                                                                  @Query("open") boolean open,
+                                                                  @Query("page") int page,
+                                                                  @Query("workflow_type") boolean showTypeDetails,
+                                                                  @QueryMap Map<String, Object> options);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?")
@@ -249,14 +257,6 @@ public interface ApiInterface {
                                                            @QueryMap Map<String, Object> options);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows?")
-    Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(@Header("Authorization") String authorization,
-                                                           @Query("limit") int limit,
-                                                           @Query("page") int page,
-                                                           @Query("workflow_type") boolean showTypeDetails,
-                                                           @QueryMap Map<String, Object> options);
-
-    @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?status=true")
     Observable<WorkflowResponseDb> getWorkflowsDbFilteredByDynamicFields(@Header("Authorization") String authorization,
                                                                          @Query("limit") int limit,
@@ -273,9 +273,16 @@ public interface ApiInterface {
                                                   @Query("open") boolean open,
                                                   @Query("page") int page,
                                                   @Query("workflow_type") boolean showTypeDetails,
-                                                  @Query("responsible_id") int profileId,
-                                                  @Query("workflow_metadata") String metaData,
-                                                  @Query("query") String searchText);
+                                                  @Query("responsible_id") int profileId);
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?status=true")
+    Observable<WorkflowResponseDb> getMyPendingWorkflowsDb(@Header("Authorization") String authorization,
+                                                           @Query("limit") int limit,
+                                                           @Query("open") boolean open,
+                                                           @Query("page") int page,
+                                                           @Query("workflow_type") boolean showTypeDetails,
+                                                           @Query("responsible_id") int profileId,
+                                                           @QueryMap Map<String, Object> options);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?")
@@ -288,7 +295,13 @@ public interface ApiInterface {
                                                            @Query("workflow_type_id") int workflowTypeId,
                                                            @Query("query") String searchText);
 
-
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?")
+    Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(@Header("Authorization") String authorization,
+                                                             @Query("limit") int limit,
+                                                             @Query("page") int page,
+                                                             @Query("workflow_type") boolean showTypeDetails,
+                                                             @QueryMap Map<String, Object> options);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflow/overview?")

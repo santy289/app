@@ -37,6 +37,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.NO_TYPE_SELECTED;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.repo.WorkflowListBoundaryCallback.NO_WORKFLOW_TYPE;
 
 public class WorkflowRepository implements IncomingWorkflowsCallback {
@@ -146,7 +147,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
      * @param searchText
      */
     public void rawQueryWorkflowListByFilters(boolean status, String token, String id,
-                                              String searchText) {
+                                              String searchText, int workflowTypeId) {
         Object[] objects;
         String queryString;
         if (TextUtils.isEmpty(searchText)) {
@@ -162,7 +163,12 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
             objects = new Object[]{status, searchText, searchText, searchText, searchText,
                                    searchText};
         }
-        startRawQuery(queryString, token, objects, id, searchText);
+
+        if (workflowTypeId == NO_TYPE_SELECTED) {
+            startRawQuery(queryString, token, objects, id, searchText);
+        } else {
+            startRawQuery(queryString, token, objects, id, workflowTypeId, searchText);
+        }
     }
 
     /**
@@ -430,7 +436,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                         false,
                         options)
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread()) // TODO SUCCESS SHOULD BE ONE SPEICFIC FOR FILTERS
                 .subscribe(this::workflowDbSuccessFilter, throwable -> {
                     Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
                     handleRepoError.postValue(true);

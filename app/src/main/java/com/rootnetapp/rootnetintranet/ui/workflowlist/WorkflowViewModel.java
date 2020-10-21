@@ -64,7 +64,7 @@ import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.UN
 
 public class WorkflowViewModel extends ViewModel {
 
-    public static final int NO_TYPE_SELECTED = 0;
+    public static final int NO_TYPE_SELECTED = -44;
     public static final int WORKFLOW_TYPE_FIELD = -98;
     public static final int REQUEST_WORKFLOW_DETAIL = 26;
 
@@ -1086,7 +1086,8 @@ public class WorkflowViewModel extends ViewModel {
                         filterSettings.isCheckedStatus(),
                         token,
                         id,
-                        filterSettings.getSearchText()); //search text is already used by the web service
+                        filterSettings.getSearchText(),
+                        filterSettings.getWorkflowTypeId()); //search text is already used by the web service
                 isScrollToTop = true;
                 reloadWorkflowsList(lifecycleOwner);
                 break;

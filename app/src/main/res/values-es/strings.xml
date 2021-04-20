@@ -170,6 +170,7 @@
     <string name="reply">Responder</string>
     <string name="no_items">Actualmente no hay items para sus parametros de búsqueda.</string>
     <string name="synchronizing">Sincronizando</string>
+    <string name="syncErrorNoPermission">No se encontraron permisos para este usuario</string>
     <string name="every_10_mins">Cada 10 mins</string>
     <string name="last_sync">Último sync:</string>
     <string name="product_not_enabled">Este producto no ha sido asignado para tu domain.</string>

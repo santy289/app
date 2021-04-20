@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.rootnetapp.rootnetintranet.BuildConfig;
+import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -30,6 +31,7 @@ import com.rootnetapp.rootnetintranet.models.responses.websocket.OptionsSettings
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
+import com.rootnetapp.rootnetintranet.models.ui.general.Message;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -53,6 +55,7 @@ public class SyncHelper {
     private MutableLiveData<String> saveToPreference;
     MutableLiveData<String[]> saveStringToPreference;
     MutableLiveData<Integer> saveIdToPreference;
+    MutableLiveData<Message> message;
 
     private ApiInterface apiInterface;
     private AppDatabase database;
@@ -79,6 +82,7 @@ public class SyncHelper {
         this.profiles = new ArrayList<>();
         this.saveIdToPreference = new MutableLiveData<>();
         this.saveStringToPreference = new MutableLiveData<>();
+        this.message = new MutableLiveData<>();
     }
 
     protected ApiInterface getApiInterface() {
@@ -426,6 +430,8 @@ public class SyncHelper {
         Object permissionsObj = loggedUser.getPermissions();
 
         if (!(permissionsObj instanceof Map)) {
+            Message messageModel = new Message(R.string.syncErrorNoPermission);
+            message.postValue(messageModel);
             proceedWithUnhandledException();
             return;
         }

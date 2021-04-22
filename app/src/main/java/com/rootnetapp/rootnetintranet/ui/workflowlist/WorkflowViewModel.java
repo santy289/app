@@ -1175,11 +1175,11 @@ public class WorkflowViewModel extends ViewModel {
             loadWorkflowsByFilters(filterSettings, lifecycleOwner);
         } else {
             showLoading.setValue(true);
-
             liveWorkflows.removeObservers(
                     lifecycleOwner); // TODO try putting this back and maybe it works and delete from handleWorkflowTypeFilters first line.
             liveWorkflows = workflowRepository.getAllWorkflows();
             addWorkflowObserver.postValue(true);
+            showLoading.setValue(false);
         }
     }
 

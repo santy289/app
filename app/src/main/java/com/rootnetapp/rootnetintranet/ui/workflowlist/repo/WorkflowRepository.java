@@ -434,7 +434,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                     Log.d(TAG, "workflowDbSuccessFilter: ");
                     handleRepoSuccessNoFilters.postValue(true);
                 }, throwable -> {
-                    Log.d(TAG, "workflowDbSuccessFilter: error " + throwable.getMessage());
+                    Log.e(TAG, "workflowDbSuccessFilter: error " + throwable.getMessage());
                     handleRepoError.postValue(true);
                 });
 
@@ -452,7 +452,7 @@ public class WorkflowRepository implements IncomingWorkflowsCallback {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread()) // TODO SUCCESS SHOULD BE ONE SPEICFIC FOR FILTERS
                 .subscribe(this::workflowDbSuccessFilter, throwable -> {
-                    Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
+                    Log.e(TAG, "getAllWorkflows: error: " + throwable.getMessage());
                     handleRepoError.postValue(true);
                 });
         disposables.add(disposable);

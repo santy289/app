@@ -74,7 +74,7 @@ public class CreateWorkflowRepository {
         return workflowTypeDbDao.getWorkflowTypeBy(workflowTypeId);
     }
 
-    protected List<FormFieldsByWorkflowType> getFiedsByWorkflowType(int byId) {
+    protected List<FormFieldsByWorkflowType> getFieldsByWorkflowType(int byId) {
         return workflowTypeDbDao.getFields(byId);
     }
 

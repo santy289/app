@@ -108,6 +108,7 @@ public class MainActivity extends AppCompatActivity
 
     private static final String TAG = "MainActivity";
     private CreateWorkflowFragment mDynamicFiltersFragment;
+    private CreateWorkflowFragment mStandardFiltersFragment;
     private boolean digitalSignatureEnabled = false;
 
     @Override
@@ -474,16 +475,20 @@ public class MainActivity extends AppCompatActivity
         mDynamicFiltersFragment = CreateWorkflowFragment
                 .newInstance(FormType.DYNAMIC_FILTERS, this);
         showDynamicFiltersFragment(mDynamicFiltersFragment, false);
+
+        mStandardFiltersFragment = CreateWorkflowFragment.newInstance(FormType.STANDARD_FILTERS, this);
         showStandardFiltersFragment(
-                CreateWorkflowFragment.newInstance(FormType.STANDARD_FILTERS, this), false);
+                mStandardFiltersFragment, false);
     }
 
     private void restoreFilterDefaults() {
         mDynamicFiltersFragment = CreateWorkflowFragment
                 .newInstance(FormType.DYNAMIC_FILTERS, this);
         showDynamicFiltersFragment(mDynamicFiltersFragment, false);
+
+        mStandardFiltersFragment = CreateWorkflowFragment.newInstance(FormType.STANDARD_FILTERS, this);
         showStandardFiltersFragment(
-                CreateWorkflowFragment.newInstance(FormType.STANDARD_FILTERS, this), false);
+                mStandardFiltersFragment, false);
 
         updateSortFieldSelection(R.string.no_selection);
         toggleRadioButtonFilter(RADIO_CLEAR_ALL, false);
@@ -1159,7 +1164,8 @@ public class MainActivity extends AppCompatActivity
 
     @UiThread
     private void sendMessageGenerateWorkflowFieldsByType(int workflowTypeId) {
-        mDynamicFiltersFragment.generateFieldsByWorkflowType(workflowTypeId);
+        mDynamicFiltersFragment.handleWorkflowTypeIdUpdateForFilters(workflowTypeId);
+        mStandardFiltersFragment.updateStandardFilterFieldTagsUsing(workflowTypeId);
     }
 
     @Override

@@ -46,6 +46,10 @@ public class Field {
     @Json(name = "show_form")
     private boolean showForm;
 
+    @ColumnInfo(name = "show_filter")
+    @Json(name = "show_filter")
+    private boolean showFilter;
+
     public int getId() {
         return id;
     }
@@ -108,5 +112,13 @@ public class Field {
 
     public void setShowForm(boolean showForm) {
         this.showForm = showForm;
+    }
+
+    public boolean isShowFilter() {
+        return showFilter;
+    }
+
+    public void setShowFilter(boolean showFilter) {
+        this.showFilter = showFilter;
     }
 }

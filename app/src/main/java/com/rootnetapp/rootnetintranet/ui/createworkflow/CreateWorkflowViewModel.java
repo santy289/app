@@ -515,6 +515,35 @@ public class CreateWorkflowViewModel extends ViewModel {
         generateFieldsByType(formSettings.findIdByTypeName(typeName));
     }
 
+    protected void updateStandardFilterFieldTagsUsing(final int workflowTypeId) {
+        if (mFormType != FormType.STANDARD_FILTERS) {
+            return;
+        }
+
+        Disposable disposable = Observable.fromCallable(() -> {
+            List<FormFieldsByWorkflowType> fields = mRepository
+                    .getFieldsByWorkflowType(workflowTypeId);
+            if (fields == null || fields.size() < 1) {
+                return null;
+            }
+            FormFieldsByWorkflowType field;
+            FieldConfig fieldConfig;
+            Moshi moshi = new Moshi.Builder().build();
+            JsonAdapter<FieldConfig> jsonAdapter = moshi.adapter(FieldConfig.class);
+            for (int i = 0; i < fields.size(); i++) {
+                field = fields.get(i);
+                fieldConfig = jsonAdapter.fromJson(field.getFieldConfig());
+                field.setFieldConfigObject(fieldConfig);
+            }
+            formSettings.updateTagsForFormItems(fields);
+            return formSettings;
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(formSettings -> Log.d(TAG, "updateStandardFilterFieldTagsUsing: done"),
+                        throwable -> showLoading.setValue(false));
+        mDisposables.add(disposable);
+    }
+
     protected void generateFieldsByType(int id) {
         if (id == 0 || mWorkflowTypeDbList == null || mWorkflowTypeDbList.isEmpty()) {
             showLoading.setValue(false);
@@ -529,7 +558,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         formSettings.setWorkflowTypeIdSelected(id);
         Disposable disposable = Observable.fromCallable(() -> {
             List<FormFieldsByWorkflowType> fields = mRepository
-                    .getFiedsByWorkflowType(id);
+                    .getFieldsByWorkflowType(id);
             if (fields == null || fields.size() < 1) {
                 return false;
             }

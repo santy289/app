@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.Field;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.models.createworkflow.BaseEntityJsonValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
@@ -738,6 +739,18 @@ public class FormSettings {
                     formItem.setFieldId(field.fieldId);
                     break;
                 }
+            }
+        }
+    }
+
+    public void updateStandardFieldBy(String machineName, int fieldId) {
+        BaseFormItem formItem;
+        for (int i = 0; i < getFormItems().size(); i++) {
+            formItem = formItems.get(i);
+            if(formItem.getMachineName().equals(machineName)) {
+                formItem.setTag(fieldId);
+                formItem.setFieldId(fieldId);
+                break;
             }
         }
     }

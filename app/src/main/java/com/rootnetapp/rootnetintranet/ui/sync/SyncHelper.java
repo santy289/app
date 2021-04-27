@@ -30,8 +30,11 @@ import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.websocket.OptionsSettingsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
 import com.rootnetapp.rootnetintranet.models.ui.general.Message;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -255,8 +258,22 @@ public class SyncHelper {
             workflowTypeDbDao.insertWorkflowTypes(workflowTypes);
 
             workflowTypeDbDao.deleteAllFields();
+            Field field;
+            FieldConfig fieldConfig;
+            Moshi moshi = new Moshi.Builder().build();
+            JsonAdapter<FieldConfig> jsonAdapter = moshi.adapter(FieldConfig.class);
             for (int i = 0; i < workflowTypes.size(); i++) {
                 List<Field> fields = workflowTypes.get(i).getFields();
+
+                for (int j = 0; j < fields.size(); j++) {
+                    field = fields.get(j);
+                    fieldConfig = jsonAdapter.fromJson(field.getFieldConfig());
+
+                    if (fieldConfig == null) {
+                        continue;
+                    }
+                    field.setConfigMachineName(fieldConfig.getMachineName());
+                }
                 workflowTypeDbDao.insertAllFields(fields);
             }
 

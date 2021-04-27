@@ -3,6 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.createworkflow;
 import com.rootnetapp.rootnetintranet.data.local.db.AppDatabase;
 import com.rootnetapp.rootnetintranet.data.local.db.country.CountryDBDao;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.ProfileDao;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.Field;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDbDao;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
@@ -36,6 +37,8 @@ import java.util.List;
 import java.util.Map;
 
 import androidx.lifecycle.LiveData;
+
+import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -76,6 +79,22 @@ public class CreateWorkflowRepository {
 
     protected List<FormFieldsByWorkflowType> getFieldsByWorkflowType(int byId) {
         return workflowTypeDbDao.getFields(byId);
+    }
+
+    protected List<Field> getFieldsByConfigMachineName(String configMachineName) {
+        return workflowTypeDbDao.getFieldsBy(configMachineName);
+    }
+
+    protected Flowable<List<Field>> getFlowableFieldsBy(String configMachineName) {
+        return workflowTypeDbDao.getFlowableFieldsBy(configMachineName);
+    }
+
+    protected Field getFirstFieldBy(String configMachineName) {
+        List<Field> fields = getFieldsByConfigMachineName(configMachineName);
+        if (fields == null || fields.size() < 1) {
+            return null;
+        }
+        return fields.get(0);
     }
 
     protected Observable<WorkflowTypeDbResponse> getAllowedWorkflowTypes(String auth) {

@@ -550,6 +550,17 @@ public class Utils {
         return sdf.format(date);
     }
 
+    public static String getDateFilterFormat(Date date, boolean isStart) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String result = sdf.format(date);
+        if (isStart) {
+            result = String.format("%s 00:00:00", result);
+        } else {
+            result = String.format("%s 23:59:59", result);
+        }
+        return result;
+    }
+
     /**
      * Formats the given date object to the given format
      *

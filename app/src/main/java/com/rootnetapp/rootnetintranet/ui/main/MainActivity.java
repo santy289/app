@@ -1165,7 +1165,6 @@ public class MainActivity extends AppCompatActivity
     @UiThread
     private void sendMessageGenerateWorkflowFieldsByType(int workflowTypeId) {
         mDynamicFiltersFragment.handleWorkflowTypeIdUpdateForFilters(workflowTypeId);
-        mStandardFiltersFragment.updateStandardFilterFieldTagsUsing(workflowTypeId);
     }
 
     @Override

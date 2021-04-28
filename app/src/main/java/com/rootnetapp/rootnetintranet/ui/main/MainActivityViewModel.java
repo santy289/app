@@ -496,7 +496,7 @@ public class MainActivityViewModel extends ViewModel {
                 }
 
                 Date value = ((DateFormItem) baseFormItem).getValue();
-                if (value == null) return null;
+                if (value == null) return dynamicFilters;
 
                 if (baseFormItem.getMachineName().equals(MACHINE_NAME_START_DATE)) {
                     start = Utils.getDateFilterFormat(value, true);

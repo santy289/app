@@ -944,8 +944,10 @@ public class WorkflowViewModel extends ViewModel {
                                                    LifecycleOwner lifecycleOwner) {
         showLoading.setValue(true);
 
-        dynamicFilters.forEach(dynamicFilter -> filterSettings
-                .addDynamicFilter(dynamicFilter.getKey(), dynamicFilter.getValue()));
+        if (dynamicFilters != null) {
+            dynamicFilters.forEach(dynamicFilter -> filterSettings
+                    .addDynamicFilter(dynamicFilter.getKey(), dynamicFilter.getValue()));
+        }
 
         loadWorkflowsByFilters(filterSettings, lifecycleOwner);
     }

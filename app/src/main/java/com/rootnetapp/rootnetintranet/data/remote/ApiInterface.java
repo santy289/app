@@ -557,7 +557,7 @@ public interface ApiInterface {
                                                                            @Field("activate") boolean isEnabled);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows/{id}/pdf?dump=false")
+    @GET("intranet/workflows/{id}/pdf?all=true")
     Observable<ExportPdfResponse> getWorkflowPdfFile(@Header("Authorization") String authorization,
                                                      @Path("id") int workflowId);
 

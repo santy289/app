@@ -2,6 +2,7 @@ package com.rootnetapp.rootnetintranet.ui.main;
 
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.IdRes;
@@ -21,6 +22,7 @@ import com.rootnetapp.rootnetintranet.models.createworkflow.form.AutocompleteFor
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseOption;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BooleanFormItem;
+import com.rootnetapp.rootnetintranet.models.createworkflow.form.DateFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.MultipleChoiceFormItem;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.Option;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.SingleChoiceFormItem;
@@ -29,12 +31,17 @@ import com.rootnetapp.rootnetintranet.models.responses.domain.ClientResponse;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.RightDrawerSortSwitchAction;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
+import com.rootnetapp.rootnetintranet.ui.workflowlist.DynamicDateFilter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.DynamicFilter;
 import com.rootnetapp.rootnetintranet.ui.workflowlist.Sort;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
+import org.w3c.dom.Text;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -50,10 +57,12 @@ import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WOR
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_COMMENT_CRUD_OWN;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_EDIT_OWN;
 import static com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils.WORKFLOW_STATUS_UPDATE_ALL;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_END_DATE;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.CHECK;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowFragment.UNCHECK;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.IS_CHECKED_INDEX;
 import static com.rootnetapp.rootnetintranet.ui.workflowlist.WorkflowViewModel.VIEW_ID_INDEX;
+import static com.rootnetapp.rootnetintranet.ui.createworkflow.FormSettings.MACHINE_NAME_START_DATE;
 
 public class MainActivityViewModel extends ViewModel {
 
@@ -120,6 +129,7 @@ public class MainActivityViewModel extends ViewModel {
     protected final static String IMG_BAR_LOGO = "imgBarLogo";
     protected final static String IMG_TOOLBAR = "imgToolbar";
     private final static String TAG = "MainActivityViewModel";
+
 
     public MainActivityViewModel(MainActivityRepository repository) {
         this.repository = repository;
@@ -469,8 +479,42 @@ public class MainActivityViewModel extends ViewModel {
                 .map(this::getDynamicFilterFromFormItem)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-
+        dynamicFilters = handleStartEndDateFormItems(baseFormItems, dynamicFilters);
         sendDynamicFilterListSelectedToWorkflowList(dynamicFilters);
+    }
+
+    private List<DynamicFilter> handleStartEndDateFormItems(List<BaseFormItem> baseFormItems,
+                                                            List<DynamicFilter> dynamicFilters) {
+        String start = "";
+        String end = null;
+        DynamicFilter dateDynamicFilter = null;
+        String mainKey = "";
+        for(BaseFormItem baseFormItem : baseFormItems) {
+            if (baseFormItem instanceof DateFormItem) {
+                if (baseFormItem.getMachineName().equals(MACHINE_NAME_START_DATE)) {
+                    mainKey = String.valueOf(baseFormItem.getFieldId());
+                }
+
+                Date value = ((DateFormItem) baseFormItem).getValue();
+                if (value == null) return null;
+
+                if (baseFormItem.getMachineName().equals(MACHINE_NAME_START_DATE)) {
+                    start = Utils.getDateFilterFormat(value, true);
+                }
+                if (baseFormItem.getMachineName().equals(MACHINE_NAME_END_DATE)) {
+                    end = Utils.getDateFilterFormat(value, false);
+                }
+            }
+        }
+
+        if (TextUtils.isEmpty(start) || TextUtils.isEmpty(end)) {
+            return dynamicFilters;
+        }
+
+        DynamicDateFilter dateFilter = new DynamicDateFilter(start, end);
+        dateDynamicFilter = new DynamicFilter(mainKey, dateFilter);
+        dynamicFilters.add(dateDynamicFilter);
+        return dynamicFilters;
     }
 
     private DynamicFilter getDynamicFilterFromFormItem(BaseFormItem baseFormItem) {

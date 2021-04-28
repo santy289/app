@@ -31,7 +31,7 @@ public class Client {
     @Json(name = "package")
     private Package _package;
     @Json(name = "products")
-    private List<Product> products = null;
+    private List<Product> products;
 
     public int getId() {
         return id;

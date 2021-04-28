@@ -24,9 +24,11 @@ import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.Profile;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
+import com.rootnetapp.rootnetintranet.data.local.db.user.User;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.WorkflowDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.WorkflowListItem;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.DefaultRoleApprover;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.Field;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.WorkflowTypeDb;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
@@ -386,6 +388,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         }
 
         Map<String, Object> roleApprovers = new HashMap<>();
+        // List<BaseFormItem> test = formSettings.getPeopleInvolvedFormItems(); // supposdely also this one has more roles
         for (BaseFormItem formItem : formSettings.getRoleApproversFormItems()) {
             Option roleApprover = ((SingleChoiceFormItem) formItem).getValue();
             if (roleApprover == null) continue; //not selected
@@ -514,6 +517,35 @@ public class CreateWorkflowViewModel extends ViewModel {
         generateFieldsByType(formSettings.findIdByTypeName(typeName));
     }
 
+    protected void updateStandardFilterFieldTagsUsing(final int workflowTypeId) {
+        if (mFormType != FormType.STANDARD_FILTERS) {
+            return;
+        }
+
+        Disposable disposable = Observable.fromCallable(() -> {
+            List<FormFieldsByWorkflowType> fields = mRepository
+                    .getFieldsByWorkflowType(workflowTypeId);
+            if (fields == null || fields.size() < 1) {
+                return null;
+            }
+            FormFieldsByWorkflowType field;
+            FieldConfig fieldConfig;
+            Moshi moshi = new Moshi.Builder().build();
+            JsonAdapter<FieldConfig> jsonAdapter = moshi.adapter(FieldConfig.class);
+            for (int i = 0; i < fields.size(); i++) {
+                field = fields.get(i);
+                fieldConfig = jsonAdapter.fromJson(field.getFieldConfig());
+                field.setFieldConfigObject(fieldConfig);
+            }
+            formSettings.updateTagsForFormItems(fields);
+            return formSettings;
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(formSettings -> Log.d(TAG, "updateStandardFilterFieldTagsUsing: done"),
+                        throwable -> showLoading.setValue(false));
+        mDisposables.add(disposable);
+    }
+
     protected void generateFieldsByType(int id) {
         if (id == 0 || mWorkflowTypeDbList == null || mWorkflowTypeDbList.isEmpty()) {
             showLoading.setValue(false);
@@ -528,7 +560,7 @@ public class CreateWorkflowViewModel extends ViewModel {
         formSettings.setWorkflowTypeIdSelected(id);
         Disposable disposable = Observable.fromCallable(() -> {
             List<FormFieldsByWorkflowType> fields = mRepository
-                    .getFiedsByWorkflowType(id);
+                    .getFieldsByWorkflowType(id);
             if (fields == null || fields.size() < 1) {
                 return false;
             }
@@ -543,7 +575,7 @@ public class CreateWorkflowViewModel extends ViewModel {
             }
             formSettings.setFields(fields);
             return formSettings;
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(ignored -> createPeopleInvolvedItem(),
                         throwable -> showLoading.setValue(false));
@@ -558,6 +590,19 @@ public class CreateWorkflowViewModel extends ViewModel {
         formSettings.clearFormItems();
         mSetFormItemListLiveData.setValue(formSettings.getFormItems());
         mSetPeopleInvolvedFormItemListLiveData.setValue(formSettings.getPeopleInvolvedFormItems());
+    }
+
+    private int getFieldIdFor(String machineName, int defaultFieldId) {
+        Field field = mRepository.getFirstFieldBy(machineName);
+        return field == null ? defaultFieldId : field.getFieldId();
+    }
+
+    private int getFieldIdForForm(String machineName, int defaultFieldId) {
+        if (mFormType == FormType.STANDARD_FILTERS) {
+            return getFieldIdFor(machineName, defaultFieldId);
+        } else {
+            return defaultFieldId;
+        }
     }
 
     /**
@@ -583,6 +628,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                 .build();
         formSettings.getFormItems().add(textInputFormItem);
         buildFieldCompleted();
+
 
         textInputFormItem = new TextInputFormItem.Builder()
                 .setTitleRes(R.string.key)
@@ -648,12 +694,43 @@ public class CreateWorkflowViewModel extends ViewModel {
         formSettings.getFormItems().add(dateFormItem);
         buildFieldCompleted();
 
+        updateStandardFilters();
+
         createStandardOwnerFormItem();
 
         mEnableSubmitButtonLiveData.setValue(true);
         mShowSubmitButtonLiveData.setValue(true);
         mShowDynamicFiltersNoTypeLiveData.setValue(false);
         showLoading.setValue(false);
+    }
+
+    private void updateStandardFilters() {
+        if (mFormType != FormType.STANDARD_FILTERS) {
+            return;
+        }
+
+        Disposable disposable = Observable.fromCallable(() -> {
+            setupStandardFieldsIdBy(MACHINE_NAME_TITLE);
+            setupStandardFieldsIdBy(MACHINE_NAME_KEY);
+            setupStandardFieldsIdBy(MACHINE_NAME_DESCRIPTION);
+            setupStandardFieldsIdBy(MACHINE_NAME_CURRENT_STATUS);
+            setupStandardFieldsIdBy(MACHINE_NAME_TYPE);
+            setupStandardFieldsIdBy(MACHINE_NAME_START_DATE);
+            setupStandardFieldsIdBy(MACHINE_NAME_END_DATE);
+            return formSettings;
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(formSettings -> Log.d(TAG, "updateStandardFilters: done"),
+                        throwable -> Log.e(TAG, "updateStandardFilters: Something went wrong updating field ids"));
+        mDisposables.add(disposable);
+    }
+
+    private void setupStandardFieldsIdBy(String machineName) {
+        Field field = mRepository.getFirstFieldBy(machineName);
+        if (field == null) {
+            return;
+        }
+        formSettings.updateStandardFieldBy(machineName, field.getFieldId());
     }
 
     private void createStandardOwnerFormItem() {
@@ -907,6 +984,7 @@ public class CreateWorkflowViewModel extends ViewModel {
     private void onWorkflowTypesSuccess(WorkflowTypeDbResponse workflowTypeDbResponse) {
         mWorkflowTypeDbList = workflowTypeDbResponse.getList();
         if (mWorkflowTypeDbList == null || mWorkflowTypeDbList.isEmpty()) {
+            showLoading.setValue(false);
             return;
         }
 
@@ -993,18 +1071,20 @@ public class CreateWorkflowViewModel extends ViewModel {
             return new IntentFormItem.Builder()
                     .setTitleRes(R.string.people_involved)
                     .setButtonActionTextRes(R.string.people_involved_action)
-                    .setRequired(workflowTypeDbSingle.isDefineRoles())
+                    .setRequired(workflowTypeDbSingle != null && workflowTypeDbSingle.isDefineRoles())
 //                    .setVisible(mWorkflowListItem == null) //hide in edit mode
                     .setTag(TAG_PEOPLE_INVOLVED)
                     .setFieldId(TAG_PEOPLE_INVOLVED)
                     .build();
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(intentFormItem -> {
                     mAddPeopleInvolvedItemLiveData.setValue(intentFormItem);
                     showFields(formSettings);
-                }, throwable -> Log
-                        .d(TAG, "createPeopleInvolvedItem: error " + throwable.getMessage()));
+                }, throwable -> {
+                    Log.d(TAG, "createPeopleInvolvedItem: error " + throwable.getMessage());
+                    showLoading.setValue(false);
+                });
         mDisposables.add(disposable);
     }
 

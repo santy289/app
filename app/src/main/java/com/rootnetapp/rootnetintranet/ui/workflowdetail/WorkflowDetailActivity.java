@@ -62,6 +62,7 @@ public class WorkflowDetailActivity extends AppCompatActivity {
     private WorkflowDetailViewPagerAdapter mViewPagerAdapter;
     private Menu mMenu;
     private OnOpenStatusChangedListener mOnOpenStatusChangedListener;
+    private boolean isSignatureEnabled = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,10 +73,13 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 .of(this, workflowViewModelFactory)
                 .get(WorkflowDetailViewModel.class);
 
-        SharedPreferences prefs = getSharedPreferences("Sessions", Context.MODE_PRIVATE);
+        workflowDetailViewModel.onStart(getBaseContext().getContentResolver());
+
+        SharedPreferences prefs = getSharedPreferences(PreferenceKeys.PREF_SESSION, Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString(PreferenceKeys.PREF_TOKEN, "");
         String permissionsString = prefs.getString(PreferenceKeys.PREF_USER_PERMISSIONS, "");
         String loggedUserId = prefs.getString(PreferenceKeys.PREF_PROFILE_ID, "");
+        isSignatureEnabled = prefs.getBoolean(PreferenceKeys.PREF_SIGNATURE, false);
 
         subscribe();
 
@@ -157,8 +161,10 @@ public class WorkflowDetailActivity extends AppCompatActivity {
      * Initializes and set the {@link WorkflowDetailViewPagerAdapter} for the {@link ViewPager}.
      */
     private void setupViewPager(WorkflowListItem workflowListItem) {
-        mViewPagerAdapter = new WorkflowDetailViewPagerAdapter(this, workflowListItem,
-                getSupportFragmentManager());
+        mViewPagerAdapter = new WorkflowDetailViewPagerAdapter(this,
+                workflowListItem,
+                getSupportFragmentManager(),
+                isSignatureEnabled);
         mBinding.viewPager.setAdapter(mViewPagerAdapter);
     }
 
@@ -223,23 +229,19 @@ public class WorkflowDetailActivity extends AppCompatActivity {
      * the file, will display a {@link Toast} message. Uses a {@link FileProvider} to create the
      * file URI, instead of using the {@link Uri#fromFile(File)} method.
      *
-     * @param pdfFile the file to be opened.
+     * @param fileUri the uri to be opened.
      *
      * @see <a href="https://developer.android.com/reference/android/support/v4/content/FileProvider">FileProvider</a>
      */
     @UiThread
-    private void openPdfFile(File pdfFile) {
-        if (pdfFile == null) return;
+    private void openPdfFile(Uri fileUri) {
+        if (fileUri == null) return;
 
         Intent target = new Intent(Intent.ACTION_VIEW);
-
-        Uri fileUri = FileProvider.getUriForFile(this,
-                this.getApplicationContext().getPackageName() + ".fileprovider", pdfFile);
-
         target.setDataAndType(fileUri, "application/pdf");
-        target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        target.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
+        target.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         Intent intent = Intent.createChooser(target,
                 getString(R.string.workflow_detail_activity_open_file));
         try {
@@ -488,6 +490,12 @@ public class WorkflowDetailActivity extends AppCompatActivity {
         addActionItem(R.id.fab_upload_file, R.string.quick_actions_upload_file,
                 R.drawable.ic_file_upload_white_24dp);
 
+
+        if (isSignatureEnabled) {
+            addActionItem(R.id.fab_digital_signature, R.string.workflow_detail_signature_fragment_title,
+                    R.drawable.ic_file_black);
+        }
+
         mBinding.fabSpeedDial.setOnActionSelectedListener(this::handleSpeedDialClick);
         mBinding.fabSpeedDial.getMainFab().setSupportImageTintList(ColorStateList.valueOf(
                 Color.WHITE)); //this is the only way to change the icon color
@@ -531,6 +539,9 @@ public class WorkflowDetailActivity extends AppCompatActivity {
                 itemPosition = WorkflowDetailViewPagerAdapter.COMMENTS;
                 break;
 
+            case R.id.fab_digital_signature:
+                itemPosition = WorkflowDetailViewPagerAdapter.SIGNATURE;
+                break;
             default:
                 return false;
         }

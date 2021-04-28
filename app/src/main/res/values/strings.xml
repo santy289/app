@@ -169,6 +169,7 @@
     <string name="reply">Reply</string>
     <string name="no_items">There are currently no items matching your search parameters.</string>
     <string name="synchronizing">Synchronizing</string>
+    <string name="syncErrorNoPermission">No permissions found for this user</string>
     <string name="every_10_mins">Every 10 mins</string>
     <string name="last_sync">Last sync:</string>
     <string name="product_not_enabled">This product has not been assigned to your domain.</string>
@@ -360,6 +361,27 @@
     <string name="workflow_detail_files_fragment_preset_unavailable">This preset is not available to download.</string>
     <string name="workflow_detail_files_fragment_permissions_not_granted">Cannot download the file because the permissions were not granted.</string>
     <string name="workflow_detail_files_fragment_no_view_permissions">You do not have permissions to view the files</string>
+    <!-- SignatureFragment-->
+    <string name="workflow_detail_signature_fragment_title">Digital Signature</string>
+    <string name="select_a_template">Select a template</string>
+    <string name="signature_initialize">Start document for signatures</string>
+    <string name="signature_overwrite">Overwrite current document</string>
+    <string name="signature_biometric">Start biometric signatures</string>
+    <string name="signature_time_title">Signature date: %1$s</string>
+    <string name="signers">Signers</string>
+    <string name="icon_signature_positive_or_negative">Icon signature positive or negative</string>
+    <string name="signature_signers_message_no_signers">No signers found for this template</string>
+    <string name="signature_overwrite_warning">Are you sure you want to delete the document? This action can not be reversed.</string>
+    <string name="error_action">Something went wrong, the action was not completed.</string>
+    <string name="signature_success_initialize">The document is initialized, you can start with the digital signature process.</string>
+    <string name="sub_signature_name">This is the name of the signer</string>
+    <string name="sub_signature_phone">This is the phone number where you want to receive the authorization code in order to sign.</string>
+    <string name="sub_signature_email">The email where we are sending a link to continue the signing process.</string>
+    <string name="sub_signature_identifier_type">It specifies the type of identifier used for the signer.</string>
+    <string name="sub_signature_identifier">The identifier code or number used for the signer.</string>
+    <string name="sub_signature_subject">The subject that will appear on the email with the signing link.</string>
+    <string name="file_downloaded">The file was downloaded successfully</string>
+    <string name="file_not_available">There is no document available at the moment, try again alter.</string>
 
     <!--MainActivity-->
     <string name="bottom_nav_timeline">Timeline</string>
@@ -504,4 +526,6 @@
     <string name="booking_detail_day_to">To</string>
     <string name="booking_detail_estimated_time">Estimated Time</string>
     <string name="booking_detail_registered_time">Registered Time</string>
+    <string name="title_activity_signature_custom_fields_form">Required Fields for Signature</string>
+    <string name="save">Save</string>
 </resources>

@@ -2,12 +2,12 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.2"
+    buildToolsVersion "29.0.3"
     defaultConfig {
         applicationId "com.rootnetapp.rootnetintranet"
         minSdkVersion 24
         targetSdkVersion 29
-        versionCode 40
+        versionCode 47
         versionName "1.3.3"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -18,9 +18,8 @@ android {
             manifestPlaceholders = [enableCrashReporting:"false"]
         }
         release {
-            buildConfigField "String", "BASE_URL", API_PROD_BASE_URL
+            buildConfigField "String", "BASE_URL", API_DEV_BASE_URL
             manifestPlaceholders = [enableCrashReporting:"true"]
-            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -28,8 +27,10 @@ android {
         targetCompatibility 1.8
         sourceCompatibility 1.8
     }
-    dataBinding {
-        enabled = true
+    buildFeatures {
+        dataBinding true
+        // for view binding:
+        // viewBinding true
     }
     dexOptions {
         javaMaxHeapSize "4g"
@@ -43,25 +44,28 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha5'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.annotation:annotation:1.0.2'
-    implementation 'androidx.appcompat:appcompat:1.0.2'
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+    implementation 'androidx.annotation:annotation:1.1.0'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'com.google.android.material:material:1.1.0-alpha06'
+    implementation 'com.google.android.material:material:1.3.0-alpha02'
 
     //android arch components
     implementation "androidx.lifecycle:lifecycle-runtime:$rootProject.archLifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-extensions:$rootProject.archLifecycleVersion"
+    // Deprecated make sure we have evertying that we need or donwload the specific module.
+    // check here: https://developer.android.com/jetpack/androidx/releases/lifecycle
+    // implementation "androidx.lifecycle:lifecycle-extensions:$rootProject.archLifecycleVersion"
 
     implementation "android.arch.work:work-runtime:$rootProject.workManager"
 
     implementation "androidx.lifecycle:lifecycle-common-java8:$rootProject.archLifecycleVersion"
-    implementation "androidx.paging:paging-runtime:2.1.0"
+    implementation "androidx.paging:paging-runtime:2.1.2"
 
     //room
     implementation "androidx.room:room-runtime:$rootProject.roomVersion"
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     annotationProcessor "androidx.room:room-compiler:$rootProject.roomVersion"
     implementation "androidx.room:room-rxjava2:$rootProject.roomVersion"
 
@@ -83,6 +87,9 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofit"
     implementation "com.squareup.retrofit2:converter-moshi:$rootProject.retrofit"
     implementation "me.jessyan:retrofit-url-manager:$rootProject.retrofitUrlInterceptorVersion"
+
+    implementation "io.github.luizgrp.sectionedrecyclerviewadapter:sectionedrecyclerviewadapter:$rootProject.sectionedRecyclerView"
+
 
     implementation "me.riddhimanadib.form-master:form-master:1.1.0"
     implementation "com.leinardi.android:speed-dial:2.0.0"
@@ -108,8 +115,8 @@ dependencies {
     implementation "com.github.kenglxn.QRGen:android:$rootProject.qrGenVersion"
 
     //Test
-    androidTestImplementation 'androidx.test:runner:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    androidTestImplementation 'androidx.test:runner:1.3.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
     testImplementation "junit:junit:$rootProject.jUnit"
     implementation 'com.auth0.android:jwtdecode:1.1.1'
     implementation "de.hdodenhof:circleimageview:$rootProject.circleImageViewVersion"

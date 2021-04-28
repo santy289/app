@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.Utils;
 import com.rootnetapp.rootnetintranet.data.local.db.profile.forms.FormCreateProfile;
+import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.Field;
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.FormFieldsByWorkflowType;
 import com.rootnetapp.rootnetintranet.models.createworkflow.BaseEntityJsonValue;
 import com.rootnetapp.rootnetintranet.models.createworkflow.FileMetaData;
@@ -712,6 +713,59 @@ public class FormSettings {
             formItems = new ArrayList<>();
         }
         return formItems;
+    }
+
+    /**
+     * This function updates the standard field filters with the current field ids and tags, depending
+     * on the workflow type id selection. This workflow type selection is done by the user when
+     * selection the workflow type filter.
+     *
+     * @param workflowTypeFields These are the fields for a specific workflow type from the Field table.
+     */
+    public void updateTagsForFormItems(List<FormFieldsByWorkflowType> workflowTypeFields) {
+        BaseFormItem formItem;
+        for (int i = 0; i < getFormItems().size(); i++) {
+            formItem = formItems.get(i);
+            for (FormFieldsByWorkflowType field : workflowTypeFields) {
+                if (isMachineNameValidForThis(formItem, field, MACHINE_NAME_TITLE) ||
+                        isMachineNameValidForThis(formItem, field, MACHINE_NAME_KEY) ||
+                        isMachineNameValidForThis(formItem, field, MACHINE_NAME_DESCRIPTION) ||
+                        isMachineNameValidForThis(formItem, field, MACHINE_NAME_CURRENT_STATUS) ||
+                        isMachineNameValidForThis(formItem, field, MACHINE_NAME_TYPE) ||
+                        isMachineNameValidForThis(formItem, field, MACHINE_NAME_START_DATE) ||
+                        isMachineNameValidForThis(formItem, field, MACHINE_NAME_END_DATE)
+                ) {
+                    formItem.setTag(field.fieldId);
+                    formItem.setFieldId(field.fieldId);
+                    break;
+                }
+            }
+        }
+    }
+
+    public void updateStandardFieldBy(String machineName, int fieldId) {
+        BaseFormItem formItem;
+        for (int i = 0; i < getFormItems().size(); i++) {
+            formItem = formItems.get(i);
+            if(formItem.getMachineName().equals(machineName)) {
+                formItem.setTag(fieldId);
+                formItem.setFieldId(fieldId);
+                break;
+            }
+        }
+    }
+
+    /**
+     * This function validates if the base form item has the target machine name.
+     *
+     * @param baseFormItem Field in a form. The form could be for creating, editing, filtering workflows.
+     * @param field This is the entity that represents the field coming form the server.
+     * @param targetMachineName Compares the config machine name in both entities.
+     * @return True if both entities have the same machine name, and false if they do not.
+     */
+    private boolean isMachineNameValidForThis(BaseFormItem baseFormItem, FormFieldsByWorkflowType field, String targetMachineName) {
+        return baseFormItem.getMachineName().equals(targetMachineName) &&
+                field.fieldConfigObject.getMachineName().equals(targetMachineName);
     }
 
     protected void setFormItems(List<BaseFormItem> formItems) {

@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.UiThread;
 import androidx.databinding.DataBindingUtil;
@@ -49,6 +50,7 @@ public class InformationFragment extends Fragment implements InformationFragment
     private FragmentWorkflowDetailInformationBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
     private BaseInformationFragmentInterface mBaseInformationFragmentInterface;
+    private static final String SAVE_WORKFLOW_TYPE = "SAVE_WORKFLOW_TYPE";
 
     public InformationFragment() {
         // Required empty public constructor
@@ -61,6 +63,20 @@ public class InformationFragment extends Fragment implements InformationFragment
         fragment.mBaseInformationFragmentInterface = baseInformationFragmentInterface;
         fragment.mWorkflowListItem = item;
         return fragment;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(SAVE_WORKFLOW_TYPE, mWorkflowListItem);
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            this.mWorkflowListItem = savedInstanceState.getParcelable(SAVE_WORKFLOW_TYPE);
+        }
     }
 
     @Override

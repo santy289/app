@@ -815,8 +815,12 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
         mBinding.tvDynamicFiltersNoType.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
-    public void generateFieldsByWorkflowType(int workflowTypeId){
+    public void handleWorkflowTypeIdUpdateForFilters(int workflowTypeId){
         viewModel.generateFieldsByType(workflowTypeId);
+    }
+
+    public void updateStandardFilterFieldTagsUsing(int workflowTypeId) {
+        viewModel.updateStandardFilterFieldTagsUsing(workflowTypeId);
     }
 
     public void hideSoftInputKeyboard() {
@@ -831,7 +835,6 @@ public class CreateWorkflowFragment extends Fragment implements CreateWorkflowFr
     }
 
     public interface OnValueSelectedListener {
-
         void onValuesSelected(List<BaseFormItem> baseFormItems);
     }
 }

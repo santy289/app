@@ -10,6 +10,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflow.workflowlist.Workfl
 import com.rootnetapp.rootnetintranet.databinding.FragmentWorkflowDetailBasePeopleInvolvedBinding;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -18,6 +19,7 @@ public class BasePeopleInvolvedFragment extends Fragment implements BasePeopleIn
 
     private FragmentWorkflowDetailBasePeopleInvolvedBinding mBinding;
     private WorkflowListItem mWorkflowListItem;
+    private static final String SAVE_WORKFLOW_TYPE = "SAVE_WORKFLOW_TYPE";
 
     public BasePeopleInvolvedFragment() {
         // Required empty public constructor
@@ -40,6 +42,20 @@ public class BasePeopleInvolvedFragment extends Fragment implements BasePeopleIn
         showFragment(PeopleInvolvedFragment.newInstance(this, mWorkflowListItem), true);
 
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(SAVE_WORKFLOW_TYPE, mWorkflowListItem);
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            this.mWorkflowListItem = savedInstanceState.getParcelable(SAVE_WORKFLOW_TYPE);
+        }
     }
 
     @Override

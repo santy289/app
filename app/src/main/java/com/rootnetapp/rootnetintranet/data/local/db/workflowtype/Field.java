@@ -46,6 +46,13 @@ public class Field {
     @Json(name = "show_form")
     private boolean showForm;
 
+    @ColumnInfo(name = "show_filter")
+    @Json(name = "show_filter")
+    private boolean showFilter;
+
+    @ColumnInfo(name = "config_machine_name")
+    private String configMachineName;
+
     public int getId() {
         return id;
     }
@@ -108,5 +115,21 @@ public class Field {
 
     public void setShowForm(boolean showForm) {
         this.showForm = showForm;
+    }
+
+    public boolean isShowFilter() {
+        return showFilter;
+    }
+
+    public void setShowFilter(boolean showFilter) {
+        this.showFilter = showFilter;
+    }
+
+    public String getConfigMachineName() {
+        return configMachineName;
+    }
+
+    public void setConfigMachineName(String configMachineName) {
+        this.configMachineName = configMachineName;
     }
 }

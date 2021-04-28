@@ -77,12 +77,15 @@ public class WorkflowSearchRepository implements IncomingWorkflowsCallback {
      * to know if we are loading this data still on the database or we are finish loading the data
      * to the database.
      *
-     * @param worflows
+     * @param workflows
      *  List of workflows to save into the database.
      */
-    public void insertWorkflows(List<WorkflowDb> worflows, BoundaryCallbackInterface callback) {
+    public void insertWorkflows(List<WorkflowDb> workflows, BoundaryCallbackInterface callback) {
         Disposable disposable = Observable.fromCallable(() -> {
-            workflowDbDao.insertWorkflows(worflows);
+            for (WorkflowDb workflowDb : workflows) {
+                workflowDb.normalizeColumns();
+            }
+            workflowDbDao.insertWorkflows(workflows);
             callback.updateIsLoading(false);
             return true;
         }).subscribeOn(Schedulers.newThread())

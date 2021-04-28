@@ -8,6 +8,7 @@ import com.rootnetapp.rootnetintranet.models.requests.comment.PostCommentRequest
 import com.rootnetapp.rootnetintranet.models.requests.createworkflow.EditRequest;
 import com.rootnetapp.rootnetintranet.models.requests.files.AttachFilesRequest;
 import com.rootnetapp.rootnetintranet.models.requests.resetpassword.ResetPasswordRequest;
+import com.rootnetapp.rootnetintranet.models.requests.signature.SignatureInitiateRequest;
 import com.rootnetapp.rootnetintranet.models.responses.activation.WorkflowActivationResponse;
 import com.rootnetapp.rootnetintranet.models.responses.attach.AttachResponse;
 import com.rootnetapp.rootnetintranet.models.responses.business.BusinessOpportunitiesResponse;
@@ -38,6 +39,10 @@ import com.rootnetapp.rootnetintranet.models.responses.resourcing.BookingRespons
 import com.rootnetapp.rootnetintranet.models.responses.resourcing.BookingsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.role.RoleResponse;
 import com.rootnetapp.rootnetintranet.models.responses.services.ServicesResponse;
+import com.rootnetapp.rootnetintranet.models.responses.signature.DocumentListResponse;
+import com.rootnetapp.rootnetintranet.models.responses.signature.InitiateSigningResponse;
+import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureFileResponse;
+import com.rootnetapp.rootnetintranet.models.responses.signature.SignatureWorkflowTypesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.templates.TemplatesResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.TimelineResponse;
 import com.rootnetapp.rootnetintranet.models.responses.timeline.interaction.InteractionResponse;
@@ -67,6 +72,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
+import okhttp3.ResponseBody;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.Field;
@@ -153,14 +159,50 @@ public interface ApiInterface {
                                           @Field("repeated_password") String repeatedPassword);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows?status=true")
-    @Deprecated
-    Observable<WorkflowsResponse> getWorkflows(@Header("Authorization") String authorization,
-                                               @Query("limit") int limit,
-                                               @Query("open") boolean open,
-                                               @Query("page") int page,
-                                               @Query("status") boolean status);
+    @GET("signing_vendor/workflow_type/{id}/templates")
+    Observable<com.rootnetapp.rootnetintranet.models.responses.signature.TemplatesResponse> getSignatureTemplatesBy(@Header("Authorization") String authorization,
+                                                                                                                     @Path("id") int workflowTypeId,
+                                                                                                                    @Query("workflowId") int workflowId);
 
+    @Headers({"Domain-Name: api"})
+    @GET("signing_vendor/document_list/{workflowId}")
+    Observable<DocumentListResponse> getSignatureDocumentList(@Header("Authorization") String authorization,
+                                                              @Path("workflowId") int workflowId);
+
+    @Headers({"Domain-Name: api"})
+    @DELETE("signing_vendor/document")
+    Observable<Object> deleteDocument(@Header("Authorization") String authorization,
+                                      @Query("workflowId") int workflowId,
+                                      @Query("templateId") int templateId);
+
+    @Headers({"Domain-Name: api"})
+    @POST("signing_vendor/initiate_signing")
+    Observable<InitiateSigningResponse> initiateSigning(@Header("Authorization") String authorization,
+                                                        @Body SignatureInitiateRequest request);
+
+    @Headers({"Domain-Name: api"})
+    @POST("signing_vendor/initiate_signing")
+    Observable<Object> initiateSigningWithFields(@Header("Authorization") String authorization,
+                                                        @Body SignatureInitiateRequest request);
+
+    @Headers({"Domain-Name: api"})
+    @GET("signing_vendor/workflow_types")
+    Observable<SignatureWorkflowTypesResponse> getTemplatesInWorkflowType(@Header("Authorization") String authorization,
+                                                                          @Query("workflowTypeId") int workflowTypeId);
+
+
+    @Headers({"Domain-Name: api"})
+    @GET("signing_vendor/documents/{provider_document_id}")
+    Observable<SignatureFileResponse> getPdfFomProvider(@Header("Authorization") String authorization,
+                                                        @Path("provider_document_id") String providerDocumentId,
+                                                        @Query("save") boolean save);
+
+    @Headers({"Domain-Name: api"})
+    @GET("signing_vendor/documents/{provider_document_id}")
+    Observable<SignatureFileResponse> getPdfFomProviderUsing(@Header("Authorization") String authorization,
+                                                    @Path("provider_document_id") String providerDocumentId,
+                                                    @Query("params") String jsonStringParams,
+                                                    @Query("save") boolean save);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?status=true&order=%7B%22desc%22:true,%22column%22:%22updated%22%7D")
@@ -178,6 +220,14 @@ public interface ApiInterface {
                                                   @Query("page") int page,
                                                   @Query("workflow_type") boolean showTypeDetails,
                                                   @Query("query") String searchText);
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?")
+    Observable<WorkflowResponseDb> getWorkflowsDbWithQueryOptions(@Header("Authorization") String authorization,
+                                                                  @Query("limit") int limit,
+                                                                  @Query("open") boolean open,
+                                                                  @Query("page") int page,
+                                                                  @Query("workflow_type") boolean showTypeDetails,
+                                                                  @QueryMap Map<String, Object> options);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?")
@@ -207,14 +257,6 @@ public interface ApiInterface {
                                                            @QueryMap Map<String, Object> options);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows?")
-    Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(@Header("Authorization") String authorization,
-                                                           @Query("limit") int limit,
-                                                           @Query("page") int page,
-                                                           @Query("workflow_type") boolean showTypeDetails,
-                                                           @QueryMap Map<String, Object> options);
-
-    @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?status=true")
     Observable<WorkflowResponseDb> getWorkflowsDbFilteredByDynamicFields(@Header("Authorization") String authorization,
                                                                          @Query("limit") int limit,
@@ -231,9 +273,16 @@ public interface ApiInterface {
                                                   @Query("open") boolean open,
                                                   @Query("page") int page,
                                                   @Query("workflow_type") boolean showTypeDetails,
-                                                  @Query("responsible_id") int profileId,
-                                                  @Query("workflow_metadata") String metaData,
-                                                  @Query("query") String searchText);
+                                                  @Query("responsible_id") int profileId);
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?status=true")
+    Observable<WorkflowResponseDb> getMyPendingWorkflowsDb(@Header("Authorization") String authorization,
+                                                           @Query("limit") int limit,
+                                                           @Query("open") boolean open,
+                                                           @Query("page") int page,
+                                                           @Query("workflow_type") boolean showTypeDetails,
+                                                           @Query("responsible_id") int profileId,
+                                                           @QueryMap Map<String, Object> options);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflows?")
@@ -246,7 +295,13 @@ public interface ApiInterface {
                                                            @Query("workflow_type_id") int workflowTypeId,
                                                            @Query("query") String searchText);
 
-
+    @Headers({"Domain-Name: api"})
+    @GET("intranet/workflows?")
+    Observable<WorkflowResponseDb> getWorkflowsByBaseFilters(@Header("Authorization") String authorization,
+                                                             @Query("limit") int limit,
+                                                             @Query("page") int page,
+                                                             @Query("workflow_type") boolean showTypeDetails,
+                                                             @QueryMap Map<String, Object> options);
 
     @Headers({"Domain-Name: api"})
     @GET("intranet/workflow/overview?")
@@ -269,7 +324,7 @@ public interface ApiInterface {
     Observable<WorkflowTypesResponse> getWorkflowTypes(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})
-    @GET("intranet/workflows/types?all_versions=true&filter_counter_status=true")
+    @GET("intranet/workflows/types?filter_counter_status=true")
     Observable<WorkflowTypeDbResponse> getWorkflowTypesDb(@Header("Authorization") String authorization);
 
     @Headers({"Domain-Name: api"})

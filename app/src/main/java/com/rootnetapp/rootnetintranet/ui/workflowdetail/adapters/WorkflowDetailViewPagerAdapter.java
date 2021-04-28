@@ -1,6 +1,7 @@
 package com.rootnetapp.rootnetintranet.ui.workflowdetail.adapters;
 
 import android.content.Context;
+import android.content.res.Resources;
 
 import com.google.android.material.tabs.TabLayout;
 import com.rootnetapp.rootnetintranet.R;
@@ -12,6 +13,7 @@ import com.rootnetapp.rootnetintranet.ui.workflowdetail.comments.CommentsFragmen
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.files.FilesFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.information.BaseInformationFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.peopleinvolved.BasePeopleInvolvedFragment;
+import com.rootnetapp.rootnetintranet.ui.workflowdetail.signature.SignatureFragment;
 import com.rootnetapp.rootnetintranet.ui.workflowdetail.status.StatusFragment;
 
 import androidx.fragment.app.Fragment;
@@ -32,16 +34,32 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
     public static final int APPROVAL_HISTORY = 4;
     public static final int COMMENTS = 5;
     public static final int FILES = 6;
+    public static final int SIGNATURE = 7;
 
-    private final Context mContext;
+    private String[] titles;
     private final WorkflowListItem mWorkflowItem;
     private int mCommentsCounter;
     private int mFilesCounter;
+    private boolean isSignatureEnabled;
 
-    public WorkflowDetailViewPagerAdapter(Context context, WorkflowListItem item,
-                                          FragmentManager fm) {
+    public WorkflowDetailViewPagerAdapter(Context context,
+                                          WorkflowListItem item,
+                                          FragmentManager fm,
+                                          boolean isSignatureEnabled) {
         super(fm);
-        this.mContext = context;
+        Resources resources = context.getResources();
+        this.isSignatureEnabled = isSignatureEnabled;
+        titles = new String[] {
+                resources.getString(R.string.workflow_detail_status_fragment_title),
+                resources.getString(R.string.workflow_detail_flowchart_fragment_title),
+                resources.getString(R.string.workflow_detail_information_fragment_title),
+                resources.getString(R.string.workflow_detail_people_involved_fragment_title),
+                resources.getString(R.string.workflow_detail_approval_history_fragment_title),
+                resources.getString(R.string.workflow_detail_comments_fragment_title),
+                resources.getString(R.string.workflow_detail_files_fragment_title),
+                resources.getString(R.string.workflow_detail_signature_fragment_title),
+        };
+
         this.mWorkflowItem = item;
     }
 
@@ -70,6 +88,8 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
                 return CommentsFragment.newInstance(mWorkflowItem, true);
             case FILES:
                 return FilesFragment.newInstance(mWorkflowItem);
+            case SIGNATURE:
+                return SignatureFragment.newInstance(mWorkflowItem);
             default:
                 return null;
         }
@@ -82,7 +102,10 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
      */
     @Override
     public int getCount() {
-        return 7;
+        if (!isSignatureEnabled) {
+            return titles.length - 1;
+        }
+        return titles.length;
     }
 
     /**
@@ -100,23 +123,20 @@ public class WorkflowDetailViewPagerAdapter extends FragmentPagerAdapter {
         // Generate title based on item position
         switch (position) {
             case STATUS:
-                return mContext.getString(R.string.workflow_detail_status_fragment_title);
             case FLOWCHART:
-                return mContext.getString(R.string.workflow_detail_flowchart_fragment_title);
             case INFORMATION:
-                return mContext.getString(R.string.workflow_detail_information_fragment_title);
             case PEOPLE_INVOLVED:
-                return mContext.getString(R.string.workflow_detail_people_involved_fragment_title);
             case APPROVAL_HISTORY:
-                return mContext.getString(R.string.workflow_detail_approval_history_fragment_title);
+            case SIGNATURE:
+                return titles[position];
             case COMMENTS:
-                title = mContext.getString(R.string.workflow_detail_comments_fragment_title);
+                title = titles[COMMENTS];
                 if (getCommentsCounter() > 0) {
                     title += " (" + getCommentsCounter() + ")";
                 }
                 return title;
             case FILES:
-                title = mContext.getString(R.string.workflow_detail_files_fragment_title);
+                title = titles[FILES];
                 if (getFilesCounter() > 0) {
                     title += " (" + getFilesCounter() + ")";
                 }

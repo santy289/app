@@ -55,6 +55,8 @@ public class FilterSettings {
     private int statusFilterIndexSelected;
     private int systemStatusFilterIndexSelected;
 
+    private Map<String, Object> queryOptions;
+
     public FilterSettings() {
         this.isCheckedMyPending = false;
         this.isCheckedStatus = true;
@@ -74,6 +76,19 @@ public class FilterSettings {
         this.baseFilterIndexSelected = 0;
         this.statusFilterIndexSelected = 1;
         this.systemStatusFilterIndexSelected = 1;
+        queryOptions = new ArrayMap<>();
+    }
+
+    public Map<String, Object> getQueryOptions() {
+        return queryOptions;
+    }
+
+    public void setQueryOptions(Map<String, Object> queryOptions) {
+        this.queryOptions = queryOptions;
+    }
+
+    public void clearQueryOptions() {
+        this.queryOptions.clear();
     }
 
     public int getSizeOfRightDrawerOptionsListMap() {

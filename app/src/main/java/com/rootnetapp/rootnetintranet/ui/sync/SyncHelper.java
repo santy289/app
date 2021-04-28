@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.rootnetapp.rootnetintranet.BuildConfig;
+import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.commons.PreferenceKeys;
 import com.rootnetapp.rootnetintranet.commons.RootnetPermissionsUtils;
 import com.rootnetapp.rootnetintranet.commons.Utils;
@@ -29,7 +30,11 @@ import com.rootnetapp.rootnetintranet.models.responses.user.ProfileResponse;
 import com.rootnetapp.rootnetintranet.models.responses.websocket.OptionsSettingsResponse;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowResponseDb;
 import com.rootnetapp.rootnetintranet.models.responses.workflows.WorkflowsResponse;
+import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.FieldConfig;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.WorkflowTypeDbResponse;
+import com.rootnetapp.rootnetintranet.models.ui.general.Message;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -53,6 +58,7 @@ public class SyncHelper {
     private MutableLiveData<String> saveToPreference;
     MutableLiveData<String[]> saveStringToPreference;
     MutableLiveData<Integer> saveIdToPreference;
+    MutableLiveData<Message> message;
 
     private ApiInterface apiInterface;
     private AppDatabase database;
@@ -67,7 +73,9 @@ public class SyncHelper {
     public final static int INDEX_KEY_STRING = 0;
     public final static int INDEX_KEY_VALUE = 1;
     private final static String TAG = "SyncHelper";
-    protected static final int MAX_ENDPOINT_CALLS = 7;
+
+    // IMPORTANT: Remember to increase or decrease this number when you remove or add an endpoint.
+    protected static final int MAX_ENDPOINT_CALLS = 6;
 
     public SyncHelper(ApiInterface apiInterface, AppDatabase database) {
         this.apiInterface = apiInterface;
@@ -77,6 +85,7 @@ public class SyncHelper {
         this.profiles = new ArrayList<>();
         this.saveIdToPreference = new MutableLiveData<>();
         this.saveStringToPreference = new MutableLiveData<>();
+        this.message = new MutableLiveData<>();
     }
 
     protected ApiInterface getApiInterface() {
@@ -94,7 +103,6 @@ public class SyncHelper {
         getWsSettings(token);
         getGoogleMapsSettings(token);
         getUser(token);
-        getAllWorkflows(token, 1);
         getWorkflowTypesDb(token);
         getLoggedProfile(token);
     }
@@ -111,7 +119,7 @@ public class SyncHelper {
 
         Disposable disposable = apiInterface
                 .getCountriesDb(token)
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::saveCountriesToDatabase, throwable -> {
                     Log.d(TAG, "getCountryData: " + throwable.getMessage());
@@ -137,7 +145,7 @@ public class SyncHelper {
                 .doOnNext(response -> saveSettingsToPreference(response,
                         PreferenceKeys.PREF_PROTOCOL))
 //                .retryWhen(observable -> Observable.timer(3, TimeUnit.SECONDS))
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> success(true), throwable -> {
                     Log.d(TAG, "getWsSettings: " + throwable.getMessage());
@@ -161,7 +169,7 @@ public class SyncHelper {
                 .getGoogleMapsApiKey(token)
                 .doOnNext(response -> saveSettingsToPreference(response,
                         PreferenceKeys.PREF_GOOGLE_MAPS_API_KEY))
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> success(true), throwable -> {
                     Log.d(TAG, "getGoogleMapsSettings: " + throwable.getMessage());
@@ -203,7 +211,7 @@ public class SyncHelper {
             countryDBDao.deleteAllCountries();
             countryDBDao.insertCountryList(list);
             return true;
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::success, this::handleNetworkError);
         disposables.add(disposable);
@@ -217,7 +225,7 @@ public class SyncHelper {
                         true,
                         page,
                         false)
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::getWorkflowDbSuccess, throwable -> {
                     Log.d(TAG, "getWorkflowsDb: error: " + throwable.getMessage());
@@ -229,10 +237,10 @@ public class SyncHelper {
     private void getWorkflowTypesDb(String token) {
         Disposable disposable = apiInterface
                 .getWorkflowTypesDb(token)
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onWorkflowTypesDbSuccess, throwable -> {
-                    Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
+                    Log.e(TAG, "getAllWorkflows: error: " + throwable.getMessage());
                     handleNetworkError(throwable);
                 });
         disposables.add(disposable);
@@ -250,14 +258,28 @@ public class SyncHelper {
             workflowTypeDbDao.insertWorkflowTypes(workflowTypes);
 
             workflowTypeDbDao.deleteAllFields();
+            Field field;
+            FieldConfig fieldConfig;
+            Moshi moshi = new Moshi.Builder().build();
+            JsonAdapter<FieldConfig> jsonAdapter = moshi.adapter(FieldConfig.class);
             for (int i = 0; i < workflowTypes.size(); i++) {
                 List<Field> fields = workflowTypes.get(i).getFields();
+
+                for (int j = 0; j < fields.size(); j++) {
+                    field = fields.get(j);
+                    fieldConfig = jsonAdapter.fromJson(field.getFieldConfig());
+
+                    if (fieldConfig == null) {
+                        continue;
+                    }
+                    field.setConfigMachineName(fieldConfig.getMachineName());
+                }
                 workflowTypeDbDao.insertAllFields(fields);
             }
 
             getWorkflowsDb(auth, 1);
             return true;
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         success -> onDatabaseSavedWorkflowTypeDb(),
@@ -269,7 +291,7 @@ public class SyncHelper {
     private void onDatabaseSavedWorkflowTypeDb() {
         Disposable disposable = apiInterface
                 .getCategoryListId(auth)
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(categoryListResponse -> {
                     int id = categoryListResponse.getCategoryList();
@@ -286,12 +308,15 @@ public class SyncHelper {
     private void getWorkflowDbSuccess(WorkflowResponseDb workflowsResponse) {
         workflowDbs.addAll(workflowsResponse.getList());
         Disposable disposable = Observable.fromCallable(() -> {
+            for (WorkflowDb workflowDb : workflowDbs) {
+                workflowDb.normalizeColumns();
+            }
             WorkflowDbDao workflowDbDao = database.workflowDbDao();
             // TODO put in a transaction DAO function
             workflowDbDao.deleteAllWorkflows();
             workflowDbDao.insertWorkflows(workflowDbs);
             return true;
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         success -> getCountryData(auth),
@@ -304,24 +329,11 @@ public class SyncHelper {
         disposables.clear();
     }
 
-    @Deprecated
-    private void getAllWorkflows(String token, int page) {
-        Disposable disposable = apiInterface
-                .getWorkflows(token, 50, true, page, true)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onWorkflowsSuccess, throwable -> {
-                    Log.d(TAG, "getAllWorkflows: error: " + throwable.getMessage());
-                    handleNetworkError(throwable);
-                });
-        disposables.add(disposable);
-    }
-
     private void getUser(String token) {
-        Disposable disposable = apiInterface.getProfiles(token).subscribeOn(Schedulers.newThread()).
+        Disposable disposable = apiInterface.getProfiles(token).subscribeOn(Schedulers.io()).
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe(this::onUsersSuccess, throwable -> {
-                    Log.d(TAG, "getData: error " + throwable.getMessage());
+                    Log.e(TAG, "getData: error " + throwable.getMessage());
                     handleNetworkError(throwable);
                 });
         disposables.add(disposable);
@@ -360,7 +372,7 @@ public class SyncHelper {
                     }
 
                     Disposable disposable = apiInterface.login(username, password, firebaseToken)
-                            .subscribeOn(Schedulers.newThread())
+                            .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(loginResponse -> {
                                 if (loginResponse == null) {
@@ -390,7 +402,7 @@ public class SyncHelper {
             database.profileDao().deleteAllProfiles();
             database.profileDao().insertProfiles(profiles);
             return true;
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::success,
                         this::handleNetworkError);
@@ -404,7 +416,7 @@ public class SyncHelper {
             database.workflowDao().clearWorkflows();
             database.workflowDao().insertAll(workflows);
             return true;
-        }).subscribeOn(Schedulers.newThread())
+        }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::success,
                         this::handleNetworkError);
@@ -413,7 +425,7 @@ public class SyncHelper {
 
     private void getLoggedProfile(String token) {
         Disposable disposable = apiInterface.getLoggedProfile(token)
-                .subscribeOn(Schedulers.newThread()).
+                .subscribeOn(Schedulers.io()).
                         observeOn(AndroidSchedulers.mainThread()).
                         subscribe(this::onLoggedProfileSuccess, throwable -> {
                             Log.d(TAG, "getData: error " + throwable.getMessage());
@@ -435,6 +447,8 @@ public class SyncHelper {
         Object permissionsObj = loggedUser.getPermissions();
 
         if (!(permissionsObj instanceof Map)) {
+            Message messageModel = new Message(R.string.syncErrorNoPermission);
+            message.postValue(messageModel);
             proceedWithUnhandledException();
             return;
         }
@@ -453,7 +467,7 @@ public class SyncHelper {
             list.add(user);
             database.userDao().insertAll(list);
             return true;
-        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::success,
                         this::handleNetworkError);
         disposables.add(disposable);

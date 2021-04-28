@@ -177,3 +177,6 @@ fabric.properties
 ### AndroidStudio Patch ###
 
 !/gradle/wrapper/gradle-wrapper.jar
+jarRepositories.xml
+output-metadata.json
+*.zip

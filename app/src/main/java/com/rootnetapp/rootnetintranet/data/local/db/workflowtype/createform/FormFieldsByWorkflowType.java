@@ -25,6 +25,9 @@ public class FormFieldsByWorkflowType {
     @ColumnInfo(name = "required")
     public boolean required;
 
+    @ColumnInfo(name = "show_filter")
+    public boolean showFilter;
+
     @Ignore
     public FieldConfig fieldConfigObject;
 
@@ -98,5 +101,13 @@ public class FormFieldsByWorkflowType {
 
     public void setRequired(boolean required) {
         this.required = required;
+    }
+
+    public boolean isShowFilter() {
+        return showFilter;
+    }
+
+    public void setShowFilter(boolean showFilter) {
+        this.showFilter = showFilter;
     }
 }

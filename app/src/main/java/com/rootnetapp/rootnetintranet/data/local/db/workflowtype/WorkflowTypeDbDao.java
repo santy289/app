@@ -4,6 +4,7 @@ import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.createform.Form
 import com.rootnetapp.rootnetintranet.data.local.db.workflowtype.workflowlist.WorkflowTypeItemMenu;
 
 import java.util.List;
+import java.util.Observable;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
@@ -12,6 +13,8 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
+
+import io.reactivex.Flowable;
 
 
 @Dao
@@ -53,8 +56,8 @@ public interface WorkflowTypeDbDao {
     public List<WorkflowTypeItemMenu> getListOfWorkflowNames();
 
     @Query("SELECT field.id AS id, field.field_id AS fieldId, workflowtypedb.id AS workflowTypeId, " +
-            "workflowtypedb.name AS workflowTypeName, field.field_name, field.field_config," +
-            "field.show_form, field.required " +
+            "workflowtypedb.name AS workflowTypeName, field.field_name, field.field_config, " +
+            "field.show_form, field.required, field.show_filter " +
             "FROM workflowtypedb INNER JOIN field " +
             "ON field.workflow_type_id = workflowtypedb.id " +
             "WHERE field.workflow_type_id = :byId")
@@ -62,4 +65,10 @@ public interface WorkflowTypeDbDao {
 
     @Query("SELECT * FROM workflowtypedb WHERE id = :workflowTypeId")
     public WorkflowTypeDb getWorkflowTypeBy(int workflowTypeId);
+
+    @Query("SELECT * FROM field where config_machine_name = :configMachineName group by field_id")
+    List<Field> getFieldsBy(String configMachineName);
+
+    @Query("SELECT * FROM field where config_machine_name = :configMachineName group by field_id")
+    Flowable<List<Field>> getFlowableFieldsBy(String configMachineName);
 }

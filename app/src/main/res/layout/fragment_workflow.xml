@@ -52,7 +52,7 @@
                         android:layout_centerVertical="true"
                         android:layout_gravity="center"
                         android:src="@android:drawable/ic_menu_search"
-                        android:tint="@color/black" />
+                        app:tint="@color/black" />
 
                     <androidx.appcompat.widget.AppCompatEditText
                         android:id="@+id/input_search"
@@ -94,7 +94,7 @@
                     android:layout_centerVertical="true"
                     android:layout_toEndOf="@id/chbx_select_all"
                     android:src="@drawable/ic_more_vert_black_24dp"
-                    android:tint="@color/colorAccent" />
+                    app:tint="@color/colorAccent" />
 
                 <View
                     android:id="@+id/view_line_header"

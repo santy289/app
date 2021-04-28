@@ -2,13 +2,17 @@ package com.rootnetapp.rootnetintranet.commons;
 
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -26,13 +30,16 @@ import org.threeten.bp.ZoneId;
 import org.threeten.bp.ZonedDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -45,6 +52,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+
 import retrofit2.HttpException;
 
 public class Utils {
@@ -386,6 +394,63 @@ public class Utils {
         return pdfFile;
     }
 
+    public static Uri saveBase64PdfToDownloads(ContentResolver contentResolver, String base64, String fileName) throws IOException {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MediaStore.Downloads.DISPLAY_NAME, fileName);
+        contentValues.put(MediaStore.Downloads.MIME_TYPE, "application/pdf");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            contentValues.put(MediaStore.Downloads.IS_PENDING, 1);
+        }
+
+        Uri collection;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+        } else {
+            collection = MediaStore.Downloads.getContentUri("external");
+        }
+        Uri item = contentResolver.insert(collection, contentValues);
+       if (item == null) {
+           throw new FileNotFoundException("Unable to reserve an URI for the downloaded base64 pdf content.");
+       }
+       try {
+           ParcelFileDescriptor pfd = contentResolver.openFileDescriptor(item, "w");
+           FileOutputStream fileOutputStream = new FileOutputStream(pfd.getFileDescriptor());
+           byte[] pdfAsBytes = Base64.decode(base64, Base64.DEFAULT);
+           fileOutputStream.write(pdfAsBytes);
+           // Let the document provider know you're done by closing the stream.
+           fileOutputStream.close();
+           pfd.close();
+
+           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+               contentValues.clear();
+               contentValues.put(MediaStore.Downloads.IS_PENDING, 0);
+               contentResolver.update(item, contentValues, null, null);
+           }
+
+           return item;
+       } catch (FileNotFoundException e) {
+           e.printStackTrace();
+       } catch (IOException e) {
+           e.printStackTrace();
+       }
+       return null;
+    }
+
+    public static File decodePdfFromByteStream(InputStream inputStream,String fileName) throws IOException {
+        int count;
+        byte[] data = new byte[1024 * 4];
+        InputStream bis = new BufferedInputStream(inputStream, 1024 * 8);
+        File outputFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);
+        OutputStream output = new FileOutputStream(outputFile);
+        while ((count = bis.read(data)) != -1) {
+            output.write(data, 0, count);
+        }
+        output.flush();
+        output.close();
+        bis.close();
+        return outputFile;
+    }
+
     /**
      * Transforms a Base64 encoded string into a {@link File} object. Also, saves the file locally
      * on the external downloads folder.
@@ -483,6 +548,17 @@ public class Utils {
     public static String getDatePostFormat(Date date) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return sdf.format(date);
+    }
+
+    public static String getDateFilterFormat(Date date, boolean isStart) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String result = sdf.format(date);
+        if (isStart) {
+            result = String.format("%s 00:00:00", result);
+        } else {
+            result = String.format("%s 23:59:59", result);
+        }
+        return result;
     }
 
     /**

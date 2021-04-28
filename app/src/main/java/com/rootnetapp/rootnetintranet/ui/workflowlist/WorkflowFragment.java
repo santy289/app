@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -100,11 +99,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         WorkflowFragment fragment = new WorkflowFragment();
         fragment.mainActivityInterface = mainActivityInterface;
         return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -285,7 +279,7 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
     }
 
     private void addWorkflowsObserver() {
-        workflowViewModel.getAllWorkflows().observe(this, getAllWorkflowsObserver);
+        workflowViewModel.getAllWorkflows().observe(getViewLifecycleOwner(), getAllWorkflowsObserver);
     }
 
     private void subscribe() {
@@ -304,94 +298,94 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
         });
 
         // Workflow Fragment's ViewModel
-        workflowViewModel.getObservableError().observe(this, this::showToastMessage);
-        workflowViewModel.getObservableShowLoading().observe(this, showLoadingObserver);
+        workflowViewModel.getObservableError().observe(getViewLifecycleOwner(), this::showToastMessage);
+        workflowViewModel.getObservableShowLoading().observe(getViewLifecycleOwner(), showLoadingObserver);
         addWorkflowsObserver();
         workflowViewModel.getObservableUpdateWithSortedList()
-                .observe(this, updateWithSortedListObserver);
-        workflowViewModel.getObservableShowList().observe(this, showListObserver);
-        workflowViewModel.getObservableAddWorkflowObserver().observe(this, aBoolean -> {
+                .observe(getViewLifecycleOwner(), updateWithSortedListObserver);
+        workflowViewModel.getObservableShowList().observe(getViewLifecycleOwner(), showListObserver);
+        workflowViewModel.getObservableAddWorkflowObserver().observe(getViewLifecycleOwner(), aBoolean -> {
             addWorkflowsObserver();
         });
         workflowViewModel.getObservableSetAllCheckboxesList()
-                .observe(this, setAllCeckboxesObserver);
-        workflowViewModel.getObservableLoadMore().observe(this, this::showBottomSheetLoading);
+                .observe(getViewLifecycleOwner(), setAllCeckboxesObserver);
+        workflowViewModel.getObservableLoadMore().observe(getViewLifecycleOwner(), this::showBottomSheetLoading);
         workflowViewModel.rightDrawerFilterMenus
-                .observe(this, this::createFilterListRightDrawer);
+                .observe(getViewLifecycleOwner(), this::createFilterListRightDrawer);
         workflowViewModel.rightDrawerOptionMenus
-                .observe(this, this::createOptionListRightDrawer);
+                .observe(getViewLifecycleOwner(), this::createOptionListRightDrawer);
         workflowViewModel.invalidateDrawerOptionsList
-                .observe(this, this::handleInvalidateOptionsList);
+                .observe(getViewLifecycleOwner(), this::handleInvalidateOptionsList);
         workflowViewModel.messageMainToggleRadioButton
-                .observe(this, this::handleMessageMainToggleRadioButton);
+                .observe(getViewLifecycleOwner(), this::handleMessageMainToggleRadioButton);
         workflowViewModel.messageMainToggleSwitch
-                .observe(this, this::handleMessageMainToggleSwitch);
+                .observe(getViewLifecycleOwner(), this::handleMessageMainToggleSwitch);
         workflowViewModel.messageMainUpdateSortSelection
-                .observe(this, this::handleMessageMainUpdateSortSelection);
+                .observe(getViewLifecycleOwner(), this::handleMessageMainUpdateSortSelection);
         workflowViewModel.messageMainWorkflowTypeFilters
-                .observe(this, this::handleMessageMainWorkflowTypeFilters);
+                .observe(getViewLifecycleOwner(), this::handleMessageMainWorkflowTypeFilters);
         workflowViewModel.messageMainBaseFilters
-                .observe(this, this::handleMessageMainBaseFilters);
+                .observe(getViewLifecycleOwner(), this::handleMessageMainBaseFilters);
         workflowViewModel.messageMainStatusFilters
-                .observe(this, this::handleMessageMainStatusFilters);
+                .observe(getViewLifecycleOwner(), this::handleMessageMainStatusFilters);
         workflowViewModel.messageMainSystemStatusFilters
-                .observe(this, this::handleMessageMainSystemStatusFilters);
+                .observe(getViewLifecycleOwner(), this::handleMessageMainSystemStatusFilters);
         workflowViewModel.messageMainWorkflowTypeFilterSelectionToFilterList
-                .observe(this, this::handleMessageMainWorkflowTypeFilterSelected);
+                .observe(getViewLifecycleOwner(), this::handleMessageMainWorkflowTypeFilterSelected);
         workflowViewModel.messageMainWorkflowTypeIdFilterSelectionToFilterList
-                .observe(this, this::handleMessageMainWorkflowTypeIdFilterSelected);
+                .observe(getViewLifecycleOwner(), this::handleMessageMainWorkflowTypeIdFilterSelected);
         workflowViewModel.messageMainBaseFilterSelectionToFilterList
-                .observe(this, this::handleMessageMainBaseFilterSelected);
+                .observe(getViewLifecycleOwner(), this::handleMessageMainBaseFilterSelected);
         workflowViewModel.messageMainStatusFilterSelectionToFilterList
-                .observe(this, this::handleMessageMainStatusFilterSelected);
+                .observe(getViewLifecycleOwner(), this::handleMessageMainStatusFilterSelected);
         workflowViewModel.messageMainSystemStatusFilterSelectionToFilterList
-                .observe(this, this::handleMessageMainSystemStatusFilterSelected);
+                .observe(getViewLifecycleOwner(), this::handleMessageMainSystemStatusFilterSelected);
         workflowViewModel.getObservableShowAddButton()
-                .observe(this, this::showAddButton);
+                .observe(getViewLifecycleOwner(), this::showAddButton);
         workflowViewModel.getObservableShowViewWorkflowButton()
-                .observe(this, this::showViewWorkflowDetailsButton);
+                .observe(getViewLifecycleOwner(), this::showViewWorkflowDetailsButton);
         workflowViewModel.getObservableCompleteMassAction()
-                .observe(this, this::handleCompleteMassAction);
+                .observe(getViewLifecycleOwner(), this::handleCompleteMassAction);
         workflowViewModel.getObservableHandleScrollRecyclerToTop()
-                .observe(this, this::scrollRecyclerToTop);
+                .observe(getViewLifecycleOwner(), this::scrollRecyclerToTop);
         workflowViewModel.getObservableShowBulkActionMenu()
-                .observe(this, this::showMassActionMenuIcon);
+                .observe(getViewLifecycleOwner(), this::showMassActionMenuIcon);
         workflowViewModel.getObservableFiltersCounter()
-                .observe(this, this::updateFiltersCounterUi);
+                .observe(getViewLifecycleOwner(), this::updateFiltersCounterUi);
 
         // MainActivity's ViewModel
         mainViewModel.messageContainerToWorkflowList
-                .observe(this, this::handleRightDrawerFilterClick);
-        mainViewModel.messageBackActionToWorkflowList.observe(this, this::handleBackAction);
+                .observe(getViewLifecycleOwner(), this::handleRightDrawerFilterClick);
+        mainViewModel.messageBackActionToWorkflowList.observe(getViewLifecycleOwner(), this::handleBackAction);
         mainViewModel.messageOptionSelectedToWorkflowList
-                .observe(this, this::handleRightDrawerOptionSelectedClick);
+                .observe(getViewLifecycleOwner(), this::handleRightDrawerOptionSelectedClick);
         mainViewModel.messageDynamicFilterSelectedToWorkflowList
-                .observe(this, this::handleRightDrawerDynamicFilterSelectedClick);
+                .observe(getViewLifecycleOwner(), this::handleRightDrawerDynamicFilterSelectedClick);
         mainViewModel.messageDynamicFilterListSelectedToWorkflowList
-                .observe(this, this::handleRightDrawerDynamicFilterListSelectedClick);
-        mainViewModel.messageInitSortByToWorkflowList.observe(this, this::handleInitSortBy);
+                .observe(getViewLifecycleOwner(), this::handleRightDrawerDynamicFilterListSelectedClick);
+        mainViewModel.messageInitSortByToWorkflowList.observe(getViewLifecycleOwner(), this::handleInitSortBy);
         mainViewModel.messageRadioButtonClickedToWorkflowList
-                .observe(this, this::handleMessageRadioButtonClickedToWorkflowList);
+                .observe(getViewLifecycleOwner(), this::handleMessageRadioButtonClickedToWorkflowList);
         mainViewModel.messageSortSwitchActionToWorkflowList
-                .observe(this, this::handleMessageSortSwitchActionToWorkflowList);
+                .observe(getViewLifecycleOwner(), this::handleMessageSortSwitchActionToWorkflowList);
         mainViewModel.messageWorkflowTypeFilterClickedToWorkflowList
-                .observe(this, this::handleMessageWorkflowTypeFilterClicked);
+                .observe(getViewLifecycleOwner(), this::handleMessageWorkflowTypeFilterClicked);
         mainViewModel.messageBaseFiltersClickedToWorkflowList
-                .observe(this, this::handleMessageBaseFiltersClicked);
+                .observe(getViewLifecycleOwner(), this::handleMessageBaseFiltersClicked);
         mainViewModel.messageStatusFiltersClickedToWorkflowList
-                .observe(this, this::handleMessageStatusFiltersClicked);
+                .observe(getViewLifecycleOwner(), this::handleMessageStatusFiltersClicked);
         mainViewModel.messageSystemStatusFiltersClickedToWorkflowList
-                .observe(this, this::handleMessageSystemStatusFiltersClicked);
+                .observe(getViewLifecycleOwner(), this::handleMessageSystemStatusFiltersClicked);
         mainViewModel.messageClearFiltersClickedToWorkflowList
-                .observe(this, this::handleMessageClearFiltersClicked);
+                .observe(getViewLifecycleOwner(), this::handleMessageClearFiltersClicked);
         mainViewModel.messageWorkflowTypeFilterPositionSelectedToWorkflowList
-                .observe(this, this::handleMessageWorkflowTypeFilterPositionSelected);
+                .observe(getViewLifecycleOwner(), this::handleMessageWorkflowTypeFilterPositionSelected);
         mainViewModel.messageBaseFilterPositionSelectedToWorkflowList
-                .observe(this, this::handleMessageBaseFilterPositionSelected);
+                .observe(getViewLifecycleOwner(), this::handleMessageBaseFilterPositionSelected);
         mainViewModel.messageStatusFilterPositionSelectedToWorkflowList
-                .observe(this, this::handleMessageStatusFilterPositionSelected);
+                .observe(getViewLifecycleOwner(), this::handleMessageStatusFilterPositionSelected);
         mainViewModel.messageSystemStatusFilterPositionSelectedToWorkflowList
-                .observe(this, this::handleMessageSystemStatusFilterPositionSelected);
+                .observe(getViewLifecycleOwner(), this::handleMessageSystemStatusFilterPositionSelected);
     }
 
     private void handleMessageMainWorkflowTypeFilterSelected(String label) {
@@ -520,14 +514,6 @@ public class WorkflowFragment extends Fragment implements WorkflowFragmentInterf
 
     private void handleBackAction(Boolean back) {
         workflowViewModel.handleRightDrawerBackAction();
-    }
-
-    private void setSwitchAscendingDescendingText(Switch switchType, boolean check) {
-        if (check) {
-            switchType.setText(getString(R.string.ascending));
-        } else {
-            switchType.setText(getString(R.string.descending));
-        }
     }
 
     @UiThread

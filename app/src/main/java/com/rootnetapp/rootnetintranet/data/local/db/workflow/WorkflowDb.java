@@ -1,5 +1,7 @@
 package com.rootnetapp.rootnetintranet.data.local.db.workflow;
 
+import android.text.TextUtils;
+
 import androidx.room.ColumnInfo;
 import androidx.room.Embedded;
 import androidx.room.Entity;
@@ -19,6 +21,7 @@ import com.rootnetapp.rootnetintranet.models.responses.workflows.presets.Preset;
 import com.rootnetapp.rootnetintranet.models.responses.workflowtypes.ApproverHistory;
 import com.squareup.moshi.Json;
 
+import java.text.Normalizer;
 import java.util.List;
 
 @Entity(foreignKeys = @ForeignKey(entity = WorkflowTypeDb.class,
@@ -37,6 +40,9 @@ public class WorkflowDb {
     @Json(name = "title")
     private String title;
 
+    @ColumnInfo(name = "title_normalized")
+    private String titleNormalized;
+
     @ColumnInfo(name = "workflow_type_key")
     @Json(name = "workflow_type_key")
     private String workflowTypeKey;
@@ -44,6 +50,9 @@ public class WorkflowDb {
     @ColumnInfo(name = "description")
     @Json(name = "description")
     private String description;
+
+    @ColumnInfo(name = "description_normalized")
+    private String descriptionNormalized;
 
     @ColumnInfo(name = "start")
     @Json(name = "start")
@@ -158,6 +167,35 @@ public class WorkflowDb {
     @Ignore
     @Json(name = "peopleRelated")
     private List<PersonRelated> peopleRelated = null;
+
+    public void normalizeColumns() {
+        this.titleNormalized = getNormalizedString(getTitle());
+        this.descriptionNormalized = getNormalizedString(getDescription());
+    }
+
+    static public String getNormalizedString(String text) {
+        if (TextUtils.isEmpty(text)) {
+            return "";
+        }
+        return Normalizer.normalize(text, Normalizer.Form.NFD)
+                .replaceAll("[^\\p{ASCII}]", "");
+    }
+
+    public String getTitleNormalized() {
+        return titleNormalized;
+    }
+
+    public void setTitleNormalized(String titleNormalized) {
+        this.titleNormalized = titleNormalized;
+    }
+
+    public String getDescriptionNormalized() {
+        return descriptionNormalized;
+    }
+
+    public void setDescriptionNormalized(String descriptionNormalized) {
+        this.descriptionNormalized = descriptionNormalized;
+    }
 
     public WorkflowTypeDb getWorkflowType() {
         return workflowType;

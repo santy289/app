@@ -97,6 +97,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -2540,6 +2542,9 @@ public class CreateWorkflowViewModel extends ViewModel {
                     List<Profile> profiles = profileResponse.getProfiles();
                     if (profiles == null || profiles.isEmpty()) return;
 
+                    Comparator<Profile> compareById = (Profile o1, Profile o2) -> o1.getFullName().compareToIgnoreCase(o2.getFullName());
+                    profiles.sort(compareById);
+
                     Option selection = null; //check for current user (default owner)
                     List<Option> userOptions = new ArrayList<>();
                     for (int i = 0; i < profiles.size(); i++) {
@@ -2683,7 +2688,7 @@ public class CreateWorkflowViewModel extends ViewModel {
                             DisplayFormItem displayFormItem = new DisplayFormItem.Builder()
                                     .setTitleRes(isFirst ? R.string.approvers_involved : 0)
                                     .setTag(approver.entityId)
-                                    .setValue(approver.entityName)
+                                    .setValue(approver.entityName == null ? approver.entityType : approver.entityName)
                                     .setImage(approver.entityAvatar)
                                     .build();
 

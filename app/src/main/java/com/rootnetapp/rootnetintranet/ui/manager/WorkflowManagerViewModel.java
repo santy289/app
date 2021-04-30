@@ -179,7 +179,7 @@ public class WorkflowManagerViewModel extends ViewModel {
      *
      * @return common filters.
      */
-    private Map<String, Object> getCommonFilters(boolean includeDate) {
+    private Map<String, Object> getCommonFilters(boolean includeDate, boolean useWorkflowTypeId) {
         Map<String, Object> options = new ArrayMap<>();
 
         options.put("status", true); //always true
@@ -189,7 +189,7 @@ public class WorkflowManagerViewModel extends ViewModel {
             options.put("end", getEndDate());
         }
 
-        if (getWorkflowTypeId() != null) {
+        if (useWorkflowTypeId && getWorkflowTypeId() != null) {
             options.put("workflow_type_id", getWorkflowTypeId());
         }
 
@@ -235,7 +235,7 @@ public class WorkflowManagerViewModel extends ViewModel {
         showLoading.setValue(true);
 
         Disposable disposable = mRepository
-                .getWorkflowsByBaseFilters(mToken, mCurrentPage, getCommonFilters(true))
+                .getWorkflowsByBaseFilters(mToken, mCurrentPage, getCommonFilters(true, true))
                 .subscribe(this::onWorkflowsSuccess, this::onFailure);
 
         mDisposables.add(disposable);
@@ -265,7 +265,7 @@ public class WorkflowManagerViewModel extends ViewModel {
      * Performs a request to the server to obtain the user's pending workflows for the list.
      */
     protected void getUserPendingWorkflowsList() {
-        Map<String, Object> options = getCommonFilters(false);
+        Map<String, Object> options = getCommonFilters(false, false);
 
         options.put("responsible_id", mUserId);
         options.put("pending", true);
@@ -306,7 +306,7 @@ public class WorkflowManagerViewModel extends ViewModel {
             return;
         }
 
-        Map<String, Object> options = getCommonFilters(true);
+        Map<String, Object> options = getCommonFilters(true, true);
 
         options.put("profile_related", mUserId);
         options.put("pending", true);
@@ -349,7 +349,7 @@ public class WorkflowManagerViewModel extends ViewModel {
             return;
         }
 
-        Map<String, Object> options = getCommonFilters(true);
+        Map<String, Object> options = getCommonFilters(true, true);
 
         options.put("profile_related", mUserId);
 
@@ -390,7 +390,7 @@ public class WorkflowManagerViewModel extends ViewModel {
             return;
         }
 
-        Map<String, Object> options = getCommonFilters(true);
+        Map<String, Object> options = getCommonFilters(true, true);
 
         options.put("profile_related", mUserId);
 
@@ -432,7 +432,7 @@ public class WorkflowManagerViewModel extends ViewModel {
             return;
         }
 
-        Map<String, Object> options = getCommonFilters(true);
+        Map<String, Object> options = getCommonFilters(true, true);
 
         options.put("profile_related", mUserId);
         options.put("out_of_time", true);
@@ -475,7 +475,7 @@ public class WorkflowManagerViewModel extends ViewModel {
             return;
         }
 
-        Map<String, Object> options = getCommonFilters(true);
+        Map<String, Object> options = getCommonFilters(true, true);
 
         options.put("profile_related", mUserId);
         options.put("latest", true);
@@ -520,7 +520,7 @@ public class WorkflowManagerViewModel extends ViewModel {
             return;
         }
 
-        Map<String, Object> options = getCommonFilters(true);
+        Map<String, Object> options = getCommonFilters(true, true);
 
         options.put("pending", true);
 
@@ -562,7 +562,7 @@ public class WorkflowManagerViewModel extends ViewModel {
             return;
         }
 
-        Map<String, Object> options = getCommonFilters(true);
+        Map<String, Object> options = getCommonFilters(true, true);
 
         showLoading.setValue(true);
         Disposable disposable = mRepository
@@ -601,7 +601,7 @@ public class WorkflowManagerViewModel extends ViewModel {
             return;
         }
 
-        Map<String, Object> options = getCommonFilters(true);
+        Map<String, Object> options = getCommonFilters(true, true);
 
         showLoading.setValue(true);
         Disposable disposable = mRepository
@@ -641,7 +641,7 @@ public class WorkflowManagerViewModel extends ViewModel {
             return;
         }
 
-        Map<String, Object> options = getCommonFilters(true);
+        Map<String, Object> options = getCommonFilters(true, true);
 
         options.put("out_of_time", true);
 
@@ -683,7 +683,7 @@ public class WorkflowManagerViewModel extends ViewModel {
             return;
         }
 
-        Map<String, Object> options = getCommonFilters(true);
+        Map<String, Object> options = getCommonFilters(true, true);
 
         options.put("latest", true);
 
@@ -721,7 +721,7 @@ public class WorkflowManagerViewModel extends ViewModel {
     protected void getOverviewWorkflowsCount() {
         showLoading.setValue(true);
         Disposable disposable = mRepository
-                .getOverviewWorkflowsCount(mToken, getCommonFilters(true))
+                .getOverviewWorkflowsCount(mToken, getCommonFilters(true, false))
                 .subscribe(this::onOverviewSuccess, this::onFailure);
 
         mDisposables.add(disposable);

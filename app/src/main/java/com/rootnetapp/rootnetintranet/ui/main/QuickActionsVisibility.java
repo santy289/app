@@ -3,7 +3,7 @@ package com.rootnetapp.rootnetintranet.ui.main;
 public class QuickActionsVisibility {
     private boolean showComment;
     private boolean showChangeStatus;
-    private boolean showApprove;
+    private boolean showApprove = false;
     private boolean showEdit;
 
     public boolean isShowComment() {

@@ -1,11 +1,11 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 33
     defaultConfig {
         applicationId "com.rootnetapp.rootnetintranet"
         minSdkVersion 24
-        targetSdkVersion 29
+        targetSdkVersion 33
         versionCode 47
         versionName "1.3.3"
         vectorDrawables.useSupportLibrary = true
@@ -35,10 +35,13 @@ android {
         javaMaxHeapSize "4g"
     }
     useLibrary 'org.apache.http.legacy'
-
     packagingOptions {
-        pickFirst 'META-INF/proguard/androidx-annotations.pro'
+        resources {
+            pickFirsts += ['META-INF/proguard/androidx-annotations.pro']
+        }
     }
+
+    namespace 'com.rootnetapp.rootnetintranet'
 }
 
 dependencies {
@@ -49,9 +52,12 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'com.google.android.material:material:1.3.0-alpha02'
-
     //android arch components
     implementation "androidx.lifecycle:lifecycle-runtime:$rootProject.archLifecycleVersion"
+    // Picasso library to downloading images
+    implementation 'com.squareup.picasso:picasso:2.71828'
+    // Coroutines dependency to put the downloading
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9'
     // Deprecated make sure we have evertying that we need or donwload the specific module.
     // check here: https://developer.android.com/jetpack/androidx/releases/lifecycle
     // implementation "androidx.lifecycle:lifecycle-extensions:$rootProject.archLifecycleVersion"

@@ -363,6 +363,7 @@
     <string name="workflow_detail_files_fragment_no_view_permissions">You do not have permissions to view the files</string>
     <!-- SignatureFragment-->
     <string name="workflow_detail_signature_fragment_title">Digital Signature</string>
+    <string name="no_available_templates">Not templates found </string>
     <string name="select_a_template">Select a template</string>
     <string name="signature_initialize">Start document for signatures</string>
     <string name="signature_overwrite">Overwrite current document</string>

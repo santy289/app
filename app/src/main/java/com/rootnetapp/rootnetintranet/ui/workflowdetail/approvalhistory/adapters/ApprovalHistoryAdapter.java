@@ -72,6 +72,7 @@ public class ApprovalHistoryAdapter extends RecyclerView.Adapter<ApprovalViewhol
             viewholder.binding.tvIsapproved.setText(context.getString(R.string.approved));
             viewholder.binding.tvIsapproved.setTextColor(context.getResources().getColor(R.color.green));
         } else {
+            viewholder.binding.tvName.setText("N/A");
             viewholder.binding.tvIsapproved.setText(context.getString(R.string.rejected));
             viewholder.binding.tvIsapproved.setTextColor(context.getResources().getColor(R.color.red));
         }

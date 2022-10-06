@@ -1456,7 +1456,6 @@ public class WorkflowViewModel extends ViewModel {
         if (workflowIds.isEmpty()) return;
 
         mWorkflowIdsToDelete = workflowIds;
-
         PostDeleteWorkflows postDeleteWorkflows = new PostDeleteWorkflows();
         postDeleteWorkflows.setWorkflowsArray(workflowIds);
 

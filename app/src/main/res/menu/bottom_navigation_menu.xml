@@ -10,6 +10,10 @@
         android:icon="@drawable/ic_view_list_black_24dp"
         android:title="@string/bottom_nav_workflow_list" />
     <item
+        android:id="@+id/menu_project_list"
+        android:icon="@drawable/ic_workflow_black_24dp"
+        android:title="@string/projects" />
+    <item
         android:id="@+id/menu_timeline"
         android:icon="@drawable/ic_timeline_black_24dp"
         android:title="@string/bottom_nav_timeline" />

@@ -721,6 +721,9 @@ public class MainActivity extends AppCompatActivity
                 showFragment(WorkflowFragment.newInstance(this), false);
                 mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
                 break;
+            case R.id.nav_projects:
+                startActivity(new Intent(this, ResourcingPlannerActivity.class));
+                break;
             case R.id.nav_resourcing:
                 startActivity(new Intent(this, ResourcingPlannerActivity.class));
                 break;

@@ -71,6 +71,7 @@
     <string name="empty_email">The email cannot be empty</string>
     <string name="workflow_manager">Workflow Manager</string>
     <string name="workflow">Workflow</string>
+    <string name="tasks">Tasks</string>
     <string name="modules">Modules</string>
     <string name="accounts">Accounts</string>
     <string name="sales">Sales</string>

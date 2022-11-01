@@ -38,6 +38,7 @@ import com.rootnetapp.rootnetintranet.fcm.NotificationDataKeys;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
+import com.rootnetapp.rootnetintranet.ui.ProjectFragment;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragmentInterface;
@@ -410,6 +411,7 @@ public class MainActivity extends AppCompatActivity
 
     private void initActionListeners() {
         mainBinding.leftDrawer.navWorkflows.setOnClickListener(this::drawerClicks);
+        mainBinding.leftDrawer.navProjects.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navResourcing.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navSync.setOnClickListener(this::drawerClicks);
         mainBinding.leftDrawer.navProfile.setOnClickListener(this::drawerClicks);
@@ -722,7 +724,7 @@ public class MainActivity extends AppCompatActivity
                 mainBinding.drawerLayout.closeDrawer(GravityCompat.START);
                 break;
             case R.id.nav_projects:
-                startActivity(new Intent(this, ResourcingPlannerActivity.class));
+                showFragment(ProjectFragment.newInstance(this), false);
                 break;
             case R.id.nav_resourcing:
                 startActivity(new Intent(this, ResourcingPlannerActivity.class));

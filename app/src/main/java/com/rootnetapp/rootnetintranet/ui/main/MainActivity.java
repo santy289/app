@@ -38,7 +38,7 @@ import com.rootnetapp.rootnetintranet.fcm.NotificationDataKeys;
 import com.rootnetapp.rootnetintranet.models.createworkflow.form.BaseFormItem;
 import com.rootnetapp.rootnetintranet.models.workflowlist.OptionsList;
 import com.rootnetapp.rootnetintranet.models.workflowlist.WorkflowTypeMenu;
-import com.rootnetapp.rootnetintranet.ui.ProjectFragment;
+import com.rootnetapp.rootnetintranet.ui.projectFragment.ProjectFragment;
 import com.rootnetapp.rootnetintranet.ui.RootnetApp;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragment;
 import com.rootnetapp.rootnetintranet.ui.createworkflow.CreateWorkflowFragmentInterface;

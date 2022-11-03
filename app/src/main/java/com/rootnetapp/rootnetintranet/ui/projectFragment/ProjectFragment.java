@@ -1,4 +1,4 @@
-package com.rootnetapp.rootnetintranet.ui;
+package com.rootnetapp.rootnetintranet.ui.projectFragment;
 
 import androidx.lifecycle.ViewModelProvider;
 
@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 
 import com.rootnetapp.rootnetintranet.R;
 import com.rootnetapp.rootnetintranet.ui.main.MainActivity;
+import com.rootnetapp.rootnetintranet.ui.projectFragment.models.List;
 
 public class ProjectFragment extends Fragment {
 
@@ -33,7 +34,10 @@ public class ProjectFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(ProjectViewModel.class);
-        // TODO: Use the ViewModel
+        for (List list : mViewModel.loadData().list) {
+            
+        }
+
     }
 
 }

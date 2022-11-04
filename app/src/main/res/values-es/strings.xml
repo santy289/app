@@ -90,6 +90,7 @@
     <string name="country">País</string>
     <string name="type">Tipo</string>
     <string name="workflow_type">Tipo de Workflow</string>
+    <string name="project_type">Tipo de Proyecto</string>
     <string name="owner">Dueño</string>
     <string name="actual_state">Estado Actual</string>
     <string name="status">Estatus</string>

@@ -531,4 +531,11 @@
     <string name="booking_detail_registered_time">Registered Time</string>
     <string name="title_activity_signature_custom_fields_form">Required Fields for Signature</string>
     <string name="save">Save</string>
+    <string name="open_detail_arrow">Open Detail Arrow</string>
+    <string name="clock">Clock</string>
+    <string name="btn_detail">btn_detail</string>
+    <string name="key_code">Key Code</string>
+    <string name="tittle_project">Relog</string>
+
+
 </resources>

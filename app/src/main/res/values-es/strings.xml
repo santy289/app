@@ -91,6 +91,7 @@
     <string name="type">Tipo</string>
     <string name="workflow_type">Tipo de Workflow</string>
     <string name="project_type">Tipo de Proyecto</string>
+    <string name="key_code">Codigo del Proyecto</string>
     <string name="owner">Dueño</string>
     <string name="actual_state">Estado Actual</string>
     <string name="status">Estatus</string>
@@ -505,6 +506,7 @@
     <string name="resourcing_planner_friday_short">Vie</string>
     <string name="resourcing_planner_saturday_short">Sáb</string>
     <string name="resourcing_planner_sunday_short">Dom</string>
+
     <plurals name="resourcing_planner_total_hours">
         <item formatted="true" quantity="one">Total: 1 hora</item>
         <item formatted="true" quantity="other">Total: %d horas</item>
@@ -525,4 +527,9 @@
     <string name="booking_detail_registered_time">Tiempo Registrado</string>
     <string name="title_activity_signature_custom_fields_form">Campos requeridos para firma</string>
     <string name="save">Guardar</string>
+    <string name="open_detail_arrow">Open Detail Arrow</string>
+    <string name="btn_detail">btn_detail</string>
+    <string name="clock">Relog</string>
+
+
 </resources>

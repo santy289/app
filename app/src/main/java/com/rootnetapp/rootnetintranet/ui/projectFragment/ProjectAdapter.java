@@ -1,6 +1,5 @@
 package com.rootnetapp.rootnetintranet.ui.projectFragment;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +15,7 @@ import java.util.List;
 
 public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHolder> {
 
-    private List<ProjectDataResult> projectDataResults;
+    private final List<ProjectDataResult> projectDataResults;
 
     public ProjectAdapter(List<ProjectDataResult> projectDataResults) {
         this.projectDataResults = projectDataResults;
@@ -34,13 +33,11 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ProjectDataResult projectDataResult = projectDataResults.get(position);
-
         holder.project_title.setText(ProjectDataResult.getTitle());
-        holder.project_type.setText(ProjectDataResult.getProject_type().name);
-        //holder.project_state.setText(ProjectDataResult.isStatus());
-        // holder.project_status.setText(ProjectDataResult.getStatus());
-        // holder.project_created.setText(ProjectDataResult.getCreated_at();
-        //holder.project_updated.setText(ProjectDataResult.getUpdated());
+        holder.project_type.setText((CharSequence) ProjectDataResult.getProject_type());
+        holder.project_state.setText(ProjectDataResult.getKey_code());
+        holder.project_created.setText((CharSequence) ProjectDataResult.getCreated_at());
+        holder.project_updated.setText((CharSequence) ProjectDataResult.getUpdated_at());
 
     }
 
@@ -53,7 +50,6 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHold
         public TextView project_title;
         public TextView project_type;
         public TextView project_state;
-        public TextView project_status;
         public TextView project_created;
         public TextView project_updated;
 
@@ -63,7 +59,6 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHold
             project_title = (TextView) itemView.findViewById(R.id.project_title);
             project_type = (TextView) itemView.findViewById(R.id.project_type);
             project_state = (TextView) itemView.findViewById(R.id.project_state);
-            project_status = (TextView) itemView.findViewById(R.id.project_status);
             project_created = (TextView) itemView.findViewById(R.id.project_created);
             project_updated = (TextView) itemView.findViewById(R.id.project_updated);
         }

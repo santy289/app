@@ -1,16 +1,22 @@
 package com.rootnetapp.rootnetintranet.ui.projectFragment.models;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.ArrayList;
 import java.util.Date;
 
 public class ProjectDataResult {
     private int id;
+    @SerializedName("title")
     private static String title;
     private int author_id;
-    private Date created_at;
-    private Date updated_at;
+    @SerializedName("created_at")
+    private static Date created_at;
+    @SerializedName("updated_at")
+    private static Date updated_at;
     private boolean status;
-    private String key_code;
+    @SerializedName("key_code")
+    private static String key_code;
     private ArrayList<Team> team;
     private String project_type_key;
     private static ProjectType project_type;
@@ -49,20 +55,20 @@ public class ProjectDataResult {
         this.author_id = author_id;
     }
 
-    public Date getCreated_at() {
+    public static Date getCreated_at() {
         return created_at;
     }
 
     public void setCreated_at(Date created_at) {
-        this.created_at = created_at;
+        ProjectDataResult.created_at = created_at;
     }
 
-    public Date getUpdated_at() {
+    public static Date getUpdated_at() {
         return updated_at;
     }
 
     public void setUpdated_at(Date updated_at) {
-        this.updated_at = updated_at;
+        ProjectDataResult.updated_at = updated_at;
     }
 
     public boolean isStatus() {
@@ -73,12 +79,12 @@ public class ProjectDataResult {
         this.status = status;
     }
 
-    public String getKey_code() {
+    public static String getKey_code() {
         return key_code;
     }
 
     public void setKey_code(String key_code) {
-        this.key_code = key_code;
+        ProjectDataResult.key_code = key_code;
     }
 
     public ArrayList<Team> getTeam() {

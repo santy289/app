@@ -33,11 +33,11 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ProjectDataResult projectDataResult = projectDataResults.get(position);
-        holder.project_title.setText(ProjectDataResult.getTitle());
-        holder.project_type.setText((CharSequence) ProjectDataResult.getProject_type());
-        holder.project_state.setText(ProjectDataResult.getKey_code());
-        holder.project_created.setText((CharSequence) ProjectDataResult.getCreated_at());
-        holder.project_updated.setText((CharSequence) ProjectDataResult.getUpdated_at());
+        holder.project_title.setText(projectDataResult.getTitle());
+        holder.project_type.setText(projectDataResult.getProject_type().name);
+        holder.project_state.setText(projectDataResult.getKey_code());
+        holder.project_created.setText(projectDataResult.getCreated_at().toString());
+        holder.project_updated.setText(projectDataResult.getUpdated_at().toString());
 
     }
 

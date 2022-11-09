@@ -7,40 +7,36 @@ import java.util.Date;
 
 public class ProjectDataResult {
     private int id;
-    @SerializedName("title")
-    private static String title;
+    private String title;
     private int author_id;
-    @SerializedName("created_at")
-    private static Date created_at;
-    @SerializedName("updated_at")
-    private static Date updated_at;
+    private Date created_at;
+    private Date updated_at;
     private boolean status;
-    @SerializedName("key_code")
-    private static String key_code;
+    private  String key_code;
     private ArrayList<Team> team;
     private String project_type_key;
-    private static ProjectType project_type;
+    private ProjectType project_type;
     private ArrayList<Meta> metas;
 
-    public static String getTitle() {
-        return title;
+    public String getTitle() {
+        return this.title;
     }
 
-    public static void setTitle(String title) {
-        ProjectDataResult.title = title;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public static ProjectType getProject_type() {
-        return project_type;
+    public ProjectType getProject_type() {
+        return this.project_type;
     }
 
-    public static void setProject_type(ProjectType project_type) {
-        ProjectDataResult.project_type = project_type;
+    public void setProject_type(ProjectType project_type) {
+        this.project_type = project_type;
     }
 
 
     public int getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(int id) {
@@ -48,47 +44,47 @@ public class ProjectDataResult {
     }
 
     public int getAuthor_id() {
-        return author_id;
+        return this.author_id;
     }
 
     public void setAuthor_id(int author_id) {
         this.author_id = author_id;
     }
 
-    public static Date getCreated_at() {
-        return created_at;
+    public Date getCreated_at() {
+        return this.created_at;
     }
 
     public void setCreated_at(Date created_at) {
-        ProjectDataResult.created_at = created_at;
+        this.created_at = created_at;
     }
 
-    public static Date getUpdated_at() {
-        return updated_at;
+    public Date getUpdated_at() {
+        return this.updated_at;
     }
 
     public void setUpdated_at(Date updated_at) {
-        ProjectDataResult.updated_at = updated_at;
+        this.updated_at = updated_at;
     }
 
     public boolean isStatus() {
-        return status;
+        return this.status;
     }
 
     public void setStatus(boolean status) {
         this.status = status;
     }
 
-    public static String getKey_code() {
-        return key_code;
+    public  String getKey_code() {
+        return this.key_code;
     }
 
     public void setKey_code(String key_code) {
-        ProjectDataResult.key_code = key_code;
+        this.key_code = key_code;
     }
 
     public ArrayList<Team> getTeam() {
-        return team;
+        return this.team;
     }
 
     public void setTeam(ArrayList<Team> team) {
@@ -96,7 +92,7 @@ public class ProjectDataResult {
     }
 
     public String getProject_type_key() {
-        return project_type_key;
+        return this.project_type_key;
     }
 
     public void setProject_type_key(String project_type_key) {
